@@ -11,6 +11,7 @@ $TbMsg["COMMAND_Configurar"]="Configurar";
 $TbMsg["COMMAND_CrearImagen"]="Crear Imatge";
 $TbMsg["COMMAND_EjecutarScript"]="Executar Script";
 $TbMsg["COMMAND_EliminarImagenCache"]="Eliminar Imatge Cache";
+$TbMsg["COMMAND_EnviarMensaje"]="Enviar Mensaje";
 $TbMsg["COMMAND_IniciarSesion"]="Iniciar Sesi&oacute;";
 $TbMsg["COMMAND_InventarioHardware"]="Inventari Hardware";
 $TbMsg["COMMAND_InventarioSoftware"]="Inventari Software";

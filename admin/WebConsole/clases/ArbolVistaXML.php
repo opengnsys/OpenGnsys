@@ -1,4 +1,4 @@
-<?
+<?php
 include_once("XmlPhp.php");
 /*===============================================================
 Esta clase implementa la apariencia y comportamiento de un treeview en código HTML y javascript.

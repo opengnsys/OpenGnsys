@@ -28,10 +28,15 @@ case "$PARM1" in
 		#1 SET_CLIENTMODE
 		#2  template
 		#3 pc_name o group_pc
+#4 modo temporal o permanente
+
 		TEMPLATE="$PARM2"
 		PC="$PARM3"
+#incluyo parametro de MODO
+		MODO="$PARM4"
 		echolog "Ejecutar $(which setclientmode) $FILE $MCASTOPT"
-		setclientmode $TEMPLATE $PC &>> $SERVERLOG
+#incluyo parametro de MODO
+		setclientmode $TEMPLATE $PC $MODO &>> $SERVERLOG
 		exit $? 
 	;;
 	default)

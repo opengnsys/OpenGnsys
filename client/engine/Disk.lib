@@ -4,7 +4,7 @@
 #@brief   Librería o clase Disk
 #@class   Disk
 #@brief   Funciones para gestión de discos y particiones.
-#@version 1.0.6
+#@version 1.1.0
 #@warning License: GNU GPLv3+
 #*/
 
@@ -40,11 +40,14 @@ timeout -k 5s -s KILL 3s $(which parted) "$@"
 #@version 1.0.4 - Llamada a función específica para tablas GPT.
 #@author  Universidad de Huelva
 #@date    2012/03/30
+#@version 1.1.1 - El inicio de la primera partición logica es el de la extendida más 4x512
+#@author  Irina Gomez, ETSII Universidad de Sevilla
+#@date    2016/07/11
 #*/ ##
 function ogCreatePartitions ()
 {
 # Variables locales.
-local ND DISK PTTYPE PART SECTORS START SIZE TYPE CACHEPART CACHESIZE IOSIZE EXTSTART EXTSIZE tmpsfdisk
+local ND DISK PTTYPE PART SECTORS START SIZE TYPE CACHEPART IODISCO IOSIZE CACHESIZE EXTSTART EXTSIZE tmpsfdisk
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk str_parttype:int_partsize ..." \
@@ -71,21 +74,15 @@ SECTORS=$(ogGetLastSector $1)
 CACHEPART=$(ogFindCache 2>/dev/null)
 [ "$ND" = "${CACHEPART% *}" ] && CACHESIZE=$(ogGetCacheSize 2>/dev/null | awk '{print $0*2}')
 [ -n "$CACHESIZE" ] && SECTORS=$[SECTORS-CACHESIZE]
+
 # Sector de inicio (la partición 1 empieza en el sector 63).
-##########   agp  ###########
-iodisco=$(ogDiskToDev $1)
-IOSIZE=$(fdisk -l $iodisco | grep I/O | cut -d ":" -f2 | cut -d "/" -f1 | cut -d " " -f2)
-if [[ $IOSIZE = 4096 ]]; then
-	START=4096
+IODISCO=$(ogDiskToDev $1)
+IOSIZE=$(fdisk -l $IODISCO | awk '/I\/O/ {print $4}')
+if [ "$IOSIZE" == "4096" ]; then
+    START=4096
 else
-	START=63
+    START=63
 fi
-##########   agp  ###########
-
-
-
-
-
 PART=1
 
 # Fichero temporal de entrada para "sfdisk"
@@ -115,6 +112,7 @@ while [ $# -gt 0 ]; do
     # Comprobar si la partición es extendida.
     if [ $ID = 5 ]; then
         [ $PART -le 4 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+	# El inicio de la primera partición logica es el de la extendida más 4x512
         let EXTSTART=$START+2048
         let EXTSIZE=$SIZE-2048
     fi
@@ -267,8 +265,8 @@ sgdisk $DELOPTIONS $OPTIONS $DISK 2>/dev/null && partprobe $DISK
 #@return  (por determinar)
 #@exception OG_ERR_FORMAT   Formato incorrecto.
 #@exception OG_ERR_NOTFOUND Disco o particion no corresponden con un dispositivo.
-#@note    tabletype: { MSDOS, GPT }
-#@note    Requisitos: sfdisk, sgdisk
+#@note    tabletype: { MSDOS, GPT }, MSDOS por defecto
+#@note    Requisitos: fdisk, gdisk, parted
 #@version 1.0.4 - Primera versión compatible con OpenGnSys.
 #@author  Universidad de Huelva
 #@date    2012/03/06
@@ -326,7 +324,7 @@ case "$CREATE" in
         if [ "$PTTYPE" == "GPT" ]; then
             sgdisk -Z $DISK
         fi
-        # Crear y borrar una partición para que la tabla se genere bien. 
+        # Crear y borrar una partición para que la tabla se genere bien.
         echo -e "o\nn\np\n\n\n\nd\n\nw" | fdisk $DISK
         partprobe $DISK 2>/dev/null
         ;;
@@ -393,7 +391,7 @@ esac
 function ogDevToDisk ()
 {
 # Variables locales.
-local DEV d n
+local CACHEFILE DEV PART d n
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME path_device | LABEL=str_label | UUID=str_uuid" \
@@ -413,10 +411,17 @@ case "$DEV" in
     UUID=*)     DEV=$(blkid -U "${1#*=}") ;;
 esac
 
-# Error si no es fichero de bloques.
-[ -b "$DEV" ] || ogRaiseError $OG_ERR_NOTFOUND "$1" || return $?
+# Error si no es fichero de bloques o directorio (para LVM).
+[ -b "$DEV" -o -d "$DEV" ] || ogRaiseError $OG_ERR_NOTFOUND "$1" || return $?
 
-# Procesa todos los discos para devolver su nº de orden y de partición.
+# Buscar en fichero de caché de discos.
+CACHEFILE=/var/cache/disks.cfg
+PART=$(awk -F: -v d="$DEV" '{if ($2==d) {print $1}}' $CACHEFILE 2>/dev/null)
+if [ -n "$PART" ]; then
+    echo "$PART"
+    return
+fi
+# Si no se encuentra, procesa todos los discos para devolver su nº de orden y de partición.
 n=1
 for d in $(ogDiskToDev); do
     [ -n "$(echo $DEV | grep $d)" ] && echo "$n ${DEV#$d}" && return
@@ -449,14 +454,17 @@ return $OG_ERR_NOTFOUND
 #@version 1.0.5 - Comprobación correcta de parámetros para soportar valores > 9.
 #@author  Ramon Gomez, ETSII Universidad Sevilla
 #@date    2013-05-07
-#@version 1.0.6 - Soporta RAID hardware y Multipath.
+#@version 1.0.6 - Soportar RAID hardware y Multipath.
 #@author  Ramon Gomez, ETSII Universidad Sevilla
 #@date    2014-09-23
+#@version 1.1.0 - Usar caché de datos y soportar pool de volúmenes ZFS.
+#@author  Ramon Gomez, ETSII Universidad Sevilla
+#@date    2016-05-27
 #*/ ##
 function ogDiskToDev ()
 {
 # Variables locales
-local ALLDISKS MPATH VOLGROUPS DISK PART i
+local CACHEFILE ALLDISKS MPATH VOLGROUPS ZFSVOLS DISK PART ZPOOL i
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -467,9 +475,25 @@ if [ "$*" == "help" ]; then
     return
 fi
 
-# Listar dispositivos de discos duros.
-ALLDISKS=$(lsblk -n -e 1,2 | awk '$6~/^disk$/ {gsub(/!/,"/"); printf "/dev/%s ",$1}')
+# Borrar fichero de caché de configuración si hay cambios en las particiones.
+CACHEFILE=/var/cache/disks.cfg
+if ! diff -q <(cat /proc/partitions) /tmp/.partitions &>/dev/null; then 
+    # Guardar copia de las particiones definidas para comprobar cambios.
+    cp -a /proc/partitions /tmp/.partitions
+    rm -f $CACHEFILE
+fi
 
+# Si existe una correspondencia con disco/dispositivo en el caché; mostrarlo y salir.
+PART=$(awk -F: -v d="$*" '{if ($1==d) {print $2}}' $CACHEFILE 2>/dev/null)
+if [ -n "$PART" ]; then
+    echo "$PART"
+    return
+fi
+
+# Continuar para detectar nuevos dispositivos.
+# Listar dispositivos de discos.
+ALLDISKS=$((lsblk -n -e 1,2 -x MAJ:MIN 2>/dev/null || lsblk -n -e 1,2) | \
+           awk '$6~/^disk$/ {gsub(/!/,"/"); printf "/dev/%s ",$1}')
 # Listar volúmenes lógicos.
 VOLGROUPS=$(vgs -a --noheadings 2>/dev/null | awk '{printf "/dev/%s ",$1}')
 ALLDISKS="$ALLDISKS $VOLGROUPS"
@@ -484,6 +508,10 @@ if MPATH=$(multipath -l -v 1 2>/dev/null | awk '{printf "/dev/mapper/%s ",$1}'; 
     ALLDISKS="$ALLDISKS $MPATH"
 fi
 
+# Detectar volúmenes ZFS.
+ZFSVOLS=$(blkid | awk -F: '/zfs/ {print $1}')
+ALLDISKS="$ALLDISKS $ZFSVOLS"
+
 # Mostrar salidas segun el número de parametros.
 case $# in
     0)  # Muestra todos los discos, separados por espacios.
@@ -494,6 +522,8 @@ case $# in
         DISK=$(echo "$ALLDISKS" | awk -v n=$1 '{print $n}')
         # Error si el fichero no existe.
         [ -e "$DISK" ] || ogRaiseError $OG_ERR_NOTFOUND "$1" || return $?
+        # Actualizar caché de configuración y mostrar dispositivo.
+        echo "$*:$DISK" >> $CACHEFILE
         echo "$DISK"
         ;;
     2)  # Error si los 2 parámetros no son números positivos.
@@ -503,21 +533,38 @@ case $# in
         PART="$DISK$2"
         # Comprobar si es partición.
         if [ -b "$PART" ]; then
+            # Actualizar caché de configuración y mostrar dispositivo.
+            echo "$*:$PART" >> $CACHEFILE
             echo "$PART"
         else
             # Comprobar si RAID o Multipath (tener en cuenta enlace simbólico).
             PART="${DISK}p$2"
             if [ "$(stat -L -c "%A" "$PART" 2>/dev/null | cut -c1)" == "b" ]; then
-                echo "$PART"
-            elif [ -n "$VOLGROUPS" ]; then
-                # Comprobar si volumen lógico.      /* (comentario Doxygen)
-                PART=$(lvscan -a 2>/dev/null | \
-                       awk -F\' -v n=$2 "\$2~/^${DISK//\//\\/}\// {if (NR==n) print \$2}")
-                [ -e "$PART" ] || ogRaiseError $OG_ERR_NOTFOUND "$1 $2" || return $?
-                #                                   (comentario Doxygen) */
+                # Actualizar caché de configuración y mostrar dispositivo.
+                echo "$*:$PART" >> $CACHEFILE
                 echo "$PART"
             else
-                ogRaiseError $OG_ERR_NOTFOUND "$1 $2" || return $?
+                PART=""
+                # Comprobar si volumen lógico.          /* (comentario Doxygen)
+                if ogCheckStringInGroup "$DISK" "$VOLGROUPS"; then
+                    PART=$(lvscan -a 2>/dev/null | \
+                           awk -F\' -v n=$2 "\$2~/^${DISK//\//\\/}\// {if (NR==n) print \$2}")
+                    [ -e "$PART" ] || ogRaiseError $OG_ERR_NOTFOUND "$1 $2" || return $?
+                    #                                   (comentario Doxygen) */
+                fi
+                # Comprobar si volumen ZFS que puede ser montado.
+                if ogCheckStringInGroup "$DISK" "$ZFSVOLS"; then
+                    zpool import -f -R /mnt -N -a 2>/dev/null
+                    ZPOOL=$(blkid -s LABEL -o value $DISK)
+                    PART=$(zfs list -Hp -o name,canmount,mountpoint -r $ZPOOL | \
+                           awk -v n=$2 '$2=="on" && $3!="none" {c++; if (c==n) print $1}')
+                fi
+                # Salir si no se encuentra dispositivo.
+                [ -n "$PART" ] || ogRaiseError $OG_ERR_NOTFOUND "$1 $2" || return $?
+                # Devolver camino al dispositivo.
+                # Actualizar caché de configuración y mostrar dispositivo.
+                echo "$*:$PART" >> $CACHEFILE
+                echo "$PART"
             fi
         fi
         ;;
@@ -610,7 +657,6 @@ echo $TYPE
 #@author  Universidad de Málaga
 #@date    2016/11/10
 #*/ ##
-
 function ogGetLastSector ()
 {
 # Variables locales
@@ -622,23 +668,22 @@ if [ "$*" == "help" ]; then
            "$FUNCNAME 1 1  =>  102400062"
     return
 fi
-# Error si no se reciben 1 o 2 parámetros.
+
+# Obtener último sector.
 case $# in 
-    1)  DISK=$(ogDiskToDev $1) || return $?
+    1)  # Para un disco.
+        DISK=$(ogDiskToDev $1) || return $?
+        LASTSECTOR=$(LANG=C sgdisk -p $DISK | awk '/last usable sector/ {print($(NF))}')
         ;;
-    2)  DISK=$(ogDiskToDev $1) || return $?
+    2)  # Para una partición.
+        DISK=$(ogDiskToDev $1) || return $?
         PART=$(ogDiskToDev $1 $2) || return $?
+        LASTSECTOR=$(LANG=C sgdisk -p $DISK | awk -v P="$2" '{if ($1==P) print $3}')
         ;;
-    *)  ogRaiseError $OG_ERR_FORMAT
+    *)  # Error si se reciben más parámetros.
+        ogRaiseError $OG_ERR_FORMAT
         return $? ;;
 esac
-
-if [ $# == 1 ]; then
-	LASTSECTOR=$(LANG=C sgdisk -p $DISK | awk '/last usable sector/ {print($(NF))}')
-else
-	LASTSECTOR=$(LANG=C sgdisk -p $DISK | awk -v P="$2" '{if ($1==P) print $3}')
-fi
-
 echo $LASTSECTOR
 }
 
@@ -671,7 +716,7 @@ fi
 
 # Comprobar que el disco existe y listar su partición activa.
 DISK="$(ogDiskToDev $1)" || return $?
-parted $DISK print 2>/dev/null | awk '/boot/ {print $1}'
+LANG=C parted -sm $DISK print 2>/dev/null | awk -F: '$7~/boot/ {print $1}'
 }
 
 
@@ -686,15 +731,21 @@ parted $DISK print 2>/dev/null | awk '/boot/ {print $1}'
 #@note    Requisitos: sfdisk
 #@version 0.9 - Primera versión compatible con OpenGnSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2009/03/25
+#@date    2009-03-25
 #@version 1.0.2 - Detectar partición vacía.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2011/12/23
+#@date    2011-12-23
+#@version 1.0.6 - Soportar LVM.
+#@author  Universidad de Huelva
+#@date    2014-09-04
+#@version 1.1.0 - Soportar pool de volúmenes ZFS.
+#@author  Ramon Gomez, ETSII Universidad Sevilla
+#@date    2014-11-14
 #*/ ##
 function ogGetPartitionId ()
 {
 # Variables locales.
-local DISK PART ID
+local DISK ID
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -705,14 +756,15 @@ fi
 # Error si no se reciben 2 parámetros.
 [ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
-# Detectar id. de tipo de partición y codificar al mnemónico.
+# Detectar y mostrar el id. de tipo de partición.
 DISK=$(ogDiskToDev $1) || return $?
-PART=$(ogDiskToDev $1 $2) || return $?
 case "$(ogGetPartitionTableType $1)" in
     GPT)    ID=$(sgdisk -p $DISK 2>/dev/null | awk -v p="$2" '{if ($1==p) print $6;}') || ogRaiseError $OG_ERR_NOTFOUND "$1,$2" || return $?
             [ "$ID" == "8300" -a "$1 $2" == "$(ogFindCache)" ] && ID=CA00
             ;;
     MSDOS)  ID=$(sfdisk --id $DISK $2 2>/dev/null) || ogRaiseError $OG_ERR_NOTFOUND "$1,$2" || return $? ;;
+    LVM)    ID=10000 ;;
+    ZPOOL)  ID=10010 ;;
 esac
 echo $ID
 }
@@ -733,11 +785,14 @@ echo $ID
 #@version 0.9 - Primera version para OpenGnSys
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009/07/24
+#@version 1.1.0 - Sustituir "sfdisk" por "partx".
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2016/05/04
 #*/ ##
 function ogGetPartitionSize ()
 {
 # Variables locales.
-local PART
+local PART SIZE
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -748,11 +803,12 @@ fi
 # Error si no se reciben 2 parámetros.
 [ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
-# Obtener el tamaño de la partición.
+# Devolver tamaño de partición, del volumen lógico o del sistema de archivos (para ZFS).
 PART="$(ogDiskToDev $1 $2)" || return $?
-partx -gbo SIZE $PART 2>/dev/null | awk '{print int($1/1024)}'
-[ ${PIPESTATUS[0]} -ne 0 ] && echo "0"
-return 0
+SIZE=$(partx -gbo SIZE $PART 2>/dev/null | awk '{print int($1/1024)}')
+[ -z "$SIZE" ] && SIZE=$(lvs --noheadings -o lv_size --units k $PART | awk '{printf "%d",$0}')
+[ -z "$SIZE" ] && SIZE=$(ogGetFsSize $1 $2)
+echo ${SIZE:-0}
 }
 
 
@@ -769,13 +825,16 @@ return 0
 #@date    Date: 27/10/2008
 #@version 1.0 - Uso de sfdisk Primera version para OpenGnSys
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2009/07/24
+#@date    2009-07-24
 #@version 1.0.4 - Uso de /proc/partitions para detectar el numero de particiones
 #@author  Universidad de Huelva
-#@date    2012/03/28
+#@date    2012-03-28
 #@version 1.0.6 - Soportar LVM.
 #@author  Universidad de Huelva
-#@date    2014/09/04
+#@date    2014-09-04
+#@version 1.1.0 - Soportar ZFS y sustituir "sfdisk" por "partx".
+#@author  Ramon Gomez, ETSII Universidad Sevilla
+#@date    2016-04-28
 #*/ ##
 function ogGetPartitionsNumber ()
 {
@@ -796,6 +855,12 @@ case "$(ogGetPartitionTableType $1)" in
     GPT|MSDOS)
             partx -gso NR $DISK 2>/dev/null | awk -v p=0 '{p=$1} END {print p}' ;;
     LVM)    lvs --noheadings $DISK 2>/dev/null | wc -l ;;
+    ZPOOL)  zpool list &>/dev/null || modprobe zfs
+            zpool import -f -R /mnt -N -a 2>/dev/null
+            zfs list -Hp -o name,canmount,mountpoint -r $(blkid -s LABEL -o value $DISK) | \
+                    awk '$2=="on" && $3!="none" {c++}
+                         END {print c}'
+            ;;
 esac
 }
 
@@ -807,13 +872,16 @@ esac
 #@return  str_tabletype - Tipo de tabla de paritiones
 #@warning Salidas de errores no determinada
 #@note    tabletype = { MSDOS, GPT }
-#@note    Requisitos: parted
+#@note    Requisitos: blkid, parted, vgs
 #@version 1.0.4 - Primera versión para OpenGnSys
 #@author  Universidad de Huelva
 #@date    2012/03/01
 #@version 1.0.6 - Soportar LVM.
 #@author  Universidad de Huelva
-#@date    2014/09/04
+#@date    2014-09-04
+#@version 1.1.0 - Mejorar rendimiento y soportar ZFS.
+#@author  Ramon Gomez, ETSII Universidad Sevilla
+#@date    2014-11-14
 #*/ ##
 function ogGetPartitionTableType ()
 {
@@ -833,8 +901,14 @@ fi
 DISK=$(ogDiskToDev $1) || return $?
 
 # Comprobar tabla de particiones.
-[ -b $DISK ] && TYPE=$(parted -sm $DISK print | awk -F: -v D=$DISK '{ if($1 == D) print toupper($6)}')
+if [ -b $DISK ]; then
+    TYPE=$(parted -sm $DISK print 2>/dev/null | awk -F: -v D=$DISK '{ if($1 == D) print toupper($6)}')
+    [ -z "$TYPE" ] && TYPE=$(parted -sm $DISK print 2>/dev/null | awk -F: -v D=$DISK '{ if($1 == D) print toupper($6)}') 
+fi
+# Comprobar si es volumen lógico.
 [ -d $DISK ] && vgs $DISK &>/dev/null && TYPE="LVM"
+# Comprobar si es pool de ZFS.
+[ -z "$TYPE" -o "$TYPE" == "UNKNOWN" ] && [ -n "$(blkid -s TYPE $DISK | grep zfs)" ] && TYPE="ZPOOL"
 
 # Mostrar salida.
 [ -n "$TYPE" ] && echo "$TYPE"
@@ -995,9 +1069,41 @@ case "${ID,,}" in
      bf03)      TYPE="SOLARIS-DISK" ;;
      ef01)      TYPE="MBR" ;;
      ef02)      TYPE="BIOS-BOOT" ;;
+     10000)     TYPE="LVM-LV" ;;
+     10010)     TYPE="ZFS-VOL" ;;
      *)         TYPE="UNKNOWN" ;;
 esac
 echo "$TYPE"
+}
+
+
+#         ogIsDiskLocked int_ndisk
+#@brief   Comprueba si un disco está bloqueado por una operación de uso exclusivo.
+#@param   int_ndisk      nº de orden del disco
+#@return  Código de salida: 0 - bloqueado, 1 - sin bloquear o error.
+#@note    Los ficheros de bloqueo se localizan en \c /var/lock/dev, siendo \c dev el dispositivo de la partición o de su disco, sustituyendo el carácter "/" por "-".
+#@version 1.1.0 - Primera versión para OpenGnsys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2016-04-08
+#*/ ##
+function ogIsDiskLocked ()
+{
+# Variables locales
+local DISK LOCKFILE
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk" \
+           "if $FUNCNAME 1; then ... ; fi"
+    return
+fi
+# Falso, en caso de error.
+[ $# == 1 ] || return 1
+DISK="$(ogDiskToDev $1 2>/dev/null)" || return 1
+
+# Comprobar existencia de fichero de bloqueo para el disco.
+LOCKFILE="/var/lock/lock${DISK//\//-}"
+test -f $LOCKFILE
 }
 
 
@@ -1052,6 +1158,13 @@ function ogListPrimaryPartitions ()
 # Variables locales.
 local PTTYPE PARTS
 
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk" \
+           "$FUNCNAME 1  =>  NTFS:10000000 EXT3:5000000 EXTENDED:1000000"
+    return
+fi
+
 PTTYPE=$(ogGetPartitionTableType $1) || return $?
 PARTS=$(ogListPartitions "$@") || return $?
 case "$PTTYPE" in
@@ -1072,10 +1185,51 @@ function ogListLogicalPartitions ()
 # Variables locales.
 local PTTYPE PARTS
 
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk" \
+           "$FUNCNAME 1  =>  LINUX-SWAP:999998"
+    return
+fi
 PTTYPE=$(ogGetPartitionTableType $1) || return $?
 [ "$PTTYPE" == "MSDOS" ] || ogRaiseError $OG_ERR_PARTITION "" || return $?
 PARTS=$(ogListPartitions "$@") || return $?
 echo $PARTS | cut -sf5- -d" "
+}
+
+
+#/**
+#         ogLockDisk int_ndisk
+#@brief   Genera un fichero de bloqueo para un disco en uso exlusivo.
+#@param   int_ndisk      nº de orden del disco
+#@return  (nada)
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
+#@note    El fichero de bloqueo se localiza en \c /var/lock/disk, siendo \c disk el dispositivo del disco, sustituyendo el carácter "/" por "-".
+#@version 1.1.0 - Primera versión para OpenGnsys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2016-04-07
+#*/ ##
+function ogLockDisk ()
+{
+# Variables locales
+local DISK LOCKFILE
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk" \
+           "$FUNCNAME 1"
+    return
+fi
+# Error si no se recibe 1 parámetro.
+[ $# == 1 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+# Obtener partición.
+DISK="$(ogDiskToDev $1)" || return $?
+
+# Crear archivo de bloqueo exclusivo.
+LOCKFILE="/var/lock/lock${DISK//\//-}"
+touch $LOCKFILE
 }
 
 
@@ -1163,7 +1317,7 @@ ID="${3^^}"
 PTTYPE=$(ogGetPartitionTableType $1)
 case "$PTTYPE" in
     GPT)    sgdisk -t$2:$ID $DISK 2>/dev/null ;;
-    MSDOS)  echo -ne "t\n$2\n${ID}\nw\n" | fdisk $DISK | grep Syncing &>/dev/null ;;
+    MSDOS)  sfdisk --id $DISK $2 $ID 2>/dev/null ;;
     *)      ogRaiseError $OG_ERR_OUTOFLIMIT "$1,$PTTYPE"
             return $? ;;
 esac
@@ -1284,7 +1438,7 @@ ogSetPartitionId $1 $2 $ID
 function ogTypeToId ()
 {
 # Variables locales
-local PTTYPE ID
+local PTTYPE ID=""
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -1328,7 +1482,6 @@ case "$PTTYPE" in
             CACHE)      ID=CA00;;
             EFI)        ID=EF00 ;;
             LINUX-RAID) ID=FD00 ;;
-            *)          ID="" ;;
         esac
         ;;
     MSDOS)
@@ -1359,7 +1512,16 @@ case "$PTTYPE" in
             EFI)        ID=ef ;;
             VMFS)       ID=fb ;;
             LINUX-RAID) ID=fd ;;
-            *)          ID="" ;;
+        esac
+        ;;
+    LVM)
+        case "$1" in
+            LVM-LV)     ID=10000 ;;
+        esac
+        ;;
+    ZVOL)
+        case "$1" in
+            ZFS-VOL)    ID=10010 ;;
         esac
         ;;
 esac
@@ -1410,6 +1572,41 @@ ogSetPartitionType $1 $2 $NEWTYPE
 
 
 #/**
+#         ogUnlockDisk int_ndisk
+#@brief   Elimina el fichero de bloqueo para un disco.
+#@param   int_ndisk      nº de orden del disco
+#@return  (nada)
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
+#@note    El fichero de bloqueo se localiza en \c /var/lock/disk, siendo \c disk el dispositivo del disco, sustituyendo el carácter "/" por "-".
+#@version 1.1.0 - Primera versión para OpenGnsys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2016-04-08
+#*/ ##
+function ogUnlockDisk ()
+{
+# Variables locales
+local DISK LOCKFILE
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk" \
+           "$FUNCNAME 1"
+    return
+fi
+# Error si no se recibe 1 parámetro.
+[ $# == 1 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+# Obtener partición.
+DISK="$(ogDiskToDev $1)" || return $?
+
+# Borrar archivo de bloqueo exclusivo.
+LOCKFILE="/var/lock/lock${DISK//\//-}"
+rm -f $LOCKFILE
+}
+
+
+#/**
 #         ogUpdatePartitionTable
 #@brief   Fuerza al kernel releer la tabla de particiones de los discos duros
 #@param   no requiere
@@ -1428,53 +1625,3 @@ do
 	partprobe $i
 done
 }
-
-
-#/**  @function ogDiskToRelativeDev: @brief Traduce los ID de discos o particiones EAC a ID Linux relativos, es decir 1 1 => sda1
-#@param  Admite 1 parametro:   $1  int_numdisk
-#@param  Admite 2 parametro:   $1   int_numdisk                    $2  int_partition
-#@return  Para 1 parametros traduce Discos Duros: Devuelve la ruta relativa linux del disco duro indicado con nomenclatura EAC.........ejemplo: IdPartition 1 => sda
-#@return  Para 2 parametros traduce Particiones: Devuelve la ruta relativa linux de la particion indicado con nomenclatura EAC...........  ejemplo: IdPartition  2 1 => sdb1
-#@warning  No definidas
-#@attention
-#@note	  Notas sin especificar
-#@version 0.1 -  Integracion para Opengnsys  -  EAC:  IdPartition en ATA.lib
-#@author  Antonio J. Doblas Viso. Universidad de Malaga
-#@date    27/10/2008
-#*/
-function ogDiskToRelativeDev () {
-if [ $# = 0 ]
-then
-	Msg "Info: Traduce el identificador del dispositivo EAC a dispositivo linux \n" info
-	Msg "Sintaxis1: IdPartition int_disk -----------------Ejemplo1: IdPartition 1 -> sda " example
-	Msg "Sintaxis2: IdPartition int_disk int_partition  --Ejemplo2: IdPartition 1 2 -> sda2 " example
-
-return
-fi
-#PART="$(Disk|cut -f$1 -d' ')$2"    # se comenta esta linea porque doxygen no reconoce la funcion disk y no crea los enlaces y referencias correctas.
-PART=$(ogDiskToDev|cut -f$1 -d' ')$2
-echo $PART | cut -f3 -d \/
-}
-
-
-#/**  @function ogDeletePartitionsLabels: @brief Elimina la informacion que tiene el kernel del cliente og sobre los labels de los sistemas de archivos
-#@param  No requiere
-#@return   Nada
-#@warning
-#@attention Requisitos:  comando interno linux rm
-#@note
-#@version 0.1 -  Integracion para Opengnsys  -  EAC:   DeletePartitionTable()  en ATA.lib
-#@author  Antonio J. Doblas Viso. Universidad de Malaga
-#@date    27/10/2008
-#*/
-function ogDeletePartitionsLabels () {
-# Si se solicita, mostrar ayuda.
-if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME " \
-           "$FUNCNAME "
-    return
-fi
-
-rm /dev/disk/by-label/*    # */ COMENTARIO OBLIGATORIO PARA DOXYGEN
-}
-

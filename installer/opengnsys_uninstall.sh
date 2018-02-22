@@ -1,7 +1,8 @@
 #!/bin/bash
+
 #/**
-#@file    opengnsys_update.sh
-#@brief   Script de desinstalación de OpenGnSys
+#@file    opengnsys_uninstall.sh
+#@brief   Script de desinstalación de OpenGnsys.
 #@warning No se elimina el directorio de imágenes, ni se desinstalan otros programas.
 #@version 0.10 - Primera prueba de desinstalación.
 #@author  Ramón Gómez - ETSII Univ. Sevilla
@@ -18,10 +19,14 @@
 #@version 1.0.5 - Usar las mismas variables que el script de instalación.
 #@author  Ramón Gómez - ETSII Univ. Sevilla
 #@date    2013/01/09
+#@version 1.1.0 - Solicitar confirmación para desinstalar.
+#@author  Ramón Gómez - ETSII Univ. Sevilla
+#@date    2017/06/27
+#*/ ##
 
 
 ####  AVISO: Editar configuración de acceso.
-####  WARNING: Edit access configuration
+####  WARNING: Edit access configuration.
 MYSQL_ROOT_PASSWORD="passwordroot"	# Clave de root de MySQL
 OPENGNSYS_DATABASE="ogAdmBD"		# Base de datos de administración
 OPENGNSYS_DB_USER="usuog"		# Usuario de acceso a la base de datos
@@ -29,11 +34,12 @@ OPENGNSYS_DB_USER="usuog"		# Usuario de acceso a la base de datos
 
 ####  AVISO: NO EDITAR variables de configuración.
 ####  WARNING: DO NOT EDIT configuration variables.
-OPENGNSYS="/opt/opengnsys"		# Directorio de OpenGnSys
+OPENGNSYS="/opt/opengnsys"		# Directorio de OpenGnsys
 OGIMG="images"				# Directorio de imágenes del repositorio
 OPENGNSYS_CLIENT_USER="opengnsys"	# Usuario Samba
 OPENGNSYS_OLDDATABASE="ogBDAdmin"	# Antigua base de datos
 MYCNF=/tmp/.my.cnf.$$			# Fichero temporal con credenciales de acceso a la BD.
+TFTPDIR=$(readlink $OPENGNSYS/tftpboot 2>/dev/null)	# Directorio de PXE/TFTP
 
 
 # Sólo ejecutable por usuario root
@@ -42,9 +48,16 @@ if [ "$(whoami)" != 'root' ]; then
     exit 1
 fi
 
+# Solicitar confirmación para la desinstalación de OpenGnsys.
+read -rp "WARNING: Files under $OPENGNSYS directory will be removed. Continue to uninstall? (y/n): " REPLY
+if [ "${REPLY^^}" != "Y" ]; then
+    echo "Operation cancelled."
+    exit 0
+fi
+
 
 # Parar servicio.
-echo "Uninstalling OpenGnSys services."
+echo "Uninstalling OpenGnsys services."
 if [ -x /etc/init.d/opengnsys ]; then
     /etc/init.d/opengnsys stop
     if [ -n "$(which update-rc.d 2>/dev/null)" ]; then
@@ -54,11 +67,11 @@ if [ -x /etc/init.d/opengnsys ]; then
     fi
 fi
 # Comprobar acceso a la bases de datos.
-echo "Erasing OpenGnSys database."
+echo "Erasing OpenGnsys database."
 DROP=1
 if ! mysql -u root -p"$MYSQL_ROOT_PASSWORD" <<<"quit" 2>/dev/null; then
     stty -echo
-    read -p  "- Please, insert MySQL root password: " MYSQL_ROOT_PASSWORD
+    read -rp "- Please, insert MySQL root password: " MYSQL_ROOT_PASSWORD
     echo ""
     stty echo
     if ! mysql -u root -p"$MYSQL_ROOT_PASSWORD" <<<"quit" 2>/dev/null; then
@@ -94,7 +107,7 @@ for serv in apache2 httpd; do
     [ -x /etc/init.d/$serv ] && /etc/init.d/$serv reload
 done
 # Eliminar ficheros.
-echo "Deleting OpenGnSys files."
+echo "Deleting OpenGnsys files."
 for dir in $OPENGNSYS/*; do
     if [ "$dir" != "$OPENGNSYS/$OGIMG" ]; then
         rm -fr "$dir"
@@ -102,13 +115,13 @@ for dir in $OPENGNSYS/*; do
 done
 rm -f /etc/init.d/opengnsys /etc/default/opengnsys /var/log/opengnsys
 rm -f /etc/cron.d/{opengnsys,torrentcreator,torrenttracker}
-# Elminar recursos de OpenGnSys en Samba.
+# Elminar recursos de OpenGnsys en Samba.
 rm -f /etc/samba/smb-og.conf
 perl -ni -e "print unless /smb-og.conf/" /etc/samba/smb.conf
 for serv in smbd smb ; do
     [ -x /etc/init.d/$serv ] && /etc/init.d/$serv reload
 done
-# Eliminar usuario de OpenGnSys.
+# Eliminar usuario de OpenGnsys.
 smbpasswd -x $OPENGNSYS_CLIENT_USER
 userdel $OPENGNSYS_CLIENT_USER
 # Tareas manuales a realizar después de desinstalar.
@@ -116,4 +129,5 @@ echo "Manual tasks:"
 echo "- You may stop or uninstall manually all other services"
 echo "     (DHCP, PXE, TFTP, NFS/Samba, Apache, MySQL)."
 echo "- Delete repository directory \"$OPENGNSYS/$OGIMG\""
+[ -n "$TFTPDIR" ] && echo "- Delete PXE configuration directory \"$TFTPDIR\""
 

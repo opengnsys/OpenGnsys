@@ -150,7 +150,7 @@
 		<SCRIPT language="javascript" src="../jscripts/comunes.js"></SCRIPT>
 		<SCRIPT language="javascript" src="../jscripts/colasacciones.js"></SCRIPT>
 		<SCRIPT language="javascript" src="../clases/jscripts/HttpLib.js"></SCRIPT>				
-		<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/colasacciones_'.$idioma.'.js"></SCRIPT>'?>
+		<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/colasacciones_'.$idioma.'.js"></SCRIPT>'?>
 	</HEAD>
 	<BODY oncontextmenu="return false">
 	<?php
@@ -308,13 +308,13 @@
 	?>
 	<TABLE  align=center border=0 align=left cellPadding=2 cellSpacing=5 >
 		<TR>
-			<? // Eliminar ?>
+			<?php // Eliminar ?>
 			<TD onclick=eleccion(1)>&nbsp;
 				<TABLE class="filtros" >
 					<TR>
 						<TD><A href="#op"><IMG border=0 src="../images/iconos/eliminar.gif"></A>&nbsp;</TD>
 						<TD><A style="text-decoration:none;COLOR:#999999;" href="#op">
-							<span	 onmouseout=desresaltar(this) onmouseover=resaltar(this)><?echo $TbMsg[12]?><span></A></TD>
+							<span	 onmouseout=desresaltar(this) onmouseover=resaltar(this)><?php echo $TbMsg[12]?><span></A></TD>
 					</TR>
 				</TABLE>
 			</TD>		
@@ -322,10 +322,10 @@
 			<TD onclick=eleccion(2)>&nbsp;
 				<TABLE class=filtros>
 					<TR>
-						<? // Resaltar ?>
+						<?php // Resaltar ?>
 						<TD><A href="#op"><IMG border=0 src="../images/iconos/reiniciar.gif"></A>&nbsp;</TD>
 						<TD><A style="text-decoration:none;COLOR:#999999;" href="#op">
-								<span	 onmouseout=desresaltar(this) onmouseover=resaltar(this)><?echo $TbMsg[13]?><span></A></TD>
+								<span	 onmouseout=desresaltar(this) onmouseover=resaltar(this)><?php echo $TbMsg[13]?><span></A></TD>
 					</TR>
 				</TABLE>
 			</TD>				
@@ -333,10 +333,10 @@
 			<TD onclick=eleccion(3)>&nbsp;
 				<TABLE class=filtros>
 					<TR>
-						<? // Parar ?>
+						<?php // Parar ?>
 						<TD><A href="#op"><IMG border=0 src="../images/iconos/acDetenida.gif"></A>&nbsp;</TD>
 						<TD><A style="text-decoration:none;COLOR:#999999;" href="#op">
-									<span	 onmouseout=desresaltar(this) onmouseover=resaltar(this)><?echo $TbMsg[14]?><span></A></TD>
+									<span	 onmouseout=desresaltar(this) onmouseover=resaltar(this)><?php echo $TbMsg[14]?><span></A></TD>
 						
 					</TR>
 				</TABLE>
@@ -345,10 +345,10 @@
 			<TD onclick=eleccion(4)>&nbsp;
 				<TABLE class=filtros>
 					<TR>
-						<? // Seguir ?>
+						<?php // Seguir ?>
 						<TD><A href="#op"><IMG border=0 src="../images/iconos/acIniciada.gif"></A>&nbsp;</TD>
 						<TD>&nbsp;<A style="text-decoration:none;COLOR:#999999;" href="#op">
-							<span onmouseout=desresaltar(this) onmouseover=resaltar(this)><?echo $TbMsg[15]?></span></A>&nbsp;</TD>
+							<span onmouseout=desresaltar(this) onmouseover=resaltar(this)><?php echo $TbMsg[15]?></span></A>&nbsp;</TD>
 					</TR>
 				</TABLE>
 			</TD>	
@@ -356,26 +356,26 @@
 			<TD onclick=eleccion(5)>&nbsp;
 				<TABLE class=filtros>
 					<TR>
-						<? // Seguir ?>
+						<?php // Seguir ?>
 						<TD><A href="#op"><IMG border=0 src="../images/iconos/acExitosa.gif"></A>&nbsp;</TD>
 						<TD>&nbsp;<A style="text-decoration:none;COLOR:#999999;" href="#op">
-							<span onmouseout=desresaltar(this) onmouseover=resaltar(this)><?echo $TbMsg[55]?></span></A>&nbsp;</TD>
+							<span onmouseout=desresaltar(this) onmouseover=resaltar(this)><?php echo $TbMsg[55]?></span></A>&nbsp;</TD>
 					</TR>
 				</TABLE>
 			</TD>
 			<TD onclick=eleccion(6)>&nbsp;
 				<TABLE class=filtros>
 					<TR>
-						<? // Seguir ?>
+						<?php // Seguir ?>
 						<TD><A href="#op"><IMG border=0 src="../images/iconos/acFallida.gif"></A>&nbsp;</TD>
 						<TD>&nbsp;<A style="text-decoration:none;COLOR:#999999;" href="#op">
-							<span onmouseout=desresaltar(this) onmouseover=resaltar(this)><?echo $TbMsg[56]?></span></A>&nbsp;</TD>
+							<span onmouseout=desresaltar(this) onmouseover=resaltar(this)><?php echo $TbMsg[56]?></span></A>&nbsp;</TD>
 					</TR>
 				</TABLE>
 			</TD>			
 		</TR>
 	</TABLE>
-	<?
+	<?php
 	//	_________________________________________________________________________
 	//	
 	// Tabla de registros de acciones 
@@ -383,7 +383,7 @@
 	?>	
 	<TABLE  border=0 class="tabla_listados" cellspacing=1 cellpadding=0 >
 	<TBODY id="tbAcciones">
-	<?
+	<?php
 		cabeceraAcciones();
 		listaAcciones($ambito,$idambito);
 
@@ -392,11 +392,11 @@
 	</TABLE>
 	</DIV>		
 	<FORM name="facciones">
-		<INPUT type="hidden" name=acciones value="<? echo $acciones?>">
+		<INPUT type="hidden" name=acciones value="<?php echo $acciones?>">
 		<INPUT type="hidden" name=localaccion value="">
-		<INPUT type="hidden" name="sesion" value="<? echo $sesion?>">		
+		<INPUT type="hidden" name="sesion" value="<?php echo $sesion?>">		
 	</FORM>
-	<?
+	<?php
 		$flotante=new MenuContextual(); // Crea objeto MenuContextual
 		$XMLcontextual=ContextualXMLAcciones(); // Crea contextual de las acciones
 		echo $flotante->CreaMenuContextual($XMLcontextual); 
@@ -406,7 +406,7 @@
 	?>
 </BODY>
 </HTML>
-<?
+<?php
 /********************************************************************/
 //	Escribe la cabecera de los registros de acciones
 //	_________________________________________________________________________
@@ -741,12 +741,12 @@ function escribeNotificacion($rs,$oA)
 		else{
 			/* Fechas y horas */
 			list($fecha,$hora)=split(" ",substr($rs->campos["fechahorafin"],0));
-			if ($fecha=="0000-00-00") $hora="";
+			if ($fecha=="1970-01-01") $hora="";
 			$html.='<TD align=center>&nbsp;'.InvFecha($fecha).'&nbsp;</TD>';
 			$html.='<TD align=center>&nbsp;'.$hora.'&nbsp;</TD>';
 				
 			list($fecha,$hora)=split(" ",substr($rs->campos["fechahorareg"],0));
-			if ($fecha=="0000-00-00") $hora="";
+			if ($fecha=="1970-01-01") $hora="";
 			$html.='<TD align=center>&nbsp;'.InvFecha($fecha).'&nbsp;</TD>';
 			$html.='<TD align=center>&nbsp;'.$hora.'&nbsp;</TD>';
 		}	
@@ -930,7 +930,7 @@ function escribeResumen($oA)
 		}	
 		
 		/* Descripción de la notificación (Descripción del error si se ha producido alguno) */	
-		$html.='<TD style="BACKGROUND-COLOR: #b5daad" >&nbsp;'.$rs->campos["descrinotificacion"].'&nbsp;</TD>';
+		$html.='<TD style="BACKGROUND-COLOR: #b5daad" >&nbsp;'.@$rs->campos["descrinotificacion"].'&nbsp;</TD>';
 
 		/* Estado */
 		$html.='<TD style="BACKGROUND-COLOR: #b5daad"  align=center>&nbsp;</TD>';
@@ -1129,10 +1129,10 @@ function escribeCheck()
 	echo'
 	<TABLE class="tabla_busquedas" align=center border=0 cellPadding=0 cellSpacing=0>
 		<TR>
-		TH height=15 align="center" colspan=14><? echo $TbMsg[18]?></TH>
+		TH height=15 align="center" colspan=14><?php echo $TbMsg[18]?></TH>
 		</TR>
 		<TR>
-			<TD align=right><? echo $TbMsg[30]?></TD>
+			<TD align=right><?php echo $TbMsg[30]?></TD>
 			<TD align=center><INPUT type="checkbox" checked></TD>
 			<TD width="20" align=center>&nbsp;</TD>
 		</TR>

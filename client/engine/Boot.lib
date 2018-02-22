@@ -4,21 +4,23 @@
 #@brief   Librería o clase Boot
 #@class   Boot
 #@brief   Funciones para arranque y post-configuración de sistemas de archivos.
-#@version 1.0.6
+#@version 1.1.0
 #@warning License: GNU GPLv3+
 #*/
 
 
 #/**
-#         ogBoot int_ndisk int_npartition
+#         ogBoot int_ndisk int_nfilesys [str_kernel str_initrd str_krnlparams]
 #@brief   Inicia el proceso de arranque de un sistema de archivos.
 #@param   int_ndisk      nº de orden del disco
-#@param   int_npartition nº de orden de la partición
+#@param   int_nfilesys   nº de orden del sistema de archivos
+#@param   str_krnlparams parámetros de arranque del kernel (opcional)
 #@return  (activar el sistema de archivos).
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
 #@exception OG_ERR_PARTITION Tipo de partición desconocido o no se puede montar.
 #@exception OG_ERR_NOTOS     La partición no tiene instalado un sistema operativo.
+#@note    En Linux, si no se indican los parámetros de arranque se detectan de la opción por defecto del cargador GRUB.
 #@note    En Linux, debe arrancarse la partición del directorio \c /boot
 #@version 0.1 - Integración para OpenGnSys. - EAC: HDboot; BootLinuxEX en Boot.lib  
 #@author  Antonio J. Doblas Viso, Universidad de Malaga
@@ -32,6 +34,9 @@
 #@version 1.0.6 - Selección a partir de tipo de sistema operativo (en vez de S.F.) y arrancar Linux con /boot separado.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2015-06-05
+#@version 1.1.0 - Nuevo parámetro opcional con opciones de arranque del Kernel.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2015-07-15
 #*/ ##
 function ogBoot ()
 {
@@ -40,12 +45,12 @@ local PART TYPE MNTDIR PARAMS KERNEL INITRD APPEND FILE LOADER f
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
-           "$FUNCNAME 1 1"
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_nfilesys [str_kernel str_initrd str_kernelparams]" \
+           "$FUNCNAME 1 1" "$FUNCNAME 1 2 \"/boot/vmlinuz /boot/initrd.img root=/dev/sda2 ro\""
     return
 fi
-# Error si no se reciben 2 parámetros.
-[ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+# Error si no se reciben 2 o 3 parámetros.
+[ $# == 2 ] || [ $# == 3 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
 # Detectar tipo de sistema de archivos y montarlo.
 PART=$(ogDiskToDev $1 $2) || return $?
@@ -55,12 +60,12 @@ MNTDIR=$(ogMount $1 $2) || return $?
 
 case "$TYPE" in
     Linux|Android)
-        # Obtiene los parámetros de arranque para Linux.
-        PARAMS=$(ogLinuxBootParameters $1 $2)
+        # Si no se indican, obtiene los parámetros de arranque para Linux.
+        PARAMS="${3:-$(ogLinuxBootParameters $1 $2 2>/dev/null)}"
         # Si no existe, buscar sistema de archivo /boot en /etc/fstab.
         if [ -z "$PARAMS" -a -e $MNTDIR/etc/fstab ]; then
             # Localizar S.F. /boot en /etc/fstab del S.F. actual.
-            PART=$(ogDevToDisk $(awk '$2=="/boot" {print $1}' $MNTDIR/etc/fstab))
+            PART=$(ogDevToDisk $(awk '$1!="#" && $2=="/boot" {print $1}' $MNTDIR/etc/fstab))
             # Montar S.F. de /boot.
             MNTDIR=$(ogMount $PART) || return $?
             # Buscar los datos de arranque.
@@ -92,9 +97,9 @@ case "$TYPE" in
             dd if=/dev/zero of=${MNTDIR}/ogboot.me bs=1024 count=3
             dd if=/dev/zero of=${MNTDIR}/ogboot.firstboot bs=1024 count=3
             dd if=/dev/zero of=${MNTDIR}/ogboot.secondboot bs=1024 count=3
-	    if  [ -z "$(ogGetRegistryValue $MNTDIR SOFTWARE '\Microsoft\Windows\CurrentVersion\Run\ogcleannboot')" ]; then               
-            ogAddRegistryValue $MNTDIR SOFTWARE '\Microsoft\Windows\CurrentVersion\Run\ogcleanboot' 
-            ogSetRegistryValue $MNTDIR SOFTWARE '\Microsoft\Windows\CurrentVersion\Run\ogcleanboot' "cmd /c del c:\ogboot.*"
+            if  [ -z "$(ogGetRegistryValue $MNTDIR SOFTWARE '\Microsoft\Windows\CurrentVersion\Run\ogcleannboot')" ]; then
+                ogAddRegistryValue $MNTDIR SOFTWARE '\Microsoft\Windows\CurrentVersion\Run\ogcleanboot'
+                ogSetRegistryValue $MNTDIR SOFTWARE '\Microsoft\Windows\CurrentVersion\Run\ogcleanboot' "cmd /c del c:\ogboot.*"
             fi
             # Activar la partición.
             ogSetPartitionActive $1 $2
@@ -119,10 +124,10 @@ esac
 
 
 #/**
-#         ogGetWindowsName int_ndisk int_npartition
+#         ogGetWindowsName int_ndisk int_nfilesys
 #@brief   Muestra el nombre del equipo en el registro de Windows.
 #@param   int_ndisk      nº de orden del disco
-#@param   int_npartition nº de orden de la partición
+#@param   int_nfilesys   nº de orden del sistema de archivos
 #@return  str_name - nombre del equipo
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
@@ -196,7 +201,7 @@ MNTDIR=$(ogMount $1 $2) || return $?
 # Fichero de configuración de GRUB.
 CONFDIR=$MNTDIR                               # Sistema de archivos de arranque (/boot).
 [ -d $MNTDIR/boot ] && CONFDIR=$MNTDIR/boot   # Sist. archivos raíz con directorio boot.
-for f in $MNTDIR/{,grubPARTITION/}{,boot/}{grub{,2},{,efi/}EFI/*}/{menu.lst,grub.cfg,grub.cfg.backup.og}; do
+for f in $MNTDIR/{,boot/}{{grubMBR,grubPARTITION}/boot/,}{grub{,2},{,efi/}EFI/*}/{menu.lst,grub.cfg}; do
     [ -r $f ] && CONFFILE=$f
 done
 [ -n "$CONFFILE" ] || ogRaiseError $OG_ERR_NOTFOUND "grub.cfg" || return $?
@@ -212,6 +217,7 @@ awk 'BEGIN {cont=-1;}
                                    if (def ~ /saved_entry/) def=0;
                                  }
      $1~/^(title|menuentry)$/ {cont++}
+     $1~/^set$/ && $2~/^root=.\(hd'$[1-1]',(msdos|gpt)'$2'\).$/ { if (def==0) def=cont; }
      $1~/^(kernel|linux(16|efi)?)$/ { if (def==cont) {
                                        kern=$2;
                                        sub($1,""); sub($1,""); sub(/^[ \t]*/,""); app=$0
@@ -456,12 +462,15 @@ rm -f $FILE
 #@version 1.0.5 - Soporte para Windows 8 y Windows 8.1.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2014-01-28
+#@version 1.1.0 - Soporte para Windows 10.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2016-01-19
 #*/ ##
 
 function ogWindowsBootParameters ()
 {
 # Variables locales.
-local PART DISK FILE VERSION WINVER MOUNT
+local PART DISK FILE WINVER MOUNT
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -480,31 +489,16 @@ let DISK=$1-1
 PART=$2	
 FILE=/tmp/temp$$
 
-VERSION=$(ogGetOsVersion $1 $2)
+# Obtener versión de Windows.
+WINVER=$(ogGetOsVersion $1 $2 | awk -F"[: ]" '$1=="Windows" {if ($3=="Server") print $2,$3,$4; else print $2,$3;}')
+[ -z "$WINVER" ] && return $(ogRaiseError $OG_ERR_NOTOS "Windows"; echo $?)
 
-if echo "$VERSION" | grep "Windows 10"
-then
-       WINVER="Windows 10"
-elif echo "$VERSION" | grep "Windows 8.1"
-then
-	WINVER="Windows 8.1"
-elif echo "$VERSION" | grep "Windows 8"
-then
-	WINVER="Windows 8"
-elif echo "$VERSION" | grep "Windows 7"
-then
-	WINVER="Windows 7"
-elif echo "$VERSION" | grep "Windows Seven"
-then 
-	WINVER="Windows Vista"
-elif echo "$VERSION" | grep "XP"
-then
-	MOUNT=$(ogMount $1 $2)
-	[ -f ${MOUNT}/boot.ini ] || return $(ogRaiseError $OG_ERR_NOTOS; echo $?)
-	cat ${MOUNT}/boot.ini | sed s/partition\([0-9]\)/partition\($PART\)/g | sed s/rdisk\([0-9]\)/rdisk\($DISK\)/g > ${MOUNT}/tmp.boot.ini; mv ${MOUNT}/tmp.boot.ini ${MOUNT}/boot.ini
-	return 0
-else
-	return $(ogRaiseError $OG_ERR_NOTOS; echo $?)
+# Acciones para Windows XP.
+if [[ "$WINVER" =~ "XP" ]]; then
+    MOUNT=$(ogMount $1 $2)
+    [ -f ${MOUNT}/boot.ini ] || return $(ogRaiseError $OG_ERR_NOTFOUND "boot.ini"; echo $?)
+    cat ${MOUNT}/boot.ini | sed s/partition\([0-9]\)/partition\($PART\)/g | sed s/rdisk\([0-9]\)/rdisk\($DISK\)/g > ${MOUNT}/tmp.boot.ini; mv ${MOUNT}/tmp.boot.ini ${MOUNT}/boot.ini
+    return 0
 fi
 
 ogUnmount $1 $2 || return $(ogRaiseError $OG_ERR_PARTITION; echo $?)
@@ -653,8 +647,8 @@ ps aux > /dev/null | grep $! | grep -E "T|S" | kill -9 $! > /dev/null
 }
 
 
-#         ogGrubInstallMbr  int_disk_GRUBCFG  int_partition_GRUBCFG #@param   bolean_Check_Os_installed_and_Configure_2ndStage   true | false[default] 
-#@brief   Instala y actualiza el gestor grub el el MBR del disco duro donde se encuentra el fichero grub.cfg. Admite sistemas Windows.
+#         ogGrubInstallMbr  int_disk_GRUBCFG  int_partition_GRUBCFG  
+#@brief   Instala el grub el el MBR del primer disco duro (FIRSTSTAGE). El fichero de configuración grub.cfg ubicado según parametros disk y part(SECONDSTAGE). Admite sistemas Windows.
 #@param   int_disk_SecondStage      
 #@param   int_part_SecondStage     
 #@param   bolean_Check_Os_installed_and_Configure_2ndStage   true | false[default] 
@@ -669,6 +663,12 @@ ps aux > /dev/null | grep $! | grep -E "T|S" | kill -9 $! > /dev/null
 #@version 1.0.3 - Ficheros de configuracion independientes segun ubicación de la primera etapa
 #@author  Antonio J. Doblas Viso.   Universidad de Malaga.
 #@date    2012-03-13
+#@version 1.1.0 - #791 El FIRSTSTAGE(MBR) siempre será el primer disco duro. EL SECONDSTAGE(grub.cfg) estára en el DISK y PART indicados en los parámetros.
+#@author  Antonio J. Doblas Viso.   Universidad de Malaga.
+#@date    2017-06-19
+#@version 1.1.0 - #827 Entrada para el ogLive si el equipo tiene partición cache.
+#@author  Antonio J. Doblas Viso.   Universidad de Malaga.
+#@date    2018-01-21
 #*/ ##
 
 function ogGrubInstallMbr {
@@ -698,8 +698,8 @@ BACKUPNAME=".backup.og"
 #VERSION=$(ogGetOsVersion $DISK $PART) 
 #echo $VERSION | grep "Linux" || return $(ogRaiseError $OG_ERR_NOTOS "no es linux"; echo $?)
 
-#Localizar primera etapa del grub
-FIRSTSTAGE=$(ogDiskToDev $DISK)
+#La primera etapa del grub se fija en el primer disco duro 
+FIRSTSTAGE=$(ogDiskToDev 1)
 
 #localizar disco segunda etapa del grub
 SECONDSTAGE=$(ogMount $DISK $PART)
@@ -726,6 +726,10 @@ then
 fi
 
 # SI Reconfigurar segunda etapa (grub.cfg) == TRUE 
+
+#llamada a updateBootCache para que aloje la primera fase del ogLive
+updateBootCache
+
 #Configur la sintaxis grub para evitar menus de "recovery" en el OGLive
 echo "GRUB_DISABLE_RECOVERY=\"true\"" >> /etc/default/grub
 echo "GRUB_DISABLE_LINUX_UUID=\"true\"" >> /etc/default/grub
@@ -735,9 +739,9 @@ echo "GRUB_DISABLE_LINUX_UUID=\"true\"" >> /etc/default/grub
 
 #Preparar configuración segunda etapa: crear ubicacion
 mkdir -p ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot/grub/
-#Preparar configuración segunda etapa: crear cabecera del fichero
+#Preparar configuración segunda etapa: crear cabecera del fichero (ignorar errores)
 sed -i 's/^set -e/#set -e/' /etc/grub.d/00_header
-/etc/grub.d/00_header > ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot/grub/grub.cfg
+/etc/grub.d/00_header > ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot/grub/grub.cfg 2>/dev/null
 #Preparar configuración segunda etapa: crear entrada del sistema operativo
 grubSyntax "$KERNELPARAM" >> ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot/grub/grub.cfg
 
@@ -825,9 +829,9 @@ echo "GRUB_DISABLE_LINUX_UUID=\"true\"" >> /etc/default/grub
 
 #Preparar configuración segunda etapa: crear ubicacion
 mkdir -p ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot/grub/
-#Preparar configuración segunda etapa: crear cabecera del fichero
+#Preparar configuración segunda etapa: crear cabecera del fichero (ingnorar errores)
 sed -i 's/^set -e/#set -e/' /etc/grub.d/00_header
-/etc/grub.d/00_header > ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot/grub/grub.cfg
+/etc/grub.d/00_header > ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot/grub/grub.cfg 2>/dev/null
 #Preparar configuración segunda etapa: crear entrada del sistema operativo
 grubSyntax $DISK $PART "$KERNELPARAM" >> ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot/grub/grub.cfg
 
@@ -846,7 +850,7 @@ grub-install --force --root-directory=${SECONDSTAGE}${PREFIXSECONDSTAGE} $FIRSTS
 #@exception OG_ERR_NOTFOUND  No se encuentra el fichero fstab a procesar.
 #@warning Puede haber un error si hay más de 1 partición swap.
 #@version 1.0.5 - Primera versión para OpenGnSys. Solo configura la SWAP
-#@author  Antonio J. Doblas Viso.   Universidad de Malaga.
+#@author  Antonio J. Doblas Viso.   Universidad de Malaga. 
 #@date    2013-03-21
 #@version 1.0.6b - correccion. Si no hay partición fisica para la SWAP, eliminar entrada del fstab.  
 #@author  Antonio J. Doblas Viso.   Universidad de Malaga.
@@ -1003,7 +1007,7 @@ MNTDIR=$(ogMount $1 $2) || return $?
 }
 
 #/**
-# ogGrubAddOgclient num_disk num_part [ timeout ] [ offline ]
+# ogGrubAddOgLive num_disk num_part [ timeout ] [ offline ]
 #@brief   Crea entrada de menu grub para ogclient, tomando como paramentros del kernel los actuales del cliente.
 #@param 1 Numero de disco
 #@param 2 Numero de particion
@@ -1014,9 +1018,18 @@ MNTDIR=$(ogMount $1 $2) || return $?
 #@exception OG_ERR_NOTFOUND No existe kernel o initrd  en cache.
 #@exception OG_ERR_NOTFOUND No existe archivo de configuracion del grub.
 # /// FIXME: Solo para el grub instalado en MBR por Opengnsys, ampliar para más casos.
+#@version 1.0.6 - Prmera integración
+#@author  
+#@date    2016-11-07
+#@version 1.1.0 - Se renombra funcion para adaptacion al cambio de nombre de ogclient a ogLive. Soporta varios ogLives en la cache. Se añade el ogLive asignado al cliente.
+#@author  Antonio J. Doblas Viso.   Universidad de Malaga.
+#@date    2017-06-17
+#*/ ##
+#*/ ##
+
 #*/
 
-ogGrubAddOgclient () {
+function ogGrubAddOgLive () {
     local TIMEOUT DIRMOUNT GRUBGFC PARTTABLETYPE NUMDISK NUMPART KERNEL STATUS NUMLINE MENUENTRY
 
     # Si se solicita, mostrar ayuda.
@@ -1033,7 +1046,7 @@ ogGrubAddOgclient () {
 
     # Error si no existe el kernel y el initrd en la cache.
     # Falta crear nuevo codigo de error.
-    [ -r $OGCAC/boot/ogvmlinuz -a -r $OGCAC/boot/oginitrd.img ] || return $(ogRaiseError log session $OG_ERR_NOTFOUND "CACHE: ogvmlinuz, oginitrd.img" 1>&2; echo $?)
+    [ -r $OGCAC/boot/${oglivedir}/ogvmlinuz -a -r $OGCAC/boot/${oglivedir}/oginitrd.img ] || return $(ogRaiseError log session $OG_ERR_NOTFOUND "CACHE: ogvmlinuz, oginitrd.img" 1>&2; echo $?)
 
     # Archivo de configuracion del grub
     DIRMOUNT=$(ogMount $1 $2)
@@ -1042,8 +1055,8 @@ ogGrubAddOgclient () {
     # Error si no existe archivo del grub
     [ -r $GRUBGFC ] || return $(ogRaiseError log session $OG_ERR_NOTFOUND  "$GRUBGFC" 1>&2; echo $?)
 
-    # Si existe la entrada de opengnsys nos salimos.
-    grep "menuentry Opengnsys" $GRUBGFC &>/dev/null && return 0
+    # Si existe la entrada de opengnsys, se borra
+    grep -q "menuentry Opengnsys" $GRUBGFC && sed -ie "/menuentry Opengnsys/,+6d" $GRUBGFC
 
     # Tipo de tabla de particiones
     PARTTABLETYPE=$(ogGetPartitionTableType $1 | tr [:upper:] [:lower:])
@@ -1052,7 +1065,7 @@ ogGrubAddOgclient () {
     read NUMDISK NUMPART <<< $(ogFindCache)
     let NUMDISK=$NUMDISK-1
     # kernel y sus opciones. Pasamos a modo usuario
-    KERNEL="/boot/ogvmlinuz $(sed -e s/^.*linuz//g -e s/ogactiveadmin=true/ogactiveadmin=false/g /proc/cmdline)"
+    KERNEL="/boot/${oglivedir}/ogvmlinuz $(sed -e s/^.*linuz//g -e s/ogactiveadmin=[a-z]*//g /proc/cmdline)"
 
     # Configuracion offline si existe parametro
     echo "$@" |grep offline &>/dev/null && STATUS=offline
@@ -1062,12 +1075,12 @@ ogGrubAddOgclient () {
     # Numero de línea de la primera entrada del grub.
     NUMLINE=$(grep -n -m 1 "^menuentry" $GRUBGFC|cut -d: -f1)
     # Texto de la entrada de opengnsys
-MENUENTRY="menuentry "Opengnsys"  --class gnu-linux --class gnu --class os { \n \
+MENUENTRY="menuentry "OpenGnsys"  --class opengnsys --class gnu --class os { \n \
 \tinsmod part_$PARTTABLETYPE \n \
 \tinsmod ext2 \n \
 \tset root='(hd${NUMDISK},$PARTTABLETYPE${NUMPART})' \n \
 \tlinux $KERNEL \n \
-\tinitrd /boot/oginitrd.img \n \
+\tinitrd /boot/${oglivedir}/oginitrd.img \n \
 }"
 
 
@@ -1081,120 +1094,1075 @@ MENUENTRY="menuentry "Opengnsys"  --class gnu-linux --class gnu --class os { \n 
     [ $TIMEOUT ] &&  sed -i s/timeout=.*$/timeout=$TIMEOUT/g $GRUBGFC
 }
 
-
 #/**
 # ogGrubHidePartitions num_disk num_part
-#@brief Configura el grub para que oculte las particiones de windows que no se esten iniciando.
+#@see ogBootLoaderHidePartitions
+#*/
+function ogGrubHidePartitions {
+    # Si se solicita, mostrar ayuda.
+    if [ "$*" == "help" ]; then
+        ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
+               "$FUNCNAME 1 6"
+        return
+    fi
+    ogBootLoaderHidePartitions $@
+    return $?
+}
+
+#/**
+# ogBurgHidePartitions num_disk num_part
+#@see ogBootLoaderHidePartitions
+#*/
+function ogBurgHidePartitions {
+    # Si se solicita, mostrar ayuda.
+    if [ "$*" == "help" ]; then
+        ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
+               "$FUNCNAME 1 6"
+        return
+    fi
+    ogBootLoaderHidePartitions $@
+    return $?
+}
+
+#/**
+# ogBootLoaderHidePartitions num_disk num_part
+#@brief Configura el grub/burg para que oculte las particiones de windows que no se esten iniciando.
 #@param 1 Numero de disco
 #@param 2 Numero de particion
 #@return  (nada)
 #@exception OG_ERR_FORMAT    Formato incorrecto.
-#@exception No existe archivo de configuracion del grub.
-#@ /// FIXME: Solo para el grub instalado en MBR por Opengnsys, ampliar para más casos.
+#@exception No existe archivo de configuracion del grub/burg.
+#@version 1.1 Se comprueban las particiones de Windows con blkid (y no con grub.cfg)
+#@author  Irina Gomez, ETSII Universidad de Sevilla
+#@date    2015-11-17
+#@version 1.1 Se generaliza la función para grub y burg
+#@author  Irina Gomez, ETSII Universidad de Sevilla
+#@date    2017-10-20
 #*/
-function ogGrubHidePartitions {
-    local DIRMOUNT GRUBGFC PARTTABLETYPE WINENTRY ENTRY TEXT ENTRY2 LINE2 PART2 HIDDEN
+function ogBootLoaderHidePartitions {
+    local FUNC DIRMOUNT GFCFILE PARTTABLETYPE WINENTRY ENTRY PART TEXT LINE2 PART2 HIDDEN
 
     # Si se solicita, mostrar ayuda.
     if [ "$*" == "help" ]; then
-        ogHelp  "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
-                "$FUNCNAME 1 6"
+        ogHelp "$FUNCNAME" "$MSG_SEE ogGrubHidePartitions ogBurgHidePartitions"
         return
     fi
+
+    # Nombre de la función que llama a esta.
+    FUNC="${FUNCNAME[@]:1}"
+    FUNC="${FUNC%%\ *}"
 
     # Error si no se reciben 2 parámetros.
     [ $# -lt 2 ] && return $(ogRaiseError session $OG_ERR_FORMAT "$MSG_FORMAT: $FUNCNAME num_disk num_part"; echo $?)
 
     # Archivo de configuracion del grub
     DIRMOUNT=$(ogMount $1 $2)
-    GRUBGFC="$DIRMOUNT/boot/grubMBR/boot/grub/grub.cfg"
+    # La función debe ser llamanda desde ogGrubHidePartitions or ogBurgHidePartitions.
+    case "$FUNC" in
+        ogGrubHidePartitions)
+            CFGFILE="$DIRMOUNT/boot/grubMBR/boot/grub/grub.cfg"
+            ;;
+        ogBurgHidePartitions)
+            CFGFILE="$DIRMOUNT/boot/burg/burg.cfg"
+            ;;
+        *)
+            ogRaiseError $OG_ERR_FORMAT "Use ogGrubHidePartitions or ogBurgHidePartitions."
+            return $?
+            ;;
+    esac
 
     # Error si no existe archivo del grub
-    [ -r $GRUBGFC ] || return $(ogRaiseError log session $OG_ERR_NOTFOUND  "$GRUBGFC" 1>&2; echo $?)
+    [ -r $CFGFILE ] || return $(ogRaiseError log session $OG_ERR_NOTFOUND  "$CFGFILE" 1>&2; echo $?)
 
-    # Si solo hay una entrada de Windows me salgo
-    [ $(grep -n "menuentry.*Windows" $GRUBGFC |wc -l) -eq 1 ] && return 0
+    # Si solo hay una particion de Windows me salgo
+    [ $(fdisk -l $(ogDiskToDev $1) | grep 'NTFS' |wc -l) -eq 1 ] && return 0
 
     # Elimino llamadas a parttool, se han incluido en otras ejecuciones de esta funcion.
-    sed -i '/parttool/d' $GRUBGFC
+    sed -i '/parttool/d' $CFGFILE
 
     PARTTABLETYPE=$(ogGetPartitionTableType $1 | tr [:upper:] [:lower:])
 
     # Entradas de Windows: numero de linea y particion. De mayor a menor.
-    WINENTRY=$(awk '/menuentry.*Windows/ { gsub(/\/dev\/sda/,""); gsub(/\)\"/, "");  print NR":"$6} ' $GRUBGFC | sed '1!G;h;$!d' )
+    WINENTRY=$(awk '/menuentry.*Windows/ {gsub(/\)\"/, "");  print NR":"$6} ' $CFGFILE | sed -e '1!G;h;$!d' -e s/[a-z\/]//g)
+    # Particiones de Windows, pueden no estar en el grub.
+    WINPART=$(fdisk -l $(ogDiskToDev $1)|awk '/NTFS/ {print substr($1,9,1)}' |sed '1!G;h;$!d')
     # Modifico todas las entradas de Windows.
     for ENTRY in $WINENTRY; do
         LINE=${ENTRY%:*}
+	PART=${ENTRY#*:}
         # En cada entrada, oculto o muestro cada particion.
         TEXT=""
-        for ENTRY2 in $WINENTRY; do
-                LINE2=${ENTRY2%:*}
-                PART2=${ENTRY2#*:}
+        for PART2 in $WINPART; do
                 # Muestro solo la particion de la entrada actual.
-                [ $LINE2 -eq $LINE ] && HIDDEN="-" || HIDDEN="+"
+                [ $PART2 -eq $PART ] && HIDDEN="-" || HIDDEN="+"
 
                 TEXT="\tparttool (hd0,$PARTTABLETYPE$PART2) hidden$HIDDEN \n$TEXT"
         done
 	
-        sed -i "${LINE}a\ $TEXT" $GRUBGFC
+        sed -i "${LINE}a\ $TEXT" $CFGFILE
     done
 
     # Activamos la particion que se inicia en todas las entradas de windows.
-    sed -i "/chainloader/i\\\tparttool \$\{root\} boot+"  $GRUBGFC
+    sed -i "/chainloader/i\\\tparttool \$\{root\} boot+"  $CFGFILE
 
 }
 
 #/**
-# ogGrubDeleteEntry num_disk num_part num_part_delete
+# ogGrubDeleteEntry num_disk num_part num_disk_delete num_part_delete
+#@see ogBootLoaderDeleteEntry
+#*/
+function ogGrubDeleteEntry {
+    # Si se solicita, mostrar ayuda.
+    if [ "$*" == "help" ]; then
+        ogHelp  "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition int_disk_delete int_npartition_delete" \
+                "$FUNCNAME 1 6 2 1"
+        return
+    fi
+    ogBootLoaderDeleteEntry $@
+    return $?
+}
+
+#/**
+# ogBurgDeleteEntry num_disk num_part num_disk_delete num_part_delete
+#@see ogBootLoaderDeleteEntry
+#*/
+function ogBurgDeleteEntry {
+    # Si se solicita, mostrar ayuda.
+    if [ "$*" == "help" ]; then
+        ogHelp  "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition int_disk_delete int_npartition_delete" \
+                "$FUNCNAME 1 6 2 1"
+        return
+    fi
+    ogBootLoaderDeleteEntry $@
+    return $?
+}
+
+#/**
+# ogBootLoaderDeleteEntry num_disk num_part num_part_delete
 #@brief Borra en el grub las entradas para el inicio en una particion.
 #@param 1 Numero de disco donde esta el grub
 #@param 2 Numero de particion donde esta el grub
-#@parm 3 Numero de la particion de la que borramos las entradas
+#@param 3 Numero del disco del que borramos las entradas
+#@param 4 Numero de la particion de la que borramos las entradas
+#@note Tiene que ser llamada desde ogGrubDeleteEntry o ogBurgDeleteEntry
 #@return  (nada)
+#@exception OG_ERR_FORMAT    Use ogGrubDeleteEntry or ogBurgDeleteEntry.
 #@exception OG_ERR_FORMAT    Formato incorrecto.
-#@exception No existe archivo de configuracion del grub.
-#@ /// FIXME: Solo para el grub instalado en MBR por Opengnsys, ampliar para más casos.
+#@exception OG_ERR_NOTFOUND  No existe archivo de configuracion del grub.
+#@version 1.1 Se generaliza la función para grub y burg
+#@author  Irina Gomez, ETSII Universidad de Sevilla
+#@date    2017-10-20
 #*/
-
-
-function ogGrubDeleteEntry {
-    local DIRMOUNT GRUBGFC MENUENTRY DELETEENTRY ENDENTRY ENTRY
+function ogBootLoaderDeleteEntry {
+    local FUNC DIRMOUNT CFGFILE DEVICE MENUENTRY DELETEENTRY ENDENTRY ENTRY
 
     # Si se solicita, mostrar ayuda.
     if [ "$*" == "help" ]; then
-        ogHelp  "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition int_npartition_delete" \
-                "$FUNCNAME 1 6 2"
+        ogHelp  "$FUNCNAME" "$MSG_SEE ogBurgDeleteEntry ogGrubDeleteEntry"
         return
     fi
 
-    # Error si no se reciben 3 parámetros.
-    [ $# -lt 3 ] && return $(ogRaiseError session $OG_ERR_FORMAT "$MSG_FORMAT: $FUNCNAME num_disk num_part"; echo $?)
+    # Si el número de parámetros menos que 4 nos salimos
+    [ $# -lt 4 ] && return $(ogRaiseError session $OG_ERR_FORMAT "$MSG_FORMAT: $FUNCNAME num_disk num_part num_disk_delete num_part_delete"; echo $?)
+ 
+
+    # Nombre de la función que llama a esta.
+    FUNC="${FUNCNAME[@]:1}"
+    FUNC="${FUNC%%\ *}"
 
     # Archivo de configuracion del grub
     DIRMOUNT=$(ogMount $1 $2)
-    GRUBGFC="$DIRMOUNT/boot/grubMBR/boot/grub/grub.cfg"
+    # La función debe ser llamanda desde ogGrubDeleteEntry or ogBurgDeleteEntry.
+    case "$FUNC" in
+        ogGrubDeleteEntry)
+            CFGFILE="$DIRMOUNT/boot/grubMBR/boot/grub/grub.cfg"
+            ;;
+        ogBurgDeleteEntry)
+            CFGFILE="$DIRMOUNT/boot/burg/burg.cfg"
+            ;;
+        *)
+            ogRaiseError $OG_ERR_FORMAT "Use ogGrubDeleteEntry or ogBurgDeleteEntry."
+            return $?
+            ;;
+    esac
+
+    # Dispositivo
+    DEVICE=$(ogDiskToDev $3 $4)
 
     # Error si no existe archivo del grub)
-    [ -r $GRUBGFC ] || return $(ogRaiseError log session $OG_ERR_NOTFOUND  "$GRUBGFC"; echo $?)
+    [ -r $CFGFILE ] || ogRaiseError log session $OG_ERR_NOTFOUND  "$CFGFILE" || return $?
 
-    # Numero de linea de cada entrada, de mayor a menor.
-    MENUENTRY="$(grep -n -e menuentry.*/dev/sda $GRUBGFC| cut -d: -f1 | sed '1!G;h;$!d' )"
+    # Numero de linea de cada entrada.
+    MENUENTRY="$(grep -n -e menuentry $CFGFILE| cut -d: -f1 | sed '1!G;h;$!d' )"
 
     # Entradas que hay que borrar.
-    DELETEENTRY=$(grep -n menuentry.*/dev/sda$3 $GRUBGFC| cut -d: -f1)
+    DELETEENTRY=$(grep -n menuentry.*$DEVICE $CFGFILE| cut -d: -f1)
+
+    # Si no hay entradas para borrar me salgo con aviso
+    [ "$DELETEENTRY" != "" ] || ogRaiseError log session $OG_ERR_NOTFOUND "Menuentry $DEVICE" || return $?
 
     # Recorremos el fichero del final hacia el principio.
-    ENDENTRY="$(wc -l $GRUBGFC|cut  -d" " -f1)"
+    ENDENTRY="$(wc -l $CFGFILE|cut  -d" " -f1)"
     for ENTRY in $MENUENTRY; do
         # Comprobamos si hay que borrar la entrada.
         if  ogCheckStringInGroup $ENTRY "$DELETEENTRY" ; then
             let ENDENTRY=$ENDENTRY-1
-            sed -i -e $ENTRY,${ENDENTRY}d  $GRUBGFC
+            sed -i -e $ENTRY,${ENDENTRY}d  $CFGFILE
         fi
 
         # Guardamos el número de línea de la entrada, que sera el final de la siguiente.
         ENDENTRY=$ENTRY
     done
+}
+
+
+#         ogBurgInstallMbr   int_disk_GRUBCFG  int_partition_GRUBCFG 
+#@param   bolean_Check_Os_installed_and_Configure_2ndStage   true | false[default] 
+#@brief   Instala y actualiza el gestor grub en el MBR del disco duro donde se encuentra el fichero grub.cfg. Admite sistemas Windows.
+#@param   int_disk_SecondStage      
+#@param   int_part_SecondStage     
+#@param   bolean_Check_Os_installed_and_Configure_2ndStage   true | false[default] 
+#@return  
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_PARTITION  Partición no soportada
+#@version 1.1.0 - Primeras pruebas instalando BURG. Codigo basado en el ogGrubInstallMBR.
+#@author  Antonio J. Doblas Viso.   Universidad de Malaga.
+#@date    2017-06-23
+#@version 1.1.0 - Redirección del proceso de copiado de archivos y de la instalacion del binario
+#@author  Antonio J. Doblas Viso.   Universidad de Malaga.
+#@date    2018-01-21
+#@version 1.1.0 - Refactorizar fichero de configuacion
+#@author  Antonio J. Doblas Viso.   Universidad de Malaga.
+#@date    2018-01-24
+#*/ ##
+
+function ogBurgInstallMbr {
+ 
+# Variables locales.
+local PART DISK FIRSTAGE SECONSTAGE PREFIXSECONDSTAGE CHECKOS KERNELPARAM BACKUPNAME FILECFG
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME  int_ndiskSecondStage int_partitionSecondStage bolean_Configure_2ndStage   \"param param \"  " \
+           "$FUNCNAME 1 1 FALSE " \
+           "$FUNCNAME 1 1 TRUE \"nomodeset irqpoll pci=noacpi quiet splash \" "
+    return
+fi  
+
+# Error si no se reciben 2 parametros.
+[ $# -ge 2 ] || return $(ogRaiseError $OG_ERR_FORMAT; echo $?)
+
+
+DISK=$1; PART=$2;
+CHECKOS=${3:-"FALSE"}
+KERNELPARAM=$4
+BACKUPNAME=".backup.og"
+
+#Error si no es linux.
+ogCheckStringInGroup $(ogGetFsType $DISK $PART) "CACHE EXT4 EXT3 EXT2" || return $(ogRaiseError $OG_ERR_PARTITION "burg no soporta esta particion"; echo $?)
+
+
+#La primera etapa del grub se fija en el primer disco duro 
+FIRSTSTAGE=$(ogDiskToDev 1)
+
+#localizar disco segunda etapa del grub
+SECONDSTAGE=$(ogMount $DISK $PART)
+
+# prepara el directorio principal de la segunda etapa (y copia los binarios)
+[ -d ${SECONDSTAGE}/boot/burg/ ]  || mkdir -p ${SECONDSTAGE}/boot/burg/; cp -prv /boot/burg/*  ${SECONDSTAGE}/boot/burg/ 2>&1>/dev/null; cp -prv $OGLIB/burg/*  ${SECONDSTAGE}/boot/burg/ 2>&1>/dev/null;
+
+#Copiamos el tema 
+mkdir -p  ${SECONDSTAGE}/boot/burg/themes/OpenGnsys
+cp -prv "$OGLIB/burg/themes" "${SECONDSTAGE}/boot/burg/" 2>&1>/dev/null
+
+#Localizar directorio segunda etapa del grub   
+#PREFIXSECONDSTAGE="/boot/burg/"
+
+# Si Reconfigurar segunda etapa (grub.cfg) == FALSE
+if [ -f ${SECONDSTAGE}/boot/burg/burg.cfg -o -f ${SECONDSTAGE}/boot/burg/burg.cfg$BACKUPNAME ]
+then 
+    if [ "$CHECKOS" == "false" -o "$CHECKOS" == "FALSE" ]
+    then
+        burg-install --force --root-directory=${SECONDSTAGE} $FIRSTSTAGE 2>&1>/dev/null
+        return $?
+    fi
+fi
+
+# SI Reconfigurar segunda etapa (burg.cfg) == TRUE 
+
+#llamada a updateBootCache para que aloje la primera fase del ogLive
+updateBootCache
+
+#Configur la sintaxis grub para evitar menus de "recovery" en el OGLive
+echo "GRUB_DISABLE_RECOVERY=\"true\"" >> /etc/default/grub
+echo "GRUB_DISABLE_LINUX_UUID=\"true\"" >> /etc/default/grub
+
+
+#Preparar configuración segunda etapa: crear ubicacion
+mkdir -p ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot/burg/
+
+#Preparar configuración segunda etapa: crear cabecera del fichero
+#/etc/burg.d/00_header > ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot/burg/burg.cfg
+
+FILECFG=${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot/burg/burg.cfg
+
+cat > "$FILECFG" << EOF
+
+set theme_name=OpenGnsys
+set gfxmode=1024x768
+
+
+set locale_dir=(\$root)/boot/burg/locale
+
+set default=0
+set timeout=25
+set lang=es
+
+
+insmod ext2
+insmod gettext
+
+
+
+
+if [ -s \$prefix/burgenv ]; then
+  load_env
+fi
+
+
+
+if [ \${prev_saved_entry} ]; then
+  set saved_entry=\${prev_saved_entry}
+  save_env saved_entry
+  set prev_saved_entry=
+  save_env prev_saved_entry
+  set boot_once=true
+fi
+
+function savedefault {
+  if [ -z \${boot_once} ]; then
+    saved_entry=\${chosen}
+    save_env saved_entry
+  fi
+}
+function select_menu {
+  if menu_popup -t template_popup theme_menu ; then
+    free_config template_popup template_subitem menu class screen
+    load_config \${prefix}/themes/\${theme_name}/theme \${prefix}/themes/custom/theme_\${theme_name}
+    save_env theme_name
+    menu_refresh
+  fi
+}
+
+function toggle_fold {
+  if test -z $theme_fold ; then
+    set theme_fold=1
+  else
+    set theme_fold=
+  fi
+  save_env theme_fold
+  menu_refresh
+}
+function select_resolution {
+  if menu_popup -t template_popup resolution_menu ; then
+    menu_reload_mode
+    save_env gfxmode
+  fi
+}
+
+
+if test -f \${prefix}/themes/\${theme_name}/theme ; then
+  insmod coreui
+  menu_region.text
+  load_string '+theme_menu { -OpenGnsys { command="set theme_name=OpenGnsys" }}'   
+  load_config \${prefix}/themes/conf.d/10_hotkey   
+  load_config \${prefix}/themes/\${theme_name}/theme \${prefix}/themes/custom/theme_\${theme_name}
+  insmod vbe
+  insmod png
+  insmod jpeg
+  set gfxfont="Unifont Regular 16"
+  menu_region.gfx
+  vmenu resolution_menu
+  controller.ext
+fi
+
+
+EOF
+
+
+#Preparar configuración segunda etapa: crear entrada del sistema operativo
+grubSyntax "$KERNELPARAM" >> "$FILECFG" 
+
+
+#Instalar el burg 
+burg-install --force --root-directory=${SECONDSTAGE} $FIRSTSTAGE 2>&1>/dev/null
+}
+
+#/**
+# ogGrubDefaultEntry int_disk_GRUGCFG  int_partition_GRUBCFG int_disk_default_entry int_npartition_default_entry
+#@see ogBootLoaderDefaultEntry
+#*/
+function ogGrubDefaultEntry {
+    # Si se solicita, mostrar ayuda.
+    if [ "$*" == "help" ]; then
+        ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition int_disk_default_entry int_npartition_default_entry" \
+               "$FUNCNAME 1 6 1 1"
+        return
+    fi
+    ogBootLoaderDefaultEntry $@
+    return $?
+}
+
+#/**
+# ogBurgDefaultEntry int_disk_BURGCFG  int_partition_BURGCFG int_disk_default_entry int_npartition_default_entry
+#@see ogBootLoaderDefaultEntry
+#*/
+function ogBurgDefaultEntry {
+    # Si se solicita, mostrar ayuda.
+    if [ "$*" == "help" ]; then
+        ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition int_disk_default_entry int_npartition_default_entry" \
+               "$FUNCNAME 1 6 1 1"
+        return
+    fi
+    ogBootLoaderDefaultEntry $@
+    return $?
+}
+
+#/**
+# ogBootLoaderDefaultEntry   int_disk_CFG  int_partition_CFG int_disk_default_entry int_npartition_default_entry
+#@brief   Configura la entrada por defecto de Burg
+#@param   int_disk_SecondStage      
+#@param   int_part_SecondStage     
+#@param   int_disk_default_entry
+#@param   int_part_default_entry
+#@return  
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_PARTITION Partición errónea o desconocida (ogMount).
+#@exception OG_ERR_OUTOFLIMIT Param $3 no es entero.
+#@exception OG_ERR_NOTFOUND   Fichero de configuración no encontrado: burg.cfg.
+#@version 1.1.0 - Define la entrada por defecto del Burg
+#@author  Irina Gomez, ETSII Universidad de Sevilla
+#@date    2017-08-09
+#@version 1.1 Se generaliza la función para grub y burg
+#@author  Irina Gomez, ETSII Universidad de Sevilla
+#@date    2018-01-04
+#*/ ##
+function ogBootLoaderDefaultEntry {
+
+# Variables locales.
+local PART CFGFILE DEFAULTENTRY MSG
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$MSG_SEE ogGrubDefaultEntry ogBurgDefaultEntry"
+    return
+fi  
+
+# Nombre de la función que llama a esta.
+FUNC="${FUNCNAME[@]:1}"
+FUNC="${FUNC%%\ *}"
+
+# Error si no se reciben 3 parametros.
+[ $# -eq 4 ] || ogRaiseError $OG_ERR_FORMAT "$FUNCNAME  int_ndiskSecondStage int_partitionSecondStage int_disk_default_entry int_partitions_default_entry" || return $?
+
+# Error si no puede montar sistema de archivos.
+DIRMOUNT=$(ogMount $1 $2) || return $?
+
+# Comprobamos que exista fichero de configuración
+# La función debe ser llamanda desde ogGrubDefaultEntry or ogBurgDefaultEntry.
+case "$FUNC" in
+    ogGrubDefaultEntry)
+        CFGFILE="$DIRMOUNT/boot/grubMBR/boot/grub/grub.cfg"
+        ;;
+    ogBurgDefaultEntry)
+        CFGFILE="$DIRMOUNT/boot/burg/burg.cfg"
+        ;;
+    *)
+        ogRaiseError $OG_ERR_FORMAT "Use ogGrubDefaultEntry or ogBurgDefaultEntry."
+        return $?
+        ;;
+esac
+
+# Error si no existe archivo de configuración
+[ -r $CFGFILE ] || ogRaiseError $OG_ERR_NOTFOUND "$CFGFILE" || return $?
+
+# Dispositivo
+DEVICE=$(ogDiskToDev $3 $4)
+
+# Número de línea de la entrada por defecto en CFGFILE (primera de la partición).
+DEFAULTENTRY=$(grep -n -m 1 menuentry.*$DEVICE $CFGFILE| cut -d: -f1)
+
+# Si no hay entradas para borrar me salgo con aviso
+[ "$DEFAULTENTRY" != "" ] || ogRaiseError session log $OG_ERR_NOTFOUND "No menuentry $DEVICE" || return $?
+
+# Número de la de linea por defecto en el menú de usuario
+MENUENTRY="$(grep -n -e menuentry $CFGFILE| cut -d: -f1 | grep -n $DEFAULTENTRY |cut -d: -f1)"
+# Las líneas empiezan a contar desde cero
+let MENUENTRY=$MENUENTRY-1
+
+sed --regexp-extended -i  s/"set default=\"?[0-9]*\"?"/"set default=\"$MENUENTRY\""/g $CFGFILE
+
+MSG="MSG_HELP_$FUNC"
+echo "${!MSG%%\.}: $@"
+}
+
+#/**
+# ogGrubOgliveDefaultEntry num_disk num_part
+#@see ogBootLoaderOgliveDefaultEntry
+#*/
+function ogGrubOgliveDefaultEntry {
+    # Si se solicita, mostrar ayuda.
+    if [ "$*" == "help" ]; then
+        ogHelp "$FUNCNAME" "$FUNCNAME int_ndiskSecondStage int_partitionSecondStage" \
+               "$FUNCNAME 1 6"
+        return
+    fi
+    ogBootLoaderOgliveDefaultEntry $@
+    return $?
+}
+
+#/**
+# ogBurgOgliveDefaultEntry num_disk num_part
+#@see ogBootLoaderOgliveDefaultEntry
+#*/
+function ogBurgOgliveDefaultEntry {
+    # Si se solicita, mostrar ayuda.
+    if [ "$*" == "help" ]; then
+        ogHelp "$FUNCNAME" "$FUNCNAME int_ndiskSecondStage int_partitionSecondStage" \
+               "$FUNCNAME 1 6"
+        return
+    fi
+    ogBootLoaderOgliveDefaultEntry $@
+    return $?
+}
+
+#/**
+# ogBootLoaderOgliveDefaultEntry 
+#@brief   Configura la entrada de ogLive como la entrada por defecto de Burg.
+#@param   int_disk_SecondStage      
+#@param   int_part_SecondStage     
+#@return  
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_PARTITION Partición errónea o desconocida (ogMount).
+#@exception OG_ERR_NOTFOUND  Fichero de configuración no encontrado: burg.cfg.
+#@exception OG_ERR_NOTFOUND  Entrada de OgLive no encontrada en burg.cfg.
+#@version 1.1.0 - Primeras pruebas con Burg 
+#@author  Irina Gomez, ETSII Universidad de Sevilla
+#@date    2017-08-09
+#@version 1.1 Se generaliza la función para grub y burg
+#@author  Irina Gomez, ETSII Universidad de Sevilla
+#@date    2018-01-04
+#*/ ##
+function  ogBootLoaderOgliveDefaultEntry {
+
+# Variables locales.
+local FUNC PART CFGFILE NUMENTRY MSG
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$MSG_SEE ogGrubOgliveDefaultEntry ogBurgOgliveDefaultEntry" \
+    return
+fi  
+
+# Nombre de la función que llama a esta.
+FUNC="${FUNCNAME[@]:1}"
+FUNC="${FUNC%%\ *}"
+
+# Error si no se reciben 2 parametros.
+[ $# -eq 2 ] || ogRaiseError $OG_ERR_FORMAT "$FUNCNAME  int_ndiskSecondStage int_partitionSecondStage" || return $?
+
+# Error si no puede montar sistema de archivos.
+PART=$(ogMount $1 $2) || return $?
+# La función debe ser llamanda desde ogGrubOgliveDefaultEntry or ogBurgOgliveDefaultEntry.
+case "$FUNC" in
+    ogGrubOgliveDefaultEntry)
+        CFGFILE="$PART/boot/grubMBR/boot/grub/grub.cfg"
+        ;;
+    ogBurgOgliveDefaultEntry)
+        CFGFILE="$PART/boot/burg/burg.cfg"
+        ;;
+    *)
+        ogRaiseError $OG_ERR_FORMAT "Use ogGrubOgliveDefaultEntry or ogBurgOgliveDefaultEntry."
+        return $?
+        ;;
+esac
+
+# Comprobamos que exista fichero de configuración
+[ -f $CFGFILE ] || ogRaiseError $OG_ERR_NOTFOUND "$CFGFILE" || return $?
+
+# Detectamos cual es la entrada de ogLive
+NUMENTRY=$(grep ^menuentry $CFGFILE| grep -n "OpenGnsys Live"|cut -d: -f1)
+
+# Si no existe entrada de ogLive nos salimos
+[ -z "$NUMENTRY" ] && (ogRaiseError $OG_ERR_NOTFOUND "menuentry OpenGnsys Live in $CFGFILE" || return $?)
+
+let NUMENTRY=$NUMENTRY-1
+sed --regexp-extended -i  s/"set default=\"?[0-9]+\"?"/"set default=\"$NUMENTRY\""/g $CFGFILE
+
+MSG="MSG_HELP_$FUNC"
+echo "${!MSG%%\.}: $@"
+}
+
+
+#/**
+# ogGrubSetTheme num_disk num_part str_theme
+#@see ogBootLoaderSetTheme
+#*/
+function ogGrubSetTheme {
+    # Si se solicita, mostrar ayuda.
+    if [ "$*" == "help" ]; then
+        ogHelp "$FUNCNAME" "$FUNCNAME int_ndiskSecondStage int_partitionSecondStage str_themeName" \
+               "$FUNCNAME 1 4 ThemeBasic"\
+               "$FUNCNAME \$(ogFindCache) ThemeBasic"
+        return
+    fi
+    ogBootLoaderSetTheme $@
+    return $?
+}
+
+#/**
+# ogBurgSetTheme num_disk num_part str_theme
+#@see ogBootLoaderSetTheme
+#*/
+function ogBurgSetTheme  {
+    # Si se solicita, mostrar ayuda.
+    if [ "$*" == "help" ]; then
+        ogHelp "$FUNCNAME" "$FUNCNAME int_ndiskSecondStage int_partitionSecondStage str_themeName" \
+               "$FUNCNAME 1 4 ThemeBasic" \
+               "$FUNCNAME \$(ogFindCache) ThemeBasic"
+        echo "Temas disponibles:\ $(ls $OGCAC/boot/burg/themes/)"
+               
+        return
+    fi
+    ogBootLoaderSetTheme $@
+    return $?
+}
+
+
+
+#/**
+# ogBootLoaderSetTheme
+#@brief   asigna un tema al BURG
+#@param   int_disk_SecondStage      
+#@param   int_part_SecondStage  
+#@param   str_theme_name   
+#@return  
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_PARTITION Partición errónea o desconocida (ogMount).
+#@exception OG_ERR_NOTFOUND  Fichero de configuración no encontrado: grub.cfg burg.cfg.
+#@exception OG_ERR_NOTFOUND  Entrada deltema no encontrada en burg.cfg.
+#@version 1.1.0 - Primeras pruebas con Burg. grub no soportado.
+#@author  Antonio J. Doblas Viso. Universidad de Malaga
+#@date    2018-01-24
+#*/ ##
+function  ogBootLoaderSetTheme {
+
+# Variables locales.
+local FUNC PART CFGFILE THEME NEWTHEME BOOTLOADER MSG
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$MSG_SEE ogGrubSetTheme ogBurgSetTheme"
+    return   
+fi
+  
+
+NEWTHEME="$3"
+
+# Nombre de la función que llama a esta.
+FUNC="${FUNCNAME[@]:1}"
+FUNC="${FUNC%%\ *}"
+
+
+
+# Error si no se reciben 2 parametros.
+[ $# -eq 3 ] || ogRaiseError $OG_ERR_FORMAT "$FUNCNAME  int_ndiskSecondStage int_partitionSecondStage str_themeName" || return $?
+
+# Error si no puede montar sistema de archivos.
+PART=$(ogMount $1 $2) || return $?
+# La función debe ser llamanda desde ogGrubSetTheme or ogBurgSetTheme.
+case "$FUNC" in
+    ogGrubSetTheme)
+    	BOOTLOADER="grug"
+    	BOOTLOADERDIR="grubMBR"
+        CFGFILE="$PART/boot/grubMBR/boot/grub/grub.cfg"  
+        ogRaiseError $OG_ERR_FORMAT "ogGrubSetTheme not sopported" 
+        return $?               
+        ;;
+    ogBurgSetTheme)
+        BOOTLOADER="burg"
+        BOOTLOADERDIR="burg"
+        CFGFILE="$PART/boot/burg/burg.cfg"        
+        ;;
+    *)
+        ogRaiseError $OG_ERR_FORMAT "Use ogGrubSetTheme or ogBurgSetTheme."
+        return $?
+        ;;
+esac
+
+# Comprobamos que exista fichero de configuración
+[ -f $CFGFILE ] || ogRaiseError $OG_ERR_NOTFOUND "$CFGFILE" || return $?
+
+# Detectamos cual es el tema asignado 
+THEME=$(grep "set theme_name=" $CFGFILE | grep ^set | cut -d= -f2)
+
+# Si no existe entrada de theme_name  nos salimos
+[ -z "$THEME" ] && (ogRaiseError $OG_ERR_NOTFOUND "theme_name in $CFGFILE" || return $?)
+
+#Actualizamos el tema del servidor a la particion
+if [ -d $OGLIB/$BOOTLOADER/themes/$NEWTHEME ]; then
+	cp -pr $OGLIB/$BOOTLOADER/themes/$NEWTHEME $PART/boot/$BOOTLOADERDIR/themes/	
+fi
+
+#Verificamos que el tema esta en la particion
+if ! [ -d $PART/boot/$BOOTLOADERDIR/themes/$NEWTHEME ]; then
+		ogRaiseError $OG_ERR_NOTFOUND "theme_name=$NEWTHEME in $PART/boot/$BOOTLOADERDIR/themes/" || return $?
+fi 
+
+#Cambiamos la entrada el fichero de configuración.
+sed --regexp-extended -i  s/"$THEME"/"$NEWTHEME"/g $CFGFILE
+
 
 }
 
+#/**
+# ogGrubSetAdminKeys num_disk num_part str_theme
+#@see ogBootLoaderSetTheme
+#*/
+function ogGrubSetAdminKeys {
+    # Si se solicita, mostrar ayuda.
+    if [ "$*" == "help" ]; then
+        ogHelp "$FUNCNAME" "$FUNCNAME int_ndiskSecondStage int_partitionSecondStage str_bolean" \
+               "$FUNCNAME 1 4 FALSE "\
+               "$FUNCNAME \$(ogFindCache) ThemeBasic"
+        return
+    fi
+    ogBootLoaderSetAdminKeys $@
+    return $?
+}
+
+#/**
+# ogBurgSetAdminKeys num_disk num_part str_bolean
+#@see ogBootLoaderSetAdminKeys
+#*/
+function ogBurgSetAdminKeys  {
+    # Si se solicita, mostrar ayuda.
+    if [ "$*" == "help" ]; then
+        ogHelp "$FUNCNAME" "$FUNCNAME int_ndiskSecondStage int_partitionSecondStage str_bolean" \
+               "$FUNCNAME 1 4 TRUE" \
+               "$FUNCNAME \$(ogFindCache) FALSE"               
+        return
+    fi
+    ogBootLoaderSetAdminKeys $@
+    return $?
+}
+
+
+
+#/**
+# ogBootLoaderSetAdminKeys
+#@brief   Activa/Desactica las teclas de administracion 
+#@param   int_disk_SecondStage      
+#@param   int_part_SecondStage  
+#@param   Boolean TRUE/FALSE   
+#@return  
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_PARTITION Partición errónea o desconocida (ogMount).
+#@exception OG_ERR_NOTFOUND  Fichero de configuración no encontrado: grub.cfg burg.cfg.
+#@exception OG_ERR_NOTFOUND  Entrada deltema no encontrada en burg.cfg.
+#@version 1.1.0 - Primeras pruebas con Burg. grub no soportado.
+#@author  Antonio J. Doblas Viso. Universidad de Malaga
+#@date    2018-01-24
+#*/ ##
+function  ogBootLoaderSetAdminKeys {
+
+# Variables locales.
+local FUNC PART CFGFILE BOOTLOADER BOOTLOADERDIR CFGFILE MSG
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$MSG_SEE ogGrubSetSetAdminKeys ogBurgSetSetAdminKeys"
+    return   
+fi
+  
+
+# Nombre de la función que llama a esta.
+FUNC="${FUNCNAME[@]:1}"
+FUNC="${FUNC%%\ *}"
+
+
+# Error si no se reciben 2 parametros.
+[ $# -eq 3 ] || ogRaiseError $OG_ERR_FORMAT "$FUNCNAME  int_ndiskSecondStage int_partitionSecondStage str_bolean" || return $?
+
+# Error si no puede montar sistema de archivos.
+PART=$(ogMount $1 $2) || return $?
+# La función debe ser llamanda desde ogGrubSetAdminKeys or ogBurgSetAdminKeys.
+case "$FUNC" in
+    ogGrubSetAdminKeys)
+    	BOOTLOADER="grug"
+    	BOOTLOADERDIR="grubMBR"
+        CFGFILE="$PART/boot/grubMBR/boot/grub/grub.cfg"  
+        ogRaiseError $OG_ERR_FORMAT "ogGrubSetAdminKeys not sopported" 
+        return $?        
+        ;;
+    ogBurgSetAdminKeys)
+        BOOTLOADER="burg"
+        BOOTLOADERDIR="burg"
+        CFGFILE="$PART/boot/burg/burg.cfg"        
+        ;;
+    *)
+        ogRaiseError $OG_ERR_FORMAT "Use ogGrubSetAdminKeys"
+        return $?
+        ;;
+esac
+
+
+# Comprobamos que exista fichero de configuración
+[ -f $CFGFILE ] || ogRaiseError $OG_ERR_NOTFOUND "$CFGFILE" || return $?
+
+
+case "$3" in
+	true|TRUE)
+		[ -f ${OGCAC}/boot/$BOOTLOADERDIR/themes/conf.d/10_hotkey.disabled ] && mv ${OGCAC}/boot/$BOOTLOADERDIR/themes/conf.d/10_hotkey.disabled ${OGCAC}/boot/$BOOTLOADERDIR/themes/conf.d/10_hotkey
+	;;
+	false|FALSE)
+		[ -f ${OGCAC}/boot/$BOOTLOADERDIR/themes/conf.d/10_hotkey ] && mv ${OGCAC}/boot/$BOOTLOADERDIR/themes/conf.d/10_hotkey ${OGCAC}/boot/$BOOTLOADERDIR/themes/conf.d/10_hotkey.disabled
+	;;	
+	*)
+	   ogRaiseError $OG_ERR_FORMAT "str bolean unknow "
+        return $?
+    ;;	
+esac
+}
+
+
+
+#/**
+# ogGrubSetTimeOut num_disk num_part int_timeout_seconds
+#@see ogBootLoaderSetTimeOut
+#*/
+function ogGrubSetTimeOut {
+    # Si se solicita, mostrar ayuda.
+    if [ "$*" == "help" ]; then
+        ogHelp "$FUNCNAME" "$FUNCNAME int_ndiskSecondStage int_partitionSecondStage int_timeout_seconds" \
+               "$FUNCNAME 1 4 50 "\
+               "$FUNCNAME \$(ogFindCache) 50"
+        return
+    fi
+    ogBootLoaderSetTimeOut $@
+    return $?
+}
+
+#/**
+# ogBurgSetTimeOut num_disk num_part str_bolean
+#@see ogBootLoaderSetTimeOut
+#*/
+function ogBurgSetTimeOut  {
+    # Si se solicita, mostrar ayuda.
+    if [ "$*" == "help" ]; then
+        ogHelp "$FUNCNAME" "$FUNCNAME int_ndiskSecondStage int_partitionSecondStage str_timeout_seconds" \
+               "$FUNCNAME 1 4 50" \
+               "$FUNCNAME \$(ogFindCache) 50"               
+        return
+    fi
+    ogBootLoaderSetTimeOut $@
+    return $?
+}
+
+
+
+#/**
+# ogBootLoaderSetTimeOut
+#@brief   Define el tiempo (segundos) que se muestran las opciones de inicio 
+#@param   int_disk_SecondStage      
+#@param   int_part_SecondStage  
+#@param   int_timeout_seconds   
+#@return  
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_PARTITION Partición errónea o desconocida (ogMount).
+#@exception OG_ERR_NOTFOUND  Fichero de configuración no encontrado: grub.cfg burg.cfg.
+#@exception OG_ERR_NOTFOUND  Entrada deltema no encontrada en burg.cfg.
+#@version 1.1.0 - Primeras pruebas con Burg. GRUB solo si está instalado en MBR
+#@author  Antonio J. Doblas Viso. Universidad de Malaga
+#@date    2018-01-24
+#*/ ##
+function  ogBootLoaderSetTimeOut {
+
+# Variables locales.
+local FUNC PART CFGFILE TIMEOUT BOOTLOADER BOOTLOADERDIR CFGFILE MSG
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$MSG_SEE ogGrubSetTimeOut ogBurgSetTimeOut"
+    return   
+fi
+  
+ogCheckStringInReg $3 "^[0-9]{1,10}$" &&  TIMEOUT="$3" || ogRaiseError $OG_ERR_FORMAT "param 3 is not a integer"
+
+# Nombre de la función que llama a esta.
+FUNC="${FUNCNAME[@]:1}"
+FUNC="${FUNC%%\ *}"
+
+# Error si no se reciben 3 parametros.
+[ $# -eq 3 ] || ogRaiseError $OG_ERR_FORMAT "$FUNCNAME  int_ndiskSecondStage int_partitionSecondStage int_timeout_seconds" || return $?
+
+# Error si no puede montar sistema de archivos.
+PART=$(ogMount $1 $2) || return $?
+# La función debe ser llamanda desde ogGrubSetTimeOut or ogBurgSetTimeOut.
+case "$FUNC" in
+    ogGrubSetTimeOut)
+    	BOOTLOADER="grug"
+    	BOOTLOADERDIR="grubMBR"
+        CFGFILE="$PART/boot/grubMBR/boot/grub/grub.cfg"     
+        ;;
+    ogBurgSetTimeOut)
+        BOOTLOADER="burg"
+        BOOTLOADERDIR="burg"
+        CFGFILE="$PART/boot/burg/burg.cfg"        
+        ;;
+    *)
+        ogRaiseError $OG_ERR_FORMAT "Use ogGrubSetTimeOut"
+        return $?
+        ;;
+esac
+
+# Comprobamos que exista fichero de configuración
+[ -f $CFGFILE ] || ogRaiseError $OG_ERR_NOTFOUND "$CFGFILE" || return $?
+
+# Asignamos el timeOut.
+sed -i s/timeout=.*$/timeout=$TIMEOUT/g $CFGFILE
+}
+
+
+#/**
+# ogGrubSetResolution num_disk num_part int_resolution
+#@see ogBootLoaderSetResolution
+#*/
+function ogGrubSetResolution {
+    # Si se solicita, mostrar ayuda.
+    if [ "$*" == "help" ]; then
+        ogHelp "$FUNCNAME" "$FUNCNAME int_ndiskSecondStage int_partitionSecondStage [str_resolution]" \
+             "$FUNCNAME 1 4 1024x768" \
+             "$FUNCNAME \$(ogFindCache) 1024x768" \
+             "$FUNCNAME 1 4"  
+        return
+    fi
+    ogBootLoaderSetResolution $@
+    return $?
+}
+
+#/**
+# ogBurgSetResolution num_disk num_part str_bolean
+#@see ogBootLoaderSetResolution
+#*/
+function ogBurgSetResolution  {
+    # Si se solicita, mostrar ayuda.
+    if [ "$*" == "help" ]; then
+        ogHelp "$FUNCNAME" "$FUNCNAME int_ndiskSecondStage int_partitionSecondStage [str_resolution]" \
+               "$FUNCNAME 1 4 1024x768" \
+               "$FUNCNAME \$(ogFindCache) 1024x768" \
+               "$FUNCNAME 1 4"               
+        return
+    fi
+    ogBootLoaderSetResolution $@
+    return $?
+}
+
+
+
+#/**
+# ogBootLoaderSetResolution
+#@brief   Define la resolucion que usuara el thema del gestor de arranque 
+#@param   int_disk_SecondStage      
+#@param   int_part_SecondStage  
+#@param   str_resolution (Opcional)    
+#@return  
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_PARTITION Partición errónea o desconocida (ogMount).
+#@exception OG_ERR_NOTFOUND  Fichero de configuración no encontrado: grub.cfg burg.cfg.
+#@version 1.1.0 - Primeras pruebas con Burg. grub no soportado.
+#@author  Antonio J. Doblas Viso. Universidad de Malaga
+#@date    2018-01-24
+#*/ ##
+function  ogBootLoaderSetResolution {
+
+# Variables locales.
+local FUNC PART CFGFILE RESOLUTION NEWRESOLUTION DEFAULTRESOLUTION BOOTLOADER BOOTLOADERDIR CFGFILE MSG
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$MSG_SEE ogGrubSetResolution ogBurgSetResolution" 
+    return   
+fi
+
+
+# Nombre de la función que llama a esta.
+FUNC="${FUNCNAME[@]:1}"
+FUNC="${FUNC%%\ *}"
+
+
+# Error si no se reciben 2 parametros.
+[ $# -ge 2 ] || ogRaiseError $OG_ERR_FORMAT "$FUNCNAME  int_ndiskSecondStage int_partitionSecondStage [str_resolution]" || return $?
+
+# Error si no puede montar sistema de archivos.
+PART=$(ogMount $1 $2) || return $?
+# La función debe ser llamanda desde oogGrugSetResolution or ogBurgSetResolution.
+case "$FUNC" in
+    ogGrubSetResolution)
+    	BOOTLOADER="grug"
+    	BOOTLOADERDIR="grubMBR"
+        CFGFILE="$PART/boot/grubMBR/boot/grub/grub.cfg"  
+        ogRaiseError $OG_ERR_FORMAT "ogGrubSetResolution not sopported" 
+        return $?     
+        ;;
+    ogBurgSetResolution)
+        BOOTLOADER="burg"
+        BOOTLOADERDIR="burg"
+        CFGFILE="$PART/boot/burg/burg.cfg"        
+        ;;
+    *)
+        ogRaiseError $OG_ERR_FORMAT "Use ogBootLoaderSetResolution"
+        return $?
+        ;;
+esac
+
+DEFAULTRESOLUTION=1024x768
+
+# Comprobamos que exista fichero de configuración
+[ -f $CFGFILE ] || ogRaiseError $OG_ERR_NOTFOUND "$CFGFILE" || return $?
+
+#controlar variable a consierar vga (default template) o video (menu)
+#Si solo dos parametros autoconfiguracion basado en el parametro vga de las propiedad menu. si no hay menu asignado es 788 por defecto
+if [ $# -eq 2 ] ; then  
+	if [ -n $video ]; then
+		NEWRESOLUTION=$(echo "$video" | cut -f2 -d: | cut -f1 -d-)
+	fi
+	if [ -n $vga ] ; then
+	case "$vga" in
+		788|789|814) 
+			NEWRESOLUTION=800x600
+			;;
+		791|792|824)
+			NEWRESOLUTION=1024x768
+			;;
+		355)
+			NEWRESOLUTION=1152x864
+			;;
+		794|795|829) 
+			NEWRESOLUTION=1280x1024
+			;;
+	esac
+	fi
+fi
+
+if [ $# -eq 3 ] ; then
+	#comprobamos que el parametro 3 cumple formato NNNNxNNNN 
+	ogCheckStringInReg $3 "[0-9]{3,4}[x][0-9]{3,4}\$" &&  NEWRESOLUTION="$3" || ogRaiseError $OG_ERR_FORMAT "param 3 is not a valid resolution: 800x600, 1024x768, 1152x864, 1280x1024, 1600x1200"
+fi
+
+# Si no existe NEWRESOLUCION  asignamos la defaulT
+[ -z "$NEWRESOLUTION" ] && NEWRESOLUTION=$DEFAULRESOLUTION
+
+#Cambiamos la entrada el fichero de configuración.
+sed -i s/gfxmode=.*$/gfxmode=$NEWRESOLUTION/g $CFGFILE
+}

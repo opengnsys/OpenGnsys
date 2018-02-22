@@ -177,71 +177,71 @@ if (!$cmd)
 						<TABLE  class=menupral align=left cellPadding=1 cellSpacing=0 >
 						  <TR valign=baseline>
 							<TD width=10><IMG src="./images/iconos/pomo.gif"></TD>
-							<? if($idtipousuario!=$SUPERADMINISTRADOR){?>
+							<?php if($idtipousuario!=$SUPERADMINISTRADOR){?>
 								<TD  onclick=eleccion(this,1)  onmouseout=desresaltar(this) onmouseover=resaltar(this) >
-									&nbsp;<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/centros.gif">&nbsp;<SPAN class="menupral"><?echo $TbMsg[0]?></SPAN></A>&nbsp;</TD>
+									&nbsp;<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/centros.gif">&nbsp;<SPAN class="menupral"><?php echo $TbMsg[0]?></SPAN></A>&nbsp;</TD>
 								<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
 								<TD  onclick=eleccion(this,2) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>		
-									&nbsp;<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/acciones.gif">&nbsp;<SPAN class=menupral ><?echo $TbMsg[1]?></SPAN></A>&nbsp;</TD>
+									&nbsp;<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/acciones.gif">&nbsp;<SPAN class=menupral ><?php echo $TbMsg[1]?></SPAN></A>&nbsp;</TD>
 								<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
 								<TD   onclick=eleccion(this,3) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>
-									&nbsp;<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/imagenes.gif">&nbsp;<SPAN class=menupral ><?echo $TbMsg[2]?></SPAN></A>&nbsp;</TD>
+									&nbsp;<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/imagenes.gif">&nbsp;<SPAN class=menupral ><?php echo $TbMsg[2]?></SPAN></A>&nbsp;</TD>
 								<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
 								<TD  onclick=eleccion(this,4) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>
-									&nbsp;<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/confihard.gif">&nbsp;<SPAN class=menupral ><?echo  $TbMsg[3] ?></SPAN></A>&nbsp;</TD>
+									&nbsp;<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/confihard.gif">&nbsp;<SPAN class=menupral ><?php echo  $TbMsg[3] ?></SPAN></A>&nbsp;</TD>
 								<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
 								<TD  onclick=eleccion(this,5) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>
-									&nbsp;<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/confisoft.gif">&nbsp;<SPAN class=menupral ><?echo  $TbMsg[4] ?></SPAN></A>&nbsp;</TD>
+									&nbsp;<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/confisoft.gif">&nbsp;<SPAN class=menupral ><?php echo  $TbMsg[4] ?></SPAN></A>&nbsp;</TD>
 								<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
 								<TD  onclick=eleccion(this,6) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>
-									&nbsp;<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/repositorio.gif">&nbsp;<SPAN class=menupral ><?echo  $TbMsg[5] ?></SPAN></A>&nbsp;</TD>
+									&nbsp;<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/repositorio.gif">&nbsp;<SPAN class=menupral ><?php echo  $TbMsg[5] ?></SPAN></A>&nbsp;</TD>
 								<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
 								<TD  onclick=eleccion(this,7) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>
-									&nbsp;<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/menus.gif">&nbsp;<SPAN class=menupral ><?echo  $TbMsg[6] ?></SPAN></A>&nbsp;</TD>
+									&nbsp;<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/menus.gif">&nbsp;<SPAN class=menupral ><?php echo  $TbMsg[6] ?></SPAN></A>&nbsp;</TD>
 								<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
 								<td onclick="eleccion(this,14)" onmouseout="desresaltar(this)" onmouseover="resaltar(this)" align="middle">
-									&nbsp;<a href="#" style="text-decoration: none"><img border="0" src="./images/iconos/busquedas.gif">&nbsp;<span class="menupral"><?echo  $TbMsg[14] ?></span></a>&nbsp;</td>
+									&nbsp;<a href="#" style="text-decoration: none"><img border="0" src="./images/iconos/busquedas.gif">&nbsp;<span class="menupral"><?php echo  $TbMsg[14] ?></span></a>&nbsp;</td>
 								<td width="4" align="middle"><img src="./images/iconos/separitem.gif"></td>
 								
 								<!--TD  onclick=eleccion(this,8) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>
-									&nbsp;<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/reservas.gif">&nbsp;<SPAN class=menupral ><?echo  $TbMsg[7] ?></SPAN></A>&nbsp;</TD>
+									&nbsp;<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/reservas.gif">&nbsp;<SPAN class=menupral ><?php echo  $TbMsg[7] ?></SPAN></A>&nbsp;</TD>
 								<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD-->
 								
-							<? }
+							<?php }
 							else{
 									if($idtipousuario==$SUPERADMINISTRADOR){?>
 											<TD  onclick=eleccion(this,9) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>&nbsp;
 											<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/administracion.gif">
-											<SPAN class=menupral ><?echo  $TbMsg[8] ?></SPAN></A>&nbsp;</TD>
+											<SPAN class=menupral ><?php echo  $TbMsg[8] ?></SPAN></A>&nbsp;</TD>
 											<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
 
 											<TD  onclick=eleccion(this,10) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>&nbsp;
 											<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/iconos.gif">
-											<SPAN class=menupral ><?echo  $TbMsg[9] ?></SPAN></A>&nbsp;</TD>
+											<SPAN class=menupral ><?php echo  $TbMsg[9] ?></SPAN></A>&nbsp;</TD>
 											<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
 
                                             <TD  onclick=eleccion(this,11) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>&nbsp;
                                             <A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/tablas.gif">
-                                            <SPAN class=menupral ><?echo  $TbMsg[15] ?></SPAN></A>&nbsp;</TD>
+                                            <SPAN class=menupral ><?php echo  $TbMsg[15] ?></SPAN></A>&nbsp;</TD>
                                             <TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
 
 
 									
-									<?}?>
-							<?}?>
+									<?php }?>
+							<?php }?>
 
 											<TD  onclick=eleccion(this,22) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>
-											&nbsp;<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/ayuda.gif">&nbsp;<SPAN class=menupral ><?echo  $TbMsg[11] ?></SPAN></A>&nbsp;</TD>
+											&nbsp;<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/ayuda.gif">&nbsp;<SPAN class=menupral ><?php echo  $TbMsg[11] ?></SPAN></A>&nbsp;</TD>
  											<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
 
 
 											<TD  onclick=eleccion(this,23) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>
-											&nbsp;<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/logocirculos.png">&nbsp;<SPAN class=menupral ><?echo  $TbMsg[17] ?></SPAN></A>&nbsp;</TD>
+											&nbsp;<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/logocirculos.png">&nbsp;<SPAN class=menupral ><?php echo  $TbMsg[17] ?></SPAN></A>&nbsp;</TD>
 											<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
 
 
 											<TD  onclick=eleccion(this,21) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>
-											&nbsp;<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/usuarioslog.gif">&nbsp;<SPAN class=menupral ><?echo  $TbMsg[10] ?></SPAN></A>&nbsp;</TD>
+											&nbsp;<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/usuarioslog.gif">&nbsp;<SPAN class=menupral ><?php echo  $TbMsg[10] ?></SPAN></A>&nbsp;</TD>
 											<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
 
 

@@ -12,6 +12,8 @@
 #@exception OG_ERR_FORMAT       formato incorrecto.
 #@exception OG_ERR_NOTCACHE     No existe cache -15-
 #@exception $OG_ERR_CACHESIZE   Tamaño de la paticion menor al archivo a descargar -16-
+#@exception $OG_ERR_MCASTRECEIVERFILE  Error en la recepción Multicast de un fichero -57- 
+#@exception $OG_ERR_PROTOCOLJOINMASTER Error en la conexión de una sesión Unicast|Multicast con el Master -60- 
 #@note   
 #@todo: 
 #@version 0.9.1 - integracion EAC
@@ -27,7 +29,12 @@
 #@date    2013-02-20
 #@version 1.0.5 - uso de md5 full para las transferencias torrent, en la llamada => ogUpdateCacheIsNecesary 
 #@date    2014-07-09
-
+#@version 1.1 - Cambio de repositorio para el recurso remoto images si es necesario
+#@author  Irina Gomez, ETSII Universidad de Sevilla
+#@date    2015-06-16
+#@version 1.1 - Control de errores en transferencia multicast (ticket #781) 
+#@author  Irina Gomez, ETSII Universidad de Sevilla 
+#@date    2017/04/20 
 #*/ ##
 
 PROG="$(basename $0)"
@@ -42,11 +49,32 @@ fi
 # Clear temporary file used as log track by httpdlog
 # Limpia los ficheros temporales usados como log de seguimiento para httpdlog
 echo " " > $OGLOGCOMMAND
-[ "$(ogGetCaller)" == "deployImage" -o "$(ogGetCaller)" == "restoreBaseImage" -o "$(ogGetCaller)" == "restoreDiffImage" ] || echo -n "" > $OGLOGSESSION;
+
+if ! [ "$(ogGetCaller)" == "deployImage" -o "$(ogGetCaller)" == "restoreBaseImage" -o "$(ogGetCaller)" == "restoreDiffImage" ]; then
+    echo -n "" > $OGLOGSESSION;
+
+    # Registro de inicio de ejecución
+    ogEcho log session "[1] $MSG_SCRIPTS_START $0 $*"
+fi
 
 REPOSITORIO="${1^^}"
 PROTOCOLO="${3^^}"
 OPTPROTOCOLO="$4"
+# Si MCASTWAIT menos que tiempo de espera del servidor lo aumento
+if [ "${PROTOCOLO%-*}" == "MULTICAST" ] && [[ ${OPTPROTOCOLO##*:} =~ ^-?[0-9]+$  ]]; then
+    [ ${MCASTWAIT:0} -lt ${OPTPROTOCOLO##*:} ] && let MCASTWAIT=${OPTPROTOCOLO##*:}+5
+fi
+
+# Unidad organizativa.
+[ "$ogunit" != "" ] && OGUNIT="$ogunit/"
+
+# Si es una ip y es distinta a la del recurso samba cambiamos de REPO.
+ogCheckIpAddress $REPOSITORIO
+if [ $? == 0 -o $REPOSITORIO == "REPO" ] ; then
+        # Si falla el cambio -> salimos con error repositorio no valido
+        ogChangeRepo $REPOSITORIO $OGUNIT || exit $(ogRaiseError $OG_ERR_NOTFOUND $REPOSITORIO; echo $?)
+        REPOSITORIO="REPO"
+fi
 REPOIP=$(ogGetRepoIp)
 ogEcho log session  $REPOSITORIO $REPOIP $PROTOCOLO $OPTPROTOCOLO
 
@@ -75,7 +103,7 @@ else
 	# Si la imagen es monolitica y ha elegido protocolo = RSYNC salimos con error.
 	[ $PROTOCOLO == "RSYNC" ] && exit $(ogRaiseError session $OG_ERR_DONTSYNC_IMAGE "REPO $2"; echo $?)
 	IMGSYNC=FALSE
-	ogUpdateCacheIsNecesary "$1" "$2" "$PROTOCOLO"
+	ogUpdateCacheIsNecesary "$REPOSITORIO" "$2" "$PROTOCOLO"
 	RETVAL=$?
 fi
 # si RETVAL=0 => actualizamos  si RETVAL=1 no actaulizasmo-exit 0  || si RETVAL>2 exit 1
@@ -174,7 +202,7 @@ TIME1=$SECONDS
 
 case "$PROTOCOLO" in
 	TORRENT)
-		ogEcho log session "ogCopyFile $1 $2.torrent absolute $OGCAC/$OGIMG"
+		ogEcho log session "ogCopyFile $REPOSITORIO $2.torrent absolute $OGCAC/$OGIMG"
 		# tiempos 
 		timewait=$(expr $(printf '%d\n' 0x$(ogGetMacAddress | awk -F: '{print $5$6}')) \* 120 / 65535)                         
 		ogExecAndLog command ogCopyFile $REPOSITORIO "$2.torrent" "$IMGDIR"
@@ -182,7 +210,7 @@ case "$PROTOCOLO" in
     		#TODO comprobar que el fichero torrent está en cache
 		# retardamos el inicio -aleatorio de 0 a 120 segundos- al tracker para gestionar mas de +-40 equipos 
 		P2PWAIT=$[ ( $RANDOM % 120 )  + 1 ]
-		ogEcho log session "   [ ] $MSG_SCRIPTS_TASK_SLEEP :  $P2PWAIT seconds ogTorrentStart CACHE $2.torrent $4"
+		ogEcho log session "   [ ] $MSG_SCRIPTS_TASK_SLEEP :  $P2PWAIT seconds"
 		sleep $P2PWAIT
 		ogEcho log session "   [  ] $MSG_SCRIPTS_TASK_START:  ogTorrentStart CACHE $2.torrent $4"
 		ogExecAndLog command ogTorrentStart CACHE "$2.torrent" $4
@@ -193,34 +221,15 @@ case "$PROTOCOLO" in
 		fi
 	;;
 	MULTICAST)
-		PORT=$(echo $OPTPROTOCOLO | cut -f1 -d":")
-		let PORTAUX=$PORT+1
 		ogEcho log session "$MSG_SCRIPTS_UPDATECACHE_CHECKMCASTSESSION : $REPOIP:$PORTAUX:$PORT"
 		#TODO: ticket 379
 		NUMBER=$[ ( $RANDOM % 30 )  + 1 ]
 		sleep $NUMBER
 		#FIN TODO
-		if (nmap -n -sU -p $PORTAUX $REPOIP | grep open)
-		then 
-			ogExecAndLog command ogMcastReceiverFile $PORT CACHE "$2"
-
-		else
-		    # TODO ticket 379 Realizar la petición basada en identificador de operacion
-	   		ogEcho log session "$MSG_SCRIPTS_TASK_START :  hose $REPOIP 2009 --out sh -c \"echo -ne START_MULTICAST $2 $OPTPROTOCOLO\""
-	   		hose $REPOIP 2009 --out sh -c "echo -ne START_MULTICAST $2 $OPTPROTOCOLO"
-	   		#echo "espero y llamo a: ogMcastReceiverFile $PORT CACHE $2"
-	   		sleep 10
-	   		if (nmap -n -sU -p $PORTAUX $REPOIP | grep open)
-	   		then 
-	   			ogExecAndLog command ogMcastReceiverFile $PORT CACHE "$2"
-			else
-				ogEcho log session "$MSG_SCRIPTS_TASK_ERR : hose $REPOIP 2009 --out sh -c echo -ne START_MULTICAST $2 $OPTPROTOCOLO"
-	   			exit $OG_ERR_UPDATECACHE
-	   		fi
-		fi
-		#cat $OGLOGCOMMAND.tmp | grep -B1 "Transfer complete"
-		sleep 5
-		#cat $OGLOGCOMMAND.tmp | grep -B1 "Transfer complete"
+		ogEcho log session ogMcastRequest "$2" $OPTPROTOCOLO
+		ogExecAndLog command ogMcastRequest "$2" $OPTPROTOCOLO || exit $?
+		ogEcho log session ogMcastReceiverFile ${OPTPROTOCOLO%%:*} CACHE "$2"
+		ogExecAndLog command ogMcastReceiverFile ${OPTPROTOCOLO%%:*} CACHE "$2" || exit $?
 		RESUMEUPDATECACHE=$(grep -m 1  -B1 "Transfer complete" $OGLOGCOMMAND.tmp)
 	;;
 	UNICAST)
@@ -242,8 +251,8 @@ case "$PROTOCOLO" in
 	   if [ -d $REPOFILE ]; then
 		# Si es sincronizada tipo directorio.
 		[ -d "$OGCAC$OGIMG/$2" ] || mkdir "$OGCAC$OGIMG/$2"
-		ogEcho log session "rsync -aHAX$OPTRSYNC  $USERRSYNC@$REPOIP::ogimages/$2/ $OGCAC$OGIMG/$2"
-		rsync -aHAX$OPTRSYNC  $PASSWORD "$USERRSYNC@$REPOIP::ogimages/$2/" "$OGCAC$OGIMG/$2" 2>> $OGLOGCOMMAND  | egrep "^sent|^sending|^total%" >>  $OGLOGCOMMAND
+		ogEcho log session "rsync -aHAX$OPTRSYNC  $USERRSYNC@$REPOIP::ogimages/$OGUNIT$2/ $OGCAC$OGIMG/$2"
+		rsync -aHAX$OPTRSYNC  $PASSWORD "$USERRSYNC@$REPOIP::ogimages/$OGUNIT$2/" "$OGCAC$OGIMG/$2" 2>> $OGLOGCOMMAND  | egrep "^sent|^sending|^total%" >>  $OGLOGCOMMAND
            else
 		# Si es sincronizada tipo archivo.
 		[ "${2##*.}" == "img" ] && IMGTYPE="img" ||  IMGTYPE="diff"
@@ -273,7 +282,8 @@ case "$PROTOCOLO" in
 		[ ${PIPESTATUS[0]} -eq 0 ] && RETVAL="1"|| RETVAL="2"
 		# Desmonto las imagenes
 		ogUnmountImage CACHE  "$IMGNAME" $IMGTYPE
-		ogUnmountImage REPO  "$IMGNAME" $IMGTYPE
+	 	ogUnmountImage REPO  "$IMGNAME" $IMGTYPE
+		ogUnlockImage CACHE "$2"
 	   fi
 	;;
 esac

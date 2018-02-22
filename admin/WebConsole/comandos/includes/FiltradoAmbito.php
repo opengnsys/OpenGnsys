@@ -173,12 +173,23 @@ function RecorriendoOrdenadores($cmd)
 
 <TD align="center">'.$TbMsg["STATUS_OPG"].'</TD>
 <TD><INPUT  type="checkbox" checked onclick="selector(this,3,'.$cid.')"></TD>
+</TR>
 
-<TD align="center">'.$TbMsg["STATUS_WXP"].'</TD>
+<TR>
+<TD align="center">'.$TbMsg["STATUS_WIN"].'</TD>
 <TD><INPUT  type="checkbox" checked onclick="selector(this,4,'.$cid.')"></TD>
 
-<TD align="center">'.$TbMsg["STATUS_LNX"].'</TD>
+<TD align="center">'.$TbMsg["STATUS_WINS"].'</TD>
 <TD><INPUT  type="checkbox" checked onclick="selector(this,5,'.$cid.')"></TD>
+
+<TD align="center">'.$TbMsg["STATUS_LNX"].'</TD>
+<TD><INPUT  type="checkbox" checked onclick="selector(this,6,'.$cid.')"></TD>
+
+<TD align="center">'.$TbMsg["STATUS_LNXS"].'</TD>
+<TD><INPUT  type="checkbox" checked onclick="selector(this,7,'.$cid.')"></TD>
+
+<TD align="center">'.$TbMsg["STATUS_OSX"].'</TD>
+<TD><INPUT  type="checkbox" checked onclick="selector(this,8,'.$cid.')"></TD>
 
 </TR>
 </TABLE>';
@@ -193,7 +204,7 @@ function RecorriendoOrdenadores($cmd)
 		$ip=$rs->campos["ip"];
 		$cadenaip.=$ip.";";
 		$htmlCode.='<TABLE  cellspacing=1 cellpadding=0>';
-		$htmlCode.='	<TR><TD align="center"><img sondeo="ordenador_OFF.gif" id="img-'.$ip.'" width=24 src="../images/ordenador_OFF.gif"></TD></TR>';
+		$htmlCode.='	<TR><TD align="center"><img sondeo="ordenador_OFF.png" id="img-'.$ip.'" width=24 src="../images/ordenador_OFF.png"></TD></TR>';
 		$htmlCode.='	<TR><TD align="center"><SPAN style="FONT-SIZE:9px;	COLOR: #4f4f4f;">'.$nombreordenador.'</SPAN></TD></TR>';			
 		$htmlCode.='	<TR><TD align="center"><SPAN style="FONT-SIZE:8px;	COLOR: #4f4f4f;">'.$ip.'</SPAN></TD></TR>';			
 		$htmlCode.='	<TR><TD align="center"><INPUT id="chk-'.$ip.'" type="checkbox" checked></TD></TR>';	
@@ -219,8 +230,8 @@ echo '</SCRIPT>';
 ?>
 <SCRIPT language="javascript">
 function Sondeo(){
-	var ambito=<? echo $ambito?>;
-	var idambito=<? echo $idambito?>;
+	var ambito=<?php echo $ambito?>;
+	var idambito=<?php echo $idambito?>;
 	var wurl="../principal/sondeo.php";
 	var prm="ambito="+ambito+"&idambito="+idambito+"&sw=1";
 	CallPage(wurl,prm,"retornoSondeo","POST");
@@ -235,8 +246,8 @@ function retornoSondeo(resul)
 //________________________________________________________________________________________________________
 //
 function respuestaSondeo(){
-	var ambito=<? echo $ambito?>;
-	var idambito=<? echo $idambito?>;
+	var ambito=<?php echo $ambito?>;
+	var idambito=<?php echo $idambito?>;
 	var wurl="../principal/sondeo.php";
 	var prm="ambito="+ambito+"&idambito="+idambito+"&sw=2"; 
 	CallPage(wurl,prm,"retornorespuestaSondeo","POST");
@@ -276,45 +287,34 @@ function soIMG(so)
 {
 	var MimgOrdenador="";
 	switch(so){
-				case 'INI':
-								MimgOrdenador="ordenador_INI.gif";  // Cliente ocupado
-								break;
-				case 'BSY':
-								MimgOrdenador="ordenador_BSY.gif";  // Cliente ocupado
-								break;
-				case 'OPG':
-								MimgOrdenador="ordenador_OPG.gif";  // Cliente Rembo
-								break;
-				case 'WS2': 
-								MimgOrdenador="ordenador_WS2.gif"; // Windows Server 2003
-								break;
-				case 'W2K':
-								MimgOrdenador="ordenador_W2K.gif"; // Windows 2000
-								break;
-				case 'WXP':
-								MimgOrdenador="ordenador_WXP.gif"; // Windows XP
-								break;
-				case 'WNT':
-								MimgOrdenador="ordenador_WNT.gif"; // Windows NT
-								break;
-				case 'W95':
-								MimgOrdenador="ordenador_W95.gif"; // Windows 95
-								break;
-				case 'W98':
-								MimgOrdenador="ordenador_W98.gif"; // Windows 98
-								break;
-				case 'WML':
-								MimgOrdenador="ordenador_WML.gif"; // Windows Millenium
-								break;
-				case 'WIN':
-								MimgOrdenador="ordenador_WXP.gif"; // Windows
-								break;								
-				case 'LNX':
-								MimgOrdenador="ordenador_LNX.gif"; // Linux
-								break;
-				default:
-								MimgOrdenador="ordenador_OFF.gif"; // Apagado
-								break;
+		case 'INI':
+			MimgOrdenador="ordenador_INI.png";  // Cliente iniciando
+			break;
+		case 'BSY':
+			MimgOrdenador="ordenador_BSY.png";  // Cliente ocupado
+			break;
+		case 'OPG':
+			MimgOrdenador="ordenador_OPG.png";  // Cliente OpenGnsys
+			break;
+		case 'WIN':
+		case 'WXP':
+			MimgOrdenador="ordenador_WIN.png";  // Windows
+			break;
+		case 'WINS':
+			MimgOrdenador="ordenador_WINS.png"; // Sesión Windows
+			break;
+		case 'LNX':
+			MimgOrdenador="ordenador_LNX.png";  // Linux
+			break;
+		case 'LNXS':
+			MimgOrdenador="ordenador_LNXS.png"; // Sesión Linux
+			break;
+		case 'OSX':
+			MimgOrdenador="ordenador_OSX.png";  // macOS
+			break;
+		default:
+			MimgOrdenador="ordenador_OFF.png";	// Apagado
+			break;
 	}
 	return(MimgOrdenador);
 }
@@ -334,32 +334,38 @@ function selector(oSLCT,op,id)
 				var oCHK = document.getElementById('chk-'+ip); // Recupera checkbox
 
 				switch(parseInt(op)){
-					case 1: // Apagados						
-						if(estado=="ordenador_OFF.gif")
+					case 1: // Apagados
+						if(estado=="ordenador_OFF.png")
 							oCHK.checked=sw;
 						break;	
-						
 					case 2: // Ocupados
-						if(estado=="ordenador_BSY.gif")
+						if(estado=="ordenador_BSY.png")
 							oCHK.checked=sw;
 						break;
-						
-					case 3: // Opengnsys
-						if(estado=="ordenador_OPG.gif")
+					case 3: // OpenGnsys
+						if(estado=="ordenador_OPG.png")
 							oCHK.checked=sw;
 						break;
-						
 					case 4: // Windows
-						if(estado=="ordenador_WXP.gif")
+						if(estado=="ordenador_WIN.png")
 							oCHK.checked=sw;
 						break;
-						
-					case 5: // Linux
-						if(estado=="ordenador_LNX.gif")
+					case 5: // Sesión Windows
+						if(estado=="ordenador_WINS.png")
 							oCHK.checked=sw;
 						break;
-
-	
+					case 6: // Linux
+						if(estado=="ordenador_LNX.png")
+							oCHK.checked=sw;
+						break;
+					case 7: // Sesión Linux
+						if(estado=="ordenador_LNXS.png")
+							oCHK.checked=sw;
+						break;
+					case 8: // macOS
+						if(estado=="ordenador_OSX.png")
+							oCHK.checked=sw;
+						break;
 				}
 			}
 		}

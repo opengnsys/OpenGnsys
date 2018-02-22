@@ -4,7 +4,7 @@
 #@brief   Librería o clase Registry
 #@class   Boot
 #@brief   Funciones para gestión del registro de Windows.
-#@version 1.0.5
+#@version 1.1.0
 #@warning License: GNU GPLv3+
 #*/
 
@@ -202,41 +202,43 @@ EOT
 
 
 #/**
-#         ogGetHivePath path_mountpoint str_hive
+#         ogGetHivePath path_mountpoint [str_hive|str_user]
 #@brief   Función básica que devuelve el camino del fichero con una sección del registro.
 #@param   path_mountpoint  directorio donde está montado el sistema Windows
 #@param   str_hive         sección del registro
 #@return  str_path - camino del fichero de registro
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_NOTFOUND  Fichero de registro no encontrado.
-#@note    hive = { DEFAULT, SAM, SECURITY, SOFTWARE, SYSTEM, COMPONENTS }
+#@note    hive = { DEFAULT, SAM, SECURITY, SOFTWARE, SYSTEM, COMPONENTS, NombreDeUsuario }
 #@warning El sistema de archivos de Windows debe estar montada previamente.
 #@version 1.0.1 - Nueva función
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2011-05-18
+#@version 1.1.0 - Soportar registro de un usuario local.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2015-10-14
 #*/ ##
 function ogGetHivePath ()
 {
 # Variables locales.
-local FILE FILENT FILEXP
+local FILE HIVE
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME path_mountpoint str_hive" \
-           "$FUNCNAME /mnt/sda1 SOFTWARE  => /mnt/sda1/WINDOWS/System32/config/SOFTWARE"
+    ogHelp "$FUNCNAME" "$FUNCNAME path_mountpoint [str_hive|str_user]" \
+           "$FUNCNAME /mnt/sda1 SOFTWARE  =>  /mnt/sda1/WINDOWS/System32/config/SOFTWARE" \
+           "$FUNCNAME /mnt/sda1 user1  =>  /mnt/sda1/Users/user1/NTUSER.DAT"
     return
 fi
 # Error si no se reciben 2 parámetros.
 [ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
-# Camino del fichero de registro en NT/2000 o en XP y posteriores.
-FILENT=$(ogGetPath "/$1/winnt/system32/config/$2")
-[ -f "$FILENT" ] && FILE="$FILENT"
-FILEXP=$(ogGetPath "/$1/windows/system32/config/$2")
-[ -f "$FILEXP" ] && FILE="$FILEXP"
-[ -f "$FILE" ] || ogRaiseError $OG_ERR_NOTFOUND "$1 $2" || return $?
-
-echo "$FILE"
+# Camino del fichero de registro de usuario o de sistema (de menor a mayor prioridad).
+FILE="$(ogGetPath "/$1/Windows/System32/config/$2")"
+[ -z "$FILE" ] && FILE="$(ogGetPath "/$1/Users/$2/NTUSER.DAT")"
+[ -z "$FILE" ] && FILE="$(ogGetPath "/$1/winnt/system32/config/$2")"
+[ -z "$FILE" ] && FILE="$(ogGetPath "/$1/Documents and Settings/$2/NTUSER.DAT")"
+[ -f "$FILE" ] && echo "$FILE" || ogRaiseError $OG_ERR_NOTFOUND "$1 $2" || return $?
 }
 
 
@@ -255,6 +257,9 @@ echo "$FILE"
 #@version 0.9 - Adaptación para OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-11
+#@version 1.1.0 - Soportar tipos BINARY (parejas hexadecimales separadas por espacio).
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2015-09-28
 #*/ ##
 function ogGetRegistryValue ()
 {
@@ -274,7 +279,12 @@ FILE=$(ogGetHivePath "$1" "$2") || return $?
 
 # Devolver el dato del valor de registro.
 # /* (comentario Doxygen)
-chntpw "$FILE" << EOT 2> /dev/null | awk '/> Value/ {getline;print $0;}'
+chntpw "$FILE" << EOT 2> /dev/null | awk '/> Value/ {if (index($0, "REG_BINARY") > 0)
+                                                         {data=""}
+                                                     else
+                                                         {getline; data=$0;} }
+                                          /^:[0-9A-F]+ / {data=data""substr($0, 9, 48);}
+                                          END {print data;}'
 cd ${3%\\*}
 cat ${3##*\\}
 q
@@ -380,16 +390,21 @@ EOT
 #@version 0.9 - Adaptación para OpenGNSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-24
+#@version 1.1.0 - Soportar tipos BINARY (parejas hexadecimales separadas por espacio).
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2015-09-28
 #*/ ##
 function ogSetRegistryValue ()
 {
 # Variables locales.
-local FILE
+local FILE i n tmpfile
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME path_mountpoint str_hive str_valuename str_data" \
-           "$FUNCNAME /mnt/sda1 SOFTWARE '\Microsoft\NewKey\Value1' 1"
+           "$FUNCNAME /mnt/sda1 SOFTWARE '\Key\SubKey\StringValue' \"Abcde Fghij\"" \
+           "$FUNCNAME /mnt/sda1 SOFTWARE '\Key\SubKey\DwordValue' 1" \
+           "$FUNCNAME /mnt/sda1 SOFTWARE '\Key\SubKey\BinaryValue' \"04 08 0C 10\""
     return
 fi
 # Error si no se reciben 4 parámetros.
@@ -397,13 +412,44 @@ fi
 # Camino del fichero de registro.
 FILE=$(ogGetHivePath "$1" "$2") || return $?
 
-# Cambiar el dato del valor de registro.
-chntpw "$FILE" << EOT &> /dev/null
+# Fichero temporal para componer la entrada al comando "chntpw".
+tmpfile=/tmp/chntpw$$
+trap "rm -f $tmpfile" 1 2 3 9 15
+
+# Comprobar tipo de datos del valor del registro.
+cat << EOT >$tmpfile
+ls ${3%\\*}
+q
+EOT
+if [ -n "$(chntpw "$FILE" < $tmpfile 2> /dev/null | grep "BINARY.*<${3##*\\}>")" ]; then
+    # Procesar tipo binario (incluir nº de bytes y líneas de 16 parejas hexadecimales).
+    [[ "$4 " =~ ^([0-9A-F]{2} )*$ ]] || ogRaiseError $OG_ERR_FORMAT "\"$4\"" || return $?
+    let n=${#4}+1
+    cat << EOT >$tmpfile
+cd ${3%\\*}
+ed ${3##*\\}
+$[n/3]
+EOT
+    # Formato de líneas hexadecimales:   :OFFSET  XX YY ZZ ... (hasta 16 parejas).
+    for (( i=0; i<n; i+=48 )); do
+        printf ":%05x  %s\n" $[i/3] "${4:$i:48}" >> $tmpfile
+    done
+    echo -e "s\nq\ny" >> $tmpfile
+else
+    # Cambiar el dato del valor de registro para cadenas y bytes.
+    cat << EOT >$tmpfile
 cd ${3%\\*}
 ed ${3##*\\}
 $4
 q
 y
 EOT
+
+fi
+
+# Aplicar cambios.
+chntpw "$FILE" < $tmpfile &> /dev/null
+rm -f $tmpfile
 }
+
 

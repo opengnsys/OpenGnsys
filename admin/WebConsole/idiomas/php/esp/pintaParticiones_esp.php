@@ -11,14 +11,21 @@ if(!isset($TbMsg)){
 
 $TbMsg["PARTITION"]='Partici&oacute;n';
 $TbMsg["INST_SO"]='S.O. Instalado';
+$TbMsg["INSTALLED_OS"]='Sistema Operativo Instalado';
 $TbMsg["SIZE_KB"]='Tama&ntilde;o (KB)';
 $TbMsg["PARTITION_TYPE"]='Tipo';
 $TbMsg["IMAGE"]='Imagen';
 $TbMsg["SOFT_PROFILE"]='Perfil Software';
+$TbMsg["FILESYSTEM"]='Sistema de Ficheros';
 $TbMsg["FILESYSTEM_SHORT"]='S.F.';
+
+$TbMsg["REFORMAT"]='Reformatear';
+$TbMsg["REMOVE"]='Eliminar';
 
 $TbMsg["DISK"]='Disco';
 $TbMsg["CONFIG_PARTTABLE"]='Tabla de particiones';
+
+$TbMsg["USAGE"]='Uso';
 
 $TbMsg["VARIABLE"]='Variable';
 $TbMsg["CACHE_CONTENT"]='Fecha/Cach&eacute;';
@@ -47,7 +54,9 @@ $TbMsg["TITLE_W"]='Opción de rsync: El algoritmo incremental rsync no se usa y 
 $TbMsg["TITLE_E"]='Opción de rsync: Se compara el destino con el origen y se borran los ficheros que no existen en el primero.';
 $TbMsg["TITLE_C"]='Opción de rsync: Comprime los archivos de datos que se envían a la máquina de destino, lo que reduce la cantidad de datos que se transmiten. ';
 $TbMsg["SEND"]='Protocolo';
-
+// AVISOS.
 $TbMsg["WARN_PROTOCOL"]='La opción "protocolo" sólo se utiliza en las sincronizadas tipo archivo la primera vez que se envía la imagen a caché. <br>En otro caso el protocolo es RSYNC.';
+$TbMsg["WARN_DIFFIMAGE"]='Hay una nueva versi&oacute;n de la imagen (se muestra la diferencia de revisiones).';
+$TbMsg["WARN_DIFFDISKSIZE"]='ATENCI&Oacute;N: no se pueden particionar grupos de ordenadores con distinto tama&ntilde;o de disco.<br>Marcar la opción de &quot;Desagrupar por tama&ntilde;o de partici&oacute;n&quot; y pulsar &quot;Aceptar&quot; en el men&uacute; superior para aplicar esta operaci&oacute;n adecuadamente.';
 ?>
 

@@ -63,10 +63,11 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 	echo '</tr>';
 
 	// Recorremos todas las configuraciones encontradas para cada disco
-	
+	$aviso="";
 	foreach($diskConfigs as $disk => $diskConfig){
-		 echo'<tr height="16">'.chr(13);
-	         echo '<td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;'.$TbMsg["DISK"].'&nbsp;'.$disk.'</td>'.chr(13);
+		$disk = (int)$disk;
+		echo'<tr height="16">'.chr(13);
+	        echo '<td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;'.$TbMsg["DISK"].'&nbsp;'.$disk.'</td>'.chr(13);
 
 
 		
@@ -87,6 +88,8 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 								 break;
 							case 3:  $disktable[$tbKeys[$k]["numdisk"]] = "LVM";
 								 break;
+							case 4:  $disktable[$tbKeys[$k]["numdisk"]] = "ZPOOL";
+								 break;
 							default: $disktable[$tbKeys[$k]["numdisk"]] = "";
 						}
 					}
@@ -94,7 +97,7 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 						echo'<tr height="16">'.chr(13);
                                 	        echo'<td align="center">&nbsp;</td>'.chr(13);
 						echo'<td align="center">'.$tbKeys[$k]["numpar"].'</td>'.chr(13);
-						if ($disktable[$tbKeys[$k]["numdisk"]] == "LVM") {
+						if ($disktable[$tbKeys[$k]["numdisk"]] == "LVM" or $disktable[$tbKeys[$k]["numdisk"]] == "ZPOOL") {
 							echo '<td></td>'.chr(13);
 						}
 						else {
@@ -108,12 +111,22 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 						$filesys=tomaSistemasFicheros($tbKeys[$k]["numpar"],$idordenadores,false,$tbKeys[$k]["numdisk"]);
 						echo'<td align="center">&nbsp;'.$filesys.'&nbsp;</td>'.chr(13);
 	
-						echo '<td align="center">&nbsp;'.tomaNombresSO($tbKeys[$k]["numpar"],$idordenadores,$tbKeys[$k]["numdisk"]).'&nbsp;</td>'.chr(13);					
-	
-						echo'<td align="right">&nbsp;'.tomaTamano($tbKeys[$k]["numpar"],$idordenadores,$tbKeys[$k]["numdisk"]).'&nbsp;</td>'.chr(13);
-	
+						echo '<td align="center">&nbsp;'.tomaNombresSO($tbKeys[$k]["numpar"],$idordenadores,$tbKeys[$k]["numdisk"]).'&nbsp;</td>'.chr(13);
+						// Mostrar uso solo en clientes individuales.
+						$uso=tomaUso($tbKeys[$k]["numpar"],$idordenadores,$tbKeys[$k]["numdisk"]);
+						if ($uso > 0 and strpos($idordenadores, ',') === false) {
+							echo'<td style="text-align:right; background-image:url(../images/flotantes/lsu.gif); background-size:'.$uso.'% 100%; background-repeat:no-repeat"><a title="'.$TbMsg["USAGE"].': '.$uso.'%">&nbsp;'.tomaTamano($tbKeys[$k]["numpar"],$idordenadores,$tbKeys[$k]["numdisk"]).'&nbsp;</a></td>'.chr(13);
+						} else {
+							echo'<td style="text-align:right">&nbsp;'.tomaTamano($tbKeys[$k]["numpar"],$idordenadores,$tbKeys[$k]["numdisk"]).'&nbsp;</td>'.chr(13);
+						}
+
+						// Si es CACHE incluyo campo oculto con el tamaño
+						if ($tbKeys[$k]["tipopar"]== "CACHE"){
+							echo "<input type='hidden' name='cachesize' value='".tomaTamano($tbKeys[$k]["numpar"],$idordenadores,$tbKeys[$k]["numdisk"])."'/>".chr(13);
+						}
+
 						echo'<td align="center">&nbsp;'.tomaImagenes($tbKeys[$k]["numpar"],$idordenadores,$tbKeys[$k]["numdisk"]).'&nbsp;</td>'.chr(13);
-						
+
 						echo'<td align="center">&nbsp;'.tomaPerfiles($tbKeys[$k]["numpar"],$idordenadores,$tbKeys[$k]["numdisk"]).'&nbsp;</td>'.chr(13);
 
 						if ($filesys == "CACHE") {
@@ -146,7 +159,12 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 							echo '&nbsp;</td>'.chr(13);
 
 						} else {
-							echo'<td align="center">&nbsp;'.$tbKeys[$k]["fechadespliegue"].'&nbsp;</td>'.chr(13);
+							if ($tbKeys[$k]["difimagen"] > 0 ) {
+								echo'<td align="center">&nbsp;'.$tbKeys[$k]["fechadespliegue"].' (* '.$tbKeys[$k]["difimagen"].')&nbsp;</td>'.chr(13);
+								$aviso=$TbMsg["WARN_DIFFIMAGE"];
+							} else {
+								echo'<td align="center">&nbsp;'.$tbKeys[$k]["fechadespliegue"].'&nbsp;</td>'.chr(13);
+							}
 						}
 					
 						echo'</tr>'.chr(13);
@@ -163,7 +181,7 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 			echo'<td></td>'.chr(13);
 			echo'<td></td>'.chr(13);
 			echo'<td></td>'.chr(13);
-			echo'<td align="right">&nbsp;<strong>'.$disksize[$disk].'</span></strong>&nbsp;</td>'.chr(13);
+			echo'<td align="right">&nbsp;<strong>'.(isset($disksize[$disk])?$disksize[$disk]:('<em>'.$TbMsg["VARIABLE"].'</em>')).'</span></strong>&nbsp;</td>'.chr(13);
 			// Creamos un campo oculto para guardar información sobre el disco y su tamaño separados por ;
 			echo "<input type='hidden' name='disksize_".$disk."' value='".$disksize[$disk]."'/>\n";
 			echo'<td></td>'.chr(13);
@@ -171,6 +189,9 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 			echo'<td></td>'.chr(13);
                         echo'</tr>'.chr(13);
 		}
+	}
+	if (!empty($aviso)) {
+		echo '<tr><th colspan="'.$columns.'">&nbsp;* '.$aviso.'&nbsp;</th></tr>'."\n";
 	}
 	echo '<tr height="5"><td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #FFFFFF;">&nbsp;</td></tr>';
 }
@@ -188,6 +209,9 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 //			Ejemplo:1;7;30000000;3;3;0;@2;130;20000000;5;4;0;@3;131;1000000;0;0;0;0
 //	Devuelve:
 //		El código html de la tabla
+// version 1.1: cliente con varios repositorios -  HTMLSELECT_imagenes: cambia parametros idordenadores por idambito
+// autor: Irina Gomez, Universidad de Sevilla
+// fecha 2015-06-17
 //________________________________________________________________________________________________________
 function pintaParticionesRestaurarImagen($cmd,$configuraciones,$idordenadores,$cc,$ambito,$idambito)
 {
@@ -217,8 +241,9 @@ function pintaParticionesRestaurarImagen($cmd,$configuraciones,$idordenadores,$c
 	// Recorremos todas las configuraciones encontradas para cada disco
 	
 	foreach($diskConfigs as $disk => $diskConfig){
-		 echo'<tr height="16">'.chr(13);
-	     echo '<td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;'.$TbMsg["DISK"].'&nbsp;'.$disk.'</td>'.chr(13);
+		$disk = (int)$disk;
+		echo'<tr height="16">'.chr(13);
+		echo '<td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;'.$TbMsg["DISK"].'&nbsp;'.$disk.'</td>'.chr(13);
 	         
 		$auxCfg=split("@",$diskConfig); // Crea lista de particiones
 		for($i=0;$i<sizeof($auxCfg);$i++){
@@ -237,8 +262,8 @@ function pintaParticionesRestaurarImagen($cmd,$configuraciones,$idordenadores,$c
 						echo '<TD align=center>&nbsp;'.tomaNombresSO($tbKeys[$k]["numpar"],$idordenadores,$tbKeys[$k]["numdisk"]).'&nbsp;</TD>'.chr(13);	
 						echo'<TD align=center>&nbsp;'.tomaSistemasFicheros($tbKeys[$k]["numpar"],$idordenadores,false,$tbKeys[$k]["numdisk"]).'&nbsp;</TD>'.chr(13);
 						echo'<TD align=center>&nbsp;'.tomaTamano($tbKeys[$k]["numpar"],$idordenadores,$tbKeys[$k]["numdisk"]).'&nbsp;</TD>'.chr(13);	
-						echo '<TD>'.HTMLSELECT_imagenes($cmd,$tbKeys[$k]["idimagen"],$tbKeys[$k]["numpar"],$tbKeys[$k]["codpar"],$icp,true,$idordenadores,$ambito).'</TD>';
-						echo '<TD>'.HTMLSELECT_imagenes($cmd,$tbKeys[$k]["idimagen"],$tbKeys[$k]["numpar"],$tbKeys[$k]["codpar"],$icp,false,$idordenadores,$ambito).'</TD>';
+						echo '<TD>'.HTMLSELECT_imagenes($cmd,$tbKeys[$k]["idimagen"],$tbKeys[$k]["numpar"],$tbKeys[$k]["codpar"],$icp,true,$idambito,$ambito).'</TD>';
+						echo '<TD>'.HTMLSELECT_imagenes($cmd,$tbKeys[$k]["idimagen"],$tbKeys[$k]["numpar"],$tbKeys[$k]["codpar"],$icp,false,$idambito,$ambito).'</TD>';
 	
 						//Clonación
 						$metodos="UNICAST=UNICAST-CACHE".chr(13);
@@ -291,14 +316,15 @@ function pintaParticionesConfigurar($cmd,$configuraciones,$idordenadores,$cc)
 
 	$colums=7;
 	echo '<TR id="TR_'.$cc.'">';
-	echo '<TH align=center><IMG src="../images/iconos/eliminar.gif"></TH>';
-	echo '<TH align=center>&nbsp;'.$TbMsg[8].'&nbsp;</TH>';
-	echo '<TH align=center>&nbsp;'.$TbMsg[24].'&nbsp;</TH>';
-	echo '<TH align=center>&nbsp;'.$TbMsg[27].'&nbsp;</TH>';
-	echo '<TH align=center>&nbsp;'.$TbMsg[22].'&nbsp;</TH>';
-	echo '<TH align=center>&nbsp;'.$TbMsg[21].'&nbsp;</TH>';
-	echo '<TH align=center>&nbsp;'.$TbMsg[14].'&nbsp;</TH>';	
+	echo '<TH align=center>&nbsp;'.$TbMsg['REMOVE'].'&nbsp;</TH>';
+	echo '<TH align=center>&nbsp;'.$TbMsg['PARTITION'].'&nbsp;</TH>';
+	echo '<TH align=center>&nbsp;'.$TbMsg['PARTITION_TYPE'].'&nbsp;</TH>';
+	echo '<TH align=center>&nbsp;'.$TbMsg['FILESYSTEM'].'&nbsp;</TH>';
+	echo '<TH align=center>&nbsp;'.$TbMsg['SIZE_KB'].'&nbsp;</TH>';
+	echo '<TH align=center>&nbsp;'.$TbMsg['INSTALLED_OS'].'&nbsp;</TH>';
+	echo '<TH align=center>&nbsp;'.$TbMsg['REFORMAT'].'&nbsp;</TH>';	
 	echo '</TR>';
+
 
 	$aviso=false;
 	$auxCfg=split("@",$configuraciones); // Crea lista de particiones
@@ -332,20 +358,30 @@ function pintaParticionesConfigurar($cmd,$configuraciones,$idordenadores,$cc)
 		}
 	}
 	// Marcar fin de zona de datos de la tabla.
-	echo '<TR id="TRIMG_'.$cc.'" height=5><TD colspan='.$colums.' style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #FFFFFF;">&nbsp;</TD></TR>';
+	// Datos del disco
+	$tm=tomaTamano(0,$idordenadores);
+	echo '<tr id="TRIMG_'.$cc.'" align="center">'.
+	     "\n<td></td>\n<td></td>\n<td".' style="font-size: 1em; padding: 1px 0px;  "'.">".$TbMsg["DISK"]."</td>".
+     "\n<td></td>\n<td".' style="font-size: 1em; padding: 1px 0px; "> '.(isset($tm)?$tm:("<em>".$TbMsg["VARIABLE"]."</em>"))." <input type='hidden' id='hdsize$cc' name='hdsize$cc' style='width:100' value='".$tm."'></td>".
+	     "\n<td></td>\n<td></td>\n</tr>";
+	echo '<tr><th colspan="'.$colums.'">&nbsp;'.$TbMsg["WARN_DISKSIZE"].'</th></tr>';
 	// Mostrar aviso: solo disco 1 con tabla MSDOS.
 	if ($aviso) {
-		echo '<tr><th colspan='.$colums.'">'.$TbMsg["CONFIG_NODISK1MSDOS"].'</th></tr>';
+		echo '<tr><th colspan="'.$colums.'">'.$TbMsg["CONFIG_NODISK1MSDOS"].'</th></tr>';
 	}
 	// Botones de añadir y confirmar.
-	echo '<TR height=30><TD style="BACKGROUND-COLOR: #FFFFFF;" colspan='.$colums.' align=center>';
-	echo '	<A href="#add" style="text-decoration:none">
+	if (isset($tm)) {
+		echo '<TR height=30><TD style="BACKGROUND-COLOR: #FFFFFF;" colspan='.$colums.' align=center>';
+		echo '	<A href="#add" style="text-decoration:none">
 						<IMG id="IMG_'.$icp.'" border=0 src="../images/boton_insertar.gif" 
 						value="'.$k.'" onclick="addParticion(this,'.$cc.')"></A>
 					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 					<A href="#add" style="text-decoration:none">
 						<IMG border=0 src="../images/boton_aceptar.gif" onclick="Confirmar('.$cc.')"></A></TD>
 					</TR>';
+	} else {
+		echo '<tr><th colspan="'.$colums.'">'.$TbMsg["WARN_DIFFDISKSIZE"].'</th></tr>'."\n";
+	}
 }
 
 /*
@@ -396,8 +432,9 @@ function pintaParticionesRestaurarImagenSincronizacion1($cmd,$configuraciones,$i
 	// Recorremos todas las configuraciones encontradas para cada disco
 	
 	foreach($diskConfigs as $disk => $diskConfig){
-		 echo'<tr height="16">'.chr(13);
-	     echo '<td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;'.$TbMsg["DISK"].'&nbsp;'.$disk.'</td>'.chr(13);
+		$disk = (int)$disk;
+		echo'<tr height="16">'.chr(13);
+		echo '<td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;'.$TbMsg["DISK"].'&nbsp;'.$disk.'</td>'.chr(13);
 	     
 		$auxCfg=split("@",$diskConfig); // Crea lista de particiones
 		for($i=0;$i<sizeof($auxCfg);$i++){
@@ -498,8 +535,9 @@ function pintaParticionesRestaurarSoftIncremental($cmd,$configuraciones,$idorden
 	// Recorremos todas las configuraciones encontradas para cada disco
 	
 	foreach($diskConfigs as $disk => $diskConfig){
-		 echo'<tr height="16">'.chr(13);
-	     echo '<td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;'.$TbMsg["DISK"].'&nbsp;'.$disk.'</td>'.chr(13);
+		$disk = (int)$disk;
+		echo'<tr height="16">'.chr(13);
+		echo '<td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;'.$TbMsg["DISK"].'&nbsp;'.$disk.'</td>'.chr(13);
 	     
 		$auxCfg=split("@",$diskConfig); // Crea lista de particiones
 		for($i=0;$i<sizeof($auxCfg);$i++){
@@ -574,8 +612,9 @@ function pintaParticionesRestaurarImagenBasica($cmd,$configuraciones,$idordenado
 	// Recorremos todas las configuraciones encontradas para cada disco
 	
 	foreach($diskConfigs as $disk => $diskConfig){
-		 echo'<tr height="16">'.chr(13);
-	     echo '<td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;'.$TbMsg["DISK"].'&nbsp;'.$disk.'</td>'.chr(13);
+		$disk = (int)$disk;
+		echo'<tr height="16">'.chr(13);
+		echo '<td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;'.$TbMsg["DISK"].'&nbsp;'.$disk.'</td>'.chr(13);
 	     
 		$auxCfg=split("@",$diskConfig); // Crea lista de particiones
 		for($i=0;$i<sizeof($auxCfg);$i++){

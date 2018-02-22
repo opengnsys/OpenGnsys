@@ -13,8 +13,12 @@ install gawk
 install subversion
 install python-openssl 
 install python 
-install php5-cli
+#install php5-cli	# ogLive anterior a Ubuntu 16.04
+install php-cli		# ogLive a partir de Ubuntu 16.04
 install dmidecode 
 install realpath
 install rpm
 install sqlite3
+install os-prober
+install moreutils
+install jq

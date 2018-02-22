@@ -4,6 +4,9 @@
 // Autor: Antonio J. Doblas Viso
 // Baso en Codigo  Comando.php de : Jose Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
 //	Xajax
+// version 1.1: Se incluye aviso para particiones GTP.
+// autor: Irina Gomez, ETSII Universidad de Sevilla
+// fecha: 2016-06-21
 // *************************************************************************************************************************************************
 
 
@@ -52,6 +55,7 @@ if (!$cmd)
 	<SCRIPT language="javascript" src="./jscripts/asistentes.js"></SCRIPT>
 	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/ejecutarscripts_'.$idioma.'.js"></SCRIPT>'?>
 	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>
+	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/asistentes_'.$idioma.'.js"></SCRIPT>'?>
 
 
 <?php 
@@ -61,6 +65,7 @@ $xajax->printJavascript('../xajax/');
 <script>
 function doOnload(){
 	calculateFreeDisk(document.fdatos);
+	getMaxCacheSize();
 }
 
 </script>
@@ -97,7 +102,7 @@ function doOnload(){
 	echo '<IMG src="'.$urlimg.'">&nbsp;&nbsp;<span align=center class=subcabeceras><U>'.$TbMsg[1].'
 			: '.$textambito.'</U></span>&nbsp;&nbsp;</span></p>';
 
-	$sws=0x11111;	// Mostrar todas las configuraciones diferentes.
+	$sws=bindec('0x11111');	// Mostrar todas las configuraciones diferentes.
 	$configuraciones = pintaConfiguraciones($cmd,$idambito,$ambito,7,$sws,false);
 	global $tbKeys; // Tabla contenedora de claves de configuración
 	global $conKeys; // Contador de claves de configuración
@@ -154,6 +159,9 @@ function doOnload(){
 			</tr>
 			<tr> <th colspan="3"><?php echo $TbMsg["WARN_DISKSIZE"]; ?></th> </tr>
 			<tr> <th colspan="3"><?php echo $TbMsg["WARN_REBOOTAFTER"]; ?></th> </tr>
+			<tr id="warngpt" style="display:none">
+				<th colspan="3" ><?php echo $TbMsg["WARN_GPT"]; ?></th>
+			</tr>
 		</table>
 	</form>	
 

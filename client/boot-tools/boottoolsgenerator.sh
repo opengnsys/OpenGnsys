@@ -1,6 +1,6 @@
 #!/bin/bash
 #@file    boottoolsgenerator.sh
-#@brief   Script generación del sistema opertativo cliente OpenGnSys
+#@brief   Script generación del sistema opertativo cliente OpenGnsys
 #@warning 
 #@version 0.9 - Prototipo de sistema operativo multiarranque de opengnsys.
 #@author  Antonio J. Doblas Viso. Universidad de Malaga.
@@ -11,11 +11,11 @@
 #*/
 
  #mkdir -p /tmp/opengnsys_installer/opengnsys
- #svn export http://opengnsys.es/svn/branches/version1.0/client /tmp/opengnsys_installer/opengnsys
+ #svn export https://opengnsys.es/svn/trunk/client /tmp/opengnsys_installer/opengnsys
 
 
 #Variables
-TYPECLIENT="host"
+TYPECLIENT="${1:-host}"
 WORKDIR=/tmp/opengnsys_installer
 INSTALL_TARGET=/opt/opengnsys
 PROGRAMDIR=$(readlink -e $(dirname "$0"))
@@ -42,12 +42,15 @@ source $PROGRAMDIR/boottoolsfunctions.lib
 echo "FASE 1 - Asignación de variables"
 #obtenemos las variables necesarias y la información del host.
 btogGetVar
-echoAndLog "OpenGnSys CLIENT installation begins at $(date)"
+echoAndLog "OpenGnsys CLIENT installation begins at $(date)"
 btogGetOsInfo $TYPECLIENT
 ##########################################################################
 echo "FASE 2 - Instalación de software adicional."
-cat /etc/apt/sources.list | grep "http://free.nchc.org.tw/drbl-core" || echo "deb http://free.nchc.org.tw/drbl-core drbl stable " >> /etc/apt/sources.list
-apt-get update; apt-get -y --force-yes install debootstrap subversion schroot squashfs-tools syslinux genisoimage gpxe qemu lsof
+grep "http://free.nchc.org.tw/drbl-core" /etc/apt/sources.list || echo "deb http://free.nchc.org.tw/drbl-core drbl stable" >> /etc/apt/sources.list
+apt-get update
+[ -n "$(apt-cache search gpxe)" ] && PXEPKG="gpxe"
+[ -n "$(apt-cache search ipxe)" ] && PXEPKG="ipxe"
+apt-get -y --force-yes install debootstrap subversion schroot squashfs-tools syslinux genisoimage $PXEPKG qemu lsof
 ###################################################################3
 echo "FASE 3 - Creación del Sistema raiz RootFS (Segundo Sistema archivos (img)) "
 echo "Fase 3.1 Generar y formatear el disco virtual. Generar el dispositivo loop."
@@ -68,9 +71,11 @@ fi
 echo "FASE 4 - Configurar acceso schroot al Segundo Sistema de archivos (img)"
 cat /etc/schroot/schroot.conf | grep $BTROOTFSIMG || btogSetFsAccess
 ###########################################################################
-echo "FASE 5 - Incorporando ficheros OpenGnSys el sistema raiz rootfs "
+echo "FASE 5 - Incorporando ficheros OpenGnsys al sistema raíz rootfs "
 cp -a ${BTSVNBOOTTOOLS}/includes/usr/bin/* /tmp
 chmod +x /tmp/boot-tools/*.sh
+# Incluir revisión.
+sed -i "1 s/$/ $VERSIONSVN/" ${BTSVNBOOTTOOLS}/includes/etc/initramfs-tools/scripts/VERSION.txt
 # En Ubuntu 13.04+ es necesario matar proceso de "udev" antes de desmontar.
 umount $BTROOTFSMNT 2>/dev/null || (kill -9 $(lsof -t $BTROOTFSMNT); umount $BTROOTFSMNT 2>/dev/null)
 schroot -p -c IMGogclient -- /tmp/boot-tools/boottoolsFsOpengnsys.sh 
@@ -112,5 +117,5 @@ echo "Fase 8.3 Generar la ISO"
 btogIsoGenerator
 ######################################################################3
 ########################################################################
-echoAndLog "OpenGnSys installation finished at $(date)"
+echoAndLog "OpenGnsys installation finished at $(date)"
 

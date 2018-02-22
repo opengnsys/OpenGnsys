@@ -19,10 +19,10 @@ MOC_DIR 	= ../.moc
 
 OBJECTS_DIR = ../.objs
 TARGET 	= browser
-LIBS 		+= -L.. -lqtermwidget
+LIBS 		+= -L.. -lqtermwidget -ldigitalclock
 
 SOURCES 	= main.cpp mainwindow.cpp
 
 HEADERS = mainwindow.h
 
-INCLUDEPATH 	= ../qtermwidget/src
+INCLUDEPATH 	= ../qtermwidget/src ../digitalclock

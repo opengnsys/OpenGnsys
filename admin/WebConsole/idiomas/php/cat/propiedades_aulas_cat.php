@@ -14,8 +14,8 @@ $TbMsg[5]="Nom";
 $TbMsg[6]="Ubicació";
 $TbMsg[7]="Canó";
 $TbMsg[8]="Pissarra";
-$TbMsg[9]="Llocs";
-$TbMsg[10]="Url Imatge";
+$TbMsg[9]="Aforament";
+$TbMsg[10]="Foto";
 $TbMsg[11]="Menú";
 $TbMsg[12]="Comentaris";
 $TbMsg[13]="Intervals";
@@ -23,7 +23,8 @@ $TbMsg[14]="Hora des de:";
 $TbMsg[15]="Hora fins:";
 $TbMsg[16]="Repositori";
 $TbMsg[17]="Perfil Hardware";
-$TbMsg[18]="Propietats per tots els ordinadors";
+$TbMsg[18]="Assignar propietats a l'objecte Aula";
+$TbMsg[1888]="Modificador massiu de propietats d'ordinadors";
 $TbMsg[19]="Grandària caché (KB)";
 $TbMsg[20]="Autoexec";
 $TbMsg[21]="Ordinadors";
@@ -40,11 +41,20 @@ $TbMsg[30]="Validació";
 $TbMsg[31]="Pàgina login";
 $TbMsg[32]="Pàgina validació";
 // UHU
+// AGP
+$TbMsg[33]="ogLive";
+$TbMsg[34]="*** Existeixen Equips amb diferents ogLive ***";
 $TbMsg[495]="Data/Caché";
 $TbMsg[509]="Foto ordinador";
 $TbMsg[5091]="Afegir foto";
 $TbMsg[5092]="Veure fotos";
+// AGP
 // Ramón
+$TbMsg['PROP_NTPIP']="IP Servidor NTP <em>(opcional)</em>";
 $TbMsg['PROP_DNSIP']="IP Servidor DNS <em>(opcional)</em>";
 $TbMsg['PROP_PROXYURL']="URL Servidor Proxy <em>(opcional)</em>";
+$TbMsg['COMM_DEFTIMEZONE']="zona horaria por defecto";
+$TbMsg['PROP_REMOTEACCESS']="Acceso remoto";
+$TbMsg['COMM_REMOTEACCESS']="permitir gesti&oacute;n de acceso remoto a los ordenadores";
+$TbMsg['COMM_DEFOGLIVE']="Assignat per l'administrador";
 ?>

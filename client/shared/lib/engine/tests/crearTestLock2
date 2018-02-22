@@ -29,11 +29,11 @@ $ ogUnmountAll 1 2>/dev/null
 $ ogLock 1 1
 
 $ ogExtendFs 1 1
-OpenGnSys error:  ogExtendFs:  "1 1"
+OpenGnsys error:  ogExtendFs:  "1 1"
 
 
 $ ogFormatFs 1 1
-OpenGnSys error:  ogFormatFs:  "1 1"
+OpenGnsys error:  ogFormatFs:  "1 1"
 
 #############################################################################
 # Los dos comandos siguientes dan error. Los comentamos por ahora

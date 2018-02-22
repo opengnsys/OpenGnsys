@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -73,23 +73,23 @@ switch($litambito){
 <SCRIPT language="javascript" src="../jscripts/constantes.js"></SCRIPT>
 <SCRIPT language="javascript" src="../jscripts/comunes.js"></SCRIPT>
 <SCRIPT language="javascript" src="../jscripts/consolaremota.js"></SCRIPT>
-<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/consolaremota_'.$idioma.'.js"></SCRIPT>'?>
+<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/consolaremota_'.$idioma.'.js"></SCRIPT>'?>
 
 	<FORM name="fdatos">
-		<INPUT type=hidden name="idambito" value=<?echo $idambito?>>
-		<INPUT type=hidden name="litambito" value=<?echo $litambito?>>
-		<INPUT type=hidden name="ambito" value=<?echo $ambito?>>
-		<INPUT type=hidden name="nomambito" value=<?echo $nomambito?>>
+		<INPUT type=hidden name="idambito" value=<?php echo $idambito?>>
+		<INPUT type=hidden name="litambito" value=<?php echo $litambito?>>
+		<INPUT type=hidden name="ambito" value=<?php echo $ambito?>>
+		<INPUT type=hidden name="nomambito" value=<?php echo $nomambito?>>
 	</FORM>
 
-	<P align=center class=cabeceras><?echo $TbMsg[7]?><BR>
+	<P align=center class=cabeceras><?php echo $TbMsg[7]?><BR>
 	<SPAN align=center class=subcabeceras>
-		<IMG src="<? echo $urlimg?>">&nbsp;<?echo $textambito.": ".$nomambito?></SPAN></P>
+		<IMG src="<?php echo $urlimg?>">&nbsp;<?php echo $textambito.": ".$nomambito?></SPAN></P>
 	<TABLE align=center border="0" cellpadding="0" cellspacing="1">
 			<TR>
-				<TD align=center class="presentaciones"><? echo $TbMsg[11]?></TD></TR>
+				<TD align=center class="presentaciones"><?php echo $TbMsg[11]?></TD></TR>
 				
-			<?
+			<?php
 			if($sw==1){ // caja para código del script			
 				echo '<TR>
 						<TD align=center><textarea onfocus="conmuta(\'hidden\');" class="cajacomandos" name id="comando" cols="'.$cols.'"
@@ -121,7 +121,7 @@ switch($litambito){
 			}
 			?>
 	</TABLE>
-<?
+<?php
 	if($ambito!=$AMBITO_ORDENADORES){ // Nota al pie
 		echo '<DIV id="Layer_nota" align=center>';
 		echo '<BR>';
@@ -131,7 +131,7 @@ switch($litambito){
 	}
 ?>
 <SCRIPT language="javascript">
-	<?
+	<?php
 		if($sw==2){ // Llama a eco
 			echo 'sw=2;';
 			echo 'enviaMsg();';

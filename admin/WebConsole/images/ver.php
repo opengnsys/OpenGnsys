@@ -1,4 +1,4 @@
-<?
+<?php
 $eliminar=$_GET["eliminar"] ;
 $archivo=$_GET["archivo"] ;
 if ($eliminar=="si")

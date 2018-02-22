@@ -6,12 +6,15 @@
 // Nombre del fichero: asistentes.js
 // DescripciÃ³n : 
 //		Este fichero implementa las funciones javascript del fichero AsistentesEjecutarScripts.php (Comandos)
-// version 1.0.6b y 1.1: codeDeployImage: Compone atributo para el comando restaurar imagen (ticket #757)
+// version 1.1: cliente con varios repositorios - Imagenes de todos los repositorios de la UO.
+// autor: Irina Gomez, Universidad de Sevilla
+// fecha 2015-06-17
+// version 1.1: showPartitionForm: Se incluye aviso para particiones GTP.
+// autor: Irina Gomez, ETSII Universidad de Sevilla
+// fecha: 2016-06-21
+// version 1.1: codeDeployImage: Compone atributo para el comando restaurar imagen (ticket #757)
 // autor: Irina Gomez, ETSII Universidad de Sevilla
 // fecha: 2016-10-27
-// versión 1.0.6b: Si existe Cache al crear las particiones reservamos la cuarta libre (ticket #753)
-// autor: Irina Gomez, ETSII Universidad de Sevilla
-// fecha: 2016-12-15
 // ***********************************************************************************************************
 
 function codeCloneRemotePartition(form){
@@ -67,13 +70,16 @@ switch (form.idmetodo.value)
 		protocol="UNICAST-DIRECT";
 		break;
 }
+
 // Datos imagen
 var imagen = form.idimagen.value.split("_");
+
 //form.codigo.value="deployImage REPO /";
 if (form.modo[0].checked) 
 {
 	// UHU - Distinguimos entre disco y particion, el valor de idparticion sera disco;particion. eje. 1;1
 	var diskPart = form.idparticion.value.split(";");
+	var imagen = form.idimagen.value.split("_");
 	command="deployImage " + imagen[0] + " /" + imagen[1] + " "+diskPart[0]+" " + diskPart[1] + " " + protocol  ;
 	form.codigo.value="\
 ogEcho log session \"[0] $MSG_SCRIPTS_TASK_START " + command + "\"\n \ " +
@@ -82,11 +88,11 @@ command + " \n";
 	// Atributos para comando RestaurarImagen
 	form.atrib_restore.value = "dsk=" + diskPart[0] + "@par="+ diskPart[1] +"@idi=" +imagen[2] +
 				   "@nci="+imagen[1] + "@ipr="+ imagen[0] +"@ifs=" +imagen[3] +
-				   "@ptc="+protocol +"@";	
+				   "@ptc="+protocol +"@";
 }
 else
 {
-	command="updateCache REPO /" + imagen[1]  + ".img" + " " + protocol  ;
+	command="updateCache REPO /" + imagen[1] + ".img" + " " + protocol  ;
 	form.codigo.value="\
 ogEcho log session \"[0] $MSG_SCRIPTS_TASK_START " + command +"\"\n \ " +
 command + " \n";
@@ -101,29 +107,36 @@ function modificarCodigo() {
 }
 
 function codeParticionado(form){
-	var errorMsg = "¡El espacio libre en disco no puede ser menor que 0!";
 	var n_disk = form.n_disk.value;
 	var tipo_part_table = form.tipo_part_table.value;
 	// Comprobamos si la opcion elejida es GPT o MSDOS para llamar a una funcion u otra
 	if(tipo_part_table == "GPT"){
+		var freediskGPT = parseInt(document.getElementById("freediskGPT").value);
 		// Comprobamos que el espacio libre en el disco no sea negativo, si lo es, dar aviso
-		if(parseInt(document.getElementById("freediskGPT").value) < 0){
-			alert(errorMsg);
+		if(freediskGPT < 0){
+			alert(TbMsg['NODISKSIZE']);
+		}
+		else if (!validaCache(freediskGPT)) {
+			alert(TbMsg['NOCACHESIZE']);
 		}
 		else{
 			codeParticionadoGPT(form);
 		}
 	}
 	else{
+		var freedisk = parseInt(document.getElementById("freedisk").value);
 		// Comprobamos que el espacio libre en el disco no sea negativo, si lo es, dar aviso
-		if(parseInt(document.getElementById("freedisk").value) < 0){
-			alert(errorMsg);
+		if(freedisk < 0){
+			alert(TbMsg['NODISKSIZE']);
+		}
+		else if (!validaCache(freedisk)) {
+			alert(TbMsg['NOCACHESIZE']);
 		}
 		else{
 			codeParticionadoMSDOS(form);
 		}
 	}
-	
+
 }
 
 
@@ -131,26 +144,18 @@ function codeParticionadoMSDOS (form) {
 	var partCode="";
 	var logicalCode="";
 	var sizecacheCode="";
-	// cacheCode: codigo para preparar la particion cache
-	var cacheCode="";
-	// cacheInit: codigo para crear la particion cache, al final de todo el proceso
-	var cacheInit="";
+	var cacheCode;
 	var cacheSize;
 	var extended=false;
 	var n_disk = form.n_disk.value;
 	var tipo_part_table = form.tipo_part_table.value;
 	var maxParts = 4;
-	var emptyCache = "";
+	var swapPart = new Array();
+	var swapCode = "";
 	
 	// Comprobamos si esta seleccionada la cuarta particion y no es CACHE
-        if(form.check4.checked) {
-		if (form.part4.value == "CACHE") {
-			// Si existe Cache al crear las particiones reservamos la cuarta libre 
-			 emptyCache = " EMPTY:0";
-		} else {
-                	maxParts = 5;
-		}
-	}
+        if(form.check4.checked && form.part4.value != "CACHE")
+                maxParts = 5;
 
 	for (var nPart=1; nPart<maxParts; nPart++) {
 		var partCheck=eval("form.check"+nPart);
@@ -159,13 +164,24 @@ function codeParticionadoMSDOS (form) {
 			if (partType.value == "CUSTOM" ) {
 				var partTypeCustom=eval("form.part"+nPart+"custom");
 				partCode += " " + partTypeCustom.value;
-				if (partTypeCustom.value == "EXTENDED") {
+				switch(partTypeCustom.value) {
+				    case "EXTENDED":
 					extended=true;
+					break;
+				    case "LINUX-SWAP":
+					swapPart.push(nPart);
+					break;
 				}
+	
 			} else {
 				partCode += " " + partType.value;
-				if (partType.value == "EXTENDED") {
+				switch(partType.value) {
+				    case "EXTENDED":
 					extended=true;
+					break;
+				    case "LINUX-SWAP":
+					swapPart.push(nPart);
+					break;
 				}
 			}
 			var partSize=eval("form.size"+nPart);
@@ -175,12 +191,11 @@ function codeParticionadoMSDOS (form) {
 			} else {
 				partCode += ":" + partSize.value;
 			}
-			// En la partición 4 dejo espacio libre para la Cache
-			if (nPart == 3)  partCode += emptyCache;
 		} else {
 			partCode += " EMPTY:0";
 		}
 	}
+	var cacheCode="";
 
 	// Si se selecciono la particion 4 y es CACHE
 	if(form.part4.value == "CACHE"){
@@ -188,29 +203,34 @@ function codeParticionadoMSDOS (form) {
 			if (form.size4.value == "0") {
 				sizecacheCode="\
 ogEcho session \"[20] $MSG_HELP_ogGetCacheSize\"\n \
-sizecache=`ogGetCacheSize` \n";
-				cacheInit="initCache "+n_disk+" $sizecache  &>/dev/null  | tee -a $OGLOGCOMMAND \n ";
+sizecache=`ogGetCacheSize` \n ";
 				cacheCode="\
 ogEcho session \"[30] $MSG_HELP_ogUpdatePartitionTable "+n_disk+"\"\n \
+ogCreatePartitionTable "+n_disk+" "+tipo_part_table +" \n \
 ogDeletePartitionTable "+n_disk+" \n \
-ogExecAndLog command ogUpdatePartitionTable "+n_disk+" \n \ ";
+ogExecAndLog command ogUpdatePartitionTable "+n_disk+" \n \
+ogEcho session \"[50] $MSG_HELP_ogCreateCache\"\n \
+initCache "+n_disk+" $sizecache NOMOUNT  &>/dev/null \n ";		
 			} else {
 				if (form.size4.value == "CUSTOM") { 
 					cacheSize = form.size4custom.value; 
 				} else {
 					cacheSize = form.size4.value;
 				} 
-				cacheInit="initCache " + n_disk + " " + cacheSize + " &>/dev/null  | tee -a $OGLOGCOMMAND \n ";
 				cacheCode="\
 ogEcho session \"[30] $MSG_HELP_ogUpdatePartitionTable "+n_disk+"\"\n \
+ogCreatePartitionTable "+n_disk+" "+tipo_part_table +" \n \
 ogDeletePartitionTable "+n_disk+" \n \
-ogUpdatePartitionTable "+n_disk+" \n \ ";
+ogUpdatePartitionTable "+n_disk+" \n \
+ogEcho session \"[50] $MSG_HELP_ogCreateCache\"\n \
+initCache " + n_disk + " " + cacheSize + " NOMOUNT &>/dev/null";	
 			} 
 		} else {
 			cacheCode="\
 ogEcho session \"[30] $MSG_HELP_ogUpdatePartitionTable "+n_disk+"\"\n \
+ogCreatePartitionTable "+n_disk+" "+tipo_part_table +" \n \
 ogDeletePartitionTable "+n_disk+" \n \
-ogUpdatePartitionTable "+n_disk+" \n \ ";
+ogUpdatePartitionTable "+n_disk+" \n";
 partCode += " EMPTY:0";
 		}
 	}
@@ -230,8 +250,14 @@ partCode += " EMPTY:0";
 				if (partType.value == "CUSTOM" ) {
 					var partTypeCustom=eval("form.part"+nPart+"custom");
 					logicalCode += " " + partTypeCustom.value;
+					// Partición swap
+					if (partTypeCustom.value == "LINUX-SWAP")
+						swapPart.push(nPart);
 				} else {
 					logicalCode += " " + partType.value;
+					// Partición swap
+					if (partType.value == "LINUX-SWAP")
+						swapPart.push(nPart);
 				}
 				var partSize=eval("form.size"+nPart);
 				if (partSize.value == "CUSTOM" ) {
@@ -247,25 +273,36 @@ partCode += " EMPTY:0";
 		partCode += logicalCode;
 	}
 
+	// Formateo de la partición swap
+	if (swapPart.length > 0) {
+	    for (var i=0; i < swapPart.length; i++) {
+		swapCode += "ogEcho session log \"$MSG_HELP_ogFormat "+n_disk+" "+swapPart[i]+" LINUX-SWAP \" \n   " ;
+		swapCode += "ogExecAndLog command session log ogFormat "+n_disk+" "+swapPart[i]+" LINUX-SWAP \n   ";
+	    }
+
+        }
+
 	form.codigo.value="\
-" + sizecacheCode + " \
-ogCreatePartitionTable "+n_disk+" "+tipo_part_table +" \n \
-ogEcho log session \"[0]  $MSG_HELP_ogCreatePartitions \"\n \
+" + sizecacheCode + " \n \
 ogEcho session \"[10] $MSG_HELP_ogUnmountAll "+n_disk+"\"\n \
-ogUnmountAll "+n_disk+" 2>/dev/null\n  \
+ogUnmountAll "+n_disk+" 2>/dev/null \n \
 ogUnmountCache \n \
-" + cacheCode + " \
+" + cacheCode + " \n \
 ogEcho session \"[60] $MSG_HELP_ogListPartitions "+n_disk+"\"\n \
 ogExecAndLog command session ogListPartitions "+n_disk+" \n \
 ogEcho session \"[70] $MSG_HELP_ogCreatePartitions  " + partCode + "\"\n \
-ogExecAndLog command ogCreatePartitions "+n_disk+" " + partCode + " \n \
-ogEcho session \"[80] $MSG_HELP_ogSetPartitionActive "+n_disk+" 1\"\n \
-ogSetPartitionActive "+n_disk+" 1 \n \
-ogEcho log session \"[100] $MSG_HELP_ogListPartitions  "+n_disk+"\"\n \
-ogUpdatePartitionTable "+n_disk+" \n \
-ms-sys /dev/sda | grep unknow && ms-sys /dev/sda \n \
-" + cacheInit + " \
-ogExecAndLog command session log ogListPartitions "+n_disk+" \n";
+if ogExecAndLog command session ogCreatePartitions "+n_disk+" " + partCode + "; then \n \
+  ogEcho session \"[80] $MSG_HELP_ogSetPartitionActive "+n_disk+" 1\"\n \
+  ogSetPartitionActive "+n_disk+" 1 \n \
+  ogEcho log session \"[100] $MSG_HELP_ogListPartitions  "+n_disk+"\"\n \
+  ogUpdatePartitionTable "+n_disk+" \n \
+  ms-sys /dev/sda | grep unknow && ms-sys /dev/sda \n \
+  ogExecAndLog command session log ogListPartitions "+n_disk+" \n \
+  "+ swapCode +"\
+else \n \
+  ogEcho session log \"[100] ERROR: $MSG_HELP_ogCreatePartitions\" \n \
+  sleep 5 \n \
+fi";
 }
 
 
@@ -278,6 +315,9 @@ function codeParticionadoGPT (form) {
         var extended=false;
         var n_disk = form.n_disk.value;
         var tipo_part_table = form.tipo_part_table.value;
+	var swapPart = new Array();
+	var swapCode = "";
+
 		numParts=document.getElementById("numGPTpartitions").value;
 		
         for (var nPart=1; nPart <= numParts; nPart++) {
@@ -287,15 +327,15 @@ function codeParticionadoGPT (form) {
 			// Solo tratamos la particion 4 como cache, si se selecciono este tipo
 			if(nPart == 4 && form.partGPT4.value == "CACHE") {
 				if (form.sizeGPT4.value == "0") {
-					sizecacheCode="\
+                                        sizecacheCode="\
 ogEcho session \"[20] $MSG_HELP_ogGetCacheSize\"\n \
-sizecache=`ogGetCacheSize` \n";
+sizecache=`ogGetCacheSize` \n ";
 					cacheCode="\
 ogEcho session \"[30] $MSG_HELP_ogUpdatePartitionTable "+n_disk+"\"\n \
 ogDeletePartitionTable "+n_disk+"  \n \
 ogExecAndLog command ogUpdatePartitionTable "+n_disk+" \n \
 ogEcho session \"[50] $MSG_HELP_ogCreateCache\"\n \
-initCache "+ n_disk +" $sizecache &>/dev/null \n ";
+initCache "+ n_disk +" $sizecache NOMOUNT &>/dev/null \n ";
 				} else {
 					if (form.sizeGPT4.value == "CUSTOM") {
 						cacheSize = form.sizeGPT4custom.value;
@@ -307,15 +347,21 @@ ogEcho session \"[30] $MSG_HELP_ogUpdatePartitionTable "+n_disk+"\"\n \
 ogDeletePartitionTable "+n_disk+" \n \
 ogUpdatePartitionTable "+n_disk+" \n \
 ogEcho session \"[50] $MSG_HELP_ogCreateCache\"\n \
-initCache "  + n_disk +" "+ cacheSize + " &>/dev/null";
+initCache "  + n_disk +" "+ cacheSize + " NOMOUNT &>/dev/null";
 				}
 			} else{
 				var partType=eval("form.partGPT"+nPart);
 				if (partType.value == "CUSTOM" ) {
 					var partTypeCustom=eval("form.partGPT"+nPart+"custom");
 					partCode += " " + partTypeCustom.value;
+					// Partición swap
+					if (partTypeCustom.value == "LINUX-SWAP")
+                                                swapPart.push(nPart);
 				} else {
 					partCode += " " + partType.value;
+					// Partición swap
+					if (partType.value == "LINUX-SWAP")
+                                                swapPart.push(nPart);
 				}
 				var partSize=eval("form.sizeGPT"+nPart);
 				if (partSize.value == "CUSTOM" ) {
@@ -337,6 +383,14 @@ partCode += " EMPTY:0";
 			}
                 }
         }
+	// Formateo de la partición swap
+	if (swapPart.length > 0) {
+            for (var i=0; i < swapPart.length; i++) {
+                swapCode += " ogEcho session log \"$MSG_HELP_ogFormat "+n_disk+" "+swapPart[i]+" LINUX-SWAP \" \n" ;
+                swapCode += " ogExecAndLog command session log ogFormat "+n_disk+" "+swapPart[i]+" LINUX-SWAP \n";
+	    }
+	}
+            
 	form.codigo.value="\
 " + sizecacheCode + " \n \
 ogCreatePartitionTable "+n_disk+" "+tipo_part_table +" \n \
@@ -354,7 +408,10 @@ ogSetPartitionActive "+n_disk+" 1 \n \
 ogEcho log session \"[100] $MSG_HELP_ogListPartitions "+n_disk+"\"\n \
 ogUpdatePartitionTable "+n_disk+" \n \
 ms-sys /dev/sda | grep unknow && ms-sys /dev/sda \n \
-ogExecAndLog command session log ogListPartitions "+n_disk+" \n";
+ogExecAndLog command session log ogListPartitions "+n_disk+" \n";  
+
+// Formateo de la swap
+form.codigo.value += swapCode;
 }
 
 
@@ -363,8 +420,19 @@ function showPartitionForm (tipo_table_part) {
 	if(tipo_table_part == "MSDOS"){
 		// De los dos tipos, se oculta el otro
 		document.getElementById("formGPT").style.display="none";
+		document.getElementById("warngpt").style.display="none";
 	} else{
 		document.getElementById("formMSDOS").style.display="none";
+		// Para GPT obliga que primera partición sea EFI
+		document.getElementById("checkGPT1").checked=true;
+		document.getElementById("checkGPT1").disabled=true;
+		document.getElementById("partGPT1").value="CUSTOM";
+		document.getElementById("partGPT1custom").value="EFI";
+		document.getElementById("sizeGPT1").value="CUSTOM";
+		document.getElementById("sizeGPT1").disabled=false;
+		document.getElementById("sizeGPT1custom").value="512000";
+		document.getElementById("sizeGPT1custom").disabled=false;
+		document.getElementById("warngpt").style.display="table-row";
 	}
 }
 
@@ -428,6 +496,30 @@ function getMinDiskSize(disk){
 	}
 	// Restar sectores iniciales del disco al tamaño total (1 MB).
 	return (minSize > 1024 ? minSize - 1024 : minSize)
+}
+
+// Calcula el tamaño de la mayor cache y lo guarda en un campo oculto
+function getMaxCacheSize() {
+	var cacheSizeArray = document.getElementsByName("cachesize");
+	var maxSize = cacheSizeArray[0].value;
+	for(var i= 1; i < cacheSizeArray.length; i++){
+		if(maxSize < cacheSizeArray[i].value)
+			maxSize = cacheSizeArray[i].value;
+	}
+	document.getElementById("maxcachesize").value = maxSize;
+	return
+
+}
+
+
+// Comprueba que la cache quepa en el espacio libre del disco
+function validaCache (freedisk) {
+	var form = document.fdatos;
+	var maxcachesize = parseInt(document.getElementById("maxcachesize").value);
+        if(form.part4.value == "CACHE" && form.check4.checked && form.size4.value == 0 ){
+	    return (freedisk - maxcachesize > 0 ? true : false);
+	}
+	return true;
 }
 
 // Código para calcular el espacio libre del disco.
@@ -615,4 +707,5 @@ function checkExtendedPartition(form) {
 		logical.style.visibility="hidden";
 	}
 }
+
 

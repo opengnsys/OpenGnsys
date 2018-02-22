@@ -44,10 +44,10 @@ $tbParametros=CreaTablaParametros($cmd); // Crea tabla en memmoria para acceder 
 		<SCRIPT language="javascript" src="../jscripts/inclusionacciones.js"></SCRIPT>
 		<SCRIPT language="javascript" src="../clases/jscripts/HttpLib.js"></SCRIPT>	
 		<SCRIPT language="javascript" src="../jscripts/comunes.js"></SCRIPT>			
-		<SCRIPT language="javascript" src="../idiomas/javascripts/<? echo $idioma?>/inclusionacciones_<? echo $idioma?>.js"></SCRIPT>
+		<SCRIPT language="javascript" src="../idiomas/javascripts/<?php echo $idioma?>/inclusionacciones_<?php echo $idioma?>.js"></SCRIPT>
 	</HEAD>
 	<BODY>
-		<?
+		<?php
 			switch($tipoaccion){
 				case $AMBITO_PROCEDIMIENTOS:
 					$urlimg="../images/iconos/procedimiento.gif";
@@ -61,12 +61,12 @@ $tbParametros=CreaTablaParametros($cmd); // Crea tabla en memmoria para acceder 
 					break;					
 			}	
 		?>
-		<P align=center class=cabeceras><IMG src="../images/iconos/acciones.gif">&nbsp;<?echo $literal?><BR>		
-		<SPAN align=center class=subcabeceras><?echo $descripcionaccion?></SPAN>&nbsp;<IMG src="<? echo $urlimg?>"></P>
+		<P align=center class=cabeceras><IMG src="../images/iconos/acciones.gif">&nbsp;<?php echo $literal?><BR>		
+		<SPAN align=center class=subcabeceras><?php echo $descripcionaccion?></SPAN>&nbsp;<IMG src="<?php echo $urlimg?>"></P>
 	
 		<TABLE align=center border=0>
 			<TR>
-		<?
+		<?php
 			$conTR=0; // Contador de lineas (Identificadores de las filas)
 			switch($tipoaccion){
 				case $AMBITO_PROCEDIMIENTOS:
@@ -82,13 +82,13 @@ $tbParametros=CreaTablaParametros($cmd); // Crea tabla en memmoria para acceder 
 			</TR>
 		</TABLE>
 		<FORM name="fdatos">
-			<INPUT type="hidden" name="conTR" value="<?echo $conTR?>">
-			<INPUT type="hidden" name="tipoaccion" value="<?echo $tipoaccion?>">
-			<INPUT type="hidden" name="idtipoaccion" value="<?echo $idtipoaccion?>">
+			<INPUT type="hidden" name="conTR" value="<?php echo $conTR?>">
+			<INPUT type="hidden" name="tipoaccion" value="<?php echo $tipoaccion?>">
+			<INPUT type="hidden" name="idtipoaccion" value="<?php echo $idtipoaccion?>">
 		</FORM>
 	</BODY>
 </HTML>
-<?
+<?php
 // *************************************************************************************************************************************************
 	function listaProcedientos($cmd,$idprocedimiento)
 	{

@@ -1,5 +1,5 @@
 #!/bin/bash
-# Proceso general de arranque de OpenGnSys Client.
+# Proceso general de arranque de OpenGnsys Client.
 
 
 # Fichero de registro de incidencias (en el servidor; si no, en local).
@@ -13,15 +13,8 @@ LOGLEVEL=5
 # Matando plymount para inicir browser o shell
 pkill -9 plymouthd
 
-# Arranque de OpenGnSys Client daemon (web services).
-if [ -x $OPENGNSYS/job_executer/init.d/job_executer ]; then
-    echo "Running Opengnsys client daemon (web services)"
-    $OPENGNSYS/job_executer/init.d/job_executer restart
-fi
-
-# Arranque de OpenGnSys Client daemon (socket).
+# Arranque de OpenGnsys Client daemon (socket).
 echo "${MSG_LAUNCHCLIENT:-.}"
-[ "$ogactiveadmin" == "true" ] && boot="admin"
 # Indicar fichero de teclado de Qt para el idioma especificado (tipo "es.qmap").
 [ -f /usr/local/etc/${LANG%_*}.qmap ] && export QWS_KEYBOARD="TTY:keymap=/usr/local/etc/${LANG%_*}.qmap"
 
@@ -37,7 +30,7 @@ else
 fi
 
 # Si fallo en cliente y modo "admin", cargar shell; si no, salir.
-if [ "$boot" == "admin" ]; then
+if [ "$ogactiveadmin" == "true" ]; then
     bash
 fi
 

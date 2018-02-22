@@ -1,4 +1,4 @@
-<?
+<?php
 /*================================================================================
 Esta clase implementa funciones de utilidad para tratar ficheros XML
 

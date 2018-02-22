@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -34,10 +34,10 @@ if (!$cmd)
 	<SCRIPT language="javascript" src="./jscripts/Reiniciar.js"></SCRIPT>
 	<SCRIPT language="javascript" src="./jscripts/comunescomandos.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../clases/jscripts/HttpLib.js"></SCRIPT>
-	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>
+	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>
 </HEAD>
 <BODY>
-<?
+<?php
 	echo '<p align=center><span class=cabeceras>'.$TbMsg[5].'&nbsp;</span><br>';
 	//________________________________________________________________________________________________________
 	//

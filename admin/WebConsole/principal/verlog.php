@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: 
 // Autor: 
@@ -46,9 +46,9 @@ else
 
 <HTML>
 <HEAD>
-<TITLE>Log: <? echo $_GET["nombreordenador"] ?> </TITLE>
+<TITLE>Log: <?php echo $_GET["nombreordenador"] ?> </TITLE>
 <meta charset="utf-8">
-<?
+<?php
 #echo "<meta http-equiv='Refresh' content='2;URL=./verlog.php?nombreordenador=". $_GET["nombreordenador"] ."&ip=".$ip ."'";
 ?>
 

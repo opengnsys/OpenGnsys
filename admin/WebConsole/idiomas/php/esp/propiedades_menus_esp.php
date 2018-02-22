@@ -1,4 +1,4 @@
-<?
+<?php
 //________________________________________________________________________________________________________
 //
 //	Fichero de idiomas php: propiedades_menus_esp.php 
@@ -21,4 +21,5 @@ $TbMsg[14]="Menú doble";
 $TbMsg[15]="URL menú personalizado";
 $TbMsg[17]="Resolución de pantalla";
 $TbMsg[18]="Imagen de fondo";
+$TbMsg["PROP_DEFAULT"]="Detectada por defecto";
 ?>

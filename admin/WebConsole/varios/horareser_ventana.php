@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -77,7 +77,7 @@ function borrar_fecha(){
 </SCRIPT>
 </HEAD>
 <BODY>
-	<?
+	<?php
 $micalendario=new Calendario("tabla_meses");
 echo '<DIV style="position:absolute;top:5px;left:10px">';
 echo '<img style="cursor:hand" SRC="../images/iconos/salir_on.gif" onclick="cerrar_ventana()">';

@@ -1,0 +1,97 @@
+#!/bin/bash
+# isntallmodule - instalar módulo de kernel en Initrd de cliente ogLive.
+# Uso:	installmodule tarfile
+# Nota: tarfile es un fichero tar.gz con el fichero .ko del módulo y un fichero "module.conf"
+#	para configuración de instalación (debe incluir nombre, fichero y camino del módulo).
+# Autor: Ramón M. Gómez
+# Fecha: 2015-12-03
+
+
+# Variables.
+PROG=$(basename $0)
+OPENGNSYS=/opt/opengnsys
+INITRD=$OPENGNSYS/tftpboot/ogclient/oginitrd.img
+TARFILE=$(realpath $1 2>/dev/null)
+tmpmod=/tmp/module$$
+tmpinit=/tmp/initrd$$
+
+# Comprobar errores. 
+if [ $# -ne 1 ]; then
+	echo "$PROG: Incorrect operand. Format: $PROG moduletarfile" >&2
+	exit 1
+fi
+if [ "$USER" != "root" ]; then
+	echo "$PROG: Need to be root." >&2
+	exit 1
+fi
+
+# Mostrar ayuda.
+if [ "$1" == "help" ]; then
+	cat << EOT
+
+$PROG: installs kernel module into ogLive image (initrd).
+
+Format: $PROG moduletarfile
+
+moduletarfile must be a tar.gz archive with 2 files:
+ - *.ko: compiled module
+ - module.conf: configuration file
+
+Configuration file format:
+	module=ModuleName
+	file=ModuleFile
+	path=ModulePath
+
+ModuleName must be a single word.
+ModuleFile must be a kernel compiled module file (*.ko).
+ModulePath must be the kernel target directory, started by "kernel/".
+
+EOT
+	exit 0
+fi
+
+# Comprobar acceso al fichero de módulos.
+if [ ! -r "$TARFILE" ]; then
+	echo "$PROG: Cannot access module file." >&2
+	exit 1
+fi
+
+pushd /tmp >/dev/null
+
+# Borrar al salir del programa.
+trap "popd 2>/dev/null; rm -fr $tmpmod $tmpinit" 0 1 2 3 6 9 15
+
+# Descompresión de módulos para el ogLive actual.
+mkdir -p $tmpmod
+cd $tmpmod
+tar xvzf $TARFILE >/dev/null || exit
+
+# Fichero de configuración.
+source module.conf || exit
+[ -z "$module" ] && echo "Module not detected." && exit 1
+
+# Descomprimir Initrd.
+mkdir -p $tmpinit
+cd $tmpinit
+gzip -dc $INITRD | cpio -im 2>/dev/null
+
+# Versión del Kernel del Initrd.
+KERNEL=$(ls -d lib/modules/[0-9]* | head -1)
+[ -z "$KERNEL" ] && echo "Kernel not detected." && exit 1
+# Avisar si el Kernel del módulo es distinto del del Initred.
+echo "$(basename $KERNEL) $(modinfo -F vermagic $tmpmod/$file | cut -f1 -d' ')" | awk '$1!=$2 {print "WARNING: installing module for Kernel",$1,"on Kernel",$2}'
+
+# Copiar módulo y reconstruir dependencias.
+echo "Installing module: $module"
+cp -a $tmpmod/$file $KERNEL/$path
+depmod -b . -a $(basename $KERNEL)
+
+# Recomponer el Initrd.
+find . | cpio -H newc -oa | gzip -9c >$INITRD
+md5sum $INITRD | cut -f1 -d" " > $INITRD.sum
+cp -a $INITRD $INITRD.sum $OPENGNSYS/tftpboot
+
+# Limpiar.
+popd >/dev/null
+rm -fr $tmpmod $tmpinit
+

@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -108,12 +108,12 @@ if (isset($_POST["situacion"])){
 	<SCRIPT language="javascript" src="../jscripts/constantes.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/comunes.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/colasreservas.js"></SCRIPT>
-	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/colasreservas_'.$idioma.'.js"></SCRIPT>'?>
-	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comunes_'.$idioma.'.js"></SCRIPT>'?>
+	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/colasreservas_'.$idioma.'.js"></SCRIPT>'?>
+	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comunes_'.$idioma.'.js"></SCRIPT>'?>
 
 </HEAD>
 <BODY>
-<?
+<?php
 switch($ambito){
 		case $AMBITO_CENTROS :
 			$urlimg='../images/iconos/centros.gif';
@@ -294,7 +294,7 @@ include_once("../includes/iframecomun.php");
 ?>
 </BODY>
 </HTML>
-<?
+<?php
 // *************************************************************************************************************************************************
 function CreaReservasTemporal($cmd,$anno_c,$mes_desde,$mes_hasta,$dia_i,$dia_f,$mes_i,$mes_f,$anno_i,$anno_f){
 	global $usuario;

@@ -40,26 +40,37 @@
 				document.fdatosejecucion.atributos.value=atributos;
 				
 				var cc=ochecks[i].getAttribute('idcfg'); // Toma identificador del bloque de configuración
-				var tbOrd=document.getElementById("tbOrd_"+cc);
-				var iptabla=tbOrd.getAttribute('value'); // Toma identificadores de los ordenadores 
+				var tbOrd=document.getElementById("tbOrd_"+cc);			
+				var iptabla=tbOrd.getAttribute('value'); // Toma identificadores de los ordenadores
 				filtrado();
-				var ipfiltro=document.fdatosejecucion.filtro.value; 
+				var ipfiltro=document.fdatosejecucion.filtro.value;
 
-				// Elimino los ordenadores del filtro que no estén en la tabla
-				if (ipfiltro!=''){ 
+				// Elimino los ordenadores del filtro que no estén en la tabla.
+				if (ipfiltro!=''){
 					var arraytabla = iptabla.split(",");
 					var arrayfiltro =ipfiltro.split(";");
-					arrayfiltro = array_interset (arrayfiltro.sort(), arraytabla.sort()); 
-					ipfiltro = arrayfiltro.join(";"); 
-					if (ipfiltro ==''){ 
-						alert(TbMsg["FILTER"]); 
-						return(false); 
+					arrayfiltro = array_interset (arrayfiltro.sort(), arraytabla.sort());
+					ipfiltro = arrayfiltro.join(";");
+					if (ipfiltro ==''){
+					        alert(TbMsg["FILTER"]);
+					        return(false);
 					}
-				} else {
-					ipfiltro=iptabla.replace(/,/g, ";"); 
+					numequipos=arrayfiltro.length;
 				}
-				document.fdatosejecucion.filtro.value=ipfiltro; 
+				else {
+					ipfiltro=iptabla.replace(/,/g, ";");
+					numequipos=iptabla.split(",").length;
+				}
 
+				// Mensaje de aviso si protocolo UNICAST y más de un ordenador
+				if ( ( protoclonacion.value=="UNICAST" || protoclonacion.value=="UNICAST-DIRECT") && numequipos > 1 ) {
+					if (confirm(TbMsg["UNICAST"]) != true) {
+						cancelar();
+						return(false);
+					}
+				}
+
+				document.fdatosejecucion.filtro.value=ipfiltro;
 				document.fdatosejecucion.submit();	
 			}
 		}
@@ -67,7 +78,7 @@
  }
 //________________________________________________________________________________________________________
   function cancelar(){
-	alert(TbMsg[0]);
+	alert(CTbMsg[0]);
 	location.href="../nada.php"
   }
 //________________________________________________________________________________________________________
@@ -104,3 +115,4 @@
 		}
 		return(comprobar_datosejecucion())
 }
+

@@ -40,7 +40,7 @@ EOT
 trap "rm -f $TMP_DHCP $TMP_MYSQL $TMP_MYCNF" 1 2 3 9 15
 # Creo fichero temporal del dhcp
 grep -v "#" $DHCPFILE |egrep -e "host " -e "hardware ethernet" -e fixed-address | sed -e 's/.$//' \
-	| sed -e s/"^.*host[[:space:]]*"//g -e s/\{/\;/g -e s/"^.*hardware ethernet[[:space:]]*"/=/g -e  s/"^.*fixed-address[[:space:]]*"/=/g \
+        | sed -e s/"^.*host[[:space:]]*"//g -e s/\{/\;/g -e s/"^.*hardware ethernet[[:space:]]*"/=/g -e  s/"^.*fixed-address[[:space:]]*"/=/g \
         | sed -e :a -e '$!N;s/\n=/ \;/;ta' -e 'P;D'\
         | sed -e s/\ //g -e s/://g -e s/\;$//g -e s/\;\;/\;/g |sort > $TMP_DHCP
 

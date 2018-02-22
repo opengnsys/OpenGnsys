@@ -15,7 +15,10 @@ include_once("../includes/opciones.php");
 include_once("../includes/CreaComando.php");
 include_once("../includes/HTMLSELECT.php");
 include_once("../includes/TomaDato.php");
+include_once("../includes/comunes.php");
+include_once("../includes/restfunctions.php");
 include_once("../idiomas/php/".$idioma."/propiedades_imagenes_".$idioma.".php");
+include_once("../idiomas/php/".$idioma."/avisos_".$idioma.".php");
 //________________________________________________________________________________________________________
 
 if (isset($_POST["opcion"])) {$opcion=$_POST["opcion"];}else{$opcion=0;} // Recoge parametros
@@ -34,12 +37,19 @@ $codpar=0;
 $idperfilsoft=0;
 $perfilsoft="";
 $comentarios="";
+$inremotepc="";
+$scheduler="";
 $grupoid=0;
 $litamb="";
 $tipoimg=0;
 $idrepositorio=0;
+$repoip="";
+$repokey="";
 $fechacreacion="";
+$revision=0;
 $imagenid=0;
+$validnombreca="";
+$validdescripcion="";
 if (isset($_POST["validnombreca"])) {$opcion=$_POST["validnombreca"];}else{$validnombreca="";} // Recoge parametros
 if (isset($_POST["datospost"])) {$datospost=$_POST["datospost"];}else{$datospost=0;} // Recoge parametros
 if (isset($_GET["opcion"])) $opcion=$_GET["opcion"];  // Recoge parametros
@@ -52,24 +62,29 @@ if (isset($_GET["tipoimg"])) $tipoimg=$_GET["tipoimg"];
 //________________________________________________________________________________________________________
 $cmd=CreaComando($cadenaconexion); // Crea objeto comando
 if (!$cmd)
-	Header('Location: '.$pagerror.'?herror=2'); // Error de conexión con servidor B.D.
-if  ($opcion!=$op_alta){
+	header('Location: '.$pagerror.'?herror=2'); // Error de conexión con servidor B.D.
+if  ($opcion!=$op_alta)
 	$resul=TomaPropiedades($cmd,$idimagen);
-	if (!$resul)
-		Header('Location: '.$pagerror.'?herror=3'); // Error de recuperación de datos.
-}
+else
+	$resul=TomaConfiguracion($cmd);
+if (!$resul)
+	header('Location: '.$pagerror.'?herror=3'); // Error de recuperación de datos.
 
-if ( $opcion == 1 && $datospost == 1)
-	{
+if ($opcion == 1 && $datospost == 1) {
 	if (isset($_POST["opcion"])) $opcion=$_POST["opcion"];// Recoge parametros
+	if (isset($_POST["idrepositorio"])) $idrepositorio=$_POST["idrepositorio"];
 	if (isset($_POST["idimagen"])) $idimagen=$_POST["idimagen"];
-	if (isset($_POST["nombreca"])) 
-		{$nombreca=$_POST["nombreca"];ValidaNombre($cmd,$nombreca);}if ($validnombreca != 1 ) {$validnombreca=0;}
+	if (isset($_POST["nombreca"])) {
+		$nombreca=$_POST["nombreca"];
+		ValidaNombre($cmd,$nombreca,$idrepositorio);
+	}
+	if ($validnombreca != 1) {$validnombreca=0;}
 	if (isset($_POST["ruta"])) $ruta=$_POST["ruta"]; 
-	if (isset($_POST["descripcion"])) $descripcion=$_POST["descripcion"]; 
+	if (isset($_POST["descripcion"])) {$descripcion=$_POST["descripcion"];}
 	if (isset($_POST["grupoid"])) $grupoid=$_POST["grupoid"];
 	if (isset($_POST["idperfilsoft"])) $idperfilsoft=$_POST["idperfilsoft"]; 
 	if (isset($_POST["comentarios"])) $comentarios=$_POST["comentarios"]; 
+	if (isset($_POST["inremotepc"])) $inremotepc=$_POST["inremotepc"]; 
 	if (isset($_POST["identificador"])) $idimagen=$_POST["identificador"];
 	if (isset($_POST["modelo"])) $numpar=$_POST["modelo"]; 
 	if (isset($_POST["numdisk"])) $numpar=$_POST["numdisk"]; 
@@ -80,9 +95,24 @@ if ( $opcion == 1 && $datospost == 1)
 	if (isset($_POST["tipoimg"])) $tipoimg=$_POST["tipoimg"]; 
 	if (isset($_POST["fechacreacion"])) $fechacreacion=$_POST["fechacreacion"]; 
 	if (isset($_POST["litamb"])) $litamb=$_POST["litamb"]; 
-	
-
 	}
+// Solicitar datos del fichero de imagen a la API REST de su repositorio.
+if  ($opcion!=$op_alta and isset($repokey)) {
+	$repo[0]['url'] = "https://$repoip/opengnsys/rest/repository/image/$nombreca";
+	$repo[0]['header'] = array('Authorization: '.$repokey);
+	$result = multiRequest($repo);
+	if ($result[0]['code'] === 200) {
+		$result = json_decode($result[0]['data']);
+		$imgpath = (@$result->type==="dir" ? @$result->name : @$result->name.".".@$result->type);
+		$imgsize = humanSize(@$result->size);
+		$imgbackup = @$result->backedup;
+		$imgbksize = isset($result->backupsize) ? humanSize($result->backupsize) : 0;
+		$imglock = @$result->locked;
+	} else {
+		$imgpath = "";
+	}
+}
+
 //________________________________________________________________________________________________________
 ?>
 <HTML>
@@ -94,21 +124,21 @@ if ( $opcion == 1 && $datospost == 1)
 	<SCRIPT language="javascript" src="../jscripts/constantes.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/propiedades_imagenes.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/opciones.js"></SCRIPT>
-	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/propiedades_imagenes_'.$idioma.'.js"></SCRIPT>'?>
+	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/propiedades_imagenes_'.$idioma.'.js"></SCRIPT>'?>
 </HEAD>
 <BODY>
 <DIV align=center>
-<?php if ( $opcion == 1 && $datospost == 1 && $validnombreca == 0 || $opcion != 1) { ?>
+<?php if ( $opcion == 1 && $datospost == 1 && $validnombreca == 0 && $validdescripcion == 0 || $opcion != 1) { ?>
 <FORM name="fdatos" action="../gestores/gestor_imagenes.php" method="post">
 <?php }else{ ?>
 <FORM name="fdatos" action="./propiedades_imagenes.php" method="post"> 
 <?php } ?>
 
-	<INPUT type="hidden" name="opcion" value="<?=$opcion?>">
-	<INPUT type="hidden" name="idimagen" value="<?=$idimagen?>">
-	<INPUT type="hidden" name="grupoid" value="<?=$grupoid?>">
-	<INPUT type="hidden" name="tipoimg" value="<?=$tipoimg?>">
-	<INPUT type="hidden" name="litamb" value="<?=$litamb?>">
+	<INPUT type="hidden" name="opcion" value="<?php echo $opcion?>">
+	<INPUT type="hidden" name="idimagen" value="<?php echo $idimagen?>">
+	<INPUT type="hidden" name="grupoid" value="<?php echo $grupoid?>">
+	<INPUT type="hidden" name="tipoimg" value="<?php echo $tipoimg?>">
+	<INPUT type="hidden" name="litamb" value="<?php echo $litamb?>">
 	<INPUT type="hidden" name="datospost" value="1">
 	<?php
 		switch($tipoimg){
@@ -124,15 +154,15 @@ if ( $opcion == 1 && $datospost == 1)
 		}
 		
 	?>
-	<P align=center class=cabeceras><?echo $lit?><BR>
-		<SPAN align=center class=subcabeceras><? echo $opciones[$opcion]?></SPAN>
+	<P align=center class=cabeceras><?php echo $lit?><BR>
+		<SPAN align=center class=subcabeceras><?php echo $opciones[$opcion]?></SPAN>
 	</P>
 
 	<TABLE  align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
 	<!-------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[11]?>&nbsp;</TD>
-			<?if ($opcion==$op_eliminacion || !empty($idperfilsoft) || $opcion == 2)
+			<TH align=center>&nbsp;<?php echo $TbMsg[11]?>&nbsp;</TD>
+			<?php	if ($opcion==$op_eliminacion || !empty($idperfilsoft) || $opcion == 2)
 	echo '<TD style="width:150">'.$nombreca.'
 					&nbsp;<INPUT type="hidden" name="nombreca" value="'.$nombreca.'"></TD>';
 				else
@@ -140,18 +170,21 @@ if ( $opcion == 1 && $datospost == 1)
 		</TR>
 	<!-------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[5]?>&nbsp;</TD>
-			<?if ($opcion==$op_eliminacion)
-					echo '<TD style="width:300">'.$descripcion.'</TD>';
-				else
-					echo '<TD><INPUT  class="formulariodatos" name=descripcion style="width:350" type=text value="'.$descripcion.'"></TH>';?>
+			<TH align=center>&nbsp;<?php echo $TbMsg[5]?>&nbsp;</TD>
+			<?php	if ($opcion==$op_eliminacion) {
+					echo '<TD style="width:300">'.$descripcion.'
+					&nbsp;<INPUT type="hidden" name="descripcion" value="'.$descripcion.'"></TD>';
+				} else {
+					echo '<TD><INPUT  class="formulariodatos" name=descripcion style="width:350" type=text value="'.$descripcion.'">';
+					if ($validnombreca == 0 && $validdescripcion == 1){echo '<font color=red><strong>&nbsp;'.$TbMsg[22].'</strong>';}
+					echo '</TD>';
+				} ?>
 		</TR>
 	<!-------------------------------------------------------------------------------------->
-	<?if($tipoimg==$IMAGENES_INCREMENTALES){?>
+	<?php if($tipoimg==$IMAGENES_INCREMENTALES){?>
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[14]?>&nbsp;</TD>
-			<?
-				if ($opcion==$op_eliminacion || !empty($idperfilsoft))
+			<TH align=center>&nbsp;<?php echo $TbMsg[14]?>&nbsp;</TD>
+			<?php	if ($opcion==$op_eliminacion || !empty($idperfilsoft))
 					echo '<TD>'.TomaDato($cmd,$idcentro,'imagenes',$imagenid,'imagenid','descripcion').'
 					&nbsp;<INPUT type="hidden" name="imagenid" value="'.$imagenid.'"></TD>';
 				else
@@ -159,24 +192,12 @@ if ( $opcion == 1 && $datospost == 1)
 					tipo=".$IMAGENES_BASICAS,"imagenid").'</TD>';
 			?>
 		</TR>	
-	<?}?>
+	<?php } ?>
 	<?php if($tipoimg!=$IMAGENES_INCREMENTALES){?>
 	<!-------------------------------------------------------------------------------------->
-		<tr>
-			<th align="center">&nbsp;<?php echo $TbMsg[9]?>&nbsp;</th>
-			<?php
-				if ($opcion==$op_eliminacion || !empty($idperfilsoft))
-					echo '<td>'.$tipopar.' ('.dechex($codpar).')
-					&nbsp;<input type="hidden" name="codpar" value="'.$codpar.'"></td>';
-				else
-					echo '<td>'.HTMLSELECT($cmd,0,'tipospar',$codpar,'codpar',"CONCAT(CASE WHEN codpar BETWEEN 1 AND 255 THEN '1-MSDOS' WHEN codpar BETWEEN 256 AND 65535 THEN '2-GPT' ELSE codpar END,': ',tipopar,' (',HEX(codpar),')')",170,"","","clonable=1").'</td>';
-			?>
-		</tr>
-	<!-------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[10]?>&nbsp;</TD>
-			<?
-				if ($opcion==$op_eliminacion || !empty($idperfilsoft))
+			<TH align=center>&nbsp;<?php echo $TbMsg[10]?>&nbsp;</TD>
+			<?php	if ($opcion==$op_eliminacion || !empty($idperfilsoft))
 					echo '<TD>'.$nombrerepositorio.'
 					&nbsp;<INPUT type="hidden" name="idrepositorio" value="'.$idrepositorio.'"></TD>';
 				else
@@ -184,60 +205,125 @@ if ( $opcion == 1 && $datospost == 1)
 			?>
 		</TR>				
 	<!-------------------------------------------------------------------------------------->
-	<?if($tipoimg==$IMAGENES_BASICAS){?>	
+	<?php if($tipoimg==$IMAGENES_BASICAS){?>	
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[16]?>&nbsp;</TD>
-			<?if ($opcion==$op_eliminacion || !empty($idperfilsoft))
+			<TH align=center>&nbsp;<?php echo $TbMsg[16]?>&nbsp;</TD>
+			<?php	if ($opcion==$op_eliminacion || !empty($idperfilsoft))
 					echo '<TD>'.$ruta.'
 					&nbsp;<INPUT type="hidden" name="ruta" value="'.$ruta.'"></TD>';
 				else
 					echo '<TD><INPUT  class="formulariodatos" name=ruta style="width:350" type=text value="'.$ruta.'"></TH>';?>
 		</TR>	
-	<?}?>				
+	<?php }?>				
 	<!-------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[7]?>&nbsp;</TD>
-			<?if ($opcion==$op_eliminacion)
+			<TH align=center>&nbsp;<?php echo $TbMsg[7]?>&nbsp;</TD>
+			<?php	if ($opcion==$op_eliminacion)
 					echo '<TD>'.$comentarios.'</TD>';
 				else
 					echo '<TD><TEXTAREA   class="formulariodatos" name=comentarios rows=3 cols=55>'.$comentarios.'</TEXTAREA></TH>';
 			?>
 		</TR>
+		<!-- Acceso remoto -->
+		<tr>
+			<th align="center">&nbsp;<?php echo $TbMsg['PROP_REMOTEACCESS']?>&nbsp;</th>
+			<?php	if ($opcion==$op_eliminacion) {
+					echo '<td><input name="inremotepc" type="checkbox" disabled readonly';
+					if ($inremotepc)  echo ' checked ';
+					echo '></td>';
+				} else {
+					echo '<td><input name="inremotepc" type="checkbox" value="1"';
+					if ($inremotepc)  echo ' checked ';
+					if ($scheduler)
+						echo '> <em>('.$TbMsg['COMM_REMOTEACCESS'].')<em></td>';
+					else
+						echo 'disabled> <em>'.$TbMsg['WARN_SCHEDULER'].'<em></td>';
+				}
+			?>
+		</tr>
+
+	    <?php if ($opcion!=$op_alta) { ?>
 		<!-- Equipo modelo (aula) -->
 		<tr>
 			<th align=center>&nbsp;<?php echo $TbMsg[19]?>&nbsp;</th>
 			<td>&nbsp;<?php echo $modelo ?>
 			    &nbsp;<input type="hidden" name="modelo" value="<?php echo $modelo ?>">
 		</tr>
-		<!-- Disco y partición -->
+		<!-- Disco, partición y tipo de partición -->
 		<tr>
 			<th align="center">&nbsp;<?php echo $TbMsg[8]?>&nbsp;</th>
-			<td>&nbsp;<?php if (! empty ($modelo)) echo "$numdisk, $numpar" ?>
-			    &nbsp;<input type="hidden" name="numdisk" value="<?php echo $numdisk ?>">
-			    &nbsp;<input type="hidden" name="numpar" value="<?php echo $numpar ?>"></td>
+			<td>&nbsp;<?php if (! empty($modelo)) echo "$numdisk, $numpar (".dechex($codpar)."-$tipopar)" ?>
+			    <input type="hidden" name="numdisk" value="<?php echo $numdisk ?>">
+			    <input type="hidden" name="numpar" value="<?php echo $numpar ?>"></td>
 		</tr>
 		<!-- Fecha de creación -->
 		<tr>
 			<th align="center">&nbsp;<?php echo $TbMsg[20]?>&nbsp;</th>
-			<td>&nbsp;<?php if (! empty ($modelo)) echo "$fechacreacion" ?>
-			    &nbsp;<input type="hidden" name="fechacreacion" value="<?php echo $fechacreacion ?>"></td>
+			<td>&nbsp;<?php if (! empty ($modelo)) echo "$fechacreacion ".($revision>0 ? "(r$revision)" : "") ?>
+			    <input type="hidden" name="fechacreacion" value="<?php echo $fechacreacion ?>"></td>
 		</tr>
-		<!-------------------------------------------------------------------------------------->
-
+		<!-- Perfil de software -->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[6]?>&nbsp;</TD>
-			<?
-					echo '<TD>'.$perfilsoft.'
-					&nbsp;<INPUT type="hidden" name="idperfilsoft" value="'.$idperfilsoft.'"></TH>';
-
+			<TH align=center>&nbsp;<?php echo $TbMsg[6]?>&nbsp;</TD>
+			<?php
+				if (isset($modelo)) {
+					echo '<TD>&nbsp;'.$perfilsoft.'
+					&nbsp;<INPUT type="hidden" name="idperfilsoft" value="'.$idperfilsoft.'"></TD>';
+				} else {
+					echo '<TD>'.HTMLSELECT($cmd,$idcentro,'perfilessoft',$idperfilsoft,'idperfilsoft','descripcion',300).'</TD>';
+				}
 			?>
 		</TR>			
-	<?}?>	
+		<!-- Sistema Operativo -->
+		<tr>
+			<th align="center">&nbsp;<?php echo $TbMsg['PROP_OS']?>&nbsp;</th>
+			<td>&nbsp;<?php	echo $sistoperativo?> </td>
+		</tr>
+	    <?php
+		// Datos de imagen en el repositorio
+		if (isset($imgpath)) {
+			print <<< EOT
+		<tr>
+			<th colspan="2" align="center">Datos del repositorio</th>
+		</tr>
+		<tr>
+			<th align="center">Camino</th>
+			<td>&nbsp;/$imgpath&nbsp;</td>
+		</tr>
+		<tr>
+			<th align="center">Tamaño</th>
+			<td>&nbsp;$imgsize&nbsp;</td>
+		</tr>
+EOT;
+			if ($imgbackup) {
+				print <<< EOT
+		<tr>
+			<th align="center">Copia de seguridad</th>
+			<td>&nbsp;$imgbksize&nbsp;</td>
+		</tr>
+EOT;
+			}
+			if ($imglock) {
+				print <<< EOT
+		<tr>
+			<th align="center">Bloqueada</th>
+			<td>&nbsp;Atención: la imagen está bloqueda por operación de uso exclusivo&nbsp;</td>
+		</tr>
+EOT;
+			}
+		}
+	    ?>
+	    <?php  } // fin if != op_alta
+	    // Mensaje aviso ruta de origen
+	    if ($opcion==$op_alta && $tipoimg==$IMAGENES_BASICAS) {
+		echo '<tr><th colspan="14">'.$TbMsg["WARN_SOURCE_PATH"].'</th></tr>';
+	    }
+	}?>	
 	<!-------------------------------------------------------------------------------------->
 	</TABLE>
 </FORM>
 
-<?
+<?php
 if (!empty($idperfilsoft)){ // Nota a pie de página indicando que cuando la imagen tiene perfilsoft no pueden modificarse ciertos campos
 	echo '
 		<DIV id="Layer_nota" align=center >
@@ -251,20 +337,20 @@ if ($validnombreca=="0"){
 echo '<script type="text/javascript">';
 echo 'confirmar('.$opcion.')';
 echo '</script>';
-			}
+}
 if ($validnombreca=="1"){
 echo '<script type="text/javascript">';
 echo 'alert('.$TbMsg[17].')';
 echo '</script>';
+}
 
-				}
 include_once("../includes/opcionesbotonesop.php");
 //________________________________________________________________________________________________________
 
 ?>
 </BODY>
 </HTML>
-<?
+<?php
 //________________________________________________________________________________________________________
 
 //	Recupera los datos de una imagen
@@ -278,6 +364,8 @@ function TomaPropiedades($cmd,$idmagen){
 	global $ruta;
 	global $descripcion;
 	global $comentarios;
+	global $inremotepc;
+	global $scheduler;
 	global $idperfilsoft;
 	global $modelo;
 	global $numdisk;
@@ -286,18 +374,27 @@ function TomaPropiedades($cmd,$idmagen){
 	global $tipopar;
 	global $nombrerepositorio;
 	global $idrepositorio;
+	global $repoip;
+	global $repokey;
 	global $perfilsoft;
+	global $sistoperativo;
 	global $imagenid;
 	global $fechacreacion;
+	global $revision;
 	
 	$rs=new Recordset; 
-	$cmd->texto="SELECT imagenes.*, tipospar.tipopar, repositorios.nombrerepositorio, perfilessoft.descripcion AS perfilsoft, CONCAT (ordenadores.nombreordenador,' (',aulas.nombreaula,')') AS modelo
+	$cmd->texto="SELECT imagenes.*, tipospar.tipopar, repositorios.nombrerepositorio, 
+			repositorios.ip, repositorios.apikey,
+			perfilessoft.descripcion AS perfilsoft, nombreso AS sistoperativo,
+			CONCAT (ordenadores.nombreordenador,' (',aulas.nombreaula,')') AS modelo,
+			IF(@@GLOBAL.event_scheduler='ON',1,0) AS scheduler
 			FROM imagenes
 			LEFT OUTER JOIN tipospar ON tipospar.codpar=imagenes.codpar
 			LEFT OUTER JOIN repositorios ON repositorios.idrepositorio=imagenes.idrepositorio
 			LEFT OUTER JOIN perfilessoft ON perfilessoft.idperfilsoft=imagenes.idperfilsoft
 			LEFT OUTER JOIN ordenadores ON ordenadores.idordenador=imagenes.idordenador
 			LEFT OUTER JOIN aulas ON ordenadores.idaula=aulas.idaula
+			LEFT OUTER JOIN nombresos ON perfilessoft.idnombreso=nombresos.idnombreso
 			WHERE imagenes.idimagen=".$idmagen;
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) return(0); // Error al abrir recordset
@@ -308,6 +405,8 @@ function TomaPropiedades($cmd,$idmagen){
 		$descripcion=$rs->campos["descripcion"];		
 		$idperfilsoft=$rs->campos["idperfilsoft"];
 		$comentarios=$rs->campos["comentarios"];
+		$inremotepc=$rs->campos["inremotepc"];
+		$scheduler=$rs->campos["scheduler"];
 		$modelo=$rs->campos["modelo"];
 		$numdisk=$rs->campos["numdisk"];
 		$numpar=$rs->campos["numpar"];
@@ -315,14 +414,37 @@ function TomaPropiedades($cmd,$idmagen){
 		$codpar=$rs->campos["codpar"];
 		$idrepositorio=$rs->campos["idrepositorio"];
 		$nombrerepositorio=$rs->campos["nombrerepositorio"];
+		$repoip=$rs->campos["ip"];
+		$repokey=$rs->campos["apikey"];
 		$perfilsoft=$rs->campos["perfilsoft"];
+		$sistoperativo=$rs->campos["sistoperativo"];
 		$imagenid=$rs->campos["imagenid"];
 		$fechacreacion=$rs->campos["fechacreacion"];
+		$revision=$rs->campos["revision"];
 		$rs->Cerrar();
 		return(true);
 	}
-	else
+	return(false);
+}
+
+//________________________________________________________________________________________________________
+//	Recupera los algunos datos de configuración de la base de datos
+//		Parametros: 
+//		- cmd: comando ya operativo (con conexión abierta)  
+//________________________________________________________________________________________________________
+function TomaConfiguracion($cmd) {
+	global $scheduler;
+
+	$rs=new Recordset; 
+	$cmd->texto="SELECT IF(@@GLOBAL.event_scheduler='ON',1,0) AS scheduler";
+	$rs->Comando=&$cmd; 
+	if (!$rs->Abrir()) return(0); // Error al abrir recordset
+	if (!$rs->EOF){
+		$scheduler=$rs->campos["scheduler"];
+		$rs->Cerrar();
 		return(true);
+	}
+	return(false);
 }
 
 //________________________________________________________________________________________________________
@@ -330,12 +452,43 @@ function TomaPropiedades($cmd,$idmagen){
 //	Comprueba Nombre de la imagen
 //		Parametros: 
 //		- cmd: Una comando ya operativo (con conexión abierta)  
-//		- id: El identificador de la imagen
+//		- nombreca: Nombre de la imagen
+//		- descripcion: Descripcion de la imagen
 //________________________________________________________________________________________________________
 
-function ValidaNombre($cmd,$nombreca){
+function ValidaNombre($cmd,$nombreca,$idrepositorio){
 	global $nombreca;
 	global $validnombreca;
+	global $idrepositorio;
+
+	$rs=new Recordset;
+	$cmd->texto="SELECT * from imagenes WHERE nombreca='$nombreca'";
+	$rs->Comando=&$cmd;
+	if (!$rs->Abrir()) return(0); // Error al abrir recordset
+	$rs->Primero();
+	if (!$rs->EOF){
+		$nombrecabase=$rs->campos["nombreca"];
+		$idrepositoriobase=$rs->campos["idrepositorio"];
+		if ( $nombrecabase == $nombreca &&  $idrepositoriobase == $idrepositorio)
+		{$validnombreca="1";}else{$validnombreca="0";}
+	}
+	$rs->Cerrar();
+}
+
+//________________________________________________________________________________________________________
+
+//	Comprueba Descripcion del nombre canónico
+//		Parametros: 
+//		- cmd: Una comando ya operativo (con conexión abierta)  
+//		- nombreca: Nombre de la imagen
+//		- descripcion: Descripcion de la imagen
+//________________________________________________________________________________________________________
+
+function ValidaDescripcion($cmd,$nombreca,$descripcion){
+	global $nombreca;
+	global $validnombreca;
+	global $descripcion;
+	global $validdescripcion;
 
 	$rs=new Recordset; 
 	$cmd->texto="SELECT * from imagenes WHERE nombreca='$nombreca'";
@@ -344,11 +497,10 @@ function ValidaNombre($cmd,$nombreca){
 	$rs->Primero(); 
 	if (!$rs->EOF){
 		$nombrecabase=$rs->campos["nombreca"];
-		if ( $nombrecabase == $nombreca )
-		{$validnombreca="1";}else{$validnombreca="0";}
-			}
-		$rs->Cerrar();
-
-
+		$descripcionbase=$rs->campos["descripcion"];
+		if ( $nombrecabase == $nombreca && "$descripcionbase" == "$descripcion" )
+		{$validdescripcion="1";}else{$validdescripcion="0";}
+	}
+	$rs->Cerrar();
 }
 ?>

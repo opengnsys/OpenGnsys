@@ -2,7 +2,7 @@
 #/**
 #         restoreBaseImage
 #@brief Script de ejemplo para restaurar una imagen 
-#@brief (puede usarse como base para el programa de restauración de imágenes usado por OpenGNSys Admin).
+#@brief   Se usa como base para el programa de restauración de imágenes de OpenGnsys Admin).
 #@param 1 REPO|CACHE
 #@param 2 imagen
 #@param 3 disco 

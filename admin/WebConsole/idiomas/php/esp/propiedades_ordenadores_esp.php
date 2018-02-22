@@ -4,7 +4,7 @@
 //	Fichero de idiomas php: propiedades_ordenadores_esp.php 
 //	Idioma: Español 
 //______________________________________________________________
-$TbMsg=array();
+if (empty ($TbMsg)) $TbMsg=array();
 $TbMsg[0]="Sin Opci&oacute;n";
 $TbMsg[1]="Insertar";
 $TbMsg[2]="Modificar";
@@ -25,10 +25,16 @@ $TbMsg[15]="Validación";
 $TbMsg[16]="Pagina login";
 $TbMsg[17]="Pagina validación";
 // UHU
+// AGP
+$TbMsg[18]="ogLive";
 $TbMsg[509]="Foto ordenador";
 $TbMsg[5091]="Insertar foto";
 $TbMsg[5092]="Ver fotos";
 $TbMsg[495]="Fecha/Cach&eacute;";
 $TbMsg[4951]="Cach&eacute; libre";
+//AGP
+$TbMsg["PROP_SERIALNO"]="N&ordm; de serie";
+$TbMsg["WARN_NOTDETECTED"]="<em>(no detectado)</em>";
+$TbMsg['COMM_DEFOGLIVE']="Asignado por el administrador";
 ?>
 

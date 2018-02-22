@@ -1,7 +1,7 @@
 #!/bin/bash
 #/**
 #@file    opengnsys_update.sh
-#@brief   Script actualización de OpenGnSys
+#@brief   Script actualización de OpenGnsys
 #@version 0.9 - basado en opengnsys_installer.sh
 #@author  Ramón Gómez - ETSII Univ. Sevilla
 #@date    2010/01/27
@@ -26,12 +26,16 @@
 #@version 1.0.6 - Redefinir URLs de ficheros de configuración usando HTTPS.
 #@author  Ramón Gómez - ETSII Univ. Sevilla
 #@date    2015/03/12
+#@version 1.1.0 - Instalación de API REST y configuración de zona horaria.
+#@author  Ramón Gómez - ETSII Univ. Sevilla
+#@date    2015/11/09
 #*/
 
 
 ####  AVISO: NO EDITAR variables de configuración.
 ####  WARNING: DO NOT EDIT configuration variables.
 INSTALL_TARGET=/opt/opengnsys		# Directorio de instalación
+PATH=$PATH:$INSTALL_TARGET/bin
 OPENGNSYS_CLIENTUSER="opengnsys"	# Usuario Samba
 
 
@@ -40,9 +44,9 @@ if [ "$(whoami)" != 'root' ]; then
         echo "ERROR: this program must run under root privileges!!"
         exit 1
 fi
-# Error si OpenGnSys no está instalado (no existe el directorio del proyecto)
+# Error si OpenGnsys no está instalado (no existe el directorio del proyecto)
 if [ ! -d $INSTALL_TARGET ]; then
-        echo "ERROR: OpenGnSys is not installed, cannot update!!"
+        echo "ERROR: OpenGnsys is not installed, cannot update!!"
         exit 1
 fi
 # Cargar configuración de acceso a la base de datos.
@@ -57,18 +61,19 @@ OPENGNSYS_DBPASSWORD=${OPENGNSYS_DBPASSWORD:-"$PASSWORD"}	# Clave del usuario
 if [ -z "$OPENGNSYS_DATABASE" -o -z "$OPENGNSYS_DBUSER" -o -z "$OPENGNSYS_DBPASSWORD" ]; then
 	echo "ERROR: set OPENGNSYS_DATABASE, OPENGNSYS_DBUSER and OPENGNSYS_DBPASSWORD"
 	echo "       variables, and run this script again."
+	exit 1
 fi
 
 # Comprobar si se ha descargado el paquete comprimido (USESVN=0) o sólo el instalador (USESVN=1).
 PROGRAMDIR=$(readlink -e $(dirname "$0"))
 PROGRAMNAME=$(basename "$0")
-OPENGNSYS_SERVER="www.opengnsys.es"
+OPENGNSYS_SERVER="opengnsys.es"
 if [ -d "$PROGRAMDIR/../installer" ]; then
 	USESVN=0
 else
 	USESVN=1
 fi
-SVN_URL="http://$OPENGNSYS_SERVER/svn/trunk/"
+SVN_URL="https://$OPENGNSYS_SERVER/svn/tags/opengnsys-1.1.0/"
 
 WORKDIR=/tmp/opengnsys_update
 mkdir -p $WORKDIR
@@ -109,8 +114,8 @@ OSVERSION="${OSVERSION%%.*}"
 # Configuración según la distribución de Linux.
 case "$OSDISTRIB" in
         ubuntu|debian|linuxmint)
-		DEPENDENCIES=( php5-ldap xinetd rsync btrfs-tools procps arp-scan )
-		UPDATEPKGLIST="apt-get update"
+		DEPENDENCIES=( curl rsync btrfs-tools procps arp-scan realpath php5-curl gettext moreutils jq wakeonlan )
+		UPDATEPKGLIST="add-apt-repository -y ppa:ondrej/php; apt-get update"
 		INSTALLPKGS="apt-get -y install --force-yes"
 		CHECKPKG="dpkg -s \$package 2>/dev/null | grep -q \"Status: install ok\""
 		if which service &>/dev/null; then
@@ -126,7 +131,7 @@ case "$OSDISTRIB" in
 		INETDCFGDIR=/etc/xinetd.d
 		;;
         fedora|centos)
-		DEPENDENCIES=( php-ldap xinetd rsync btrfs-progs procps-ng arp-scan )
+		DEPENDENCIES=( curl rsync btrfs-progs procps-ng arp-scan gettext moreutils jq wakeonlan )
 		# En CentOS 7 instalar arp-scan de CentOS 6.
 		[ "$OSDISTRIB$OSVERSION" == "centos7" ] && DEPENDENCIES=( ${DEPENDENCIES[*]/arp-scan/http://dag.wieers.com/redhat/el6/en/$(arch)/dag/RPMS/arp-scan-1.9-1.el6.rf.$(arch).rpm} )
 		INSTALLPKGS="yum install -y"
@@ -148,7 +153,7 @@ case "$OSDISTRIB" in
 		;;
 esac
 for i in apache2 httpd; do
-	[ -f /etc/$i ] && APACHECFGDIR="/etc/$i"
+	[ -d /etc/$i ] && APACHECFGDIR="/etc/$i"
 	[ -f /etc/init.d/$i ] && APACHESERV="/etc/init.d/$i"
 done
 for i in dhcpd dhcpd3-server isc-dhcp-server; do
@@ -279,6 +284,8 @@ function importSqlFile()
         local tmpfile=$(mktemp)
         local mycnf=/tmp/.my.cnf.$$
         local status
+	local APIKEY=$(php -r 'echo md5(uniqid(rand(), true));')
+	REPOKEY=$(php -r 'echo md5(uniqid(rand(), true));')
 
         if [ ! -r $sqlfile ]; then
                 errorAndLog "${FUNCNAME}(): Unable to read $sqlfile!!"
@@ -288,7 +295,8 @@ function importSqlFile()
         echoAndLog "${FUNCNAME}(): importing SQL file to ${database}..."
         chmod 600 $tmpfile
         sed -e "s/SERVERIP/$SERVERIP/g" -e "s/DBUSER/$OPENGNSYS_DB_USER/g" \
-            -e "s/DBPASSWORD/$OPENGNSYS_DB_PASSWD/g" $sqlfile > $tmpfile
+            -e "s/DBPASSWORD/$OPENGNSYS_DB_PASSWD/g" \
+            -e "s/APIKEY/$APIKEY/g" -e "s/REPOKEY/$REPOKEY/g" $sqlfile > $tmpfile
 	# Componer fichero con credenciales de conexión.  
 	touch $mycnf
 	chmod 600 $mycnf
@@ -309,6 +317,34 @@ EOT
         return 0
 }
 
+# Comprobar configuración de MySQL y recomendar cambios necesarios.
+function checkMysqlConfig()
+{
+	if [ $# -ne 2 ]; then
+		errorAndLog "${FNCNAME}(): invalid number of parameters"
+		exit 1
+	fi
+
+	local dbuser="$1"
+	local dbpassword="$2"
+	local mycnf=/tmp/.my.cnf.$$
+
+	echoAndLog "${FUNCNAME}(): checking MySQL configuration"
+	touch $mycnf
+	cat << EOT > $mycnf
+[client]
+user=$dbuser
+password=$dbpassword
+EOT
+	# Check if scheduler is active.
+	if [ "$(mysql --defaults-extra-file=$mycnf -Nse 'SELECT @@GLOBAL.event_scheduler;')" = "OFF" ]; then
+		MYSQLCONFIG="SET GLOBAL event_scheduler = ON; "
+	fi
+	rm -f $mycnf
+
+        echoAndLog "${FUNCNAME}(): MySQL configuration has checked"
+        return 0
+}
 
 #####################################################################
 ####### Funciones de instalación de paquetes
@@ -320,18 +356,19 @@ function installDependencies()
 	local package
 
 	if [ $# = 0 ]; then
-		echoAndLog "${FUNCNAME}(): no deps needed."
+		echoAndLog "${FUNCNAME}(): no dependencies are needed"
 	else
+		PHP5VERSION=$(apt-cache pkgnames php5 2>/dev/null | sort | head -1)
 		while [ $# -gt 0 ]; do
-			package="$1"
-			eval $CHECKPKG || INSTALLDEPS="$INSTALLDEPS $1"
+			package="${1/php5/$PHP5VERSION}"
+			eval $CHECKPKG || INSTALLDEPS="$INSTALLDEPS $package"
 			shift
 		done
 		if [ -n "$INSTALLDEPS" ]; then
 			$UPDATEPKGLIST
 			$INSTALLPKGS $INSTALLDEPS
 			if [ $? -ne 0 ]; then
-				errorAndLog "${FUNCNAME}(): cannot install some dependencies: $INSTALLDEPS."
+				errorAndLog "${FUNCNAME}(): cannot install some dependencies: $INSTALLDEPS"
 				return 1
 			fi
 		fi
@@ -371,8 +408,29 @@ function svnExportCode()
 # Comprobar si existe conexión.
 function checkNetworkConnection()
 {
-	OPENGNSYS_SERVER=${OPENGNSYS_SERVER:-"www.opengnsys.es"}
+	OPENGNSYS_SERVER=${OPENGNSYS_SERVER:-"opengnsys.es"}
 	wget --spider -q $OPENGNSYS_SERVER
+}
+
+# Comprobar si la versión es anterior a la actual.
+function checkVersion()
+{
+	local PRE
+
+	# Obtener versión actual y versión a actualizar.
+	OLDVERSION=$(awk '{print $2}' $INSTALL_TARGET/doc/VERSION.txt 2>/dev/null)
+	if [ $USESVN -eq 1 ]; then
+		NEWVERSION=$(curl -s $SVN_URL/doc/VERSION.txt 2>/dev/null | awk '{print $2}')
+	else
+		NEWVERSION=$(awk '{print $2}' $PROGRAMDIR/doc/VERSION.txt 2>/dev/null)
+	fi
+	[[ "$NEWVERSION" =~ pre ]] && PRE=1
+
+	# Comparar versiones.
+	[[ "$NEWVERSION" < "${OLDVERSION/pre/}" ]] && return 1
+	[ "${NEWVERSION/pre/}" == "$OLDVERSION" -a "$PRE" == "1" ] && return 1
+
+	return 0
 }
 
 # Obtener los parámetros de red del servidor.
@@ -384,7 +442,7 @@ function getNetworkSettings()
 	local DEVICES
 	local dev
 
-	echoAndLog "${FUNCNAME}(): Detecting network parameters."
+	echoAndLog "${FUNCNAME}(): Detecting network parameters"
 	SERVERIP="$ServidorAdm"
 	DEVICES="$(ip -o link show up | awk '!/loopback/ {sub(/:.*/,"",$2); print $2}')"
 	for dev in $DEVICES; do
@@ -397,14 +455,14 @@ function getNetworkSettings()
 ####### Funciones específicas de la instalación de Opengnsys
 #####################################################################
 
-# Actualizar cliente OpenGnSys.
+# Actualizar cliente OpenGnsys.
 function updateClientFiles()
 {
 	local ENGINECFG=$INSTALL_TARGET/client/etc/engine.cfg
 
 	# Actualizar ficheros del cliente.
 	backupFile $ENGINECFG
-	echoAndLog "${FUNCNAME}(): Updating OpenGnSys Client files."
+	echoAndLog "${FUNCNAME}(): Updating OpenGnsys Client files"
 	rsync --exclude .svn -irplt $WORKDIR/opengnsys/client/shared/* $INSTALL_TARGET/client
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while updating client structure"
@@ -413,34 +471,62 @@ function updateClientFiles()
 	find $INSTALL_TARGET/client -name .svn -type d -exec rm -fr {} \; 2>/dev/null
 
 	# Actualizar librerías del motor de clonación.
-	echoAndLog "${FUNCNAME}(): Updating OpenGnSys Cloning Engine files."
+	echoAndLog "${FUNCNAME}(): Updating OpenGnsys Cloning Engine files"
 	rsync --exclude .svn -irplt $WORKDIR/opengnsys/client/engine/*.lib* $INSTALL_TARGET/client/lib/engine/bin
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while updating engine files"
 		exit 1
+	fi
+	# Actualizar fichero de configuración del motor de clonación.
+	if ! grep -q "^TZ" $ENGINECFG; then
+		TZ=$(timedatectl status | awk -F"[:()]" '/Time.*zone/ {print $2}')
+		cat << EOT >> $ENGINECFG
+# OpenGnsys Server timezone.
+TZ="${TZ// /}"
+EOT
 	fi
 	if ! diff -q ${ENGINECFG}{,-LAST} &>/dev/null; then
 		NEWFILES="$NEWFILES $ENGINECFG"
 	else
 		rm -f ${ENGINECFG}-LAST
 	fi
+	# Obtener URL para descargas adicionales.
+	DOWNLOADURL=$(oglivecli config download-url 2>/dev/null)
+	DOWNLOADURL=${DOWNLOADURL:-"https://$OPENGNSYS_SERVER/trac/downloads"}
 
-	echoAndLog "${FUNCNAME}(): client files update success."
+	echoAndLog "${FUNCNAME}(): client files successfully updated"
 }
 
 # Configurar HTTPS y exportar usuario y grupo del servicio Apache.
 function apacheConfiguration ()
 {
-	# Activar HTTPS (solo actualizando desde versiones anteriores a 1.0.2).
+	local config template
+
+	# Activar HTTPS (solo actualizando desde versiones anteriores a 1.0.2) y
+	#    activar módulo Rewrite (solo actualizaciones desde 1.0.x a 1.1.x).
 	if [ -e $APACHECFGDIR/sites-available/opengnsys.conf ]; then
-		echoAndLog "${FUNCNAME}(): Configuring HTTPS access..."
-		mv $APACHECFGDIR/sites-available/opengnsys.conf $APACHECFGDIR/sites-available/opengnsys
+		echoAndLog "${FUNCNAME}(): Configuring Apache modules"
 		a2ensite default-ssl
 		a2enmod ssl
-		a2dissite opengnsys.conf
+		a2enmod rewrite
 		a2ensite opengnsys
-		$APACHESERV restart
+	elif [ -e $APACHECFGDIR/conf.modules.d ]; then
+		echoAndLog "${FUNCNAME}(): Configuring Apache modules"
+		sed -i '/rewrite/s/^#//' $APACHECFGDIR/*.conf
 	fi
+	# Actualizar configuración de Apache a partir de fichero de plantilla.
+	for config in $APACHECFGDIR/{,sites-available/}opengnsys.conf; do
+		# Elegir plantilla según versión de Apache.
+		if [ -n "$(apachectl -v | grep "2\.[0-2]")" ]; then
+		       template=$WORKDIR/opengnsys/server/etc/apache-prev2.4.conf.tmpl > $config
+		else
+		       template=$WORKDIR/opengnsys/server/etc/apache.conf.tmpl
+		fi
+		sed -e "s,CONSOLEDIR,$INSTALL_TARGET/www,g" $template > $config
+	done
+
+	# Reiniciar Apache.
+	$APACHESERV restart
 
 	# Variables de ejecución de Apache.
 	# - APACHE_RUN_USER
@@ -459,7 +545,7 @@ function rsyncConfigure()
 
 	# Configurar acceso a Rsync.
 	if [ ! -f /etc/rsyncd.conf ]; then
-		echoAndLog "${FUNCNAME}(): Configuring Rsync service."
+		echoAndLog "${FUNCNAME}(): Configuring Rsync service"
 		NEWFILES="$NEWFILES /etc/rsyncd.conf"
 		sed -e "s/CLIENTUSER/$OPENGNSYS_CLIENTUSER/g" \
 		    $WORKDIR/opengnsys/repoman/etc/rsyncd.conf.tmpl > /etc/rsyncd.conf
@@ -491,7 +577,7 @@ EOT
 	fi
 }
 
-# Copiar ficheros del OpenGnSys Web Console.
+# Copiar ficheros del OpenGnsys Web Console.
 function updateWebFiles()
 {
 	local ERRCODE COMPATDIR f
@@ -505,6 +591,8 @@ function updateWebFiles()
 	ERRCODE=$?
 	mv $INSTALL_TARGET/WebConsole $INSTALL_TARGET/www
 	unzip -o $WORKDIR/opengnsys/admin/xajax_0.5_standard.zip -d $INSTALL_TARGET/www/xajax
+	unzip -o $WORKDIR/opengnsys/admin/slim-2.6.1.zip -d $INSTALL_TARGET/www/rest
+	unzip -o $WORKDIR/opengnsys/admin/swagger-ui-2.2.5.zip -d $INSTALL_TARGET/www/rest
 	if [ $ERRCODE != 0 ]; then
 		errorAndLog "${FUNCNAME}(): Error updating web files."
 		exit 1
@@ -525,11 +613,38 @@ function updateWebFiles()
 	done
 	cp -a $COMPATDIR/imagenes.device.php $COMPATDIR/imagenes.device4.php
 
-	# Cambiar permisos para ficheros especiales.
-	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/images/{fotos,iconos}
-	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/tmp/
+	# Fichero de log de la API REST.
+	touch $INSTALL_TARGET/log/{ogagent,rest,remotepc}.log
+	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/log/{ogagent,rest,remotepc}.log
 
-	echoAndLog "${FUNCNAME}(): Web files updated successfully."
+	echoAndLog "${FUNCNAME}(): Web files successfully updated"
+}
+
+# Copiar ficheros en la zona de descargas de OpenGnsys Web Console.
+function updateDownloadableFiles()
+{
+	local FILENAME=ogagentpkgs-$NEWVERSION.tar.gz
+	local TARGETFILE=$WORKDIR/$FILENAME
+
+	# Descargar archivo comprimido, si es necesario.
+	if [ -s $PROGRAMDIR/$FILENAME ]; then
+		echoAndLog "${FUNCNAME}(): Moving $PROGRAMDIR/$FILENAME file to $(dirname $TARGETFILE)"
+		mv $PROGRAMDIR/$FILENAME $TARGETFILE
+	else
+		echoAndLog "${FUNCNAME}(): Downloading $FILENAME"
+		wget $DOWNLOADURL/$FILENAME -O $TARGETFILE
+	fi
+	if [ ! -s $TARGETFILE ]; then
+		errorAndLog "${FUNCNAME}(): Cannot download $FILENAME"
+		return 1
+	fi
+
+	# Descomprimir fichero en zona de descargas.
+	tar xvzf $TARGETFILE -C $INSTALL_TARGET/www/descargas
+	if [ $? != 0 ]; then
+		errorAndLog "${FUNCNAME}(): Error uncompressing archive $FILENAME"
+		exit 1
+	fi
 }
 
 # Copiar carpeta de Interface 
@@ -547,10 +662,7 @@ function updateInterfaceAdm()
 		echoAndLog "${FUNCNAME}(): error while updating admin interface" 
 		exit 1
 	fi 
-	chmod -R +x $INSTALL_TARGET/client/interfaceAdm 
-	chown $OPENGNSYS_CLIENTUSER:$OPENGNSYS_CLIENTUSER $INSTALL_TARGET/client/interfaceAdm/CambiarAcceso
-	chmod 700 $INSTALL_TARGET/client/interfaceAdm/CambiarAcceso
-	echoAndLog "${FUNCNAME}(): Admin interface updated successfully."
+	echoAndLog "${FUNCNAME}(): Admin interface successfully updated"
 } 
 
 # Crear documentación Doxygen para la consola web.
@@ -560,14 +672,13 @@ function makeDoxygenFiles()
 	$WORKDIR/opengnsys/installer/ogGenerateDoc.sh \
 			$WORKDIR/opengnsys/client/engine $INSTALL_TARGET/www
 	if [ ! -d "$INSTALL_TARGET/www/html" ]; then
-		errorAndLog "${FUNCNAME}(): unable to create Doxygen web files."
+		errorAndLog "${FUNCNAME}(): unable to create Doxygen web files"
 		return 1
 	fi
 	rm -fr "$INSTALL_TARGET/www/api"
 	mv "$INSTALL_TARGET/www/html" "$INSTALL_TARGET/www/api"
 	rm -fr $INSTALL_TARGET/www/{man,perlmod,rtf}
-	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/api
-	echoAndLog "${FUNCNAME}(): Doxygen web files created successfully."
+	echoAndLog "${FUNCNAME}(): Doxygen web files created successfully"
 }
 
 
@@ -579,7 +690,7 @@ function createDirs()
 	local dir
 
 	mkdir -p ${INSTALL_TARGET}/{bin,doc,etc,lib,sbin,www}
-	mkdir -p ${INSTALL_TARGET}/{client,images}
+	mkdir -p ${INSTALL_TARGET}/{client,images/groups}
 	mkdir -p ${INSTALL_TARGET}/log/clients
 	ln -fs ${INSTALL_TARGET}/log /var/log/opengnsys
 	# Detectar directorio de instalación de TFTP.
@@ -588,33 +699,23 @@ function createDirs()
 			[ -d $dir ] && ln -fs $dir ${INSTALL_TARGET}/tftpboot
 		done
 	fi
-	mkdir -p ${INSTALL_TARGET}/tftpboot/menu.lst
+	mkdir -p $INSTALL_TARGET/tftpboot/menu.lst/examples
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while creating dirs. Do you have write permissions?"
 		return 1
 	fi
+	! [ -f $INSTALL_TARGET/tftpboot/menu.lst/templates/00unknown ] && mv $INSTALL_TARGET/tftpboot/menu.lst/templates/* $INSTALL_TARGET/tftpboot/menu.lst/examples
 
 	# Crear usuario ficticio.
 	if id -u $OPENGNSYS_CLIENTUSER &>/dev/null; then
 		echoAndLog "${FUNCNAME}(): user \"$OPENGNSYS_CLIENTUSER\" is already created"
 	else
-		echoAndLog "${FUNCNAME}(): creating OpenGnSys user"
+		echoAndLog "${FUNCNAME}(): creating OpenGnsys user"
 		useradd $OPENGNSYS_CLIENTUSER 2>/dev/null
 		if [ $? -ne 0 ]; then
-			errorAndLog "${FUNCNAME}(): error creating OpenGnSys user"
+			errorAndLog "${FUNCNAME}(): error creating OpenGnsys user"
 			return 1
 		fi
-	fi
-
-	# Establecer los permisos básicos.
-	echoAndLog "${FUNCNAME}(): setting directory permissions"
-	chmod -R 775 $INSTALL_TARGET/{log/clients,images,tftpboot/menu.lst}
-	mkdir -p $INSTALL_TARGET/tftpboot/menu.lst/examples
-	! [ -f $INSTALL_TARGET/tftpboot/menu.lst/templates/00unknown ] && mv $INSTALL_TARGET/tftpboot/menu.lst/templates/* $INSTALL_TARGET/tftpboot/menu.lst/examples
-	chown -R :$OPENGNSYS_CLIENTUSER $INSTALL_TARGET/{log/clients,images,tftpboot/menu.lst}
-	if [ $? -ne 0 ]; then
-		errorAndLog "${FUNCNAME}(): error while setting permissions"
-		return 1
 	fi
 
 	# Mover el fichero de registro al directorio de logs. 
@@ -626,23 +727,79 @@ function createDirs()
 	return 0
 }
 
+# Actualización incremental de la BD (versión actaul a actaul+1, hasta final-1 a final).
+function updateDatabase()
+{
+	local DBDIR="$WORKDIR/opengnsys/admin/Database"
+	local file FILES=""
+
+	echoAndLog "${FUNCNAME}(): looking for database updates"
+	pushd $DBDIR >/dev/null
+	# Bucle de actualización incremental desde versión actual a la final.
+	for file in $OPENGNSYS_DATABASE-*-*.sql; do
+		case "$file" in
+			$OPENGNSYS_DATABASE-$OLDVERSION-$NEWVERSION.sql)
+				# Actualización única de versión inicial y final.
+				FILES="$FILES $file"
+				break
+				;;
+			$OPENGNSYS_DATABASE-*-postinst.sql)
+				# Ignorar fichero específico de post-instalación.
+				;;
+			$OPENGNSYS_DATABASE-$OLDVERSION-*.sql)
+				# Actualización de versión n a n+1.
+				FILES="$FILES $file"
+				OLDVERSION="$(echo $file | cut -f3 -d-)"
+				;;
+			$OPENGNSYS_DATABASE-*-$NEWVERSION.sql)
+				# Última actualización de versión final-1 a final.
+				if [ -n "$FILES" ]; then
+					FILES="$FILES $file"
+					break
+				fi
+				;;
+		esac
+	done
+	# Aplicar posible actualización propia para la versión final.
+	file=$OPENGNSYS_DATABASE-$NEWVERSION.sql
+	if [ -n "$FILES" -o "$OLDVERSION" = "$NEWVERSION" -a -r $file ]; then
+		FILES="$FILES $file"
+	fi
+
+	popd >/dev/null
+	if [ -n "$FILES" ]; then
+		for file in $FILES; do
+			importSqlFile $OPENGNSYS_DBUSER $OPENGNSYS_DBPASSWORD $OPENGNSYS_DATABASE $DBDIR/$file
+		done
+		echoAndLog "${FUNCNAME}(): database is update"
+	else
+		echoAndLog "${FUNCNAME}(): database unchanged"
+	fi
+}
+
 # Copia ficheros de configuración y ejecutables genéricos del servidor.
 function updateServerFiles()
 {
 	# No copiar ficheros del antiguo cliente Initrd
 	local SOURCES=(	repoman/bin \
 			server/bin \
+			server/lib \
 			admin/Sources/Services/ogAdmServerAux \
 			admin/Sources/Services/ogAdmRepoAux \
 			server/tftpboot \
 			installer/opengnsys_uninstall.sh \
+			installer/opengnsys_export.sh \
+			installer/opengnsys_import.sh \
 			doc )
 	local TARGETS=(	bin \
 			bin \
+			lib \
 			sbin/ogAdmServerAux \
 			sbin/ogAdmRepoAux \
 			tftpboot \
 			lib/opengnsys_uninstall.sh \
+			lib/opengnsys_export.sh \
+			lib/opengnsys_import.sh \
 			doc )
 
 	if [ ${#SOURCES[@]} != ${#TARGETS[@]} ]; then
@@ -680,12 +837,14 @@ function updateServerFiles()
 		perl -pi -e 's!UrlMsg=.*msgbrowser\.php!UrlMsg=http://localhost/cgi-bin/httpd-log\.sh!g; s!UrlMenu=http://!UrlMenu=https://!g' $INSTALL_TARGET/client/etc/ogAdmClient.cfg
 		NEWFILES="$NEWFILES $INSTALL_TARGET/client/etc/ogAdmClient.cfg"
 	fi
+
 	echoAndLog "${FUNCNAME}(): updating cron files"
 	[ ! -f /etc/cron.d/opengnsys ] && echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/opengnsys.cron ] && $INSTALL_TARGET/bin/opengnsys.cron" > /etc/cron.d/opengnsys
 	[ ! -f /etc/cron.d/torrentcreator ] && echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/torrent-creator ] && $INSTALL_TARGET/bin/torrent-creator" > /etc/cron.d/torrentcreator
 	[ ! -f /etc/cron.d/torrenttracker ] && echo "5 * * * *   root   [ -x $INSTALL_TARGET/bin/torrent-tracker ] && $INSTALL_TARGET/bin/torrent-tracker" > /etc/cron.d/torrenttracker
 	[ ! -f /etc/cron.d/imagedelete ] && echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/deletepreimage ] && $INSTALL_TARGET/bin/deletepreimage" > /etc/cron.d/imagedelete
-	echoAndLog "${FUNCNAME}(): server files updated successfully."
+	[ ! -f /etc/cron.d/ogagentqueue ] && echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/ogagentqueue.cron ] && $INSTALL_TARGET/bin/ogagentqueue.cron" > /etc/cron.d/ogagentqueue
+	echoAndLog "${FUNCNAME}(): server files successfully updated"
 }
 
 ####################################################################
@@ -718,40 +877,44 @@ function compileServices()
 {
 	local hayErrores=0
 
-	# Compilar OpenGnSys Server
-	echoAndLog "${FUNCNAME}(): Recompiling OpenGnSys Admin Server"
+	# Compilar OpenGnsys Server
+	echoAndLog "${FUNCNAME}(): Recompiling OpenGnsys Admin Server"
 	pushd $WORKDIR/opengnsys/admin/Sources/Services/ogAdmServer
 	make && moveNewService ogAdmServer $INSTALL_TARGET/sbin
 	if [ $? -ne 0 ]; then
-		echoAndLog "${FUNCNAME}(): error while compiling OpenGnSys Admin Server"
+		echoAndLog "${FUNCNAME}(): error while compiling OpenGnsys Admin Server"
 		hayErrores=1
 	fi
 	popd
-	# Compilar OpenGnSys Repository Manager
-	echoAndLog "${FUNCNAME}(): Recompiling OpenGnSys Repository Manager"
+	# Compilar OpenGnsys Repository Manager
+	echoAndLog "${FUNCNAME}(): Recompiling OpenGnsys Repository Manager"
 	pushd $WORKDIR/opengnsys/admin/Sources/Services/ogAdmRepo
 	make && moveNewService ogAdmRepo $INSTALL_TARGET/sbin
 	if [ $? -ne 0 ]; then
-		echoAndLog "${FUNCNAME}(): error while compiling OpenGnSys Repository Manager"
+		echoAndLog "${FUNCNAME}(): error while compiling OpenGnsys Repository Manager"
 		hayErrores=1
 	fi
 	popd
-	# Compilar OpenGnSys Agent
-	echoAndLog "${FUNCNAME}(): Recompiling OpenGnSys Agent"
+	# Actualizar o insertar clave de acceso REST en el fichero de configuración del repositorio.
+	grep -q '^ApiToken=' $INSTALL_TARGET/etc/ogAdmRepo.cfg && \
+		sed -i "s/^ApiToken=.*$/ApiToken=$REPOKEY/" $INSTALL_TARGET/etc/ogAdmRepo.cfg || \
+		sed -i "$ a\ApiToken=$REPOKEY/" $INSTALL_TARGET/etc/ogAdmRepo.cfg
+	# Compilar OpenGnsys Agent
+	echoAndLog "${FUNCNAME}(): Recompiling OpenGnsys Server Agent"
 	pushd $WORKDIR/opengnsys/admin/Sources/Services/ogAdmAgent
 	make && moveNewService ogAdmAgent $INSTALL_TARGET/sbin
 	if [ $? -ne 0 ]; then
-		echoAndLog "${FUNCNAME}(): error while compiling OpenGnSys Agent"
+		echoAndLog "${FUNCNAME}(): error while compiling OpenGnsys Server Agent"
 		hayErrores=1
 	fi
 	popd
 
-	# Compilar OpenGnSys Client
-	echoAndLog "${FUNCNAME}(): Recompiling OpenGnSys Client"
+	# Compilar OpenGnsys Client
+	echoAndLog "${FUNCNAME}(): Recompiling OpenGnsys Client"
 	pushd $WORKDIR/opengnsys/admin/Sources/Clients/ogAdmClient
 	make && mv ogAdmClient $INSTALL_TARGET/client/bin
 	if [ $? -ne 0 ]; then
-		echoAndLog "${FUNCNAME}(): error while compiling OpenGnSys Client"
+		echoAndLog "${FUNCNAME}(): error while compiling OpenGnsys Client"
 		hayErrores=1
 	fi
 	popd
@@ -761,116 +924,60 @@ function compileServices()
 
 
 ####################################################################
-### Funciones instalacion cliente OpenGnSys
+### Funciones instalacion cliente OpenGnsys
 ####################################################################
 
-# Actualizar cliente OpenGnSys
+# Actualizar cliente OpenGnsys
 function updateClient()
 {
-	local DOWNLOADURL="http://$OPENGNSYS_SERVER/downloads"
-	local FILENAME=ogLive-precise-3.2.0-23-generic-r4311.iso	# 1.0.4-rc4
-	#local FILENAME=ogLive-precise-3.11.0-26-generic-r4413.iso 	# 1.0.6-rc1
+	#local FILENAME=ogLive-precise-3.2.0-23-generic-r5159.iso       # 1.1.0-rc6 (old)
+	local FILENAME=ogLive-xenial-4.8.0-39-generic-amd64-r5331.iso   # 1.1.0-rc6
 	local SOURCEFILE=$DOWNLOADURL/$FILENAME
-	local TARGETFILE=$INSTALL_TARGET/lib/$FILENAME
-	local SOURCELENGTH TARGETLENGTH
-	local TMPDIR=/tmp/${FILENAME%.iso}
-	local OGINITRD=$INSTALL_TARGET/tftpboot/ogclient/oginitrd.img
-	local OGVMLINUZ=$INSTALL_TARGET/tftpboot/ogclient/ogvmlinuz
+	local TARGETFILE=$(oglivecli config download-dir)/$FILENAME
+	local SOURCELENGTH
+	local TARGETLENGTH
+	local OGINITRD
 	local SAMBAPASS
-	local KERNELVERSION
-	local RSYNCSERV RSYNCCLNT
 
+	# Comprobar si debe convertirse el antiguo cliente al nuevo formato ogLive.
+	if oglivecli check | grep -q "oglivecli convert"; then
+		echoAndLog "${FUNCNAME}(): Converting OpenGnsys Client to default ogLive"
+		oglivecli convert
+	fi
 	# Comprobar si debe actualizarse el cliente.
 	SOURCELENGTH=$(LANG=C wget --spider $SOURCEFILE 2>&1 | awk '/Length:/ {print $2}')
-	TARGETLENGTH=$(ls -l $TARGETFILE 2>/dev/null | awk '{print $5}')
+	TARGETLENGTH=$(stat -c "%s" $TARGETFILE 2>/dev/null)
 	[ -z $TARGETLENGTH ] && TARGETLENGTH=0
 	if [ "$SOURCELENGTH" != "$TARGETLENGTH" ]; then
-		echoAndLog "${FUNCNAME}(): Loading Client"
-		wget $DOWNLOADURL/$FILENAME -O $TARGETFILE
+		echoAndLog "${FUNCNAME}(): Downloading $FILENAME"
+		oglivecli download $FILENAME
 		if [ ! -s $TARGETFILE ]; then
-			errorAndLog "${FUNCNAME}(): Error loading OpenGnSys Client"
+			errorAndLog "${FUNCNAME}(): Error downloading $FILENAME"
 			return 1
 		fi
-		# Obtener la clave actual de acceso a Samba para restaurarla.
-		if [ -f $OGINITRD ]; then
-			SAMBAPASS=$(gzip -dc $OGINITRD | \
-				    cpio -i --to-stdout scripts/ogfunctions 2>&1 | \
-				    grep "^[ 	].*OPTIONS=" | \
-				    sed 's/\(.*\)pass=\(\w*\)\(.*\)/\2/')
-		fi
-		# Montar la imagen ISO del ogclient, actualizar ficheros y desmontar.
-		echoAndLog "${FUNCNAME}(): Updatting ogclient files"
-		mkdir -p $TMPDIR
-		mount -o loop,ro $TARGETFILE $TMPDIR
-		rsync -irlt $TMPDIR/ogclient $INSTALL_TARGET/tftpboot
-		umount $TMPDIR
-		rmdir $TMPDIR
-		# Recuperar la clave de acceso a Samba.
-		if [ -n "$SAMBAPASS" ]; then
-			echoAndLog "${FUNCNAME}(): Restoring client access key"
-			echo -ne "$SAMBAPASS\n$SAMBAPASS\n" | \
-					$INSTALL_TARGET/bin/setsmbpass
-		fi
-		# Establecer los permisos.
-		find -L $INSTALL_TARGET/tftpboot -type d -exec chmod 755 {} \;
-		find -L $INSTALL_TARGET/tftpboot -type f -exec chmod 644 {} \;
-		chown -R :$OPENGNSYS_CLIENTUSER $INSTALL_TARGET/tftpboot/ogclient
-		chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/tftpboot/menu.lst
+		# Actaulizar la imagen ISO del ogclient.
+		echoAndLog "${FUNCNAME}(): Updatting ogLive client"
+		oglivecli install $FILENAME
 		
-		# Ofrecer md5 del kernel y vmlinuz para ogupdateinitrd en cache
-		cp -av $INSTALL_TARGET/tftpboot/ogclient/ogvmlinuz* $INSTALL_TARGET/tftpboot
-		cp -av $INSTALL_TARGET/tftpboot/ogclient/oginitrd.img* $INSTALL_TARGET/tftpboot
-		
-		# Obtiene versión del Kernel del cliente (con 2 decimales).
-		KERNELVERSION=$(file -bkr $OGVMLINUZ 2>/dev/null | \
-				awk '/Linux/ { for (i=1; i<=NF; i++)
-						   if ($i~/version/) {
-						      v=$(i+1);
-						      printf ("%d",v);
-						      sub (/[0-9]*\./,"",v);
-						      printf (".%02d",v)
-					     } }')
-		# Actaulizar la base de datos adaptada al Kernel del cliente.
-		OPENGNSYS_DBUPDATEFILE="$WORKDIR/opengnsys/admin/Database/$OPENGNSYS_DATABASE-$INSTVERSION-postinst.sql"
-		if [ -f $OPENGNSYS_DBUPDATEFILE ]; then
-			perl -pi -e "s/KERNELVERSION/$KERNELVERSION/g" $OPENGNSYS_DBUPDATEFILE
-			importSqlFile $OPENGNSYS_DBUSER $OPENGNSYS_DBPASSWORD $OPENGNSYS_DATABASE $OPENGNSYS_DBUPDATEFILE
-		fi
-
-		# Montar SquashFS para comprobar versión de Rsync. 
-		mkdir -p $TMPDIR
-		mount -o loop,ro $INSTALL_TARGET/tftpboot/ogclient/ogclient.sqfs $TMPDIR
-		# Si versión Rsync de servidor > cliente, enlazar a fichero compilado. 
-		RSYNCSERV=$(rsync --version 2>/dev/null | awk '/protocol/ {print $6}')
-		RSYNCCLNT=$(chroot $TMPDIR /usr/bin/rsync --version 2>/dev/null | awk '/protocol/ {print $6}')
-		if [ -z "$RSYNCSERV" -o ${RSYNCSERV:-0} -gt ${RSYNCCLNT:-1} ]; then
-			[ -e $INSTALL_TARGET/client/bin/rsync-$RSYNCSERV ] && mv -f $INSTALL_TARGET/client/bin/rsync-$RSYNCSERV $INSTALL_TARGET/client/bin/rsync
-		else
-			# Si no, renombrar fichero compilado con nº de protocolo. 
-			[ -e $INSTALL_TARGET/client/bin/rsync ] && mv -f $INSTALL_TARGET/client/bin/rsync $INSTALL_TARGET/client/bin/rsync-$($INSTALL_TARGET/client/bin/rsync --version 2>/dev/null | awk '/protocol/ {print $6}')
-		fi
-		# Desmontar SquashFS. 
-		umount $TMPDIR
-		rmdir $TMPDIR
 		CLIENTUPDATED=${FILENAME%.*}
 
-		echoAndLog "${FUNCNAME}(): Client update successfully"
+		echoAndLog "${FUNCNAME}(): ogLive successfully updated"
 	else
 		# Si no existe, crear el fichero de claves de Rsync.
 		if [ ! -f /etc/rsyncd.secrets ]; then
-			echoAndLog "${FUNCNAME}(): Restoring client access key"
+			echoAndLog "${FUNCNAME}(): Restoring ogLive access key"
+			OGINITRD=$(oglivecli config install-dir)/$(jq -r ".oglive[.default].directory")/oginitrd.img
 			SAMBAPASS=$(gzip -dc $OGINITRD | \
 				    cpio -i --to-stdout scripts/ogfunctions 2>&1 | \
 				    grep "^[ 	].*OPTIONS=" | \
 				    sed 's/\(.*\)pass=\(\w*\)\(.*\)/\2/')
-			echo -ne "$SAMBAPASS\n$SAMBAPASS\n" | \
-					$INSTALL_TARGET/bin/setsmbpass
+			echo -ne "$SAMBAPASS\n$SAMBAPASS\n" | setsmbpass
 		else
-			echoAndLog "${FUNCNAME}(): Client is already updated"
+			echoAndLog "${FUNCNAME}(): ogLive is already updated"
 		fi
+		# Versión del ogLive instalado.
+		echo "${FILENAME%.*}" > $INSTALL_TARGET/doc/veroglive.txt 
 	fi
-	# Versión del ogLive instalado
-	echo "${FILENAME%.*}" > $INSTALL_TARGET/doc/veroglive.txt
 }
 
 # Comprobar permisos y ficheros.
@@ -878,13 +985,13 @@ function checkFiles()
 {
 	# Comprobar permisos adecuados.
 	if [ -x	$INSTALL_TARGET/bin/checkperms ]; then
-		echoAndLog "${FUNCNAME}(): Checking permissions." 
+		echoAndLog "${FUNCNAME}(): Checking permissions"
 		OPENGNSYS_DIR="$INSTALL_TARGET" OPENGNSYS_USER="$OPENGNSYS_CLIENTUSER" APACHE_USER="$APACHE_RUN_USER" APACHE_GROUP="$APACHE_RUN_GROUP" $INSTALL_TARGET/bin/checkperms
 	fi
 
 	# Eliminamos el fichero de estado del tracker porque es incompatible entre los distintos paquetes
 	if [ -f /tmp/dstate ]; then
-		echoAndLog "${FUNCNAME}(): Delete unused files." 
+		echoAndLog "${FUNCNAME}(): Deleting unused files"
 		rm -f /tmp/dstate
 	fi
 }
@@ -896,11 +1003,11 @@ function updateSummary()
 	local VERSIONFILE="$INSTALL_TARGET/doc/VERSION.txt"
 	local REVISION=$(LANG=C svn info $SVN_URL|awk '/Rev:/ {print "r"$4}')
 
-	[ -f $VERSIONFILE ] || echo "OpenGnSys" >$VERSIONFILE
+	[ -f $VERSIONFILE ] || echo "OpenGnsys" >$VERSIONFILE
 	perl -pi -e "s/($| r[0-9]*)/ $REVISION/" $VERSIONFILE
 
 	echo
-	echoAndLog "OpenGnSys Update Summary"
+	echoAndLog "OpenGnsys Update Summary"
 	echo       "========================"
 	echoAndLog "Project version:                  $(cat $VERSIONFILE)"
 	echoAndLog "Update log file:                  $LOG_FILE"
@@ -912,29 +1019,32 @@ function updateSummary()
 		# Indicar si se debe reiniciar servicios manualmente o usando el Cron.
 		[ -f /etc/default/opengnsys ] && source /etc/default/opengnsys
 		if [ "$RUN_CRONJOB" == "no" ]; then
-			echoAndLog "        WARNING: you must restart OpenGnSys services manually."
+			echoAndLog "        WARNING: you must to restart OpenGnsys services manually"
 		else
-			echoAndLog "        New OpenGnSys services will be restarted by the cronjob."
+			echoAndLog "        New OpenGnsys services will be restarted by the cronjob"
 		fi
 	fi
 	echoAndLog "Warnings:"
-	echoAndLog " - You must to clear web browser cache before loading OpenGnSys page."
+	echoAndLog " - You must to clear web browser cache before loading OpenGnsys page"
+	echoAndLog " - Generated new key to access Repository REST API (file ogAdmRepo.cfg)"
 	if [ -n "$CLIENTUPDATED" ]; then
 		echoAndLog " - ogLive Client is updated to: $CLIENTUPDATED"
 	fi
-	echoAndLog " - Launch $INSTALL_TARGET/bin/installoglive script and select new ogLive"
-	echoAndLog "      for clients' hardware compatibilty."
+	if [ -n "$MYSQLCONFIG" ]; then
+		echoAndLog " - MySQL must be reconfigured, run next code as DB root user and restart service:"
+		echoAndLog "      $MYSQLCONFIG"
+	fi
 	echo
 }
 
 
 
 #####################################################################
-####### Proceso de actualización de OpenGnSys
+####### Proceso de actualización de OpenGnsys
 #####################################################################
 
 
-echoAndLog "OpenGnSys update begins at $(date)"
+echoAndLog "OpenGnsys update begins at $(date)"
 
 pushd $WORKDIR
 
@@ -942,19 +1052,27 @@ pushd $WORKDIR
 checkNetworkConnection
 if [ $? -ne 0 ]; then
 	errorAndLog "Error connecting to server. Causes:"
-	errorAndLog " - Network is unreachable, review devices parameters."
-	errorAndLog " - You are inside a private network, configure the proxy service."
-	errorAndLog " - Server is temporally down, try agian later."
+	errorAndLog " - Network is unreachable, check device parameters"
+	errorAndLog " - You are inside a private network, configure the proxy service"
+	errorAndLog " - Server is temporally down, try again later"
 	exit 1
 fi
 getNetworkSettings
+
+# Comprobar si se intanta actualizar a una versión anterior.
+checkVersion
+if [ $? -ne 0 ]; then
+	errorAndLog "Cannot downgrade to an older version ($OLDVERSION to $NEWVERSION)"
+	errorAndLog "You must to uninstall OpenGnsys and install desired release"
+	exit 1
+fi
 
 # Comprobar auto-actualización del programa.
 if [ "$PROGRAMDIR" != "$INSTALL_TARGET/bin" ]; then
 	checkAutoUpdate
 	if [ $? -ne 0 ]; then
-		echoAndLog "OpenGnSys updater has been overwritten."
-		echoAndLog "Please, re-execute this script."
+		echoAndLog "OpenGnsys updater has been overwritten"
+		echoAndLog "Please, rerun this script"
 		exit
 	fi
 fi
@@ -965,14 +1083,14 @@ autoConfigure
 # Instalar dependencias.
 installDependencies ${DEPENDENCIES[*]}
 if [ $? -ne 0 ]; then
-	errorAndLog "Error: you may install all needed dependencies."
+	errorAndLog "Error: you must to install all needed dependencies"
 	exit 1
 fi
 
-# Arbol de directorios de OpenGnSys.
+# Arbol de directorios de OpenGnsys.
 createDirs ${INSTALL_TARGET}
 if [ $? -ne 0 ]; then
-	errorAndLog "Error while creating directory paths!"
+	errorAndLog "Error while creating directory paths"
 	exit 1
 fi
 
@@ -980,32 +1098,23 @@ fi
 if [ $USESVN -eq 1 ]; then
 	svnExportCode $SVN_URL
 	if [ $? -ne 0 ]; then
-		errorAndLog "Error while getting code from svn"
+		errorAndLog "Error while getting code from svn server"
 		exit 1
 	fi
 else
 	ln -fs "$(dirname $PROGRAMDIR)" opengnsys
 fi
 
-# Si existe fichero de actualización de la base de datos; aplicar cambios.
-INSTVERSION=$(awk '{print $2}' $INSTALL_TARGET/doc/VERSION.txt)
-REPOVERSION=$(awk '{print $2}' $WORKDIR/opengnsys/doc/VERSION.txt)
-if [ "$INSTVERSION" == "$REPOVERSION" ]; then
-	OPENGNSYS_DBUPDATEFILE="$WORKDIR/opengnsys/admin/Database/$OPENGNSYS_DATABASE-$INSTVERSION.sql"
-else
-	OPENGNSYS_DBUPDATEFILE="$WORKDIR/opengnsys/admin/Database/$OPENGNSYS_DATABASE-$INSTVERSION-$REPOVERSION.sql"
-fi
-if [ -f $OPENGNSYS_DBUPDATEFILE ]; then
-	echoAndLog "Updating tables from file: $(basename $OPENGNSYS_DBUPDATEFILE)"
-	importSqlFile $OPENGNSYS_DBUSER $OPENGNSYS_DBPASSWORD $OPENGNSYS_DATABASE $OPENGNSYS_DBUPDATEFILE
-else
-	echoAndLog "Database unchanged."
-fi
+# Comprobar configuración de MySQL.
+checkMysqlConfig $OPENGNSYS_DBUSER $OPENGNSYS_DBPASSWORD
+
+# Actualizar la BD.
+updateDatabase
 
 # Actualizar ficheros complementarios del servidor
 updateServerFiles
 if [ $? -ne 0 ]; then
-	errorAndLog "Error updating OpenGnSys Server files"
+	errorAndLog "Error updating OpenGnsys Server files"
 	exit 1
 fi
 
@@ -1020,9 +1129,11 @@ updateInterfaceAdm
 apacheConfiguration
 updateWebFiles
 if [ $? -ne 0 ]; then
-	errorAndLog "Error updating OpenGnSys Web Admin files"
+	errorAndLog "Error updating OpenGnsys Web Admin files"
 	exit 1
 fi
+# Actaulizar ficheros descargables.
+updateDownloadableFiles
 # Generar páginas Doxygen para instalar en el web
 makeDoxygenFiles
 
@@ -1032,7 +1143,7 @@ compileServices
 # Actaulizar ficheros auxiliares del cliente
 updateClient
 if [ $? -ne 0 ]; then
-	errorAndLog "Error updating clients"
+	errorAndLog "Error updating client files"
 	exit 1
 fi
 
@@ -1043,7 +1154,7 @@ checkFiles
 updateSummary
 
 #rm -rf $WORKDIR
-echoAndLog "OpenGnSys update finished at $(date)"
+echoAndLog "OpenGnsys update finished at $(date)"
 
 popd
 

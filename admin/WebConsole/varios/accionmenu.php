@@ -71,19 +71,19 @@ else{ // Viene de menus
 	<SCRIPT language="javascript" src="../jscripts/accionmenu.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/comunes.js"></SCRIPT>	
 	<SCRIPT language="javascript" src="../clases/jscripts/HttpLib.js"></SCRIPT>	
-	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/accionmenu_'.$idioma.'.js"></SCRIPT>'?>
+	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/accionmenu_'.$idioma.'.js"></SCRIPT>'?>
 	</HEAD>
 	<BODY>
 	<FORM  name="fdatos"> 
-		<input type=hidden value="<? echo $idcentro?>" id=idcentro>	 
-		<input type=hidden value="<? echo $idtipoaccion?>" id=idtipoaccion>	 
-		<input type=hidden value="<? echo $tipoaccion?>" id=tipoaccion>	 
+		<input type=hidden value="<?php echo $idcentro?>" id=idcentro>	 
+		<input type=hidden value="<?php echo $idtipoaccion?>" id=idtipoaccion>	 
+		<input type=hidden value="<?php echo $tipoaccion?>" id=tipoaccion>	 
 	</FORM>
 	<P align=center class=cabeceras><?php echo $litcabecera ?><br>
-		<span align=center class=subcabeceras><?echo $TbMsg[1]?></span>&nbsp;<img src="../images/iconos/menus.gif"><br><br>
+		<span align=center class=subcabeceras><?php echo $TbMsg[1]?></span>&nbsp;<img src="../images/iconos/menus.gif"><br><br>
 		<span align=center class=presentaciones>
 			<img src="<?php echo $urlimg?>">&nbsp;&nbsp;&nbsp;
-			<u><?php echo $litacion?></u>:&nbsp;<? echo $litdescri?></span>	
+			<u><?php echo $litacion?></u>:&nbsp;<?php echo $litdescri?></span>	
 	</P>
 	<DIV align=center id="Layer_items">
 		<TABLE width="90%" class="tabla_listados" cellspacing=1 cellpadding=0 >
@@ -95,10 +95,10 @@ else{ // Viene de menus
 					else		
 						echo '<TH align=center>'.$TbMsg[15].'</TH>';	
 				?>	
-				<TH><?echo $TbMsg[10]?></TH>
-				<TH><?echo $TbMsg[11]?></TH>
-				<TH><?echo $TbMsg[12]?></TH>
-				<TH><?echo $TbMsg[13]?></TH>				
+				<TH><?php echo $TbMsg[10]?></TH>
+				<TH><?php echo $TbMsg[11]?></TH>
+				<TH><?php echo $TbMsg[12]?></TH>
+				<TH><?php echo $TbMsg[13]?></TH>				
 				<?php
 					if($op==2){ // Si viene desde "menus" ...					
 						echo '<TH style="visibility:hidden">&nbsp;</TH>';						
@@ -106,7 +106,7 @@ else{ // Viene de menus
 					}				
 				?>
 			</TR>
-<?	
+<?php	
 //________________________________________________________________________________________________________
 	
 if(!empty($idmenu)) // Viene de la página de menús
@@ -151,19 +151,19 @@ else
 	<BR>	
 <TABLE align=center>
 	<TR>
-		<TD><A href="#botones"><IMG border=0 src="../images/boton_confirmar.gif" onclick="javascript:confirmar(<? echo $op?>)" ></A></TD>
+		<TD><A href="#botones"><IMG border=0 src="../images/boton_confirmar.gif" onclick="javascript:confirmar(<?php echo $op?>)" ></A></TD>
 	</TR>
 </TABLE>
 	<BR>		
 	<DIV id="Layer_nota" align=center>
-		<SPAN align=center class=notas><I><? echo$TbMsg[14]?></I></SPAN>
+		<SPAN align=center class=notas><I><?php echo$TbMsg[14]?></I></SPAN>
 	</DIV>
 </FORM>
 
 
 </BODY>
 </HTML>
-<?
+<?php
 //________________________________________________________________________________________________________
 // Descripción:
 //	Muestra la tabla de items a incluir en menús

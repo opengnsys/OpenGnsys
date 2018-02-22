@@ -56,19 +56,19 @@ if  ($opcion!=$op_alta){
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../jscripts/propiedades_menus.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/opciones.js"></SCRIPT>
-	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/propiedades_menus_'.$idioma.'.js"></SCRIPT>'?>
+	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/propiedades_menus_'.$idioma.'.js"></SCRIPT>'?>
 </HEAD>
 <BODY>
 <FORM  name="fdatos" action="../gestores/gestor_menus.php" method="post"> 
-	<INPUT type=hidden name=opcion value=<?=$opcion?>>
-	<INPUT type=hidden name=idmenu value=<?=$idmenu?>>
-	<INPUT type=hidden name=grupoid value=<?=$grupoid?>>
+	<INPUT type=hidden name=opcion value=<?php echo $opcion?>>
+	<INPUT type=hidden name=idmenu value=<?php echo $idmenu?>>
+	<INPUT type=hidden name=grupoid value=<?php echo $grupoid?>>
 	<P align=center class=cabeceras><?php echo $TbMsg[4]?><BR>
 	<SPAN align=center class=subcabeceras><?php echo $opciones[$opcion]?></SPAN></P>
 	<table align="center" border="0" cellPadding="1" cellSpacing="1" class="tabla_datos">
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<tr>
-			<th align="center">&nbsp;<?echo $TbMsg[5]?>&nbsp;</th>
+			<th align="center">&nbsp;<?php echo $TbMsg[5]?>&nbsp;</th>
 			<?php	if ($opcion==$op_eliminacion)
 					echo '<td style="width:300">'.$descripcion.'</td>';
 				else
@@ -76,7 +76,7 @@ if  ($opcion!=$op_alta){
 		</tr>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<tr>
-			<th  align=center>&nbsp;<?echo $TbMsg[6]?>&nbsp;</th>
+			<th  align=center>&nbsp;<?php echo $TbMsg[6]?>&nbsp;</th>
 			<?php	if ($opcion==$op_eliminacion)
 					echo '<td  style="width:300">'.$titulo.'</td>';
 				else
@@ -84,7 +84,7 @@ if  ($opcion!=$op_alta){
 		</tr>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<tr>
-			<th align="center">&nbsp;<?echo $TbMsg[18]?>&nbsp;</th>
+			<th align="center">&nbsp;<?php echo $TbMsg[18]?>&nbsp;</th>
 			<?php	if ($opcion==$op_eliminacion)
 					echo '<td colspan="3">'.TomaDato($cmd,0,'iconos',$idurlimg,'idicono','descripcion').'&nbsp;</td>';
 				else
@@ -106,6 +106,10 @@ if  ($opcion!=$op_alta){
 					$tbresolucion[792]="1024x768  24bits";
 					$tbresolucion[795]="1280x1024 24bits";
 					$tbresolucion[799]="1600x1200 24bits";
+					$tbresolucion[814]="800x600   32bits";
+					$tbresolucion[824]="1024x768  32bits";
+					$tbresolucion[829]="1280x1024 32bits";
+					$tbresolucion[834]="1600x1200 32bits";
 					if (empty ($tbresolucion[$resolucion])) {
 						$res = $resolucion;
 					} else {
@@ -124,18 +128,27 @@ if  ($opcion!=$op_alta){
 						$parametros.="789=800x600   24bits".chr(13);
 						$parametros.="792=1024x768  24bits".chr(13);
 						$parametros.="795=1280x1024 24bits".chr(13);
-						$parametros.="799=1600x1200 24bits";
+						$parametros.="799=1600x1200 24bits".chr(13);
+						$parametros.="814=800x600   32bits".chr(13);
+						$parametros.="824=1024x768  32bits".chr(13);
+						$parametros.="829=1280x1024 32bits".chr(13);
+						$parametros.="834=1600x1200 32bits";
 					} else {
 						// Kernel 3.7 y superior usa parámetro "video".
-						$parametros ="uvesafb:800x600-16=800x600, 16bit".chr(13);
+						$parametros ="uvesafb:D=".$TbMsg["PROP_DEFAULT"].chr(13);
+						$parametros.="uvesafb:800x600-16=800x600, 16bit".chr(13);
 						$parametros.="uvesafb:800x600-24=800x600, 24bit".chr(13);
+						$parametros.="uvesafb:800x600-32=800x600, 32bit".chr(13);
 						$parametros.="uvesafb:1024x768-16=1024x768, 16bit".chr(13);
 						$parametros.="uvesafb:1024x768-24=1024x768, 24bit".chr(13);
+						$parametros.="uvesafb:1024x768-32=1024x768, 32bit".chr(13);
 						$parametros.="uvesafb:1152x864-16=1152x864, 16bit".chr(13);
 						$parametros.="uvesafb:1280x1024,16=1280x1024, 16bit".chr(13);
 						$parametros.="uvesafb:1280x1024,24=1280x1024, 24bit".chr(13);
+						$parametros.="uvesafb:1280x1024,32=1280x1024, 32bit".chr(13);
+						$parametros.="uvesafb:1600x1200,16=1600x1200, 16bit".chr(13);
 						$parametros.="uvesafb:1600x1200,24=1600x1200, 24bit".chr(13);
-						$parametros.="uvesafb:1600x1200,24=1600x1200, 16bit";
+						$parametros.="uvesafb:1600x1200,32=1600x1200, 32bit";
 					}
 					echo '<td>'.HTMLCTESELECT($parametros,"resolucion","estilodesple","",$resolucion,150).'</td>';
 				}
@@ -143,7 +156,7 @@ if  ($opcion!=$op_alta){
 		</tr>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<tr>
-			<th align="center">&nbsp;<?echo $TbMsg[7]?>&nbsp;</th>
+			<th align="center">&nbsp;<?php echo $TbMsg[7]?>&nbsp;</th>
 			<?php	if ($opcion==$op_eliminacion)
 					echo '<td>'.$comentarios.'&nbsp</TD>';
 				else
@@ -156,7 +169,7 @@ if  ($opcion!=$op_alta){
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 	<TABLE  align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
 		<TR>
-			<TD align=center colspan=2>&nbsp;<b><?echo $TbMsg[8]?></b>&nbsp;</TD>
+			<TD align=center colspan=2>&nbsp;<b><?php echo $TbMsg[8]?></b>&nbsp;</TD>
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
@@ -178,8 +191,8 @@ if  ($opcion!=$op_alta){
 		</TR>
 
 		<TR>
-			<TH align=center>&nbsp; <?echo $TbMsg[15]?>&nbsp;</TH>
-			<?if ($opcion==$op_eliminacion)
+			<TH align=center>&nbsp; <?php echo $TbMsg[15]?>&nbsp;</TH>
+			<?php if ($opcion==$op_eliminacion)
 					echo '<TD colspan=5>'.$htmlmenupub.'</TD>';
 				else
 					echo '<TD colspan=5><INPUT  class="formulariodatos" name=htmlmenupub style="width:350" type=text value="'.$htmlmenupub.'"></TD>';
@@ -187,7 +200,7 @@ if  ($opcion!=$op_alta){
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TD align=center colspan=6>&nbsp;<b><?echo $TbMsg[12]?></b>&nbsp;</TD>
+			<TD align=center colspan=6>&nbsp;<b><?php echo $TbMsg[12]?></b>&nbsp;</TD>
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
@@ -208,8 +221,8 @@ if  ($opcion!=$op_alta){
 			?>
 		</TR>
 		<TR>
-			<TH align=center>&nbsp; <?echo $TbMsg[15]?>&nbsp;</TH>
-			<?if ($opcion==$op_eliminacion)
+			<TH align=center>&nbsp; <?php echo $TbMsg[15]?>&nbsp;</TH>
+			<?php if ($opcion==$op_eliminacion)
 					echo '<TD colspan=5">'.$htmlmenupri.'</TD>';
 				else
 					echo '<TD colspan=5><INPUT  class="formulariodatos" name=htmlmenupri style="width:350" type=text value="'.$htmlmenupri.'"></TD>';

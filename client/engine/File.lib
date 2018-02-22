@@ -265,25 +265,24 @@ case $# in
         return $? ;;
 esac
 
-# Volver a directorio inicial en caso de error.
-CURRENTDIR="$PWD"
-trap "cd $CURRENTDIR" RETURN
-
-# Eliminar caracteres \c / iniciales, finales y duplicados.
+# Eliminar caracteres \c / duplicados y finales.
         # /* (comentario Doxygen)
-FILE="$(echo $FILE|sed -e 's/\(\/\)*\1/\//g' -e 's/^\///' -e 's/\/$//')"
-PREVFILE=""
-FILEPATH="/"
-while [ "$FILE" != "$PREVFILE" ]; do
-    # Busca el nombre correcto en el directorio actual.
-    cd "$FILEPATH" 2>/dev/null || FILE=""
-    FILEPATH="${FILEPATH}/$(ls -A 2>/dev/null | grep -i -m1 "^${FILE%%/*}$")" || return $?
-    PREVFILE="$FILE"
-    FILE="${FILE#*/}"
-done
+FILE="$(echo $FILE|sed -e 's/\(\/\)*\1/\//g; s/\/$//')"
+# Comprobar si existe el fichero para reducir tiempos.
+if [ -e "$FILE" ]; then
+    FILEPATH="$FILE"
+else
+    # Buscar el nombre correcto en cada subdirectorio del camino.
+    FILEPATH="/"
+    while [ "$FILE" != "$PREVFILE" ]; do
+        FILEPATH="$(ls -d "${FILEPATH%/}/${FILE%%/*}" 2>/dev/null || find "$FILEPATH" -maxdepth 1 -iname "${FILE%%/*}" -print 2>/dev/null)"
+        PREVFILE="$FILE"
+        FILE="${FILE#*/}"
+    done
+fi
         # (comentario Doxygen) */
-# Muestra el camino Linux, quitando el / inicial duplicado.
-[ "$FILEPATH" != "/" ] && echo ${FILEPATH#/}
+[ -n "$FILEPATH" ] && echo "$FILEPATH"
+return 0
 }
 
 

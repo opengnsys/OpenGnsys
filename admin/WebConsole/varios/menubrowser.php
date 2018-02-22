@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -64,7 +64,7 @@ function PulsaEnter(oEvento){
 </DIV>
 </BODY>
 </HTML>
-<?
+<?php
 //___________________________________________________________________________________________________
 //
 // Redupera la ip del cliente web

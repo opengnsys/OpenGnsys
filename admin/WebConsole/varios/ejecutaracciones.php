@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -51,16 +51,16 @@ $arbol=new ArbolVistaXml($arbolXML,0,$baseurlimg,$clasedefault,1,20,100,1,$titul
 	<SCRIPT language="javascript" src="../jscripts/constantes.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../clases/jscripts/HttpLib.js"></SCRIPT>		
 	<SCRIPT language="javascript" src="../jscripts/ejecutaracciones.js"></SCRIPT>
-	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comunes_'.$idioma.'.js"></SCRIPT>'?>
-	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/ejecutaracciones_'.$idioma.'.js"></SCRIPT>'?>
+	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comunes_'.$idioma.'.js"></SCRIPT>'?>
+	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/ejecutaracciones_'.$idioma.'.js"></SCRIPT>'?>
 </HEAD>
 <BODY OnContextMenu="return false">
 <FORM  name="fdatos"> 
-	<INPUT type=hidden name=ambito value=<?=$ambito?>>
-	<INPUT type=hidden name=idambito value=<?=$idambito?>>
+	<INPUT type=hidden name=ambito value=<?php echo $ambito?>>
+	<INPUT type=hidden name=idambito value=<?php echo $idambito?>>
 </FORM>
 
-<?
+<?php
 switch($ambito){
 		case $AMBITO_CENTROS :
 			$urlimg='../images/iconos/centros.gif';
@@ -88,7 +88,7 @@ switch($ambito){
 ?>
 <BR>
 <BR>
-<?
+<?php
 //________________________________________________________________________________________________________
 echo $arbol->CreaArbolVistaXML();	 // Crea árbol (HTML) a partir del XML
 $flotante=new MenuContextual();			 // Crea objeto MenuContextual
@@ -99,7 +99,7 @@ echo $flotante->CreaMenuContextual($XMLcontextual);
 ?>
 </BODY>
 </HTML>
-<?
+<?php
 // *************************************************************************************************************************************************
 //	Devuelve una cadena con formato XML con toda la información de las acciones registradas en un Centro concreto
 //	Parametros: PROCEDIMIENTO

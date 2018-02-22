@@ -1,4 +1,4 @@
-<?
+<?php
 // *******************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -55,7 +55,7 @@ if ($cmd){
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 <BODY>
 	<SCRIPT language="javascript" src="../jscripts/propiedades_usuarios.js"></SCRIPT>
-<?
+<?php
 	$literal="";
 	switch($opcion){
 		case $op_alta :
@@ -93,7 +93,7 @@ else{
 ?>
 </BODY>
 </HTML>	
-<?
+<?php
 /*________________________________________________________________________________________________________
 	Inserta, modifica o elimina datos en la tabla usuarios
 ________________________________________________________________________________________________________*/
@@ -126,10 +126,13 @@ function Gestiona(){
 	$cmd->CreaParametro("@idambito",$idambito,1);
 	$cmd->CreaParametro("@ididioma",$ididioma,1);
 	$cmd->CreaParametro("@idtipousuario",$idtipousuario,1);
+	// Generar clave de acceso a la API REST.
+	$apikey=md5(uniqid(rand(), true));
+	$cmd->CreaParametro("@apikey",$apikey,0);
 
 	switch($opcion){
 		case $op_alta :
-			$cmd->texto="INSERT INTO usuarios (usuario,pasguor,nombre,email,ididioma,idtipousuario ) VALUES (@usuario,@pasguor,@nombre,@email,@ididioma,@idtipousuario);";
+			$cmd->texto="INSERT INTO usuarios (usuario,pasguor,nombre,email,ididioma,idtipousuario,apikey) VALUES (@usuario,SHA2(@pasguor,224),@nombre,@email,@ididioma,@idtipousuario,@apikey);";
 			$resul=$cmd->Ejecutar();
 			if ($resul){ // Crea una tabla nodo para devolver a la página que llamó ésta
 				$idusuario=$cmd->Autonumerico();
@@ -141,7 +144,7 @@ function Gestiona(){
 			}
 			break;
 		case $op_modificacion:
-			$cmd->texto="UPDATE usuarios SET usuario=@usuario,pasguor=@pasguor,nombre=@nombre,email=@email,ididioma=@ididioma WHERE idusuario=@idusuario";
+			$cmd->texto="UPDATE usuarios SET usuario=@usuario,pasguor=SHA2(@pasguor,224),nombre=@nombre,email=@email,ididioma=@ididioma WHERE idusuario=@idusuario";
 			$resul=$cmd->Ejecutar();
 			break;
 		case $op_eliminacion :
@@ -160,18 +163,16 @@ function Gestiona(){
 ________________________________________________________________________________________________________*/
 function toma_usuario($cmd,$idusuario){
 	global $usuario;
-	global $pasguor;
 	global $idambito;
 	global $idtipousuario;
 
 	$rs=new Recordset; 
-	$cmd->texto="SELECT usuario, pasguor,idambito,idtipousuario FROM usuarios WHERE idusuario=".$idusuario;
+	$cmd->texto="SELECT usuario, idambito, idtipousuario FROM usuarios WHERE idusuario=".$idusuario;
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) return(0); // Error al abrir recordset
 	$rs->Primero(); 
 	if (!$rs->EOF){
 		$usuario=$rs->campos["usuario"];
-		$pasguor=$rs->campos["pasguor"];
 		$idambito=$rs->campos["idambito"];
 		$idtipousuario=$rs->campos["idtipousuario"];
 		return(true);

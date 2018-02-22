@@ -10,9 +10,12 @@
 // **********************************************************************************************************
 include_once("../includes/ctrlacc.php");
 include_once("../includes/opciones.php");
+include_once("../includes/comunes.php");
 include_once("../includes/CreaComando.php");
 include_once("../clases/AdoPhp.php");
-include_once("../idiomas/php/".$idioma."/propiedades_repositorios_".$idioma.".php"); 
+include_once("../idiomas/php/".$idioma."/propiedades_repositorios_".$idioma.".php");
+// Fichero con funciones para trabajar con el webservice
+include_once("../includes/restfunctions.php");
 //________________________________________________________________________________________________________
 $opcion=0;
 $opciones=array($TbMsg[0],$TbMsg[1],$TbMsg[2],$TbMsg[3]);
@@ -21,11 +24,11 @@ $idrepositorio=0;
 $nombrerepositorio="";
 $ip="";
 $puertorepo="2002";
+$apiKeyRepo="";
 $grupoid=0;
 $comentarios="";
 $ordenadores=0; // Número de ordenador a los que da servicio
 $numordenadores=0; // Número de ordenador a los que da servicio
-$repolocal="";
 
 if (isset($_GET["opcion"])) $opcion=$_GET["opcion"]; // Recoge parametros
 if (isset($_GET["idrepositorio"])) $idrepositorio=$_GET["idrepositorio"]; 
@@ -42,41 +45,32 @@ if  ($opcion!=$op_alta){
 }
 //________________________________________________________________________________________________________
 //#########################################################################
-$iprepositorio="";
-$ipservidor=$_SERVER['SERVER_ADDR'];
 
-	$cmd->texto="SELECT * FROM repositorios WHERE idrepositorio=$idrepositorio";
-	$rs=new Recordset;
-	$rs->Comando=&$cmd; 
-	if (!$rs->Abrir()) return(true); // Error al abrir recordset
-	$rs->Primero(); 
-	if (!$rs->EOF){
-		$nombrerepositorio=$rs->campos["nombrerepositorio"];
-		$iprepositorio=$rs->campos["ip"];
+// Si tenemos un apiKey podemos obtener la información desde el webservice en el repositorio
+if($apiKeyRepo != ""){
+	$repo[0]['url'] = "https://$ip/opengnsys/rest/repository/images";
+	$repo[0]['header'] = array('Authorization: '.$apiKeyRepo);
+	$result = multiRequest($repo);
+	if ($result[0]['code'] === 200) {
+		$result = json_decode($result[0]['data']);
+		$repodir = $result->directory;
+		$totalrepo = humanSize($result->disk->total);
+		$librerepo = humanSize($result->disk->free);
+		$ocupadorepo = humanSize($result->disk->total - $result->disk->free);
+		$porcentajerepo = 100 - floor(100 * $result->disk->free / $result->disk->total);
+		$repoOus = $result->ous;
+		$repoImages = $result->images;
+		$repoWithApi = true;
+	} else {
+		// Error de acceso a la API REST.
+		$repoWithApi = false;
+		$repoImages = null;
 	}
-	$rs->Cerrar();
-
-if ($iprepositorio == $ipservidor)
-{
-	$repolocal="si";
-	$espaciorepo=exec("df -h /opt/opengnsys/images");
-	$espaciorepo=split(" ",$espaciorepo);
-	for ($j=0;$j<count($espaciorepo);$j++)
-	{
-	        if ($espaciorepo[$j]!="")
-	                {$espaciorepos[]=$espaciorepo[$j];}
-	}
-	for ($k=0;$k<count($espaciorepos);$k++)
-	{
-	        $totalrepo=$espaciorepos[1];
-    	    $ocupadorepo=$espaciorepos[2];
-	        $librerepo=$espaciorepos[3];
-	        $porcentajerepo=$espaciorepos[4];
-	}
+} else {
+	// Error de acceso a la API REST.
+	$repoWithApi = false;
+	$repoImages = null;
 }
-else{
-	$repolocaL="no";
-	}
 
 //#########################################################################
 ?>
@@ -88,104 +82,141 @@ else{
 	<SCRIPT language="javascript" src="../jscripts/validators.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/propiedades_repositorios.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/opciones.js"></SCRIPT>
-	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/propiedades_repositorios_'.$idioma.'.js"></SCRIPT>'?>
+	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/propiedades_repositorios_'.$idioma.'.js"></SCRIPT>'?>
 </HEAD>
 <BODY>
 <DIV  align=center>
 <FORM  name="fdatos" action="../gestores/gestor_repositorios.php" method="post"> 
-	<INPUT type=hidden name=opcion value="<? echo $opcion?>">
-	<INPUT type=hidden name=idrepositorio value="<? echo $idrepositorio?>">
-	<INPUT type=hidden name=grupoid value="<? echo $grupoid?>">
-	<INPUT type=hidden name=ordenadores value="<? echo $ordenadores?>">
+	<INPUT type=hidden name=opcion value="<?php echo $opcion?>">
+	<INPUT type=hidden name=idrepositorio value="<?php echo $idrepositorio?>">
+	<INPUT type=hidden name=grupoid value="<?php echo $grupoid?>">
+	<INPUT type=hidden name=ordenadores value="<?php echo $ordenadores?>">
 
-	<P align=center class=cabeceras><?echo $TbMsg[4]?><BR>
-	<SPAN align=center class=subcabeceras><? echo $opciones[$opcion]?></SPAN></P>
+	<P align=center class=cabeceras><?php echo $TbMsg[4]?><BR>
+	<SPAN align=center class=subcabeceras><?php echo $opciones[$opcion]?></SPAN></P>
 	<TABLE  align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos >
-<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+<!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[5]?>&nbsp;</TD>
-			<?
+			<TH align="center">&nbsp;<?php echo $TbMsg[5]?>&nbsp;</TD>
+			<?php
 				if ($opcion==$op_eliminacion)
 					echo '<TD>'.$nombrerepositorio.'</TD>';
 				else	
-					echo '<TD><INPUT  class="formulariodatos" name=nombrerepositorio style="width:200" type=text value="'.$nombrerepositorio.'"></TD>';
+					echo '<TD><INPUT  class="formulariodatos" name="nombrerepositorio" style="width:200" type="text" value="'.$nombrerepositorio.'"></TD>';
 			?>
-			<TD valign=top align=left rowspan=3	><CENTER>
-				<IMG border=3 style="border-color:#63676b" src="../images/aula.jpg">
-				<BR>&nbsp;Ordenadores:&nbsp;<? echo $ordenadores?></CENTER></TD>
+			<TD valign="top" align="left" rowspan="4"	><CENTER>
+				<IMG border="3" style="border-color:#63676b" src="../images/aula.jpg">
+				<BR>&nbsp;Ordenadores:&nbsp;<?php echo $ordenadores?></CENTER></TD>
 		</TR>
-<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+<!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[6]?>&nbsp;</TD>
-			<?
+			<TH align=center>&nbsp;<?php echo $TbMsg[6]?>&nbsp;</TD>
+			<?php
 			if ($opcion==$op_eliminacion)
 					echo '<TD>'.$ip.'</TD>';
 			else	
-				echo'<TD><INPUT  class="formulariodatos" name=ip type=text style="width:200" value="'.$ip.'"></TD>';
+				echo'<TD><INPUT  class="formulariodatos" name="ip" type="text" style="width:200" value="'.$ip.'"></TD>';
 			?>
 		</TR>
-<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+<!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[8]?>&nbsp;</TD>
-		<?
-			if ($opcion==$op_eliminacion)
+			<TH align=center>&nbsp;<?php echo $TbMsg[8]?>&nbsp;</TD>
+			<?php
+				if ($opcion==$op_eliminacion)
 					echo '<TD>'.$puertorepo.'</TD>';
-			else	
-				echo'<TD><INPUT  class="formulariodatos" name=puertorepo type=text style="width:200" value="'.$puertorepo.'"></TD>';
+				else	
+					echo'<TD><INPUT  class="formulariodatos" name=puertorepo type="text" style="width:200" value="'.$puertorepo.'"></TD>';
 			?>
 		</TR>
-<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+<!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[7]?>&nbsp;</TD>
-			<?
-			if ($opcion==$op_eliminacion)
-					echo '<TD colspan=2>'.$comentarios.'</TD>';
-			else	
-				echo '<TD colspan=2><TEXTAREA   class="formulariodatos" name=comentarios rows=2 cols=50>'.$comentarios.'</TEXTAREA></TD>';
+			<TH align=center>&nbsp;<?php echo $TbMsg[17]?>&nbsp;</TD>
+			<?php
+				if ($opcion==$op_eliminacion)
+					echo '<TD>'.$apiKeyRepo.'</TD>';
+				else	
+					echo'<TD><INPUT  class="formulariodatos" name="apiKeyRepo" type="text" style="width:200" value="'.$apiKeyRepo.'"></TD>';
+			?>
+		</TR>
+<!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
+		<TR>
+			<TH align=center>&nbsp;<?php echo $TbMsg[7]?>&nbsp;</TD>
+			<?php
+				if ($opcion==$op_eliminacion)
+					echo '<TD colspan="2">'.$comentarios.'</TD>';
+				else	
+					echo '<TD colspan="2"><TEXTAREA   class="formulariodatos" name="comentarios" rows=2 cols=50>'.$comentarios.'</TEXTAREA></TD>';
 			?>
 		</TR>	
 
-<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+<!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
 	
 	</TABLE>
 		<?php	if ( $opcion == 1 ){} else { ?>
 
 	<TABLE  align=center border=0 cellPadding=2 cellSpacing=2 class=tabla_datos >
-    <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+    <!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
 
-		<?php  if ($repolocal == "si" ) { ?>
+		<?php  if ($repoWithApi) { ?>
 		<TR>
-			<TH align=center width=125>&nbsp;<?echo $TbMsg[11]?>&nbsp;</TD>
-			<TH align=center width=120>&nbsp;<?echo $TbMsg[12]?>&nbsp;</TD>
-			<TH align=center width=120>&nbsp;<?echo $TbMsg[13]?>&nbsp;</TD>
-			<TH align=center width=101>&nbsp;<?echo $TbMsg[14]?>&nbsp;</TD>
+			<TH align=center width=125>&nbsp;<?php echo $TbMsg[11]?>&nbsp;</TD>
+			<TH align=center width=120>&nbsp;<?php echo $TbMsg[12]?>&nbsp;</TD>
+			<TH align=center width=120>&nbsp;<?php echo $TbMsg[13]?>&nbsp;</TD>
+			<TH align=center width=101>&nbsp;<?php echo $TbMsg[14]?>&nbsp;</TD>
 		</TR>
                 <TR>
-			<TD align=center width=125>&nbsp;<?echo $totalrepo?>&nbsp;</TD>
-            		<TD align=center width=120>&nbsp;<?echo $ocupadorepo?>&nbsp;</TD>
-           		<TD align=center width=120>&nbsp;<?echo $librerepo?>&nbsp;</TD>
-           		<TD align=center width=101>&nbsp;<?echo $porcentajerepo?>&nbsp;</TD>
+			<TD align=center width=125>&nbsp;<?php echo $totalrepo?>&nbsp;</TD>
+            		<TD align=center width=120>&nbsp;<?php echo $ocupadorepo?>&nbsp;</TD>
+           		<TD align=center width=120>&nbsp;<?php echo $librerepo?>&nbsp;</TD>
+           		<TD align=center width=101>&nbsp;<?php echo "$porcentajerepo %" ?>&nbsp;</TD>
                 </TR>
+                <?php 
+				// Si tenemos informacion del repositorio remoto, mostramos las imagenes
+				if($repoWithApi == true && is_array($repoImages)){
+					echo "<tr class='tabla_listados_sin'><th colspan='4'>".$TbMsg['MSG_CONTENT']." $repodir</th></tr>\n";
+
+echo "<tr><td>".$TbMsg['MSG_IMAGE']." (".$TbMsg['MSG_TYPE'].")</td><td>".$TbMsg['MSG_SIZE']."</td><td>".$TbMsg['MSG_MODIFIED']."</td><td>".$TbMsg['MSG_PERMISSIONS']."</td></tr>\n";
+		   			foreach($repoImages as $image){
+		   				echo "<tr class='tabla_listados_sin'>";
+		   				echo "<td>".$image->name." (".$image->type.")</td>";
+		   				echo "<td>".humanSize($image->size)."</td>";
+		   				echo "<td>".$image->modified."</td>";
+		   				echo "<td>".$image->mode."</td>";
+		   				echo "</tr>\n";
+		   			}
+		   			foreach($repoOus as $ou) {
+		   				foreach($ou->images as $image) {
+		   					echo "<tr class='tabla_listados_sin'>";
+		   					echo "<td>".$ou->subdir." / ".$image->name." (".$image->type.")</td>";
+		   					echo "<td>".$image->size." bytes</td>";
+		   					echo "<td>".$image->modified."</td>";
+		   					echo "<td>".$image->mode."</td>";
+		   					echo "</tr>\n";
+		   				}
+		   			}
+		   		}
+		   	?>
 		<?php }else { ?>
 		<tr>
 			<th align="center">&nbsp;<?php echo '<strong>'.$TbMsg[15].'</strong></br>'.$TbMsg[16] ?></th>
 		</tr>
         		<?php } ?>
 		<?php } ?>
-<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+<!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
     
    	</TABLE>
+   
 	
 </FORM>
 </DIV>
-<?
+<?php
 //________________________________________________________________________________________________________
 include_once("../includes/opcionesbotonesop.php");
 //________________________________________________________________________________________________________
 ?>
 </BODY>
 </HTML>
-<?
+<?php
 //________________________________________________________________________________________________________
 //	Recupera los datos de un repositorio
 //		Parametros: 
@@ -197,6 +228,7 @@ function TomaPropiedades($cmd,$id){
 	global $ip;
 	global $comentarios;
 	global $puertorepo;
+	global $apiKeyRepo;
 	global $ordenadores;
 
 
@@ -217,6 +249,7 @@ function TomaPropiedades($cmd,$id){
 		$ip=$rs->campos["ip"];
 		$comentarios=$rs->campos["comentarios"];
 		$puertorepo=$rs->campos["puertorepo"];
+		$apiKeyRepo=$rs->campos["apikey"];
 //		$ordenadores=$rs->campos["numordenadores"];
 	}
 	$rs->Cerrar();

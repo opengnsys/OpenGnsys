@@ -1,7 +1,16 @@
-#! /bin/sh
+#!/bin/bash
 set -e
 
-grub_probe=$OGBIN/grub-probe1.99
+#grubSyntax
+#version 1.1.0
+#autoconfigurador de items de menu para grub/brg
+#basado en scripts del paquete de grub
+#Antonio Doblas Viso
+#Universidad de Málaga
+
+DISK=
+PART=
+
 
 
 if [ $# == 3 ]; then
@@ -17,6 +26,29 @@ if [ $# == 1 ]; then
 fi
 
 
+#Versión de scripts compatible con la versión 1.99 de grub-probe
+#Uso del grub-probe 1.99  según arquitectura
+grub_probe=${grub_probe:-$OGBIN/grub-probe1.99_$(arch)}
+
+#librerias del osProber para kernel antiguos: detecta e identifica sistema operativos.
+grub-install --version | grep 1.99 && cp -r /opt/opengnsys/lib/os-probes/* /usr/lib/os-probes/
+
+
+#Autoreconocimiento del ogLive en cache
+#fichero de reconocimeinto de grub
+#fichero de lsb-release en la cache (al final de este scripts se elimina esta entrada para que el browser no lo muestre
+
+if [ $(ls /opt/opengnsys/cache/boot/$oglivedir/ogvmlinuz 2>/dev/null) ]; then
+	sed -i 's|/boot/\${oglivedir}/ogvmlinuz |/vmlinuz |i' /usr/lib/linux-boot-probes/mounted/90fallback
+	sed -i 's|/vmlinuz |/vmlinuz /boot/\${oglivedir}/ogvmlinuz |1' /usr/lib/linux-boot-probes/mounted/90fallback
+	mkdir -p /opt/opengnsys/cache/etc/
+	echo "DISTRIB_ID=Ubuntu" > /opt/opengnsys/cache/etc/lsb-release
+	echo "DISTRIB_RELEASE= " >> /opt/opengnsys/cache/etc/lsb-release
+	echo $oglivedir | awk -F- ' {print "DISTRIB_CODENAME="$2 }' >> /opt/opengnsys/cache/etc/lsb-release
+	echo "DISTRIB_DESCRIPTION=OpenGnsys Live" >> /opt/opengnsys/cache/etc/lsb-release
+fi
+
+#ver linea 195 detección de los os en variable OSPROBED
 
 OG_prepare_grub_to_access_device ()
 {
@@ -80,11 +112,7 @@ OG_prepare_grub_to_access_device ()
 
 
 
-# ADV buscar os-prober
-#Si $DISK no definido usar 1
-DISK=${DISK:-"1"}
-OSSEARCH=$(ogDiskToDev $DISK $PART)
-#echo $OSSEARCH
+
 
 # grub-mkconfig helper script.
 # Copyright (C) 2006,2007,2008,2009  Free Software Foundation, Inc.
@@ -178,8 +206,22 @@ case "$1" in
 
 
 esac
- 
-OSPROBED="`os-prober | grep $OSSEARCH | tr ' ' '^' | paste -s -d ' '`"
+
+
+
+# ADV  OSPROBED
+if [ -n "${DISK}" ]; then
+	#Si $DISK esta definido buscar en el disco y la particion parametro 1 y 2 
+	OSSEARCH=$(ogDiskToDev $DISK $PART)
+	OSPROBED="`os-prober | grep $OSSEARCH | tr ' ' '^' | paste -s -d ' '`"
+else
+	#si no esta definido
+	OSPROBED="`os-prober | tr ' ' '^' | paste -s -d ' '`"
+fi
+
+#DISK=${DISK:-"1"}
+#echo $OSSEARCH 
+#echo "$OSPROBED"
 
 
 if [ -z "${OSPROBED}" ] ; then
@@ -273,10 +315,12 @@ for OS in ${OSPROBED} ; do
 	  fi
 	  ;;
       esac
+      #adv
+      LABELCLASS=$(echo "${LONGNAME}" | awk '{print tolower($1$2);}')
 
       found_other_os=1
       cat << EOF
-menuentry "${LONGNAME} (on ${DEVICE})" --class windows --class os {
+menuentry "${LONGNAME} (on ${DEVICE})" --class $LABELCLASS --class windows {
 EOF
       save_default_entry | sed -e "s/^/\t/"
 #ADV      prepare_grub_to_access_device ${DEVICE} | sed -e "s/^/\t/"
@@ -298,17 +342,22 @@ EOF
 EOF
     ;;
     linux)
+	KERNELPARAM=""
+	#linuxprobed detecta todos los  kernels de una partición.
       LINUXPROBED="`linux-boot-prober ${DEVICE} 2> /dev/null | tr ' ' '^' | paste -s -d ' '`"
+#esta opcion de linuxprobe solo interpreta el primer kernel detectado de la partición 
+#Si queremos que autoincluya todos los kernels hay que comentar esta filtrado de LINUXPROBED
+      LINUXPROBED=$(echo $LINUXPROBED | awk '{ print $1}') 	
       prepare_boot_cache=
-
+       #	echo "ADV listado de los kerenel encontrados linux-boot-prober ${DEVICE} $LINUXPROBED"
       for LINUX in ${LINUXPROBED} ; do
+	LINUX=$LINUXPROBED
         LROOT="`echo ${LINUX} | cut -d ':' -f 1`"
         LBOOT="`echo ${LINUX} | cut -d ':' -f 2`"
         LLABEL="`echo ${LINUX} | cut -d ':' -f 3 | tr '^' ' '`"
         LKERNEL="`echo ${LINUX} | cut -d ':' -f 4`"
         LINITRD="`echo ${LINUX} | cut -d ':' -f 5`"
         LPARAMS="`echo ${LINUX} | cut -d ':' -f 6- | tr '^' ' '`"
-
         if [ -z "${LLABEL}" ] ; then
           LLABEL="${LONGNAME}"
         fi
@@ -319,8 +368,9 @@ EOF
 	fi
 
 	found_other_os=1
+      	LABELCLASS=$(echo "${LLABEL}" | awk '{print tolower($1);}')
         cat << EOF
-menuentry "${LLABEL} (on ${DEVICE})" --class gnu-linux --class gnu --class os {
+menuentry "${LLABEL} (on ${DEVICE})" --class $LABELCLASS --class linux --class os {
 EOF
 	save_default_entry | sed -e "s/^/\t/"
 	if [ -z "${prepare_boot_cache}" ]; then
@@ -328,6 +378,9 @@ EOF
 	    prepare_boot_cache="$(OG_prepare_grub_to_access_device ${LBOOT} | sed -e "s/^/\t/")"
 	fi
 	printf '%s\n' "${prepare_boot_cache}"
+	if [ "$LABELCLASS" == "opengnsys" ]; then
+		KERNELPARAM=$(cat /proc/cmdline)
+	fi
 	cat <<  EOF
 	linux ${LKERNEL} ${LPARAMS} ${KERNELPARAM} 
 EOF
@@ -339,7 +392,7 @@ EOF
         cat << EOF
 }
 EOF
-      done
+     done
     ;;
     macosx)
       OSXUUID="`grub-probe --target=fs_uuid --device ${DEVICE} 2> /dev/null`"
@@ -379,3 +432,5 @@ EOF
 done
 
 adjust_timeout
+
+rm /opt/opengnsys/cache/etc/lsb-release &>/dev/null

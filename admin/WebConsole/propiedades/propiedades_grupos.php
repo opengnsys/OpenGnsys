@@ -136,24 +136,24 @@ switch($literaltipo){
 	<SCRIPT language="javascript" src="../jscripts/propiedades_grupos.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/opciones.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/constantes.js"></SCRIPT>
-	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/propiedades_grupos_'.$idioma.'.js"></SCRIPT>'?>
+	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/propiedades_grupos_'.$idioma.'.js"></SCRIPT>'?>
 </HEAD>
 <BODY>
 <DIV  align=center>
 <FORM  name="fdatos" action="" method=post> 
-	<INPUT type=hidden name=opcion value=<?=$opcion?>>
-	<INPUT type=hidden name=idgrupo value=<?=$idgrupo?>>
-	<INPUT type=hidden name=grupoid value=<?=$grupoid?>>
-	<INPUT type=hidden name=tipo value=<?=$tipo?>>
-	<INPUT type=hidden name=literaltipo value="<?=$literaltipo?>">
-	<INPUT type=hidden name=iduniversidad value=<?=$iduniversidad?>>
-	<INPUT type=hidden name=idaula value=<?=$idaula?>>
-	<P align=center class=cabeceras><IMG src="<? echo $urlimg?>">&nbsp;<?echo $textambito?><BR>
-	<SPAN align=center class=subcabeceras><? echo $opciones[$opcion]?></SPAN></P>
+	<INPUT type=hidden name=opcion value=<?php echo $opcion?>>
+	<INPUT type=hidden name=idgrupo value=<?php echo $idgrupo?>>
+	<INPUT type=hidden name=grupoid value=<?php echo $grupoid?>>
+	<INPUT type=hidden name=tipo value=<?php echo $tipo?>>
+	<INPUT type=hidden name=literaltipo value="<?php echo $literaltipo?>">
+	<INPUT type=hidden name=iduniversidad value=<?php echo $iduniversidad?>>
+	<INPUT type=hidden name=idaula value=<?php echo $idaula?>>
+	<P align=center class=cabeceras><IMG src="<?php echo $urlimg?>">&nbsp;<?php echo $textambito?><BR>
+	<SPAN align=center class=subcabeceras><?php echo $opciones[$opcion]?></SPAN></P>
 	<TABLE  align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos >
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 	<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[5]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?php echo $TbMsg[5]?>&nbsp;</TD>
 			<?php	if ($opcion==$op_eliminacion)
 					echo '<TD style="width:300">'.$nombregrupo.'</TD>';
 				else
@@ -161,7 +161,7 @@ switch($literaltipo){
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 	<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[6]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?php echo $TbMsg[6]?>&nbsp;</TD>
 			<?php	if ($opcion==$op_eliminacion)
 					echo '<TD>'.$comentarios.'</TD>';
 				else

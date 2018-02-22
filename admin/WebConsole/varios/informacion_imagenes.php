@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -41,14 +41,14 @@ $arbol=new ArbolVistaXml($arbolXML,0,$baseurlimg,$clasedefault,1,20,130,1,$titul
 	<SCRIPT language="javascript" src="../clases/jscripts/ArbolVistaXML.js"></SCRIPT>
 </HEAD>
 <BODY>
-	<P align=center class=cabeceras><?echo $TbMsg[0]?><BR>
-	<SPAN align=center class=subcabeceras><?echo $TbMsg[1]?></SPAN>&nbsp;<IMG src="../images/iconos/imagenes.gif"><BR><BR>
-	<IMG src="../images/iconos/imagen.gif"><SPAN class=presentaciones>&nbsp;&nbsp;<U><?echo $TbMsg[2]?></U>:	<? echo $descripcionimagen?></SPAN></P>
-	<?echo $arbol->CreaArbolVistaXml(); // Crea arbol de configuraciones
+	<P align=center class=cabeceras><?php echo $TbMsg[0]?><BR>
+	<SPAN align=center class=subcabeceras><?php echo $TbMsg[1]?></SPAN>&nbsp;<IMG src="../images/iconos/imagenes.gif"><BR><BR>
+	<IMG src="../images/iconos/imagen.gif"><SPAN class=presentaciones>&nbsp;&nbsp;<U><?php echo $TbMsg[2]?></U>:	<?php echo $descripcionimagen?></SPAN></P>
+	<?php echo $arbol->CreaArbolVistaXml(); // Crea arbol de configuraciones
 ?>
 </BODY>
 </HTML>
-<?
+<?php
 /**************************************************************************************************************************************************
 	Devuelve una cadena con formato XML de toda la información de las imagenes
 	Parametros: 
@@ -158,11 +158,14 @@ function SubarbolXML_Ordenadores($cmd,$idimagen)
 
 	$cadenaXML="";
 	$gidaula=null;
-	$cmd->texto="SELECT DISTINCT aulas.idaula,aulas.nombreaula,ordenadores.idordenador,ordenadores.nombreordenador,
-								ordenadores_particiones.numpar,ordenadores.idperfilhard FROM ordenadores
- 								INNER JOIN aulas ON  ordenadores.idaula=aulas.idaula
-								INNER JOIN ordenadores_particiones ON  ordenadores_particiones.idordenador=ordenadores.idordenador
- 								WHERE ordenadores_particiones.idimagen=".$idimagen." ORDER BY aulas.idaula,ordenadores.nombreordenador";
+	$cmd->texto="SELECT DISTINCT aulas.idaula, aulas.nombreaula, ordenadores.idordenador,
+			    ordenadores.nombreordenador, ordenadores.idperfilhard,
+			    ordenadores_particiones.numdisk, ordenadores_particiones.numpar
+		       FROM ordenadores
+ 		      INNER JOIN aulas ON ordenadores.idaula=aulas.idaula
+		      INNER JOIN ordenadores_particiones ON ordenadores_particiones.idordenador=ordenadores.idordenador
+		      WHERE ordenadores_particiones.idimagen='$idimagen'
+		      ORDER BY aulas.idaula, ordenadores.nombreordenador";
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) return($cadenaXML); // Error al abrir recordset
@@ -188,7 +191,7 @@ function SubarbolXML_Ordenadores($cmd,$idimagen)
 		$cadenaXML.='<ORDENADOR';
 		// Atributos			
 		$cadenaXML.=' imagenodo="../images/iconos/ordenador.gif"';
-		$litpar="(Par:".$rs->campos["numpar"].")";
+		$litpar="(Par:".$rs->campos["numdisk"].",".$rs->campos["numpar"].")";
 		$cadenaXML.=' infonodo="'.$rs->campos["nombreordenador"].' '.$litpar.'"' ;
 		$cadenaXML.='></ORDENADOR>';
 		$rs->Siguiente();
@@ -196,7 +199,7 @@ function SubarbolXML_Ordenadores($cmd,$idimagen)
 	if ($gidaula)
 		$cadenaXML.='</AULA>';
 	if ($rs->numeroderegistros>0)
-			$cadenaXML.='</ORDENADORES>';
+		$cadenaXML.='</ORDENADORES>';
 	$rs->Cerrar();
 	return($cadenaXML);
 }

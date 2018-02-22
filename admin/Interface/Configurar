@@ -12,7 +12,7 @@ echo " " > $OGLOGSESSION; echo " " > $OGLOGCOMMAND; echo " " > ${OGLOGCOMMAND}.t
 # Registro de inicio de ejecución
 ogEcho log session "$MSG_INTERFACE_START $0 $*"
 
-# Solo ejecutable por OpenGnSys Client.
+# Solo ejecutable por OpenGnsys Client.
 PATH=$PATH:$(dirname $0)
 PROG=$(basename $0)
 
@@ -78,7 +78,7 @@ for ((i=0; i<${#TBPRM[@]}; i++)); do
         # Si se activa operación de formatear, componer datos de formateo.
         if [ "$ope" == 1 ]; then
            # Comprobamos que la particion y el s.f sean validos.
-	   ogCheckStringInGroup $cpt "EMPTY EXTENDED LINUX-LVM"
+	   ogCheckStringInGroup $cpt "EMPTY EXTENDED LINUX-LVM LVM ZPOOL"
            [ $? -ne 0 ] && TBF[par]="$sfi"
         fi
         # Obtener la partición mayor.

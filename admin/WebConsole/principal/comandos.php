@@ -1,4 +1,4 @@
-<?
+<?php
 include_once("../includes/ctrlacc.php");
 
 include_once("../clases/AdoPhp.php");
@@ -37,12 +37,12 @@ $literal=$literal.$literalnodo;
 <SCRIPT language="javascript" src="../clases/jscripts/MenuContextual.js"></SCRIPT>
 <SCRIPT language="javascript" src="../jscripts/comandos.js"></SCRIPT>
 <BODY>
-	<input type=hidden value="<? echo $identificador?>" id=identificador> 
-	<input type=hidden value="<? echo $ambicom?>" id=ambicom> 
+	<input type=hidden value="<?php echo $identificador?>" id=identificador> 
+	<input type=hidden value="<?php echo $ambicom?>" id=ambicom> 
 	
 	<p align=center class=cabeceras>COMANDOS&nbsp<img src="../images/iconos/comandos.gif"><br>
-	<span align=center class=subcabeceras><? echo $literal ?></span></p>
-<?
+	<span align=center class=subcabeceras><?php echo $literal ?></span></p>
+<?php
 $cmd=CreaComando($cadenaconexion); // Crea objeto comando
 if ($cmd){
 	$rs=new Recordset; 
@@ -88,7 +88,7 @@ if ($cmd){
 }
 ?>
 <br>
-<?
+<?php
 //________________________________________________________________________________________________________
 include_once("../includes/opcionesbotones.php");
 //________________________________________________________________________________________________________
@@ -99,8 +99,8 @@ include_once("../includes/iframecomun.php");
 ?>
 </BODY>
 </HTML>
-<?	$cmd->Conexion->Cerrar(); // Cierra la conexión ?>
-<?
+<?php	$cmd->Conexion->Cerrar(); // Cierra la conexión ?>
+<?php
 /******************************************************************
 	Devuelve una objeto comando totalmente operativo (con la conexión abierta)
 	Parametros: 

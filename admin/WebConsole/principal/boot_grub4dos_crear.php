@@ -75,10 +75,10 @@ if ($opcioncrear == 1)
 						<TABLE width="500" align=center border=1 >
 						<TR><TD align="center"><br><br><br><SPAN align=center class=subcabeceras><?php echo $TbMsg[14];?></span><br><br><br>	
 						<form name="crearranque" method="post" action="./boot_grub4dos_crear.php">
-						<input type="hidden" name="litambito" value="<? echo $litambito?>">
-						<input type="hidden" name="idambito" value="<? echo $idambito?>">
-						<input type="hidden" name="nombreambito" value="<? echo $nombreambito?>">
-						<input type="hidden" name="ultimonumero" value="<? echo $ultimonumero?>">
+						<input type="hidden" name="litambito" value="<?php echo $litambito?>">
+						<input type="hidden" name="idambito" value="<?php echo $idambito?>">
+						<input type="hidden" name="nombreambito" value="<?php echo $nombreambito?>">
+						<input type="hidden" name="ultimonumero" value="<?php echo $ultimonumero?>">
 						<input type="hidden" name="confirmado" value="">
 						<input type="hidden" name="opcioncrear" value="1">
 						<input type="submit" value="Continuar" name="nuevoarran">
@@ -92,9 +92,9 @@ if ($opcioncrear == 1)
 						<TABLE width="500" align=center border=1 >
 						<TR><TD align="center"><br><?php if ($guarnomb != null) echo $TbMsg[6];?><br><br><SPAN align=center class=subcabeceras><?php echo $descripfich;?></span><br><br><br>	
 						<form name="crearranque" method="post" action="./boot_grub4dos.php">
-						<input type="hidden" name="litambito" value="<? echo $litambito?>">
-						<input type="hidden" name="idambito" value="<? echo $idambito?>">
-						<input type="hidden" name="nombreambito" value="<? echo $nombreambito?>">
+						<input type="hidden" name="litambito" value="<?php echo $litambito?>">
+						<input type="hidden" name="idambito" value="<?php echo $idambito?>">
+						<input type="hidden" name="nombreambito" value="<?php echo $nombreambito?>">
 						<input type="hidden" name="confirmado" value="1">
 						<input type="hidden" name="opcioncrear" value="1">
 						<input type="submit" value="Continuar" name="nuevoarran">
@@ -158,10 +158,10 @@ boot";
 </TR>
 <TR>
 	<TD width="150"  valign="middle">
-		<input type="hidden" name="litambito" value="<? echo $litambito?>">
-		<input type="hidden" name="idambito" value="<? echo $idambito?>">
-		<input type="hidden" name="nombreambito" value="<? echo $nombreambito?>">
-		<input type="hidden" name="ultimonumero" value="<? echo $ultimonumero?>">
+		<input type="hidden" name="litambito" value="<?php echo $litambito?>">
+		<input type="hidden" name="idambito" value="<?php echo $idambito?>">
+		<input type="hidden" name="nombreambito" value="<?php echo $nombreambito?>">
+		<input type="hidden" name="ultimonumero" value="<?php echo $ultimonumero?>">
 		<input type="hidden" name="opcioncrear" value="1">
 
 		<input type="submit" name="boton" value="<?php echo $TbMsg[13]?>">
@@ -170,9 +170,9 @@ boot";
 
 <TD width="500"  valign="middle"><br />
 		<form name="crearranque" method="post" action="./boot_grub4dos.php">
-		<input type="hidden" name="litambito" value="<? echo $litambito?>">
-		<input type="hidden" name="idambito" value="<? echo $idambito?>">
-		<input type="hidden" name="nombreambito" value="<? echo $nombreambito?>">
+		<input type="hidden" name="litambito" value="<?php echo $litambito?>">
+		<input type="hidden" name="idambito" value="<?php echo $idambito?>">
+		<input type="hidden" name="nombreambito" value="<?php echo $nombreambito?>">
 		<input type="hidden" name="modo" value="1">
 		<input type="submit" value="<?php echo $TbMsg[16]?>">
 		</form>
@@ -209,9 +209,9 @@ if ($opcioncrear == 2)
 		<TABLE width="500" align=center border=1 >
 		<TR><TD align="center"><br><br><br><SPAN align=center class=subcabeceras><?php echo $TbMsg[14];?></span><br><br><br>
 		<form name="crearranque" method="post" action="./boot_grub4dos_crear.php">
-		<input type="hidden" name="litambito" value="<? echo $litambito?>">
-		<input type="hidden" name="idambito" value="<? echo $idambito?>">
-		<input type="hidden" name="nombreambito" value="<? echo $nombreambito?>">
+		<input type="hidden" name="litambito" value="<?php echo $litambito?>">
+		<input type="hidden" name="idambito" value="<?php echo $idambito?>">
+		<input type="hidden" name="nombreambito" value="<?php echo $nombreambito?>">
 		<input type="hidden" name="confirmado" value="0">
 		<input type="hidden" name="opcioncrear" value="2">
 		<input type="submit" value="Continuar" name="nuevoarran">
@@ -233,9 +233,9 @@ if ($opcioncrear == 2)
 		<TABLE width="500" align=center border=1 >
 		<TR><TD align="center"><br><br><br><SPAN align=center class=subcabeceras><?php echo $TbMsg[7];?></span><br><br><br>
 		<form name="crearranque" method="post" action="./boot_grub4dos.php">
-		<input type="hidden" name="litambito" value="<? echo $litambito?>">
-		<input type="hidden" name="idambito" value="<? echo $idambito?>">
-		<input type="hidden" name="nombreambito" value="<? echo $nombreambito?>">
+		<input type="hidden" name="litambito" value="<?php echo $litambito?>">
+		<input type="hidden" name="idambito" value="<?php echo $idambito?>">
+		<input type="hidden" name="nombreambito" value="<?php echo $nombreambito?>">
 		<input type="hidden" name="confirmado" value="0">
 		<input type="hidden" name="opcioncrear" value="2">
 		<input type=hidden name=modo value=1></input>
@@ -298,10 +298,10 @@ if ($numeros > 19)
 	<TD height="70" colspan="2" valign="middle">
 		<p align=center><SPAN align=center class=cabeceras> <?php echo $TbMsg[4]?> </SPAN></p><p aling=left>
         <form name="crearranque" method="post" action="./boot_grub4dos_crear.php">
-        	<input type="hidden" name="litambito" value="<? echo $litambito?>">
-		<input type="hidden" name="idambito" value="<? echo $idambito?>">
-		<input type="hidden" name="nombreambito" value="<? echo $nombreambito?>">
-		<input type="hidden" name="ultimonumero" value="<? echo $ultimonumero?>">
+        	<input type="hidden" name="litambito" value="<?php echo $litambito?>">
+		<input type="hidden" name="idambito" value="<?php echo $idambito?>">
+		<input type="hidden" name="nombreambito" value="<?php echo $nombreambito?>">
+		<input type="hidden" name="ultimonumero" value="<?php echo $ultimonumero?>">
 		<input type="hidden" name="opcioncrear" value="2">
 		<input type="hidden" name="modo" value="1">
         <?php if ($_SESSION["wadminetboot"] == 1 ){ ?>
@@ -314,10 +314,10 @@ if ($numeros > 19)
  <?php if ($numeros > 19){  ?>
 <TR>
 <form name="actualiza" method="post" action="./boot_grub4dos_crear.php">
-		<input type="hidden" name="litambito" value="<? echo $litambito?>">
-		<input type="hidden" name="idambito" value="<? echo $idambito?>">
-		<input type="hidden" name="nombreambito" value="<? echo $nombreambito?>">
-		<input type="hidden" name="ultimonumero" value="<? echo $ultimonumero?>">
+		<input type="hidden" name="litambito" value="<?php echo $litambito?>">
+		<input type="hidden" name="idambito" value="<?php echo $idambito?>">
+		<input type="hidden" name="nombreambito" value="<?php echo $nombreambito?>">
+		<input type="hidden" name="ultimonumero" value="<?php echo $ultimonumero?>">
 		<input type="hidden" name="opcioncrear" value="2">
 
 	<TD height="10" colspan="2" valign="middle">
@@ -341,10 +341,10 @@ if ($numeros > 19)
 <?php }else{?>
 <TR>
 <form name="actualiza" method="post" action="./boot_grub4dos.php">
-		<input type="hidden" name="litambito" value="<? echo $litambito?>">
-		<input type="hidden" name="idambito" value="<? echo $idambito?>">
-		<input type="hidden" name="nombreambito" value="<? echo $nombreambito?>">
-		<input type="hidden" name="ultimonumero" value="<? echo $ultimonumero?>">
+		<input type="hidden" name="litambito" value="<?php echo $litambito?>">
+		<input type="hidden" name="idambito" value="<?php echo $idambito?>">
+		<input type="hidden" name="nombreambito" value="<?php echo $nombreambito?>">
+		<input type="hidden" name="ultimonumero" value="<?php echo $ultimonumero?>">
 		<input type="hidden" name="modo" value="1">
 
 	<TD height="10" colspan="2" valign="middle">
@@ -387,10 +387,10 @@ if ($numeros > 19)
 	<TD width="300"  valign="middle">
 		<SPAN align=center class=subcabeceras></SPAN>
 
-		<input type="hidden" name="litambito" value="<? echo $litambito?>">
-		<input type="hidden" name="idambito" value="<? echo $idambito?>">
-		<input type="hidden" name="nombreambito" value="<? echo $nombreambito?>">
-		<input type="hidden" name="ultimonumero" value="<? echo $ultimonumero?>">
+		<input type="hidden" name="litambito" value="<?php echo $litambito?>">
+		<input type="hidden" name="idambito" value="<?php echo $idambito?>">
+		<input type="hidden" name="nombreambito" value="<?php echo $nombreambito?>">
+		<input type="hidden" name="ultimonumero" value="<?php echo $ultimonumero?>">
 		<input type="hidden" name="confirmado" value="1">
 		<input type="hidden" name="opcioncrear" value="2">
 		<input type="submit" value="<?php echo $TbMsg[13]?>" name="nuevoarran">
@@ -399,9 +399,9 @@ if ($numeros > 19)
 
 	<TD width="500"  valign="middle"><br />
 		<form name="crearranque" method="post" action="./boot_grub4dos.php">
-		<input type="hidden" name="litambito" value="<? echo $litambito?>">
-		<input type="hidden" name="idambito" value="<? echo $idambito?>">
-		<input type="hidden" name="nombreambito" value="<? echo $nombreambito?>">
+		<input type="hidden" name="litambito" value="<?php echo $litambito?>">
+		<input type="hidden" name="idambito" value="<?php echo $idambito?>">
+		<input type="hidden" name="nombreambito" value="<?php echo $nombreambito?>">
 		<input type="hidden" name="confirmado" value="1">
 		<input type="hidden" name="opcioncrear" value="2">
 		<input type="hidden" name="modo" value="1">
@@ -489,10 +489,10 @@ for ($b=0;$b<count($pn);$b++)
 	<TD height="70" colspan="4" valign="middle">
 		<p align=center><SPAN align=center class=cabeceras> <?php echo $TbMsg[4]?> </SPAN></p><p align=left>
         <form name="crearranque" method="post" action="./boot_grub4dos_crear.php">
-        	<input type="hidden" name="litambito" value="<? echo $litambito?>">
-		<input type="hidden" name="idambito" value="<? echo $idambito?>">
-		<input type="hidden" name="nombreambito" value="<? echo $nombreambito?>">
-		<input type="hidden" name="ultimonumero" value="<? echo $ultimonumero?>">
+        	<input type="hidden" name="litambito" value="<?php echo $litambito?>">
+		<input type="hidden" name="idambito" value="<?php echo $idambito?>">
+		<input type="hidden" name="nombreambito" value="<?php echo $nombreambito?>">
+		<input type="hidden" name="ultimonumero" value="<?php echo $ultimonumero?>">
 		<input type="hidden" name="opcioncrear" value="2">
 	<?php	echo $modo;if ($modo==1)
 			{
@@ -506,10 +506,10 @@ for ($b=0;$b<count($pn);$b++)
   </TR>
 <TR>
 <form name="actualiza" method="post" action="./boot_grub4dos_crear.php">
-		<input type="hidden" name="litambito" value="<? echo $litambito?>">
-		<input type="hidden" name="idambito" value="<? echo $idambito?>">
-		<input type="hidden" name="nombreambito" value="<? echo $nombreambito?>">
-		<input type="hidden" name="ultimonumero" value="<? echo $ultimonumero?>">
+		<input type="hidden" name="litambito" value="<?php echo $litambito?>">
+		<input type="hidden" name="idambito" value="<?php echo $idambito?>">
+		<input type="hidden" name="nombreambito" value="<?php echo $nombreambito?>">
+		<input type="hidden" name="ultimonumero" value="<?php echo $ultimonumero?>">
 		<input type="hidden" name="opcioncrear" value="2">
 		<input type="hidden" name="modo" value="1">
 
@@ -573,10 +573,10 @@ for ($b=0;$b<count($pn);$b++)
 	<TD width="500"  valign="middle">
 		<SPAN align=center class=subcabeceras></SPAN>
 
-		<input type="hidden" name="litambito" value="<? echo $litambito?>">
-		<input type="hidden" name="idambito" value="<? echo $idambito?>">
-		<input type="hidden" name="nombreambito" value="<? echo $nombreambito?>">
-		<input type="hidden" name="ultimonumero" value="<? echo $ultimonumero?>">
+		<input type="hidden" name="litambito" value="<?php echo $litambito?>">
+		<input type="hidden" name="idambito" value="<?php echo $idambito?>">
+		<input type="hidden" name="nombreambito" value="<?php echo $nombreambito?>">
+		<input type="hidden" name="ultimonumero" value="<?php echo $ultimonumero?>">
 		<input type="hidden" name="confirmado" value="1">
 		<input type="hidden" name="opcioncrear" value="2">
 		<input type="submit" value="<?php echo $TbMsg[13]?>" name="nuevoarran">
@@ -585,9 +585,9 @@ for ($b=0;$b<count($pn);$b++)
 
 	<TD width="500"  valign="middle"><br />
 		<form name="crearranque" method="post" action="./boot_grub4dos.php">
-		<input type="hidden" name="litambito" value="<? echo $litambito?>">
-		<input type="hidden" name="idambito" value="<? echo $idambito?>">
-		<input type="hidden" name="nombreambito" value="<? echo $nombreambito?>">
+		<input type="hidden" name="litambito" value="<?php echo $litambito?>">
+		<input type="hidden" name="idambito" value="<?php echo $idambito?>">
+		<input type="hidden" name="nombreambito" value="<?php echo $nombreambito?>">
 		<input type="hidden" name="confirmado" value="1">
 		<input type="hidden" name="opcioncrear" value="2">
 		<input type="hidden" name="modo" value="1">
@@ -677,9 +677,9 @@ $rs->Cerrar();
 		<TABLE width="500" align=center border=1 >
 		<TR><TD align="center"><br><?php if($eliminafichero != null) echo $TbMsg[8];?><br><br><SPAN align=center class=subcabeceras><?php echo substr($eliminafichero,2);?></span><br><br><br>
 		<form name="crearranque" method="post" action="./boot_grub4dos.php">
-		<input type="hidden" name="litambito" value="<? echo $litambito?>">
-		<input type="hidden" name="idambito" value="<? echo $idambito?>">
-		<input type="hidden" name="nombreambito" value="<? echo $nombreambito?>">
+		<input type="hidden" name="litambito" value="<?php echo $litambito?>">
+		<input type="hidden" name="idambito" value="<?php echo $idambito?>">
+		<input type="hidden" name="nombreambito" value="<?php echo $nombreambito?>">
 		<input type="submit" value="Continuar" name="nuevoarran">
 		</form>
 		</TR></TD>
@@ -741,9 +741,9 @@ array_multisort($pn);
 	<TD width="150"  valign="middle">
 		<SPAN align=center class=subcabeceras></SPAN>
 
-		<input type="hidden" name="litambito" value="<? echo $litambito?>">
-		<input type="hidden" name="idambito" value="<? echo $idambito?>">
-		<input type="hidden" name="nombreambito" value="<? echo $nombreambito?>">
+		<input type="hidden" name="litambito" value="<?php echo $litambito?>">
+		<input type="hidden" name="idambito" value="<?php echo $idambito?>">
+		<input type="hidden" name="nombreambito" value="<?php echo $nombreambito?>">
 		<input type="hidden" name="confirmado" value="1">
 		<input type="hidden" name="opcioncrear" value="3">
 		<input type="submit" value="<?php echo $TbMsg[13]?>" name="nuevoarra">
@@ -752,9 +752,9 @@ array_multisort($pn);
 
 	<TD width="500"  valign="middle"><br />
 		<form name="crearranque" method="post" action="./boot_grub4dos.php">
-		<input type="hidden" name="litambito" value="<? echo $litambito?>">
-		<input type="hidden" name="idambito" value="<? echo $idambito?>">
-		<input type="hidden" name="nombreambito" value="<? echo $nombreambito?>">
+		<input type="hidden" name="litambito" value="<?php echo $litambito?>">
+		<input type="hidden" name="idambito" value="<?php echo $idambito?>">
+		<input type="hidden" name="nombreambito" value="<?php echo $nombreambito?>">
 		<input type="hidden" name="modo" value="1">
 		<input type="submit" value="<?php echo $TbMsg[16]?>" name="nuevoarran">
 		</form>

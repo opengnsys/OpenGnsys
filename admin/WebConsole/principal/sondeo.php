@@ -7,8 +7,12 @@
 // Nombre del fichero: sondeo.php
 // Descripción : 
 //		Consulta el estado de los ordenadores
+// Version 1.1: De la salida del sondeo del agente antiguo se eliminan los que han respondido con el agente nuevo
+// Autor: Irina Gomez - ETSII Universidad Sevilla
+// Fecha: 2017/11/03
 // *************************************************************************************************************************************************
 	include_once("../includes/ctrlacc.php");
+	include_once("../includes/restfunctions.php");
 	include_once("../clases/SockHidra.php");
 	include_once("../clases/AdoPhp.php");
 	include_once("../includes/constantes.php");
@@ -41,12 +45,13 @@
 	$cadenaip="";
 	$cadenamac="";
 	RecopilaIpesMacs($cmd,$ambito,$idambito); // Ámbito de aplicación
+
 	$aplicacion="ido=".$cadenaid.chr(13)."iph=".$cadenaip.chr(13);
-	//________________________________________________________________________________________________________
 	// Envio al servidor de la petición
 	//________________________________________________________________________________________________________
 	$resul=false;
 	$trama="";
+	$trama_notificacion="";
 	$shidra=new SockHidra($servidorhidra,$hidraport); 
 	if ($shidra->conectar()){ // Se ha establecido la conexión con el servidor hidra
 		$parametros="nfn=".$funcion.chr(13);
@@ -64,8 +69,31 @@
 		$ValorParametros=extrae_parametros($parametros,chr(13),'=');
 		if (isset ($ValorParametros["tso"])) {
 			$trama_notificacion=$ValorParametros["tso"];
-			echo $trama_notificacion; // Devuelve respuesta
 		}
 	}
+
+	// Send REST requests to new OGAgent clients.
+	$urls = array();
+	// Compose array of REST URLs.
+	foreach (explode (';', $cadenaip) as $ip) {
+		$urls[$ip] = "https://$ip:8000/opengnsys/status";
+	}
+	// Launch concurrent requests.
+	$responses = multiRequest($urls);
+	// Process responses array (IP as array index).
+	foreach ($responses as $ip => $resp) {
+		if (isset($resp['data'])) {
+			$data = json_decode($resp['data']);
+			// If user session is oppened, then append "S" to client status.
+			if (isset($data->status) and isset($data->loggedin)) {
+				// Output format: IP1/Status1;...
+				echo "$ip/".$data->status.($data->loggedin?"S;":";");
+				// eliminamos los equipos repetidos en el agente antiguo y nuevo.
+				$trama_notificacion=preg_replace("/$ip\/\w{3}/",'',$trama_notificacion);
+
+			}
+		}
+	}
+	echo $trama_notificacion;
 ?>
 

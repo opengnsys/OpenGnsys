@@ -1,7 +1,7 @@
 # OpenGnsys oginit			-*- shell-script -*-
 
 #@file    oginit
-#@brief   Guion modificador inicio initrd para OpenGnSys
+#@brief   Guion modificador inicio initrd para OpenGnsys
 #@warning 
 #@version 0.1 - basado en ROOTfs - rootfs over nfs -
 #@author  Antonio J. Doblas Viso. Universidad de Málaga
@@ -37,12 +37,12 @@
 mountroot ()
 {
 	[ -f /scripts/VERSION.txt ] && OGVERSION=$(cat /scripts/VERSION.txt)
-	OGVERSION=${OGVERSION:-"OpenGnSys Client"}
+	OGVERSION=${OGVERSION:-"OpenGnsys Client"}
 	echo; echo; echo "$OGVERSION"; echo; echo
 
-	[ "$quiet" != "y" ] && log_begin_msg "Running OpenGnsys /scripts/og-top"
-	run_scripts /scripts/og-top
-	[ "$quiet" != "y" ] && log_end_msg
+	#[ "$quiet" != "y" ] && log_begin_msg "Running OpenGnsys /scripts/og-top"
+	#run_scripts /scripts/og-top
+	#[ "$quiet" != "y" ] && log_end_msg
 
 	# If the root device hasn't shown up yet, give it a little while
 	# to deal with removable devices
@@ -59,7 +59,7 @@ mountroot ()
 	ogExportKernelParameters 
 	# Cambiar resolución de vídeo para kernels que usan el parámetro "video".
 	[ -n "$video" ] && ogChangeVideoResolution
-	log_success_msg "Checking OpenGnSys Environmnet"
+	log_success_msg "Checking OpenGnsys Environmnet"
 	ogExportVarEnvironment
 	
 	[ "$ogdebug" == "true" ] && ogYesNo --timeout 5 --default no "Stop before configure ramfs structure for OG: y/N "
@@ -110,6 +110,10 @@ mountroot ()
 	[ "$ogdebug" == "true" ] && ogYesNo --timeout 5 --default no "Stop before connect with client dir SHARE -engine,scripts,interface, -share- on $OGSERVERSHARE : y/N "
     [ $? == 0 ] && sh || echo " "
 	ogConnect $OGSERVERSHARE $OGPROTOCOL $SRCOGSHARE $DSTOGSHARE 
+	if [ $? -ne 0 -a "$SRCOGSHARE" != "$DEFOGSHARE" ]; then
+		ogConnect $OGSERVERSHARE $OGPROTOCOL $DEFOGSHARE $DSTOGSHARE && SRCOGSHARE=$DEFOGSHARE
+	fi
+	unset DEFOGSHARE
 	
 	[ "$ogdebug" == "true" ] && ogYesNo --timeout 5 --default no "Stop before connect with client dir LOG STORAGE on $OGSERVERLOG : y/N "
     [ $? == 0 ] && sh || echo " "

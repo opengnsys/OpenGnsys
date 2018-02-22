@@ -1,4 +1,4 @@
-<?
+<?php
 //________________________________________________________________________________________________________
 //
 //	Fichero de idiomas php: restaurarsoftincremental_esp.php (Comandos)

@@ -178,29 +178,29 @@ if($accion==$INSERTAR_REGISTRO || $accion==$MODIFICAR_REGISTRO){
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
   <LINK rel="stylesheet" type="text/css" href="../estilos.css">
   <SCRIPT language="javascript" src="M_Iconos.js"></SCRIPT>
-<? echo '   <SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/iconos_'.$idioma.'.js"></SCRIPT>'?>
+<?php echo '   <SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/iconos_'.$idioma.'.js"></SCRIPT>'?>
   </HEAD>
   <BODY>
 <!--------------------------------------------------------------------------------------------------------------------------------------------------->
   <FORM name="fdatos" action="M_Iconos.php"  enctype="multipart/form-data" method="post">
-	<input name="opcion" type="hidden" value="<? echo $opcion?>">
-	<input name="accion" type="hidden" value="<? echo $accion?>">
-	<input name="idicono" type="hidden" value="<? echo $idicono?>">
-	<input name="filebaja_urlicono" type="hidden" value="<? echo basename($urlicono)?>">
-	<input name="fileexist_urlicono" type="hidden" value="<? echo $urlicono?>">
+	<input name="opcion" type="hidden" value="<?php echo $opcion?>">
+	<input name="accion" type="hidden" value="<?php echo $accion?>">
+	<input name="idicono" type="hidden" value="<?php echo $idicono?>">
+	<input name="filebaja_urlicono" type="hidden" value="<?php echo basename($urlicono)?>">
+	<input name="fileexist_urlicono" type="hidden" value="<?php echo $urlicono?>">
 <!--------------------------------------------------------------------------------------------------------------------------------------------------->
      <DIV align=center id="Layer_Datos">
-                <P class=cabeceras><? echo $TbMsg["TITLE"] ; ?><BR>
-                <SPAN class="subcabeceras"><? echo $TbMsg["$mopciones[$opcion]"] ?></SPAN></P>
-                <P align="center"><SPAN class=textos><? echo $TbMsg["TABLE_TITLE"] ?></SPAN></P>
+                <P class=cabeceras><?php echo $TbMsg["TITLE"] ; ?><BR>
+                <SPAN class="subcabeceras"><?php echo $TbMsg["$mopciones[$opcion]"] ?></SPAN></P>
+                <P align="center"><SPAN class=textos><?php echo $TbMsg["TABLE_TITLE"] ?></SPAN></P>
         <TABLE class="tabla_datos" align="center">
 
 <!--------------------------------------------------------------------------------------------------------------------------------------------------->
 
                         <TR>
-                                <TH>&nbsp;<? echo $TbMsg["TYPE"] ?> &nbsp;</TH>
-                                <?if ($opcion==$CONSULTAR || $opcion==$ELIMINAR){?>
-                                        <TD><?
+                                <TH>&nbsp;<?php echo $TbMsg["TYPE"] ?> &nbsp;</TH>
+                                <?php if ($opcion==$CONSULTAR || $opcion==$ELIMINAR){?>
+                                        <TD><?php
                                                         $TBtipo[1]=$TbMsg["TYPE_WEB"];
                                                         $TBtipo[2]=$TbMsg["TYPE_ITEMS"];
                                                         $TBtipo[3]=$TbMsg["TYPE_MENU"];
@@ -217,36 +217,36 @@ if($accion==$INSERTAR_REGISTRO || $accion==$MODIFICAR_REGISTRO){
 
 <!-------------------------------------------------------------------------------------------------------------------------------------------------->
 			<TR>
-				<TH>&nbsp;<? echo $TbMsg["DESCRIP"] ?>  &nbsp;</TH>
-				<?if ($opcion==$CONSULTAR || $opcion==$ELIMINAR){?>
-					<TD><?echo $descripcion?></TD>
-				<?}else{?>
-					<TD><INPUT class=cajatexto name="descripcion" maxlength=250  style="width:250" value="<? echo $descripcion?>"></TD>
-				<?}?>
+				<TH>&nbsp;<?php echo $TbMsg["DESCRIP"] ?>  &nbsp;</TH>
+				<?php if ($opcion==$CONSULTAR || $opcion==$ELIMINAR){?>
+					<TD><?php echo $descripcion?></TD>
+				<?php }else{?>
+					<TD><INPUT class=cajatexto name="descripcion" maxlength=250  style="width:250" value="<?php echo $descripcion?>"></TD>
+				<?php }?>
 			</TR>
 <!--------------------------------------------------------------------------------------------------------------------------------------------------->
-		<?if ($opcion==$CONSULTAR || $opcion==$ELIMINAR){?>
+		<?php if ($opcion==$CONSULTAR || $opcion==$ELIMINAR){?>
 			<TR>
 				<TH>&nbsp;Icono&nbsp;</TH>
-				<TD><?echo basename($urlicono)?></TD>
+				<TD><?php echo basename($urlicono)?></TD>
 			</TR>
-		<?}else{
+		<?php }else{
 						if ($opcion==$INSERTAR || ($opcion==$MODIFICAR && empty($urlicono))){?>
 							<TR>
-								<TH>&nbsp; <? echo $TbMsg["ICON"] ?> &nbsp;</TH>
-								<TD><INPUT type=file class=cajatexto name="urlicono"  style="width:500" value="<? echo $urlicono?>">
+								<TH>&nbsp; <?php echo $TbMsg["ICON"] ?> &nbsp;</TH>
+								<TD><INPUT type=file class=cajatexto name="urlicono"  style="width:500" value="<?php echo $urlicono?>">
 						</TR>
-					<?}else{?>
+					<?php }else{?>
 							<TR>
-								<TH>&nbsp; <? echo $TbMsg["ICON"] ?> &nbsp;</TH>
-								<TD><?echo basename($urlicono)?></TD>
+								<TH>&nbsp; <?php echo $TbMsg["ICON"] ?> &nbsp;</TH>
+								<TD><?php echo basename($urlicono)?></TD>
 							</TR>
 							<TR>
-								<TH>&nbsp; <? echo $TbMsg["REPLACE"] ?> &nbsp;</TH>
-								<TD><INPUT type=file class=cajatexto name="urlicono"  style="width:500" value="<? echo $urlicono?>">
+								<TH>&nbsp; <?php echo $TbMsg["REPLACE"] ?> &nbsp;</TH>
+								<TD><INPUT type=file class=cajatexto name="urlicono"  style="width:500" value="<?php echo $urlicono?>">
 						</TR>
-					<?}?>
-			<?}?>
+					<?php }?>
+			<?php }?>
 			</TR>
 <!--------------------------------------------------------------------------------------------------------------------------------------------------->
 	</TABLE>
@@ -256,7 +256,7 @@ if($accion==$INSERTAR_REGISTRO || $accion==$MODIFICAR_REGISTRO){
     <DIV id="Layer_opciones">
         <TABLE align="center" border="0" >
              <TR>
-             <?switch($opcion){
+             <?php switch($opcion){
                    case $CONSULTAR:
                                                   echo '<TD><img style="cursor:hand" SRC="../images/boton_insertar_'.$idioma.'.gif" onclick="Cancelar()"></TD>';
                                                   break;
@@ -274,7 +274,7 @@ if($accion==$INSERTAR_REGISTRO || $accion==$MODIFICAR_REGISTRO){
         </DIV>
 
 
-<?
+<?php
 //________________________________________________________________________________________________________
 // Posiciona cursor en campo usuario y muestra mensaje de error si lo hubiera
 echo '<SCRIPT LANGUAGE="javascript">';
@@ -286,7 +286,7 @@ echo '</SCRIPT>';
   </FORM>
   </BODY>
   </HTML>
-  <?
+  <?php
 //______________________________________________________________________
 //	Inicialiciza los campos de trabajo de la tabla
 //______________________________________________________________________

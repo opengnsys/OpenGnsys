@@ -31,6 +31,12 @@
 #@version 1.0.6 - Se añade la gestión de errores de la CACHE cuando en el engine.cfg se define RESTOREPROTOCOLNOCACHE=NONE.
 #@author  Antonio J. Doblas Viso.
 #@date    2015-02-23
+#@version 1.1 - Cambio de repositorio para el recurso remoto images si es necesario
+#@author  Irina Gomez, ETSII Universidad de Sevilla
+#@date    2015-06-16
+#@version 1.1 - Control de errores en transferencia multicast (ticket #781) 
+#@author  Irina Gomez, ETSII Universidad de Sevilla 
+#@date    2017/04/20 
 #**/
 
 
@@ -57,6 +63,8 @@ PART="$4"
 PROTO="${5^^}"
 PROTO="${PROTO:-"UNICAST"}"
 PROTOOPT="$6"
+# Unidad organizativa.
+[ "$ogunit" != "" ] && OGUNIT="$ogunit"
 
 #Load engine configurator from engine.cfg file.
 #Carga el configurador del engine desde el fichero engine.cfg
@@ -77,17 +85,25 @@ ogEcho log session "$MSG_HELP_ogUnmount $DISK $PART"
 ogUnmount $DISK $PART 2>/dev/null
 
 # Valor por defecto para el repositorio.
-[ "$REPO" == "$(ogGetRepoIp)" ] && REPO="REPO"
-[ "$REPO" == "$(ogGetIpAddress)" ] && REPO="CACHE"
+if [ "$REPO" == "$(ogGetIpAddress)" -o "$REPO" == "CACHE" ]; then
+    MODE="CACHE"
+else
+    ogCheckIpAddress "$REPO"
+    if [ $? == 0 -o "$REPO" == "REPO"  ]; then
+        # Si falla el cambio -> salimos con error repositorio no valido
+        ogChangeRepo $REPO ${OGUNIT} || exit $(ogRaiseError $OG_ERR_NOTFOUND "$REPO $OGUNIT"; echo $?)
+        MODE="REPO"
+    fi
+fi
 
 #Informacioin previa de la imagen
-IMGOS=$(ogGetImageInfo `ogGetPath $REPO $IMGNAME.img`) || exit $(ogRaiseError session $OG_ERR_NOTFOUND "$REPO $2"; echo $?)
-IMGSIZE=$(ls -s `ogGetPath $REPO $IMGNAME.img`| cut -f1 -d" ")
+IMGOS=$(ogGetImageInfo `ogGetPath $MODE $IMGNAME.img`) || exit $(ogRaiseError session $OG_ERR_NOTFOUND "$REPO $2"; echo $?)
+IMGSIZE=$(ls -s `ogGetPath $MODE $IMGNAME.img`| cut -f1 -d" ")
 
 ogEcho log session "[1] REPO=$REPO IMG-FILE=$IMGNAME.img  SIZE=$IMGSIZE (KB)   METADATA=$IMGOS"
 
 # Procesar repositorio.
-case "$REPO" in
+case "$MODE" in
     CACHE)  # Repositorio en caché local.
         NEXTOPERATION=CACHE
     ;;
@@ -102,9 +118,9 @@ case "$REPO" in
 
             # Si protocolo es torrent|torrent-cache o multicast|multicast-cache
             TORRENT|TORRENT-CACHE|MULTICAST|MULTICAST-CACHE|UNICAST|UNICAST-CACHE)
-                ogEcho log session "[2] updateCache REPO \"/$IMGNAME.img\" $PROTO $PROTOOPT"
+                ogEcho log session "[2] updateCache "$REPO" \"/$IMGNAME.img\" $PROTO $PROTOOPT"
                 TIME2=$SECONDS
-                updateCache REPO "/$IMGNAME.img" "$PROTO" "$PROTOOPT"	 	
+                updateCache "$REPO" "/$IMGNAME.img" "$PROTO" "$PROTOOPT"	 	
                 RETVAL=$?
                 TIME2=$[SECONDS-TIME2]
                 ogEcho log session "   [ ]  $MSG_SCRIPTS_TIME_PARTIAL updateCache $[TIME2/60]m $[TIME2%60]s"
@@ -144,6 +160,10 @@ case "$REPO" in
                           	;;
                         esac # del RESTOREPROTOCOLNOTCACHE
                     ;;
+		    57|60)
+			# Time-out en la transferencia multicast (El mensaje de error está enviado)
+			exit $RETVAL
+		    ;;
                 esac
             ;;
             *)  # Error: protocolo desconocido.
@@ -165,9 +185,9 @@ case "$NEXTOPERATION" in
     CACHE)
         PARAMS="CACHE $IMGNAME $DISK $PART" ;;
     UNICAST)
-        PARAMS="REPO $IMGNAME $DISK $PART" ;;
+        PARAMS="$REPO $IMGNAME $DISK $PART" ;;
     MULTICAST)
-        PARAMS="REPO $IMGNAME $DISK $PART $PROTO $PROTOOPT" ;;
+        PARAMS="$REPO $IMGNAME $DISK $PART $PROTO $PROTOOPT" ;;
 esac
 
 # Si existe, ejecuta script personalizado "restoreImageCustom"; si no, llama al genérico "restoreImage".

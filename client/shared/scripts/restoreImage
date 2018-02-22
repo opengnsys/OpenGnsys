@@ -1,6 +1,25 @@
 #!/bin/bash
-# Script de ejemplo para restaurar una imagen.
-# (puede usarse como base para el programa de restauración de imágenes usado por OpenGNSys Admin).
+#/**
+#@file    restoreImage
+#@brief   Script de ejemplo para restaurar una imagen.
+#@param   $1 Repositorio (CACHE, REPO o dirección IP)
+#@param   $2 Nombre canónico de la imagen (sin extensión)
+#@param   $3 Número de disco
+#@param   $4 Número de particion
+#@param   $5 Protocolo (UNICAST, UNICAST-DIRECT, MULTICAST o MULTICAST-DIRECT)
+#@param   $6 Opciones del protocolo
+#@exception OG_ERR_FORMAT   1 formato incorrecto.
+#@exception OG_ERR_NOTFOUND  2 cambio de repositorio: repositorio no encontrado
+#@exception OG_ERR_NOTFOUND  2 fichero de imagen o partición no detectados.
+#@exception $OG_ERR_MCASTRECEIVERFILE  57 Error en la recepción Multicast de un fichero
+#@exception $OG_ERR_PROTOCOLJOINMASTER 60 Error en la conexión de una sesión Unicast|Multicast con el Master
+#@version 1.1 - Cambio de repositorio para el recurso remoto images si es necesario
+#@author  Irina Gomez, ETSII Universidad de Sevilla
+#@date    2015-06-16
+#@version 1.1 - Control de errores en transferencia multicast (ticket #781)
+#@author  Irina Gomez, ETSII Universidad de Sevilla
+#@date    2017/04/20
+#**/
 
 TIME1=$SECONDS
 PROG="$(basename $0)"
@@ -17,7 +36,7 @@ fi
 # Clear temporary file used as log track by httpdlog
 # Limpia los ficheros temporales usados como log de seguimiento para httpdlog
 echo " " > $OGLOGCOMMAND
-[ "$(ogGetCaller)" == "deployImage" ] || echo -n "" > $OGLOGSESSION; 
+ogCheckStringInGroup "$(ogGetCaller)" "deployImage restoreImageCustom" || echo -n "" > $OGLOGSESSION; 
 
 ogEcho log session "[1] $MSG_SCRIPTS_START $0 $*"
 
@@ -29,7 +48,25 @@ PART="$4"
 PROTO="${5^^}"
 PROTO=${PROTO:-"UNICAST"}
 PROTOOPT="$6"
+# Si MCASTWAIT menos que tiempo de espera del servidor lo aumento
+if [ "${PROTO%-*}" == "MULTICAST" ] && [[ ${PROTOOPT##*:} =~ ^-?[0-9]+$ ]]; then
+    [ ${MCASTWAIT:-0} -lt ${PROTOOPT##*:} ] && let MCASTWAIT=${PROTOOPT##*:}+5
+fi
 IMGTYPE="${IMGTYPE:-"img"}"
+
+# Unidad organizativa
+[ "$ogunit" != "" ] && OGUNIT="$ogunit/"
+
+# Si es una ip y es igual a la del equipo restaura desde cache
+[ "$REPO" == "$(ogGetIpAddress)" ] && REPO="CACHE"
+# Si es una ip y es distinta a la del recurso samba cambiamos de REPO.
+ogCheckIpAddress $REPO 
+if [ $? == 0 -o $REPO == "REPO" ] ; then
+        # Si falla el cambio -> salimos con error repositorio no valido
+        ogChangeRepo $REPO ${OGUNIT%/} || exit $(ogRaiseError $OG_ERR_NOTFOUND '$REPO $OGUNIT'; echo $?)
+        REPO="REPO"
+fi
+
 # Comprobar que existe la imagen del origen.
 IMGFILE=$(ogGetPath "$REPO" "$IMGNAME.$IMGTYPE")
 IMGDIR=$(ogGetParentPath "$REPO" "$IMGNAME")
@@ -52,7 +89,7 @@ case "$PROTO" in
         COMPRESS=$(ogGetImageCompressor REPO $IMGNAME)
         #TODO comprobar parametros anteriores
         ogEcho log session "[40] ogMcastReceiverPartition $DISK $PART $PORT $TOOL $COMPRESS"
-        ogMcastRequest "$IMGNAME.img" "$PROTOOPT" 
+        ogMcastRequest "$IMGNAME.img" "$PROTOOPT" || exit $?
         ogExecAndLog command ogMcastReceiverPartition "$DISK" "$PART" "$PORT" "$TOOL" "$COMPRESS"
         RETVAL=$?
         ;;

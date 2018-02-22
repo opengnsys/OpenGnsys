@@ -22,3 +22,4 @@ CTbMsg[13]="ATENCIÓN.- Debe elegir un modo de inclusión en tarea ejecutable, d
 CTbMsg[14]="ATENCIÓN.- Debe especificar el nombre de la nueva tarea ejecutable que se creará y a la que se añadirá este comando";
 CTbMsg[15]="ATENCIÓN.- Debe elegir la tarea a la que se añadirá este comando";
 CTbMsg[16]="AVISO: si el código incluye reinicio o apagado, puede provocar que el cliente no inicie correctamente";
+CTbMsg[17]="El comando se ha enviado correctamente, pero han habido errores de conexión con la API REST de repositorio";

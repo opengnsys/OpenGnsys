@@ -1,4 +1,4 @@
-<?
+<?php
 //________________________________________________________________________________________________________
 //
 //	Fichero de idiomas php: eliminarimagencache_esp.php (Comandos)
@@ -38,4 +38,5 @@
 	$TbMsg[30]='Unidad Organizativa';
 	$TbMsg[31]='Archivo';
 	$TbMsg[32]='Directorio';
+	$TbMsg[33]='AVISO: La imagen está situada en un directorio que no corresponde a la unidad organizativa.';
 ?>

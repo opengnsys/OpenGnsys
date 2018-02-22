@@ -1,4 +1,4 @@
-<? 
+<?php 
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -48,61 +48,61 @@ if  ($opcion!=$op_alta){
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../jscripts/propiedades_ordenadorestandar.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/opciones.js"></SCRIPT>
-	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/propiedades_ordenadorestandar_'.$idioma.'.js"></SCRIPT>'?>
+	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/propiedades_ordenadorestandar_'.$idioma.'.js"></SCRIPT>'?>
 </HEAD>
 <BODY>
 <FORM  name="fdatos"> 
-	<P align=center class=cabeceras><IMG  border=0 src="../images/iconos/aula.gif">&nbsp;<?echo $TbMsg[0]?>:<SPAN  class=cabeceras><? echo $nombreaula?></SPAN><BR>
-	<SPAN align=center class=subcabeceras><?echo $TbMsg[1]?></SPAN></P>
+	<P align=center class=cabeceras><IMG  border=0 src="../images/iconos/aula.gif">&nbsp;<?php echo $TbMsg[0]?>:<SPAN  class=cabeceras><?php echo $nombreaula?></SPAN><BR>
+	<SPAN align=center class=subcabeceras><?php echo $TbMsg[1]?></SPAN></P>
 	<TABLE  align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[2]?>&nbsp;</TD>
-			<?
+			<TH align=center>&nbsp;<?php echo $TbMsg[2]?>&nbsp;</TD>
+			<?php
 				echo '<TD><INPUT class="formulariodatos" name=nombreordenador  type=text value="'.$nombreordenador.'"></TD>';
 			?>
 			<TD colspan=2 valign=top align=left rowspan=3><IMG border=2 style="border-color:#63676b" src="../images/fotoordenador.gif"></TD>
 		</TR>	
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[3]?>&nbsp;</TD>
-			<?
+			<TH align=center>&nbsp;<?php echo $TbMsg[3]?>&nbsp;</TD>
+			<?php
 				echo '<TD><INPUT class="formulariodatos" name=ip  type=text value="'.$ip.'"></TD>';
 			?>
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[4]?>&nbsp;</TD>
-			<?
+			<TH align=center>&nbsp;<?php echo $TbMsg[4]?>&nbsp;</TD>
+			<?php
 				echo '<TD><INPUT class="formulariodatos" name=mac  type=text value="'. $mac.'"></TD>';
 			?>
 		</TR>	
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[5]?>&nbsp;</TD>
-			<?
+			<TH align=center>&nbsp;<?php echo $TbMsg[5]?>&nbsp;</TD>
+			<?php
 				echo '<TD colspan=3>'.HTMLSELECT($cmd,$idcentro,'perfileshard',$idperfilhard,'idperfilhard','descripcion',250).'</TD>';
 			?>
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[7]?>&nbsp;</TD>
-			<?
+			<TH align=center>&nbsp;<?php echo $TbMsg[7]?>&nbsp;</TD>
+			<?php
 				echo '<TD colspan=3>'.HTMLSELECT($cmd,$idcentro,'repositorios',$idrepositorio,'idrepositorio','nombrerepositorios',250).'</TD>';
 			?>
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[11]?>&nbsp;</TD>
-			<?
+			<TH align=center>&nbsp;<?php echo $TbMsg[11]?>&nbsp;</TD>
+			<?php
 				echo '<TD colspan=3><INPUT style="width:250"class="formulariodatos" name=cache  type=text value="'. $cache.'"></TD>';
 			?>
 		</TR>
 
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[8]?>&nbsp;</TD>
-			<?
+			<TH align=center>&nbsp;<?php echo $TbMsg[8]?>&nbsp;</TD>
+			<?php
 				echo '<TD colspan=3><INPUT class="formulariodatos" name=numorde  type=text value=0 style="width:250"></TD>';
 			?>
 		</TR>
@@ -112,22 +112,22 @@ if  ($opcion!=$op_alta){
 	<TABLE border=0 align=center>
 		<TR>
 			<TD width=20>&nbsp;</TD>
-			<TD colspan=3 align=left ><SPAN class=notas><I><?echo $TbMsg[9]?><br><br><?echo $TbMsg[10]?></I></SPAN></TD>
+			<TD colspan=3 align=left ><SPAN class=notas><I><?php echo $TbMsg[9]?><br><br><?php echo $TbMsg[10]?></I></SPAN></TD>
 			<TD width=20>&nbsp;</TD></TR>
 		<TR>
 			<TD colspan=5 width=20>&nbsp;</TD>
 		</TR>
 		<TR>
 			<TD width=20>&nbsp;</TD>
-			<TD align=right><A href=#><IMG border=0 src="../images/boton_cancelar_<? echo $idioma ?>.gif" style="cursor:hand"  onclick="cancelar()"></A></TD>
+			<TD align=right><A href=#><IMG border=0 src="../images/boton_cancelar_<?php echo $idioma ?>.gif" style="cursor:hand"  onclick="cancelar()"></A></TD>
 			<TD width=20></TD>
-			<TD align=left ><A href=#><IMG border=0 src="../images/boton_confirmar_<? echo $idioma ?>.gif" style="cursor:hand"  onclick="confirmar(<? echo $idaula?>)" ></A></TD>
+			<TD align=left ><A href=#><IMG border=0 src="../images/boton_confirmar_<?php echo $idioma ?>.gif" style="cursor:hand"  onclick="confirmar(<?php echo $idaula?>)" ></A></TD>
 			<TD width=20>&nbsp;</TD>
 		</TR>
 	</TABLE>
 </BODY>
 </HTML>
-<?
+<?php
 //________________________________________________________________________________________________________
 //	Recupera los datos de un ordenador estandar 
 //		Parametros: 

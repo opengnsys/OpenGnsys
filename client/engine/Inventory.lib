@@ -4,7 +4,7 @@
 #@brief   Librería o clase Inventory
 #@class   Inventory
 #@brief   Funciones para recogida de datos de inventario de hardware y software de los clientes.
-#@version 1.0.6
+#@version 1.1.0
 #@warning License: GNU GPLv3+
 #*/
 
@@ -45,6 +45,48 @@ if [ "$*" == "help" ]; then
     return
 fi
 ogGetOsVersion "$@" | cut -sf1 -d:
+}
+
+
+#/**
+#         ogGetOsUuid int_ndisk int_nfilesys
+#@brief   Devuelve el UUID del sistema operativo instalado en un sistema de archivos.
+#@param   int_ndisk      nº de orden del disco
+#@param   int_nfilesys   nº de orden de la partición
+#@return  str_uuid -     UUID del sistema operativo.
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_NOTFOUND  Disco o partición no corresponden con un dispositiv
+#@version 1.1.0 - Primera versión para OpenGnsys
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2015-09-09
+#*/ ##
+function ogGetOsUuid ()
+{
+# Variables locales.
+local MNTDIR
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_nfilesys" \
+           "$FUNCNAME 1 2  =>  540e47c6-8e78-4178-aa46-042e4803fb16"
+    return
+fi
+# Error si no se reciben 2 parametros.
+[ $# = 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+# Montar la particion, si no lo estaba previamente.
+MNTDIR=$(ogMount $1 $2) || return $?
+
+# Obtener UUID según el tipo de sistema operativo.
+case "$(ogGetOsType $1 $2)" in
+    Linux)
+        # Leer el UUID del sistema de ficheros raíz o el fichero de identificador.
+        findmnt -no UUID $MNTDIR 2>/dev/null || cat $MNTDIR/etc/machine-id 2>/dev/null
+        ;;
+    Windows)
+        # Leer identificador en clave de registro.
+        ogGetRegistryValue $MNTDIR SOFTWARE '\Microsoft\Cryptography\MachineGuid' 2>/dev/null
+        ;;
+esac
 }
 
 
@@ -126,8 +168,23 @@ fi
 # Para Windows: leer la version del registro.
 if [ -z "$VERSION" ]; then
     TYPE="Windows"
-    VERSION=$(ogGetRegistryValue $MNTDIR software '\Microsoft\Windows NT\CurrentVersion\ProductName' 2>/dev/null)
-    [ -n "$(ogGetRegistryValue $MNTDIR software '\Microsoft\Windows\CurrentVersion\ProgramW6432Dir' 2>/dev/null)" ] && IS64BIT="$MSG_64BIT"
+    FILE="$(ogGetHivePath $MNTDIR SOFTWARE)"
+    if [ -n "$FILE" ]; then
+        # Nuevo método más rápido para acceder al registro de Windows..
+        VERSION=$(echo $(hivexsh << EOT 2>/dev/null
+load $FILE
+cd \Microsoft\Windows NT\CurrentVersion
+lsval ProductName
+lsval ReleaseId
+EOT
+        ))
+        [ -n "$(reglookup -H -p "Microsoft/Windows/CurrentVersion/ProgramW6432Dir" "$FILE" 2>/dev/null)" ] && IS64BIT="$MSG_64BIT"
+        if [ -z "$VERSION" ]; then
+            # Compatibilidad con métrodo antiguo y más lento de acceder al registro.
+            VERSION=$(ogGetRegistryValue $MNTDIR software '\Microsoft\Windows NT\CurrentVersion\ProductName' 2>/dev/null)
+            [ -n "$(ogGetRegistryValue $MNTDIR software '\Microsoft\Windows\CurrentVersion\ProgramW6432Dir' 2>/dev/null)" ] && IS64BIT="$MSG_64BIT"
+        fi
+    fi
 fi
 # Para cargador Windows: buscar versión en fichero BCD (basado en os-prober).
 if [ -z "$VERSION" ]; then
@@ -136,20 +193,20 @@ if [ -z "$VERSION" ]; then
     [ -z "$FILE" ] && FILE="$(ogGetPath $MNTDIR/EFI/Microsoft/boot/bcd)"
     if [ -n "$FILE" ]; then
         for DISTRIB in "Windows Recovery" "Windows Boot"; do
-            if grep -qs "$(echo "$DISTRIB" | sed 's/./&./g')" $FILE; then
+            if grep -aqs "$(echo "$DISTRIB" | sed 's/./&./g')" $FILE; then
                 VERSION="$DISTRIB loader"
             fi
         done
     fi
 fi
-# Para MacOS: detectar kernel y completar con fichero plist de información del sistema.
+# Para macOS: detectar kernel y completar con fichero plist de información del sistema.
 if [ -z "$VERSION" ]; then
     TYPE="MacOS"
     # Kernel de Mac OS (no debe ser fichero de texto).
     FILE="$MNTDIR/mach_kernel"
     if [ -z "$(file -b $FILE | grep 'text')" ]; then
         # Obtener tipo de kernel.
-        [ -n "$(file -b $FILE | grep 'Mach-O')" ] && VERSION="Mac OS"
+        [ -n "$(file -b $FILE | grep 'Mach-O')" ] && VERSION="macOS"
         [ -n "$(file -b $FILE | grep 'Mach-O 64-bit')" ] && IS64BIT="$MSG_64BIT"
         # Datos de configuración de versión de Mac OS.
         FILE="$MNTDIR/System/Library/CoreServices/SystemVersion.plist"
@@ -157,7 +214,7 @@ if [ -z "$VERSION" ]; then
                                       /ProductName/ {getline;s=$3}
                                       /ProductVersion/ {getline;v=$3}
                                       END {print s,v}' $FILE)
-        # Datos de recuperación de Mac OS.
+        # Datos de recuperación de macOS.
         FILE="$MNTDIR/com.apple.recovery.boot"
         [ -r $FILE -a -n "$VERSION" ] && VERSION="$VERSION recovery"
     fi
@@ -168,7 +225,7 @@ if [ -z "$VERSION" ]; then
     TYPE="BSD"
     FILE="$MNTDIR/boot/kernel/kernel"
     if [ -r $FILE ]; then
-        VERSION="$(strings $FILE|awk '/@.*RELEASE/ {print $1,$2}')"
+        VERSION="$(strings $FILE|awk '/@.*RELEASE/ {sub(/@\(#\)/,""); print $1,$2}')"
         [ -n "$(file -b $FILE | grep 'x86-64')" ] && IS64BIT="$MSG_64BIT"
     fi
 fi
@@ -197,15 +254,37 @@ return 0
 
 
 #/**
+#         ogGetSerialNumber
+#@brief   Obtiene el nº de serie del cliente.
+#@version 1.1.0 - Primeras versión con OpenGnsys
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2015-06-08
+function ogGetSerialNumber ()
+{
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME"
+    return
+fi
+
+# Obtener nº de serie (ignorar los no especificados)
+dmidecode -s system-serial-number | egrep -vi "(^[ 0]+$|not specified|filled by o.e.m.)"
+}
+
+
+#/**
 #         ogListHardwareInfo
 #@brief   Lista el inventario de hardware de la máquina cliente.
 #@return  TipoDispositivo:Modelo    (por determinar)
 #@warning Se ignoran los parámetros de entrada.
-#@note    TipoDispositivo = { ata, bio, boa, cdr, cpu, dis, fir, mem, mod, mul, net, ser, vga }
-#@note    Requisitos: lshw, awk
+#@note    TipoDispositivo = { bio, boa, bus, cha, cdr, cpu, dis, fir, mem, mod, mul, net, sto, usb, vga }
+#@note    Requisitos: dmidecode, lshw, awk
 #@version 0.1 - Primeras pruebas con OpenGnSys
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-07-28
+#@version 1.1.0 - Incluir nuevos componentes al inventario.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2014-04-23
 #*/ ##
 function ogListHardwareInfo ()
 {
@@ -215,34 +294,51 @@ if [ "$*" == "help" ]; then
     return
 fi
 
-# Recopilación de disposibivos procesando la salida de \c lshw
+# Recopilación de dispositivos procesando la salida de \c lshw
 ogEcho info "$MSG_HARDWAREINVENTORY}"
+echo "cha=$(dmidecode -s chassis-type)" | grep -v "Other"
+[ -e /sys/firmware/efi ] && echo "boo=UEFI" || echo "boo=BIOS"
 lshw | awk 'BEGIN {type="mod";}
-	/product:/ {sub(/ *product: */,"");  prod=$0;}
-	/vendor:/  {sub(/ *vendor: */,"");   vend=$0;}
-	/version:/ {sub(/ *version: */,"v.");vers=$0;}
-	/size:/    {sub(/ *size: */,"");     size=$0;}
-	/\*-/	   {if (type=="mem")
-                    print type"="size;
-                else
-                    if (type!="" && prod!="")
+       /product:/ {sub(/ *product: */,"");  prod=$0;}
+       /vendor:/  {sub(/ *vendor: */,"");   vend=$0;}
+       /version:/ {sub(/ *version: */,"v.");vers=$0;}
+       /size:/    {size=$2;}
+       /clock:/   {clock=$2;}
+       /slot:/    {sub(/ *slot: */,"");     slot=$0;}
+       /\*-/      {if (type=="mem"){
+                     if (size!=""){
+                       numbank++;
+                       print type"="vend,prod,size,clock" ("slot")";}
+                   }else{
+                     if (type=="totalmem"){
+                       if (size!=""){
+                          totalmemory="mem="size;}
+                     }else{
+                       if (type!="" && prod!=""){
+                         if (prod=="v."vers)
+                           vers="";
+                         print type"="vend,prod,size,vers;} }
+                   }
+                   type=prod=vend=vers=size=clock=slot="";}
+       $1~/-core/    {type="boa";}
+       $1~/-firmware/ {type="bio";}
+       $1~/-cpu/     {type="cpu";}
+       $1~/-bank/    {type="mem";}
+       $1~/-memory/  {type="totalmem";}
+       $1~/-ide/     {type="ide";}
+       $1~/-storage/ {type="sto";}
+       $1~/-disk/    {type="dis";}
+       $1~/-cdrom/   {type="cdr";}
+       $1~/-display/ {type="vga";}
+       $1~/-network/ {type="net";}
+       $1~/-multimedia/ {type="mul";}
+       $1~/-usb/     {type="usb";}
+       $1~/-firewire/ {type="fir";}
+       $1~/-serial/  {type="bus";}
+       END           {if (type!="" && prod!="")
                         print type"="vend,prod,size,vers;
-                type=prod=vend=vers=size="";}
-	/-core/    {type="boa";}
-	/-firmware/ {type="bio";}
-	/-cpu/     {type="cpu";}
-	/-memory/  {type="mem";}
-	/-ide/     {type="ide";}
-	/-disk/    {type="dis";}
-	/-cdrom/   {type="cdr";}
-	/-display/ {type="vga";}
-	/-network/ {type="net";}
-	/-multimedia/ {type="mul";}
-	/-usb/     {type="usb";}
-	/-firewire/ {type="fir";}
-	/-serial/  {type="bus";}
-	END 	   {if (type!="" && prod!="")
-                    print type"="vend,prod,size,vers;}
+                      if (length(numbank)==0 && length(totalmemory)>=4)
+                        print totalmemory; }
       '
 # */ (comentario para Doxygen)
 }
@@ -263,14 +359,17 @@ lshw | awk 'BEGIN {type="mod";}
 #@version 1.0.5 - Aproximación para inventario de software de Mac OS.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2013-10-08
-#@version 1.0.6 - Proceso depende del tipo de SO y sporte para FreeBSD.
+#@version 1.0.6 - Proceso depende del tipo de SO y soporte para FreeBSD.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2014-11-13
+#@version 1.1.0 - Se muestra el sistema operativo en la primera línea de la salida
+#@author  Irina Gomez, ETSII Universidad de Sevilla
+#@date    2016-04-26
 #*/ ##
 function ogListSoftware ()
 {
 # Variables locales.
-local MNTDIR TYPE DPKGDIR RPMDIR PACMANDIR KEYS KEYS32 k PROG VERS
+local MNTDIR TYPE DPKGDIR RPMDIR PACMANDIR k
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -284,29 +383,23 @@ fi
 MNTDIR=$(ogMount $1 $2) || return $?
 TYPE=$(ogGetOsType $1 $2) || return $?
 
+# Sistema Operativo en la primera línea de la salida
+ogGetOsVersion $1 $2 | awk -F ':'  '{print $2}'
+
 case "$TYPE" in
     Linux)          # Software de GNU/Linux.
         # Procesar paquetes dpkg.
         DPKGDIR="${MNTDIR}/var/lib/dpkg"
         if [ -r $DPKGDIR ]; then
-        #    dpkg --admindir=$DPKGDIR -l | \
             # Proceso de fichero en sistemas de 64 bits.
-            if [ -e $MNTDIR/lib64 ]; then
-                awk '/Package:/ {if (pack!="") print pack,vers;
-                                 sub(/-dev$/,"",$2);
-                                 pack=$2}
-                     /Version:/ {sub(/^.*:/,"",$2); sub(/-.*$/,"",$2);
-                                 vers=$2}
-                     /Status:/  {if ($2!="install") pack=vers=""}
-                     END        {if (pack!="") print pack,vers}
-                    ' $DPKGDIR/status | sort | uniq
-            else
-                # FIXME Sólo 32 bits
-                chroot "$MNTDIR" /usr/bin/dpkg -l | \
-                    awk '$1~/ii/ {sub(/-dev$/,"",$2); sub(/^.*:/,"",$3);
-                                  sub(/-.*$/,"",$3); print $2,$3}
-                        ' | sort | uniq
-            fi
+            awk '/Package:/ {if (pack!="") print pack,vers;
+                             sub(/-dev$/,"",$2);
+                             pack=$2}
+                 /Version:/ {sub(/^.*:/,"",$2); sub(/-.*$/,"",$2);
+                             vers=$2}
+                 /Status:/  {if ($2!="install") pack=vers=""}
+                 END        {if (pack!="") print pack,vers}
+                ' $DPKGDIR/status | sort | uniq
         fi
         # Procesar paquetes RPM.
         RPMDIR="${MNTDIR}/var/lib/rpm"
@@ -330,29 +423,50 @@ for k in db.keys():
         # Procesar paquetes pacman.
         PACMANDIR="${MNTDIR}/var/lib/pacman/local"
         if [ -r $PACMANDIR ]; then
-            # FIXME Separar nombre y versión de los paquetes
-            ls -A $PACMANDIR
+            ls $PACMANDIR | awk -F- '/-/ {print gensub(/-/, " ", NF-2);}'
         fi
         ;;
     Windows)        # Software de Windows.
-        # Claves de registro para programas instalados: formato "{clave}".
-        KEYS=$(ogListRegistryKeys $MNTDIR software '\Microsoft\Windows\CurrentVersion\Uninstall')
-        KEYS32=$(ogListRegistryKeys $MNTDIR software '\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall')
-        # Mostrar los valores "DisplayName" y "DisplayVersion" para cada clave.
-        (for k in $KEYS; do
-            PROG=$(ogGetRegistryValue $MNTDIR software "\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\$k\\DisplayName")
-            if [ -n "$PROG" ]; then
-                VERS=$(ogGetRegistryValue $MNTDIR software "\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\$k\\DisplayVersion")
-                echo "$PROG $VERS"
+        # Comprobar tipo de proceso del registro de Windows.
+        if which hivexregedit &>/dev/null; then
+            # Nuevo proceso más rápido basado en "hivexregedit".
+            local HIVE TMPFILE
+            HIVE=$(ogGetHivePath $MNTDIR software 2>/dev/null)
+            if [ -n "$HIVE" ]; then
+                # Claves de registro para programas instalados.
+                TMPFILE=/tmp/tmp$$
+                trap "rm -f $TMPFILE" 1 2 3 9 15
+                hivexregedit --unsafe-printable-strings --export "$HIVE" '\Microsoft\Windows\CurrentVersion\Uninstall' > $TMPFILE 2>/dev/null
+                hivexregedit --unsafe-printable-strings --export "$HIVE" '\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall' >> $TMPFILE 2>/dev/null
+                # Mostrar los valores "DisplayName" y "DisplayVersion" para cada clave.
+                awk -F\" '$1~/^\[/ {n=""}
+                          $2~/DisplayName/ {n=$4}
+                          $2~/DisplayVersion/ {print n,$4}
+                         ' $TMPFILE | sort | uniq
+                rm -f $TMPFILE
             fi
-        done
-        for k in $KEYS32; do
-            PROG=$(ogGetRegistryValue $MNTDIR software "\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\$k\\DisplayName")
-            if [ -n "$PROG" ]; then
-                VERS=$(ogGetRegistryValue $MNTDIR software "\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\$k\\DisplayVersion")
-                echo "$PROG $VERS"
-            fi
-        done) | sort | uniq
+        else
+            # Compatibilidad con clientes ogLive antiguos.
+            local KEYS KEYS32 PROG VERS
+            # Claves de registro para programas instalados: formato "{clave}".
+            KEYS=$(ogListRegistryKeys $MNTDIR software '\Microsoft\Windows\CurrentVersion\Uninstall')
+            KEYS32=$(ogListRegistryKeys $MNTDIR software '\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall')
+            # Mostrar los valores "DisplayName" y "DisplayVersion" para cada clave.
+            (for k in $KEYS; do
+                PROG=$(ogGetRegistryValue $MNTDIR software "\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\$k\\DisplayName")
+                if [ -n "$PROG" ]; then
+                    VERS=$(ogGetRegistryValue $MNTDIR software "\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\$k\\DisplayVersion")
+                    echo "$PROG $VERS"
+                fi
+             done
+             for k in $KEYS32; do
+                PROG=$(ogGetRegistryValue $MNTDIR software "\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\$k\\DisplayName")
+                if [ -n "$PROG" ]; then
+                    VERS=$(ogGetRegistryValue $MNTDIR software "\\Wow6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\$k\\DisplayVersion")
+                    echo "$PROG $VERS"
+                fi
+             done) | sort | uniq
+        fi
         ;;
     MacOS)          # Software de Mac OS.
         # Listar directorios de aplicaciones e intentar obtener la versión del fichero .plist (tanto original como descomprimido).
@@ -373,48 +487,3 @@ for k in db.keys():
         return $? ;;
 esac
 }
-
-
-#/**  @function ogInfoCache: @brief muestra la informacion de la CACHE.
-#@param  sin parametros
-#@return  texto que se almacena en $IP.-InfoCache.  punto_montaje, tama?oTotal, TamanioOcupado, TaminioLibre, imagenes dentro de la cahce
-#@warning  Salidas de errores no determinada
-#@warning   printf no soportado por busybox
-#@attention
-#@version 0.1	Date: 27/10/2008 Author Antonio J. Doblas Viso. Universidad de Malaga
-#*/
-function ogInfoCache ()
-{
-local info infoFilesystem infoSize infoUsed infoUsedPorcet infoMountedOn content
-if ogMountCache
-then
-	info=`df -h | grep $OGCAC`
-	infoFilesystem=`echo $info | cut -f1 -d" "`
-	infoSize=`echo $info | cut -f2 -d" "`
-	infoUsed=`echo $info | cut -f3 -d" "`
-	infoAvail=`echo $info | cut -f4 -d" "`
-	infoUsedPorcet=`echo $info | cut -f5 -d" "`
-	infoMountedOn=`echo $info | cut -f2 -d" "`
-        if `ls  ${OGCAC}$OGIMG > /dev/null 2>&1`
-	then
-	       cd ${OGCAC}${OPENGNSYS}
-		#content=`find images/ -type f -printf "%h/  %f  %s \n"`   busybox no soporta printf
-		content=`find images/ -type f`
-		cd /
-		echo $info
-		echo -ne $content
-		echo " "
-		#echo "$info" > ${OGLOG}/${IP}-InfoCache
-		#echo "$content" >> {$OGLOG}/${IP}-InfoCache
-	else
-		echo $info
-		#echo "$info" > {$OGLOG}/${IP}-InfoCache
-	fi
-	ogUnmountCache
-else
-	echo " "
-	#echo " " > {$OGLOG}/${IP}-InfoCache
-
-fi
-}
-

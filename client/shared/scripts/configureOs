@@ -26,9 +26,13 @@
 #@version 1.0.5 - Postconfiguración para Mac OS X.
 #@author Ramon Gomez, ETSII Universidad de Sevilla
 #@date   2013-10-11
-#@version 1.0.6b - Pasar las opciones no usadas al configureOsCustom.templates 
-#@author 
+#@version 1.1.0 - Postconfiguración para agente de sistema operativo basado en REST.
+#@author Ramon Gomez, ETSII Universidad de Sevilla
+#@date   2016-08-16
+#@version 1.0.6b - llamadas opcionales para mejoras varias. Descomentar la instruccion para su activacion. ogConfigureFstab  
+#@author Antonio J. Doblas Viso.    Universidad de Malaga.
 #@date   2016-11-03
+#*/ ##
 
 # Carga el configurador del engine y los parámetros de red.
 [ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
@@ -66,21 +70,24 @@ case "$OSTYPE" in
         # Configurar el boot sector de la partición Windows.
         ogFixBootSector $1 $2
         # Configurar el gestor de arranque de Windows XP/Vista/7.
-        ogWindowsBootParameters $1 $2        
+        ogWindowsBootParameters $1 $2
         # Registrar en Windows que la partición indicada es su nueva unidad C:\
         ogWindowsRegisterPartition $1 $2 C $1 $2
-        # Instalar cliente para Windows si se indica en la variable INSTALLOSCLIENT.
-	if [ "${INSTALLOSCLIENT^^}" == "TRUE" ]; then
-        	ogInstallMiniSetup $1 $2 postconf.cmd
-        	ogInstallWindowsClient $1 $2 postconf.cmd
-	fi
+        # Eliminar el antiguo cliente de Windows.
+        if [ -n "$(ogGetPath $MNTDIR/windows/ogAdmWinClient.exe)$(ogGetPath $MNTDIR/winnt/ogAdmWinClient.exe)" ]; then
+            ogInstallMiniSetup $1 $2 postconf.cmd
+            ogUninstallWindowsClient $1 $2 postconf.cmd
+        fi
+        # Configurar nuevo agente OGAgent.
+        ogConfigureOgagent $1 $2
         ;;
     Linux)      # Postconfiguración de GNU/Linux.
-         ## Instala (no configura) el codigo de arranque del Grub en la partición (no lo configura, se mantiene el original de la imagen)
+        ## Instala (no configura) el codigo de arranque del Grub en la partición (no lo configura, se mantiene el original de la imagen)
         ogGrubInstallPartition $1 $2
-	if [ "${INSTALLOSCLIENT^^}" == "TRUE" ]; then
-        	ogInstallLinuxClient $1 $2
-	fi
+        # Eliminar el antiguo cliente de Linux.
+        [ -n "$(find $MNTDIR/usr/sbin $MNTDIR/sbin $MNTDIR/usr/local/sbin -name ogAdmLnxClient -print)" ] && ogUninstallLinuxClient $1 $2
+        # Configurar nuevo agente OGAgent.
+        ogConfigureOgagent $1 $2
         ;;
     MacOS)      # Postconfiguración de Mac OS X.
         # Fichero indicador de activación de postconfiguración.
@@ -139,11 +146,14 @@ if [ -e /osxpostconf ]; then
 	# Descromprimir ficheros de versión para obtener inventario de aplicaciones.
 	find /Applications -type d -name "*.app" -prune -exec \
 	     ditto --nopreserveHFSCompression "{}/Contents/version.plist" "{}/Contents/version.plist.uncompress"
-	rm -f /osxpostconf       # Borrar fichero indicador de psotconfiguración
+	rm -f /osxpostconf    # Borrar fichero indicador de psotconfiguración
 fi
 EOT
         # Dar permiso de ejecución.
         chmod 700 $MNTDIR/var/root/postconfd.sh
+        # Configurar nuevo agente OGAgent de sistema operativo.
+        ogConfigureOgagent $1 $2
         ;;
 esac
+exit 0
 

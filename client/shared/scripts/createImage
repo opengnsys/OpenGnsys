@@ -3,7 +3,7 @@
 #/**
 #@file    createImage
 #@brief   Scirpt de ejemplo para crear una imagen de un sistema de archivos.
-#@brief   (puede usarse como base para el programa de creación de imágenes usado por OpenGnSys Admin).
+#@brief   Se usa como base para el programa de creación de imágenes de OpenGnsys Admin).
 #@param 1 disco 
 #@param 2 particion 
 #@param 3 REPO|CACHE
@@ -26,12 +26,15 @@
 #@version 1.0.1 - Control de espacio requerido
 #@author  Antonio J.Doblas Viso
 #@date   2011-05-10
- #@version 1.0.2 - Separacion de log
+#@version 1.0.2 - Separacion de log
 #@author  Antonio J.Doblas Viso
 #@date   2011-08-4
-#@version 1.0.6b - La copia de seguridad de la imagen antigua se hace después de las comprobaciones.
+#@version 1.1.0 - La copia de seguridad de la imagen antigua se hace después de las comprobaciones.
 #@author  Irina Gomez - ETSII Universidad de Sevilla
 #@date    2016-10-14
+#@version 1.1.0 - Se muestra el espacio necesario para alojar la imagen y el disponible (ticket #771)
+#@author  Irina Gomez - ETSII Universidad de Sevilla
+#@date    2017-03-28
 #*/ ##
 
 # Test 1.  crear una imagen en un REPO sin espacio libre. 
@@ -58,15 +61,32 @@ TIME1=$SECONDS
 #IMGCOMP="lzop"
 IMGEXT=${IMGEXT:-"img"}
 #IMGREDUCE="TRUE"
+REPO="${3^^}"
+
+# Unidad organizativa
+[ "$ogunit" != "" ] && OGUNIT="$ogunit"
 
 # Clear temporary file used as log track by httpdlog
 # Limpia los ficheros temporales usados como log de seguimiento para httpdlog
-echo " " > $OGLOGSESSION; echo " " > $OGLOGCOMMAND; echo " " > ${OGLOGCOMMAND}.tmp
+# salvo si es llamado desde createImageCustom
+if [ "$(ogGetCaller)" != "createImageCustom" ]; then
+    echo " " > $OGLOGSESSION; echo " " > $OGLOGCOMMAND; echo " " > ${OGLOGCOMMAND}.tmp
+fi
 
 ogEcho log session "[1] $MSG_SCRIPTS_START $0 $*"
 
+# Si es una ip y es igual a la del equipo restaura desde cache
+[ "$REPO" == "$(ogGetIpAddress)" ] && REPO="CACHE"
+# Si es una ip y es distinta a la del recurso samba cambiamos de REPO.
+ogCheckIpAddress $REPO
+if [ $? == 0 -o $REPO == "REPO" ] ; then
+        # Si falla el cambio -> salimos con error repositorio no valido
+        ogChangeRepo $REPO $OGUNIT || exit $(ogRaiseError $OG_ERR_NOTFOUND '$REPO'; echo $?)
+        REPO="REPO"
+fi
+
 # Si el repositorio es CACHE comprobamos que exista
-if [ "${3^^}" == "CACHE" ]; then 
+if [ "$REPO" == "CACHE" ]; then 
     ! ogFindCache >/dev/null && exit $(ogRaiseError $OG_ERR_NOTCACHE "CACHE "; echo $?)
 fi
 
@@ -75,14 +95,14 @@ PART=$(ogDiskToDev "$1" "$2" 2>/dev/null) || exit $(ogRaiseError $OG_ERR_PARTITI
 
 #Comprobamos acceso de escritura.
 DIRTEMP=$(date +%Y%m%d-%H%M%S)
-ogMakeDir $3 /$4$DIRTEMP 2>/dev/null || exit $(ogRaiseError $OG_ERR_NOTWRITE "$3"; echo $?) && ogDeleteTree $3 /$4$DIRTEMP 
+ogMakeDir $REPO /$4$DIRTEMP 2>/dev/null || exit $(ogRaiseError $OG_ERR_NOTWRITE "$REPO"; echo $?) && ogDeleteTree $REPO /$4$DIRTEMP 
 
-IMGDIR=$(ogGetParentPath "$3" "/$4")
+IMGDIR=$(ogGetParentPath "$REPO" "/$4")
 # Si no existe, crear subdirectorio de la imagen.
 if [ $? != 0 ]; then
-    ogEcho log session "[5] $MSG_HELP_ogMakeDir \"$3 $(dirname "$4")."
-    ogMakeDir "$3" $(dirname "/$4") || exit $(ogRaiseError $OG_ERR_NOTWRITE "$3 /$4"; echo $?)
-    IMGDIR=$(ogGetParentPath "$3" "/$4") || exit $(ogRaiseError $OG_ERR_NOTWRITE "$3 /$4"; echo $?)
+    ogEcho log session "[5] $MSG_HELP_ogMakeDir \"$REPO $(dirname "$4")."
+    ogMakeDir "$REPO" $(dirname "/$4") || exit $(ogRaiseError $OG_ERR_NOTWRITE "$REPO /$4"; echo $?)
+    IMGDIR=$(ogGetParentPath "$REPO" "/$4") || exit $(ogRaiseError $OG_ERR_NOTWRITE "$REPO /$4"; echo $?)
 fi
 IMGFILE=$IMGDIR/$(basename "/$4").$IMGEXT
 
@@ -91,10 +111,10 @@ echo " " > $OGLOGCOMMAND
 ogCleanOs $1 $2
 
 #Comprobar espacio que requerira la imagen para ser almacenada
-read SIZEDATA SIZEREQUIRED ISENOUGHSPACE <<< $(ogGetSizeParameters $1 $2 "$3")
+read SIZEDATA SIZEREQUIRED SIZEFREE ISENOUGHSPACE <<< $(ogGetSizeParameters $1 $2 "$REPO" "$4")
 
-ogEcho log session "[16] $PROG: $MSG_SCRIPTS_CREATE_SIZE $SIZEREQUIRED"
-[ "$ISENOUGHSPACE" == "TRUE" ] || exit $(ogRaiseError session $OG_ERR_CACHESIZE "$3"; echo $?)
+ogEcho log session "[16] $PROG: $MSG_SCRIPTS_CREATE_SIZE $SIZEREQUIRED $SIZEFREE"
+[ "$ISENOUGHSPACE" == "TRUE" ] || exit $(ogRaiseError session $OG_ERR_CACHESIZE "$REPO"; echo $?)
 
 # Comprobar consistencia del sistema de archivos.
 echo " " > $OGLOGCOMMAND
@@ -125,8 +145,8 @@ fi
 # Crear la imagen.
 echo " " > $OGLOGCOMMAND
 TIME2=$SECONDS
-ogEcho log session "[40] $MSG_HELP_ogCreateImage : ogCreateImage $1 $2 $3 $4 $IMGPROG $IMGCOMP"
-ogCreateImage "$1" "$2" "$3" "/$4" "$IMGPROG" "$IMGCOMP" &>> $OGLOGCOMMAND || exit $(ogRaiseError $OG_ERR_IMAGE "ogCreteImage"; echo $?)
+ogEcho log session "[40] $MSG_HELP_ogCreateImage : ogCreateImage $1 $2 $REPO $4 $IMGPROG $IMGCOMP"
+ogCreateImage "$1" "$2" "$REPO" "/$4" "$IMGPROG" "$IMGCOMP" &>> $OGLOGCOMMAND || exit $(ogRaiseError $OG_ERR_IMAGE "ogCreteImage"; echo $?)
 RESUMECREATEIMAGE=$(grep "Total Time:" $OGLOGCOMMAND)
 TIMEAUX2=$[SECONDS-TIME2]
 ogEcho log session "      $RESUMECREATEIMAGE "
@@ -143,8 +163,8 @@ ogEcho log session "      $MSG_HELP_ogExtendFs  $NEWSIZEFS ->  $SIZEFS = $SIZEFS
 #TODO que hacer si error al extender sistemade archivos
 
 #resumen de la operacion
-IMGSIZE=$(ls -s `ogGetPath $3 /$4.$IMGEXT`| cut -f1 -d" ")
-IMGOS=$(ogGetImageInfo `ogGetPath $3 /$4.$IMGEXT`)
+IMGSIZE=$(ls -s `ogGetPath $REPO /$4.$IMGEXT`| cut -f1 -d" ")
+IMGOS=$(ogGetImageInfo `ogGetPath $REPO /$4.$IMGEXT`)
 
 TIME=$[SECONDS-TIME1]
 ogEcho log session "[100] $MSG_SCRIPTS_TIME_TOTAL $[TIME/60]m $[TIME%60]s"

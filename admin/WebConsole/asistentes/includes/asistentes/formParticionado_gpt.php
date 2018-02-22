@@ -13,7 +13,7 @@ for ($p=1; $p<4; $p++) {
     echo '
 <tr id="trPartition'.$p.'">
 <td>
-<input type="checkbox" name="checkGPT'.$p.'" value="checkGPT'.$p.'" onclick="clickPartitionCheckbox(this.form, '.$p.',true);" /> '.$TbMsg[20].' '.$p.'</td>
+<input type="checkbox" id="checkGPT'.$p.'" name="checkGPT'.$p.'" value="checkGPT'.$p.'" onclick="clickPartitionCheckbox(this.form, '.$p.',true);" /> '.$TbMsg[20].' '.$p.'</td>
 <td>
 <select name="partGPT'.$p.'" id="partGPT'.$p.'" style="width:220" disabled="true" onclick="
 	//if (this.form.part'.$p.'.options[this.form.part'.$p.'.selectedIndex].value == \'CUSTOM\') {
@@ -37,7 +37,7 @@ for ($p=1; $p<4; $p++) {
 <option value="CUSTOM"> '.$TbMsg[39].'</option>
 </select>
 <br />
-<input type="text" style="width:100" name="sizeGPT'.$p.'custom" value="0" disabled="true" onchange="calculateFreeDisk(this.form);" />
+<input type="text" style="width:100" id="sizeGPT'.$p.'custom" name="sizeGPT'.$p.'custom" value="0" disabled="true" onchange="calculateFreeDisk(this.form);" />
 </td>
 </tr>
     ';
@@ -47,7 +47,7 @@ for ($p=1; $p<4; $p++) {
 <tr id="trPartition4">
 <td><input type="checkbox" name="checkGPT4" value="checkGPT4" onclick="clickPartitionCheckbox(this.form, 4,true);" /> <?php echo $TbMsg[20].' '.$p;?> </td>
 <td>
-<select name="partGPT4" id="partGPT4" style="width:220" disabled="true" onchange="checkExtendedPartition(form);"><? echo htmlForm_typepartnotcacheGPT(4) ?></select>
+<select name="partGPT4" id="partGPT4" style="width:220" disabled="true" onchange="checkExtendedPartition(form);"><?php echo htmlForm_typepartnotcacheGPT(4) ?></select>
 </td>
 <td><select name="sizeGPT4" id="sizeGPT4" style="width:220" disabled="true" onclick="if (this.form.sizeGPT4.options[this.form.sizeGPT4.selectedIndex].value == 'CUSTOM') { this.form.sizeGPT4custom.disabled=false } else { this.form.sizeGPT4custom.disabled=true }" onchange="calculateFreeGPTDisk(this.form);" />
 	<option value="0"> <?php echo $TbMsg[40];?> </option>
@@ -71,6 +71,7 @@ for ($p=1; $p<4; $p++) {
 <th>
 <input type="hidden" id="numGPTpartitions" value="4"/>
 <input type="hidden" id="minsizeGPT" />
+<input type="hidden" id="maxcachesize" />
 <?php echo $TbMsg[38];?>: <input type="text" id="freediskGPT" width="15" disabled="true" />
 </th>
 </tr>

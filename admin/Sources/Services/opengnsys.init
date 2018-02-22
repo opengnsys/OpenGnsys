@@ -6,8 +6,8 @@
 # Required-Stop:
 # Default-Start:     2 3 4 5
 # Default-Stop:      1
-# Short-Description: Servicios del sistema OpenGnSys
-# Description:       Servicios del sistema OpenGnSys
+# Short-Description: Servicios del sistema OpenGnsys
+# Description:       Servicios del sistema OpenGnsys
 ### END INIT INFO
 
 #
@@ -19,7 +19,7 @@ IMAGEDIR=$BASEDIR/images
 CLIENTLOGDIR=$BASEDIR/log/clients
 
 #
-# Servidor de OpenGnSys
+# Servidor de OpenGnsys
 #
 SERVERNAME=ogAdmServer
 SERVERDAEMON=$BASEDIR/sbin/$SERVERNAME
@@ -126,7 +126,7 @@ config() {
 }
 
 arranca_demonios() {
-  # Comprobar que está instalado OpenGnSys.
+  # Comprobar que está instalado OpenGnsys.
   if [ ! -d $BASEDIR ]; then
      $ACTIONMSG "ERROR: No existe el directorio $BASEDIR"
      $FAILMSG

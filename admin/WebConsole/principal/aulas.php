@@ -54,7 +54,7 @@ $arbol=new ArbolVistaXML($arbolXML,0,$baseurlimg,$clasedefault,1,0,5); // Crea e
 	<INPUT type="hidden" name="gestor" value="">
 	<INPUT type="hidden" name="funcion" value="">
 </FORM>
-<?
+<?php
 //________________________________________________________________________________________________________
 echo $arbol->CreaArbolVistaXML();	// Crea árbol (HTML) a partir del XML
 $flotante=new MenuContextual();			 // Crea objeto MenuContextual
@@ -116,7 +116,7 @@ echo $flotante->CreaMenuContextual($XMLcontextual);
 ?>
 </BODY>
 </HTML>
-<?
+<?php
 // *************************************************************************************************************************************************
 //	Devuelve una cadena con formato XML con toda la informaci� de aulas y ordenadores registrados en un Centro concreto
 //	Parametros: 
@@ -350,15 +350,6 @@ function ContextualXMLCentros(){
 	$layerXML.=' textoitem='.$TbMsg[28];
 	$layerXML.='></ITEM>';
 
-	$layerXML.='<SEPARADOR>';
-	$layerXML.='</SEPARADOR>';
-
-	$layerXML.='<ITEM';
-	$layerXML.=' alpulsar="cola_reservas('.$RESERVA_CONFIRMADA.')"';
-	$layerXML.=' imgitem="../images/iconos/reservas.gif"';
-	$layerXML.=' textoitem='.$TbMsg[29];
-	$layerXML.='></ITEM>';
-
 	$layerXML.='</MENUCONTEXTUAL>';
 	return($layerXML);
 }
@@ -465,15 +456,6 @@ function ContextualXMLGruposAulas(){
 	$layerXML.=' alpulsar="eliminar_grupos()"';
 	$layerXML.=' imgitem="../images/iconos/eliminar.gif"';
 	$layerXML.=' textoitem='.$TbMsg[7];
-	$layerXML.='></ITEM>';
-
-	$layerXML.='<SEPARADOR>';
-	$layerXML.='</SEPARADOR>';
-
-	$layerXML.='<ITEM';
-	$layerXML.=' alpulsar="cola_reservas('.$RESERVA_CONFIRMADA.')"';
-	$layerXML.=' imgitem="../images/iconos/reservas.gif"';
-	$layerXML.=' textoitem='.$TbMsg[29];
 	$layerXML.='></ITEM>';
 
 	$layerXML.='</MENUCONTEXTUAL>';
@@ -639,7 +621,7 @@ function ContextualXMLAulas(){
 	$layerXML.=' imgitem="../images/iconos/eliminar.gif"';
 	$layerXML.=' textoitem='.$TbMsg[14];
 	$layerXML.='></ITEM>';
-
+	/*
 	$layerXML.='<SEPARADOR>';
 	$layerXML.='</SEPARADOR>';
 
@@ -655,13 +637,7 @@ function ContextualXMLAulas(){
 	$layerXML.=' imgitem="../images/iconos/operadores.gif"';
 	$layerXML.=' textoitem='.$TbMsg[37];
 	$layerXML.='></ITEM>';
-
-	$layerXML.='<ITEM';
-	$layerXML.=' alpulsar="cola_reservas('.$RESERVA_CONFIRMADA.')"';
-	$layerXML.=' imgitem="../images/iconos/reservas.gif"';
-	$layerXML.=' textoitem='.$TbMsg[29];
-	$layerXML.='></ITEM>';
-
+	*/
 	$layerXML.='</MENUCONTEXTUAL>';
 	return($layerXML);
 }

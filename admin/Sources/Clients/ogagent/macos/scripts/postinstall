@@ -1,0 +1,17 @@
+#!/usr/bin/env sh
+
+# Directories
+SRCDIR=$(dirname "$0")
+BINDIR=/usr/bin
+INITDIR=/Library/LaunchDaemons
+
+# Check if it needs to install Python dependencies:
+if ! which pip &>/dev/null; then
+    easy_install pip
+    pip install netifaces requests six
+fi
+
+# Copying files.
+cp $SRCDIR/ogagent $BINDIR
+cp $SRCDIR/es.opengnsys.ogagent.plist $INITDIR
+

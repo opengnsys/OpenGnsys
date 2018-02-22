@@ -5,11 +5,11 @@
 //	Idioma: Catal�
 //________________________________________________________________________________________________________
 	if (empty ($TbMsg)) $TbMsg=array();
-	$TbMsg[0]='Creaci&oacute; d\'Imatge';
-	$TbMsg[1]='Caracter&iacute;stiques de l\'ordinador';
-	$TbMsg[2]='Nom';
-	$TbMsg[3]='Direcci&oacute; IP';
-	$TbMsg[4]='Direcci&oacute; MAC';
+	$TbMsg[0]='Unidad Organizativa';
+	$TbMsg[1]='Grupo de aulas';
+	$TbMsg[2]='Aula';
+	$TbMsg[3]='Grupo de ordenadores';
+	$TbMsg[4]='Ordenador';
 	$TbMsg[5]='Eliminar Imatge de la Cache en Client';
 	$TbMsg[6]='Dades a subministrar';
 	$TbMsg[7]='Im&aacute;tges Disponibles';

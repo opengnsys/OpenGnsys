@@ -1,9 +1,9 @@
 
-Estructura de Ficheros de OpenGnSys 1.0
+Estructura de Ficheros de OpenGnsys 1.1
 =======================================
 
 
-Estructura de directorios de OpenGnSys Client
+Estructura de directorios de OpenGnsys Client
 ---------------------------------------------
 
 /opt/opengnsys
@@ -19,7 +19,7 @@ Estructura de directorios de OpenGnSys Client
   log (rw) - ficheros de registro de incidencias.
 
 
-Servicios de OpenGnSys Server:
+Servicios de OpenGnsys Server:
 ------------------------------
 - Syslog - gestión de logs de servidores y clientes.
 - DHCP
@@ -30,21 +30,24 @@ Servicios de OpenGnSys Server:
 - Servidor de órdenes
 
 
-Estructura de directorios de OpenGnSys Server:
+Estructura de directorios de OpenGnsys Server:
 ----------------------------------------------
 
 /opt/opengnsys
   bin - binarios del servidor.
   client - exporta en remoto la estructura de directorios del cliente.
+  doc - ficheros de documentación.
   etc - ficheros de configuración.
   lib - librerías de las utilidades.
   log - ficheros de registro de incidencias.
+  sbin - binarios de servicios.
   tftpboot - arranque remoto de clientes (enlace al directorio de TFTP).
+  www - ficheros web.
 
 NOTA: páginas de manuales y documentación se copian a los directorios estándares del sistema operativo.
 
 
-Estructura de directorios de OpenGnSys Repository Manager
+Estructura de directorios de OpenGnsys Repository Manager
 ---------------------------------------------------------
 
 /opt/opengnsys
@@ -52,6 +55,7 @@ Estructura de directorios de OpenGnSys Repository Manager
   etc - ficheros de configuración.
   images - imágenes de sistemas de archivos.
   log - ficheros de registro de incidencias.
+  sbin - binarios de servicios.
 
 
 

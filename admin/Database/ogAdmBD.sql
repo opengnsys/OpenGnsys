@@ -1,6 +1,8 @@
 -- Fichero de instalación de la base de datos.
 
-SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
+SET sql_mode = "NO_AUTO_VALUE_ON_ZERO";
+SET GLOBAL sql_mode = TRIM(BOTH ',' FROM REPLACE(@@sql_mode, 'ONLY_FULL_GROUP_BY', ''));
+SET GLOBAL event_scheduler = ON;
 
 --
 -- Base de datos: `ogAdmBD`
@@ -12,24 +14,25 @@ SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 -- Estructura de tabla para la tabla `acciones`
 --
 
-CREATE TABLE IF NOT EXISTS `acciones` (
+DROP TABLE IF EXISTS `acciones`;
+CREATE TABLE `acciones` (
   `idaccion` int(11) NOT NULL AUTO_INCREMENT,
-  `tipoaccion` smallint(6) NOT NULL,
-  `idtipoaccion` int(11) NOT NULL,
-  `descriaccion` varchar(250) NOT NULL,
-  `idordenador` int(11) NOT NULL,
-  `ip` varchar(50) NOT NULL,
-  `sesion` int(11) NOT NULL,
-  `idcomando` int(11) NOT NULL,
+  `tipoaccion` smallint(6) NOT NULL DEFAULT '0',
+  `idtipoaccion` int(11) NOT NULL DEFAULT '0', 
+  `descriaccion` varchar(250) NOT NULL DEFAULT '',
+  `idordenador` int(11) NOT NULL DEFAULT '0',
+  `ip` varchar(50) NOT NULL DEFAULT '',
+  `sesion` int(11) NOT NULL DEFAULT '0',
+  `idcomando` int(11) NOT NULL DEFAULT '0',
   `parametros` text,
-  `fechahorareg` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
-  `fechahorafin` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
+  `fechahorareg` datetime NOT NULL DEFAULT '1970-01-01 00:00:00',
+  `fechahorafin` datetime NOT NULL DEFAULT '1970-01-01 00:00:00',
   `estado` tinyint(1) NOT NULL DEFAULT '0',
   `resultado` tinyint(1) NOT NULL DEFAULT '0',
   `descrinotificacion` varchar(256) DEFAULT NULL,
   `ambito` smallint(6) NOT NULL DEFAULT '0',
   `idambito` int(11) NOT NULL DEFAULT '0',
-  `restrambito` text NOT NULL,
+  `restrambito` text,
   `idprocedimiento` int(11) NOT NULL DEFAULT '0',
   `idtarea` int(11) NOT NULL DEFAULT '0',
   `idcentro` int(11) NOT NULL DEFAULT '0',
@@ -44,10 +47,32 @@ CREATE TABLE IF NOT EXISTS `acciones` (
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `acciones_log`
+--
+
+DROP TABLE IF EXISTS `acciones_log`;
+CREATE TABLE acciones_log LIKE acciones;
+ALTER TABLE acciones_log ADD fecha_borrado DATETIME;
+DELIMITER //
+-- Trigger para guardar acciones antes de ser borradas.
+CREATE TRIGGER registrar_acciones BEFORE DELETE ON acciones FOR EACH ROW BEGIN
+	INSERT INTO acciones_log VALUES
+		(OLD.idaccion, OLD.tipoaccion, OLD.idtipoaccion, OLD.descriaccion,
+		OLD.idordenador, OLD.ip, OLD.sesion, OLD.idcomando, OLD.parametros,
+		OLD.fechahorareg, OLD.fechahorafin, OLD.estado, OLD.resultado,
+		OLD.descrinotificacion, OLD.ambito, OLD.idambito, OLD.restrambito,
+		OLD.idprocedimiento, OLD.idtarea, OLD.idcentro, OLD.idprogramacion, NOW());
+END//
+DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `acciones_menus`
 --
 
-CREATE TABLE IF NOT EXISTS `acciones_menus` (
+DROP TABLE IF EXISTS `acciones_menus`;
+CREATE TABLE `acciones_menus` (
   `idaccionmenu` int(11) NOT NULL AUTO_INCREMENT,
   `tipoaccion` tinyint(4) NOT NULL DEFAULT '0',
   `idtipoaccion` int(11) NOT NULL DEFAULT '0',
@@ -65,7 +90,8 @@ CREATE TABLE IF NOT EXISTS `acciones_menus` (
 -- Estructura de tabla para la tabla `administradores_centros`
 --
 
-CREATE TABLE IF NOT EXISTS `administradores_centros` (
+DROP TABLE IF EXISTS `administradores_centros`;
+CREATE TABLE `administradores_centros` (
   `idadministradorcentro` int(11) NOT NULL AUTO_INCREMENT,
   `idusuario` int(11) NOT NULL DEFAULT '0',
   `idcentro` int(11) NOT NULL DEFAULT '0',
@@ -81,34 +107,36 @@ INSERT INTO `administradores_centros` (`idadministradorcentro`, `idusuario`, `id
 -- Estructura de tabla para la tabla `aulas`
 --
 
-CREATE TABLE IF NOT EXISTS `aulas` (
+DROP TABLE IF EXISTS `aulas`;
+CREATE TABLE `aulas` (
   `idaula` int(11) NOT NULL AUTO_INCREMENT,
   `nombreaula` varchar(100) NOT NULL DEFAULT '',
   `idcentro` int(11) NOT NULL DEFAULT '0',
   `urlfoto` varchar(250) DEFAULT NULL,
-  `cuadro_y` char(3) DEFAULT NULL,
-  `cuadro_x` char(3) DEFAULT NULL,
   `cagnon` tinyint(1) DEFAULT NULL,
   `pizarra` tinyint(1) DEFAULT NULL,
   `grupoid` int(11) DEFAULT NULL,
   `ubicacion` varchar(255) DEFAULT NULL,
   `comentarios` text,
-  `puestos` tinyint(4) DEFAULT NULL,
+  `puestos` smallint DEFAULT NULL,
   `horaresevini` tinyint(4) DEFAULT NULL,
   `horaresevfin` tinyint(4) DEFAULT NULL,
-  `modomul` tinyint(4) NOT NULL,
-  `ipmul` varchar(16) NOT NULL,
-  `pormul` int(11) NOT NULL,
+  `modomul` tinyint(4) NOT NULL DEFAULT '0',
+  `ipmul` varchar(16) NOT NULL DEFAULT '',
+  `pormul` int(11) NOT NULL DEFAULT '0',
   `velmul` smallint(6) NOT NULL DEFAULT '70',
   `router` varchar( 30 ),
   `netmask` varchar( 30 ),
   `dns` varchar (30),
   `proxy` varchar (30),
+  `ntp` varchar (30),
   `modp2p` enum('seeder','peer','leecher') DEFAULT 'peer',
   `timep2p` int(11) NOT NULL DEFAULT '60',
   `validacion` tinyint(1) DEFAULT '0',
   `paginalogin` varchar(100),
   `paginavalidacion` varchar(100),
+  `inremotepc` tinyint DEFAULT '0',
+  `oglivedir` varchar(50) NOT NULL DEFAULT 'ogLive',
   PRIMARY KEY (`idaula`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
@@ -117,18 +145,19 @@ CREATE TABLE IF NOT EXISTS `aulas` (
 -- Estructura de tabla para la tabla `asistentes`
 --
 
-CREATE TABLE IF NOT EXISTS `asistentes` (
+DROP TABLE IF EXISTS `asistentes`;
+CREATE TABLE `asistentes` (
   `idcomando` int(11) NOT NULL AUTO_INCREMENT,
   `descripcion` varchar(250) NOT NULL DEFAULT '',
-  `pagina` varchar(256) NOT NULL,
-  `gestor` varchar(256) NOT NULL,
-  `funcion` varchar(64) NOT NULL,
+  `pagina` varchar(256) NOT NULL DEFAULT '',
+  `gestor` varchar(256) NOT NULL DEFAULT '',
+  `funcion` varchar(64) NOT NULL DEFAULT '',
   `urlimg` varchar(250) DEFAULT NULL,
   `aplicambito` tinyint(4) DEFAULT NULL,
   `visuparametros` varchar(250) DEFAULT NULL,
   `parametros` varchar(250) DEFAULT NULL,
   `comentarios` text,
-  `activo` tinyint(1) NOT NULL,
+  `activo` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY ( `idcomando` , `descripcion` ) 
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=11 ;
 
@@ -141,39 +170,19 @@ INSERT INTO `asistentes` (`idcomando`, `descripcion`, `pagina`, `gestor`, `funci
 ('8', 'Asistente Particionado', '../asistentes/AsistenteParticionado.php', '../asistentes/gestores/gestor_Comandos.php', 'EjecutarScript', ' ', '31', 'iph;tis;dcr;dsp', 'nfn;iph;tis;dcr;scp', ' ', '1');
 
 
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `campus`
---
-
-CREATE TABLE IF NOT EXISTS `campus` (
-  `idcampus` int(11) NOT NULL AUTO_INCREMENT,
-  `nombrecampus` varchar(100) NOT NULL DEFAULT '',
-  `iduniversidad` int(11) DEFAULT NULL,
-  `urlmapa` varchar(255) DEFAULT NULL,
-  `cuadro_y` tinyint(3) DEFAULT NULL,
-  `cuadro_x` tinyint(3) DEFAULT NULL,
-  PRIMARY KEY (`idcampus`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
-
---
--- Volcar la base de datos para la tabla `campus`
---
-
-
 -- --------------------------------------------------------
 
 --
 -- Estructura de tabla para la tabla `centros`
 --
 
-CREATE TABLE IF NOT EXISTS `centros` (
+DROP TABLE IF EXISTS `centros`;
+CREATE TABLE `centros` (
   `idcentro` int(11) NOT NULL AUTO_INCREMENT,
   `nombrecentro` varchar(100) NOT NULL DEFAULT '',
   `identidad` int(11) DEFAULT NULL,
   `comentarios` text,
+  `directorio` varchar(50) DEFAULT '',
   PRIMARY KEY (`idcentro`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
@@ -182,7 +191,7 @@ CREATE TABLE IF NOT EXISTS `centros` (
 -- Volcar la base de datos para la tabla `centros`
 --
 INSERT INTO `centros` (`idcentro`,`nombrecentro`,`identidad`,`comentarios`) VALUES 
- (1,'Unidad Organizativa (Default)',1,'Esta Unidad Organizativa se crea automáticamente en el proceso de instalación de OpenGnSys');
+ (1,'Unidad Organizativa (Default)',1,'Esta Unidad Organizativa se crea automáticamente en el proceso de instalación de OpenGnsys');
 
 
 -- --------------------------------------------------------
@@ -191,18 +200,19 @@ INSERT INTO `centros` (`idcentro`,`nombrecentro`,`identidad`,`comentarios`) VALU
 -- Estructura de tabla para la tabla `comandos`
 --
 
-CREATE TABLE IF NOT EXISTS `comandos` (
+DROP TABLE IF EXISTS `comandos`;
+CREATE TABLE `comandos` (
   `idcomando` int(11) NOT NULL AUTO_INCREMENT,
   `descripcion` varchar(250) NOT NULL DEFAULT '',
-  `pagina` varchar(256) NOT NULL,
-  `gestor` varchar(256) NOT NULL,
-  `funcion` varchar(64) NOT NULL,
+  `pagina` varchar(256) NOT NULL DEFAULT '',
+  `gestor` varchar(256) NOT NULL DEFAULT '',
+  `funcion` varchar(64) NOT NULL DEFAULT '',
   `urlimg` varchar(250) DEFAULT NULL,
   `aplicambito` tinyint(4) DEFAULT NULL,
   `visuparametros` varchar(250) DEFAULT NULL,
   `parametros` varchar(250) DEFAULT NULL,
   `comentarios` text,
-  `activo` tinyint(1) NOT NULL,
+  `activo` tinyint(1) NOT NULL DEFAULT '0',
   `submenu` varchar(50) NOT NULL DEFAULT '',
   PRIMARY KEY (`idcomando`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=13 ;
@@ -226,7 +236,8 @@ INSERT INTO `comandos` (`idcomando`, `descripcion`, `pagina`, `gestor`, `funcion
 (12, 'Crear Imagen Basica', '../comandos/CrearImagenBasica.php', '../comandos/gestores/gestor_Comandos.php', 'CrearImagenBasica', '', 16, 'dsk;par;cpt;idi;nci;ipr;iph;bpi;cpc;bpc;rti;nba', 'nfn;dsk;par;cpt;idi;nci;ipr;iph;bpi;cpc;bpc;rti;nba', '', 1, 'Sincronizacion'),
 (13, 'Restaurar Imagen Basica', '../comandos/RestaurarImagenBasica.php', '../comandos/gestores/gestor_Comandos.php', 'RestaurarImagenBasica', '', 28, 'dsk;par;idi;nci;ipr;iph;bpi;cpc;bpc;rti;nba;met', 'nfn;dsk;par;idi;nci;ipr;iph;bpi;cpc;bpc;rti;nba;met', '', 1, 'Sincronizacion'),
 (14, 'Crear Software Incremental', '../comandos/CrearSoftIncremental.php', '../comandos/gestores/gestor_Comandos.php', 'CrearSoftIncremental', '', 16, 'dsk;par;idi;nci;ipr;idf;ncf;bpi;cpc;bpc;iph;rti;nba', 'nfn;dsk;par;idi;nci;ipr;idf;ncf;bpi;cpc;bpc;iph;rti;nba', '', 1, 'Sincronizacion'),
-(15, 'Restaurar Software Incremental', '../comandos/RestaurarSoftIncremental.php', '../comandos/gestores/gestor_Comandos.php', 'RestaurarSoftIncremental', '', 28, 'dsk;par;idi;nci;ipr;idf;ncf;bpi;cpc;bpc;iph;rti;met;nba', 'nfn;dsk;par;idi;nci;ipr;idf;ncf;bpi;cpc;bpc;iph;rti;met;nba', '', 1, 'Sincronizacion');
+(15, 'Restaurar Software Incremental', '../comandos/RestaurarSoftIncremental.php', '../comandos/gestores/gestor_Comandos.php', 'RestaurarSoftIncremental', '', 28, 'dsk;par;idi;nci;ipr;idf;ncf;bpi;cpc;bpc;iph;rti;met;nba', 'nfn;dsk;par;idi;nci;ipr;idf;ncf;bpi;cpc;bpc;iph;rti;met;nba', '', 1, 'Sincronizacion'),
+(16, 'Enviar mensaje', '../comandos/EnviarMensaje.php', '../comandos/gestores/gestor_Comandos.php', 'EnviarMensaje', '', 31, 'tit;msj', 'nfn;iph;tit;msj', '', 1, '');
 
 
 
@@ -236,12 +247,14 @@ INSERT INTO `comandos` (`idcomando`, `descripcion`, `pagina`, `gestor`, `funcion
 -- Estructura de tabla para la tabla `entidades`
 --
 
-CREATE TABLE IF NOT EXISTS `entidades` (
+DROP TABLE IF EXISTS `entidades`;
+CREATE TABLE `entidades` (
   `identidad` int(11) NOT NULL AUTO_INCREMENT,
   `nombreentidad` varchar(200) NOT NULL DEFAULT '',
   `comentarios` text,
   `iduniversidad` int(11) DEFAULT NULL,
   `grupoid` int(11) DEFAULT NULL,
+  `ogunit` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`identidad`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;
 
@@ -250,7 +263,7 @@ CREATE TABLE IF NOT EXISTS `entidades` (
 --
 
 INSERT INTO `entidades` (`identidad`, `nombreentidad`, `comentarios`, `iduniversidad`, `grupoid`) VALUES
-(1, 'Entidad (Default)', 'Esta Entidad se crea automáticamente en el proceso de instalación de OpenGnSys', 1, 0);
+(1, 'Entidad (Default)', 'Esta Entidad se crea automáticamente en el proceso de instalación de OpenGnsys', 1, 0);
 
 -- --------------------------------------------------------
 
@@ -258,11 +271,12 @@ INSERT INTO `entidades` (`identidad`, `nombreentidad`, `comentarios`, `idunivers
 -- Estructura de tabla para la tabla `entornos`
 --
 
-CREATE TABLE IF NOT EXISTS `entornos` (
+DROP TABLE IF EXISTS `entornos`;
+CREATE TABLE `entornos` (
   `identorno` int(11) NOT NULL AUTO_INCREMENT,
-  `ipserveradm` varchar(50) NOT NULL,
-  `portserveradm` int(20) NOT NULL,
-  `protoclonacion` varchar(50) NOT NULL,
+  `ipserveradm` varchar(50) NOT NULL DEFAULT '',
+  `portserveradm` int(20) NOT NULL DEFAULT 2008,
+  `protoclonacion` varchar(50) NOT NULL DEFAULT '',
   PRIMARY KEY (`identorno`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;
 
@@ -279,7 +293,8 @@ INSERT INTO `entornos` (`identorno`, `ipserveradm`, `portserveradm`, `protoclona
 -- Estructura de tabla para la tabla `estatus`
 --
 
-CREATE TABLE IF NOT EXISTS `estatus` (
+DROP TABLE IF EXISTS `estatus`;
+CREATE TABLE `estatus` (
   `idestatus` int(11) NOT NULL AUTO_INCREMENT,
   `descripcion` varchar(250) NOT NULL DEFAULT '',
   PRIMARY KEY (`idestatus`)
@@ -302,7 +317,8 @@ INSERT INTO `estatus` (`idestatus`, `descripcion`) VALUES
 -- Estructura de tabla para la tabla `grupos`
 --
 
-CREATE TABLE IF NOT EXISTS `grupos` (
+DROP TABLE IF EXISTS `grupos`;
+CREATE TABLE `grupos` (
   `idgrupo` int(11) NOT NULL AUTO_INCREMENT,
   `nombregrupo` varchar(250) NOT NULL DEFAULT '',
   `grupoid` int(11) NOT NULL DEFAULT '0',
@@ -319,7 +335,8 @@ CREATE TABLE IF NOT EXISTS `grupos` (
 -- Estructura de tabla para la tabla `gruposordenadores`
 --
 
-CREATE TABLE IF NOT EXISTS `gruposordenadores` (
+DROP TABLE IF EXISTS `gruposordenadores`;
+CREATE TABLE `gruposordenadores` (
   `idgrupo` int(11) NOT NULL AUTO_INCREMENT,
   `nombregrupoordenador` varchar(250) NOT NULL DEFAULT '',
   `idaula` int(11) NOT NULL DEFAULT '0',
@@ -334,7 +351,8 @@ CREATE TABLE IF NOT EXISTS `gruposordenadores` (
 -- Estructura de tabla para la tabla `hardwares`
 --
 
-CREATE TABLE IF NOT EXISTS `hardwares` (
+DROP TABLE IF EXISTS `hardwares`;
+CREATE TABLE `hardwares` (
   `idhardware` int(11) NOT NULL AUTO_INCREMENT,
   `idtipohardware` int(11) NOT NULL DEFAULT '0',
   `descripcion` varchar(250) NOT NULL DEFAULT '',
@@ -350,7 +368,8 @@ CREATE TABLE IF NOT EXISTS `hardwares` (
 -- Estructura de tabla para la tabla `iconos`
 --
 
-CREATE TABLE IF NOT EXISTS `iconos` (
+DROP TABLE IF EXISTS `iconos`;
+CREATE TABLE `iconos` (
   `idicono` int(11) NOT NULL AUTO_INCREMENT,
   `urlicono` varchar(200) DEFAULT NULL,
   `idtipoicono` int(11) DEFAULT NULL,
@@ -384,7 +403,8 @@ INSERT INTO `iconos` (`idicono`, `urlicono`, `idtipoicono`, `descripcion`) VALUE
 -- Estructura de tabla para la tabla `idiomas`
 --
 
-CREATE TABLE IF NOT EXISTS `idiomas` (
+DROP TABLE IF EXISTS `idiomas`;
+CREATE TABLE `idiomas` (
   `ididioma` int(11) NOT NULL AUTO_INCREMENT,
   `descripcion` varchar(100) DEFAULT NULL,
   `nemonico` char(3) DEFAULT NULL,
@@ -406,23 +426,26 @@ INSERT INTO `idiomas` (`ididioma`, `descripcion`, `nemonico`) VALUES
 -- Estructura de tabla para la tabla `imagenes`
 --
 
-CREATE TABLE IF NOT EXISTS `imagenes` (
+DROP TABLE IF EXISTS `imagenes`;
+CREATE TABLE `imagenes` (
   `idimagen` int(11) NOT NULL AUTO_INCREMENT,
-  `nombreca` varchar(50) NOT NULL,
+  `nombreca` varchar(50) NOT NULL DEFAULT '',
+  `revision` smallint UNSIGNED NOT NULL DEFAULT '0',
   `descripcion` varchar(250) NOT NULL DEFAULT '',
   `idperfilsoft` int(11) DEFAULT NULL,
   `idcentro` int(11) DEFAULT NULL,
   `comentarios` text,
   `grupoid` int(11) DEFAULT NULL,
-  `idrepositorio` int(11) NOT NULL DEFAULT 0,
-  `idordenador` int(11) NOT NULL DEFAULT 0,
-  `numdisk` smallint NOT NULL DEFAULT 0,
-  `numpar` smallint NOT NULL DEFAULT 0,
-  `codpar` int(8) NOT NULL DEFAULT 0,
+  `idrepositorio` int(11) NOT NULL DEFAULT '0',
+  `idordenador` int(11) NOT NULL DEFAULT '0',
+  `numdisk` smallint NOT NULL DEFAULT '0',
+  `numpar` smallint NOT NULL DEFAULT '0',
+  `codpar` int(8) NOT NULL DEFAULT '0',
   `tipo` tinyint NULL,
-  `imagenid` int NOT NULL DEFAULT 0,
+  `imagenid` int NOT NULL DEFAULT '0',
   `ruta` varchar(250) NULL,
   `fechacreacion` datetime DEFAULT NULL,
+  `inremotepc` tinyint DEFAULT '0',
   PRIMARY KEY (`idimagen`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
@@ -432,7 +455,8 @@ CREATE TABLE IF NOT EXISTS `imagenes` (
 -- Estructura de tabla para la tabla `menus`
 --
 
-CREATE TABLE IF NOT EXISTS `menus` (
+DROP TABLE IF EXISTS `menus`;
+CREATE TABLE `menus` (
   `idmenu` int(11) NOT NULL AUTO_INCREMENT,
   `descripcion` varchar(250) NOT NULL DEFAULT '',
   `idcentro` int(11) NOT NULL DEFAULT '0',
@@ -454,9 +478,10 @@ CREATE TABLE IF NOT EXISTS `menus` (
 -- Estructura de tabla para la tabla `nombresos`
 --
 
-CREATE TABLE IF NOT EXISTS `nombresos` (
+DROP TABLE IF EXISTS `nombresos`;
+CREATE TABLE `nombresos` (
   `idnombreso` smallint(11) NOT NULL AUTO_INCREMENT,
-  `nombreso` varchar(250) NOT NULL,
+  `nombreso` varchar(250) NOT NULL DEFAULT '',
   `idtiposo` int(11) DEFAULT '0',
   PRIMARY KEY (`idnombreso`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
@@ -464,13 +489,31 @@ CREATE TABLE IF NOT EXISTS `nombresos` (
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `ogagent_queue`
+--
+
+DROP TABLE IF EXISTS `ogagent_queue`;
+CREATE TABLE `ogagent_queue` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `clientid` int(11) NOT NULL,
+  `exectime` datetime DEFAULT NULL,
+  `operation` varchar(25),
+--  `parameters` varchar(100),
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `ordenadores`
 --
 
-CREATE TABLE IF NOT EXISTS `ordenadores` (
+DROP TABLE IF EXISTS `ordenadores`;
+CREATE TABLE `ordenadores` (
   `idordenador` int(11) NOT NULL AUTO_INCREMENT,
   `nombreordenador` varchar(100) DEFAULT NULL,
-  `ip` varchar(16) NOT NULL,
+  `numserie` varchar(25) DEFAULT NULL,
+  `ip` varchar(16) NOT NULL DEFAULT '',
   `mac` varchar(12) DEFAULT NULL,
   `idaula` int(11) DEFAULT NULL,
   `idperfilhard` int(11) DEFAULT NULL,
@@ -478,16 +521,18 @@ CREATE TABLE IF NOT EXISTS `ordenadores` (
   `grupoid` int(11) DEFAULT NULL,
   `idmenu` int(11) DEFAULT NULL,
   `cache` int(11) DEFAULT NULL,
-  `router` varchar(16) NOT NULL,
-  `mascara` varchar(16) NOT NULL,
-  `idproautoexec` int(11) NOT NULL DEFAULT 0,
-  `arranque` VARCHAR( 30 ) NOT NULL DEFAULT '00unknown',
+  `router` varchar(16) NOT NULL DEFAULT '',
+  `mascara` varchar(16) NOT NULL DEFAULT '',
+  `idproautoexec` int(11) NOT NULL DEFAULT '0',
+  `arranque` varchar(30) NOT NULL DEFAULT '00unknown',
   `netiface` enum('eth0','eth1','eth2') DEFAULT 'eth0',
-  `netdriver` varchar( 30 ) NOT NULL DEFAULT 'generic',
-  `fotoord` varchar( 250 ) NOT NULL DEFAULT 'fotoordenador.gif',
+  `netdriver` varchar(30) NOT NULL DEFAULT 'generic',
+  `fotoord` varchar(250) NOT NULL DEFAULT 'fotoordenador.gif',
   `validacion` tinyint(1) DEFAULT '0',
   `paginalogin` varchar(100),
   `paginavalidacion` varchar(100),
+  `agentkey` varchar(32),
+  `oglivedir` varchar(50) NOT NULL DEFAULT 'ogLive',
   PRIMARY KEY (`idordenador`),
   KEY `idaulaip` (`idaula` ASC, `ip` ASC)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
@@ -500,18 +545,21 @@ CREATE TABLE IF NOT EXISTS `ordenadores` (
 -- Estructura de tabla para la tabla `ordenadores_particiones`
 --
 
-CREATE TABLE IF NOT EXISTS `ordenadores_particiones` (
-  `idordenador` int(11) NOT NULL,
-  `numdisk` smallint NOT NULL,
-  `numpar` smallint NOT NULL,
-  `codpar` int(8) NOT NULL,
-  `tamano` int(11) NOT NULL,
-  `idsistemafichero` smallint(11) NOT NULL,
-  `idnombreso` smallint(11) NOT NULL,
-  `idimagen` int(11) NOT NULL,
-  `idperfilsoft` int(11) NOT NULL,
+DROP TABLE IF EXISTS `ordenadores_particiones`;
+CREATE TABLE `ordenadores_particiones` (
+  `idordenador` int(11) NOT NULL DEFAULT '0',
+  `numdisk` smallint NOT NULL DEFAULT '0',
+  `numpar` smallint NOT NULL DEFAULT '0',
+  `codpar` int(8) NOT NULL DEFAULT '0',
+  `tamano` int(11) NOT NULL DEFAULT '0',
+  `uso` tinyint NOT NULL DEFAULT '0',
+  `idsistemafichero` smallint(11) NOT NULL DEFAULT '0',
+  `idnombreso` smallint(11) NOT NULL DEFAULT '0',
+  `idimagen` int(11) NOT NULL DEFAULT '0',
+  `revision` smallint UNSIGNED NOT NULL DEFAULT '0',
+  `idperfilsoft` int(11) NOT NULL DEFAULT '0',
   `fechadespliegue` datetime NULL,
-  `cache` text NOT NULL,
+  `cache` text,
   UNIQUE KEY `idordenadornumdisknumpar` (`idordenador`,`numdisk`,`numpar`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 
@@ -521,13 +569,14 @@ CREATE TABLE IF NOT EXISTS `ordenadores_particiones` (
 -- Estructura de tabla para la tabla `parametros`
 --
 
-CREATE TABLE IF NOT EXISTS `parametros` (
+DROP TABLE IF EXISTS `parametros`;
+CREATE TABLE `parametros` (
   `idparametro` int(11) NOT NULL AUTO_INCREMENT,
-  `nemonico` char(3) NOT NULL,
-  `descripcion` text NOT NULL,
-  `nomidentificador` varchar(64) NOT NULL,
-  `nomtabla` varchar(64) NOT NULL,
-  `nomliteral` varchar(64) NOT NULL,
+  `nemonico` char(3) NOT NULL DEFAULT '',
+  `descripcion` text,
+  `nomidentificador` varchar(64) NOT NULL DEFAULT '',
+  `nomtabla` varchar(64) NOT NULL DEFAULT '',
+  `nomliteral` varchar(64) NOT NULL DEFAULT '',
   `tipopa` tinyint(1) DEFAULT '0',
   `visual` tinyint(4) NOT NULL DEFAULT '0',
   PRIMARY KEY (`idparametro`),
@@ -575,7 +624,9 @@ INSERT INTO `parametros` (`idparametro`, `nemonico`, `descripcion`, `nomidentifi
 (35, 'bpc', 'Borrado previo de la imagen en cache', '', '', '', 5, 1), 
 (36, 'rti', 'Ruta de origen', '', '', '', 0, 1), 
 (37, 'met', 'Método clonación', ';', '', 'Desde caché; Desde repositorio', 3, 1),
-(38, 'nba', 'No borrar archivos en destino', '', '', '', 0, 1); 
+(38, 'nba', 'No borrar archivos en destino', '', '', '', 0, 1),
+(39, 'tit', 'Título', '', '', '', 0, 1),
+(40, 'msj', 'Contenido', '', '', '', 0, 1); 
 
 -- --------------------------------------------------------
 
@@ -584,12 +635,13 @@ INSERT INTO `parametros` (`idparametro`, `nemonico`, `descripcion`, `nomidentifi
 
 --
 
-CREATE TABLE IF NOT EXISTS `perfileshard` (
+DROP TABLE IF EXISTS `perfileshard`;
+CREATE TABLE `perfileshard` (
   `idperfilhard` int(11) NOT NULL AUTO_INCREMENT,
   `descripcion` varchar(250) NOT NULL DEFAULT '',
   `comentarios` text,
   `grupoid` int(11) DEFAULT NULL,
-  `idcentro` int(11) NOT NULL,
+  `idcentro` int(11) NOT NULL DEFAULT '0',
   `winboot` enum( 'reboot', 'kexec' ) NOT NULL DEFAULT 'reboot',
   PRIMARY KEY (`idperfilhard`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
@@ -601,7 +653,8 @@ CREATE TABLE IF NOT EXISTS `perfileshard` (
 -- Estructura de tabla para la tabla `perfileshard_hardwares`
 --
 
-CREATE TABLE IF NOT EXISTS `perfileshard_hardwares` (
+DROP TABLE IF EXISTS `perfileshard_hardwares`;
+CREATE TABLE `perfileshard_hardwares` (
   `idperfilhard` int(11) NOT NULL DEFAULT '0',
   `idhardware` int(11) NOT NULL DEFAULT '0',
   KEY `idperfilhard` (`idperfilhard`)
@@ -613,12 +666,14 @@ CREATE TABLE IF NOT EXISTS `perfileshard_hardwares` (
 -- Estructura de tabla para la tabla `perfilessoft`
 --
 
-CREATE TABLE IF NOT EXISTS `perfilessoft` (
+DROP TABLE IF EXISTS `perfilessoft`;
+CREATE TABLE `perfilessoft` (
   `idperfilsoft` int(11) NOT NULL AUTO_INCREMENT,
+  `idnombreso` smallint(5) unsigned DEFAULT NULL,
   `descripcion` varchar(250) NOT NULL DEFAULT '',
   `comentarios` text,
   `grupoid` int(11) DEFAULT NULL,
-  `idcentro` int(11) NOT NULL,
+  `idcentro` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`idperfilsoft`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
@@ -628,7 +683,8 @@ CREATE TABLE IF NOT EXISTS `perfilessoft` (
 -- Estructura de tabla para la tabla `perfilessoft_softwares`
 --
 
-CREATE TABLE IF NOT EXISTS `perfilessoft_softwares` (
+DROP TABLE IF EXISTS `perfilessoft_softwares`;
+CREATE TABLE `perfilessoft_softwares` (
   `idperfilsoft` int(11) NOT NULL DEFAULT '0',
   `idsoftware` int(11) NOT NULL DEFAULT '0'
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
@@ -639,9 +695,10 @@ CREATE TABLE IF NOT EXISTS `perfilessoft_softwares` (
 -- Estructura de tabla para la tabla `plataformas`
 --
 
-CREATE TABLE IF NOT EXISTS `plataformas` (
+DROP TABLE IF EXISTS `plataformas`;
+CREATE TABLE `plataformas` (
   `idplataforma` int(11) NOT NULL AUTO_INCREMENT,
-  `plataforma` varchar(250) NOT NULL,
+  `plataforma` varchar(250) NOT NULL DEFAULT '',
   PRIMARY KEY (`idplataforma`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=18 ;
 
@@ -662,7 +719,8 @@ INSERT INTO `plataformas` (`idplataforma`, `plataforma`) VALUES
 -- Estructura de tabla para la tabla `procedimientos`
 --
 
-CREATE TABLE IF NOT EXISTS `procedimientos` (
+DROP TABLE IF EXISTS `procedimientos`;
+CREATE TABLE `procedimientos` (
   `idprocedimiento` int(11) NOT NULL AUTO_INCREMENT,
   `descripcion` varchar(250) NOT NULL DEFAULT '',
   `urlimg` varchar(250) DEFAULT NULL,
@@ -678,13 +736,14 @@ CREATE TABLE IF NOT EXISTS `procedimientos` (
 -- Estructura de tabla para la tabla `procedimientos_acciones`
 --
 
-CREATE TABLE IF NOT EXISTS `procedimientos_acciones` (
+DROP TABLE IF EXISTS `procedimientos_acciones`;
+CREATE TABLE `procedimientos_acciones` (
   `idprocedimientoaccion` int(11) NOT NULL AUTO_INCREMENT,
   `idprocedimiento` int(11) NOT NULL DEFAULT '0',
   `orden` smallint(4) DEFAULT NULL,
   `idcomando` int(11) NOT NULL DEFAULT '0',
   `parametros` text,
-  `procedimientoid` int(11) NOT NULL,
+  `procedimientoid` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`idprocedimientoaccion`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
@@ -694,13 +753,14 @@ CREATE TABLE IF NOT EXISTS `procedimientos_acciones` (
 -- Estructura de tabla para la tabla `programaciones`
 --
 
-CREATE TABLE IF NOT EXISTS `programaciones` (
+DROP TABLE IF EXISTS `programaciones`;
+CREATE TABLE `programaciones` (
   `idprogramacion` int(11) NOT NULL AUTO_INCREMENT,
   `tipoaccion` int(11) DEFAULT NULL,
   `identificador` int(11) DEFAULT NULL,
   `nombrebloque` varchar(255) DEFAULT NULL,
-  `annos` tinyint(4) DEFAULT NULL,
-  `meses` smallint(4) DEFAULT NULL,
+  `annos` smallint DEFAULT NULL,
+  `meses` smallint DEFAULT NULL,
   `diario` int(11) DEFAULT NULL,
   `dias` tinyint(4) DEFAULT NULL,
   `semanas` tinyint(4) DEFAULT NULL,
@@ -715,9 +775,25 @@ CREATE TABLE IF NOT EXISTS `programaciones` (
   `ampmfin` tinyint(1) DEFAULT NULL,
   `minutosfin` tinyint(4) DEFAULT NULL,
   `suspendida` tinyint(1) DEFAULT NULL,
-  `sesion` int(11) NOT NULL,
+  `sesion` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`idprogramacion`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `remotepc`
+--
+
+DROP TABLE IF EXISTS `remotepc`;
+CREATE TABLE `remotepc` (
+  `id` int(11) NOT NULL,
+  `reserved` datetime DEFAULT NULL,
+  `urllogin` varchar(100),
+  `urllogout` varchar(100),
+  `language` varchar(5),
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -725,20 +801,22 @@ CREATE TABLE IF NOT EXISTS `programaciones` (
 -- Estructura de tabla para la tabla `repositorios`
 --
 
-CREATE TABLE IF NOT EXISTS `repositorios` (
+DROP TABLE IF EXISTS `repositorios`;
+CREATE TABLE `repositorios` (
   `idrepositorio` int(11) NOT NULL AUTO_INCREMENT,
-  `nombrerepositorio` varchar(250) NOT NULL,
+  `nombrerepositorio` varchar(250) NOT NULL DEFAULT '',
   `ip` varchar(15) NOT NULL DEFAULT '',
   `passguor` varchar(50) NOT NULL DEFAULT '',
   `idcentro` int(11) DEFAULT NULL,
   `grupoid` int(11) DEFAULT NULL,
   `comentarios` text,
-  `puertorepo` int(11) NOT NULL,
+  `puertorepo` int(11) NOT NULL DEFAULT '0',
+  `apikey` varchar(32) NOT NULL DEFAULT '',
   PRIMARY KEY (`idrepositorio`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
-INSERT INTO `repositorios` (`idrepositorio`,`nombrerepositorio`,`ip`,`passguor`,`idcentro`,`grupoid`,`comentarios`,`puertorepo`) VALUES 
- (1,'Repositorio (Default)','SERVERIP','',1,0,'',2002);
+INSERT INTO `repositorios` (`idrepositorio`,`nombrerepositorio`,`ip`,`passguor`,`idcentro`,`grupoid`,`comentarios`,`puertorepo`,`apikey`) VALUES 
+ (1,'Repositorio (Default)','SERVERIP','',1,0,'',2002,'REPOKEY');
 
 
 -- --------------------------------------------------------
@@ -747,11 +825,12 @@ INSERT INTO `repositorios` (`idrepositorio`,`nombrerepositorio`,`ip`,`passguor`,
 -- Estructura de tabla para la tabla `sistemasficheros`
 --
 
-CREATE TABLE IF NOT EXISTS `sistemasficheros` (
+DROP TABLE IF EXISTS `sistemasficheros`;
+CREATE TABLE `sistemasficheros` (
   `idsistemafichero` smallint(11) NOT NULL AUTO_INCREMENT,
   `descripcion` varchar(50) NOT NULL DEFAULT '',
   `nemonico` varchar(16) DEFAULT NULL,
-  `codpar` int(8) NOT NULL,
+  `codpar` int(8) NOT NULL DEFAULT '0',
   PRIMARY KEY (`idsistemafichero`),
   UNIQUE KEY (`descripcion`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
@@ -774,7 +853,9 @@ INSERT INTO `sistemasficheros` (`idsistemafichero`, `descripcion`, `nemonico`, `
  (16, 'UFS', 'UFS', 0),
  (17, 'XFS', 'XFS', 0),
  (18, 'EXFAT', 'EXFAT', 0),
- (19, 'LINUX-SWAP', 'LINUX-SWAP', 0);
+ (19, 'LINUX-SWAP', 'LINUX-SWAP', 0),
+ (20, 'F2FS', 'F2FS', 0),
+ (21, 'NILFS2', 'NILFS2', 0);
 
 
 -- --------------------------------------------------------
@@ -783,7 +864,8 @@ INSERT INTO `sistemasficheros` (`idsistemafichero`, `descripcion`, `nemonico`, `
 -- Estructura de tabla para la tabla `softwares`
 --
 
-CREATE TABLE IF NOT EXISTS `softwares` (
+DROP TABLE IF EXISTS `softwares`;
+CREATE TABLE `softwares` (
   `idsoftware` int(11) NOT NULL AUTO_INCREMENT,
   `idtiposoftware` int(11) NOT NULL DEFAULT '0',
   `descripcion` varchar(250) NOT NULL DEFAULT '',
@@ -800,14 +882,15 @@ CREATE TABLE IF NOT EXISTS `softwares` (
 -- Estructura de tabla para la tabla `tareas`
 --
 
-CREATE TABLE IF NOT EXISTS `tareas` (
+DROP TABLE IF EXISTS `tareas`;
+CREATE TABLE `tareas` (
   `idtarea` int(11) NOT NULL AUTO_INCREMENT,
   `descripcion` varchar(250) NOT NULL DEFAULT '',
   `urlimg` varchar(250) DEFAULT NULL,
   `idcentro` int(11) NOT NULL DEFAULT '0',
   `ambito` smallint(6) NOT NULL DEFAULT '0',
   `idambito` int(11) NOT NULL DEFAULT '0',
-  `restrambito` text NOT NULL,
+  `restrambito` text,
   `comentarios` text,
   `grupoid` int(11) DEFAULT '0',
   PRIMARY KEY (`idtarea`)
@@ -819,7 +902,8 @@ CREATE TABLE IF NOT EXISTS `tareas` (
 -- Estructura de tabla para la tabla `tareas_acciones`
 --
 
-CREATE TABLE IF NOT EXISTS `tareas_acciones` (
+DROP TABLE IF EXISTS `tareas_acciones`;
+CREATE TABLE `tareas_acciones` (
   `idtareaaccion` int(11) NOT NULL AUTO_INCREMENT,
   `idtarea` int(11) NOT NULL DEFAULT '0',
   `orden` smallint(6) NOT NULL DEFAULT '0',
@@ -834,12 +918,12 @@ CREATE TABLE IF NOT EXISTS `tareas_acciones` (
 -- Estructura de tabla para la tabla `tipohardwares`
 --
 
-CREATE TABLE IF NOT EXISTS `tipohardwares` (
+DROP TABLE IF EXISTS `tipohardwares`;
+CREATE TABLE `tipohardwares` (
   `idtipohardware` int(11) NOT NULL AUTO_INCREMENT,
   `descripcion` varchar(250) NOT NULL DEFAULT '',
   `urlimg` varchar(250) NOT NULL DEFAULT '',
-  `nemonico` char(3) NOT NULL,
-  `pci` tinyint(1) NOT NULL,
+  `nemonico` char(3) NOT NULL DEFAULT '',
   PRIMARY KEY (`idtipohardware`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=17 ;
 
@@ -847,22 +931,25 @@ CREATE TABLE IF NOT EXISTS `tipohardwares` (
 -- Volcar la base de datos para la tabla `tipohardwares`
 --
 
-INSERT INTO `tipohardwares` (`idtipohardware`, `descripcion`, `urlimg`, `nemonico`, `pci`) VALUES
-(1, 'Placas', '../images/iconos/placabase.gif', 'boa', 0),
-(2, 'Dispositivos Multimedia', '../images/iconos/tsonido.gif', 'mul', 0),
-(3, 'Tarjetas de Red', '../images/iconos/nic.gif', 'net', 0),
-(4, 'Microprocesadores', '../images/iconos/micro.gif', 'cpu', 0),
-(5, 'Memorias', '../images/iconos/confihard.gif', 'mem', 0),
-(7, 'Tarjetas gráficas', '../images/iconos/vga.gif', 'vga', 0),
-(8, 'Discos', '../images/iconos/discoduro.gif', 'dis', 0),
-(9, 'Dispositivos de sonido', '../images/iconos/audio.gif', 'aud', 0),
-(10, 'Marca y modelo del equipo', '../images/iconos/confihard.gif', 'mod', 0),
-(11, 'Modelo y version de la bios', '../images/iconos/confihard.gif', 'bio', 0),
-(12, 'Modelo de grabadora o  grabadora de CD/DVD', '../images/iconos/dvdcd.gif', 'cdr', 0),
-(13, 'Controladores IDE', '../images/iconos/ide.gif', 'ide', 0),
-(14, 'Controladores FireWire', '../images/iconos/confihard.gif', 'fir', 0),
-(15, 'Controladores USB', '../images/iconos/usb.gif', 'usb', 0),
-(16, 'Bus del Sistema', '../images/iconos/confihard.gif', 'bus', 0);
+INSERT INTO `tipohardwares` (`idtipohardware`, `descripcion`, `urlimg`, `nemonico`) VALUES
+(1, 'Placas', '../images/iconos/placabase.gif', 'boa'),
+(2, 'Dispositivos Multimedia', '../images/iconos/tsonido.gif', 'mul'),
+(3, 'Tarjetas de Red', '../images/iconos/nic.gif', 'net'),
+(4, 'Microprocesadores', '../images/iconos/micro.gif', 'cpu'),
+(5, 'Memorias', '../images/iconos/confihard.gif', 'mem'),
+(7, 'Tarjetas gráficas', '../images/iconos/vga.gif', 'vga'),
+(8, 'Discos', '../images/iconos/discoduro.gif', 'dis'),
+(9, 'Dispositivos de sonido', '../images/iconos/audio.gif', 'aud'),
+(10, 'Marca y modelo del equipo', '../images/iconos/confihard.gif', 'mod'),
+(11, 'Modelo y version de la bios', '../images/iconos/confihard.gif', 'bio'),
+(12, 'Modelo de grabadora o  grabadora de CD/DVD', '../images/iconos/dvdcd.gif', 'cdr'),
+(13, 'Controladores IDE', '../images/iconos/ide.gif', 'ide'),
+(14, 'Controladores FireWire', '../images/iconos/confihard.gif', 'fir'),
+(15, 'Controladores USB', '../images/iconos/usb.gif', 'usb'),
+(16, 'Bus del Sistema', '../images/iconos/confihard.gif', 'bus'),
+(17, 'Chasis del Sistema', '', 'cha'),
+(18, 'Controladores de almacenamiento', '../images/iconos/almacenamiento.png', 'sto'),
+(19, 'Tipo de proceso de arranque', '../images/iconos/arranque.png', 'boo');
 
 -- --------------------------------------------------------
 
@@ -870,7 +957,8 @@ INSERT INTO `tipohardwares` (`idtipohardware`, `descripcion`, `urlimg`, `nemonic
 -- Estructura de tabla para la tabla `tiposoftwares`
 --
 
-CREATE TABLE IF NOT EXISTS `tiposoftwares` (
+DROP TABLE IF EXISTS `tiposoftwares`;
+CREATE TABLE `tiposoftwares` (
   `idtiposoftware` int(11) NOT NULL AUTO_INCREMENT,
   `descripcion` varchar(250) NOT NULL DEFAULT '',
   `urlimg` varchar(250) NOT NULL DEFAULT '',
@@ -892,10 +980,11 @@ INSERT INTO `tiposoftwares` (`idtiposoftware`, `descripcion`, `urlimg`) VALUES
 -- Estructura de tabla para la tabla `tiposos`
 --
 
-CREATE TABLE IF NOT EXISTS `tiposos` (
+DROP TABLE IF EXISTS `tiposos`;
+CREATE TABLE `tiposos` (
   `idtiposo` int(11) NOT NULL AUTO_INCREMENT,
-  `tiposo` varchar(250) NOT NULL,
-  `idplataforma` int(11) NOT NULL,
+  `tiposo` varchar(250) NOT NULL DEFAULT '',
+  `idplataforma` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`idtiposo`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=21 ;
 
@@ -920,10 +1009,11 @@ INSERT INTO `tiposos` (`idtiposo`, `tiposo`, `idplataforma`) VALUES
 -- Estructura de tabla para la tabla `tipospar`
 --
 
-CREATE TABLE IF NOT EXISTS `tipospar` (
+DROP TABLE IF EXISTS `tipospar`;
+CREATE TABLE `tipospar` (
   `codpar` int(8) NOT NULL,
-  `tipopar` varchar(250) NOT NULL,
-  `clonable` tinyint(4) NOT NULL,
+  `tipopar` varchar(250) NOT NULL DEFAULT '',
+  `clonable` tinyint(4) NOT NULL DEFAULT '0',
   UNIQUE KEY `codpar` (`codpar`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
@@ -947,6 +1037,7 @@ INSERT INTO `tipospar` (`codpar`, `tipopar`, `clonable`) VALUES
 (CONV('8E',16,10), 'LINUX-LVM', 1),
 (CONV('A5',16,10), 'FREEBSD', 1),
 (CONV('A6',16,10), 'OPENBSD', 1),
+(CONV('A9',16,10), 'NETBSD', 1),
 (CONV('AF',16,10), 'HFS', 1),
 (CONV('BE',16,10), 'SOLARIS-BOOT', 1),
 (CONV('BF',16,10), 'SOLARIS', 1),
@@ -958,20 +1049,30 @@ INSERT INTO `tipospar` (`codpar`, `tipopar`, `clonable`) VALUES
 (CONV('FD',16,10), 'LINUX-RAID', 1),
 (CONV('0700',16,10), 'WINDOWS', 1),
 (CONV('0C01',16,10), 'WIN-RESERV', 1),
+(CONV('2700',16,10), 'WIN-RECOV', 1),
 (CONV('7F00',16,10), 'CHROMEOS-KRN', 1),
 (CONV('7F01',16,10), 'CHROMEOS', 1),
 (CONV('7F02',16,10), 'CHROMEOS-RESERV', 1),
 (CONV('8200',16,10), 'LINUX-SWAP', 0),
 (CONV('8300',16,10), 'LINUX', 1),
 (CONV('8301',16,10), 'LINUX-RESERV', 1),
+(CONV('8302',16,10), 'LINUX', 1),
 (CONV('8E00',16,10), 'LINUX-LVM', 1),
 (CONV('A500',16,10), 'FREEBSD-DISK', 0),
 (CONV('A501',16,10), 'FREEBSD-BOOT', 1),
 (CONV('A502',16,10), 'FREEBSD-SWAP', 0),
 (CONV('A503',16,10), 'FREEBSD', 1),
+(CONV('A504',16,10), 'FREEBSD', 1),
+(CONV('A901',16,10), 'NETBSD-SWAP', 0),
+(CONV('A902',16,10), 'NETBSD', 1),
+(CONV('A903',16,10), 'NETBSD', 1),
+(CONV('A904',16,10), 'NETBSD', 1),
+(CONV('A905',16,10), 'NETBSD', 1),
+(CONV('A906',16,10), 'NETBSD-RAID', 1),
 (CONV('AB00',16,10), 'HFS-BOOT', 1),
 (CONV('AF00',16,10), 'HFS', 1),
 (CONV('AF01',16,10), 'HFS-RAID', 1),
+(CONV('AF02',16,10), 'HFS-RAID', 1),
 (CONV('BE00',16,10), 'SOLARIS-BOOT', 1),
 (CONV('BF00',16,10), 'SOLARIS', 1),
 (CONV('BF01',16,10), 'SOLARIS', 1),
@@ -983,8 +1084,14 @@ INSERT INTO `tipospar` (`codpar`, `tipopar`, `clonable`) VALUES
 (CONV('EF00',16,10), 'EFI', 1),
 (CONV('EF01',16,10), 'MBR', 0),
 (CONV('EF02',16,10), 'BIOS-BOOT', 0),
+(CONV('FB00',16,10), 'VMFS', 1),
+(CONV('FB01',16,10), 'VMFS-RESERV', 1),
+(CONV('FB02',16,10), 'VMFS-KRN', 1),
 (CONV('FD00',16,10), 'LINUX-RAID', 1),
-(CONV('FFFF',16,10), 'UNKNOWN', 1);
+(CONV('FFFF',16,10), 'UNKNOWN', 1),
+(CONV('10000',16,10), 'LVM-LV', 1),
+(CONV('10010',16,10), 'ZFS-VOL', 1);
+
 
 -- --------------------------------------------------------
 
@@ -992,7 +1099,8 @@ INSERT INTO `tipospar` (`codpar`, `tipopar`, `clonable`) VALUES
 -- Estructura de tabla para la tabla `universidades`
 --
 
-CREATE TABLE IF NOT EXISTS `universidades` (
+DROP TABLE IF EXISTS `universidades`;
+CREATE TABLE `universidades` (
   `iduniversidad` int(11) NOT NULL AUTO_INCREMENT,
   `nombreuniversidad` varchar(200) NOT NULL DEFAULT '',
   `comentarios` text,
@@ -1004,7 +1112,7 @@ CREATE TABLE IF NOT EXISTS `universidades` (
 --
 
 INSERT INTO `universidades` (`iduniversidad`, `nombreuniversidad`, `comentarios`) VALUES
-(1, 'Universidad (Default)', 'Esta Universidad se crea automáticamentese en el proceso de instalación de OpenGnSys');
+(1, 'Universidad (Default)', 'Esta Universidad se crea automáticamentese en el proceso de instalación de OpenGnsys');
 
 -- --------------------------------------------------------
 
@@ -1012,7 +1120,8 @@ INSERT INTO `universidades` (`iduniversidad`, `nombreuniversidad`, `comentarios`
 -- Estructura de tabla para la tabla `urlimagesitems`
 --
 
-CREATE TABLE IF NOT EXISTS `urlimagesitems` (
+DROP TABLE IF EXISTS `urlimagesitems`;
+CREATE TABLE `urlimagesitems` (
   `idurlimagesitems` int(11) NOT NULL AUTO_INCREMENT,
   `descripcion` varchar(250) NOT NULL DEFAULT '',
   PRIMARY KEY (`idurlimagesitems`)
@@ -1029,14 +1138,16 @@ CREATE TABLE IF NOT EXISTS `urlimagesitems` (
 -- Estructura de tabla para la tabla `usuarios`
 --
 
-CREATE TABLE IF NOT EXISTS `usuarios` (
+DROP TABLE IF EXISTS `usuarios`;
+CREATE TABLE `usuarios` (
   `idusuario` int(11) NOT NULL AUTO_INCREMENT,
   `usuario` varchar(50) NOT NULL DEFAULT '',
-  `pasguor` varchar(50) NOT NULL DEFAULT '',
+  `pasguor` varchar(56) NOT NULL DEFAULT '',
   `nombre` varchar(200) DEFAULT NULL,
   `email` varchar(200) DEFAULT NULL,
   `ididioma` int(11) DEFAULT NULL,
   `idtipousuario` tinyint(4) DEFAULT NULL,
+  `apikey` varchar(32) NOT NULL DEFAULT '',
   PRIMARY KEY (`idusuario`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;
 
@@ -1044,7 +1155,7 @@ CREATE TABLE IF NOT EXISTS `usuarios` (
 -- Volcar la base de datos para la tabla `usuarios`
 --
 
-INSERT INTO `usuarios` (`idusuario`, `usuario`, `pasguor`, `nombre`, `email`, `ididioma`, `idtipousuario`) VALUES
-(1, 'DBUSER', 'DBPASSWORD', 'Usuario de la base de datos MySql', '', 1, 1);
+INSERT INTO `usuarios` (`idusuario`, `usuario`, `pasguor`, `nombre`, `email`, `ididioma`, `idtipousuario`, `apikey`) VALUES
+(1, 'DBUSER', SHA2('DBPASSWORD', 224), 'Usuario de la base de datos MySql', '', 1, 1, 'APIKEY');
 
 

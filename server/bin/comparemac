@@ -1,6 +1,6 @@
 #!/bin/bash
 # comparemac - script para comparar las direcciones MAC (ethernet) de los clientes
-#	       conectados a la red con las registradas en OpenGnSys.
+#	       conectados a la red con las registradas en OpenGnsys.
 # Requisitos: arp-scan
 # Autores: Manuel González, Ramón M. Gómez - Univ. Sevilla, Junio 2014.
 

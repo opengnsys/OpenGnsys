@@ -1,4 +1,4 @@
-<?
+<?php
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -17,6 +17,7 @@ include_once("../includes/HTMLSELECT.php");
 include_once("../includes/HTMLCTESELECT.php");
 include_once("../includes/TomaDato.php");
 include_once("../includes/RecopilaIpesMacs.php");
+include_once("../idiomas/php/".$idioma."/avisos_".$idioma.".php");
 include_once("../idiomas/php/".$idioma."/comandos/configurar_".$idioma.".php");
 include_once("../idiomas/php/".$idioma."/comandos/opcionesacciones_".$idioma.".php");
 include_once("../includes/ConfiguracionesParticiones.php");
@@ -61,11 +62,11 @@ if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 <SCRIPT language="javascript" src="./jscripts/comunescomandos.js"></SCRIPT>
 <SCRIPT language="javascript" src="../jscripts/constantes.js"></SCRIPT>
 <SCRIPT language="javascript" src="../clases/jscripts/HttpLib.js"></SCRIPT>
-<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>
-<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/configurar_'.$idioma.'.js"></SCRIPT>'?>
+<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>
+<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/configurar_'.$idioma.'.js"></SCRIPT>'?>
 </HEAD>
 <BODY>
-<?
+<?php
 	echo '<p align=center><span class=cabeceras>'.$TbMsg[5].'&nbsp;</span><br>';
 	//________________________________________________________________________________________________________
 	//
@@ -82,24 +83,24 @@ if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 		
 	?>
 		<FORM action="Configurar.php" name="fdatos" method="POST">
-				<INPUT type="hidden" name="idambito" value="<? echo $idambito?>">
-				<INPUT type="hidden" name="ambito" value="<? echo $ambito?>">			
-				<INPUT type="hidden" name="cadenaid" value="<? echo $cadenaid?>">			
+				<INPUT type="hidden" name="idambito" value="<?php echo $idambito?>">
+				<INPUT type="hidden" name="ambito" value="<?php echo $ambito?>">			
+				<INPUT type="hidden" name="cadenaid" value="<?php echo $cadenaid?>">			
 				<TABLE class="tabla_busquedas" align=center border=0 cellPadding=0 cellSpacing=0>
 				<TR>
-					<TH height=15 align="center" colspan=14><? echo $TbMsg[18]?></TH>
+					<TH height=15 align="center" colspan=14><?php echo $TbMsg[18]?></TH>
 				</TR>
 				<TR>
-					<TD align=right><? echo $TbMsg[30]?></TD>
-					<TD align=center><INPUT type="checkbox" value="<? echo $msk_sysFi?>" name="fk_sysFi" <? if($fk_sysFi==$msk_sysFi) echo " checked "?>></TD>
+					<TD align=right><?php echo $TbMsg[30]?></TD>
+					<TD align=center><INPUT type="checkbox" value="<?php echo $msk_sysFi?>" name="fk_sysFi" <?php if($fk_sysFi==$msk_sysFi) echo " checked "?>></TD>
 					<TD width="20" align=center>&nbsp;</TD>
 
-					<TD align=right><? echo $TbMsg[32]?></TD>
-					<TD align=center><INPUT type="checkbox" value="<? echo $msk_tamano?>" name="fk_tamano" <? if($fk_tamano==$msk_tamano) echo " checked "?>></TD>
+					<TD align=right><?php echo $TbMsg[32]?></TD>
+					<TD align=center><INPUT type="checkbox" value="<?php echo $msk_tamano?>" name="fk_tamano" <?php if($fk_tamano==$msk_tamano) echo " checked "?>></TD>
 					<TD width="20" align=center>&nbsp;</TD>
 				
-					<TD align=right><? echo $TbMsg[31]?></TD>
-					<TD align=center><INPUT type="checkbox" value="<? echo $msk_nombreSO?>" name="fk_nombreSO" <? if($fk_nombreSO==$msk_nombreSO) echo " checked "?>></TD>
+					<TD align=right><?php echo $TbMsg[31]?></TD>
+					<TD align=center><INPUT type="checkbox" value="<?php echo $msk_nombreSO?>" name="fk_nombreSO" <?php if($fk_nombreSO==$msk_nombreSO) echo " checked "?>></TD>
 					<TD width="20" align=center>&nbsp;</TD>				
 				</TR>
 				<TR>
@@ -108,11 +109,11 @@ if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 				<TR>
 					<TD height=20 align="center" colspan=14>
 						<A href=#>
-						<IMG border=0 src="../images/boton_confirmar_<? echo $idioma ?>.gif" onclick="document.fdatos.submit()"></A></TD>			
+						<IMG border=0 src="../images/boton_confirmar_<?php echo $idioma ?>.gif" onclick="document.fdatos.submit()"></A></TD>			
 				</TR>
 			</TABLE>
 		</FORM>	
-<?
+<?php
 	}
 	$sws=$fk_sysFi |  $fk_tamano | $fk_nombreSO;
 
@@ -138,7 +139,7 @@ if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 ?>
 </BODY>
 </HTML>
-<?
+<?php
 
 /*________________________________________________________________________________________________________
 	Crea la etiqueta html <SELECT> de los número de particiones
@@ -149,7 +150,7 @@ function HTMLSELECT_particiones($p)
 	
 	$SelectHtml="";
 	$opciones="";
-	for($i=0;$i<8;$i++)
+	for($i=0;$i<9;$i++)
 			$opciones.="$i=$i".chr(13);
 	$opciones.="$i=$i";
 	$SelectHtml.=HTMLCTESELECT($opciones,"particiones","estilodesple","",$p,40,"");

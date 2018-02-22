@@ -147,11 +147,14 @@ BOOLEAN gestionaTrama(SOCKET *socket_c)
 			if (res == 0) { // Encontrada la función que procesa el mensaje
 				liberaMemoria(nfn);
 				res=tbfuncionesServer[i].fptr(socket_c, ptrTrama); // Invoca la función
-				liberaMemoria((char*)ptrTrama);
+				liberaMemoria(ptrTrama->parametros);
+				liberaMemoria(ptrTrama);
 				return(res);
 			}
 		}
-		
+		liberaMemoria(nfn);
+		liberaMemoria(ptrTrama->parametros);
+		liberaMemoria(ptrTrama);
 		/*
 		 Sólo puede ser un comando personalizado o su notificación
 		if (ptrTrama->tipo == MSG_COMANDO)
@@ -215,6 +218,7 @@ BOOLEAN respuestaSondeo(SOCKET *socket_c, TRAMA* ptrTrama) {
 	lSize = strlen(iph); // Calcula longitud de la cadena de direccion/es IPE/S
 	Ipes = (char*) reservaMemoria(lSize + 1);
 	if (Ipes == NULL) {
+		liberaMemoria(iph);
 		errorLog(modulo, 3, FALSE);
 		return (FALSE);
 	}
@@ -348,6 +352,7 @@ BOOLEAN EcoConsola(SOCKET *socket_c, TRAMA* ptrTrama)
 	// Lee archivo de eco de consola
 	iph = copiaParametro("iph",ptrTrama); // Toma dirección ip del cliente
 	sprintf(fileco,"/tmp/_Seconsola_%s",iph); // Nombre del archivo en el Servidor
+	liberaMemoria(iph);
 	lSize=lonArchivo(fileco);
 	if(lSize>0){ // Si el fichero tiene contenido...
 		initParametros(ptrTrama,lSize+LONGITUD_PARAMETROS);
@@ -504,6 +509,7 @@ BOOLEAN procesoInclusionClienteWinLnx(SOCKET *socket_c, TRAMA *ptrTrama,int *ido
 	iph = copiaParametro("iph",ptrTrama); // Toma ip
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexión con la BD
+		liberaMemoria(iph);
 		errorLog(modulo, 20, FALSE);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
@@ -516,14 +522,19 @@ BOOLEAN procesoInclusionClienteWinLnx(SOCKET *socket_c, TRAMA *ptrTrama,int *ido
 				" WHERE ordenadores.ip = '%s'", iph);
 
 	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
+		liberaMemoria(iph);
 		errorLog(modulo, 21, FALSE);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
+		db.Close();
 		return (21);
 	}
 
 	if (tbl.ISEOF()) { // Si no existe el cliente
+		liberaMemoria(iph);
 		errorLog(modulo, 22, FALSE);
+		db.liberaResult(tbl);
+		db.Close();
 		return (22);
 	}
 
@@ -532,15 +543,22 @@ BOOLEAN procesoInclusionClienteWinLnx(SOCKET *socket_c, TRAMA *ptrTrama,int *ido
 		infoDebug(msglog);
 	}
 	if (!tbl.Get("idordenador", *idordenador)) {
+		liberaMemoria(iph);
+		db.liberaResult(tbl);
 		tbl.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
+		db.Close();
 		return (FALSE);
 	}
 	if (!tbl.Get("nombreordenador", nombreordenador)) {
+		liberaMemoria(iph);
+		db.liberaResult(tbl);
 		tbl.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
+		db.Close();
 		return (FALSE);
 	}
+	db.liberaResult(tbl);
 	db.Close();
 	
 	if (!registraCliente(iph)) { // Incluyendo al cliente en la tabla de sokets
@@ -604,6 +622,8 @@ BOOLEAN procesoInclusionCliente(SOCKET *socket_c, TRAMA *ptrTrama) {
 	cfg = copiaParametro("cfg",ptrTrama); // Toma configuracion
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexión con la BD
+		liberaMemoria(iph);
+		liberaMemoria(cfg);
 		errorLog(modulo, 20, FALSE);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
@@ -732,14 +752,35 @@ BOOLEAN actualizaConfiguracion(Database db, Table tbl, char* cfg, int ido)
 	char msglog[LONSTD], sqlstr[LONSQL];
 	int lon, p, c,i, dato, swu, idsoi, idsfi,k;
 	char *ptrPar[MAXPAR], *ptrCfg[6], *ptrDual[2], tbPar[LONSTD];
-	char *disk, *par, *cpt, *sfi, *soi, *tam; // Parametros que definen una partición
+	char *ser, *disk, *par, *cpt, *sfi, *soi, *tam, *uso; // Parametros de configuración.
 	char modulo[] = "actualizaConfiguracion()";
 
 	lon = 0;
 	p = splitCadena(ptrPar, cfg, '\n');
 	for (i = 0; i < p; i++) {
 		c = splitCadena(ptrCfg, ptrPar[i], '\t');
-		disk = par = cpt = sfi = soi = tam = NULL;
+
+		// Si la 1ª línea solo incluye el número de serie del equipo; actualizar BD.
+		if (i == 0 && c == 1) {
+			splitCadena(ptrDual, ptrCfg[0], '=');
+			ser = ptrDual[1];
+			if (strlen(ser) > 0) {
+				// Solo actualizar si número de serie no existía.
+				sprintf(sqlstr, "UPDATE ordenadores SET numserie='%s'"
+						" WHERE idordenador=%d AND numserie IS NULL",
+						ser, ido);
+				if (!db.Execute(sqlstr, tbl)) { // Error al insertar
+					db.GetErrorErrStr(msglog);
+					errorInfo(modulo, msglog);
+					return (FALSE);
+				}
+			}
+			continue;
+		}
+
+		// Distribución de particionado.
+		disk = par = cpt = sfi = soi = tam = uso = NULL;
+
 		splitCadena(ptrDual, ptrCfg[0], '=');
 		disk = ptrDual[1]; // Número de disco
 
@@ -750,7 +791,7 @@ BOOLEAN actualizaConfiguracion(Database db, Table tbl, char* cfg, int ido)
 		if(k==2){
 			cpt = ptrDual[1]; // Código de partición
 		}else{
-			cpt = "0";
+			cpt = (char*)"0";
 		}
 
 		k=splitCadena(ptrDual, ptrCfg[3], '=');
@@ -774,10 +815,14 @@ BOOLEAN actualizaConfiguracion(Database db, Table tbl, char* cfg, int ido)
 		splitCadena(ptrDual, ptrCfg[5], '=');
 		tam = ptrDual[1]; // Tamaño de la partición
 
+		splitCadena(ptrDual, ptrCfg[6], '=');
+		uso = ptrDual[1]; // Porcentaje de uso del S.F.
+
 		lon += sprintf(tbPar + lon, "(%s, %s),", disk, par);
 
-		sprintf(sqlstr, "SELECT numdisk,numpar,codpar,tamano,idsistemafichero,idnombreso"
-				"  FROM ordenadores_particiones WHERE idordenador=%d AND numdisk=%s AND numpar=%s",
+		sprintf(sqlstr, "SELECT numdisk, numpar, codpar, tamano, uso, idsistemafichero, idnombreso"
+				"  FROM ordenadores_particiones"
+				" WHERE idordenador=%d AND numdisk=%s AND numpar=%s",
 				ido, disk, par);
 
 
@@ -788,9 +833,9 @@ BOOLEAN actualizaConfiguracion(Database db, Table tbl, char* cfg, int ido)
 			return (FALSE);
 		}
 		if (tbl.ISEOF()) { // Si no existe el registro
-			sprintf(sqlstr, "INSERT INTO ordenadores_particiones(idordenador,numdisk,numpar,codpar,tamano,idsistemafichero,idnombreso,idimagen)"
-					" VALUES(%d,%s,%s,0x%s,%s,%d,%d,0)",
-					ido, disk, par, cpt, tam, idsfi, idsoi);
+			sprintf(sqlstr, "INSERT INTO ordenadores_particiones(idordenador,numdisk,numpar,codpar,tamano,uso,idsistemafichero,idnombreso,idimagen)"
+					" VALUES(%d,%s,%s,0x%s,%s,%s,%d,%d,0)",
+					ido, disk, par, cpt, tam, uso, idsfi, idsoi);
 
 
 			if (!db.Execute(sqlstr, tbl)) { // Error al insertar
@@ -833,19 +878,25 @@ BOOLEAN actualizaConfiguracion(Database db, Table tbl, char* cfg, int ido)
 				sprintf(sqlstr, "UPDATE ordenadores_particiones SET "
 					" codpar=0x%s,"
 					" tamano=%s,"
+					" uso=%s,"
 					" idsistemafichero=%d,"
 					" idnombreso=%d,"
 					" idimagen=0,"
 					" idperfilsoft=0,"
 					" fechadespliegue=NULL"
 					" WHERE idordenador=%d AND numdisk=%s AND numpar=%s",
-					cpt, tam, idsfi, idsoi, ido, disk, par);
-				if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
-					errorLog(modulo, 21, FALSE);
-					db.GetErrorErrStr(msglog);
-					errorInfo(modulo, msglog);
-					return (FALSE);
-				}
+					cpt, tam, uso, idsfi, idsoi, ido, disk, par);
+			} else {  // Actualizar porcentaje de uso.
+				sprintf(sqlstr, "UPDATE ordenadores_particiones SET "
+					" uso=%s"
+					" WHERE idordenador=%d AND numdisk=%s AND numpar=%s",
+					uso, ido, disk, par);
+			}
+			if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
+				errorLog(modulo, 21, FALSE);
+				db.GetErrorErrStr(msglog);
+				errorInfo(modulo, msglog);
+				return (FALSE);
 			}
 		}
 	}
@@ -2033,10 +2084,25 @@ BOOLEAN actualizaCreacionImagen(Database db, Table tbl, char* idi, char* dsk,
 
 	/* Actualizar los datos de la imagen */
 	snprintf(sqlstr, LONSQL,
-			"UPDATE imagenes"
-			"   SET idordenador=%s, numdisk=%s, numpar=%s, codpar=%s, idperfilsoft=%d, idrepositorio=%d, fechacreacion=NOW()"
-			" WHERE idimagen=%s", ido, dsk, par, cpt, ifs, idr, idi);
+		"UPDATE imagenes"
+		"   SET idordenador=%s, numdisk=%s, numpar=%s, codpar=%s,"
+		"       idperfilsoft=%d, idrepositorio=%d,"
+		"       fechacreacion=NOW(), revision=revision+1"
+		" WHERE idimagen=%s", ido, dsk, par, cpt, ifs, idr, idi);
 
+	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
+		errorLog(modulo, 21, FALSE);
+		db.GetErrorErrStr(msglog);
+		errorInfo(modulo, msglog);
+		return (FALSE);
+	}
+	/* Actualizar los datos en el cliente */
+	snprintf(sqlstr, LONSQL,
+		"UPDATE ordenadores_particiones"
+		"   SET idimagen=%s, revision=(SELECT revision FROM imagenes WHERE idimagen=%s),"
+		"       fechadespliegue=NOW()"
+		" WHERE idordenador=%s AND numdisk=%s AND numpar=%s",
+		idi, idi, ido, dsk, par);
 	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
 		errorLog(modulo, 21, FALSE);
 		db.GetErrorErrStr(msglog);
@@ -2321,7 +2387,7 @@ BOOLEAN RESPUESTA_RestaurarImagen(SOCKET *socket_c, TRAMA* ptrTrama)
 	Database db;
 	Table tbl;
 	BOOLEAN res;
-	char *iph, *ido, *idi, *dsk, *par, *ifs;
+	char *iph, *ido, *idi, *dsk, *par, *ifs, *cfg;
 	char modulo[] = "RESPUESTA_RestaurarImagen()";
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
@@ -2346,11 +2412,15 @@ BOOLEAN RESPUESTA_RestaurarImagen(SOCKET *socket_c, TRAMA* ptrTrama)
 	dsk = copiaParametro("dsk",ptrTrama); // Número de disco
 	par = copiaParametro("par",ptrTrama); // Número de partición
 	ifs = copiaParametro("ifs",ptrTrama); // Identificador del perfil software contenido
-	
+	cfg = copiaParametro("cfg",ptrTrama); // Configuración de discos
+	if(cfg){
+		actualizaConfiguracion(db, tbl, cfg, atoi(ido)); // Actualiza la configuración del ordenador
+		liberaMemoria(cfg);	
+	}
 	res=actualizaRestauracionImagen(db, tbl, idi, dsk, par, ido, ifs);
 	
 	liberaMemoria(iph);
-	liberaMemoria(ido);	
+	liberaMemoria(ido);
 	liberaMemoria(idi);
 	liberaMemoria(par);
 	liberaMemoria(ifs);
@@ -2421,8 +2491,10 @@ BOOLEAN actualizaRestauracionImagen(Database db, Table tbl, char* idi,
 	/* Actualizar los datos de la imagen */
 	snprintf(sqlstr, LONSQL,
 			"UPDATE ordenadores_particiones"
-			"   SET idimagen=%s, idperfilsoft=%s, fechadespliegue=NOW()"
-			" WHERE idordenador=%s AND numdisk=%s AND numpar=%s", idi, ifs, ido, dsk, par);
+			"   SET idimagen=%s, idperfilsoft=%s, fechadespliegue=NOW(),"
+			"       revision=(SELECT revision FROM imagenes WHERE idimagen=%s)," 
+			"       idnombreso=(SELECT idnombreso FROM perfilessoft WHERE idperfilsoft=%s)" 
+			" WHERE idordenador=%s AND numdisk=%s AND numpar=%s", idi, ifs, idi, ifs, ido, dsk, par);
 
 	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
 		errorLog(modulo, 21, FALSE);
@@ -2554,7 +2626,6 @@ BOOLEAN RESPUESTA_EjecutarScript(SOCKET *socket_c, TRAMA* ptrTrama)
 	Database db;
 	Table tbl;
 	char *iph, *ido,*cfg;
-	int res;
 
 	char modulo[] = "RESPUESTA_EjecutarScript()";
 
@@ -2576,9 +2647,8 @@ BOOLEAN RESPUESTA_EjecutarScript(SOCKET *socket_c, TRAMA* ptrTrama)
 	}
 	
 	cfg = copiaParametro("cfg",ptrTrama); // Toma configuración de particiones
-	
 	if(cfg){
-		res=actualizaConfiguracion(db, tbl, cfg, atoi(ido)); // Actualiza la configuración del ordenador
+		actualizaConfiguracion(db, tbl, cfg, atoi(ido)); // Actualiza la configuración del ordenador
 		liberaMemoria(cfg);	
 	}
 
@@ -3070,10 +3140,12 @@ BOOLEAN RESPUESTA_InventarioSoftware(SOCKET *socket_c, TRAMA* ptrTrama) {
 //	Devuelve:
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
+//
+//	Versión 1.1.0: Se incluye el sistema operativo. Autora: Irina Gómez - ETSII Universidad Sevilla
 // ________________________________________________________________________________________________________
 BOOLEAN actualizaSoftware(Database db, Table tbl, char* sft, char* par,char* ido, char* npc, char* idc) 
 {
-	int i, j, lon, aux, idperfilsoft;
+	int i, j, lon, aux, idperfilsoft, idnombreso;
 	bool retval;
 	char *wsft;
 	int tbidsoftware[MAXSOFTWARE];
@@ -3121,6 +3193,12 @@ BOOLEAN actualizaSoftware(Database db, Table tbl, char* sft, char* par,char* ido
 		lon = MAXSOFTWARE; // Limita el número de componentes software
 
 	for (i = 0; i < lon; i++) {
+		// Primera línea es el sistema operativo: se obtiene identificador
+		if (i == 0) {
+			idnombreso = checkDato(db, tbl, rTrim(tbSoftware[i]), "nombresos", "nombreso", "idnombreso");
+			continue;
+		}
+
 		sprintf(sqlstr,
 				"SELECT idsoftware FROM softwares WHERE descripcion ='%s'",
 				rTrim(tbSoftware[i]));
@@ -3189,7 +3267,7 @@ BOOLEAN actualizaSoftware(Database db, Table tbl, char* sft, char* par,char* ido
 		aux += sprintf(idsoftwares + aux, ",%d", tbidsoftware[i]);
 
 	// Comprueba existencia de perfil software y actualización de éste para el ordenador
-	if (!cuestionPerfilSoftware(db, tbl, idc, ido, idperfilsoft, idsoftwares,
+	if (!cuestionPerfilSoftware(db, tbl, idc, ido, idperfilsoft, idnombreso, idsoftwares, 
 			npc, par, tbidsoftware, lon)) {
 		errorLog(modulo, 83, FALSE);
 		errorInfo(modulo, msglog);
@@ -3210,6 +3288,7 @@ BOOLEAN actualizaSoftware(Database db, Table tbl, char* sft, char* par,char* ido
 //		- tbl: Objeto tabla
 //		- idcentro: Identificador del centro en la tabla
 //		- ido: Identificador del ordenador del cliente en la tabla
+//		- idnombreso: Identificador del sistema operativo
 //		- idsoftwares: Cadena con los identificadores de componentes software separados por comas
 //		- npc: Nombre del ordenador del cliente
 //		- particion: Número de la partición
@@ -3218,9 +3297,11 @@ BOOLEAN actualizaSoftware(Database db, Table tbl, char* sft, char* par,char* ido
 //	Devuelve:
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
-//________________________________________________________________________________________________________/
+//
+//	Versión 1.1.0: Se incluye el sistema operativo. Autora: Irina Gómez - ETSII Universidad Sevilla
+//_________________________________________________________________________________________________________
 BOOLEAN cuestionPerfilSoftware(Database db, Table tbl, char* idc, char* ido,
-		int idperfilsoftware, char *idsoftwares, char *npc, char *par,
+		int idperfilsoftware, int idnombreso, char *idsoftwares, char *npc, char *par,
 		int *tbidsoftware, int lon) {
 	char *sqlstr, msglog[LONSTD];
 	int i, nwidperfilsoft;
@@ -3248,8 +3329,8 @@ BOOLEAN cuestionPerfilSoftware(Database db, Table tbl, char* idc, char* ido,
 		return (false);
 	}
 	if (tbl.ISEOF()) { // No existe un perfil software con esos componentes de componentes software, lo crea
-		sprintf(sqlstr, "INSERT perfilessoft  (descripcion,idcentro,grupoid)"
-				" VALUES('Perfil Software (%s, Part:%s) ',%s,0)", npc, par, idc);
+		sprintf(sqlstr, "INSERT perfilessoft  (descripcion, idcentro, grupoid, idnombreso)"
+				" VALUES('Perfil Software (%s, Part:%s) ',%s,0,%i)", npc, par, idc,idnombreso);
 		if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 			db.GetErrorErrStr(msglog);
 			errorInfo(modulo, msglog);
@@ -3409,7 +3490,7 @@ BOOLEAN recibeArchivo(SOCKET *socket_c, TRAMA *ptrTrama) {
 BOOLEAN envioProgramacion(SOCKET *socket_c, TRAMA *ptrTrama)
 {
 	char sqlstr[LONSQL], msglog[LONSTD];
-	char *idp,*mar,iph[LONIP],mac[LONMAC];
+	char *idp,iph[LONIP],mac[LONMAC];
 	Database db;
 	Table tbl;
 	int idx,idcomando;
@@ -3464,24 +3545,19 @@ BOOLEAN envioProgramacion(SOCKET *socket_c, TRAMA *ptrTrama)
 				return (FALSE);
 			}
 
-			//mar = copiaParametro("mar",ptrTrama); // Toma modo de arranque si el comando es Arrancar
-
 			// Se manda por broadcast y por unicast
-			if (!Levanta(iph,mac,"1")) {
+			if (!Levanta(iph, mac, (char*)"1")) {
 				sprintf(msglog, "%s:%s", tbErrores[32], modulo);
 				errorInfo(modulo, msglog);
-				liberaMemoria(mar);
 				return (FALSE);
 			}
 
-			if (!Levanta(iph,mac,"2")) {
+			if (!Levanta(iph, mac, (char*)"2")) {
 				sprintf(msglog, "%s:%s", tbErrores[32], modulo);
 				errorInfo(modulo, msglog);
-				liberaMemoria(mar);
 				return (FALSE);
 			}
 
-			liberaMemoria(mar);
 		}
 		if (clienteDisponible(iph, &idx)) { // Si el cliente puede recibir comandos
 			strcpy(tbsockets[idx].estado, CLIENTE_OCUPADO); // Actualiza el estado del cliente
@@ -3505,6 +3581,7 @@ int main(int argc, char *argv[]) {
 	socklen_t iAddrSize;
 	struct sockaddr_in local, cliente;
 	char modulo[] = "main()";
+	int activo=1;
 
 	/*--------------------------------------------------------------------------------------------------------
 	 Validación de parámetros de ejecución y lectura del fichero de configuración del servicio
@@ -3642,6 +3719,7 @@ int main(int argc, char *argv[]) {
 	 Creación y configuración del socket del servicio
 	 ---------------------------------------------------------------------------------------------------------*/
 	socket_s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP); // Crea socket del servicio
+	setsockopt(socket_s, SOL_SOCKET, SO_REUSEPORT, &activo, sizeof(int));
 	if (socket_s == SOCKET_ERROR) { // Error al crear el socket del servicio
 		errorLog(modulo, 13, TRUE);
 		exit(EXIT_FAILURE);

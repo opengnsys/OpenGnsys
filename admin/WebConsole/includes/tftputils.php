@@ -11,6 +11,9 @@
 include_once("../includes/ctrlacc.php");
 include_once("../clases/AdoPhp.php");
 
+// Directorio de ficheros PXE.
+define("PXEDIR", "/opt/opengnsys/tftpboot/menu.lst");
+
 
 /**
  * @brief    Sustituye espacio por "_" y quita acentos y tildes.
@@ -21,7 +24,7 @@ include_once("../clases/AdoPhp.php");
  * @date     
 */
 function cleanString ($cadena) {
-	return strtr ($cadena, " áéíóúñçÁÉÍÓÚÑÇ", "_aeiouncAEIOUNC");
+	return strtr(trim($cadena), " áéíóúñçÁÉÍÓÚÑÇ", "_aeiouncAEIOUNC");
 }
 
 
@@ -51,9 +54,18 @@ function clientKernelVersion () {
  * @param    {String}  bootopt   Plantilla de arranque PXE.
  * @param    {Number}  hostid    Id. del ordenador.
  * @param    {String}  lang      Idioma de arranque.
- * @versión  1.0.5 - Primera versión, adaptada de NetBoot Avanzado.
- * @authors  Ramón Gómez - ETSII Universidad de Sevilla
+ * @version  1.0.5 - Primera versión, adaptada de NetBoot Avanzado (Antonio J. Doblas Viso - Universidad de Málaga)
+ * @author  Ramón Gómez - ETSII Universidad de Sevilla
  * @date     2013-04-25
+ * @version  1.1.0 - Se incluye la unidad organizativa como parametro del kernel: ogunit=directorio_unidad (ticket #678).
+ * @author   Irina Gómez - ETSII Universidad de Sevilla
+ * @date     2015-12-16
+ * @version  1.1.0 - La segunda fase de carga del ogLive se define en el SERVER para evitar erores de sincronismo entre versiones (ticket #787).
+ * @author   Antonio J. Doblas Viso - Universidad de Malaga
+ * @date     2017-06-01
+  * @version  1.1.0 - Se incluye el nombre del perfil hardware y se elimina el winboot (ticket #828).
+ * @author   Antonio J. Doblas Viso - Universidad de Malaga
+ * @date     2018-01-21 
  */
 function createBootMode ($cmd, $bootopt, $hostid, $lang) {	
 
@@ -69,13 +81,17 @@ function createBootMode ($cmd, $bootopt, $hostid, $lang) {
 	// Obtener información de la base de datos.
 	$cmd->texto="SELECT ordenadores.nombreordenador AS hostname, ordenadores.ip AS ip,
 			    ordenadores.mac AS mac, ordenadores.netiface AS netiface,
+			    ordenadores.oglivedir AS oglivedir,
 			    aulas.netmask AS netmask, aulas.router AS router,
-			    aulas.dns AS dns, aulas.proxy AS proxy,
+			    aulas.ntp AS ntp, aulas.dns AS dns, aulas.proxy AS proxy,
 			    aulas.nombreaula AS grupo, repositorios.ip AS iprepo,
 			    (SELECT ipserveradm FROM entornos LIMIT 1) AS ipserveradm,
-			    menus.resolucion AS vga, perfileshard.winboot AS winboot
+			    menus.resolucion AS vga, perfileshard.descripcion AS hardprofile,
+			    centros.directorio, entidades.ogunit
 			FROM ordenadores 
 			JOIN aulas USING (idaula)
+			JOIN centros USING (idcentro)
+			JOIN entidades USING (identidad)
 			JOIN repositorios USING (idrepositorio)
 			LEFT JOIN menus USING (idmenu)
 			LEFT JOIN perfileshard USING (idperfilhard)
@@ -91,13 +107,21 @@ function createBootMode ($cmd, $bootopt, $hostid, $lang) {
 	$netiface=$rs->campos["netiface"];
 	$netmask=$rs->campos["netmask"];
 	$router=$rs->campos["router"];
+	$ntp=$rs->campos["ntp"];
 	$dns=$rs->campos["dns"];
 	$proxy=$rs->campos["proxy"];
 	$group=cleanString($rs->campos["grupo"]);
 	$repo=$rs->campos["iprepo"];
 	$server=$rs->campos["ipserveradm"];
 	$vga=$rs->campos["vga"];
-	$winboot=$rs->campos["winboot"];
+	$hardprofile=cleanString($rs->campos["hardprofile"]);
+	$oglivedir=$rs->campos["oglivedir"];
+	$ogunit=$rs->campos["ogunit"];
+	if ($ogunit == 0 or $rs->campos["directorio"] == null) {
+		$directorio="" ;
+	} else {
+		$directorio=$rs->campos["directorio"];
+	}
 
 	$rs->Cerrar();
 
@@ -119,13 +143,14 @@ function createBootMode ($cmd, $bootopt, $hostid, $lang) {
 		  " ip=$ip:$server:$router:$netmask:$hostname:$netiface:none" .
 		  " group=$group" .
 		  " ogrepo=$repo" .
-		  " oglive=$repo" .
+		  " oglive=$server" .
 		  " oglog=$server" .
 		  " ogshare=$server";
 	// Añadir parámetros opcionales.
+	if (! empty ($ntp))	{ $infohost.=" ogntp=$ntp"; }
 	if (! empty ($dns))	{ $infohost.=" ogdns=$dns"; }
 	if (! empty ($proxy))	{ $infohost.=" ogproxy=$proxy"; }
-	if (! empty ($winboot))	{ $infohost.=" winboot=$winboot"; }
+	if (! empty ($hardprofile))	{ $infohost.=" hardprofile=$hardprofile"; }
 	// Comprobar si se usa el parámetro "vga" (número de 3 cifras) o "video" (cadena).
 	if (! empty ($vga)) {
 		// UHU - Se sustituye la función is_int por is_numeric, ya que al ser un string no funciona bien con is_int
@@ -135,21 +160,20 @@ function createBootMode ($cmd, $bootopt, $hostid, $lang) {
 			$infohost.=" video=$vga";
 		}
 	}
+	if (! empty ($directorio)) { $infohost.=" ogunit=$directorio"; }
 	
-	// Obtener nombre de fichero PXE a partir de la MAC del ordenador cliente.
-	$pxedir="/opt/opengnsys/tftpboot/menu.lst";
 	$mac = substr($mac,0,2) . ":" . substr($mac,2,2) . ":" . substr($mac,4,2) . ":" . substr($mac,6,2) . ":" . substr($mac,8,2) . ":" . substr($mac,10,2);
-	$macfile="$pxedir/01-" . str_replace(":","-",strtoupper($mac));	
+	$macfile = PXEDIR . "/01-" . str_replace(":", "-", strtoupper($mac));	
 
 	// Crear fichero de arranque a partir de la plantilla y los datos del cliente.
 	// UHU - si el parametro vga no existe, no se quita.
 	if (! empty ($vga)) {
-		exec ("sed -e 's|vga=...||g' -e 's|INFOHOST|$infohost|g' $pxedir/templates/$bootopt > $macfile");
+		exec("sed -e 's|vga=...||g; s|INFOHOST|$infohost|g; s|set ISODIR=.*|set ISODIR=$oglivedir|g' " . PXEDIR . "/templates/$bootopt > $macfile");
 	}
 	else{
-		exec ("sed -e 's|INFOHOST|$infohost|g' $pxedir/templates/$bootopt > $macfile");
+		exec("sed -e 's|INFOHOST|$infohost|g; s|set ISODIR=.*|set ISODIR=$oglivedir|g; s|set ISODIR=.*|set ISODIR=$oglivedir|g' " . PXEDIR . "/templates/$bootopt > $macfile");
 	}
-	exec ("chmod 777 $macfile");
+	chmod($macfile, 0777);
 }
 
 
@@ -164,10 +188,10 @@ function createBootMode ($cmd, $bootopt, $hostid, $lang) {
 function deleteBootFile ($mac) {	
 
 	// Obtener nombre de fichero a partir de dirección MAC.
-	$pxedir="/opt/opengnsys/tftpboot/menu.lst";
-	$macfile = "$pxedir/01-" . substr($mac,0,2) . "-" . substr($mac,2,2) . "-" . substr($mac,4,2) . "-" . substr($mac,6,2) . "-" . substr($mac,8,2) . "-" . substr($mac,10,2);
+	$mac = strtoupper($mac);
+	$macfile = PXEDIR . "/01-" . substr($mac, 0, 2) . "-" . substr($mac, 2, 2) . "-" . substr($mac, 4, 2) . "-" . substr($mac, 6, 2) . "-" . substr($mac, 8, 2) . "-" . substr($mac, 10, 2);
 	// Eliminar el fichero.
-	exec ("rm -f $macfile");
+	@unlink($macfile);
 }
 
 /**
@@ -210,6 +234,48 @@ function updateBootMode ($cmd, $idfield, $idvalue, $lang) {
 		}
 		$rs->Cerrar();
 	}
+}
+
+/**
+ *           updateBootRepo ($cmd, $repoid)
+ * @brief    Actualiza la IP del repositorio en los ficheros PXE de todos sus equipos asociados.
+ * @param    {Object}  cmd      Objeto de conexión con la base de datos
+ * @param    {Integer} repoid   Campo identificador del repositorio
+ * @return   {Integer}          0, sin errores; -1, error acceso a BD; >0, ficheros no modificados
+ * @versión  1.1.0 - Primera versión.
+ * @authors  Ramón Gómez - ETSII Universidad de Sevilla
+ * @date     2018-01-19
+ */
+function updateBootRepo ($cmd, $repoid) {
+	$errors = 0;
+	// Obtener todas las MAC de los ordenadores incluidos en el repositorio.
+	$cmd->texto = "SELECT UPPER(ordenadores.mac) AS mac, repositorios.ip AS iprepo
+			 FROM ordenadores
+			 JOIN repositorios USING (idrepositorio)
+			WHERE ordenadores.idrepositorio = '$repoid'";
+	$rs = new Recordset;
+	$rs->Comando=&$cmd;
+	if ($rs->Abrir()) {
+		$rs->Primero();
+		while (! $rs->EOF) {
+			$mac = $rs->campos["mac"];
+			$repo = $rs->campos["iprepo"];
+			// Obtener nombre de fichero PXE a partir de la MAC del ordenador cliente.
+			$macfile = PXEDIR . "/01-" . substr($mac, 0, 2) . "-" . substr($mac, 2, 2) . "-" . substr($mac, 4, 2) . "-" . substr($mac, 6, 2) . "-" . substr($mac, 8, 2) . "-" . substr($mac, 10, 2);
+			// Actualizar parámetro "ogrepo" en el fichero PXE.
+			if ($pxecode = @file_get_contents($macfile)) {
+				$pxecode = preg_replace("/ogrepo=[^ ]*/", "ogrepo=$repo", $pxecode);
+				if (! @file_put_contents($macfile, $pxecode)) {
+					$erros++;
+				}
+			}
+			$rs->Siguiente();
+		}
+		$rs->Cerrar();
+	} else {
+		$errors = -1;
+	}
+	return($errors);
 }
 
 ?>

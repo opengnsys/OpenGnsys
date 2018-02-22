@@ -44,4 +44,6 @@
 	$TbMsg[32]='Tamaño de partición';
 	$TbMsg[33]='Nombre de la Imagen ';
 	$TbMsg[34]='Perfil software';
+
+	$TbMsg["HD"]='Disco';
 ?>

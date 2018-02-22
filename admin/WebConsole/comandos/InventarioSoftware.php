@@ -33,8 +33,8 @@ if (!$cmd)
 	<SCRIPT language="javascript" src="./jscripts/InventarioSoftware.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../clases/jscripts/HttpLib.js"></SCRIPT>
 	<SCRIPT language="javascript" src="./jscripts/comunescomandos.js"></SCRIPT>
-<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/inventariosoftware_'.$idioma.'.js"></SCRIPT>'?>
-	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>
+<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/inventariosoftware_'.$idioma.'.js"></SCRIPT>'?>
+	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>
 </HEAD>
 <BODY>
 <?php
@@ -65,12 +65,12 @@ switch($ambito){
 ?>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 	<P align=center>
-	<SPAN align=center class=subcabeceras><? echo $TbMsg[7] ?></SPAN>
+	<SPAN align=center class=subcabeceras><?php echo $TbMsg[7] ?></SPAN>
 	</p>
 		<?php echo tablaConfiguracionesInventarioSoftware($cmd,$idambito); ?>
 
 	</BR>
-<?
+<?php
 //________________________________________________________________________________________________________
 	include_once("./includes/formularioacciones.php");
 //________________________________________________________________________________________________________
@@ -80,7 +80,7 @@ switch($ambito){
 ?>
 </BODY>
 </HTML>
-<?
+<?php
 /*________________________________________________________________________________________________________
 	Particiones
 ________________________________________________________________________________________________________*/

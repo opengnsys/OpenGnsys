@@ -31,24 +31,24 @@
 	margin-left: 350px;
 	border: none;
 }
-.acceso label {
+.acceso div {
 	margin-top: 20px;
-	height: 20px;
+	height: 25px;
+}
+.acceso label {
 	float: left;
 }
 .acceso input {
-	margin-top: 20px;
+	float: right;
 	margin-right: 50px;
 	width: 100px;
-	height: 20px;
-	float: right;
 }
 .acceso button {
 	margin-left: 100px;
 }
 .pie {
 	margin: 0px auto;
-	padding: 0px 10px;
+	padding: 2px 10px;
 	width: 580px;
 	font: normal normal 10px sans-serif;
 }

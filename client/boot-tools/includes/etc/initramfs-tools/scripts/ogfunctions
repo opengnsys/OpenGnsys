@@ -1,21 +1,52 @@
 #/**
 #@file    ogfunctions.lib
-#@brief   Librería o clase para la gestion del sistema operativo de los clientes OpenGnSys.
+#@brief   Librería o clase para la gestion del sistema operativo de los clientes OpenGnsys.
 #@class   client
-#@version 1.0.5
+#@version 1.1.0
 #@warning License: GNU GPLv3+
 #*/ ##
 
 
 #/**
-#        ogExportKernelParameters
+#         ogGetNetworkDevice
+#@brief   Devuelve el nombre de dispositivo de red correpondiente al índice indicado.
+#@param   int_devindex   índice de dispositivo de red.
+#@return  str_devname    nombre de dispositivo de red.
+#@note    Índice 0 debe corresponder a interfaz "lo" y a partir de 1 para las reales.
+#@version 1.1.0 - Primera versión de la función.
+#@author  Ramón Gómez, ETSII Universidad de Sevilla
+#@date    2016/04/20
+#*/ ##
+ogGetNetworkDevice ()
+{
+# Mantener retrocompatibilidad con interfaces antiguas tipo eth.
+case "$1" in
+	eth0)	ind=1 ;;
+	eth1)	ind=2 ;;
+	eth2)	ind=3 ;;
+	*)	ind="$1" ;;
+esac
+# Buscar el dispositivo del índice.
+dev=""
+for f in /sys/class/net/*/uevent; do
+	source $f
+	let aux=$IFINDEX-1
+	[ "$ind" = "$INTERFACE" -o "$ind" = $aux ] && dev="$INTERFACE"
+done
+[ -n "$dev" ] && echo "$dev"
+}
+
+
+#/**
+#         ogExportKernelParameters
 #@brief   Exporta los parametros pasados al kernel
-#@param   
-#@return  
 #@exception OG_ERR_FORMAT    Formato incorrecto.
-#@version 0.7 - 
-#@author Antonio J. Doblas. Universidad de Malaga.
+#@version 0.7 - Primera versión de la función.
+#@author  Antonio J. Doblas. Universidad de Malaga.
 #@date    2010/05/24
+#@version 1.1.0 - Sustituir índice de interfaz de red por su dispositivo.
+#@author  Ramón Gómez, ETSII Universidad de Sevilla
+#@date    2016/04/20
 #*/ ##
 ogExportKernelParameters ()
 {
@@ -24,6 +55,14 @@ ogExportKernelParameters ()
 	do
 		echo $i | grep "=" > /dev/null && export $i
 	done
+	# Sustituir índice de interfaz de red por su dispositivo.
+	DEVIND=$(echo "$ip" | cut -f6 -d:)
+	if [ -n "$DEVIND" ]; then
+		PRE=$(echo "$ip" | cut -f1-5 -d:)
+		POST=$(echo "$ip" | cut -f7- -d:)
+		DEVICE=$(ogGetNetworkDevice $DEVIND)
+		[ -n "$DEVICE" ] && export ip="$PRE:$DEVICE:${POST:-none}"
+	fi
 	return 0
 }
 
@@ -43,20 +82,28 @@ ogChangeVideoResolution ()
 {
 # Variables locales.
 local DRIVER MODE
-# Obtener driver y resolución.
-DRIVER="$(echo $video|cut -f1 -d:)"
-MODE="$(echo $video|cut -f2 -d:)"
-case "$DRIVER" in
-	# Cambiar resolución para driver "uvesafb".
-	uvesafb)
-		grep ":$(echo $MODE|cut -f1 -d-)p" /sys/class/graphics/fb0/modes | head -1 > /sys/class/graphics/fb0/mode 2>&1 || MODE="640x480-16"
-		echo "$(echo $MODE|cut -f2 -d-)" > /sys/class/graphics/fb0/bits_per_pixel 2>&1
-		echo "Screen mode: $(cat /sys/class/graphics/fb0/mode),$(cat /sys/class/graphics/fb0/bits_per_pixel)bpp."
-	;;
-	# Resolución por defecto para el resto de casos.
-	*)	echo "Unknown video driver, using default mode."
-	;;
-esac
+# Mostrar resolución y driver por defecto si solo hay una opción disponible.
+if [ $(grep -c "" /sys/class/graphics/fb0/modes) -eq 1 ]; then
+	echo "Default screen mode: $(cat /sys/class/graphics/fb0/modes),$(cat /sys/class/graphics/fb0/bits_per_pixel)bpp$(lsmod|awk '$1=="video" && $3>0 {printf " (%s)",$4}')."
+else
+	# Obtener driver y resolución.
+	DRIVER="$(echo $video|cut -f1 -d:)"
+	MODE="$(echo $video|cut -f2 -d:)"
+	case "$DRIVER" in
+		# Cambiar resolución para driver "uvesafb".
+		uvesafb)
+			# Obtener modo por defecto si parámetro "video=uvesafb:D".
+			[ "$MODE" == "D" ] && MODE=$(awk -F: '$1=="D" {print $2; nextfile}' /sys/class/graphics/fb0/modes)
+			# Cambiar resolución según valor del parámetro "video".
+			grep ":$(echo ${MODE/p/}|cut -f1 -d-)p" /sys/class/graphics/fb0/modes | head -1 > /sys/class/graphics/fb0/mode 2>&1
+			echo "$(echo $MODE|cut -f2 -d-)" > /sys/class/graphics/fb0/bits_per_pixel 2>&1
+			echo "Screen mode: $(cat /sys/class/graphics/fb0/mode),$(cat /sys/class/graphics/fb0/bits_per_pixel)bpp."
+			;;
+		# Resolución por defecto para el resto de casos.
+		*)	echo "Unknown video driver, using default mode."
+			;;
+	esac
+fi
 }
 
 
@@ -74,20 +121,23 @@ ogExportVarEnvironment ()
 {
 	export CFGINITRD="/tmp/initrd.cfg"	
 	OGPROTOCOL="${ogprotocol:-smb}"
+	[ "$ogunit" != "" ] && OGUNIT="/$ogunit"
 	# OPTIONS Para samba y local (a nfs no le afecta)
 	export OPTIONS=" -o user=opengnsys,pass=og"
+	DEFOGLIVE="ogclient"
+	export OGLIVEDIR="${oglivedir:-$DEFOGLIVE}" && echo "OGLIVEDIR=$OGLIVEDIR" >> $CFGINITRD
 	case "$OGPROTOCOL" in
 		nfs|NFS)			
 			export SRCOGLIVE="/var/lib/tftpboot" && echo "SRCOGLIVE=$SRCOGLIVE" >> $CFGINITRD	
 			export SRCOGSHARE="/opt/opengnsys/client" && echo "SRCOGSHARE=$SRCOGSHARE" >> $CFGINITRD
 			export SRCOGLOG="/opt/opengnsys/log/clients" && echo "SRCOGLOG=$SRCOGLOG" >> $CFGINITRD	
-			export SRCOGIMAGES="/opt/opengnsys/images" && echo "SRCOGIMAGES=$SRCOGIMAGES" >> $CFGINITRD	
+			export SRCOGIMAGES="/opt/opengnsys/images$OGUNIT" && echo "SRCOGIMAGES=$SRCOGIMAGES" >> $CFGINITRD	
 		;;
 		smb|SMB|cifs|CIFS|samba|SAMBA)
 			export SRCOGLIVE="tftpboot"  && echo "SRCOGLIVE=$SRCOGLIVE" >> $CFGINITRD
 			export SRCOGSHARE="ogclient" && echo "SRCOGSHARE=$SRCOGSHARE" >> $CFGINITRD
 			export SRCOGLOG="oglog" && echo "SRCOGLOG=$SRCOGLOG" >> $CFGINITRD	
-			export SRCOGIMAGES="ogimages" && echo "SRCOGIMAGES=$SRCOGIMAGES" >> $CFGINITRD
+			export SRCOGIMAGES="ogimages$OGUNIT" && echo "SRCOGIMAGES=$SRCOGIMAGES" >> $CFGINITRD
 		;;
 		local|LOCAL)
 			# Ponemos variables SRC compatibles con smb y nfs.
@@ -203,7 +253,12 @@ ogPostConfigureFS()
 	fi
 	
 	#configuramos el uso del servicio http proxy (parámetro del Kernel "ogproxy=URL_Proxy")
-	[ -n "${ogproxy}" ] && export http_proxy="$ogproxy" 	
+	if [ -n "${ogproxy}" ]; then
+		export http_proxy="$ogproxy"
+		export https_proxy="$ogproxy"
+		export ftp_proxy="$ogproxy"
+		export ftps_proxy="$ogproxy"   	
+	fi	
 	
 	# configuramos el /etc/networks
 	#read -e NETIP NETDEFAULT <<<$(route -n | grep eth0 | awk -F" " '{print $1}')
@@ -253,9 +308,10 @@ ogPostConfigureFS()
 	   fi
 	fi
 
-	#Montamos un directorio temporal para el apt-get
-	mount tmpfs /var/cache/apt/archives -t tmpfs -o size=15M
-	mkdir -p /var/cache/apt/archives/partial
+	#Montamos un directorio temporal para permitir instalacion de softare desde el comando apt-get (parametor kernel "ogtmpfs=50" valor en megas
+    ogtmpfs="${ogtmpfs:-15}"
+    mount tmpfs /var/cache/apt/archives -t tmpfs -o size=${ogtmpfs}M
+    mkdir -p /var/cache/apt/archives/partial
 }
 
 
@@ -312,52 +368,62 @@ ogGetROOTSERVER ()
 
 
 #       ogUpdateInitrd
-#@brief   Actualiza el intird de la cache desde el servidor. Si el arranque ha disdo desde cache, compueba desde el servidor nueva version del initird.
+#@brief   Actualiza el initrd de la cache desde el servidor. Si el arranque ha sido desde cache, comprueba desde el servidor nueva version del initird.
 #@param1 
 #@return  
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@version 0.9
 #@author Antonio J. Doblas. Universidad de Malaga.
 #@date    2011/05/24
+#@version 1.1.0 - Permite varios ogLive dentro de subdirectorios
+#@author Irina Gómez. ETSII Universidad de Sevilla
+#@date    2017/04/27
+#@version 1.1.0 - Se permite varios ogLives en la CACHE
+#@author Antonio J. Doblas Viso. Universidad de Malaga
+#@date    2017/05/31
 #*/ ##
 
 ogUpdateInitrd ()
 {
+	local OGLIVEDIR
+	OGLIVEDIR=${oglivedir:-"ogclient"}
 	cd /tmp
 	mkdir /tmp/cache
-	TYPE=$(blkid | grep CACHE | awk -F"TYPE=" '{print $2}' | tr -d \")
+	TYPE=$(blkid -po export $(blkid -L CACHE) 2>/dev/null | awk -F= '$1=="TYPE" { print $2}')
+	# Salir si no se detecta caché.
+	[ -z "$TYPE" ] && return
 	mount -t $TYPE LABEL=CACHE /tmp/cache || return
-	mkdir /tmp/cache/boot
+	mkdir -p /tmp/cache/boot/$OGLIVEDIR
 	
 	
 	# comparamos los del server
-	busybox tftp -g -r ogvmlinuz.sum $ROOTSERVER
-	busybox tftp -g -r oginitrd.img.sum $ROOTSERVER
+	busybox tftp -g -r $OGLIVEDIR/ogvmlinuz.sum $ROOTSERVER
+	busybox tftp -g -r $OGLIVEDIR/oginitrd.img.sum $ROOTSERVER
 	SERVERVMLINUZ=`cat ogvmlinuz.sum`
 	SERVERINITRD=`cat oginitrd.img.sum`
 
 	
 	#comparamos los de la cache
-	CACHEVMLINUZ=`cat /tmp/cache/boot/ogvmlinuz.sum`
-	CACHEINITRD=`cat /tmp/cache/boot/oginitrd.img.sum`
+	CACHEVMLINUZ=`cat /tmp/cache/boot/$OGLIVEDIR/ogvmlinuz.sum`
+	CACHEINITRD=`cat /tmp/cache/boot/$OGLIVEDIR/oginitrd.img.sum`
 	
 	echo "MD5 on SERVER: $SERVERVMLINUZ $SERVERINITRD"
-	echo "MD5  on CACHE: $CACHEVMLINUZ $CACHEINITRD"
+	echo "MD5 on  CACHE: $CACHEVMLINUZ $CACHEINITRD"
 	
-	cd /tmp/cache/boot
+	cd /tmp/cache/boot/$OGLIVEDIR || mkdir -p /tmp/cache/boot/$OGLIVEDIR
 	
 	if [ "$CACHEVMLINUZ" != "$SERVERVMLINUZ" ]
 	then		
 		echo "ogvmlinuz updating"
-		busybox tftp -g -r ogvmlinuz $ROOTSERVER
-		busybox tftp -g -r ogvmlinuz.sum $ROOTSERVER
+		busybox tftp -g -r $OGLIVEDIR/ogvmlinuz $ROOTSERVER
+		busybox tftp -g -r $OGLIVEDIR/ogvmlinuz.sum $ROOTSERVER
 		DOREBOOT=true
 	fi
 	if [ "$CACHEINITRD" != "$SERVERINITRD" ]
 	then
 		echo "oginitrd updating"
-		busybox tftp -g -r oginitrd.img $ROOTSERVER
-		busybox tftp -g -r oginitrd.img.sum $ROOTSERVER
+		busybox tftp -g -r $OGLIVEDIR/oginitrd.img $ROOTSERVER
+		busybox tftp -g -r $OGLIVEDIR/oginitrd.img.sum $ROOTSERVER
 		DOREBOOT=true
 	fi
 
@@ -408,7 +474,11 @@ ogConnect ()
 			# TODO: buscar condicion para NFS
 		   fi
 		;;
+		*)
+			return 1
+		;;
 	esac
+	return $?
 }
 
 
@@ -457,21 +527,27 @@ ogConnectOgLive ()
 ogMergeLive()
 {
 #Si existe en el punto de acceso del del oglive el fichero ogclient.sqfs	
-if [ -f $DSTOGLIVE/ogclient/ogclient.sqfs ]
+if [ ! -d $DSTOGLIVE/$OGLIVEDIR ]; then
+	echo "Usando ogLive por defecto."
+	export OGLIVEDIR=$DEFOGLIVE
+fi
+if [ -f $DSTOGLIVE/$OGLIVEDIR/ogclient.sqfs ]
 then	
 	cat /proc/mounts > /tmp/mtab.preunion
 	if [ "$og2nd" == "img" ]
 	then
 		#Montamos el ROOTFS tipo  img, para desarrolladores
 		#TODO: comprobar que se tiene acceso de escritura
-		losetup /dev/loop0 $DSTOGLIVE/ogclient/ogclient.img -o 32256
+		losetup /dev/loop0 $DSTOGLIVE/$OGLIVEDIR/ogclient.img -o 32256
 		mount /dev/loop0 $OGLIVEROOTFS
 	else
 		## Montamos el ROOTFS tipo squashfs
-		mount $DSTOGLIVE/ogclient/ogclient.sqfs $OGLIVEROOTFS -t squashfs -o loop
+		mount $DSTOGLIVE/$OGLIVEDIR/ogclient.sqfs $OGLIVEROOTFS -t squashfs -o loop
 	fi
 # Realizamos la union entre el ogliveram(initrd) y el ogliverootfs(ogclient.sqfs)	
-	for i in etc var lib bin sbin usr root boot; do
+# Nota: el orden es muy importante para evitar errores de montaje.
+	[ -d $DSTOGLIVE/lib32 ] && LIBS=lib32
+	for i in bin sbin lib $LIBS etc var usr root boot; do
 		ogUnionLiveDir $i
 	done
 	cat /tmp/mtab.preunion > /etc/mtab
@@ -503,7 +579,7 @@ ogUnionLiveDir()
 	U1STDIR="${OGLIVERAMFS}${TMPDIR}=RW"
 	U2NDDIR="${OGLIVEROOTFS}${TMPDIR}=RO"
 	UNIONDIR=${OGLIVEUNIONFS}${TMPDIR}
-	mkdir -p $UNIONDIR
+	mkdir -p $UNIONDIR $TMPDIR
 	$UBIN $FUSE_OPT $UNION_OPT ${U1STDIR}:${U2NDDIR} $UNIONDIR
 	mount --bind  $UNIONDIR $TMPDIR
 }
@@ -580,16 +656,17 @@ else
 			;;
 		""|on|any)
 			# Bring up device
-			DEVICE=eth0
+			DEVICE=1
 			;;
 		dhcp|bootp|rarp|both)
-			DEVICE=eth0
+			DEVICE=1
 			;;
 		*)
 			DEVICE=`echo $IP | cut -f6 -d:`
 			;;
 	esac
 fi
+DEVICE=$(ogGetNetworkDevice $DEVICE)
 if [ -z "${DEVICE}" ]; then
 	echo "variable DEVICE con valor $DEVICE no encontrada, llamamos de nuevo a ogconfigure_networking"
 	ogConfigureNetworking

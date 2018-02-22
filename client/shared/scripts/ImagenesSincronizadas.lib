@@ -21,7 +21,7 @@
 		#echo "[START Interface ] Run this command: $0 $*" | tee -a $OGLOGSESSION $OGLOGFILE
 		echo "$MSG_INTERFACE_START $0 $*" | tee -a $OGLOGSESSION $OGLOGFILE
 		
-		# Solo ejecutable por OpenGnSys Client.
+		# Solo ejecutable por OpenGnsys Client.
 		PATH=$PATH:$(dirname $0)
 		PROG=$(basename $0)
 

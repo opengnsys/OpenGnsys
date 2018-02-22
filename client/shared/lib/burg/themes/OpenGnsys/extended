@@ -1,0 +1,79 @@
+include "theme"
+
+screen {
+  background = "$$/background.png"
+
+  panel {
+    halign = center
+    attach_vcenter = 0
+    height = 19
+    # Flip so the cursor defaults to the main menu
+    direction = bottom_to_top
+
+    ### Main Menu ###
+    panel {
+      height = 15
+      max_width = 120
+      margin_top = 1
+      class = container-body
+      # No need for a min width and centering panel because extended width > min width
+
+      direction = left_to_right
+      anchor = 1
+      id = __menu__
+    }
+
+    panel {
+      height = 4
+      width = 100%
+      class = container-title
+
+      direction = left_to_right
+
+      image {
+        image = "$$/images/txt-select.png"
+        attach_top = 0
+        attach_left = 0
+      }
+
+      ### Tools Menu ###
+      image {
+        attach_right = 2
+        image = "$$/images/button-tools.png:$$/images/button-tools-hover.png"
+        command = "menu_popup tools_menu"
+      }
+    }
+  }
+
+  ### Progress Bar ###
+  panel {
+    halign = center
+    attach_vcenter = 20
+    width = 80
+    class = progressbar-background
+    id = __timeout__
+
+    progressbar { }
+  }
+}
+
+template_menuitem {
+  panel {
+    width = 40
+    height = 12
+
+    parameters = "class=image.class:title=panel.text.text"
+
+    image {
+      attach_vcenter = 0
+      attach_hcenter = 0
+    }
+
+    panel {
+      attach_vcenter = 0
+      attach_hcenter = 0
+      class = text-line
+      text { font = "Helvetica Regular 22" }
+    }
+  }
+}

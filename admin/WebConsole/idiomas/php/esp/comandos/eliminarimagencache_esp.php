@@ -5,11 +5,11 @@
 //	Idioma: Espa�ol 
 //________________________________________________________________________________________________________
 	if (empty ($TbMsg)) $TbMsg=array();
-	$TbMsg[0]='Creaci&oacute;n de Imagen';
-	$TbMsg[1]='Caracter&iacute;sticas del ordenador';
-	$TbMsg[2]='Nombre';
-	$TbMsg[3]='Direcci&oacute;n IP';
-	$TbMsg[4]='Direcci&oacute;n MAC';
+	$TbMsg[0]='Unidad Organizativa';
+	$TbMsg[1]='Grupo de aulas';
+	$TbMsg[2]='Aula';
+	$TbMsg[3]='Grupo de ordenadores';
+	$TbMsg[4]='Ordenador';
 	$TbMsg[5]='Eliminar Imagen de la Cache en Cliente';
 	$TbMsg[6]='Datos a suministrar';
 	$TbMsg[7]='Im&aacute;genes Disponibles';

@@ -1,4 +1,4 @@
-<?
+<?php
 // ******************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -47,23 +47,23 @@ $arbol=new ArbolVistaXml($arbolXML,0,$baseurlimg,$clasedefault,1,20,130,1,$titul
 	<SCRIPT language="javascript" src="../jscripts/informacion_menus.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/comunes.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/opciones.js"></SCRIPT>
-	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/informacion_menus_'.$idioma.'.js"></SCRIPT>'?>
+	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/informacion_menus_'.$idioma.'.js"></SCRIPT>'?>
 </HEAD>
 <BODY>
 	<FORM name=fdatos>
-		<input type=hidden value="<? echo $idmenu?>" id=idmenu>	 
-		<input type=hidden value="<? echo $contitempub?>" id=contitempub>	 
-		<input type=hidden value="<? echo $contitempri?>" id=contitempri>	 
+		<input type=hidden value="<?php echo $idmenu?>" id=idmenu>	 
+		<input type=hidden value="<?php echo $contitempub?>" id=contitempub>	 
+		<input type=hidden value="<?php echo $contitempri?>" id=contitempri>	 
 	</FORM>
-	<p align=center class=cabeceras><?echo $TbMsg[0]?><br>
-	<span align=center class=subcabeceras><?echo $TbMsg[1]?></span>&nbsp;<img src="../images/iconos/menus.gif"><br>
-	<img src="../images/iconos/menu.gif"><span class=presentaciones>&nbsp;&nbsp;<u><?echo $TbMsg[2]?></u>:	<? echo $descripcionmenu?></span></p>
-	<?
+	<p align=center class=cabeceras><?php echo $TbMsg[0]?><br>
+	<span align=center class=subcabeceras><?php echo $TbMsg[1]?></span>&nbsp;<img src="../images/iconos/menus.gif"><br>
+	<img src="../images/iconos/menu.gif"><span class=presentaciones>&nbsp;&nbsp;<u><?php echo $TbMsg[2]?></u>:	<?php echo $descripcionmenu?></span></p>
+	<?php
 	echo $arbol->CreaArbolVistaXML(); // Crea arbol de configuraciones
 	?>
 </BODY>
 </HTML>
-<?
+<?php
 // *************************************************************************************************************************************************
 function CreaArbol($cmd,$idmenu){
 	$cadenaXML=SubarbolXML_Menus($cmd,$idmenu);

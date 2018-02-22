@@ -1,5 +1,5 @@
 
-Installing and updating OpenGnSys
+Installing and updating OpenGnsys
 =================================
 
 
@@ -8,27 +8,27 @@ Installing OpenGnsys
 --------------------
 
 
-Run opengnsys_installer.sh script as "root" to install all its dependencies, to  install the OpenGnSys components, and to make the initial configuration.
+Run opengnsys_installer.sh script as "root" to install all its dependencies, to install the OpenGnsys components, and to make the initial configuration.
 
            sudo bash opengnsys_installer.sh
 
 Follow the instructions.
 
 
-Updating OpenGnSys
+Updating OpenGnsys
 ------------------
 
-Run opengnsys_update.sh script as "root" to update all OpenGnSys components from the Subversion repository:
+Run opengnsys_update.sh script as "root" to update all OpenGnsys components from the Subversion repository:
 
 	sudo bash /opt/opengnsys/lib/opengnsys_update.sh
 
 Follow the instructions.
 
 
-Uninstalling OpenGnSys
+Uninstalling OpenGnsys
 ----------------------
 
-Run opengnsys_uninstall.sh script as "root" to uninstall all OpenGnSys components:
+Run opengnsys_uninstall.sh script as "root" to uninstall all OpenGnsys components:
 
 	sudo bash /opt/opengnsys/lib/opengnsys_uninstall.sh
 

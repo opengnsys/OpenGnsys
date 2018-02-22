@@ -1,12 +1,22 @@
-# OpenGnSys Web Console template configuration for Apache.
+# OpenGnsys Web Console template configuration for Apache.
 
 Alias /opengnsys CONSOLEDIR
 
-# Overrides default CentOS php.ini configuration.
-php_value short_open_tag on
+RewriteEngine On
 
+# Redirect HTTP to HTTPS and default configuration.
 <Directory CONSOLEDIR>
+	RewriteCond %{HTTPS} !=on
+	RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R]
 	Options -Indexes FollowSymLinks
 	DirectoryIndex index.php
+	AddType octet/stream .pkg
 </Directory>
-
+# Redirect HTTP to HTTPS and RESTful configuration.
+<Directory CONSOLEDIR/rest>
+	RewriteBase /opengnsys/rest/
+	RewriteCond %{HTTPS} !=on
+	RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R]
+	RewriteCond %{REQUEST_FILENAME} !-f
+	RewriteRule ^ index.php [QSA,L]
+</Directory>

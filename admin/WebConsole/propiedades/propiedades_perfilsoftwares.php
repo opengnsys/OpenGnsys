@@ -1,4 +1,4 @@
-<?  
+<?php  
 // *************************************************************************************************************************************************
 // Aplicación WEB: ogAdmWebCon
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
@@ -45,31 +45,31 @@ if  ($opcion!=$op_alta){
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../jscripts/propiedades_perfilsoftwares.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/opciones.js"></SCRIPT>
-	<? echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/propiedades_perfilsoftwares_'.$idioma.'.js"></SCRIPT>'?>
+	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/propiedades_perfilsoftwares_'.$idioma.'.js"></SCRIPT>'?>
 </HEAD>
 <BODY>
 <DIV  align=center>
 <FORM  name="fdatos" action="../gestores/gestor_perfilsoftwares.php" method="post"> 
-	<INPUT type=hidden name=opcion value=<?=$opcion?>>
-	<INPUT type=hidden name=idperfilsoft value=<?=$idperfilsoft?>>
-	<INPUT type=hidden name=imagenes value=<?=$imagenes?>>
-	<INPUT type=hidden name=grupoid value=<?=$grupoid?>>
-	<P align=center class=cabeceras><?echo $TbMsg[4]?><BR>
-	<SPAN align=center class=subcabeceras><? echo $opciones[$opcion]?></SPAN></P>
+	<INPUT type=hidden name=opcion value=<?php echo $opcion?>>
+	<INPUT type=hidden name=idperfilsoft value=<?php echo $idperfilsoft?>>
+	<INPUT type=hidden name=imagenes value=<?php echo $imagenes?>>
+	<INPUT type=hidden name=grupoid value=<?php echo $grupoid?>>
+	<P align=center class=cabeceras><?php echo $TbMsg[4]?><BR>
+	<SPAN align=center class=subcabeceras><?php echo $opciones[$opcion]?></SPAN></P>
 	<TABLE  align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[5]?>&nbsp;</TH>
-			<?if ($opcion==$op_eliminacion)
+			<TH align=center>&nbsp;<?php echo $TbMsg[5]?>&nbsp;</TH>
+			<?php if ($opcion==$op_eliminacion)
 					echo '<TD style="width:215">'.$descripcion.'</TD>';
 				else
 					echo '<TD><INPUT  class="formulariodatos" name=descripcion style="width:215" type=text value="'.$descripcion.'"></TD>';?>
-			<TD align=left rowspan=2><IMG border=3 style="border-color:#63676b" src="../images/aula.jpg"><br><center>&nbsp;Images:&nbsp;<? echo $imagenes?></center></TD>
+			<TD align=left rowspan=2><IMG border=3 style="border-color:#63676b" src="../images/aula.jpg"><br><center>&nbsp;Images:&nbsp;<?php echo $imagenes?></center></TD>
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?echo $TbMsg[6]?>&nbsp;</TH>
-			<?if ($opcion==$op_eliminacion)
+			<TH align=center>&nbsp;<?php echo $TbMsg[6]?>&nbsp;</TH>
+			<?php if ($opcion==$op_eliminacion)
 					echo '<TD>'.$comentarios.'</TD>';
 				else
 					echo '<TD><TEXTAREA   class="formulariodatos" name=comentarios rows=3 cols=40>'.$comentarios.'</TEXTAREA></TD>';
@@ -79,14 +79,14 @@ if  ($opcion!=$op_alta){
 	</TABLE>
 </FORM>
 </DIV>
-<?
+<?php
 //________________________________________________________________________________________________________
 include_once("../includes/opcionesbotonesop.php");
 //________________________________________________________________________________________________________
 ?>
 </BODY>
 </HTML>
-<?
+<?php
 //________________________________________________________________________________________________________
 //	Recupera los datos de un perfil software
 //		Parametros: 
