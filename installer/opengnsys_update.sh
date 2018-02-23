@@ -73,7 +73,7 @@ if [ -d "$PROGRAMDIR/../installer" ]; then
 else
 	USESVN=1
 fi
-SVN_URL="https://$OPENGNSYS_SERVER/svn/tags/opengnsys-1.1.0/"
+SVN_URL="https://$OPENGNSYS_SERVER/svn/trunk/"
 
 WORKDIR=/tmp/opengnsys_update
 mkdir -p $WORKDIR
