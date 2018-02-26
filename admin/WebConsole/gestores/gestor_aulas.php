@@ -32,6 +32,7 @@ $pizarra=false;
 $ubicacion="";
 $comentarios="";
 $puestos=0;
+$idordprofesor=0;
 $horaresevini=0;
 $horaresevfin=0;
 $idmenu=0;
@@ -82,8 +83,9 @@ if (isset($_POST["pizarra"])) $pizarra=$_POST["pizarra"];
 if (isset($_POST["ubicacion"])) $ubicacion=$_POST["ubicacion"]; 
 if (isset($_POST["comentarios"])) $comentarios=$_POST["comentarios"];
 if (isset($_POST["puestos"])) $puestos=$_POST["puestos"]; 
-if (isset($_POST["horaresevini"])) $horaresevini=$_POST["horaresevini"]; 
-if (isset($_POST["horaresevfin"])) $horaresevfin=$_POST["horaresevfin"]; 
+if (isset($_POST["idordenador"])) $idordprofesor=$_POST["idordenador"];
+if (isset($_POST["horaresevini"])) $horaresevini=$_POST["horaresevini"];
+if (isset($_POST["horaresevfin"])) $horaresevini=$_POST["horaresevfin"];
 if (isset($_POST["idmenu"])) $idmenu=$_POST["idmenu"]; 
 if (isset($_POST["idprocedimiento"])) $idproautoexec=$_POST["idprocedimiento"]; 
 if (isset($_POST["idrepositorio"])) $idrepositorio=$_POST["idrepositorio"]; 
@@ -187,8 +189,9 @@ function Gestiona(){
 	global	$ubicacion;
 	global	$comentarios;
 	global	$puestos;
-	global	$horaresevini;
-	global	$horaresevfin;
+	global	$idordprofesor;
+	global  $horaresevini;
+	global  $horaresevfin;
 
 	global	$idmenu;
 	global	$idproautoexec;
@@ -239,6 +242,7 @@ function Gestiona(){
 	$cmd->CreaParametro("@ubicacion",$ubicacion,0);
 	$cmd->CreaParametro("@comentarios",$comentarios,0);
 	$cmd->CreaParametro("@puestos",$puestos,1);
+	$cmd->CreaParametro("@idordprofesor",$idordprofesor,1);
 	$cmd->CreaParametro("@horaresevini",$horaresevini,1);
 	$cmd->CreaParametro("@horaresevfin",$horaresevfin,1);
 	$cmd->CreaParametro("@idmenu",$idmenu,1);
@@ -267,17 +271,17 @@ function Gestiona(){
 
 	switch($opcion){
 		case $op_alta :
-			$cmd->texto="INSERT INTO aulas
-						(idcentro, grupoid, nombreaula, urlfoto, inremotepc,
-						 cagnon, pizarra, ubicacion, comentarios, puestos,
-						 horaresevini, horaresevfin, router, netmask,
-						 ntp, dns, proxy, modomul, ipmul, pormul, velmul,
-						 modp2p, timep2p, validacion, paginalogin, paginavalidacion, oglivedir) 
-					 VALUES (@idcentro, @grupoid, @nombreaula, @urlfoto, @inremotepc,
-						 @cagnon, @pizarra, @ubicacion, @comentarios, @puestos,
-						 @horaresevini, @horaresevfin, @router, @netmask,
-						 @ntp, @dns, @proxy, @modomul, @ipmul, @pormul, @velmul,
-						 @modp2p, @timep2p, @validacion, @paginalogin, @paginavalidacion, @oglivedir)";
+			$cmd->texto = <<<EOD
+INSERT INTO aulas
+	(idcentro, grupoid, nombreaula, urlfoto, inremotepc, cagnon, pizarra,
+	 ubicacion, comentarios, puestos, horaresevini, horaresevfin, router,
+	 netmask, ntp, dns, proxy, modomul, ipmul, pormul, velmul, modp2p,
+	 timep2p, validacion, paginalogin, paginavalidacion, oglivedir) 
+ VALUES (@idcentro, @grupoid, @nombreaula, @urlfoto, @inremotepc, @cagnon, @pizarra,
+	 @ubicacion, @comentarios, @puestos, @horaresevini, @horaresevfin, @router,
+	 @netmask, @ntp, @dns, @proxy, @modomul, @ipmul, @pormul, @velmul, @modp2p,
+	 @timep2p, @validacion, @paginalogin, @paginavalidacion, @oglivedir);
+EOD;
 			$resul=$cmd->Ejecutar();
 			if ($resul){ // Crea una tabla nodo para devolver a la página que llamó ésta
 				$idaula=$cmd->Autonumerico();
@@ -289,17 +293,17 @@ function Gestiona(){
 			}
 			break;
 		case $op_modificacion:
-			$cmd->texto="UPDATE aulas SET
-					    nombreaula=@nombreaula, urlfoto=@urlfoto, inremotepc=@inremotepc,
-					    cagnon=@cagnon, pizarra=@pizarra, ubicacion=@ubicacion,
-					    comentarios=@comentarios, puestos=@puestos,
-					    horaresevini=@horaresevini, horaresevfin=@horaresevfin,
-					    router=@router,netmask=@netmask, ntp=@ntp, dns=@dns, proxy=@proxy,
-					    modomul=@modomul, ipmul=@ipmul, pormul=@pormul, velmul=@velmul,
-					    modp2p=@modp2p, timep2p=@timep2p, validacion=@validacion,
-					    paginalogin=@paginalogin, paginavalidacion=@paginavalidacion,
-					    oglivedir=IF(@oglivedir='0',oglivedir,@oglivedir)
-					WHERE idaula=@idaula";
+			$cmd->texto = <<<EOD
+UPDATE aulas SET
+	nombreaula=@nombreaula, urlfoto=@urlfoto, inremotepc=@inremotepc, cagnon=@cagnon,
+	pizarra=@pizarra, ubicacion=@ubicacion, comentarios=@comentarios,
+	puestos=@puestos, idordprofesor=@idordprofesor, router=@router, netmask=@netmask,
+	ntp=@ntp, dns=@dns, proxy=@proxy, modomul=@modomul, ipmul=@ipmul, pormul=@pormul,
+	velmul=@velmul, modp2p=@modp2p, timep2p=@timep2p, validacion=@validacion,
+	paginalogin=@paginalogin, paginavalidacion=@paginavalidacion,
+	oglivedir=IF(@oglivedir='0',oglivedir,@oglivedir)
+  WHERE idaula=@idaula;
+EOD;
 			$resul=$cmd->Ejecutar();
 			if ($resul){ // Crea una tabla nodo para devolver a la página que llamó ésta
 				$clsUpdate="";	

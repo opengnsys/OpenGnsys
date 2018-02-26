@@ -23,6 +23,7 @@ $opcion=0;
 $opciones=array($TbMsg[0],$TbMsg[1],$TbMsg[2],$TbMsg[3]);
 //________________________________________________________________________________________________________
 $idordenador=0; 
+$ordprofesor=false;
 $nombreordenador="";
 $numserie="";
 $ip="";
@@ -89,9 +90,9 @@ function abrir_ventana(URL){
 		<tr>
 			<th align="center">&nbsp;<?php echo $TbMsg[5]?> <sup>*</sup>&nbsp;</th>
 			<?php	if ($opcion==$op_eliminacion)
-					echo '<td>'.$nombreordenador.'</td>';
+					echo '<td>'.$nombreordenador.($ordprofesor?' ('.$TbMsg["WARN_PROFESSOR"].')':'').'</td>';
 				else
-					echo '<td><input class="formulariodatos" name=nombreordenador  type=text value="'.$nombreordenador.'"></td>';
+					echo '<td><input class="formulariodatos" name=nombreordenador  type=text value="'.$nombreordenador.'">'.($ordprofesor?' ('.$TbMsg["WARN_PROFESSOR"].')':'').'</td>';
 				if (empty ($fotoordenador)) {
 					$fotoordenador="fotoordenador.gif";
 				}
@@ -353,6 +354,7 @@ if ($opcion!=$op_alta) {
 //________________________________________________________________________________________________________
 function TomaPropiedades($cmd,$id){
 	global $idordenador; 
+	global $ordprofesor;
 	global $nombreordenador;
 	global $numserie;
 	global $ip;
@@ -372,12 +374,16 @@ function TomaPropiedades($cmd,$id){
         global $arranque;
 
 	$rs=new Recordset; 
-	$cmd->texto="SELECT * FROM ordenadores WHERE idordenador=".$id;
+	$cmd->texto="SELECT *, IF(idordprofesor=idordenador,1,0) AS ordprofesor
+		       FROM ordenadores
+		       JOIN aulas USING(idaula)
+		       WHERE idordenador=".$id;
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) return(false); // Error al abrir recordset
 	$rs->Primero(); 
 	if (!$rs->EOF){
 		$nombreordenador=$rs->campos["nombreordenador"];
+		$ordprofesor = $rs->campos["ordprofesor"] == 1;
 		$numserie=$rs->campos["numserie"];
 		$ip=$rs->campos["ip"];
 		$mac=$rs->campos["mac"];

@@ -15,5 +15,6 @@ $TbMsg["SEARCH_MAC"]="MAC address";
 $TbMsg["SEARCH_DUPLICATES"]="Duplicates";
 $TbMsg["SEARCH_NOMATCHES"]="There are no matches";
 $TbMsg["SEARCH_NOVALUE"]="You must enter a value for the search criteria";
+$TbMsg["SEARCH_PROFESSOR"]="Professor's computers";
 ?>
 

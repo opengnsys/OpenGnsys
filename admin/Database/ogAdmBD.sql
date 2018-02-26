@@ -119,6 +119,7 @@ CREATE TABLE `aulas` (
   `ubicacion` varchar(255) DEFAULT NULL,
   `comentarios` text,
   `puestos` smallint DEFAULT NULL,
+  `idordprofesor` int(11) DEFAULT 0,
   `horaresevini` tinyint(4) DEFAULT NULL,
   `horaresevfin` tinyint(4) DEFAULT NULL,
   `modomul` tinyint(4) NOT NULL DEFAULT '0',

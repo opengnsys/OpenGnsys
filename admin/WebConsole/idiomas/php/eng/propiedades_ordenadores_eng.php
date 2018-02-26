@@ -30,5 +30,6 @@ $TbMsg[4951]="Cache Free";
 $TbMsg["PROP_SERIALNO"]="Serial No.";
 $TbMsg["WARN_NOTDETECTED"]="<em>(does not detected)</em>";
 $TbMsg['COMM_DEFOGLIVE']="Assigned by administrator";
+// Ticket-816 PCprofesor
+$TbMsg['WARN_PROFESSOR']="professor";
 ?>
-

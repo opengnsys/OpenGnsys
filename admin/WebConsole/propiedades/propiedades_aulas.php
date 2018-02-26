@@ -27,6 +27,7 @@ $nombreaula="";
 $grupoid=0;
 $ordenadores=0;
 $ubicacion="";
+$idordprofesor=0;
 $inremotepc="";
 $scheduler="";
 $cagnon="";
@@ -206,6 +207,18 @@ function abrir_ventana(URL){
 					}
 					?>
 		</TR>
+<!---- Ramón ------------------------idordprofesor---------------------------------------------------------------------------------------------------------------------------------------->
+		<?php	if ($opcion!=$op_alta) { ?>
+		<tr>
+			<th align="center">&nbsp;<?php echo $TbMsg['PROP_PROFCOMPUTER']; ?>&nbsp;</th>
+			<?php	if ($opcion==$op_eliminacion) {
+					echo '<td colspan="3">'.TomaDato($cmd,0,'ordenadores',$idordprofesor,'idordenador','nombreordenador').'&nbsp;</td>';
+				} else {
+					echo '<td colspan="3">'.HTMLSELECT($cmd,0,'ordenadores',$idordprofesor,'idordenador','nombreordenador',100,'','',"idaula=$idaula").'</td>';
+				}
+			?>
+		</tr>
+		<?php	} ?>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
 			<TH align=center>&nbsp;<?php echo $TbMsg[12]?>&nbsp;</TH>
@@ -476,6 +489,7 @@ function TomaPropiedades($cmd,$ida)
 	global $idaula;
 	global $nombreaula;
 	global $urlfoto;
+	global $idordprofesor;
 	global $inremotepc;
 	global $scheduler;
 	global $cagnon;
@@ -527,6 +541,7 @@ function TomaPropiedades($cmd,$ida)
 	$cagnon=false;
 	$pizarra=false;
 	$ubicacion="";
+	$idordprofesor=0; 
 	$comentarios="";
 	$ordenadores=0;
 	$puestos=0;
@@ -616,18 +631,19 @@ function TomaPropiedades($cmd,$ida)
 		$scheduler=$rs->campos["scheduler"];
 		$oglive=$rs->campos["oglivedir"];
 		$cntDiff=$rs->campos["cntdiff"];
+		$idordprofesor=$rs->campos["idordprofesor"];
 
 		$ordenadores=$rs->campos["numordenadores"];
 		$idmenu=$rs->campos["idmenus"];
-		if(count(split(",",$idmenu))>1) $idmenu=0;		
+		if(count(explode(",",$idmenu))>1) $idmenu=0;
 		$idrepositorio=$rs->campos["idrepositorios"];
-		if(count(split(",",$idrepositorio))>1) $idrepositorio=0;		
+		if(count(explode(",",$idrepositorio))>1) $idrepositorio=0;
 		$idperfilhard=$rs->campos["idperfileshard"];		
-		if(count(split(",",$idperfilhard))>1) $idperfilhard=0;		
+		if(count(explode(",",$idperfilhard))>1) $idperfilhard=0;
 		$idmenu=$rs->campos["idmenus"];
-		if(count(split(",",$idmenu))>1) $idmenu=0;		
+		if(count(explode(",",$idmenu))>1) $idmenu=0;
 		$idprocedimiento=$rs->campos["idprocedimientos"];
-		if(count(split(",",$idprocedimiento))>1) $idprocedimiento=0;	
+		if(count(explode(",",$idprocedimiento))>1) $idprocedimiento=0;
 	
 		$gidmenu=$idmenu;
 		$gidprocedimiento=$idprocedimiento;

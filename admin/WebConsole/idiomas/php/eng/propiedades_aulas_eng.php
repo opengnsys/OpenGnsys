@@ -57,5 +57,6 @@ $TbMsg['COMM_DEFTIMEZONE']="default time zone";
 $TbMsg['PROP_REMOTEACCESS']="Remote access";
 $TbMsg['COMM_REMOTEACCESS']="allow management of remote access to the computers";
 $TbMsg['COMM_DEFOGLIVE']="Assigned by administrator";
+// Ticket-816 PCprofesor
+$TbMsg['PROP_PROFCOMPUTER']="Professor's computer";
 ?>
-

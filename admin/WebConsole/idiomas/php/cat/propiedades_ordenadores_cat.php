@@ -31,5 +31,7 @@ $TbMsg[4951]="Cach� lliure";
 $TbMsg["PROP_SERIALNO"]="N&ordm; de serie";
 $TbMsg["WARN_NOTDETECTED"]="<em>(no detectado)</em>";
 $TbMsg['COMM_DEFOGLIVE']="Assignat per l'administrador";
+// Ticket-816 PCprofesor
+$TbMsg['WARN_PROFESSOR']="profesor";
 ?>
 

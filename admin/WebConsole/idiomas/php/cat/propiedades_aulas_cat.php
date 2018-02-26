@@ -57,4 +57,6 @@ $TbMsg['COMM_DEFTIMEZONE']="zona horaria por defecto";
 $TbMsg['PROP_REMOTEACCESS']="Acceso remoto";
 $TbMsg['COMM_REMOTEACCESS']="permitir gesti&oacute;n de acceso remoto a los ordenadores";
 $TbMsg['COMM_DEFOGLIVE']="Assignat per l'administrador";
+// Ticket-816 PCprofesor
+$TbMsg['PROP_PROFCOMPUTER']="Ordenador de profesor";
 ?>

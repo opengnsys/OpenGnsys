@@ -79,7 +79,7 @@ switch($litambito){
 		break;
 	case $LITAMBITO_AULAS :
 		$ambito=$AMBITO_AULAS;
-		$cmd->texto="SELECT idaula,nombreaula FROM aulas WHERE idaula=".$idambito;
+		$cmd->texto="SELECT idaula, nombreaula, idordprofesor FROM aulas WHERE idaula=".$idambito;
 		RecorreAulas($cmd);
 		break;
 	case $LITAMBITO_GRUPOSORDENADORES :
@@ -166,7 +166,7 @@ function RecorreGruposAulas($cmd){
 		$idgrupo=$rs->campos["idgrupo"];
 		$cmd->texto="SELECT idgrupo,nombregrupo FROM grupos WHERE grupoid=".$idgrupo." AND tipo=".$AMBITO_GRUPOSAULAS." ORDER BY nombregrupo";
 		RecorreGruposAulas($cmd);
-		$cmd->texto="SELECT idaula,nombreaula FROM aulas WHERE  grupoid=".$idgrupo." ORDER BY nombreaula";
+		$cmd->texto="SELECT idaula,nombreaula,idordprofesor FROM aulas WHERE  grupoid=".$idgrupo." ORDER BY nombreaula";
 		RecorreAulas($cmd);
 		$rs->Siguiente();
 	}
@@ -176,6 +176,7 @@ function RecorreGruposAulas($cmd){
 function RecorreAulas($cmd){
 	global $idaula;
 	global $nombreaula;
+	global $idordprofesor;
 	global $k; // Indice de la Matriz
 	global $cadenaip;
 
@@ -186,6 +187,7 @@ function RecorreAulas($cmd){
 	while (!$rs->EOF){
 		$idaula=$rs->campos["idaula"];
 		$nombreaula=$rs->campos["nombreaula"];
+		$idordprofesor=$rs->campos["idordprofesor"];
 		$cmd->texto="SELECT idordenador,nombreordenador,ip,mac FROM ordenadores WHERE  idaula=".$idaula;
 		$k=0;
 		$cadenaip="";
@@ -257,6 +259,7 @@ function pintaordenadores(){
 	global $cadenaip;
 	global $idaula;
 	global $nombreaula;
+	global $idordprofesor;
 	global $servidorhidra,$hidraport;
 	global $TbMsg;
 
@@ -279,7 +282,7 @@ function pintaordenadores(){
 		echo '</tr>';
 		echo '<tr>';
 		echo '<td align=center  id="'.$LITAMBITO_ORDENADORES.'-'.$Midordenador[$i].'">';
-		echo '	<font color="#003300" size="1" face="Arial, Helvetica, sans-serif">'.$Mnombreordenador[$i].'</font>';
+		echo '	<font color="#003300" size="1" face="Arial, Helvetica, sans-serif">'.$Mnombreordenador[$i].($Midordenador[$i]==$idordprofesor?' *':'').'</font>';
 		echo '	</br>';
 		echo '	<font color="#003300" size="1" face="Arial, Helvetica, sans-serif">';
 		echo '	<strong><font color="#D0A126">'.$Mip[$i].'</font></strong>';			
