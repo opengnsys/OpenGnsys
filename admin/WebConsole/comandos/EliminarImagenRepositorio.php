@@ -415,7 +415,7 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 		// ########### Buscando si existe fichero imagen #####################
 		$buscando="ls /opt/opengnsys/images/$gentor";
 		$bustor=exec($buscando);
-		if(preg_match("/.diff/",$value)) 
+		if(preg_match("/.diff/",$value))
 			{
 			$marcadif=1;
 			$value = str_replace(".diff", "", $value); //quitar todos los .diff y continuamos
@@ -439,7 +439,7 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 		$nombrecaidcentro=0; // No afecta a vista unidad organizativa  
 		$nombrecentro='';	//  No afecta a vista unidad organizativa
 		// ########## Si el Nombre contiene .diff lo quitamos para buscar objeto imagen
-		if(preg_match("/.diff/",$imgname)){ $imgname = str_replace(".diff", "", $imgname);} 
+		if(preg_match("/.diff/",$imgname)){ $imgname = str_replace(".diff", "", $imgname);}
 
 		$cmd->texto="SELECT idcentro, nombrecentro, nombreca FROM imagenes LEFT JOIN centros USING(idcentro) WHERE nombreca='$imgname' ";
 		$rs=new Recordset; 
@@ -465,7 +465,7 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 			continue; 
 		   }
 		   // si ogunit con dir separados -> si la imagen no es del dir del centro no la muestro
-		   if ($separarogunit == 1 and  ! preg_match("/".$dircentros[$idcentro]."/", "/".$value)) {
+		   if ($separarogunit == 1 and  ! preg_match("~".$dircentros[$idcentro]."~", "/".$value)) {
 			$contandotipo++;
 			continue; 
 		   };
