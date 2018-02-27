@@ -81,7 +81,7 @@ function Gestiona(){
 	global $numorde;
 
 	if($numorde>0){ 
-		$auxIP=split("[.]",$ip);
+		$auxIP=explode("[.]",$ip);
 		$swip=false;
 		$litnwip="";
 		$nwip=0;

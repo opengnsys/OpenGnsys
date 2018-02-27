@@ -11,7 +11,7 @@
 include_once("./includes/ctrlacc.php");
 include_once("./includes/constantes.php");
 if (! empty ($_POST['idmicentro'])) {
-	$cambiocentro=split(",",$_POST['idmicentro']);
+	$cambiocentro=explode(",",$_POST['idmicentro']);
 	$_SESSION["widcentro"]=$cambiocentro[0];
 	$_SESSION["wnombrecentro"]=$cambiocentro[1];
 	}

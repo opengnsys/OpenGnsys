@@ -114,10 +114,10 @@ function pintacomandos($cmd,$idtareacomando){
 	$HTMLparametros.= '<TD>&nbsp;'.$nombre.'&nbsp;</TD>'.chr(13);
 	$HTMLparametros.=	'</TR>';
 
-	$auxVP=split(";",$rs->campos["visuparametros"]); // Parametros visualizables
-	$auxP=split(chr(13),$rs->campos["parametros"]); // Recorre parametros para visualizar los que así sean
+	$auxVP=explode(";",$rs->campos["visuparametros"]); // Parametros visualizables
+	$auxP=explode(chr(13),$rs->campos["parametros"]); // Recorre parametros para visualizar los que así sean
 	for ($i=0;$i<sizeof($auxP);$i++){
-		$dualparam=split("=",$auxP[$i]);
+		$dualparam=explode("=",$auxP[$i]);
 		for ($k=0;$k<sizeof($auxVP);$k++){
 			 if($auxVP[$k]==$dualparam[0]){
 				$posp=busca_indicebinariodual($dualparam[0],$tabla_parametros,$cont_parametros); // Busca datos del parámetro en la tabla cargada previamentre con todos los parámetros
@@ -148,7 +148,7 @@ function pintacomandos($cmd,$idtareacomando){
 }
 //________________________________________________________________________________________________________
 function PintaOrdenadores($cmd,$cadenaip){
-	$auxP=split(";",$cadenaip); 
+	$auxP=explode(";",$cadenaip); 
 	if(sizeof($auxP)<1) return("");
 	$clauslaIN="'".$auxP[0]."'";
 	for ($i=1;$i<sizeof($auxP);$i++)

@@ -152,8 +152,8 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 		$cmd->ParamSetValor("@ambito",$ambito);
 		$cmd->ParamSetValor("@idambito",$idambito);			
 		$cmd->ParamSetValor("@idcentro",$idcentro);
-		$auxID=split(",",$cadenaid);
-		$auxIP=split(";",$cadenaip);
+		$auxID=explode(",",$cadenaid);
+		$auxIP=explode(";",$cadenaip);
 		for ($i=0;$i<sizeof($auxID);$i++){
 			$cmd->ParamSetValor("@idordenador",$auxID[$i]);
 			$cmd->ParamSetValor("@ip",$auxIP[$i]);

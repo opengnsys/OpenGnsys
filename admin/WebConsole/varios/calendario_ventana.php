@@ -18,7 +18,7 @@ $dia_elegido=1;
 if (isset($_GET["fecha"])){
 	$fecha=$_GET["fecha"]; 
 	if ($fecha!=""){
-		list($dia_p,$mes_p,$anno_p)=split("/",$fecha);
+		list($dia_p,$mes_p,$anno_p)=explode("/",$fecha);
 		$mes_elegido=(int)($mes_p);
 		$anno_elegido=(int)($anno_p);
 		$dia_elegido=(int)($dia_p);

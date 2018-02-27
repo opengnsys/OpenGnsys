@@ -409,9 +409,9 @@ function pintaParticionesAsistenteDeployImage($cmd,$configuraciones,$idordenador
 	echo '<TH align=center>&nbsp;'.$TbMsg[26].'&nbsp;</TH>'; // Perfil software 
 	echo '</TR>';
 
-	$auxCfg=split("@",$configuraciones); // Crea lista de particiones
+	$auxCfg=explode("@",$configuraciones); // Crea lista de particiones
 	for($i=0;$i<sizeof($auxCfg);$i++){
-		$auxKey=split(";",$auxCfg[$i]); // Toma clave de configuracion
+		$auxKey=explode(";",$auxCfg[$i]); // Toma clave de configuracion
 		for($k=0;$k<$conKeys;$k++){ // Busca los literales para las claves de esa partición
 			if($tbKeys[$k]["cfg"]==$auxCfg[$i]){ // Claves encontradas
 				if ($tbKeys[$k]["numpar"] == 0) { // Info del disco (umpart=0)

@@ -50,9 +50,9 @@ function gestiona($cmd,$opcion,$acciones){
 	global $ACCION_INICIADA;
 	global $ACCION_FINALIZADA;
 
-	$tbAcciones=split(";",$acciones);
+	$tbAcciones=explode(";",$acciones);
 	for($i=0;$i<sizeof($tbAcciones)-1;$i++){
-		list($tipoaccion,$idtipoaccion,$sesion,$idaccion)=split(",",$tbAcciones[$i]);
+		list($tipoaccion,$idtipoaccion,$sesion,$idaccion)=explode(",",$tbAcciones[$i]);
 		switch($opcion){
 		
 			case 1: // Eliminar ============================================================

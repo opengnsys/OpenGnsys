@@ -8,8 +8,8 @@ _______________________________________________________________________*/
 function InvFecha($fecha){
 	if ($fecha=="1970-01-01")return("");
 
-	$auxsplit=split(" ",$fecha);
-	list($anno_p,$mes_p,$dia_p)=split("[/-]",$auxsplit[0]);
+	$auxexplode=explode(" ",$fecha);
+	list($anno_p,$mes_p,$dia_p)=explode("[/-]",$auxexplode[0]);
 	$fecha_p=$dia_p.'-'.$mes_p.'-'.$anno_p;
 	return($fecha_p);
 }
@@ -17,7 +17,7 @@ function InvFecha($fecha){
 //Convierte fecha de mysql a normal 
 //////////////////////////////////////////////////// 
 function sacafechaDB($fecha){ 
-    ereg( "([0-9]{2,4})-([0-9]{1,2})-([0-9]{1,2})", $fecha, $mifecha); 
+    preg_match("/([0-9]{2,4})-([0-9]{1,2})-([0-9]{1,2})/", $fecha, $mifecha); 
     $lafecha=$mifecha[3]."/".$mifecha[2]."/".$mifecha[1]; 
     return $lafecha; 
 } 
@@ -27,7 +27,7 @@ function sacafechaDB($fecha){
 //////////////////////////////////////////////////// 
 
 function metefechaDB($fecha){ 
-    ereg( "([0-9]{1,2})/([0-9]{1,2})/([0-9]{2,4})", $fecha, $mifecha); 
+    preg_match("/([0-9]{1,2})/([0-9]{1,2})/([0-9]{2,4})/", $fecha, $mifecha); 
     $lafecha=$mifecha[3]."-".$mifecha[2]."-".$mifecha[1]; 
     return $lafecha; 
 } 

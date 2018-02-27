@@ -12,7 +12,7 @@
 //		usuario,password,base de datos,etc separados por coma
 // *************************************************************************************************************************************************
 function CreaComando($cadenaconexion){
-	$strcn=split(";",$cadenaconexion);
+	$strcn=explode(";",$cadenaconexion);
 	$cn=new Conexion; 
 	$cmd=new Comando;	
 	$cn->CadenaConexion($strcn[0],$strcn[1],$strcn[2],$strcn[3],$strcn[4]);

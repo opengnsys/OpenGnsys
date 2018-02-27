@@ -60,8 +60,8 @@ if ($opcioncrear == 1)
 		{	
 				//$delcar=array(" "," /", "-", "@", "=");
 				$guarnomb=ucfirst($_POST["nombrenuevoboot"]);
-				$descripfich=$guarnomb;$descripfich=ereg_replace("[^A-Za-z0-9]", "-", $descripfich);//str_replace($delcar, "-", $descripfich);
-				$guarnomb=ereg_replace("[^A-Za-z0-9]", "", $descripfich);//str_replace($delcar, "", $guarnomb);
+				$descripfich=$guarnomb;$descripfich=preg_replace("/[^A-Za-z0-9]/", "-", $descripfich);//str_replace($delcar, "-", $descripfich);
+				$guarnomb=preg_replace("/[^A-Za-z0-9]/", "", $descripfich);//str_replace($delcar, "", $guarnomb);
 				$nombrenuevoboot=$ultimonumero.$guarnomb;
 				$parametrosnuevoboot=$_POST["parametrosnuevoboot"];
 				$nuevoboot = "/var/lib/tftpboot/menu.lst/templates/".$nombrenuevoboot;
@@ -199,7 +199,7 @@ if ($opcioncrear == 2)
 		{
 				$modificadescripcion=ucfirst($_POST["modificadescripcion"]);
 //				$modificadescripcion=str_replace(" ", "", $modificadescripcion);
-				$descripfich=$modificadescripcion;$descripfich=ereg_replace("[^A-Za-z0-9]", "-", $descripfich);
+				$descripfich=$modificadescripcion;$descripfich=preg_replace("/[^A-Za-z0-9]/", "-", $descripfich);
 				$ficherow="/var/lib/tftpboot/menu.lst/templates/".$_POST["nombrefichero"];//echo $ficherow."<br>";
 				$parametrosmodifica=$_POST["parametrosmodifica"];
 

@@ -57,9 +57,9 @@ function Gestiona()
 	/* Altas */
 	if(!empty($altas)){
 		$altas=substr($altas,0,strlen($altas)-1); // Quita el último ";"
-		$tbAltas=split(";",$altas);
+		$tbAltas=explode(";",$altas);
 		for($i=0;$i<sizeof($tbAltas);$i++){
-				$tbAlta=split(",",$tbAltas[$i]);
+				$tbAlta=explode(",",$tbAltas[$i]);
 				/* Toma datos  altas */
 				$idmenu=$tbAlta[0];
 				$idtipoaccion=$tbAlta[1];
@@ -89,9 +89,9 @@ function Gestiona()
 	/* Bajas */
 	if(!empty($bajas)){
 		$bajas=substr($bajas,0,strlen($bajas)-1); // Quita el último ";"
-		$tbBajas=split(";",$bajas);
+		$tbBajas=explode(";",$bajas);
 		for($i=0;$i<sizeof($tbBajas);$i++){
-				$tbBaja=split(",",$tbBajas[$i]);
+				$tbBaja=explode(",",$tbBajas[$i]);
 				/* Toma datos  bajas */
 				$idmenu=$tbBaja[0];
 				$idtipoaccion=$tbBaja[1];
@@ -112,9 +112,9 @@ function Gestiona()
 /* Modificaciones */
 	if(!empty($modificaciones)){
 		$modificaciones=substr($modificaciones,0,strlen($modificaciones)-1); // Quita el último ";"
-		$tbModificaciones=split(";",$modificaciones);
+		$tbModificaciones=explode(";",$modificaciones);
 		for($i=0;$i<sizeof($tbModificaciones);$i++){
-				$tbtbModificacion=split(",",$tbModificaciones[$i]);
+				$tbtbModificacion=explode(",",$tbModificaciones[$i]);
 				/* Toma datos  modificaciones */
 				$idmenu=$tbtbModificacion[0];
 				$idtipoaccion=$tbtbModificacion[1];

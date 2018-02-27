@@ -239,17 +239,17 @@ function TomaPropiedades($cmd,$idambito)
 
                 $ordenadores=$rs->campos["numordenadores"];
                 $idmenu=$rs->campos["idmenus"];
-                if(count(split(",",$idmenu))>1) $idmenu=0;              
+                if(count(explode(",",$idmenu))>1) $idmenu=0;              
                 $idrepositorio=$rs->campos["idrepositorios"];
-                if(count(split(",",$idrepositorio))>1) $idrepositorio=0;                
+                if(count(explode(",",$idrepositorio))>1) $idrepositorio=0;                
                 $idperfilhard=$rs->campos["idperfileshard"];            
-                if(count(split(",",$idperfilhard))>1) $idperfilhard=0;          
+                if(count(explode(",",$idperfilhard))>1) $idperfilhard=0;          
                 $cache=$rs->campos["caches"];           
-                if(count(split(",",$cache))>1) $cache=0;        
+                if(count(explode(",",$cache))>1) $cache=0;        
                 $idmenu=$rs->campos["idmenus"];
-                if(count(split(",",$idmenu))>1) $idmenu=0;              
+                if(count(explode(",",$idmenu))>1) $idmenu=0;              
                 $idprocedimiento=$rs->campos["idprocedimientos"];
-                if(count(split(",",$idprocedimiento))>1) $idprocedimiento=0;    
+                if(count(explode(",",$idprocedimiento))>1) $idprocedimiento=0;    
         
                 $gidmenu=$idmenu;
                 $gidprocedimiento=$idprocedimiento;
@@ -341,14 +341,14 @@ switch($ambito){
 
 							$cache=$rs->campos["cache"];
 							$idordenador=$rs->campos["idordenador"];
-							$ima=split(",",$cache);
+							$ima=explode(",",$cache);
 							for ($x=0;$x<count($ima); $x++)
 							{
-								if(ereg(".img",$ima[$x])  ) //si contiene .img son ficheros de imagen
+								if(preg_match("/.img/",$ima[$x])  ) //si contiene .img son ficheros de imagen
 								{
-									if (ereg(".img.sum",$ima[$x]) || ereg(".img.torrent",$ima[$x]) || ereg(".img.full.sum",$ima[$x]) )//Si el nombre contiene .img.sum o img.torrent o img.full.sum
+									if (preg_match("/.img.sum/",$ima[$x]) or preg_match("/.img.torrent/",$ima[$x]) or preg_match("/.img.full.sum/",$ima[$x]) )//Si el nombre contiene .img.sum o img.torrent o img.full.sum
 									{}else{$esdir[]="f";
-										if (ereg(".img.diff",$ima[$x]))
+										if (preg_match("/.img.diff/",$ima[$x]))
 										{
 											$ima[$x] = str_replace(".img.diff", "", $ima[$x]); //quitar todos los .img
 											$ima[$x]=trim($ima[$x]);
@@ -359,7 +359,7 @@ switch($ambito){
 											$nombreimagenes[]="f-".$ima[$x];
 											}
 											}
-								}elseif (ereg(".MB",$ima[$x])){
+								}elseif (preg_match("/.MB/",$ima[$x])){
 									}else{	// Es un directorio
 											$ima[$x]=trim($ima[$x]);
 											$nombreimagenes[]="d-".$ima[$x];
@@ -398,7 +398,7 @@ switch($ambito){
 		foreach($sin_duplicados as $value){ //imprimimos $sin_duplicados
 		
 			// Eliminino las f- y d-
-			$value=split("-",$value);
+			$value=explode("-",$value);
 			$value=$value[1];
 			
 			if (empty($value) && $ambito == $AMBITO_ORDENADORES){
@@ -411,7 +411,7 @@ switch($ambito){
 					$nombrefichero=$value.'.img';
 					$tamanofich=exec("du -h /opt/opengnsys/images/$nombrefichero");
 					if ($tamanofich==""){$tamanofich=$TbMsg[14];}
-					$tamanofich=split("/",$tamanofich);     
+					$tamanofich=explode("/",$tamanofich);     
 					$todo=".*";
 					if ($esdir[$numdir] == "d"){$ruta[$numdir]='rm%20-r%20/opt/opengnsys/cache/opt/opengnsys/images/'.$value;}else{$ruta[$numdir]='rm%20-r%20/opt/opengnsys/cache/opt/opengnsys/images/'.$value.$todo;}
 					echo '<TR>'.chr(13);

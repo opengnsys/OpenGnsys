@@ -18,11 +18,11 @@
 // *************************************************************************************************************************************************
 function HTMLCTESELECT($parametros,$nombreid,$clase,$defaultlit,$valorselec,$ancho,$eventochg=""){
 	if (!empty($eventochg))	$eventochg='onchange="'.$eventochg.'(this);"';
-	$opciones=split(chr(13),$parametros);
+	$opciones=explode(chr(13),$parametros);
 	$SelectHtml= '<select '.$eventochg.' class="'.$clase.'" id='.$nombreid.' name="'.$nombreid.'" style="width: '.$ancho.'">';
 	if (!empty($defaultlit)) $SelectHtml.= '<option value="0">'.$defaultlit.'</option>';
 	for($i=0;$i<sizeof($opciones);$i++){
-		$item=split("=",$opciones[$i]);
+		$item=explode("=",$opciones[$i]);
 		// Comprobar formato de línea: "nombre=valor".
 		if (! empty ($item[1])) {
 			$SelectHtml.= '<option value="'.$item[0].'"';

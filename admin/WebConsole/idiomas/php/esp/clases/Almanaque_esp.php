@@ -152,7 +152,7 @@ class Almanaque{
 			Una cadena con formato de fecha dd/mm/aaaa.
 	________________________________________________________________________________________________________*/
 	function _DiaSemana($fecha){
-		list($dia,$mes,$anno)=split('[/.-]',$fecha);
+		list($dia,$mes,$anno)=explode('[/.-]',$fecha);
 		$cont=0;
 		for ($i=1900;$i<$anno;$i++){
 			if ($this->bisiesto($i)) $dias_anuales=366; else	$dias_anuales=365;

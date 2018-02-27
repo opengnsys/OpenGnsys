@@ -9,9 +9,9 @@
 	//________________________________________________________________________________________
 	function extrae_parametros($parametros,$chsep,$chval){
 		$ParametrosCadena="";
-		$auxP=split($chsep,$parametros);
+		$auxP=explode($chsep,$parametros);
 		for ($i=0;$i<sizeof($auxP);$i++){
-			$dualparam=split($chval,$auxP[$i]);
+			$dualparam=explode($chval,$auxP[$i]);
 
 			if (isset($dualparam[0]) && isset($dualparam[1])){
 				$streval='$ParametrosCadena["'.$dualparam[0].'"]="'.$dualparam[1].'";';
@@ -29,9 +29,9 @@
 	//________________________________________________________________________________________
 	function extrae_parametro($parametros,$chsep,$chval,$chr){
 		$ParametrosCadena="";
-		$auxP=split($chsep,$parametros);
+		$auxP=explode($chsep,$parametros);
 		for ($i=0;$i<sizeof($auxP);$i++){
-			$dualparam=split($chval,$auxP[$i]);
+			$dualparam=explode($chval,$auxP[$i]);
 			if (isset($dualparam[0]) && isset($dualparam[1])){
 				if($dualparam[0]==$chr)
 					return($dualparam[1]);
@@ -149,9 +149,9 @@
 	{
 		global $tbParametros;
 		$html="";
-		$auxprm=split($ch,$parametros);
+		$auxprm=explode($ch,$parametros);
 		for($i=0;$i<sizeof($auxprm);$i++){
-			list($nemonico,$valor)=split("=",$auxprm[$i]);
+			list($nemonico,$valor)=explode("=",$auxprm[$i]);
 			if(isset($tbParametros[$nemonico])){
 				if($tbParametros[$nemonico]["visual"]==1){
 					$tbParametrosValor[$nemonico]["descripcion"]=$tbParametros[$nemonico]["descripcion"];
@@ -163,7 +163,7 @@
 							$tbParametrosValor[$nemonico]["valor"]=TomaDato($cmd,0,$tbParametros[$nemonico]["nomtabla"],$valor,$tbParametros[$nemonico]["nomidentificador"],$tbParametros[$nemonico]["nomliteral"]);
 							break;
 						case 2: // El parámetro es compuesto de otros parametros
-							$blkprm=split(chr(10),substr($auxprm[$i],4));
+							$blkprm=explode(chr(10),substr($auxprm[$i],4));
 							for($j=0;$j<sizeof($blkprm);$j++){
 								$tbSubParametrosValor=array();
 								ParametrosValor($cmd,$blkprm[$j],$tbSubParametrosValor,chr(9));
@@ -177,7 +177,7 @@
 							}
 							break;	
 						case 3: // El valor lo toma de una array 
-							$tbcte=split($tbParametros[$nemonico]["nomidentificador"],$tbParametros[$nemonico]["nomliteral"]);
+							$tbcte=explode($tbParametros[$nemonico]["nomidentificador"],$tbParametros[$nemonico]["nomliteral"]);
 							$tbParametrosValor[$nemonico]["valor"]=$tbcte[$valor];
 							break;
 						case 4: // El valor lo toma directamente pero está codificado con urlencode

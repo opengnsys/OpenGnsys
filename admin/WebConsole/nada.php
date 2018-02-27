@@ -118,7 +118,7 @@ $buscaversistemapple="";
 $buscaversistemapple=$_SERVER['HTTP_USER_AGENT'];
 $buscaversistemapple=str_replace("OS","OS:",$buscaversistemapple);
 $buscaversistemapple=str_replace("like",":like",$buscaversistemapple);
-$buscaversistemapple=split(":",$buscaversistemapple);
+$buscaversistemapple=explode(":",$buscaversistemapple);
 $versistem=$buscaversistemapple[1];}
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -129,7 +129,7 @@ $versistem=$buscaversistemapple[1];}
 if(stripos($buscaversistem,'linux') == TRUE ){
 $buscaversistemlinux="";
 $buscaversistemlinux=str_replace(")",";",$buscaversistem);
-$buscaversistemlinux=split(";",$buscaversistemlinux);
+$buscaversistemlinux=explode(";",$buscaversistemlinux);
 $versistem=$buscaversistemlinux[3];
 }
 
@@ -139,7 +139,7 @@ $versistem=$buscaversistemlinux[3];
 if(stripos($buscaversistem,'android') == TRUE ){
 $buscaversistemandroid="";
 $buscaversistemandroid=str_replace(")",";",$buscaversistem);
-$buscaversistemandroid=split(";",$buscaversistemandroid);
+$buscaversistemandroid=explode(";",$buscaversistemandroid);
 $versistem=$buscaversistemandroid[2];
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////

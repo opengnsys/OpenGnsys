@@ -11,9 +11,9 @@ include_once("../idiomas/php/".$idioma."/pintaParticiones_".$idioma.".php");
 function splitConfigurationsByDisk($configuraciones){
 	// Recorremos las configuraciones para separalas segun el disco al que pertenezcan
 	$diskConfigs = array();
-	$configs = split("@",$configuraciones);
+	$configs = explode("@",$configuraciones);
 	foreach($configs as $config){
-		$parts = split(";",$config);
+		$parts = explode(";",$config);
 		if(!isset($diskConfigs[$parts[0]])){
 			$diskConfigs[$parts[0]] = "@";
 		}
@@ -71,9 +71,9 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 
 
 		
-		$auxCfg=split("@",$diskConfig); // Crea lista de particiones
+		$auxCfg=explode("@",$diskConfig); // Crea lista de particiones
 		for($i=0;$i<sizeof($auxCfg);$i++){
-			$auxKey=split(";",$auxCfg[$i]); // Toma clave de configuracion
+			$auxKey=explode(";",$auxCfg[$i]); // Toma clave de configuracion
 			for($k=0;$k<$conKeys;$k++){ // Busca los literales para las claves de esa partición
 				if($tbKeys[$k]["cfg"]==$auxCfg[$i]){ // Claves encontradas
 					if ($tbKeys[$k]["numpar"] == 0) { // Info del disco (umpart=0)
@@ -131,8 +131,8 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 
 						if ($filesys == "CACHE") {
 							echo '<td align="leght">&nbsp;';
-							$campocache = eregi_replace("[\n|\r|\n\r]", '', tomaCache($tbKeys[$k]["numpar"],$idordenadores,$tbKeys[$k]["numdisk"]));
-							$ima=split(",",$campocache);
+							$campocache = preg_replace("/[\n|\r|\n\r]/i", '', tomaCache($tbKeys[$k]["numpar"],$idordenadores,$tbKeys[$k]["numdisk"]));
+							$ima=explode(",",$campocache);
 							$numero=1;
 							for ($x=0;$x<count($ima); $x++) {
 								if(substr($ima[$x],-3)==".MB") {
@@ -149,7 +149,7 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 									// Esto para numerarla
 									if(substr($ima[$x],-4)==".img" || substr($ima[$x],-5)==".diff" || substr($ima[$x],-4)=="") {
 										echo '<br />('.$info.') &nbsp;'.$numero++.'.-'.$ima[$x];
-									} elseif(ereg(".sum",$ima[$x]) || ereg(".torrent",$ima[$x]) || ereg(".full.sum",$ima[$x])) {
+									} elseif(preg_match("/.sum/",$ima[$x]) or preg_match("/.torrent/",$ima[$x]) or preg_match("/.full.sum/",$ima[$x])) {
 										echo '<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.$ima[$x];
 										}else{
 											echo '<br /><font color=blue>('.$info.') </font>'.$numero++.'.-<font color=blue>'.$ima[$x]."</font>";
@@ -245,9 +245,9 @@ function pintaParticionesRestaurarImagen($cmd,$configuraciones,$idordenadores,$c
 		echo'<tr height="16">'.chr(13);
 		echo '<td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;'.$TbMsg["DISK"].'&nbsp;'.$disk.'</td>'.chr(13);
 	         
-		$auxCfg=split("@",$diskConfig); // Crea lista de particiones
+		$auxCfg=explode("@",$diskConfig); // Crea lista de particiones
 		for($i=0;$i<sizeof($auxCfg);$i++){
-			$auxKey=split(";",$auxCfg[$i]); // Toma clave de configuracion
+			$auxKey=explode(";",$auxCfg[$i]); // Toma clave de configuracion
 			for($k=0;$k<$conKeys;$k++){ // Busca los literales para las claves de esa partición
 				if($tbKeys[$k]["cfg"]==$auxCfg[$i]){ // Claves encontradas
 				    if($tbKeys[$k]["numpar"]!=0){    // No es info. del disco (part. 0)
@@ -327,9 +327,9 @@ function pintaParticionesConfigurar($cmd,$configuraciones,$idordenadores,$cc)
 
 
 	$aviso=false;
-	$auxCfg=split("@",$configuraciones); // Crea lista de particiones
+	$auxCfg=explode("@",$configuraciones); // Crea lista de particiones
 	for($i=0;$i<sizeof($auxCfg);$i++){
-		$auxKey=split(";",$auxCfg[$i]); // Toma clave de configuracion
+		$auxKey=explode(";",$auxCfg[$i]); // Toma clave de configuracion
 		for($k=1;$k<$conKeys;$k++){ // Busca los literales para las claves de esa partición
 			if($tbKeys[$k]["cfg"]==$auxCfg[$i]){ // Claves encontradas
 				if($tbKeys[$k]["numdisk"]==1){ // Solo tratar disco 1
@@ -436,9 +436,9 @@ function pintaParticionesRestaurarImagenSincronizacion1($cmd,$configuraciones,$i
 		echo'<tr height="16">'.chr(13);
 		echo '<td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;'.$TbMsg["DISK"].'&nbsp;'.$disk.'</td>'.chr(13);
 	     
-		$auxCfg=split("@",$diskConfig); // Crea lista de particiones
+		$auxCfg=explode("@",$diskConfig); // Crea lista de particiones
 		for($i=0;$i<sizeof($auxCfg);$i++){
-			$auxKey=split(";",$auxCfg[$i]); // Toma clave de configuracion
+			$auxKey=explode(";",$auxCfg[$i]); // Toma clave de configuracion
 			for($k=0;$k<$conKeys;$k++){ // Busca los literales para las claves de esa partici�n
 				if($tbKeys[$k]["cfg"]==$auxCfg[$i]){ // Claves encontradas
 					$swcc=$tbKeys[$k]["clonable"];
@@ -539,9 +539,9 @@ function pintaParticionesRestaurarSoftIncremental($cmd,$configuraciones,$idorden
 		echo'<tr height="16">'.chr(13);
 		echo '<td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;'.$TbMsg["DISK"].'&nbsp;'.$disk.'</td>'.chr(13);
 	     
-		$auxCfg=split("@",$diskConfig); // Crea lista de particiones
+		$auxCfg=explode("@",$diskConfig); // Crea lista de particiones
 		for($i=0;$i<sizeof($auxCfg);$i++){
-			$auxKey=split(";",$auxCfg[$i]); // Toma clave de configuracion
+			$auxKey=explode(";",$auxCfg[$i]); // Toma clave de configuracion
 			for($k=0;$k<$conKeys;$k++){ // Busca los literales para las claves de esa partici�n
 				if($tbKeys[$k]["cfg"]==$auxCfg[$i]){ // Claves encontradas
 					$swcc=$tbKeys[$k]["clonable"];
@@ -616,9 +616,9 @@ function pintaParticionesRestaurarImagenBasica($cmd,$configuraciones,$idordenado
 		echo'<tr height="16">'.chr(13);
 		echo '<td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;'.$TbMsg["DISK"].'&nbsp;'.$disk.'</td>'.chr(13);
 	     
-		$auxCfg=split("@",$diskConfig); // Crea lista de particiones
+		$auxCfg=explode("@",$diskConfig); // Crea lista de particiones
 		for($i=0;$i<sizeof($auxCfg);$i++){
-			$auxKey=split(";",$auxCfg[$i]); // Toma clave de configuracion
+			$auxKey=explode(";",$auxCfg[$i]); // Toma clave de configuracion
 			for($k=0;$k<$conKeys;$k++){ // Busca los literales para las claves de esa partici�n
 				if($tbKeys[$k]["cfg"]==$auxCfg[$i]){ // Claves encontradas
 					$swcc=$tbKeys[$k]["clonable"];

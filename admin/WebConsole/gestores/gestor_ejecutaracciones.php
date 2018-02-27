@@ -257,8 +257,8 @@ function insertaComando($idcomando,$parametros,$idprocedimiento,$ambito,$idambit
 			
 	if(strlen($cadenaip)==0) return(true);	
 	
-	$auxID=split(",",$cadenaid);
-	$auxIP=split(";",$cadenaip);
+	$auxID=explode(",",$cadenaid);
+	$auxIP=explode(";",$cadenaip);
 
 	for ($i=0;$i<sizeof($auxID);$i++){
 		$cmd->ParamSetValor("@idordenador",$auxID[$i]);

@@ -31,7 +31,7 @@ class XmlPhp{
 				$this->buffer=trim($this->buffer);
 			}
 		}
-		$this->buffer=ereg_replace( "[\n\r\t]"," ", $this->buffer );
+		$this->buffer=preg_replace("/[\n\r\t]/"," ", $this->buffer );
 	}
 	/* -------------------------------------------------------------------------------------------
 		Recupera la información del primer nodo (nodo raiz) del arbol.Devuelve false en caso de que
@@ -187,7 +187,7 @@ class XmlPhp{
 	---------------------------------------------------------------------------------------------*/
 	function NombreNodo(){
 		$infonodo=$this->Infonodo();
-		$trozos=split(" ",$infonodo);
+		$trozos=explode(" ",$infonodo);
 		return ($trozos[0]);
 	}
 	/* -------------------------------------------------------------------------------------------

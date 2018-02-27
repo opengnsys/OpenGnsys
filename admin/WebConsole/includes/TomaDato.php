@@ -22,8 +22,8 @@ function TomaDato($cmd,$idcentro,$nombretabla,$identificador,$nombreid,$nombreli
 	if (empty($identificador)) return($Dato);
 
 	if($swid==0)	$ch='"';	else $ch=""; // Caracter comillas para campos alfanuméricos
-	$auxidentificador=split(";",$identificador);
-	$auxnombreid=split(";",$nombreid);
+	$auxidentificador=explode(";",$identificador);
+	$auxnombreid=explode(";",$nombreid);
 
 	$clausulaWhere=" WHERE  ".$auxnombreid[0]."=".$ch.$auxidentificador[0].$ch;
 	for ($i=1;$i<sizeof($auxidentificador);$i++)

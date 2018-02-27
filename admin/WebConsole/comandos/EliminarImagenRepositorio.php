@@ -58,7 +58,7 @@ if (!$rs->Abrir()) return(true); // Error al abrir recordset
 	$rs->Cerrar();
 
 	$espaciorepo=exec("df -h /opt/opengnsys/images");
-	$espaciorepo=split(" ",$espaciorepo);
+	$espaciorepo=explode(" ",$espaciorepo);
 	for ($j=0;$j<count($espaciorepo);$j++)
 	{
 		if ($espaciorepo[$j]!="")
@@ -168,7 +168,7 @@ $repolocal="si";
 		}
 		if ($checkbox == "si" && $chekmarcadif == 0)
 		{
-			if(ereg(".ant",$nombre))
+			if(preg_match("/.ant/",$nombre))
 			{
 				$nombre = str_replace(".ant", "", $nombre); //quitar todos los .backup y continuamos
 				$delete=$nombre.".img.ant.delete";
@@ -348,11 +348,11 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 	$idc=$_SESSION["widcentro"];
 	for ($x=0;$x<count($imarepo); $x++)
 	{ //Llave For
-			if(ereg(".img",$imarepo[$x])  ) //si contiene .img
+			if(preg_match("/.img/",$imarepo[$x])  ) //si contiene .img
 			{	
-					if (ereg(".sum",$imarepo[$x]) || ereg(".torrent",$imarepo[$x])|| ereg(".lock",$imarepo[$x])  )//Si el nombre contiene .img.sum o img.torrent o .img.lock
+					if (preg_match("/.sum/",$imarepo[$x]) or preg_match("/.torrent/",$imarepo[$x]) or preg_match("/.lock/",$imarepo[$x])  )//Si el nombre contiene .img.sum o img.torrent o .img.lock
 					{}else{	// COMPROBANDO EL NOMBRE DIF
-						if(ereg(".img.diff",$imarepo[$x]))
+						if(preg_match("/.img.diff/",$imarepo[$x]))
 						{
 							$imarepo[$x] = str_replace(".diff", "", $imarepo[$x]); //quitar todos los .img
 							$imarepo[$x]=trim($imarepo[$x]);
@@ -360,7 +360,7 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 							$imarepo[$x]=trim($imarepo[$x]);
 							$nombreimagenes[]=$imarepo[$x].'.diff';
 							$tipo[]="F";
-						}elseif(ereg(".ant",$imarepo[$x]))
+						}elseif(preg_match("/.ant/",$imarepo[$x]))
 							{
 								$imarepo[$x] = str_replace(".img", "", $imarepo[$x]); //quitar todos los .img
 								$imarepo[$x]=trim($imarepo[$x]);
@@ -411,18 +411,18 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 		//Buscamos tamano de fichero
 		//Buscamos si existe fichero de bloqueo
 		$gentor=str_replace(":","/",$value).".img.lock";
-		if(ereg(".diff",$value))$gendif=$value.".img.diff";
+		if(preg_match("/.diff/",$value))$gendif=$value.".img.diff";
 		// ########### Buscando si existe fichero imagen #####################
 		$buscando="ls /opt/opengnsys/images/$gentor";
 		$bustor=exec($buscando);
-		if(ereg(".diff",$value)) 
+		if(preg_match("/.diff/",$value)) 
 			{
 			$marcadif=1;
 			$value = str_replace(".diff", "", $value); //quitar todos los .diff y continuamos
 			$nombrefichero=trim($value);
 			$nombrefichero=$value.'.img.diff';
 			}
-		elseif(ereg(".ant",$value))
+		elseif(preg_match("/.ant/",$value))
 			{
 				$nombrefichero=str_replace(".ant", "", $value);
 				$nombrefichero=$nombrefichero.".img.ant";$marcadif=0;
@@ -439,7 +439,7 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 		$nombrecaidcentro=0; // No afecta a vista unidad organizativa  
 		$nombrecentro='';	//  No afecta a vista unidad organizativa
 		// ########## Si el Nombre contiene .diff lo quitamos para buscar objeto imagen
-		if(ereg(".diff",$imgname)){ $imgname = str_replace(".diff", "", $imgname);} 
+		if(preg_match("/.diff/",$imgname)){ $imgname = str_replace(".diff", "", $imgname);} 
 
 		$cmd->texto="SELECT idcentro, nombrecentro, nombreca FROM imagenes LEFT JOIN centros USING(idcentro) WHERE nombreca='$imgname' ";
 		$rs=new Recordset; 
@@ -465,7 +465,7 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 			continue; 
 		   }
 		   // si ogunit con dir separados -> si la imagen no es del dir del centro no la muestro
-		   if ($separarogunit == 1 and  ! ereg($dircentros[$idcentro], "/".$value)) {
+		   if ($separarogunit == 1 and  ! preg_match("/".$dircentros[$idcentro]."/", "/".$value)) {
 			$contandotipo++;
 			continue; 
 		   };
@@ -493,16 +493,16 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 			{
 			$tamanofich=exec("ls -lah ".$nombredirectorio." | awk 'NR==1 {print $2}'");
 			}
-		elseif (ereg(".ant",$nombrefichero))
+		elseif (preg_match("/.ant/",$nombrefichero))
 			{
 				$nombreficheroant=str_replace(".ant", "", $nombrefichero); //quitar todos los .ant y continuamos
 
 				$nombreficheroant=$nombreficheroant.".ant";
 				$tamanofich=exec("du -h --max-depth=1 /opt/opengnsys/images/$nombreficheroant");
-				$tamanofich=split("/",$tamanofich);//////////////////////////////////////////echo $nombrefichero."</br>";
+				$tamanofich=explode("/",$tamanofich);//////////////////////////////////////////echo $nombrefichero."</br>";
 			}else{
 				$tamanofich=exec("du -h --max-depth=1 /opt/opengnsys/images/$nombrefichero");
-				$tamanofich=split("/",$tamanofich);//////////////////////////////////////////echo $nombrefichero."</br>";
+				$tamanofich=explode("/",$tamanofich);//////////////////////////////////////////echo $nombrefichero."</br>";
 			}
 		// ######## TAMAÃ‘O DEL FICHERO Y DIRECTORIO ##########################
 												
@@ -578,7 +578,7 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 		{
 			echo '<TD align=center ><input type="checkbox" name="checkboxobjeto'.$contar.'"  value="si"></TD>'.chr(13);
 		}
-		elseif (ereg(".ant",$nombrefichero))
+		elseif (preg_match("/.ant/",$nombrefichero))
 			{
 				echo '<TD align=center><font color=red>&nbsp;------</strong></TD>'.chr(13);
 			}else{

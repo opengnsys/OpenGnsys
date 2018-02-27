@@ -58,7 +58,7 @@ if($cmd){ // Compone cadena ip recorriendo ámbitos
 $resul=false;
 if($cmd){
 	$shidra=new SockHidra($servidorhidra,$hidraport); 
-	$cadenaip=ereg_replace( ";", "','", $cadenaip );
+	$cadenaip=preg_replace("/;/", "','", $cadenaip );
 	$cmd->texto="SELECT  ordenadores.ip as ipord,servidoresrembo.ip FROM ordenadores INNER JOIN servidoresrembo ON ordenadores.idservidorrembo =servidoresrembo.idservidorrembo WHERE ordenadores.ip IN ('".$cadenaip."') ORDER BY servidoresrembo.ip";
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 

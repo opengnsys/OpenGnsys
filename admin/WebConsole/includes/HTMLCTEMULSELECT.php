@@ -20,10 +20,10 @@ function HTMLCTEMULSELECT($parametros,$nombreid,$tbvalor,$clase,$eventochg,$anch
 	if (!empty($eventochg)) $eventochg='onchange="'.$eventochg.'(this);"';
 	if (empty($clase))	$clase='formulariodatos';
 	$x=0;
-	$opciones=split(chr(13),$parametros);
+	$opciones=explode(chr(13),$parametros);
 	$SelectHtml= '<SELECT '.$eventochg.' class="'.$clase.'" name="'.$nombreid.'" multiple size='.$alto.' style="WIDTH: '.$ancho.'">';
 	for($i=0;$i<sizeof($opciones);$i++){
-		$item=split("=",$opciones[$i]);
+		$item=explode("=",$opciones[$i]);
 		$SelectHtml.= '<OPTION value="'.$item[0].'"';
 		if (isset($tbvalor[$x])){
 			if($tbvalor[$x]==$item[0]) {

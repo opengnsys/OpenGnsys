@@ -740,12 +740,12 @@ function escribeNotificacion($rs,$oA)
 		}
 		else{
 			/* Fechas y horas */
-			list($fecha,$hora)=split(" ",substr($rs->campos["fechahorafin"],0));
+			list($fecha,$hora)=explode(" ",substr($rs->campos["fechahorafin"],0));
 			if ($fecha=="1970-01-01") $hora="";
 			$html.='<TD align=center>&nbsp;'.InvFecha($fecha).'&nbsp;</TD>';
 			$html.='<TD align=center>&nbsp;'.$hora.'&nbsp;</TD>';
 				
-			list($fecha,$hora)=split(" ",substr($rs->campos["fechahorareg"],0));
+			list($fecha,$hora)=explode(" ",substr($rs->campos["fechahorareg"],0));
 			if ($fecha=="1970-01-01") $hora="";
 			$html.='<TD align=center>&nbsp;'.InvFecha($fecha).'&nbsp;</TD>';
 			$html.='<TD align=center>&nbsp;'.$hora.'&nbsp;</TD>';
@@ -1074,7 +1074,7 @@ function escribeParametros($comando,$parametros,$visuparametros,$oA)
 	$html="";
 	$tbParametrosValor=array();
 	ParametrosValor($cmd,$parametros,$tbParametrosValor); // Toma valores de cada parámetro
-	$vprm=split(";",$visuparametros);
+	$vprm=explode(";",$visuparametros);
 
 	if($visupro==1 || ($visupro=0 && $visucmd==0)) $comando="&nbsp;"; // No se muestra el nombre del comando
 	for($i=0;$i<sizeof($vprm);$i++){

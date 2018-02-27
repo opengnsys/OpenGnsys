@@ -74,10 +74,10 @@ function Gestiona()
 	/* Altas */
 	if(!empty($altas)){
 		$altas=substr($altas,0,strlen($altas)-1); // Quita el último ";"
-		$tbAltas=split(";",$altas);
+		$tbAltas=explode(";",$altas);
 		for($i=0;$i<sizeof($tbAltas);$i++){
 			/* Toma datos  altas */
-			list($identificador,$orden,$ambito)=split(",",$tbAltas[$i]);
+			list($identificador,$orden,$ambito)=explode(",",$tbAltas[$i]);
 			switch($tipoaccion){
 				case $AMBITO_PROCEDIMIENTOS:
 					$cmd->ParamSetValor("@idprocedimiento",$idtipoaccion);
@@ -120,17 +120,17 @@ function Gestiona()
 	/* Bajas */
 	if(!empty($bajas)){
 		$bajas=substr($bajas,0,strlen($bajas)-1); // Quita el último ";"
-		$tbBajas=split(";",$bajas);
+		$tbBajas=explode(";",$bajas);
 		for($i=0;$i<sizeof($tbBajas);$i++){
 			switch($tipoaccion){
 				case $AMBITO_PROCEDIMIENTOS:
-					list($idprocedimientoaccion)=split(",",$tbBajas[$i]);
+					list($idprocedimientoaccion)=explode(",",$tbBajas[$i]);
 					$cmd->ParamSetValor("@idprocedimientoaccion",$idprocedimientoaccion);
 					$cmd->texto="DELETE FROM procedimientos_acciones 
 								WHERE idprocedimientoaccion=@idprocedimientoaccion";
 					break;							
 				case $AMBITO_TAREAS:
-					list($idtareaaccion)=split(",",$tbBajas[$i]);
+					list($idtareaaccion)=explode(",",$tbBajas[$i]);
 					$cmd->ParamSetValor("@idtareaaccion",$idtareaaccion);
 					$cmd->texto="DELETE FROM tareas_acciones 
 								WHERE idtareaaccion=@idtareaaccion";				
@@ -146,18 +146,18 @@ function Gestiona()
 	/* Modificaciones */
 	if(!empty($modificaciones)){
 		$modificaciones=substr($modificaciones,0,strlen($modificaciones)-1); // Quita el último ";"
-		$tbModificaciones=split(";",$modificaciones);
+		$tbModificaciones=explode(";",$modificaciones);
 		for($i=0;$i<sizeof($tbModificaciones);$i++){
 			switch($tipoaccion){
 				case $AMBITO_PROCEDIMIENTOS:
-					list($idprocedimientoaccion,$orden)=split(",",$tbModificaciones[$i]);
+					list($idprocedimientoaccion,$orden)=explode(",",$tbModificaciones[$i]);
 					$cmd->ParamSetValor("@idprocedimientoaccion",$idprocedimientoaccion);
 					$cmd->ParamSetValor("@orden",$orden);
 					$cmd->texto="UPDATE procedimientos_acciones SET orden=@orden
 								 WHERE idprocedimientoaccion=@idprocedimientoaccion";
 					break;							
 				case $AMBITO_TAREAS:
-					list($idtareaaccion,$orden)=split(",",$tbModificaciones[$i]);				
+					list($idtareaaccion,$orden)=explode(",",$tbModificaciones[$i]);				
 					$cmd->ParamSetValor("@idtareaaccion",$idtareaaccion);
 					$cmd->ParamSetValor("@orden",$orden);
 					$cmd->texto="UPDATE tareas_acciones SET orden=@orden

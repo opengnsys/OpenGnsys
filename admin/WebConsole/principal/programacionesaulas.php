@@ -80,19 +80,19 @@ if (isset($_POST["fechafin"])) $fechafin=$_POST["fechafin"];
 
 if (isset($_POST["estadoreserva"])) {
 	$estadoreserva=$_POST["estadoreserva"]; 
-	$auxP=split(";",$estadoreserva);
+	$auxP=explode(";",$estadoreserva);
 	$cont=0;
 	for ($i=0;$i<sizeof($auxP)-1;$i++){
-		$dualparam=split("=",$auxP[$i]);
+		$dualparam=explode("=",$auxP[$i]);
 		$westadoreserva[$cont++]=$dualparam[0];
 	}
 }
 if (isset($_POST["situacion"])){
 	$situacion=$_POST["situacion"]; 
-	$auxP=split(";",$situacion);
+	$auxP=explode(";",$situacion);
 	$cont=0;
 	for ($i=0;$i<sizeof($auxP)-1;$i++){
-		$dualparam=split("=",$auxP[$i]);
+		$dualparam=explode("=",$auxP[$i]);
 		$wsituacion[$cont++]=$dualparam[0];
 	}
 }
@@ -253,12 +253,12 @@ function ProcesoAnual($fechainicio,$fechafin,$swa){
 	global $TBfechas;
 	global $JDif;
 
-	list($sdia,$smes,$sanno)=split("/",$fechainicio);
+	list($sdia,$smes,$sanno)=explode("/",$fechainicio);
 	$dia_i=(int)$sdia;
 	$mes_i=(int)$smes;
 	$anno_i=(int)$sanno;
 
-	list($sdia,$smes,$sanno)=split("/",$fechafin);
+	list($sdia,$smes,$sanno)=explode("/",$fechafin);
 	$dia_f=(int)$sdia;
 	$mes_f=(int)$smes;
 	$anno_f=(int)$sanno;
@@ -514,9 +514,9 @@ function ListaReservas($cmd,$anno_c,$mes_desde,$mes_hasta,$dia_i,$dia_f,$mes_i,$
 		$swr=false; // detecta si la reserva es válida
 		$TBfechas=""; // tabla en memoria para acumulado de horas por fecha de cada reserva
 		$cf=$calendario->Fechas($anno_c,$mes_desde,$mes_hasta,$rs->campos["meses"],$rs->campos["diario"],$rs->campos["dias"],$rs->campos["semanas"]);
-		$fechas_reservas=split(";",$cf);
+		$fechas_reservas=explode(";",$cf);
 		for ($i=0;$i<sizeof($fechas_reservas)-1;$i++){
-				list($auxdia,$auxmes,$auxanno)=split("/",$fechas_reservas[$i]);
+				list($auxdia,$auxmes,$auxanno)=explode("/",$fechas_reservas[$i]);
 				$auxfecha=mktime(0, 0, 0, $auxmes,$auxdia, $auxanno);
 				if($auxfecha>=$fechaminima &&  $auxfecha<=$fechamaxima){
 					$swr=true;

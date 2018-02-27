@@ -173,7 +173,7 @@ ________________________________________________________________________________
 			Una cadena con formato de fecha dd/mm/aaaa.
 ________________________________________________________________________________________________________*/
 	function _DiaSemana($fecha){
-		list($dia,$mes,$anno)=split('[/.-]',$fecha);
+		list($dia,$mes,$anno)=explode('[/.-]',$fecha);
 		$cont=0;
 		for ($i=1900;$i<$anno;$i++){
 			if ($this->bisiesto($i)) $dias_anuales=366; else	$dias_anuales=365;
@@ -406,7 +406,7 @@ function Fechas($anno_c,$mes_desde,$mes_hasta,$meses,$diario,$dias,$semanas){
 				for($j=1;$j<=7;$j++){
 					if($auxdias&$mascara>0){
 						$cadenadias=$this->DiasPorMes($i,$anno_c,$j);
-						$tbdias=split(";",$cadenadias);
+						$tbdias=explode(";",$cadenadias);
 						for ($k=0;$k<sizeof($tbdias)-1;$k++)
 							$cadenafechas.=$tbdias[$k]."/".$i."/".$anno_c.";";
 					}
@@ -424,7 +424,7 @@ function Fechas($anno_c,$mes_desde,$mes_hasta,$meses,$diario,$dias,$semanas){
 						}
 						else
 							$cadenadias=$this->DiasPorSemanas($i,$anno_c,$j);
-						$tbdias=split(";",$cadenadias);
+						$tbdias=explode(";",$cadenadias);
 						for ($k=0;$k<sizeof($tbdias)-1;$k++)
 							$cadenafechas.=$tbdias[$k]."/".$i."/".$anno_c.";";
 					}
@@ -439,8 +439,8 @@ function Fechas($anno_c,$mes_desde,$mes_hasta,$meses,$diario,$dias,$semanas){
 			if($diario&$mascara>0) $cadenadiario.=$i.";";
 			$diario=$diario>>1;
 	}
-	$tbmeses=split(";",$cadenameses);
-	$tbdiario=split(";",$cadenadiario);
+	$tbmeses=explode(";",$cadenameses);
+	$tbdiario=explode(";",$cadenadiario);
 	for ($i=0;$i<sizeof($tbmeses)-1;$i++){
 		for ($j=0;$j<sizeof($tbdiario)-1;$j++){
 			$cadenafechas.=$tbdiario[$j]."/".$tbmeses[$i]."/".$anno_c.";";
@@ -456,7 +456,7 @@ function Fechas($anno_c,$mes_desde,$mes_hasta,$meses,$diario,$dias,$semanas){
 		- El dia juliano
 _______________________________________________________________________*/
 function juliana($fecha) {
-	list($dia,$mes,$anno)=split("[/-]",$fecha);
+	list($dia,$mes,$anno)=explode("[/-]",$fecha);
 	$GGG = 1;
     if ($anno <= 1585) $GGG = 0;
     $juliano= -1 * floor(7 * (floor(($mes + 9) / 12) + $anno) / 4);

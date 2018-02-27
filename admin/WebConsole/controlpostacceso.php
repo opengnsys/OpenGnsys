@@ -49,7 +49,7 @@ if ($idc != 0)
  $idi=""; 
 
  if(!empty($iph)){ // LLamada del browser del cliente 
-     list($wip,$wusu,$wpwd,$wbd,$tbd)=split(";",$cnx); 
+     list($wip,$wusu,$wpwd,$wbd,$tbd)=explode(";",$cnx); 
      $usu=$wusu; 
      $pss=$wpwd; 
  }

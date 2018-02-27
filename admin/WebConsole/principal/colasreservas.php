@@ -80,19 +80,19 @@ if (isset($_POST["fechafin"])) $fechafin=$_POST["fechafin"];
 
 if (isset($_POST["estadoreserva"])) {
 	$estadoreserva=$_POST["estadoreserva"]; 
-	$auxP=split(";",$estadoreserva);
+	$auxP=explode(";",$estadoreserva);
 	$cont=0;
 	for ($i=0;$i<sizeof($auxP)-1;$i++){
-		$dualparam=split("=",$auxP[$i]);
+		$dualparam=explode("=",$auxP[$i]);
 		$westadoreserva[$cont++]=$dualparam[0];
 	}
 }
 if (isset($_POST["situacion"])){
 	$situacion=$_POST["situacion"]; 
-	$auxP=split(";",$situacion);
+	$auxP=explode(";",$situacion);
 	$cont=0;
 	for ($i=0;$i<sizeof($auxP)-1;$i++){
-		$dualparam=split("=",$auxP[$i]);
+		$dualparam=explode("=",$auxP[$i]);
 		$wsituacion[$cont++]=$dualparam[0];
 	}
 }
@@ -200,8 +200,8 @@ $ClausulaWhere.=" AND idaula in(".$cadenaaulas.")";
 if(empty($fechainicio)) $fechainicio=date("d/m/Y",mktime(0, 0, 0, date("m")  , date("d"), date("Y")));
 if(empty($fechafin))	$fechafin=date("d/m/Y",mktime(0, 0, 0, date("m")+1  , date("d"), date("Y")));
 
-list($dia_i,$mes_i,$anno_i)=split("/",$fechainicio);
-list($dia_f,$mes_f,$anno_f)=split("/",$fechafin);
+list($dia_i,$mes_i,$anno_i)=explode("/",$fechainicio);
+list($dia_f,$mes_f,$anno_f)=explode("/",$fechafin);
 
 // Elimina registros en tabla temporal
 $cmd->texto="DELETE FROM  reservastemporal where idcentro=".$idcentro." AND usuario='".$usuario."'"; // Elimina todos los registros de la tabla temporal
@@ -309,9 +309,9 @@ function CreaReservasTemporal($cmd,$anno_c,$mes_desde,$mes_hasta,$dia_i,$dia_f,$
 	// Recorre reservas
 	while (!$rs->EOF){
 		$cadenafechas=FechasReservas($anno_c,$mes_desde,$mes_hasta,$rs->campos["meses"],$rs->campos["diario"],$rs->campos["dias"],$rs->campos["semanas"]);
-		$fechas_reservas=split(";",$cadenafechas);
+		$fechas_reservas=explode(";",$cadenafechas);
 		for ($i=0;$i<sizeof($fechas_reservas)-1;$i++){
-				list($auxdia,$auxmes,$auxanno)=split("/",$fechas_reservas[$i]);
+				list($auxdia,$auxmes,$auxanno)=explode("/",$fechas_reservas[$i]);
 				$auxfecha=mktime(0, 0, 0, $auxmes,$auxdia, $auxanno);
 
 				if($auxfecha>=$fechaminima &&  $auxfecha<=$fechamaxima){
@@ -352,7 +352,7 @@ function FechasReservas($anno_c,$mes_desde,$mes_hasta,$meses,$diario,$dias,$sema
 				for($j=1;$j<=7;$j++){
 					if($auxdias&$mascara>0){
 						$cadenadias=$calendario->DiasPorMes($i,$anno_c,$j);
-						$tbdias=split(";",$cadenadias);
+						$tbdias=explode(";",$cadenadias);
 						for ($k=0;$k<sizeof($tbdias)-1;$k++)
 							$cadenafechas.=$tbdias[$k]."/".$i."/".$anno_c.";";
 					}
@@ -370,7 +370,7 @@ function FechasReservas($anno_c,$mes_desde,$mes_hasta,$meses,$diario,$dias,$sema
 						}
 						else
 							$cadenadias=$calendario->DiasPorSemanas($i,$anno_c,$j);
-						$tbdias=split(";",$cadenadias);
+						$tbdias=explode(";",$cadenadias);
 						for ($k=0;$k<sizeof($tbdias)-1;$k++)
 							$cadenafechas.=$tbdias[$k]."/".$i."/".$anno_c.";";
 					}
@@ -385,8 +385,8 @@ function FechasReservas($anno_c,$mes_desde,$mes_hasta,$meses,$diario,$dias,$sema
 			if($diario&$mascara>0) $cadenadiario.=$i.";";
 			$diario=$diario>>1;
 	}
-	$tbmeses=split(";",$cadenameses);
-	$tbdiario=split(";",$cadenadiario);
+	$tbmeses=explode(";",$cadenameses);
+	$tbdiario=explode(";",$cadenadiario);
 	for ($i=0;$i<sizeof($tbmeses)-1;$i++){
 		for ($j=0;$j<sizeof($tbdiario)-1;$j++){
 			$cadenafechas.=$tbdiario[$j]."/".$tbmeses[$i]."/".$anno_c.";";
@@ -815,7 +815,7 @@ $j=0;
 		}
 	}
 	$HTMLannos[$cont_a].="</TR></TABLE>";
-	$cadenaXML=ereg_replace( "%anno-".$ganno.'%',urlencode($HTMLannos[$cont_a]), $cadenaXML );
+	$cadenaXML=preg_replace("/%anno-".$ganno.'%/',urlencode($HTMLannos[$cont_a]), $cadenaXML );
 	$cont_a++;
 }
 //________________________________________________________________________________________________________
@@ -841,7 +841,7 @@ function GuardaMesAnno($ganno,$gmes,$CntMes){
 	$HTMLmeses[$cont_m]="<TABLE cellspacing=3><TR><TD valign=top>";
 	$HTMLmeses[$cont_m].=$calendario->MesAnno($gmes,$ganno,$CntMes);
 	$HTMLmeses[$cont_m].="</TD></TR></TABLE>";
-	$cadenaXML=ereg_replace('%mes-'.$ganno.'-'.$gmes.'%',urlencode($HTMLmeses[$cont_m]), $cadenaXML );
+	$cadenaXML=preg_replace('/%mes-'.$ganno.'-'.$gmes.'%/',urlencode($HTMLmeses[$cont_m]), $cadenaXML );
 	$cont_m++;
 }
 //________________________________________________________________________________________________________
@@ -868,7 +868,7 @@ function GuardaHorasDias($ganno,$gmes,$gdia,$CntDia,&$CntMes){
 	$HTMLhorasdias.="</TD></TR></TABLE>";
 
 	$CntMes[$gdia]=$porcenhoras;
-	$cadenaXML=ereg_replace('%horas-'.$ganno.'-'.$gmes.'-'.$gdia.'%',urlencode($HTMLhorasdias), $cadenaXML );
+	$cadenaXML=preg_replace('/%horas-'.$ganno.'-'.$gmes.'-'.$gdia.'%/',urlencode($HTMLhorasdias), $cadenaXML );
 }
 //________________________________________________________________________________________________________
 function CriteriosBusquedas(){

@@ -49,13 +49,6 @@ function listar_directorios_ruta($ruta){
 			
 			$buffer=$prebuffer."\n\t".$meta.$posbuffer;
 
-			/*
-			$buffer=ereg_replace( "<"," ",$buffer);
-			$buffer=ereg_replace( ">"," ",$buffer);
-			$buffer=ereg_replace( "[\n\r]","<BR>",$buffer);
-			echo $buffer;
-			*/
-			
 			$fp = fopen($archivo,"w"); 
 			fwrite($fp, $buffer,strlen($buffer)); 
 			fclose($fp); 

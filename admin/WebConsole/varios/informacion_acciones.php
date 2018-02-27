@@ -184,7 +184,7 @@ function SubarbolXML_comandos($descricomando,$parametros,$visuparametros)
 
 		$tbParametrosValor=array();
 		ParametrosValor($cmd,$parametros,$tbParametrosValor); // Toma valores de cada parámetro
-		$visuprm=split(";",$visuparametros);
+		$visuprm=explode(";",$visuparametros);
 		for($i=0;$i<sizeof($visuprm);$i++){
 			$nemo=$visuprm[$i];
 			if(isset($tbParametrosValor[$nemo])){
