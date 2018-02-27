@@ -618,26 +618,49 @@ SIZE=$(awk -v D=${DISK#/dev/} '{if ($4==D) {print $3}}' /proc/partitions)
 
 #/**
 #         ogGetDiskType path_device
-#@brief   Muestra el tipo de disco (real, RAID, meta-disco, etc.).
-#@warning Función en pruebas
+#@brief   Muestra el tipo de disco (real, RAID, meta-disco, USB, etc.).
+#@param   path_device  Dispositivo
+#@exception OG_ERR_FORMAT   formato incorrecto.
+#@exception OG_ERR_NOTFOUND disco no detectado o no es un dispositivo de bloques.
+#@note    Requisitos: udevadm
+#@version 1.1.1 - Primera version para OpenGnsys
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2018-02-27
 #*/ ##
 function ogGetDiskType ()
 {
+# Variables locales
 local DEV MAJOR TYPE
 
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME path_device" \
+           "$FUNCNAME /dev/sdb  =>  USB"
+    return
+fi
+# Error si no se recibe 1 parámetro.
+[ $# == 1 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
 # Obtener el driver del dispositivo de bloques.
-[ -b "$1" ] || ogRaiseError $OG_ERR_FORMAT || return $?
+[ -b "$1" ] || ogRaiseError $OG_ERR_NOTFOUND "$1" || return $?
 DEV=${1#/dev/}
 MAJOR=$(awk -v D="$DEV" '{if ($4==D) print $1;}' /proc/partitions)
 TYPE=$(awk -v D=$MAJOR '/Block/ {bl=1} {if ($1==D&&bl) print toupper($2)}' /proc/devices)
 # Devolver mnemónico del driver de dispositivo.
 case "$TYPE" in
-    SD)            TYPE="DISK"
-                   udevadm info -q property $1 2>/dev/null | grep -q "^ID_BUS=usb" && TYPE="USB"
-                   ;;
-    SR|IDE*)       TYPE="CDROM" ;;         # FIXME Comprobar discos IDE.
-    MD|CCISS*)     TYPE="RAID" ;;
-    DEVICE-MAPPER) TYPE="MAPPER" ;;        # FIXME Comprobar LVM y RAID.
+    SD)
+        TYPE="DISK"
+        udevadm info -q property $1 2>/dev/null | grep -q "^ID_BUS=usb" && TYPE="USB"
+        ;;
+    SR|IDE*)
+        TYPE="CDROM"        # FIXME Comprobar discos IDE.
+        ;;
+    MD|CCISS*)
+        TYPE="RAID"
+        ;;
+    DEVICE-MAPPER)
+        TYPE="MAPPER"       # FIXME Comprobar LVM y RAID.
+        ;;
 esac
 echo $TYPE
 }
@@ -654,15 +677,16 @@ echo $TYPE
 #@note    Requisitos: sfdisk, sgdisk
 #@version 1.0.4 - Primera versión compatible con OpenGnSys.
 #@author  Universidad de Huelva
-#@date    2012/06/03
+#@date    2012-06-03
 #@version 1.0.6b - uso de sgdisk para todo tipo de particiones. Incidencia #762
 #@author  Universidad de Málaga
-#@date    2016/11/10
+#@date    2016-11-10
 #*/ ##
 function ogGetLastSector ()
 {
 # Variables locales
 local DISK PART LASTSECTOR
+
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk [int_npart]" \
