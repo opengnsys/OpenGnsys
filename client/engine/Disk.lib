@@ -632,7 +632,9 @@ MAJOR=$(awk -v D="$DEV" '{if ($4==D) print $1;}' /proc/partitions)
 TYPE=$(awk -v D=$MAJOR '/Block/ {bl=1} {if ($1==D&&bl) print toupper($2)}' /proc/devices)
 # Devolver mnemónico del driver de dispositivo.
 case "$TYPE" in
-    SD)            TYPE="DISK" ;;
+    SD)            TYPE="DISK"
+                   udevadm info -q property $1 2>/dev/null | grep -q "^ID_BUS=usb" && TYPE="USB"
+                   ;;
     SR|IDE*)       TYPE="CDROM" ;;         # FIXME Comprobar discos IDE.
     MD|CCISS*)     TYPE="RAID" ;;
     DEVICE-MAPPER) TYPE="MAPPER" ;;        # FIXME Comprobar LVM y RAID.

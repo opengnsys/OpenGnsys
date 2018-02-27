@@ -56,7 +56,7 @@ PART="$(ogDiskToDev $1 $2)" || return $?
 TYPE=$(ogGetFsType $1 $2)
 case "$TYPE" in
     EXT[234])     PROG="e2fsck"; PARAMS="-y"; CODES=(1 2) ;;
-    BTRFS)        PROG="btrfsck"; CODES=1 ;;
+    BTRFS)        PROG="btrfsck"; CODES=(1) ;;
     REISERFS)     PROG="fsck.reiserfs"; PARAMS="<<<\"Yes\""; CODES=(1 2) ;;
     REISER4)      PROG="fsck.reiser4"; PARAMS="-ay" ;;
     JFS)          PROG="fsck.jfs"; CODES=(1 2) ;;
@@ -64,9 +64,9 @@ case "$TYPE" in
     F2FS)         PROG="fsck.f2fs" ;;
     NTFS)         PROG="ntfsfix" ;;
     EXFAT)        PROG="fsck.exfat" ;;
-    FAT32)        PROG="dosfsck"; PARAMS="-a"; CODES=1 ;;
-    FAT16)        PROG="dosfsck"; PARAMS="-a"; CODES=1 ;;
-    FAT12)        PROG="dosfsck"; PARAMS="-a"; CODES=1 ;;
+    FAT32)        PROG="dosfsck"; PARAMS="-a"; CODES=(1) ;;
+    FAT16)        PROG="dosfsck"; PARAMS="-a"; CODES=(1) ;;
+    FAT12)        PROG="dosfsck"; PARAMS="-a"; CODES=(1) ;;
     HFS)          PROG="fsck.hfs"; PARAMS="-f" ;;
     HFSPLUS)      PROG="fsck.hfs"; PARAMS="-f" ;;
     UFS)          PROG="fsck.ufs" ;;
@@ -399,7 +399,7 @@ echo ${SIZE%.0*}
 function ogGetFsType ()
 {
 # Variables locales.
-local PART ID TYPE
+local PART TYPE
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_nfilesys" \
@@ -709,6 +709,34 @@ case "$*" in
         ogMountCdrom ;;
     *)  ogMountFs "$@" ;;
 esac
+}
+
+
+#/**
+#         ogMountFirstFs int_ndisk
+#@brief   Monta el primer sistema de archivos disponible en el disco.
+#@param   int_ndisk      nº de orden del disco
+#@return  Punto de montaje del primer sistema de archivos detectado
+#*/ ##
+function ogMountFirstFs ()
+{
+# Variables locales
+local PART NPARTS MNTDIR
+
+# Error si no se recibe 1 parámetro.
+[ $# == 1 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+# Obtener nº de particiones del disco.
+NPARTS=$(ogGetPartitionsNumber "$1") || return $?
+for (( PART = 1; PART <= NPARTS; PART++ )); do
+    MNTDIR=$(ogMount $1 $PART 2>/dev/null)
+    if [ -n "$MNTDIR" ]; then
+        echo "$MNTDIR"
+        return 0
+    fi
+done
+ogRaiseError $OG_ERR_NOTFOUND "$1"
+return $OG_ERR_NOTFOUND
 }
 
 
