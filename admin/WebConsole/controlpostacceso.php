@@ -17,10 +17,6 @@ include_once("./clases/AdoPhp.php");
  $ident=""; 
  $idc=0; 
  $iph=""; // Switch menu cliente 
-  
- if (isset($_POST["usu"])) $usu=mysql_escape_string($_POST["usu"]);  
- if (isset($_POST["pss"])) $pss=mysql_escape_string($_POST["pss"]);  
- if (isset($_POST["idcentro"])) $idc=mysql_escape_string($_POST["idcentro"]); 
 
  if (isset($_GET["iph"])) $iph=$_GET["iph"];  
 //________________________________________________________________________________________________________
@@ -28,6 +24,10 @@ include_once("./clases/AdoPhp.php");
  if (!$cmd)
   die($TbMsg["ACCESS_ERROR"]);
 //________________________________________________________________________________________________________
+
+ if (isset($_POST["usu"])) $usu=mysqli_escape_string($cmd->Conexion->controlador, $_POST["usu"]);
+ if (isset($_POST["pss"])) $pss=mysqli_escape_string($cmd->Conexion->controlador, $_POST["pss"]);
+ if (isset($_POST["idcentro"])) $idc=mysqli_escape_string($cmd->Conexion->controlador, $_POST["idcentro"]);
 
 if ($idc != 0)
 {

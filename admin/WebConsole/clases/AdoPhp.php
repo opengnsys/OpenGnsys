@@ -80,7 +80,7 @@ class Conexion{
 		if (!$this->_cadena_conexion()) return(false); // Comprueba si los datos necesarios para conexiones se han aportado
 		switch ($this->estado) {
 			case 1:	// Existe actualmente una conexiónabierta que se sustituir�por la nueva
-				if (mysql_close($this->controlador)){ // Se cierra la conexion actual
+				if (mysqli_close($this->controlador)){ // Se cierra la conexion actual
 					$this->estado=0;
 					$intentos_de_conexion=0;
 					while(true){
@@ -125,7 +125,7 @@ class Conexion{
 		$this->ultimoerror=-1;
 		switch ($this->estado) {
 			case 1:	// Actualmente la conexion est�abierta
-				if (mysql_close($this->controlador)){ // Se cierra la conexion actual
+				if (mysqli_close($this->controlador)){ // Se cierra la conexion actual
 					$this->estado=0;
 					$this->error[$this->inderror++]=0;
 					$this->ultimoerror=0;
@@ -155,9 +155,9 @@ class Conexion{
 	----------------------------------------------------------------------------------------------*/
 	function _nueva_conexion(){
 		$this->estado=2;// Intenta la conexion
-		if ($this->controlador=mysql_connect($this->servidor,$this->usuario,$this->password)){// Conexion O.K. 
+		if ($this->controlador=mysqli_connect($this->servidor,$this->usuario,$this->password)){// Conexion O.K.
 			$this->estado=1; // La conexion con el servidor se estableci�			
-			if (mysql_select_db($this->basedatos, $this->controlador)){// Base datos O.K.
+			if (mysqli_select_db($this->controlador, $this->basedatos)){// Base datos O.K.
 				$this->error[$this->inderror++]=0;
 				$this->ultimoerror=0;
 				return(true);
@@ -165,7 +165,7 @@ class Conexion{
 			else{ // Problemas con la base de datos
 				$this->error[$this->inderror++]=2;
 				$this->ultimoerror=2;
-				if (mysql_close ($this->controlador)) $this->estado=0; // Se cierra la conexion
+				if (mysqli_close($this->controlador)) $this->estado=0; // Se cierra la conexion
 				return(false); 
 			}
 		}
@@ -180,7 +180,7 @@ class Conexion{
 		Establece una sistema UTF8 para las consultas
 	----------------------------------------------------------------------------------------------*/
 	function SetUtf8(){
-			mysql_query("SET NAMES 'utf8'");
+			mysqli_query($this->controlador, "SET NAMES 'utf8'");
 	}
 	/* -------------------------------------------------------------------------------------------
 		Revisa y detecta las condiciones que deben cumplir los datos necesarios para establecer 
@@ -340,11 +340,11 @@ class Comando{
 	function CreaParametro($nombre,$valor,$tipo){
 		for($i=0;$i<sizeof($this->parametros);$i++){
 			if($this->parametros[$i]["nombre"]==$nombre){
-				$this->parametros[$i]["valor"]=mysql_real_escape_string($valor);
+				$this->parametros[$i]["valor"]=mysqli_real_escape_string($this->Conexion->controlador, $valor);
 				return;
 			}
 		}	
-		$p = new parametro($nombre,mysql_real_escape_string($valor),$tipo);
+		$p = new parametro($nombre,mysqli_real_escape_string($this->Conexion->controlador, $valor),$tipo);
 		$this->AddParametro($p);
 	}
 
@@ -360,7 +360,7 @@ class Comando{
 	function ParamSetValor($nombre,$valor){
 		for($i=0;$i<sizeof($this->parametros);$i++){
 			if($this->parametros[$i]["nombre"]==$nombre)
-				$this->parametros[$i]["valor"]=mysql_real_escape_string($valor);
+				$this->parametros[$i]["valor"]=mysqli_real_escape_string($this->Conexion->controlador, $valor);
 		}
 	}
 	/* -------------------------------------------------------------------------------------------
@@ -422,7 +422,7 @@ class Comando{
 			}
 		}
 		$this->Traduce();
-		if (!$this->resul=mysql_query($this->texto,$this->Conexion->controlador)){
+		if (!$this->resul=mysqli_query($this->Conexion->controlador, $this->texto)){
 			$this->error[$this->inderror++]=4; // Error en la sentencia SQL del comando
 			$this->ultimoerror=4;
 			return(false);
@@ -433,12 +433,12 @@ class Comando{
 		if (strtoupper(substr($sqlstr,0,6))=="SELECT"){
 			$this->Recordset->Inicializar();
 			$this->Recordset->filas=$this->resul;
-			$this->Recordset->numerodecampos=mysql_num_fields($this->Recordset->filas);
-			$this->Recordset->numeroderegistros=mysql_num_rows($this->Recordset->filas); 
+			$this->Recordset->numerodecampos=mysqli_num_fields($this->Recordset->filas);
+			$this->Recordset->numeroderegistros=mysqli_num_rows($this->Recordset->filas);
 			if ($this->Recordset->numeroderegistros>0){
 				$this->Recordset->BOF=false;
 				$this->Recordset->EOF=false;
-				$this->Recordset->campos=mysql_fetch_array($this->Recordset->filas);
+				$this->Recordset->campos=mysqli_fetch_array($this->Recordset->filas);
 			}
 		}
 
@@ -450,7 +450,7 @@ class Comando{
 		Esta funci� recupera el ltimo nmero asignado a una clave autonum�ica de una tabla
 	---------------------------------------------------------------------------------------------*/
 	function Autonumerico(){
-		$ulreg=mysql_insert_id();
+		$ulreg=mysqli_insert_id($this->Conexion->controlador);
 		return($ulreg);
 	}
 }
@@ -577,17 +577,17 @@ class Recordset{
 		}
 		$this->Traduce();
 		$this->Inicializar();
-		if (!$this->filas=mysql_query($this->Comando->texto,$this->Comando->Conexion->controlador)){
+		if (!$this->filas=mysqli_query($this->Comando->Conexion->controlador, $this->Comando->texto)){
 			$this->error[$this->inderror++]=4; // Error en la sentencia SQL del comando o al abrir la consula
 			$this->ultimoerror=4;
 			return(false);
 		}
-		$this->numeroderegistros=mysql_num_rows($this->filas); // La consulta se ha realizado con �ito
-		$this->numerodecampos=mysql_num_fields($this->filas);
+		$this->numeroderegistros=mysqli_num_rows($this->filas); // La consulta se ha realizado con �ito
+		$this->numerodecampos=mysqli_num_fields($this->filas);
 		if ($this->numeroderegistros>0){
 			$this->BOF=false;
 			$this->EOF=false;
-			$this->campos=mysql_fetch_array($this->filas);
+			$this->campos=mysqli_fetch_array($this->filas);
 		}
 		$this->estado=1; // Recordset abierto
 		$this->error[$this->inderror++]=0; // Recuperaci� de registros correcta
@@ -600,7 +600,7 @@ class Recordset{
 	function Cerrar(){
 		$this->inderror=-1; // Inicializar contador de errores
 		$this->ultimoerror=-1;
-		if (!mysql_free_result($this->filas)){
+		if (!mysqli_free_result($this->filas)){
 			$this->error[$this->inderror++]=6; // Error al cerrar la consulta (Al liberar memoria)
 			$this->ultimoerror=6;
 			return(false);
@@ -619,8 +619,8 @@ class Recordset{
 			if ($this->posicion==$this->numeroderegistros)
 				$this->EOF=true;
 			else{
-				if (mysql_data_seek($this->filas,$this->posicion))
-					$this->campos=mysql_fetch_array($this->filas);
+				if (mysqli_data_seek($this->filas,$this->posicion))
+					$this->campos=mysqli_fetch_array($this->filas);
 			}
 		}
 	}
@@ -633,8 +633,8 @@ class Recordset{
 			if ($this->posicion<0)
 				$this->BOF=true;
 			else{
-				if (mysql_data_seek($this->filas,$this->posicion));
-					$this->campos=mysql_fetch_array($this->filas);
+				if (mysqli_data_seek($this->filas,$this->posicion));
+					$this->campos=mysqli_fetch_array($this->filas);
 			}
 		}
 	}
@@ -644,8 +644,8 @@ class Recordset{
 	function Primero(){
 		if ($this->numeroderegistros>0){
 			$this->posicion=0;
-			if (mysql_data_seek($this->filas,$this->posicion))
-				$this->campos=mysql_fetch_array($this->filas);
+			if (mysqli_data_seek($this->filas,$this->posicion))
+				$this->campos=mysqli_fetch_array($this->filas);
 		}
 	}
 	/* -------------------------------------------------------------------------------------------
@@ -654,8 +654,8 @@ class Recordset{
 	function Ultimo(){
 		if ($this->numeroderegistros>0){
 			$this->posicion=$this->numeroderegistros-1;
-			if (mysql_data_seek($this->filas,$this->posicion))
-				$this->campos=mysql_fetch_array($this->filas);
+			if (mysqli_data_seek($this->filas,$this->posicion))
+				$this->campos=mysqli_fetch_array($this->filas);
 		}
 	}
 }	
@@ -663,8 +663,8 @@ class Recordset{
 		Esta funci�n devuelve una matriz asociativa con el nombre de los campos del recordset
 	---------------------------------------------------------------------------------------------*/
 	function DatosNombres(){
-		if (mysql_data_seek($this->filas,$this->posicion))
-			return(mysql_fetch_assoc($this->filas));
+		if (mysqli_data_seek($this->filas,$this->posicion))
+			return(mysqli_fetch_assoc($this->filas));
 		return("");
 	}
 	/* -------------------------------------------------------------------------------------------
@@ -672,7 +672,7 @@ class Recordset{
 	---------------------------------------------------------------------------------------------*/
 	function InfoCampos(){
 		$infocampos= array ();
-		while ($row = mssql_fetch_field($this->filas)) {
+		while ($row = mysqli_fetch_field($this->filas)) {
 			$campo["name"]=$row->name;
 			$campo["column_source"]=$row->column_source;
 			$campo["maxlon"]=$row->max_length;

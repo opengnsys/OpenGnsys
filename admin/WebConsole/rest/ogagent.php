@@ -58,7 +58,7 @@ UPDATE ordenadores
  WHERE ip='$ip' AND mac=UPPER(REPLACE('$mac', ':', ''))
  LIMIT 1;
 EOD;
-		    if ($cmd->Ejecutar() !== true or mysql_affected_rows() !== 1) {
+		    if ($cmd->Ejecutar() !== true or mysqli_affected_rows($cmd->Conexion->controlador) !== 1) {
 			// DB access error or not updated.
 			throw new Exception("Cannot store new secret key: ip=$ip, mac=$mac, os=$osType:$osVersion.");
 		    }

@@ -212,8 +212,8 @@ function updateBootMode ($cmd, $idfield, $idvalue, $lang) {
 	if (empty ($idfield) or empty ($idvalue))
 		return;
 	// Control para evitar ataques XSS.
-	$idfield = mysql_real_escape_string ($idfield);
-	$idvalue = mysql_real_escape_string ($idvalue);
+	$idfield = mysqli_real_escape_string ($cmd->Conexion->controlador, $idfield);
+	$idvalue = mysqli_real_escape_string ($cmd->Conexion->controlador, $idvalue);
 
 	// Obtener los ordenadores asociados al aula y sus plantillas de arranque.
 	$cmd->texto = "SELECT idordenador AS hostid, arranque AS bootopt

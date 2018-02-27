@@ -17,7 +17,7 @@ function InvFecha($fecha){
 //Convierte fecha de mysql a normal 
 //////////////////////////////////////////////////// 
 function sacafechaDB($fecha){ 
-    preg_match("/([0-9]{2,4})-([0-9]{1,2})-([0-9]{1,2})/", $fecha, $mifecha); 
+    preg_match("~([0-9]{2,4})-([0-9]{1,2})-([0-9]{1,2})~", $fecha, $mifecha);
     $lafecha=$mifecha[3]."/".$mifecha[2]."/".$mifecha[1]; 
     return $lafecha; 
 } 
@@ -27,7 +27,7 @@ function sacafechaDB($fecha){
 //////////////////////////////////////////////////// 
 
 function metefechaDB($fecha){ 
-    preg_match("/([0-9]{1,2})/([0-9]{1,2})/([0-9]{2,4})/", $fecha, $mifecha); 
+    preg_match("~([0-9]{1,2})/([0-9]{1,2})/([0-9]{2,4})~", $fecha, $mifecha);
     $lafecha=$mifecha[3]."-".$mifecha[2]."-".$mifecha[1]; 
     return $lafecha; 
 } 
