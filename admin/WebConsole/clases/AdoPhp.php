@@ -6,7 +6,7 @@ Especificaciones:
 	- Estado de la conexión($estado)
 		0: No conectado
 		1: Conectado
-		2: Se est�intentando conectar
+		2: Se está intentando conectar
 
 ================================================================================*/
 
@@ -24,10 +24,10 @@ class Conexion{
 	var $msgerrores=array(
 		"No se ha producido ningn error",
 		"001 : conexiónError - La conexion no se pudo establecer",
-		"002 : conexiónError - Se estableci� la conexióncon el servidor pero la base de datos no responde",
-		"003 : conexiónError - No se ha podido cerrar la actual conexi�",
-		"004 : conexiónError - El objeto est�ocupado intentando establecer una conexiónanterior",
-		"005 : conexiónError - La conexiónya est�cerrada",
+		"002 : conexiónError - Se estableció la conexióncon el servidor pero la base de datos no responde",
+		"003 : conexiónError - No se ha podido cerrar la actual conexión",
+		"004 : conexiónError - El objeto está ocupado intentando establecer una conexiónanterior",
+		"005 : conexiónError - La conexiónya está cerrada",
 		"006 : conexiónError - No se ha especificado ningn servidor de base de datos",
 		"007 : conexiónError - No se ha especificado ningn usuario de la base de datos",
 		"008 : conexiónError - No se ha especificado password de usuario",
@@ -43,7 +43,7 @@ class Conexion{
 	/* -------------------------------------------------------------------------------------------
 		Adquiere o actualiza los datos necesarias para establecer conexiones
 		
-		Par�etros de entrada:
+		Parámetros de entrada:
 			servidor: Servidor donde se ubica la base de datos
 			usuario : Un usuario con acceso al servidor
 			passwor : Clave de usuario
@@ -54,7 +54,7 @@ class Conexion{
 			true : Si los datos aportadospara establecer conexiones son correctos
 			false: En caso contrario
 
-		En el caso de devolver false, la funci� TomaUltimoError() devuelve el error ocurrido
+		En el caso de devolver false, la función TomaUltimoError() devuelve el error ocurrido
 	----------------------------------------------------------------------------------------------*/
 	function CadenaConexion($servidor,$usuario,$password,$basedatos,$proveedor){
 		$this->servidor=$servidor; 
@@ -71,7 +71,7 @@ class Conexion{
 			true : Si la apertura de la conexiónha sido satisfactoria
 			false: En caso contrario
 
-		En el caso de devolver false, la funci� TomaUltimoError() devuelve el error ocurrido
+		En el caso de devolver false, la función TomaUltimoError() devuelve el error ocurrido
 	----------------------------------------------------------------------------------------------*/
 	function Abrir(){
 		$this->inderror=-1; // Inicializar contador de errores
@@ -96,12 +96,12 @@ class Conexion{
 					return(false);
 				}
 				break;
-			case 2:	// Actualmente est�objeto est�ocupado intentando establecer otra conexi�
+			case 2:	// Actualmente este objeto está ocupado intentando establecer otra conexión
 				$this->error[$this->inderror++]=4;
 				$this->ultimoerror=4;
 				return(false);
 				break;
-			default : // No existe actualmente ninguna conexiónabierta, se abrir�una nueva
+			default : // No existe actualmente ninguna conexiónabierta, se abrirá una nueva
 				$intentos_de_conexion=0;
 				while(true){
 					$intentos_de_conexion++;
@@ -118,45 +118,45 @@ class Conexion{
 			true : Si la conexiónse ha cerrado satisfactoriamente
 			false: En caso contrario
 
-		En el caso de devolver false, la funci� TomaUltimoError() devuelve el error ocurrido
+		En el caso de devolver false, la función TomaUltimoError() devuelve el error ocurrido
 	----------------------------------------------------------------------------------------------*/
 	function Cerrar(){
 		$this->inderror=-1; // Inicializar contador de errores
 		$this->ultimoerror=-1;
 		switch ($this->estado) {
-			case 1:	// Actualmente la conexion est�abierta
+			case 1:	// Actualmente la conexion está abierta
 				if (mysqli_close($this->controlador)){ // Se cierra la conexion actual
 					$this->estado=0;
 					$this->error[$this->inderror++]=0;
 					$this->ultimoerror=0;
 					return(true);
 				}
-				else{ // Error al cerrar la conexi�
+				else{ // Error al cerrar la conexión
 					$this->error[$this->inderror++]=3;
 					$this->ultimoerror=3;
 					return(false);
 				}
 				break;
-			case 2:	// Actualmente est�objeto est�ocupado intentando establecer otra conexi�
+			case 2:	// Actualmente este objeto está ocupado intentando establecer otra conexión
 				$this->error[$this->inderror++]=4;
 				$this->ultimoerror=4;
 				return(false);
 				break;
 
-			default :	// Actualmente la conexiónest�ya cerrada
+			default :	// Actualmente la conexión está ya cerrada
 				$this->error[$this->inderror++]=5;
 				$this->ultimoerror=5;
 				return(false);
 		}
 	}
 	/* -------------------------------------------------------------------------------------------
-		Establece una nueva conexi�. Este m�odo es privado y s�o lo puede ejecutar la propia
-		clase desde el m�odo pblico Abrir.
+		Establece una nueva conexión. Este método es privado y sólo lo puede ejecutar la propia
+		clase desde el método pblico Abrir.
 	----------------------------------------------------------------------------------------------*/
 	function _nueva_conexion(){
 		$this->estado=2;// Intenta la conexion
 		if ($this->controlador=mysqli_connect($this->servidor,$this->usuario,$this->password)){// Conexion O.K.
-			$this->estado=1; // La conexion con el servidor se estableci�			
+			$this->estado=1; // La conexion con el servidor se estableció
 			if (mysqli_select_db($this->controlador, $this->basedatos)){// Base datos O.K.
 				$this->error[$this->inderror++]=0;
 				$this->ultimoerror=0;
@@ -190,7 +190,7 @@ class Conexion{
 			true : Si los datos aportados son correctos
 			false: Si algn dato NO ha sido aportado o es incorrecto
 		
-		Este m�odo es privado y s�o lo ejecutan m�odos pblicos de la propia clase
+		Este método es privado y sólo lo ejecutan métodos pblicos de la propia clase
 	----------------------------------------------------------------------------------------------*/
 	function _cadena_conexion(){
 
@@ -243,10 +243,10 @@ class Conexion{
 	
 		Esta clase tiene dos propiedades que definen su contenido
 			nombre=nombre del parametro
-			valor = valor de dicho par�etro
+			valor = valor de dicho parámetro
 			tipo = tipo de parametro:
-						0: El valor del par�etro debe ir encerrado entre comillas simples
-						1: El valor del par�etro no necesita ir entre comillas simples
+						0: El valor del parámetro debe ir encerrado entre comillas simples
+						1: El valor del parámetro no necesita ir entre comillas simples
 ========================================================================================*/
 class parametro{
 	var $nombre;
@@ -271,8 +271,8 @@ class parametro{
 
 	Especificaciones:
 	
-		Las sentencias SQL pueden contener par�etros que pueden ser sustituidos por el valor
-		de los objetos par�etro. Estos par�etros tendr� la forma:@nombre_del_parametro
+		Las sentencias SQL pueden contener parámetros que pueden ser sustituidos por el valor
+		de los objetos parámetro. Estos parámetros tendrán la forma: @nombre_del_parametro
 ==================================================================================================*/
 class Comando{
 	var $texto;
@@ -298,7 +298,7 @@ class Comando{
 		$this->Recordset=new Recordset;
 	} 
 	/* -------------------------------------------------------------------------------------------
-		Devuelve el c�igo del ltimo error ocurrido durante el proceso anterior.
+		Devuelve el código del ltimo error ocurrido durante el proceso anterior.
 	----------------------------------------------------------------------------------------------*/
 	function UltimoError(){
 		return($this->ultimoerror);
@@ -310,10 +310,10 @@ class Comando{
 		return($this->msgerrores[$this->ultimoerror]);
 	}
 	/* -------------------------------------------------------------------------------------------
-		A�de un par�etro a la colecci� de parametros. La matriz que implementa la colecci�
-		es una matriz asociativa cuyo indice asociativo es el nombre del par�etro
+		Añade un parámetro a la colección de parametros. La matriz que implementa la colección
+		es una matriz asociativa cuyo indice asociativo es el nombre del parámetro
 		
-		Par�etros de entrada:
+		Parámetros de entrada:
 			objparam: Un objeto parametro
 	---------------------------------------------------------------------------------------------*/
 	function AddParametro($objparam){
@@ -323,15 +323,15 @@ class Comando{
 		$this->parametros[]=$tbparametro;
 	} 
 	/* -------------------------------------------------------------------------------------------
-		A�de un par�etro a la colecci� de parametros. La matriz que implementa la colecci�
-		es una matriz asociativa cuyo indice asociativo es el del par�etro
+		Añade un parámetro a la colección de parametros. La matriz que implementa la colección
+		es una matriz asociativa cuyo indice asociativo es el del parámetro
 		
-		Par�etros de entrada:
-			nombre: El nombre del par�etro
-			valor : El valor del par�etro
+		Parámetros de entrada:
+			nombre: El nombre del parámetro
+			valor : El valor del parámetro
 			tipo = tipo de parametro:
-						0: El valor del par�etro debe ir encerrado entre comillas simples
-						1: El valor del par�etro no necesita ir entre comillas simples
+						0: El valor del parámetro debe ir encerrado entre comillas simples
+						1: El valor del parámetro no necesita ir entre comillas simples
 	Versión 1.1: Al incluir los valores se escapan caracteres especiales (ticket #777) 
 	Autor: Irina Gómez - ETSII, Universidad de Sevilla
 	Fecha: 2017-03-30
@@ -349,10 +349,10 @@ class Comando{
 	}
 
 	/* -------------------------------------------------------------------------------------------
-		Sustituye el valor de un par�etro existente por otro
-		Par�etros de entrada:
-			nombre: El nombre del par�etro
-			valor : El nuevo valor del par�etro
+		Sustituye el valor de un parámetro existente por otro
+		Parámetros de entrada:
+			nombre: El nombre del parámetro
+			valor : El nuevo valor del parámetro
 	Versión 1.1: Al incluir los valores se escapan caracteres especiales (ticket #777) 
 	Autor: Irina Gómez - ETSII, Universidad de Sevilla
 	Fecha: 2017-03-30
@@ -364,31 +364,31 @@ class Comando{
 		}
 	}
 	/* -------------------------------------------------------------------------------------------
-		Establece la conexiónque se usar�para ejecutar las acciones pertinentes
+		Establece la conexiónque se usará para ejecutar las acciones pertinentes
 
-		Par�etros de entrada:
+		Parámetros de entrada:
 			objconexion: Un objeto conexion
 	---------------------------------------------------------------------------------------------*/
 	function EstableceConexion($objconexion){
 		$this->Conexion= $objconexion;
 	}
 	/* -------------------------------------------------------------------------------------------
-		Establece la conexiónque se usar�para ejecutar las acciones pertinentes
+		Establece la conexiónque se usará para ejecutar las acciones pertinentes
 
-		Par�etros de entrada:
-			textocomando: Un texto con la sentencia SQL (Puede contener par�etros)
+		Parámetros de entrada:
+			textocomando: Un texto con la sentencia SQL (Puede contener parámetros)
 	---------------------------------------------------------------------------------------------*/
 	function EstableceTexto($textocomando){
 		$this->texto=$textocomando;
 	}
 	/* -------------------------------------------------------------------------------------------
-		Sustituye el valor de los parametros en la expresi� que forma el texto del Comando
+		Sustituye el valor de los parametros en la expresión que forma el texto del Comando
 	---------------------------------------------------------------------------------------------*/
 	function Traduce(){
 		$execomando=$this->texto;
-		if (sizeof($this->parametros)>0){ // Hay par�etros que sustituir
+		if (sizeof($this->parametros)>0){ // Hay parámetros que sustituir
 			foreach($this->parametros as $parametro){
-				if ($parametro["tipo"]==0) // Tipo alfanum�ico
+				if ($parametro["tipo"]==0) // Tipo alfanumérico
 					$execomando=str_replace($parametro["nombre"],"'".$parametro["valor"]."'",$execomando);
 				else
 					$execomando=str_replace($parametro["nombre"],$parametro["valor"],$execomando);
@@ -409,7 +409,7 @@ class Comando{
 		}
 		else{
 			if ($this->Conexion==null){
-				$this->error[$this->inderror++]=2; // conexiónNO establecida
+				$this->error[$this->inderror++]=2; // conexión NO establecida
 				$this->ultimoerror=2;
 				return(false);
 			}
@@ -464,7 +464,7 @@ class Comando{
 =========================================================================================*/
 class Recordset{
 	var $Comando;
-	var $filas= array();
+	var $filas;
 	var $BOF,$EOF,$estado;
 	var $campos;
 	var $numeroderegistros,$numerodecampos,$posicion;
@@ -497,7 +497,7 @@ class Recordset{
 		$this->estado=0;
 	} 
 	/* -------------------------------------------------------------------------------------------
-		Devuelve el c�igo del ltimo error ocurrido durante el proceso anterior.
+		Devuelve el código del ltimo error ocurrido durante el proceso anterior.
 	----------------------------------------------------------------------------------------------*/
 	function UltimoError(){
 		return($this->ultimoerror);
@@ -509,23 +509,23 @@ class Recordset{
 		return($this->msgerrores[$this->ultimoerror]);
 	}
 	/* -------------------------------------------------------------------------------------------
-		Establece el comando que se usar�para ejecutar las consultas pertinentes
+		Establece el comando que se usará para ejecutar las consultas pertinentes
 
-		Par�etros de entrada:
-			objcomando: Un objeto comando con la sentencia SQL (Puede contener par�etros)
+		Parámetros de entrada:
+			objcomando: Un objeto comando con la sentencia SQL (Puede contener parámetros)
 
 		Devuelve :
 			true : Si el texto del comando contiene la clausula SELECT
 			false: En caso contrario
 
-		En el caso de devolver false, la funci� TomaUltimoError() devuelve el error ocurrido
+		En el caso de devolver false, la función TomaUltimoError() devuelve el error ocurrido
 	---------------------------------------------------------------------------------------------*/
 	function EstableceComando($objcomando){
 		$this->inderror=-1; // Inicializar contador de errores
 		$this->ultimoerror=-1;
 		if (stristr($objcomando->texto,"select")){
 			$this->Comando=$objcomando;
-			$this->error[$this->inderror++]=0; // Comando v�ido, contiene "SELECT"
+			$this->error[$this->inderror++]=0; // Comando válido, contiene "SELECT"
 			$this->ultimoerror=0;
 			return(true);
 		}
@@ -536,13 +536,13 @@ class Recordset{
 		}
 	}
 	/* -------------------------------------------------------------------------------------------
-		Sustituye el valor de los parametros en la expresi� que forma el texto del Comando
+		Sustituye el valor de los parametros en la expresión que forma el texto del Comando
 	---------------------------------------------------------------------------------------------*/
 	function Traduce(){
 		$execomando=$this->Comando->texto;
-		if (sizeof($this->Comando->parametros)>0){ // Hay par�etros que sustituir
+		if (sizeof($this->Comando->parametros)>0){ // Hay parámetros que sustituir
 			foreach($this->Comando->parametros as $parametro){
-				if ($parametro["tipo"]==0) // Tipo alfanum�ico
+				if ($parametro["tipo"]==0) // Tipo alfanumérico
 					$execomando=str_replace($parametro["nombre"],"'".$parametro["valor"]."'",$execomando);
 				else
 					$execomando=str_replace($parametro["nombre"],$parametro["valor"],$execomando);
@@ -582,7 +582,7 @@ class Recordset{
 			$this->ultimoerror=4;
 			return(false);
 		}
-		$this->numeroderegistros=mysqli_num_rows($this->filas); // La consulta se ha realizado con �ito
+		$this->numeroderegistros=mysqli_num_rows($this->filas); // La consulta se ha realizado con éxito
 		$this->numerodecampos=mysqli_num_fields($this->filas);
 		if ($this->numeroderegistros>0){
 			$this->BOF=false;
@@ -590,7 +590,7 @@ class Recordset{
 			$this->campos=mysqli_fetch_array($this->filas);
 		}
 		$this->estado=1; // Recordset abierto
-		$this->error[$this->inderror++]=0; // Recuperaci� de registros correcta
+		$this->error[$this->inderror++]=0; // Recuperación de registros correcta
 		$this->ultimoerror=0;
 		return(true);
 	}
@@ -600,11 +600,7 @@ class Recordset{
 	function Cerrar(){
 		$this->inderror=-1; // Inicializar contador de errores
 		$this->ultimoerror=-1;
-		if (!mysqli_free_result($this->filas)){
-			$this->error[$this->inderror++]=6; // Error al cerrar la consulta (Al liberar memoria)
-			$this->ultimoerror=6;
-			return(false);
-		}
+		mysqli_free_result($this->filas);
 		$this->Inicializar();
 		$this->error[$this->inderror++]=0; // Recuperaci� de registros correcta
 		$this->ultimoerror=0;
@@ -632,8 +628,7 @@ class Recordset{
 			$this->posicion--;
 			if ($this->posicion<0)
 				$this->BOF=true;
-			else{
-				if (mysqli_data_seek($this->filas,$this->posicion));
+			elseif (mysqli_data_seek($this->filas,$this->posicion)) {
 					$this->campos=mysqli_fetch_array($this->filas);
 			}
 		}
@@ -660,7 +655,7 @@ class Recordset{
 	}
 }	
 	/* -------------------------------------------------------------------------------------------
-		Esta funci�n devuelve una matriz asociativa con el nombre de los campos del recordset
+		Esta función devuelve una matriz asociativa con el nombre de los campos del recordset
 	---------------------------------------------------------------------------------------------*/
 	function DatosNombres(){
 		if (mysqli_data_seek($this->filas,$this->posicion))
@@ -668,7 +663,7 @@ class Recordset{
 		return("");
 	}
 	/* -------------------------------------------------------------------------------------------
-		Esta funci�n devuelve informaci�n sobre los campos de la tabla
+		Esta función devuelve información sobre los campos de la tabla
 	---------------------------------------------------------------------------------------------*/
 	function InfoCampos(){
 		$infocampos= array ();
@@ -681,4 +676,4 @@ class Recordset{
 		}
 		return($infocampos);
 	}
-?>
+
