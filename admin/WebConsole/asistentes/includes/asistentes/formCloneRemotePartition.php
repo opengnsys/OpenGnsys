@@ -4,14 +4,14 @@
 <tr>
 	<td class="op_basic">
 	    <?php echo $TbMsg["WCRP32"] ?> 
-		<select name="ipMaster" id="ipMaster" style="width:220" onChange="xajax_ListarOrigenMaster(this.value);">
+		<select name="ipMaster" id="ipMaster" style="width:220" onChange="ListarOrigenesMaster(this.value);">
 				<option value=""> -- <?php echo $TbMsg["WCRP32"] ?> -- </option>
 				<?php echo ''.htmlOPTION_equipos($cmd,$ambito,$idambito).'';   ?>
 		</select>		
 		<br />		
 		<!--DIV donde se mostrara la respuesta AJAX sobre las particiones clonables del equipo-->
 		<?php echo $TbMsg["WCRP33"] ?>
-		<div id="divListado"></div>
+		<div id="ajaxDiv"></div>
 		<br />
 		<?php echo $TbMsg["WCRP34"] ?> 
 		<select name="targetpart" id="targetpart" style="width:220;">

@@ -3,14 +3,12 @@
 // Aplicacion WEB: ogAdmWebCon
 // Autor: Antonio J. Doblas Viso
 // Baso en Codigo  Comando.php de : Jose Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-//	Xajax
 // version 1.1: Se incluye aviso para particiones GTP.
 // autor: Irina Gomez, ETSII Universidad de Sevilla
 // fecha: 2016-06-21
 // *************************************************************************************************************************************************
 
 
-require_once('xajax.common.php'); 
 //Haciendo referencia a las funciones registradas y que seran interpretadas como funciones javascript
 
 
@@ -57,11 +55,6 @@ if (!$cmd)
 	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>
 	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/asistentes_'.$idioma.'.js"></SCRIPT>'?>
 
-
-<?php 
-//indicamos al objeto xajax se encargue de generar el javascript de las funciones registradas por ejm: ListarParticionesXip
-$xajax->printJavascript('../xajax/'); 
-?>
 <script>
 function doOnload(){
 	calculateFreeDisk(document.fdatos);

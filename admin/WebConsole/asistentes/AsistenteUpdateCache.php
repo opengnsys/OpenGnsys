@@ -3,14 +3,7 @@
 // Aplicacion WEB: ogAdmWebCon
 // Autor: 
 // Baso en Codigo  Comando.php de : Jose Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-//	Xajax
 // *************************************************************************************************************************************************
-
-
-require_once('xajax.common.php'); 
-//Haciendo referencia a las funciones registradas y que seran interpretadas como funciones javascript
-
-
 
 /********HACIENDO CONSULTA A LA TABLA ordenadores***********/
 include_once("../includes/ctrlacc.php");
@@ -53,11 +46,6 @@ if (!$cmd)
 	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/ejecutarscripts_'.$idioma.'.js"></SCRIPT>'?>
 	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>
 
-
-<?php 
-//indicamos al objeto xajax se encargue de generar el javascript de las funciones registradas por ejm: ListarParticionesXip
-$xajax->printJavascript('../xajax/'); 
-?>
 </head>
 
 
