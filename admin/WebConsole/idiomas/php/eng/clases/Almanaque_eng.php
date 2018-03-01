@@ -1,13 +1,13 @@
 	<?php
 /*============================================================================
-	Esta clase genera tablas HTML para selección de fechas (Versión inglesa)
+	Esta clase genera tablas HTML para selecciÃ³n de fechas (versiÃ³n inglesa)
 	
 	Atributos de la clase:
 
-		clase: Clase [CSS] de la tabla HTML que se generará.
-		onmouseover: Función Javascript que se ejuctará al generarse el evento
-		onmouseout: Función Javascript que se ejuctará al generarse el evento
-		onclick: Función Javascript que se ejuctará al hacer click sobre el objeto
+		clase: Clase [CSS] de la tabla HTML que se generarÃ¡.
+		onmouseover: FunciÃ³n Javascript que se ejuctarÃ¡ al generarse el evento
+		onmouseout: FunciÃ³n Javascript que se ejuctarÃ¡ al generarse el evento
+		onclick: FunciÃ³n Javascript que se ejuctarÃ¡ al hacer click sobre el objeto
 
 ============================================================================*/
 class Almanaque{
@@ -17,14 +17,16 @@ class Almanaque{
 	var $onmouseout;
 	var $onclick;
 
-	var $desplazamiento_dias=6; // Ajuste fino dependiendo del año de comienzo del algoritmo
+	var $desplazamiento_dias=6; // Ajuste fino dependiendo del aÃ±o de comienzo del algoritmo
 	var $nombre_mes=array();
 	var $nombre_dia=array();
 	var $dias_meses=array();
 	var $semanas=array();
 	var $numero_annos=array();
+    var $numero_dias=array();
+    var $numero_horas=array();
 
-	function Almanaque($pclase="",$ponmouseover="sobre(this)",$ponmouseout="fuera(this)",$ponclick="clic(this)"){ //Constructor
+	function __construct($pclase="", $ponmouseover="sobre(this)", $ponmouseout="fuera(this)", $ponclick="clic(this)"){ //Constructor
 		$this->clase=$pclase;
 		$this->onmouseover=$ponmouseover;
 		$this->onmouseout=$ponmouseout;
@@ -43,7 +45,7 @@ class Almanaque{
 		$this->nombre_mes[11]=array ("November",0x0400);
 		$this->nombre_mes[12]=array ("December",0x0800);
 
-		$this->nombre_dia[1]=array ("Mo",0x01); // tamaño 1 bytes
+		$this->nombre_dia[1]=array ("Mo",0x01); // tamaÃ±o 1 bytes
 		$this->nombre_dia[2]=array ("Tu",0x02); 
 		$this->nombre_dia[3]=array ("We",0x04); 
 		$this->nombre_dia[4]=array ("Th",0x08); 
@@ -65,14 +67,14 @@ class Almanaque{
 		$this->dias_meses[11]=30;
 		$this->dias_meses[12]=31;
 
-		$this->semanas[1]=array ("1ª",0x01); // tamaño 1 bytes
-		$this->semanas[2]=array ("2ª",0x02);
-		$this->semanas[3]=array ("3ª",0x04);
-		$this->semanas[4]=array ("4ª",0x08);
-		$this->semanas[5]=array ("5ª",0x10);
+		$this->semanas[1]=array ("1ï¿½",0x01); // tamaÃ±o 1 bytes
+		$this->semanas[2]=array ("2ï¿½",0x02);
+		$this->semanas[3]=array ("3ï¿½",0x04);
+		$this->semanas[4]=array ("4ï¿½",0x08);
+		$this->semanas[5]=array ("5ï¿½",0x10);
 		$this->semanas[6]=array ("Last",0x20);
 
-		$this->numero_annos[2010]=0x0001; // tamaño 2 bytes 
+		$this->numero_annos[2010]=0x0001; // tamaÃ±o 2 bytes
 		$this->numero_annos[2011]=0x0002; 
 		$this->numero_annos[2012]=0x0004; 
 		$this->numero_annos[2013]=0x0008; 
@@ -89,7 +91,7 @@ class Almanaque{
 		$this->numero_annos[2024]=0x4000; 
 		$this->numero_annos[2025]=0x8000; 
 
-		$this->numero_dias[1]=0x00000001; // tamaño 4 bytes
+		$this->numero_dias[1]=0x00000001; // tamaÃ±o 4 bytes
 		$this->numero_dias[2]=0x00000002; 
 		$this->numero_dias[3]=0x00000004; 
 		$this->numero_dias[4]=0x00000008; 
@@ -130,7 +132,7 @@ class Almanaque{
 		$this->numero_dias[32]=0x80000000;
 
 
-		$this->numero_horas[1]=array	("0:00",	 0x0001);  // tamaño 2 bytes
+		$this->numero_horas[1]=array	("0:00",	 0x0001);  // tamaÃ±o 2 bytes
 		$this->numero_horas[2]=array	("1:00",	 0x0002);  
 		$this->numero_horas[3]=array	("2:00",	 0x0004);  
 		$this->numero_horas[4]=array	("3:00",	 0x0008);  
@@ -144,7 +146,7 @@ class Almanaque{
 		$this->numero_horas[12]=array ("11:00",0x0800);  
 
 /*
-		$this->numero_horas[1]=array ("8:00",0x00000001);  // tamaño 4 bytes
+		$this->numero_horas[1]=array ("8:00",0x00000001);  // tamaÃ±o 4 bytes
 		$this->numero_horas[2]=array ("8:30",0x00000002);  
 		$this->numero_horas[3]=array ("9:00",0x00000004);  
 		$this->numero_horas[4]=array ("9:30",0x00000008);  
@@ -177,10 +179,10 @@ class Almanaque{
 	}
 	
 	/*-------------------------------------------------------------------------------------------
-		Esta función devuelve el número del día de la semana:
-			0=domingo 1=Lunes, 2=mártes ... 6=sábado
+		Esta funciÃ³n devuelve el nÃºmero del dÃ­a de la semana:
+			0=domingo 1=lunes, 2=martes ... 6=sÃ¡bado
 		
-		Parámetro de entrada:
+		ParÃ¡metro de entrada:
 			Una cadena con formato de fecha dd/mm/aaaa.
 	----------------------------------------------------------------------------------------------*/
 	function _DiaSemana($fecha){
@@ -204,29 +206,29 @@ class Almanaque{
 		return($cont%7);
 	}
 	/* -------------------------------------------------------------------------------------------
-		Esta función devuelve true si el año pasado como parámetro es bisiesto y false si no lo es
+		Esta funciÃ³n devuelve true si el aÃ±o pasado como parÃ¡metro es bisiesto y false si no lo es
 
-		Parámetro de entrada:
-			Una número que representa el año
+		ParÃ¡metro de entrada:
+			Una nÃºmero que representa el aÃ±o
 	----------------------------------------------------------------------------------------------*/
 	function bisiesto($anob){
 		if ($anob%4==0) return(true); else return(false);
 	}
 	/* -------------------------------------------------------------------------------------------
-		Esta función devuelve una cadena con el código HTML con un rango de años (2003-2010)
+		Esta funciÃ³n devuelve una cadena con el cÃ³digo HTML con un rango de aÃ±os (2003-2010)
 	----------------------------------------------------------------------------------------------*/
 	function Annos($ano_desde,$ano_hasta){
 		$HTML_calendario='<TABLE id="tabla_annos" class="'.$this->clase.'">'.chr(13);
 		$HTML_calendario.='<TR>'.chr(13);
-		$HTML_calendario.='<TH style="cursor:hand" onclick="TH_'.$this->onclick.'">Years</TH></TR>'.chr(13); // Literal años
-		for ($i=$ano_desde; $i<=ano_hasta; ){
+		$HTML_calendario.='<TH style="cursor:hand" onclick="TH_'.$this->onclick.'">Years</TH></TR>'.chr(13); // Literal aï¿½os
+		for ($i=$ano_desde; $i<=$ano_hasta; ){
 			$HTML_calendario.='<TR><TD id="'.$this->numero_annos[$i][0].'" value="'.$this->numero_annos[$i][1].'" style="cursor:hand" onmouseover="'.$this->onmouseover.'" onmouseout="'.$this->onmouseout.'" onclick="'.$this->onclick.'">'.$this->numero_annos[$i][0].'</TD></TR>'.chr(13);
 		}
 		$HTML_calendario.='</TABLE>'.chr(13);
 		return($HTML_calendario);
 	}	
 	/* -------------------------------------------------------------------------------------------
-		Esta función devuelve una cadena con el código HTML del calendario del mes y año elegidos
+		Esta funciÃºn devuelve una cadena con el cÃ³digo HTML del calendario del mes y aÃ±o elegidos
 		y que son propiedades de la clase.
 	----------------------------------------------------------------------------------------------*/
 	function MesAnno($mes,$anno){
@@ -242,7 +244,7 @@ class Almanaque{
 		$HTML_calendario.='<TH colspan=7 style="cursor:hand" onclick="TH_'.$this->onclick.'">'.$this->nombre_mes[$mes][0].'</TH></TR>'.chr(13); // Nombre del mes
 		$HTML_calendario.='<TR>'.chr(13);
 		for ($i=1;$i<8;$i++)
-			$HTML_calendario.='<TH>'.$this->nombre_dia[$i][0].'</TH>'.chr(13); // Días de la semana
+			$HTML_calendario.='<TH>'.$this->nombre_dia[$i][0].'</TH>'.chr(13); // Dï¿½as de la semana
 		$HTML_calendario.='</TR><TR>'.chr(13);
 		for ($i=1;$i<$ds;$i++)
 			$HTML_calendario.='<TD></TD>'.chr(13); // Relleno primeros dias de la semana
@@ -259,7 +261,7 @@ class Almanaque{
 		return($HTML_calendario);
 	}
 	/* -------------------------------------------------------------------------------------------
-		Esta función devuelve una cadena con el código HTML con los meses del año en dos columnas.
+		Esta funciÃ³n devuelve una cadena con el cÃ³digo HTML con los meses del aÃ±o en dos columnas.
 	----------------------------------------------------------------------------------------------*/
 	function Meses(){
 		$HTML_calendario='<TABLE id="tabla_meses" class="'.$this->clase.'">'.chr(13);
@@ -273,12 +275,12 @@ class Almanaque{
 		return($HTML_calendario);
 	}
 	/* -------------------------------------------------------------------------------------------
-		Esta función devuelve una cadena con el código HTML con los días de la semana en una fila.
+		Esta funciÃ³n devuelve una cadena con el cÃ³digo HTML con los dÃ­as de la semana en una fila.
 	----------------------------------------------------------------------------------------------*/
 	function Dias(){
 		$HTML_calendario='<TABLE id="tabla_dias" class="'.$this->clase.'">'.chr(13);
 		$HTML_calendario.='<TR>'.chr(13);
-		$HTML_calendario.='<TH  colspan=7 style="cursor:hand" onclick="TH_'.$this->onclick.'">Day</TH><TR>'.chr(13); // Literal Días
+		$HTML_calendario.='<TH  colspan=7 style="cursor:hand" onclick="TH_'.$this->onclick.'">Day</TH><TR>'.chr(13); // Literal Dï¿½as
 		for ($i=1;$i<8;$i++){
 			$HTML_calendario.='<TD id="'.$i.'" value="'.$this->nombre_dia[$i][1].'" style="cursor:hand" onmouseover="'.$this->onmouseover.'" onmouseout="'.$this->onmouseout.'" onclick="'.$this->onclick.'">'.$this->nombre_dia[$i][0].'</TD>'.chr(13);
 		}
@@ -286,7 +288,7 @@ class Almanaque{
 		return($HTML_calendario);
 	}		
 	/* -------------------------------------------------------------------------------------------
-		Esta función devuelve una cadena con el código HTML con el orden de las semana en una fila.
+		Esta funciÃ³n devuelve una cadena con el cÃ³digo HTML con el orden de las semana en una fila.
 	----------------------------------------------------------------------------------------------*/
 	function Semanas(){
 		$HTML_calendario='<TABLE id="tabla_semanas" class="'.$this->clase.'">'.chr(13);
@@ -299,12 +301,12 @@ class Almanaque{
 		return($HTML_calendario);
 	}	
 	/* -------------------------------------------------------------------------------------------
-		Esta función devuelve una cadena con el código HTML con los 31 días de un mes en 3 filas
+		Esta funciÃ³n devuelve una cadena con el cÃ³digo HTML con los 31 dÃ­as de un mes en 3 filas
 	----------------------------------------------------------------------------------------------*/
 	function DiasMes(){
 		$HTML_calendario='<TABLE id="tabla_diasmes" class="'.$this->clase.'">'.chr(13);
 		$HTML_calendario.='<TR>'.chr(13);
-		$HTML_calendario.='<TH colspan=8 style="cursor:hand" onclick="TH_'.$this->onclick.'">Day of month</TH><TR>'.chr(13); // Literal Día
+		$HTML_calendario.='<TH colspan=8 style="cursor:hand" onclick="TH_'.$this->onclick.'">Day of month</TH><TR>'.chr(13); // Literal Dï¿½a
 		$HTML_calendario.='<TR>'.chr(13);
 		$sd=1; // Control salto de fila
 		for ($i=1;$i<32;$i++){
@@ -319,7 +321,7 @@ class Almanaque{
 		return($HTML_calendario);
 	}
 	/* -------------------------------------------------------------------------------------------
-		Esta función devuelve una cadena con el código HTML con las horas de apertura de las aulas
+		Esta funciÃ³n devuelve una cadena con el cÃ³digo HTML con las horas de apertura de las aulas
 	----------------------------------------------------------------------------------------------*/
 	function Horas(){
 		$HTML_calendario='<TABLE  id="tabla_horas" class="'.$this->clase.'">'.chr(13);
@@ -349,7 +351,7 @@ class Almanaque{
 		return($HTML_calendario);
 	}
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-		Esta función devuelve una cadena con el código HTML con las horas hasta de reserva de las aulas
+		Esta funciÃ³n devuelve una cadena con el cÃ³digo HTML con las horas hasta de reserva de las aulas
 ________________________________________________________________________________________________________*/
 	function HorasReserva($literal,$nombretabla,$nombreampm,$nombreminuto){
 		if($literal=="1") 
@@ -382,7 +384,7 @@ ________________________________________________________________________________
 		return($HTML_calendario);
 	}
 	/* -------------------------------------------------------------------------------------------
-		Esta función devuelve una cadena con el código HTML con las horas de apertura de las aulas
+		Esta funciÃ³n devuelve una cadena con el cÃ³digo HTML con las horas de apertura de las aulas
 	----------------------------------------------------------------------------------------------*/
 	function Horas_Completas(){
 		$maxcolumnas=16;

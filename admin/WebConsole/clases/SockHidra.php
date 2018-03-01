@@ -24,7 +24,7 @@ class SockHidra{
 	//	- puerto: El puerto usado para las comunicaciones
 	//	- timeout: El tiempo de espera para la conexi�
 	//________________________________________________________________________________________
-	function SockHidra($servidor,$puerto,$timeout=30){ 
+	function __construct($servidor, $puerto, $timeout=30){
 		$this->servidor=$servidor;
 		if (!$this->_esIP($this->servidor))
 			$this->servidor = gethostbyname ($servidor);

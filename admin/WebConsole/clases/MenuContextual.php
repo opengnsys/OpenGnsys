@@ -29,7 +29,7 @@ Clase para trabajar con menús contextuales.
 
 ==================================================================================================*/
 class MenuContextual{
-	Function MenuContextual($urlImages="../images/flotantes"){
+	Function __construct($urlImages="../images/flotantes"){
 		$this->urlImg=$urlImages;
 	}
 	/*---------------------------------------------------------------------------------------------

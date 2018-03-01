@@ -1058,7 +1058,7 @@ class clsAccion
 	var $notini;
 	var $linot;
 	var $swcp;
-	function clsAccion(){  // Constructor
+	function __construct(){  // Constructor
 
 	}
 }

@@ -9,7 +9,7 @@ class EncripDescrip{
 	//
 	//  Constructor
 	//________________________________________________________________________________________
-	function EncripDescrip($clave=12){ 
+	function __construct($clave=12){
 		$this->cadena="";
 		$this->clave=$clave;
 	}

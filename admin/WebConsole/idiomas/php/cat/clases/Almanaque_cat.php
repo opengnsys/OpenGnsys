@@ -23,8 +23,10 @@ class Almanaque{
 	var $dias_meses=array();
 	var $semanas=array();
 	var $numero_annos=array();
+    var $numero_dias=array();
+    var $numero_horas=array();
 
-	function Almanaque($pclase="",$ponmouseover="sobre(this)",$ponmouseout="fuera(this)",$ponclick="clic(this)"){ //Constructor
+	function __construct($pclase="", $ponmouseover="sobre(this)", $ponmouseout="fuera(this)", $ponclick="clic(this)"){ //Constructor
 		$this->clase=$pclase;
 		$this->onmouseover=$ponmouseover;
 		$this->onmouseout=$ponmouseout;
@@ -187,7 +189,7 @@ class Almanaque{
 		$HTML_calendario='<TABLE id="tabla_annos" class="'.$this->clase.'">'.chr(13);
 		$HTML_calendario.='<TR>'.chr(13);
 		$HTML_calendario.='<TH style="cursor:pointer" onclick="TH_'.$this->onclick.'">Años</TH></TR>'.chr(13); // Literal años
-		for ($i=$ano_desde; $i<=ano_hasta; $i++){
+		for ($i=$ano_desde; $i<=$ano_hasta; $i++){
 			$HTML_calendario.='<TR><TD align="center" id="'.$this->numero_annos[$i][0].'" 
 			value="'.$this->numero_annos[$i][1].'" style="cursor:pointer" 
 			onmouseover="'.$this->onmouseover.'" onmouseout="'.$this->onmouseout.'" 

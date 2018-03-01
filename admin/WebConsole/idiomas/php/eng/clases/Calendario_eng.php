@@ -1,13 +1,13 @@
 	<?php
 /*========================================================================================================
-	Esta clase genera tablas HTML para selecciÛn de fechas (VersiÛn inglesa)
+	Esta clase genera tablas HTML para selecci√≥n de fechas (versi√≥n inglesa)
 	
 	Atributos de la clase:
 
-		clase: Clase [CSS] de la tabla HTML que se generar·.
-		onmouseover: FunciÛn Javascript que se ejuctar· al generarse el evento
-		onmouseout: FunciÛn Javascript que se ejuctar· al generarse el evento
-		onclick: FunciÛn Javascript que se ejuctar· al hacer click sobre el objeto
+		clase: Clase [CSS] de la tabla HTML que se generar√°.
+		onmouseover: Funci√≥n Javascript que se ejuctar√° al generarse el evento
+		onmouseout: Funci√≥n Javascript que se ejuctar√° al generarse el evento
+		onclick: Funci√≥n Javascript que se ejuctar√° al hacer click sobre el objeto
 
 =========================================================================================================*/
 class Calendario{
@@ -19,12 +19,13 @@ class Calendario{
 	var $onmouseout;
 	var $onclick;
 
-	var $desplazamiento_dias=6; // Ajuste fino dependiendo del aÒo de comienzo del algoritmo
+	var $desplazamiento_dias=6; // Ajuste fino dependiendo del a√±o de comienzo del algoritmo
 	var $nombre_mes=array();
 	var $nombre_dia=array();
+	var $numero_annos=array();
 	var $dias_meses=array();
 
-	function Calendario($pclase="",$ponmouseover="sobre(this)",$ponmouseout="fuera(this)",$ponclick="clic(this)"){ //Constructor
+	function __construct($pclase="", $ponmouseover="sobre(this)", $ponmouseout="fuera(this)", $ponclick="clic(this)"){ //Constructor
 		$this->clase=$pclase;
 		$this->onmouseover=$ponmouseover;
 		$this->onmouseout=$ponmouseout;
@@ -44,7 +45,7 @@ class Calendario{
 		$this->nombre_mes[12]=array ("December",0x0800);
 
 
-		$this->numero_annos[1]=array ("2004",0x01); // tamaÒo 1 bytes
+		$this->numero_annos[1]=array ("2004",0x01); // tama√±o 1 bytes
 		$this->numero_annos[2]=array ("2005",0x02); 
 		$this->numero_annos[3]=array ("2006",0x04); 
 		$this->numero_annos[4]=array ("2007",0x08); 
@@ -66,7 +67,7 @@ class Calendario{
 		$this->dias_meses[11]=30;
 		$this->dias_meses[12]=31;
 
-		$this->nombre_dia[1]=array ("Mo",0x01); // tamaÒo 1 bytes
+		$this->nombre_dia[1]=array ("Mo",0x01); // tama√±o 1 bytes
 		$this->nombre_dia[2]=array ("Tu",0x02); 
 		$this->nombre_dia[3]=array ("We",0x04); 
 		$this->nombre_dia[4]=array ("Th",0x08); 
@@ -75,7 +76,7 @@ class Calendario{
 		$this->nombre_dia[7]=array ("Su",0x40); 
 	}
 /*________________________________________________________________________________________________________
-		Esta funciÛn devuelve una cadena con el cÛdigo HTML del calendario del mes y aÒo elegidos
+		Esta funci√≥n devuelve una cadena con el c√≥digo HTML del calendario del mes y a√±o elegidos
 		y que son propiedades de la clase.
 ________________________________________________________________________________________________________*/
 	function MesAnno($mes,$anno,$CntMes){
@@ -91,7 +92,7 @@ ________________________________________________________________________________
 		$HTML_calendario.='<TH colspan=7 id="'.$mes.'/'.$anno.'" value="'.$this->aula.'" style="cursor:hand" onclick="TH_'.$this->onclick.'">'.$this->nombre_mes[$mes][0].'</TH></TR>'.chr(13); // Nombre del mes
 		$HTML_calendario.='<TR>'.chr(13);
 		for ($i=1;$i<8;$i++)
-			$HTML_calendario.='<TH>'.$this->nombre_dia[$i][0].'</TH>'.chr(13); // DÌas de la semana
+			$HTML_calendario.='<TH>'.$this->nombre_dia[$i][0].'</TH>'.chr(13); // D√≠as de la semana
 		$HTML_calendario.='</TR><TR>'.chr(13);
 		for ($i=1;$i<$ds;$i++)
 			$HTML_calendario.='<TD>&nbsp;</TD>'.chr(13); // Relleno primeros dias de la semana
@@ -115,7 +116,7 @@ ________________________________________________________________________________
 		return($HTML_calendario);
 	}
 /*________________________________________________________________________________________________________
-		Esta funciÛn devuelve una cadena con el cÛdigo HTML del calendario del mes y aÒo elegidos
+		Esta funci√≥n devuelve una cadena con el c√≥digo HTML del calendario del mes y a√±o elegidos
 		y que son propiedades de la clase.
 ________________________________________________________________________________________________________*/
 	function JMesAnno($mes,$anno,$JDif,$TBfechas,$sumahoras){
@@ -123,7 +124,7 @@ ________________________________________________________________________________
 		$Jdpl=$this->juliana($fecha)-$JDif; // Calcula punto departida para indice juliano
 		$ds=$this->_DiaSemana($fecha);
 		if ($ds==0) $ds=7;
-		$paso=2; // PorporciÛn para el la intensidad del color
+		$paso=2; // Porporci√≥n para el la intensidad del color
 		$swbi=0; // Suma para bisiesto
 		if ($this->bisiesto($anno) && $mes==2)	$swbi=1; 
  		$HTML_calendario='<TABLE  border=1 cellspacing=0 cellpadding=1 id="tabla_mesanno" class="'.$this->clase.'">'.chr(13);
@@ -131,7 +132,7 @@ ________________________________________________________________________________
 		$HTML_calendario.='<TH colspan=7 id="'.$mes.'/'.$anno.'"  style="cursor:hand" onclick="TH_'.$this->onclick.'">'.$this->nombre_mes[(int)$mes][0].'</TH></TR>'.chr(13); // Nombre del mes
 		$HTML_calendario.='<TR>'.chr(13);
 		for ($i=1;$i<8;$i++)
-			$HTML_calendario.='<TH>'.$this->nombre_dia[$i][0].'</TH>'.chr(13); // DÌas de la semana
+			$HTML_calendario.='<TH>'.$this->nombre_dia[$i][0].'</TH>'.chr(13); // D√≠as de la semana
 		$HTML_calendario.='</TR><TR>'.chr(13);
 		for ($i=1;$i<$ds;$i++)
 			$HTML_calendario.='<TD>&nbsp;</TD>'.chr(13); // Relleno primeros dias de la semana
@@ -166,10 +167,10 @@ ________________________________________________________________________________
 	}
 
 /*________________________________________________________________________________________________________
-		Esta funciÛn devuelve el n˙mero del dÌa de la semana:
-			0=domingo 1=Lunes, 2=m·rtes ... 6=s·bado
+		Esta funci√≥n devuelve el n√∫mero del d√≠a de la semana:
+			0=domingo 1=lunes, 2=martes ... 6=s√°bado
 		
-		Par·metro de entrada:
+		Par√°metro de entrada:
 			Una cadena con formato de fecha dd/mm/aaaa.
 ________________________________________________________________________________________________________*/
 	function _DiaSemana($fecha){
@@ -193,16 +194,16 @@ ________________________________________________________________________________
 		return($cont%7);
 	}
 //________________________________________________________________________________________________________
-//		Esta funciÛn devuelve true si el aÒo pasado como par·metro es bisiesto y false si no lo es
+//		Esta funci√≥n devuelve true si el a√±o pasado como par√°metro es bisiesto y false si no lo es
 //
-//		Par·metro de entrada:
-//			Una n˙mero que representa el aÒo
+//		Par√°metro de entrada:
+//			Una n√∫mero que representa el a√±o
 //________________________________________________________________________________________________________
 function bisiesto($anob){
 		if ($anob%4==0) return(true); else return(false);
 	}
 //________________________________________________________________________________________________________
-//		Esta funciÛn devuelve una cadena con el cÛdigo HTML con las horas de reservas de las aulas
+//		Esta funci√≥n devuelve una cadena con el c√≥digo HTML con las horas de reservas de las aulas
 //________________________________________________________________________________________________________
 function HorasDias($CntDia,&$porcenhoras){
 	$HTML_calendario="";
@@ -268,7 +269,7 @@ function HorasDias($CntDia,&$porcenhoras){
 				if($sw>0)
 					$HTML_ampm[$j].=' style="COLOR:#eeeeee;BACKGROUND-COLOR: #cc3366;"';
 
-				if($sw>0) // Cuenta la fracciÛn de 15 minutos como reservada
+				if($sw>0) // Cuenta la fracci√≥n de 15 minutos como reservada
 					$conthoras++;
 				$HTML_ampm[$j].=' align=center>&nbsp;'.$currenthorario.'&nbsp;</TD>'.chr(13);
 				$currentminutos+=15;
@@ -302,7 +303,7 @@ function HorasDias($CntDia,&$porcenhoras){
 	return($HTML_calendario);
 }	
 /* --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-	Devuelve una cadena con los dÌas del mes que son  lunes(1) o martes(2) o miÈrcoles(3), etc ...domingo(7) separada por comas
+	Devuelve una cadena con los d√≠as del mes que son  lunes(1) o martes(2) o mi√©rcoles(3), etc ...domingo(7) separada por comas
 ________________________________________________________________________________________________________________*/
 function DiasPorMes($mes,$anno,$numerodia){
 	$cadenadias="";
@@ -315,7 +316,7 @@ function DiasPorMes($mes,$anno,$numerodia){
 			$ds++;
 			if($ds>7) $ds=1;
 		}
-		// Calcula n˙mero de dias del mes
+		// Calcula n√∫mero de dias del mes
 		$diasmaxmes=$this->dias_meses[$mes];
 		if ($mes==2){
 			if ($this->bisiesto($anno)){
@@ -329,7 +330,7 @@ function DiasPorMes($mes,$anno,$numerodia){
 		return($cadenadias);
 }
 /*________________________________________________________________________________________________________
-	Devuelve una cadena con los dÌas del mes correspondiente a una semana concreta, separados por coma
+	Devuelve una cadena con los d√≠as del mes correspondiente a una semana concreta, separados por coma
 ________________________________________________________________________________________________________*/
 function DiasPorSemanas($mes,$anno,$numerosemana){
 	$cadenadias="";
@@ -346,7 +347,7 @@ function DiasPorSemanas($mes,$anno,$numerosemana){
 				$nsem++;
 			}
 		}
-		// Calcula n˙mero de dias del mes
+		// Calcula n√∫mero de dias del mes
 		$diasmaxmes=$this->dias_meses[$mes];
 		if ($mes==2){
 			if ($this->bisiesto($anno)){
@@ -361,7 +362,7 @@ function DiasPorSemanas($mes,$anno,$numerosemana){
 		return($cadenadias);
 }
 // ____________________________________________________________________________
-//	Esta funciÛn devuelve el n˙mero de la ˙ltima semana de un mes
+//	Esta funci√≥n devuelve el n√∫mero de la √∫ltima semana de un mes
 // ____________________________________________________________________________
 function UltimaSemana($mes,$anno){
 	$diasmaxmes=$this->dias_meses[$mes];
@@ -380,16 +381,16 @@ function UltimaSemana($mes,$anno){
 	return($cociente);
 }
 //________________________________________________________________________________________________________
-// FunciÛn : Fechas
-// DescripciÛn :
+// Funci√≥n : Fechas
+// Descripci√≥n :
 //		Devuelve una cadena de fechas separada por comas que son  las fechas que forman parte de una reserva concreta
-//	Parametros: 
-//		- anno_c: Un aÒo determinado
+//	Par√°metros:
+//		- anno_c: Un a√±o determinado
 //		- mes_desde: El mes desde que se considera la reserva
 //		- mes_hasta: El mes hasta que se considera la reserva
-//		- meses: Campo con informaciÛn hexadecimal de los meses de la reserva ( la informaciÛn contenida en el campo de la tabla con este nombre
+//		- meses: Campo con informaci√≥n hexadecimal de los meses de la reserva ( la informaci√≥n contenida en el campo de la tabla con este nombre
 //		- diario:  Idem para los dias de un mes
-//		- dias: idem para los nombres de los dÌas
+//		- dias: idem para los nombres de los d√≠as
 //		- semanas: Idem para las semanas
 //________________________________________________________________________________________________________
 function Fechas($anno_c,$mes_desde,$mes_hasta,$meses,$diario,$dias,$semanas){
@@ -450,7 +451,7 @@ function Fechas($anno_c,$mes_desde,$mes_hasta,$meses,$diario,$dias,$semanas){
 }
 /*______________________________________________________________________
 	Devuelve el dia juliano de una fecha determinada
-	Parametros: 
+	Par√°metros:
 		- cadena con la fecha en formato "dd/mm/aaaa"
 	Devuelve:
 		- El dia juliano

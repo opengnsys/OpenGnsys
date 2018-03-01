@@ -35,7 +35,7 @@ class Conexion{
 		"010 : conexiónError - No se ha especificado ningn proveedor de bases de datos",
 	);
 	/*--------------------------------------------------------------------------------------------*/
-	function Conexion(){ // Constructor de la clase
+	function __construct(){ // Constructor de la clase
 		$this->inderror=0;
 		$this->ultimoerror=0;
 		$this->estado=0;
@@ -253,7 +253,7 @@ class parametro{
 	var $valor;
 	var $tipo;
 	/*--------------------------------------------------------------------------------------------*/
-	function parametro($nombre="SinNombre",$valor="",$tipo="0"){ // Constructor de la clase
+	function __construct($nombre="SinNombre", $valor="", $tipo="0"){ // Constructor de la clase
 		$this->SetParametro($nombre,$valor,$tipo);
 	}
 	/* -------------------------------------------------------------------------------------------
@@ -292,7 +292,7 @@ class Comando{
 		"005 : Comando Error - No se ha podido recuperar el valor @@identity de la ltima clave insertada",
 	);	
 	/*--------------------------------------------------------------------------------------------*/
-	function Comando(){ // Constructor de la clase
+	function __construct(){ // Constructor de la clase
 		$this->inderror=0;
 		$this->ultimoerror=0;
 		$this->Recordset=new Recordset;
@@ -482,7 +482,7 @@ class Recordset{
 		"006 : Recordset Error - No se puede liberar la consulta",
 	);	
 	/*--------------------------------------------------------------------------------------------*/
-	function Recordset(){ // Constructor de la clase
+	function __construct(){ // Constructor de la clase
 		$this->Inicializar();
 	}
 	/* -------------------------------------------------------------------------------------------

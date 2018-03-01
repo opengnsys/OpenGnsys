@@ -26,7 +26,7 @@ class ArbolVistaXML{
 	var $v_imgnivel=array();	// Valores de expansión y contracción para los distintos niveles
 	var $nodos_count;	// Contador de nodo
 
-	Function ArbolVistaXML($fXML,$fileocade,$baseurlimg="/.images/",$clasedefault,$nivelexp=0,$x=0,$y=0,$tipotabla=0,$titulotabla=""){
+	Function __construct($fXML, $fileocade, $baseurlimg="/.images/", $clasedefault, $nivelexp=0, $x=0, $y=0, $tipotabla=0, $titulotabla=""){
 		// Constructor
 		$this->gXML=new XmlPhp($fXML,$fileocade);
 		$this->baseurlimg=$baseurlimg;

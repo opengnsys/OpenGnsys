@@ -4,25 +4,25 @@ Esta clase implementa funciones de utilidad para tratar ficheros XML
 
 	Parametros del constructor:
 		fxml=Fichero XML que contiene los atributos de los nodos
-		fileocade=Indica si el dato anterior es un fichero o una variable con el contenido del ·rbol:
+		fileocade=Indica si el dato anterior es un fichero o una variable con el contenido del √°rbol:
 			0: Es una cadena
 			1: Es un fichero
 
 	Especificaciones:
-		Se le llama informaciÛn del nodo al nombre del nodo + sus atributos eliminando los marcadores
+		Se le llama informaci√≥n del nodo al nombre del nodo + sus atributos eliminando los marcadores
 		de comienzo:"<" y fin:">"
 ================================================================================*/
 class XmlPhp{
 	var $buffer;
 	var $nptr;
 
-	function XmlPhp($fxml,$fileocade){ // Constructor
+	function __construct($fxml, $fileocade){ // Constructor
 		if ($fileocade==0){
 			$this->nptr=1;
 			$this->buffer=trim($fxml);
 		}
 		else{
-			$tbuffer=filesize($fxml); // Calcula tamaÒo del fichero
+			$tbuffer=filesize($fxml); // Calcula tama√±o del fichero
 			if ($tbuffer>0){ // EL fichero tiene contenido
 				$fd=fopen($fxml, "r");
 				$this->buffer=fread ($fd,$tbuffer);
@@ -34,7 +34,7 @@ class XmlPhp{
 		$this->buffer=preg_replace("/[\n\r\t]/"," ", $this->buffer );
 	}
 	/* -------------------------------------------------------------------------------------------
-		Recupera la informaciÛn del primer nodo (nodo raiz) del arbol.Devuelve false en caso de que
+		Recupera la informaci√≥n del primer nodo (nodo raiz) del arbol.Devuelve false en caso de que
 		no tenga hijos o bien no exista documento XML que analizar.
 	---------------------------------------------------------------------------------------------*/
 	function InfoNodoRaiz(){
@@ -43,7 +43,7 @@ class XmlPhp{
 		return($this->Infonodo());
 	}
 	/* -------------------------------------------------------------------------------------------
-		Establece el puntero de nodos al primer nodo del ·rbol (nodo raiz). Devuelve  false en caso
+		Establece el puntero de nodos al primer nodo del √°rbol (nodo raiz). Devuelve  false en caso
 		de que no exista documento XML que analizar.
 	---------------------------------------------------------------------------------------------*/
 	function NodoRaiz(){
@@ -54,7 +54,7 @@ class XmlPhp{
 		return(false);
 	}
 	/* -------------------------------------------------------------------------------------------
-		Recupera la informaciÛn del primer nodo hijo del nodo actual. Devuelve false en caso de que
+		Recupera la informaci√≥n del primer nodo hijo del nodo actual. Devuelve false en caso de que
 		no tenga hijos o bien no exista documento XML que analizar.
 	---------------------------------------------------------------------------------------------*/
 	function InfoPrimerNodoHijo(){
@@ -79,8 +79,8 @@ class XmlPhp{
 		return(true);
 	}
 	/* -------------------------------------------------------------------------------------------
-		Recupera la informaciÛn del siguiente nodo hermano del actual. Devuelve false en caso de que
-		el nodo actual sea el ˙ltimo de sus hermanos o bien no exista documento XML que analizar.
+		Recupera la informaci√≥n del siguiente nodo hermano del actual. Devuelve false en caso de que
+		el nodo actual sea el √∫ltimo de sus hermanos o bien no exista documento XML que analizar.
 	---------------------------------------------------------------------------------------------*/
 	function InfoSiguienteNodoHermano(){
 		if (!$this->SiguienteNodoHermano()) // No tiene hermanos o no existe documento XML
@@ -89,14 +89,14 @@ class XmlPhp{
 	}
 	/* -------------------------------------------------------------------------------------------
 		Establece el puntero de nodos al siguiente nodo hermano del nodo actual. Devuelve  false en 
-		caso de que el nodo actual sea el ˙ltimo de los hermanos o bien no exista documento XML que analizar.
+		caso de que el nodo actual sea el √∫ltimo de los hermanos o bien no exista documento XML que analizar.
 	---------------------------------------------------------------------------------------------*/
 	function SiguienteNodoHermano(){
 		if ($this->buffer==null) return(false); // No existe documento XML
 		$gnptr=$this->nptr;
 		$resul=$this->_siguiente_hermano();
 		if (!$resul){
-			$this->nptr=$gnptr; // Es el ˙ltimo hermano
+			$this->nptr=$gnptr; // Es el √∫ltimo hermano
 			return(false);
 		}
 		return(true);
@@ -118,7 +118,7 @@ class XmlPhp{
 				while ($lon<strlen($this->buffer)){
 					if (substr($this->buffer,$lon++,1)=='<'){
 						if (substr($this->buffer,$lon,1)=='/')
-							return(false); // Es el ˙ltimo hermano
+							return(false); // Es el √∫ltimo hermano
 						else{
 							$this->nptr=$lon;
 							return(true);
@@ -130,7 +130,7 @@ class XmlPhp{
 		}
 	}
 	/* -------------------------------------------------------------------------------------------
-		Recupera el n˙mero de hijos del nodo actual
+		Recupera el n√∫mero de hijos del nodo actual
 	---------------------------------------------------------------------------------------------*/
 	function NumerodeHijos(){
 		$gnptr=$this->nptr;
@@ -143,7 +143,7 @@ class XmlPhp{
 		return($nh);
 	}
 	/* -------------------------------------------------------------------------------------------
-		Devuelve true si el nodo es el ˙ltimo de sus hermanos
+		Devuelve true si el nodo es el √∫ltimo de sus hermanos
 	---------------------------------------------------------------------------------------------*/
 	function EsUltimoHermano(){
 		$gnptr=$this->nptr;
@@ -156,8 +156,8 @@ class XmlPhp{
 	}
 	/* -------------------------------------------------------------------------------------------
 		Devuelve los atributos del nodo. 
-		Pr·metros:
-			Si se aporta el puntero del nodo se devolver·n los atributos del nodo apuntado
+		Par√°metros:
+			Si se aporta el puntero del nodo se devolver√°n los atributos del nodo apuntado
 			pero si no se especifican argumentos se devuelven los atributos del nodo actual.
 	---------------------------------------------------------------------------------------------*/
 	function Atributos($ptrnodo=-1){
@@ -191,7 +191,7 @@ class XmlPhp{
 		return ($trozos[0]);
 	}
 	/* -------------------------------------------------------------------------------------------
-		Recupera la informaciÛn del nodo actual
+		Recupera la informaci√≥n del nodo actual
 	---------------------------------------------------------------------------------------------*/
 	function Infonodo(){
 		if ($this->buffer==null) return(false); // No existe documento XML
@@ -205,10 +205,10 @@ class XmlPhp{
 	}
 	/* -------------------------------------------------------------------------------------------
 		Recorre el arbol de nodos del documento XML y para cada nodo genera un evento que se 
-		puede capturar a travÈs de una funcion que tiene esta forma:
+		puede capturar a trav√©s de una funcion que tiene esta forma:
 			fNodoXML(nivel,infonodo) donde:
 				- nivel es el nivel de profundidad del nodo (en base 0)
-				- infonodo es toda la informaciÛn contenida en el nodo.						
+				- infonodo es toda la informaci√≥n contenida en el nodo.
 	---------------------------------------------------------------------------------------------*/
 	function RecorreArboXML(){
 		if (!$this->NodoRaiz()) return; // No existe documento XML que analizar
@@ -228,21 +228,21 @@ class XmlPhp{
 		}while($this->SiguienteNodoHermano());
 	}
 	/*------------------------------------------------------------------------------------------------
-		Elimina un atributo de la informaciÛn del nodo
+		Elimina un atributo de la informaci√≥n del nodo
 			Parametros: 
 				- nombreatributo:El nombre del atributo
-				- info: La informaciÛn del Nodo
+				- info: La informaci√≥n del Nodo
 	------------------------------------------------------------------------------------------------*/
 	function EliminaAtributo($nombreatributo,$info){
 		$nada="";
 		return($this->TomaAtributo($nombreatributo,$nada,$info,true));
 	}
 	/*------------------------------------------------------------------------------------------------
-		Recupera el valor del atributo y lo elimina de la informaciÛn del nodo
+		Recupera el valor del atributo y lo elimina de la informaci√≥n del nodo
 			Parametros: 
 				- nombreatributo:El nombre del atributo
-				- puntero: Referencia a la variable que contendr· el valor del atributo
-				- info: La informaciÛn del Nodo
+				- puntero: Referencia a la variable que contendr√° el valor del atributo
+				- info: La informaci√≥n del Nodo
 	------------------------------------------------------------------------------------------------*/
 	function TomaAtributoEspecial($nombreatributo,&$puntero,$info){
 		return($this->TomaAtributo($nombreatributo,$puntero,$info,true));
@@ -251,9 +251,9 @@ class XmlPhp{
 		Recupera el valor del atributo 
 			Parametros: 
 				- nombreatributo:El nombre del atributo
-				- puntero: Referencia a la variable que contendr· el valor del atributo
-				- info: La informaciÛn del Nodo
-				- sw: Si vale true el atributo se eliminar· de la informaciÛn del nodo
+				- puntero: Referencia a la variable que contendr√° el valor del atributo
+				- info: La informaci√≥n del Nodo
+				- sw: Si vale true el atributo se eliminar√° de la informaci√≥n del nodo
 	------------------------------------------------------------------------------------------------*/
 	function TomaAtributo($nombreatributo,&$puntero,$info,$swkill=false){
 		$doblescomillas='"';
@@ -264,7 +264,7 @@ class XmlPhp{
 			return($info);
 		}
 		$pos+=strlen($strAtributo);  // Avanza hasta el signo igual
-		$posa=$pos; // Primera posiciÛn del valor del atributo
+		$posa=$pos; // Primera posici√≥n del valor del atributo
 		$swcomillas=false;
 		while ($pos<strlen($info)){
 			if ($doblescomillas==substr($info,$pos,1)) $swcomillas=!$swcomillas;
@@ -275,7 +275,7 @@ class XmlPhp{
 		$posb=$pos;
 		$valoratributo=substr($info,$posa,$posb-$posa);
 		if ($swkill) // Eliminar el atributo de la la cadena 
-			$info=str_replace($strAtributo.$valoratributo,"",$info); // Elimina el atributo de la informaciÛn
+			$info=str_replace($strAtributo.$valoratributo,"",$info); // Elimina el atributo de la informaci√≥n
 		if ($doblescomillas==substr($valoratributo,0,1)) // Elimina las comillas
 				$valoratributo=str_replace($doblescomillas,"",$valoratributo);
 		$puntero=$valoratributo;
