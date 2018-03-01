@@ -45,23 +45,21 @@ else
 		color:#FFFFFF;
 		font-family: sans-serif;
 		font-size: 12px;
-		font-weight:300; 
-		BORDER-BOTTOM: #000000 1px solid;
-		BORDER-LEFT: #FFFFFF 1px solid;
-		BORDER-RIGHT: #000000 1px solid;
-		BORDER-TOP: #FFFFFF 1px solid;
-	} 
+		font-weight:300;
+		border: 1px solid #FFFFFF;
+		border-right-color: #000000;
+		border-bottom-color: #000000;
+    }
 	.tdclien{
 		background: url('../images/iconos/clienven.png');
 		color:#000000;
 		font-family: sans-serif;
 		font-size: 14px;
-		font-weight:300; 
-		BORDER-BOTTOM: #999999 1px solid;
-		BORDER-LEFT: #FFFFFF 1px solid;
-		BORDER-RIGHT: #999999 1px solid;
-		BORDER-TOP: #FFFFFF 1px solid;
-	} 
+		font-weight:300;
+		border: 1px solid #FFFFFF;
+		border-right-color: #999999;
+		border-bottom-color: #999999;
+    }
 	</STYLE>
 </HEAD>
 <BODY>

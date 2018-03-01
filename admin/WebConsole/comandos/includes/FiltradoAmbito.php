@@ -1,12 +1,12 @@
 <?php
 // ******************************************************************************************************************
-// Aplicación WEB: ogAdmWebCon
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creación: Año 2012
-// Fecha Última modificación: Febrero-2012
+// AplicaciÃ³n WEB: ogAdmWebCon
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha CreaciÃ³n: AÃ±o 2012
+// Fecha Ãºltima modificaciÃ³n: Febrero-2012
 // Nombre del fichero: FiltradoAmbito.php
-// Descripción : 
-//		Colección de funciones en php y javascript que implementan la posibilidad de aplicar filtro de selección
+// DescripciÃ³n : 
+//		ColecciÃ³n de funciones en php y javascript que implementan la posibilidad de aplicar filtro de selecciÃ³n
 //		a un determinado grupo de ordenadores dentro de un aula para aplicarles comandos.
 //
 // ********************************************************************************************************************
@@ -199,7 +199,7 @@ function RecorriendoOrdenadores($cmd)
 	$htmlCode.='<TR>';
 		
 	while (!$rs->EOF){
-		$htmlCode.='<TD style="BORDER-BOTTOM: #999999 1px solid;BORDER-LEFT: #999999 1px solid;BORDER-RIGHT: #999999 1px solid;BORDER-TOP: #999999 1px solid;">';
+		$htmlCode.= '<TD style="border: 1px solid #999999;">';
 		$nombreordenador=$rs->campos["nombreordenador"];
 		$ip=$rs->campos["ip"];
 		$cadenaip.=$ip.";";
@@ -258,7 +258,7 @@ function respuestaSondeo(){
 function retornorespuestaSondeo(resul)
 {
 	if(resul.length>0){
-		var ip=""; // Dirección IP del ordenador
+		var ip=""; // DirecciÃ³n IP del ordenador
 		var so=""; // Sistema operativo activo
 		var objOrd=null; // Objeto ordenador
 		var imgOrd="";
@@ -301,13 +301,13 @@ function soIMG(so)
 			MimgOrdenador="ordenador_WIN.png";  // Windows
 			break;
 		case 'WINS':
-			MimgOrdenador="ordenador_WINS.png"; // Sesión Windows
+			MimgOrdenador="ordenador_WINS.png"; // SesiÃ³n Windows
 			break;
 		case 'LNX':
 			MimgOrdenador="ordenador_LNX.png";  // Linux
 			break;
 		case 'LNXS':
-			MimgOrdenador="ordenador_LNXS.png"; // Sesión Linux
+			MimgOrdenador="ordenador_LNXS.png"; // SesiÃ³n Linux
 			break;
 		case 'OSX':
 			MimgOrdenador="ordenador_OSX.png";  // macOS
@@ -350,7 +350,7 @@ function selector(oSLCT,op,id)
 						if(estado=="ordenador_WIN.png")
 							oCHK.checked=sw;
 						break;
-					case 5: // Sesión Windows
+					case 5: // SesiÃ³n Windows
 						if(estado=="ordenador_WINS.png")
 							oCHK.checked=sw;
 						break;
@@ -358,7 +358,7 @@ function selector(oSLCT,op,id)
 						if(estado=="ordenador_LNX.png")
 							oCHK.checked=sw;
 						break;
-					case 7: // Sesión Linux
+					case 7: // SesiÃ³n Linux
 						if(estado=="ordenador_LNXS.png")
 							oCHK.checked=sw;
 						break;

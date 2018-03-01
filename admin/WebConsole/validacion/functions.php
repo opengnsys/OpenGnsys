@@ -154,12 +154,9 @@ function GeneraMenu($rs,$tipo,$iph){
 			break;
 	}		
 	$codeHTML.='<A style="text-decoration:none" href="'.$url.'?iph='.$iph.'">';
-	$codeHTML.='<SPAN style="
-				BORDER-BOTTOM: #999999 1px solid;
-				BORDER-LEFT: #999999 1px solid;
-				BORDER-RIGHT: #999999 1px solid;
-				BORDER-TOP: #999999 1px solid;
-				COLOR:#999999;FONT-FAMILY: Arial, Helvetica, sans-serif;FONT-SIZE:9px;">&nbsp;'.$lit.'&nbsp;</SPAN></A>';
+	$codeHTML.= '<SPAN style="
+				border: 1px solid #999999;
+				COLOR:#999999;FONT-FAMILY: Arial, Helvetica, sans-serif;FONT-SIZE:9px;">&nbsp;' .$lit.'&nbsp;</SPAN></A>';
 	
 	$codeHTML.='</P>';
 	//$codeHTML.='</DIV>';

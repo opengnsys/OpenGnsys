@@ -104,25 +104,18 @@
 }
 
 .input_nodo{
-    BORDER-BOTTOM: 1px solid;
-    BORDER-LEFT: 1px solid;
-    BORDER-RIGHT: 1px solid;
-    BORDER-TOP: 1px solid;
+    border: 1px solid;
     COLOR: #000000;
     FONT-SIZE: 11px;
     HEIGHT: 14px;
 }
 .marcorelieve{
-    BORDER-BOTTOM: #808080 1px solid;
-    BORDER-LEFT: #ffffff 1px solid;
-    BORDER-RIGHT: #808080 1px solid;
-    BORDER-TOP: #ffffff 1px solid;
+    border: 1px solid #ffffff;
+    border-right-color: #808080;
+    border-bottom-color: #808080;
 }
 .marco{
-    BORDER-BOTTOM: #999999 1px solid;
-    BORDER-LEFT: #999999 1px solid;
-    BORDER-RIGHT: #999999 1px solid;
-    BORDER-TOP: #999999 1px solid;
+    border: 1px solid #999999;
     COLOR: #000000;
     FONT-FAMILY: Verdana,Arial, Helvetica, sans-serif;
     FONT-SIZE: 13px;
@@ -133,10 +126,7 @@
     FONT-SIZE: 11px;
 }
 .menupral TD{
-    BORDER-BOTTOM: #d4d0c8 1px solid;
-    BORDER-LEFT: #d4d0c8 1px solid;
-    BORDER-RIGHT: #d4d0c8 1px solid;
-    BORDER-TOP: #d4d0c8 1px solid;
+    border: 1px solid #d4d0c8;
 }
 
 .menupral SPAN{
@@ -146,38 +136,35 @@
 }
 
 .filtros{
-    BORDER-BOTTOM: #999999 1px solid;
-    BORDER-LEFT: #999999 1px solid;
-    BORDER-RIGHT: #999999 1px solid;
-    BORDER-TOP: #999999 1px solid;
+    border: 1px solid #999999;
 }
 
 .filtros TD{
-  FONT-FAMILY: sans-serif;
-  FONT-SIZE: 11px;
-	COLOR:#999999;
+    FONT-FAMILY: sans-serif;
+    FONT-SIZE: 11px;
+    COLOR:#999999;
 }
 .supercabeceras {
-	COLOR:#FE6C65; 
-	FONT-FAMILY: Arial;
-	FONT-SIZE: 30px;
-	FONT-WEIGHT: 600;
+    COLOR:#FE6C65;
+    FONT-FAMILY: Arial, sans-serif;
+    FONT-SIZE: 30px;
+    FONT-WEIGHT: 600;
 }
 .sobrecabeceras {
-	COLOR:#7575DD; 
-	FONT-FAMILY: Arial;
-	FONT-SIZE: 24px;
-	FONT-WEIGHT: 400;
+    COLOR:#7575DD;
+    FONT-FAMILY: Arial, sans-serif;
+    FONT-SIZE: 24px;
+    FONT-WEIGHT: 400;
 }
 .cabeceras{
     COLOR: #999999;
-    FONT-FAMILY: Verdana;
+    FONT-FAMILY: Verdana, sans-serif;
     FONT-SIZE: 24px;
-	FONT-WEIGHT: 600;
+    FONT-WEIGHT: 600;
 }
 .subcabeceras{
-	COLOR: #D6A621;
-    FONT-FAMILY: Verdana;
+    COLOR: #D6A621;
+    FONT-FAMILY: Verdana, sans-serif;
     FONT-SIZE: 20px;
 }
 
@@ -203,7 +190,7 @@
     FONT-FAMILY:  Arial, Helvetica, sans-serif;
     FONT-SIZE: 12px;
     FONT-WEIGHT: 500;
-	BORDER-BOTTOM:#999999 1px solid ;
+    BORDER-BOTTOM:#999999 1px solid ;
 }
 
 .tabla_datos TD{
@@ -211,7 +198,7 @@
     COLOR: #003300;
     FONT-FAMILY: Arial, Helvetica, sans-serif;
     FONT-SIZE: 12px;
-	BORDER-BOTTOM:#999999 1px solid;
+    BORDER-BOTTOM:#999999 1px solid;
 }
 
 .formulariodatos{
@@ -249,8 +236,8 @@
     FONT-FAMILY:  Arial, Helvetica, sans-serif;
     FONT-SIZE: 12px;
     FONT-WEIGHT: 500;
- 	BORDER-BOTTOM:#4f4f4f 1px solid;   
- 	BORDER-RIGHT:#4f4f4f 1px solid; 
+    BORDER-BOTTOM:#4f4f4f 1px solid;   
+    BORDER-RIGHT:#4f4f4f 1px solid; 
 }
 
 .tabla_listados_sin TD{
@@ -271,11 +258,10 @@ A.tabla_listados_sin:link{
 }
 
 .recuadros{    
-	BACKGROUND-COLOR: lightseagreen;
-    BORDER-BOTTOM: teal solid;
-    BORDER-LEFT: #b4e0d2 solid;
-    BORDER-RIGHT: teal solid;
-    BORDER-TOP: #b4e0d2 solid;
+    BACKGROUND-COLOR: lightseagreen;
+    border: solid #b4e0d2;
+    border-right-color: teal;
+    border-bottom-color: teal;
     COLOR: white;
     FONT-STYLE: italic
 }
@@ -289,10 +275,7 @@ A.tabla_listados_sin:link{
     FONT-FAMILY:  Arial, Helvetica, sans-serif;
     FONT-SIZE: 11px;
     FONT-WEIGHT: 500;
-    BORDER-BOTTOM: #999999  1px solid;
-    BORDER-LEFT: #999999  1px solid;
-    BORDER-RIGHT: #999999 1px solid;
-    BORDER-TOP: #999999 1px solid;	
+    border: 1px solid #999999;
 }
 
 .tabla_meses TD{
@@ -330,7 +313,7 @@ A.tabla_listados_sin:link{
     FONT-FAMILY:  Arial, Helvetica, sans-serif;
     FONT-SIZE: 11px;
     FONT-WEIGHT: 500;
-	BORDER-BOTTOM:#000000 1px solid ;
+    BORDER-BOTTOM:#000000 1px solid ;
 }
 
 .tabla_busquedas TD{
@@ -356,13 +339,13 @@ A.tabla_listados_sin:link{
 }
 
 .cajacomandos{
-	BACKGROUND-COLOR: #ffffff;
+    BACKGROUND-COLOR: #ffffff;
     COLOR: #000000;
     FONT-FAMILY: Arial, Helvetica, sans-serif;
     FONT-SIZE: 12px
 }
 .salidacomandos{
-	BACKGROUND-COLOR: #000000;
+    BACKGROUND-COLOR: #000000;
     COLOR: #ffffff;
     FONT-FAMILY: Arial, Helvetica, sans-serif;
     FONT-SIZE: 12px
@@ -377,7 +360,7 @@ A.tabla_listados_sin:link{
     FONT-FAMILY:  Arial, Helvetica, sans-serif;
     FONT-SIZE: 12px;
     FONT-WEIGHT: 700;
-	BORDER-BOTTOM:#000000 1px solid ;
+    BORDER-BOTTOM:#000000 1px solid ;
 
 }
 .tabla_parametros TD{
@@ -385,14 +368,11 @@ A.tabla_listados_sin:link{
     COLOR: #003300;
     FONT-FAMILY: Arial, Helvetica, sans-serif;
     FONT-SIZE: 11px;
-	BORDER-BOTTOM:#000000 1px solid;
+    BORDER-BOTTOM:#000000 1px solid;
 
 }
 .opciones_ejecucion{
-    BORDER-TOP: silver thin solid;
-    BORDER-BOTTOM: silver thin solid;
-    BORDER-LEFT: silver thin solid;
-    BORDER-RIGHT: silver thin solid;
+    border: thin solid silver;
     FONT-FAMILY:  Arial, Helvetica, sans-serif;
     FONT-SIZE: 11px;
 }
@@ -401,30 +381,28 @@ A.tabla_listados_sin:link{
 }
 
 .tablaprogramacion TH{
-	FONT-WEIGHT: bold;
+    FONT-WEIGHT: bold;
     FONT-FAMILY:  Arial, Helvetica, sans-serif;
     FONT-SIZE: 11px;
-	BORDER-LEFT: medium none;
-	COLOR: white;
-	BACKGROUND-COLOR: lightseagreen;
-	TEXT-ALIGN: left;
+    BORDER-LEFT: medium none;
+    COLOR: white;
+    BACKGROUND-COLOR: lightseagreen;
+    TEXT-ALIGN: left;
 }
 
 .tablaprogramacion TD{
-	FONT-SIZE: 9pt;				    
+    FONT-SIZE: 9pt;				    
     FONT-FAMILY:  Arial, Helvetica, sans-serif;
-	COLOR: #000000;
-
+    COLOR: #000000;
 }
 
 .botonprogramacion{
-	BORDER-BOTTOM: #666666 1px solid;
-	BORDER-TOP: #ffffff 1px solid;
-	BORDER-LEFT: #ffffff 1px solid;				    				    
-	BORDER-RIGHT: #666666 1px solid;
+    border: 1px solid #ffffff;
+    border-right-color: #666666;
+    border-bottom-color: #666666;
     BACKGROUND-COLOR: #EEEECC;
-	FONT-SIZE: 9pt;		
-	COLOR: #000000;
+    FONT-SIZE: 9pt;		
+    COLOR: #000000;
     FONT-FAMILY:  Arial, Helvetica, sans-serif;
 }
 
@@ -437,7 +415,7 @@ A.tabla_listados_sin:link{
     FONT-FAMILY:  Arial, Helvetica, sans-serif;
     FONT-SIZE: 11px;
     FONT-WEIGHT: 500;
-	BORDER-BOTTOM:#000000 1px solid ;
+    BORDER-BOTTOM:#000000 1px solid ;
 }
 
 .tabla_accesos TD{
@@ -446,11 +424,8 @@ A.tabla_listados_sin:link{
     FONT-SIZE: 11px;
 }
 .mensajebrowser{
-    BORDER-BOTTOM: #999999 1px solid;
-    BORDER-LEFT: #999999 1px solid;
-    BORDER-RIGHT: #999999 1px solid;
-    BORDER-TOP: #999999 1px solid;
-	BACKGROUND-COLOR: #FFFFFF;
+    border: 1px solid #999999;
+    BACKGROUND-COLOR: #FFFFFF;
     COLOR: #999999;
     FONT-FAMILY:  Arial, Helvetica, sans-serif;
     FONT-SIZE: 14px;

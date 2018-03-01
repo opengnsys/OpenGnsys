@@ -270,7 +270,7 @@ $tbParametros=CreaTablaParametros($cmd); // Crea tabla en memmoria para acceder 
 		echo '<BR><TABLE align=center>
 				<TR>
 					<TD><A href="#botones"><IMG border=0 src="../images/boton_confirmar.gif" 
-					onclick="javascript:confirmar('.$op.')"></A></TD>
+					onclick="confirmar('.$op.');"></A></TD>
 				</TR>
 			</TABLE>
 			<BR>		

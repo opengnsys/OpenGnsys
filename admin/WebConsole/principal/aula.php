@@ -269,7 +269,7 @@ function pintaordenadores(){
 		echo '<p align=center class=cabeceras><img  border=0 nod="'.$LITAMBITO_AULAS.'-'.$idaula.'" value="'.$nombreaula.'"
 				style="cursor:pointer" src="../images/iconos/aula.gif" oncontextmenu="nwmenucontextual(this,' ."'flo_".$LITAMBITO_AULAS."'" .')" >&nbsp;&nbsp;'.$TbMsg[23].'</br><span id="'.$LITAMBITO_AULAS.'-'.$idaula.'" class=subcabeceras>'.$nombreaula.'</span></p>';
 	}
-	echo '<TABLE style="BORDER-BOTTOM: #d4d0c8 1px solid;BORDER-LEFT: #d4d0c8 1px solid;BORDER-RIGHT: #d4d0c8 1px solid;BORDER-TOP: #d4d0c8 1px solid" align=center><TR>';
+	echo '<TABLE style="border: 1px solid #d4d0c8;" align="center"><TR>';
 	for($i=0;$i<$k;$i++){ // Vuelve a recorrer los datos de ordenadores para crear HTML
 		$ntr++;
 		echo '<TD>';
