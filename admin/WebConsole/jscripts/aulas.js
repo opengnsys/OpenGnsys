@@ -20,7 +20,7 @@ function mover_ordenador(){
 }
 //________________________________________________________________________________________________________
 //	
-//		Esta funci� cambia de sitio un ordenador desde un aula a otro aula o bien adentro de un 
+//		Esta función cambia de sitio un ordenador desde un aula a otro aula o bien adentro de un 
 //  grupo de ordenadores dentro del mismo aula
 //________________________________________________________________________________________________________
 function colocar_ordenador(swsufijo){
@@ -52,8 +52,8 @@ function retornoColocar(iHTML){
 //	
 //		Devuelve el resultado de cambiar un ordenador de sitio
 //		Especificaciones:
-//		Los par�etros recibidos son:
-//			- resul: resultado de la operaci� de eliminaci� ( true si tuvo �ito)
+//		Los parámetros recibidos son:
+//			- resul: resultado de la operación de eliminación ( true si tuvo éxito)
 //			- descrierror: Descripción del error en su caso
 //			- nwid: Identificador del registro
 //________________________________________________________________________________________________________
@@ -81,7 +81,7 @@ function resultado_cambiar_ordenadores(resul,descrierror,id){
 }
 //________________________________________________________________________________________________________
 //	
-//	Refresca la visualizaci� del estado de los ordenadores(Clientes rembo y clientes Windows o Linux) 
+//	Refresca la visualización del estado de los ordenadores(Clientes rembo y clientes Windows o Linux) 
 //________________________________________________________________________________________________________
 function actualizar_ordenadores(){
 	reset_contextual(-1,-1); // Oculta menu contextual
@@ -123,7 +123,7 @@ function retornoPurgar(resul){
 }
 //________________________________________________________________________________________________________
 //	
-//	Conmuta el estado de los ordenadores(Modo Administrado reinici�dolos) 
+//	Conmuta el estado de los ordenadores(Modo Administrado reiniciándolos) 
 //________________________________________________________________________________________________________
 function consola_remota(ambito){
 	reset_contextual(-1,-1);
@@ -226,13 +226,13 @@ function menucontextual(o,idmnctx){
 }
 //________________________________________________________________________________________________________
 //	
-//  Env� un comando para su ejecuci� o incorporaci� a procedimientos o tareas
+//  Envía un comando para su ejecución o incorporación a procedimientos o tareas
 //________________________________________________________________________________________________________
 function confirmarcomando(ambito,idcomando,descricomando,pagina,gestor,funcion){
 	reset_contextual(-1,-1); // Oculta menu contextual
 	document.fcomandos.idcomando.value=idcomando; // Identificador del comandos
 	document.fcomandos.descricomando.value=descricomando; // Descripción del comandos	
-	document.fcomandos.ambito.value=ambito; // �?mbito de aplicación
+	document.fcomandos.ambito.value=ambito; // Ámbito de aplicación
 	document.fcomandos.idambito.value=currentNodo.toma_identificador(); // Identificador del ámbito
 	document.fcomandos.nombreambito.value=currentNodo.toma_infonodo() ; // Nombre del ámbito
 	document.fcomandos.action=pagina; // Página interactiva del comando
@@ -242,14 +242,14 @@ function confirmarcomando(ambito,idcomando,descricomando,pagina,gestor,funcion){
 }
 //________________________________________________________________________________________________________
 //	
-//  Env� un comando para su ejecuci� o incorporaci� a procedimientos o tareas
+//  Envía un comando para su ejecución o incorporación a procedimientos o tareas
 //________________________________________________________________________________________________________
 function confirmarprocedimiento(ambito){
 	reset_contextual(-1,-1); // Oculta menu contextual
 	var idambito=currentNodo.toma_identificador(); // identificador del ambito
-	var nombreambito=currentNodo.toma_infonodo(); // nombre del �bito
+	var nombreambito=currentNodo.toma_infonodo(); // nombre del ámbito
 	if(nombreambito=="")
-		var  nombreambito=currentNodo.value; // nombre del �bito desde  p�ina aula.php
+		var  nombreambito=currentNodo.value; // nombre del ámbito desde  página aula.php
 	var wurl="../varios/ejecutaracciones.php?ambito="+ambito+"&idambito="+idambito+"&nombreambito="+nombreambito;
 	window.open(wurl,"frame_contenidos")}
 //________________________________________________________________________________________________________
@@ -277,10 +277,10 @@ function cola_acciones(tipoaccion){
 			ambito=AMBITO_ORDENADORES;
 			break;
 	}
-	var idambito=currentNodo.toma_identificador(); // identificador del �bito
+	var idambito=currentNodo.toma_identificador(); // identificador del ámbito
 	var nombreambito=currentNodo.toma_infonodo(); // nombre del ordenador
 	if(nombreambito=="")
-		var  nombreambito=currentNodo.value; // nombre del �bito desde p�ina aula.php
+		var  nombreambito=currentNodo.value; // nombre del ámbito desde página aula.php
 	var wurl="../principal/colasacciones.php?ambito="+ambito+"&idambito="+idambito+"&nombreambito="+nombreambito;
 	window.open(wurl,"frame_contenidos")
 }
@@ -310,10 +310,10 @@ function cola_reservas(tiporeserva){
 			ambito=AMBITO_ORDENADORES;
 			break;
 	}
-	var idambito=currentNodo.toma_identificador(); // identificador del �bito
+	var idambito=currentNodo.toma_identificador(); // identificador del ámbito
 	var nombreambito=currentNodo.toma_infonodo(); // nombre del ordenador
 	if(nombreambito=="")
-		var  nombreambito=currentNodo.value; // nombre del �bito desde p�ina aula.php
+		var  nombreambito=currentNodo.value; // nombre del ámbito desde página aula.php
 	var wurl="../principal/programacionesaulas.php?ambito="+ambito+"&idambito="+idambito+"&nombreambito="+nombreambito+"&tipocola="+tiporeserva;
 	window.open(wurl,"frame_contenidos")
 }
@@ -338,9 +338,9 @@ function resultado_ordenadorestandar(resul,descrierror){
 }
 //________________________________________________________________________________________________________
 //	
-//	Muestra la configuraci� de los ordenadores
-//	Par�etros:
-//			- ambito: �bito que se quiere investigar
+//	Muestra la configuración de los ordenadores
+//	Parámetros:
+//			- ambito: ámbito que se quiere investigar
 //________________________________________________________________________________________________________
 function configuraciones(ambito){
 		reset_contextual(-1,-1); // Oculta menu contextual

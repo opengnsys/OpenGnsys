@@ -1,21 +1,21 @@
 <?php
 // *****************************************************************************
-// Aplicaci�n WEB: ogAdmWebCon
-// Autor: Jos� Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creaci�n: Agosto-2010
+// Aplicación WEB: ogAdmWebCon
+// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha Creación: Agosto-2010
 // Nombre del fichero: acceso.php
-// Descripci�n: Pantalla principal de acceso a la consola de administraci�n web.
-// Versi�n 1.0.3: Unificaci�n de ficheros e internacionalizaci�n.
-// Autor: Ram�n G�mez - ETSII, Universidad de Sevilla
+// Descripción: Pantalla principal de acceso a la consola de administración web.
+// Versión 1.0.3: Unificación de ficheros e internacionalización.
+// Autor: Ramón Gómez - ETSII, Universidad de Sevilla
 // Fecha: 2012-02-07
 // *****************************************************************************
 session_start();
-if(isset($_SESSION)){ 	// Si existe algua sesi�n ...
+if(isset($_SESSION)){ 	// Si existe algua sesión ...
 	session_unset(); // Elimina variables
 	session_destroy(); // Destruye sesi�n
 }
 
-// Cargar configuraci�n.
+// Cargar configuración.
 include_once("controlacceso.php");
 include_once("./includes/CreaComando.php");
 include_once("./clases/AdoPhp.php");
@@ -121,7 +121,7 @@ function PulsaEnter(oEvento){
 </div>
 <div class="pie">
 <?php
-// A�adir versi�n y URL al proyecto.
+// Añadir versión y URL al proyecto.
 $versionfile="../doc/VERSION.txt";
 if (file_exists ($versionfile)) {
 	echo '<span><a href="https://opengnsys.es/">';

@@ -306,54 +306,54 @@
 	// Tabla de opciones que afectan a todas las acciones mostradas 
 	//	_________________________________________________________________________
 	?>
-	<TABLE  align=center border=0 align=left cellPadding=2 cellSpacing=5 >
+	<TABLE  align=center border=0 cellPadding=2 cellSpacing=5 >
 		<TR>
 			<?php // Eliminar ?>
-			<TD onclick=eleccion(1)>&nbsp;
+			<TD onclick="eleccion(1);">&nbsp;
 				<TABLE class="filtros" >
 					<TR>
 						<TD><A href="#op"><IMG border=0 src="../images/iconos/eliminar.gif"></A>&nbsp;</TD>
 						<TD><A style="text-decoration:none;COLOR:#999999;" href="#op">
-							<span onmouseout=desresaltar(this); onmouseover=resaltar(this)><?php echo $TbMsg[12]?><span></A></TD>
+							<span onmouseout="desresaltar(this);" onmouseover="resaltar(this);"><?php echo $TbMsg[12]?><span></A></TD>
 					</TR>
 				</TABLE>
 			</TD>		
 			
-			<TD onclick=eleccion(2)>&nbsp;
+			<TD onclick="eleccion(2);">&nbsp;
 				<TABLE class=filtros>
 					<TR>
 						<?php // Resaltar ?>
 						<TD><A href="#op"><IMG border=0 src="../images/iconos/reiniciar.gif"></A>&nbsp;</TD>
 						<TD><A style="text-decoration:none;COLOR:#999999;" href="#op">
-								<span onmouseout=desresaltar(this); onmouseover=resaltar(this)><?php echo $TbMsg[13]?><span></A></TD>
+								<span onmouseout="desresaltar(this);" onmouseover="resaltar(this);"><?php echo $TbMsg[13]?><span></A></TD>
 					</TR>
 				</TABLE>
 			</TD>				
 
-			<TD onclick=eleccion(3)>&nbsp;
+			<TD onclick="eleccion(3);">&nbsp;
 				<TABLE class=filtros>
 					<TR>
 						<?php // Parar ?>
 						<TD><A href="#op"><IMG border=0 src="../images/iconos/acDetenida.gif"></A>&nbsp;</TD>
 						<TD><A style="text-decoration:none;COLOR:#999999;" href="#op">
-									<span onmouseout=desresaltar(this); onmouseover=resaltar(this)><?php echo $TbMsg[14]?><span></A></TD>
+									<span onmouseout="desresaltar(this);" onmouseover="resaltar(this);"><?php echo $TbMsg[14]?><span></A></TD>
 						
 					</TR>
 				</TABLE>
 			</TD>	
 			
-			<TD onclick=eleccion(4)>&nbsp;
+			<TD onclick="eleccion(4);">&nbsp;
 				<TABLE class=filtros>
 					<TR>
 						<?php // Seguir ?>
 						<TD><A href="#op"><IMG border=0 src="../images/iconos/acIniciada.gif"></A>&nbsp;</TD>
 						<TD>&nbsp;<A style="text-decoration:none;COLOR:#999999;" href="#op">
-							<span onmouseout=desresaltar(this); onmouseover=resaltar(this)><?php echo $TbMsg[15]?></span></A>&nbsp;</TD>
+							<span onmouseout="desresaltar(this);" onmouseover="resaltar(this);"><?php echo $TbMsg[15]?></span></A>&nbsp;</TD>
 					</TR>
 				</TABLE>
 			</TD>	
 			
-			<TD onclick=eleccion(5)>&nbsp;
+			<TD onclick="eleccion(5);">&nbsp;
 				<TABLE class=filtros>
 					<TR>
 						<?php // Seguir ?>
@@ -363,7 +363,7 @@
 					</TR>
 				</TABLE>
 			</TD>
-			<TD onclick=eleccion(6)>&nbsp;
+			<TD onclick="eleccion(6);">&nbsp;
 				<TABLE class=filtros>
 					<TR>
 						<?php // Seguir ?>
