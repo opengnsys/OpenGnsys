@@ -49,8 +49,7 @@ function resultado_insertar_trabajostareas(resul,descrierror,resultado_modificar
 	}
 	alert(TbMsg[0]);
 	var imgact=document.getElementById("imgact-"+currentidtarea);
-	var imgHTML='<TD id="imgact-'+currentidtarea+'"><IMG src="../images/iconos/actualizar.gif" style="cursor:hand" onclick="ActualizarAccion('+currentidtarea+')">';
-	imgact.innerHTML=imgHTML
+	imgact.innerHTML='<TD id="imgact-' + currentidtarea + '"><IMG src="../images/iconos/actualizar.gif" style="cursor:hand" onclick="ActualizarAccion(' + currentidtarea + ')">'
 }
 //________________________________________________________________________________________________________
 function resultado_eliminar_trabajostareas(resul,descrierror,idtt){

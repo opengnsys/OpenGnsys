@@ -561,25 +561,24 @@ function calculateFreeDisk(form) {
 // Código para calcular el espacio libre del disco. en el formulario GPT
 function calculateFreeGPTDisk(form) {
 	// Si esta seleccionada la opcion MSDOS, se llama a la funcion correspondiente
-    if(document.getElementById("tipo_part_table").value == "MSDOS"){
-            calculateFreeDisk(form);
-    }
-    // Capturamos el disco seleccionado
+	if(document.getElementById("tipo_part_table").value == "MSDOS"){
+		calculateFreeDisk(form);
+	}
+	// Capturamos el disco seleccionado
 	var disk = document.getElementById("n_disk").value;
 	// Buscamos el input hidden para el disco seleccionado
-	var diskSize = getMinDiskSize(disk);
-	document.getElementById('freediskGPT').value=diskSize;
+	document.getElementById('freediskGPT').value=getMinDiskSize(disk);
 	
 	var freeDisk=document.getElementById("freediskGPT");
 	// Capturamos el numero de particiones que hay hechas
 	numParts=document.getElementById("numGPTpartitions").value;
-    for (npart=1; npart<=numParts; npart++) {
+	for (npart=1; npart<=numParts; npart++) {
             var partCheck=eval("form.checkGPT"+npart);
             var partSize=eval("form.sizeGPT"+npart);
             var partSizeCustom=eval("form.sizeGPT"+npart+"custom");
             if (partCheck.checked) {
                     if (partSize.options[partSize.selectedIndex].value == "CUSTOM") {
-                            freeDisk.value -= parseInt(partSizeCustom.value);
+                            reeDisk.value -= parseInt(partSizeCustom.value);
                     } else {
                             freeDisk.value -= parseInt(partSize.options[partSize.selectedIndex].value);
                     }

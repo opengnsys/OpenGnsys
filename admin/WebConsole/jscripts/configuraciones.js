@@ -77,17 +77,17 @@ function cola_acciones(tipoaccion){
 //			- idnodo: El identificador del nodo
 //____________________________________________________________________________
 function configuraciones(ambito){
-		var identificador=currentOrdenador;
+		var identificador;
 		switch(ambito){
 			case AMBITO_configuracionaulaS:
-					var identificador=currentconfiguracionaula;
+					identificador=currentconfiguracionaula;
 					wurl="configuracionconfiguracionaula.php?idconfiguracionaula="+identificador;
-					 window.open(wurl,"frame_contenidos");
+					window.open(wurl,"frame_contenidos");
 					break;
 			case AMBITO_ORDENADORES:
-					var identificador=currentOrdenador;
+					identificador=currentOrdenador;
 					wurl="configuracionordenador.php?idordenador="+identificador;
-					 window.open(wurl,"frame_contenidos");
+					window.open(wurl,"frame_contenidos");
 					break;
 		}
 }	

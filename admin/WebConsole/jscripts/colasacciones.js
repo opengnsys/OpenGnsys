@@ -313,10 +313,8 @@
 				nodo.childNodes[iinfor].innerHTML=LITACCION_FALLIDA;
 			}
 			var ahora = new Date();
-			var fechafin=ahora.getDate()+"-"+(ahora.getMonth()+1)+"-"+ahora.getFullYear();
-			nodo.childNodes[ifechafin].innerHTML=fechafin;
-			var horafin=ahora.getHours()+":"+(ahora.getMinutes()+1)+":"+ahora.getSeconds();
-			nodo.childNodes[ihorafin].innerHTML=horafin;
+            nodo.childNodes[ifechafin].innerHTML=ahora.getDate() + "-" + (ahora.getMonth() + 1) + "-" + ahora.getFullYear();
+            nodo.childNodes[ihorafin].innerHTML=ahora.getHours() + ":" + (ahora.getMinutes() + 1) + ":" + ahora.getSeconds();
 		}			
 	}	
 	
