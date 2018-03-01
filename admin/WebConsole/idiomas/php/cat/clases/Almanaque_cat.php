@@ -23,8 +23,8 @@ class Almanaque{
 	var $dias_meses=array();
 	var $semanas=array();
 	var $numero_annos=array();
-    var $numero_dias=array();
-    var $numero_horas=array();
+	var $numero_dias=array();
+	var $numero_horas=array();
 
 	function __construct($pclase="", $ponmouseover="sobre(this)", $ponmouseout="fuera(this)", $ponclick="clic(this)"){ //Constructor
 		$this->clase=$pclase;

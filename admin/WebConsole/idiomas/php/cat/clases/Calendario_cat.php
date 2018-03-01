@@ -22,7 +22,7 @@ class Calendario{
 	var $desplazamiento_dias=6; // Ajuste fino dependiendo del año de comienzo del algoritmo
 	var $nombre_mes=array();
 	var $nombre_dia=array();
-    var $numero_annos=array();
+	var $numero_annos=array();
 	var $dias_meses=array();
 
 	function __construct($pclase="", $ponmouseover="sobre(this)", $ponmouseout="fuera(this)", $ponclick="clic(this)"){ //Constructor

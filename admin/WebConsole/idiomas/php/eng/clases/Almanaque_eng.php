@@ -23,8 +23,8 @@ class Almanaque{
 	var $dias_meses=array();
 	var $semanas=array();
 	var $numero_annos=array();
-    var $numero_dias=array();
-    var $numero_horas=array();
+	var $numero_dias=array();
+	var $numero_horas=array();
 
 	function __construct($pclase="", $ponmouseover="sobre(this)", $ponmouseout="fuera(this)", $ponclick="clic(this)"){ //Constructor
 		$this->clase=$pclase;
@@ -67,11 +67,11 @@ class Almanaque{
 		$this->dias_meses[11]=30;
 		$this->dias_meses[12]=31;
 
-		$this->semanas[1]=array ("1�",0x01); // tamaño 1 bytes
-		$this->semanas[2]=array ("2�",0x02);
-		$this->semanas[3]=array ("3�",0x04);
-		$this->semanas[4]=array ("4�",0x08);
-		$this->semanas[5]=array ("5�",0x10);
+		$this->semanas[1]=array ("1ª",0x01); // tamaño 1 bytes
+		$this->semanas[2]=array ("2ª",0x02);
+		$this->semanas[3]=array ("3ª",0x04);
+		$this->semanas[4]=array ("4ª",0x08);
+		$this->semanas[5]=array ("5ª",0x10);
 		$this->semanas[6]=array ("Last",0x20);
 
 		$this->numero_annos[2010]=0x0001; // tamaño 2 bytes
@@ -228,7 +228,7 @@ class Almanaque{
 		return($HTML_calendario);
 	}	
 	/* -------------------------------------------------------------------------------------------
-		Esta funciún devuelve una cadena con el código HTML del calendario del mes y año elegidos
+		Esta función devuelve una cadena con el código HTML del calendario del mes y año elegidos
 		y que son propiedades de la clase.
 	----------------------------------------------------------------------------------------------*/
 	function MesAnno($mes,$anno){
@@ -306,7 +306,7 @@ class Almanaque{
 	function DiasMes(){
 		$HTML_calendario='<TABLE id="tabla_diasmes" class="'.$this->clase.'">'.chr(13);
 		$HTML_calendario.='<TR>'.chr(13);
-		$HTML_calendario.='<TH colspan=8 style="cursor:hand" onclick="TH_'.$this->onclick.'">Day of month</TH><TR>'.chr(13); // Literal D�a
+		$HTML_calendario.='<TH colspan=8 style="cursor:hand" onclick="TH_'.$this->onclick.'">Day of month</TH><TR>'.chr(13); // Literal Día
 		$HTML_calendario.='<TR>'.chr(13);
 		$sd=1; // Control salto de fila
 		for ($i=1;$i<32;$i++){
