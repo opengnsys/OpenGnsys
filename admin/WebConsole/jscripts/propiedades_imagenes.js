@@ -96,5 +96,4 @@ function comprobar_datos(){
 				validate (form.descripcion, validate_notnull, 0) &&
 				validate (form.imagenid, validate_notnull, 8);	
 	}
-	return(true);
 }

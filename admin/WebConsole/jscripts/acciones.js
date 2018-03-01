@@ -61,13 +61,14 @@ function programacion(tipoaccion)
 	reset_contextual(-1,-1);
 	var identificador=currentNodo.toma_identificador();
 	var descripcion=currentNodo.toma_infonodo();
+	var whref;
 	switch(tipoaccion){
 		case EJECUCION_COMANDO:
-			var whref="../varios/programaciones.php?idcomando="+identificador+"&descripcioncomando="+descripcion+"&tipoaccion="+EJECUCION_COMANDO;
+			whref="../varios/programaciones.php?idcomando="+identificador+"&descripcioncomando="+descripcion+"&tipoaccion="+EJECUCION_COMANDO;
 			break;
 		case EJECUCION_TAREA:
-			var whref="../varios/programaciones.php?idtarea="+identificador+"&descripciontarea="+descripcion+"&tipoaccion="+EJECUCION_TAREA;
-			break;	alert(whref);
+			whref="../varios/programaciones.php?idtarea="+identificador+"&descripciontarea="+descripcion+"&tipoaccion="+EJECUCION_TAREA;
+			break;
 	}
 	window.open(whref,"frame_contenidos")
 }

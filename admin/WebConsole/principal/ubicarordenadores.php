@@ -219,10 +219,10 @@ function ListaEquiposGrupo($cmd,$idaula,$idgrupo)
 switch ($idgrupo){
 	case 0:
 		$cmd->texto="select nombreordenador from ordenadores where ordenadores.idaula='" . $idaula . "' AND ordenadores.grupoid = '0'";
-		;;
+		break;
 	default:
 		$cmd->texto="select nombreordenador from ordenadores JOIN gruposordenadores ON ordenadores.grupoid = gruposordenadores.idgrupo where ordenadores.idaula='" . $idaula . "' AND gruposordenadores.idgrupo = '". $idgrupo ."'";
-		;;
+		break;
 }
 
 #$cmd->texto="select nombreordenador from ordenadores JOIN gruposordenadores ON ordenadores.grupoid = gruposordenadores.idgrupo where ordenadores.idaula='" . $idaula . "' AND gruposordenadores.idgrupo = '". $idgrupo ."'";

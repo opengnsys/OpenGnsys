@@ -313,8 +313,8 @@
 				nodo.childNodes[iinfor].innerHTML=LITACCION_FALLIDA;
 			}
 			var ahora = new Date();
-            nodo.childNodes[ifechafin].innerHTML=ahora.getDate() + "-" + (ahora.getMonth() + 1) + "-" + ahora.getFullYear();
-            nodo.childNodes[ihorafin].innerHTML=ahora.getHours() + ":" + (ahora.getMinutes() + 1) + ":" + ahora.getSeconds();
+			nodo.childNodes[ifechafin].innerHTML=ahora.getDate() + "-" + (ahora.getMonth() + 1) + "-" + ahora.getFullYear();
+			nodo.childNodes[ihorafin].innerHTML=ahora.getHours() + ":" + (ahora.getMinutes() + 1) + ":" + ahora.getSeconds();
 		}			
 	}	
 	
@@ -434,4 +434,4 @@ function programacion(idcmd,sesion,descripcion)
 		curentwprg.close();
 	curentwprg=window.open(whref,"wprg","left=50,top=20,height=520,width=480,scrollbars=no")
 }
-	
+

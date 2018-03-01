@@ -578,7 +578,7 @@ function calculateFreeGPTDisk(form) {
             var partSizeCustom=eval("form.sizeGPT"+npart+"custom");
             if (partCheck.checked) {
                     if (partSize.options[partSize.selectedIndex].value == "CUSTOM") {
-                            reeDisk.value -= parseInt(partSizeCustom.value);
+                            freeDisk.value -= parseInt(partSizeCustom.value);
                     } else {
                             freeDisk.value -= parseInt(partSize.options[partSize.selectedIndex].value);
                     }
