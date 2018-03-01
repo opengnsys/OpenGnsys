@@ -1,18 +1,18 @@
 // *************************************************************************************************************************************************
 //	Libreria de scripts de Javascript
-// Copyright 2003-2005 José Manuel Alonso. Todos los derechos reservados.
-// Fecha Creación:2003-2004
-// Fecha Última modificación: Marzo-2005
+// Copyright 2003-2005 Josï¿½ Manuel Alonso. Todos los derechos reservados.
+// Fecha Creaciï¿½n:2003-2004
+// Fecha ï¿½ltima modificaciï¿½n: Marzo-2005
 // Nombre del fichero: CrearImagenBasica.js
-// Descripción : 
+// Descripciï¿½n : 
 //		Este fichero implementa las funciones javascript del fichero CrearImagenBasica.php (Comandos)
 // *************************************************************************************************************************************************
 	var RC="@";
 
  function confirmar()
  {
- 	var prm=comprobar_datos()
- 	if(prm=="") return; // Ha habido algún error
+ 	var prm=comprobar_datos();
+ 	if(prm=="") return; // Ha habido algï¿½n error
  	
 	var disco=1; // Siempre disco 1
 	document.fdatosejecucion.atributos.value="dsk="+disco+RC+prm;
@@ -21,7 +21,7 @@
 }
 //________________________________________________________________________________________________________
 //	
-//	Cancela la edición 
+//	Cancela la ediciï¿½n 
 //________________________________________________________________________________________________________
 
 function cancelar(){
@@ -35,15 +35,15 @@ function cancelar(){
 
 function comprobar_datos()
 {
-	var prm=""; // Retorno parámetros
+	var prm=""; // Retorno parï¿½metros
 	var cadPar=document.getElementById("cadPar").getAttribute("value");
 	var tbPar=cadPar.split(";");
 	for(var i=0;i<tbPar.length;i++){
-		var par=tbPar[i]; // Numero de partición
+		var par=tbPar[i]; // Numero de particiï¿½n
 		if(par>0){ 
 			var trObj=document.getElementById('trPar-'+par); // Recupera objeto fila
 			var obRDO=trObj.childNodes[0].childNodes[0]; // Recupera Radio buton de la fila
-			if(obRDO.checked){ // Si está seleccionado ...
+			if(obRDO.checked){ // Si estï¿½ seleccionado ...
 				var cpt=obRDO.getAttribute("value");
 				var obSel=trObj.childNodes[3].childNodes[0]; // Recupera  objeto select de la Imagen	
 				var idx=obSel.selectedIndex;
@@ -54,7 +54,7 @@ function comprobar_datos()
 				// Compone parametros	
 				var tbIMG=obSel.options[idx].value.split(";");
 				var idi=tbIMG[0]; // Identificador de la imagen
-				var nci=tbIMG[1]; // Nombre canónico de la imagen			
+				var nci=tbIMG[1]; // Nombre canï¿½nico de la imagen			
 				var ipr=tbIMG[2]; // Ip del repositorio de la imagen							
 				var rti=tbIMG[3]; // Ruta de origen de la imagen							
 
@@ -66,15 +66,15 @@ function comprobar_datos()
 				prm+="rti="+rti+RC;	
 
 				
-				var desplemet=document.getElementById("desplesync_"+par); // Desplegable metodo de syncronización
-				var  p=desplemet.selectedIndex // Toma índice seleccionado
+				var desplemet=document.getElementById("desplesync_"+par); // Desplegable metodo de syncronizaciï¿½n
+				var  p=desplemet.selectedIndex; // Toma ï¿½ndice seleccionado
 				
-				// No ha elegido ninguna partición
+				// No ha elegido ninguna particiï¿½n
 				if(p==0){
-					alert(TbMsg[3])
+					alert(TbMsg[3]);
 					return("");
 				}
-				prm+="msy="+p+RC;	// Método de syncronización 1=Sincronización1 2=Sincronizacion2					
+				prm+="msy="+p+RC;	// Mï¿½todo de syncronizaciï¿½n 1=Sincronizaciï¿½n1 2=Sincronizacion2					
 	
 								
 				var chrChk=document.getElementById('whl-'+par); // Recupera objeto fila de la tabla opciones adicionales
@@ -94,15 +94,15 @@ function comprobar_datos()
 				var obChk=trObj.childNodes[15].childNodes[0]; // Recupera  objeto checkbox no borrar archivos en destino	
 				if(obChk.checked)	prm+="nba=1"+RC; else prm+="nba=0"+RC;				
 
-				if(comprobar_datosejecucion()) // Comprueba opciones de ejecución
+				if(comprobar_datosejecucion()) // Comprueba opciones de ejecuciï¿½n
 					return(prm);
 				else
 					return("");
 			}
 		}
 	}	
-	// No ha elegido ninguna partición
-	alert(TbMsg[2])
+	// No ha elegido ninguna particiï¿½n
+	alert(TbMsg[2]);
 	return("");
 }
 

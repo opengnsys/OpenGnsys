@@ -112,10 +112,10 @@ function retornoGestion(resul)
 //________________________________________________________________________________________________________
 function resultado_gestion_accionmenu(resul,descrierror){
 	if (!resul){ // Ha habido algún error en la inserción
-		alert(descrierror)
+		alert(descrierror);
 		return
 	}
-	alert(TbMsg[3])
+	alert(TbMsg[3]);
 	location.href="../nada.php";
 }
 

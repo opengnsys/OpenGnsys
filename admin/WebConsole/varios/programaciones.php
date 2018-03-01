@@ -110,7 +110,7 @@ $mialmanaque= new Almanaque("tabla_meses");
 						<TABLE border=0 cellPadding=0 cellSpacing=0>
 							<TR  class=opciones_ejecucion>
 								<TD colspan=6><INPUT   id=sw_sus type="checkbox" <?php echo $wsw_sus?> 
-									onclick="suspender_programacion(<?php echo $identificador?>,<?php echo $tipoaccion?>,<?php echo $sesion?>))">
+									onclick="suspender_programacion(<?php echo $identificador?>,<?php echo $tipoaccion?>,<?php echo $sesion?>);)">
 									<SPAN style="COLOR:#999999"><?php echo $TbMsg[1]?></SPAN></TD>
 							</TR>
 							<TR>
@@ -270,7 +270,7 @@ $mialmanaque= new Almanaque("tabla_meses");
 </FORM>
 <SCRIPT language="javascript">
 	var lista=document.getElementById("lista_programaciones");
-	var numblo=lista.options.length
+	var numblo=lista.options.length;
 	if(numblo>0){
 		lista.selectedIndex=0;
 		consulta_programacion()

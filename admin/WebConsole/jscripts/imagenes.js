@@ -9,10 +9,10 @@
 //	Muestra información sobre las imágenes
 //___________________________________________________________________________________________________________
 function muestra_informacion(){
-	reset_contextual(-1,-1)
-	var identificador=currentNodo.toma_identificador()
-	var descripcionimagen=currentNodo.toma_infonodo()
-	var whref="../varios/informacion_imagenes.php?idimagen="+identificador+"&descripcionimagen="+descripcionimagen
+	reset_contextual(-1,-1);
+	var identificador=currentNodo.toma_identificador();
+	var descripcionimagen=currentNodo.toma_infonodo();
+	var whref="../varios/informacion_imagenes.php?idimagen="+identificador+"&descripcionimagen="+descripcionimagen;
 	window.open(whref,"frame_contenidos")
 }
 //________________________________________________________________________________________________________
@@ -20,10 +20,10 @@ function muestra_informacion(){
 //	Muestra formulario para gestionar el software incremental incluido en una imagen
 //________________________________________________________________________________________________________
 function insertar_imagenincremental(){
-	reset_contextual(-1,-1)
-	var identificador=currentNodo.toma_identificador()
-	var descripcionimagen=currentNodo.toma_infonodo()
-	var whref="../varios/imagenincremental.php?idimagen="+identificador+"&descripcionimagen="+descripcionimagen
+	reset_contextual(-1,-1);
+	var identificador=currentNodo.toma_identificador();
+	var descripcionimagen=currentNodo.toma_infonodo();
+	var whref="../varios/imagenincremental.php?idimagen="+identificador+"&descripcionimagen="+descripcionimagen;
 	window.open(whref,"frame_contenidos")
 }
 //________________________________________________________________________________________________________
@@ -33,9 +33,9 @@ function insertar_imagenincremental(){
 //
 function insertar_imagen(litamb,tipoimg)
 {
-	reset_contextual(-1,-1) // Oculta menu contextual
-	var identificador=currentNodo.toma_identificador()
-	var whref="../propiedades/propiedades_imagenes.php?opcion="+op_alta+"&grupoid="+identificador+"&litamb="+litamb+"&tipoimg="+tipoimg
+	reset_contextual(-1,-1); // Oculta menu contextual
+	var identificador=currentNodo.toma_identificador();
+	var whref="../propiedades/propiedades_imagenes.php?opcion="+op_alta+"&grupoid="+identificador+"&litamb="+litamb+"&tipoimg="+tipoimg;
 	window.open(whref,"frame_contenidos");
 }
 //________________________________________________________________________________________________________
@@ -45,9 +45,9 @@ function insertar_imagen(litamb,tipoimg)
 //
 function modificar_imagen(tipoimg)
 {
-	reset_contextual(-1,-1) // Oculta menu contextual
-	var identificador=currentNodo.toma_identificador()
-	var whref="../propiedades/propiedades_imagenes.php?opcion="+op_modificacion+"&tipoimg="+tipoimg+"&identificador="+identificador
+	reset_contextual(-1,-1); // Oculta menu contextual
+	var identificador=currentNodo.toma_identificador();
+	var whref="../propiedades/propiedades_imagenes.php?opcion="+op_modificacion+"&tipoimg="+tipoimg+"&identificador="+identificador;
 	window.open(whref,"frame_contenidos");
 }
 //________________________________________________________________________________________________________
@@ -57,8 +57,8 @@ function modificar_imagen(tipoimg)
 //
 function eliminar_imagen(tipoimg)
 {
-	reset_contextual(-1,-1) // Oculta menu contextual
-	var identificador=currentNodo.toma_identificador()
-	var whref="../propiedades/propiedades_imagenes.php?opcion="+op_eliminacion+"&tipoimg="+tipoimg+"&identificador="+identificador
+	reset_contextual(-1,-1); // Oculta menu contextual
+	var identificador=currentNodo.toma_identificador();
+	var whref="../propiedades/propiedades_imagenes.php?opcion="+op_eliminacion+"&tipoimg="+tipoimg+"&identificador="+identificador;
 	window.open(whref,"frame_contenidos");
 }

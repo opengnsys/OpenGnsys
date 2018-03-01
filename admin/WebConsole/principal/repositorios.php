@@ -70,7 +70,7 @@ echo $flotante->CreaMenuContextual($XMLcontextual);
 $XMLcontextual=CreacontextualXMLRepositorio(); // Repositorio
 echo $flotante->CreaMenuContextual($XMLcontextual);
 ?>
-</BODY OnContextMenu="return false">
+</BODY OnContextMenu="return false;">
 </HTML>
 <?php
 // *************************************************************************************************************************************************

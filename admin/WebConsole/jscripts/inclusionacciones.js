@@ -52,7 +52,7 @@ function confirmar()
 	}
 	/* LLamada a la gestión */
 	var wurl="../gestores/gestor_inclusionacciones.php";
-	var prm="tipoaccion="+document.fdatos.tipoaccion.value+"&idtipoaccion="+document.fdatos.idtipoaccion.value
+	var prm="tipoaccion="+document.fdatos.tipoaccion.value+"&idtipoaccion="+document.fdatos.idtipoaccion.value;
 	prm+="&altas="+altas+"&bajas="+bajas+"&modificaciones="+modificaciones;
 	CallPage(wurl,prm,"retornoGestion","POST");	
 }
@@ -68,10 +68,10 @@ function confirmar()
 function resultado_gestion_inclusionacciones(resul,descrierror)
 {
 	if (!resul){ // Ha habido algún error en la inserción
-		alert(descrierror)
+		alert(descrierror);
 		return
 	}
-	alert(TbMsg[2])
+	alert(TbMsg[2]);
 	location.href="../nada.php";
 }
 //______________________________________________________________________________________________________

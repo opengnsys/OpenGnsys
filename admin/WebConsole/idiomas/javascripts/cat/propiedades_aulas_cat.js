@@ -21,7 +21,7 @@ TbMsg[13]="La URL del servidor Proxy no es válida";
 TbMsg[14]="Deben introducirse datos de validación: página de login y página de validación";
 TbMsg[15]="La URL de la página de login no es válida";
 TbMsg[16]="La URL de la página de validación no es válida";
-TbMsg[17]="La ubicación sólo puede contener caracteres alfanuméricos"
-TbMsg[18]="Los comentarios sólo pueden contener caracteres alfanuméricos"
+TbMsg[17]="La ubicación sólo puede contener caracteres alfanuméricos";
+TbMsg[18]="Los comentarios sólo pueden contener caracteres alfanuméricos";
 TbMsg[19]="La dirección IP del servidor NTP no es válida";
 

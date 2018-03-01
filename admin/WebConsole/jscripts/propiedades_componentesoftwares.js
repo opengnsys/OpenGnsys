@@ -79,18 +79,18 @@ function comprobar_datos(){
 		document.fdatos.descripcion.focus();
 		return(false);
 	}
-	var  p=document.fdatos.idtiposoftware.selectedIndex
+	var  p=document.fdatos.idtiposoftware.selectedIndex;
 	if (p==0){  
-         alert(TbMsg[1])
-         document.forms.fdatos.idtiposoftware.focus()
+         alert(TbMsg[1]);
+         document.forms.fdatos.idtiposoftware.focus();
          return(false)
 	}
 	else{
 		if(p==3){ // Tipo de software: sistema operativo
-		 p=document.fdatos.idtiposo.selectedIndex
+		 p=document.fdatos.idtiposo.selectedIndex;
 		 if (p==0){  
-			alert(TbMsg[2])
-			document.forms.fdatos.idtiposo.focus()
+			alert(TbMsg[2]);
+			document.forms.fdatos.idtiposo.focus();
 			return(false)
 		 }
 		}
@@ -106,7 +106,7 @@ function seleccion(o){
 		var otiposo=document.getElementById("tridtiposo"); // Toma objeto Iframe
 		if(otiposo!=null){
 			if(o.value!=1){
-				otiposo.style.display="none"
+				otiposo.style.display="none";
 				document.fdatos.idtiposo.selectedIndex=0
 			}
 			else

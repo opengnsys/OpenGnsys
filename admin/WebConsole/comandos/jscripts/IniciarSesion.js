@@ -69,13 +69,13 @@ function confirmar(){
   function comprobar_datos()
 {
 		tb_conf=document.getElementById("tabla_conf");
-		var ochecks=tb_conf.getElementsByTagName('INPUT')
-		var op=0
+		var ochecks=tb_conf.getElementsByTagName('INPUT');
+		var op=0;
 		for(var i=0;i<ochecks.length;i++){
 			if(ochecks[i].checked)		op++;
 		}
 		if(op==0){
-			   alert(TbMsg[1])
+			   alert(TbMsg[1]);
 			 return(false);
 		}
 		return(comprobar_datosejecucion())

@@ -89,7 +89,7 @@ function comprobar_datos(){
 		document.fdatos.solicitante.focus();
 		return(false);
 	}
-	p=document.fdatos.idaula.selectedIndex
+	p=document.fdatos.idaula.selectedIndex;
 	if(p==0){
 		alert(TbMsg[2]);
 		document.fdatos.idaula.focus();

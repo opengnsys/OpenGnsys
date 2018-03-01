@@ -9,18 +9,18 @@
 // *************************************************************************************************************************************************
 //________________________________________________________________________________________________________
 function gestion_componente(id,o){
-	idincremental=document.fdatos.idsoftincremental.value
+	idincremental=document.fdatos.idsoftincremental.value;
 	if (o.checked)
-		var wurl="../gestores/gestor_incrementalcomponente_soft.php?opcion="+op_alta+"&idsoftincremental="+idincremental+"&idsoftware="+id
+		var wurl="../gestores/gestor_incrementalcomponente_soft.php?opcion="+op_alta+"&idsoftincremental="+idincremental+"&idsoftware="+id;
 	else
-		var wurl="../gestores/gestor_incrementalcomponente_soft.php?opcion="+op_eliminacion+"&idsoftincremental="+idincremental+"&idsoftware="+id
+		var wurl="../gestores/gestor_incrementalcomponente_soft.php?opcion="+op_eliminacion+"&idsoftincremental="+idincremental+"&idsoftware="+id;
 	ifr=document.getElementById("iframes_comodin"); // Toma objeto Iframe
 	ifr.src=wurl; // LLama a la página gestora
 }
 //________________________________________________________________________________________________________
 function resultado_insertar_incrementalcomponente_soft(resul,descrierror,nwid,tablanodo){
 	if (!resul){ // Ha habido algún error en la inserción
-		alert(descrierror)
+		alert(descrierror);
 		return
 	}
 	alert(TbMsg[0])
@@ -28,7 +28,7 @@ function resultado_insertar_incrementalcomponente_soft(resul,descrierror,nwid,ta
 //________________________________________________________________________________________________________
 function resultado_eliminar_incrementalcomponente_soft(resul,descrierror,idp,idh){
 	if (!resul){ // Ha habido algún error en la eliminación
-		alert(descrierror)
+		alert(descrierror);
 		return
 	}
 	alert(TbMsg[1])

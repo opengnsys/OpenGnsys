@@ -26,8 +26,8 @@ function retornoGestion(resul){
 }
 //________________________________________________________________________________________________________
 function ActualizarAccion(id){
-	var objorden=document.getElementById("orden-"+id)
-	var orden=objorden.value
+	var objorden=document.getElementById("orden-"+id);
+	var orden=objorden.value;
 	if(orden=="" || orden<1){
 			alert(TbMsg[1]);
 			oorden.focus();
@@ -39,12 +39,12 @@ function ActualizarAccion(id){
 //________________________________________________________________________________________________________
 function resultado_eliminar_procedimientocomando(resul,descrierror,idtt){
 	if (!resul){ // Ha habido algún error en la eliminación
-		alert(descrierror)
+		alert(descrierror);
 		return
 	}
-	alert(TbMsg[2])
+	alert(TbMsg[2]);
 	var oTABLE=document.getElementById("TABLACOMANDOS");
-	var oTRs=oTABLE.getElementsByTagName('TR')
+	var oTRs=oTABLE.getElementsByTagName('TR');
 	for(var i=0;i<oTRs.length;i++){
 			if(oTRs[i].getAttribute("id")=='TR-'+currentidprocedimientocomando || oTRs[i].getAttribute("id")=='PAR-'+currentidprocedimientocomando)
 					oTRs[i].style.display="none"
@@ -53,25 +53,25 @@ function resultado_eliminar_procedimientocomando(resul,descrierror,idtt){
 //________________________________________________________________________________________________________
 function resultado_modificar_procedimientocomando(resul,descrierror,id){
 	if (!resul){ // Ha habido algún error en la eliminación
-		alert(descrierror)
+		alert(descrierror);
 		return
 	}
 	alert(TbMsg[3])
 }
 //________________________________________________________________________________________________________
 function ver_parametros(o,sw,ida){
-		o=o.parentNode
-		o.childNodes[sw].style.display="none"
-		sw++
-		if(sw>1)sw=0
-		o.childNodes[sw].style.display="block"
+		o=o.parentNode;
+		o.childNodes[sw].style.display="none";
+		sw++;
+		if(sw>1)sw=0;
+		o.childNodes[sw].style.display="block";
 		while (o.tagName!="TBODY"){
 			o=o.parentNode
 		}
-		var oTRs=o.getElementsByTagName('TR')
+		var oTRs=o.getElementsByTagName('TR');
 		for(var i=0;i<oTRs.length;i++){
 			if(oTRs[i].getAttribute("id")=='NOT_'+ida || oTRs[i].getAttribute("id")=='PAR-'+ida)
-				if (oTRs[i].style.display=="none") oTRs[i].style.display="block"
+				if (oTRs[i].style.display=="none") oTRs[i].style.display="block";
 				else
 					oTRs[i].style.display="none"
 		}

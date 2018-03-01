@@ -69,7 +69,7 @@ function confirmar(op){
 	}
 	else{
 		if(document.fdatos.ordenadores.value>0){
-			var res=confirm(TbMsg[2])
+			var res=confirm(TbMsg[2]);
 			if(!res) return;
 		}
 	}

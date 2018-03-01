@@ -8,14 +8,14 @@
 //		Este fichero implementa las funciones javascript del fichero administradores_centros
 // *************************************************************************************************************************************************
 function gestion_administrador(idcentro,o){
-	idusuario=document.fdatos.idusuario.value
+	idusuario=document.fdatos.idusuario.value;
 	if (o.checked)
 		var opcion=op_alta;
 	else
 		var opcion=op_eliminacion;
 
 	var wurl="../gestores/gestor_administradores_usuarios.php";
-	var prm="opcion="+opcion+"&idcentro="+idcentro+"&idusuario="+idusuario
+	var prm="opcion="+opcion+"&idcentro="+idcentro+"&idusuario="+idusuario;
 	CallPage(wurl,prm,"retornoGestion","POST");
 }
 //______________________________________________________________________________________________________
@@ -27,7 +27,7 @@ function retornoGestion(resul){
 //________________________________________________________________________________________________________
 function resultado_insertar_centros_administradores(resul,descrierror,nwid,tablanodo){
 	if (!resul){ // Ha habido algún error en la inserción
-		alert(descrierror)
+		alert(descrierror);
 		return
 	}
 	alert(TbMsg[0])
@@ -36,7 +36,7 @@ function resultado_insertar_centros_administradores(resul,descrierror,nwid,tabla
 //________________________________________________________________________________________________________
 function resultado_eliminar_centros_administradores(resul,descrierror,idp,idh){
 	if (!resul){ // Ha habido algún error en la eliminación
-		alert(descrierror)
+		alert(descrierror);
 		return
 	}
 	alert(TbMsg[1])

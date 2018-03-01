@@ -27,7 +27,7 @@ function confirmar(op){
 		document.fdatos.action="../gestores/gestor_gruposordenadores.php";
 	}
 	else
-		document.fdatos.action="../gestores/gestor_grupos.php?opcion="+opcion
+		document.fdatos.action="../gestores/gestor_grupos.php?opcion="+opcion;
 
 	if (opcion!=op_eliminacion){
 		if(!comprobar_datos()) return;

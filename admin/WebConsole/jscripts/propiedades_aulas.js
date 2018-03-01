@@ -65,8 +65,8 @@ function selfclose(){
 //	Esta función desabilita la marca de un checkbox en opcion "bajas"
 //________________________________________________________________________________________________________
  function desabilita(o) {
-	var b
-    b=o.checked
+	var b;
+    b=o.checked;
     o.checked=!b
  }
 //________________________________________________________________________________________________________
@@ -140,7 +140,7 @@ function comprobar_datos(){
 //________________________________________________________________________________________________________
 	function vertabla_horas(ohora){
 		currentHora=ohora;
-		url="../varios/horareser_ventana.php?hora="+ohora.value
+		url="../varios/horareser_ventana.php?hora="+ohora.value;
 		window.open(url,"vh","top=200,left=250,height=120,width=160,scrollbars=no")
 	}
 //________________________________________________________________________________________________________

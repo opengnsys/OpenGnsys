@@ -25,8 +25,8 @@
 	var descripcion_nuevatarea=document.fdatosejecucion.nombretarea.value;
 	var sw_tareaexistente=document.fdatosejecucion.sw_tarea[1].checked;
 
-	var  pprocedimiento=document.fdatosejecucion.idprocedimiento.selectedIndex
-	var  ptarea=document.fdatosejecucion.idtarea.selectedIndex
+	var  pprocedimiento=document.fdatosejecucion.idprocedimiento.selectedIndex;
+	var  ptarea=document.fdatosejecucion.idtarea.selectedIndex;
 
 	if(!sw_ejya && !sw_ejprg && !sw_mkprocedimiento && !sw_mktarea  ){
 		//alert("ATENCIÓN.- Debe elegir al menos un modo de ejecución");
@@ -173,7 +173,7 @@ function	tareaexistente(o){
 //____________________________________________________________________________
 function compone_urlejecucion(){
 
-		var wurl="" 
+		var wurl=""; 
 
 		var sw_ejya=document.fdatosejecucion.sw_ejya.checked;
 		var sw_seguimiento=document.fdatosejecucion.sw_seguimiento[0].checked;
@@ -182,27 +182,27 @@ function compone_urlejecucion(){
 		
 		var sw_mkprocedimiento=document.fdatosejecucion.sw_mkprocedimiento.checked;
 		if (document.fdatosejecucion.sw_procedimiento[0].checked){
-			var nwidprocedimiento=0
+			var nwidprocedimiento=0;
 			var nwdescriprocedimiento=document.fdatosejecucion.nombreprocedimiento.value;
 		}
 		else{
-			var  p=document.fdatosejecucion.idprocedimiento.selectedIndex
-			var nwidprocedimiento=document.fdatosejecucion.idprocedimiento.options[p].value
+			var  p=document.fdatosejecucion.idprocedimiento.selectedIndex;
+			var nwidprocedimiento=document.fdatosejecucion.idprocedimiento.options[p].value;
 			var nwdescriprocedimiento=document.fdatosejecucion.idprocedimiento.options[p].text
 		}
 
 		var sw_mktarea=document.fdatosejecucion.sw_mktarea.checked;
 		if (document.fdatosejecucion.sw_tarea[0].checked){
-			var nwidtarea=0
+			var nwidtarea=0;
 			var nwdescritarea=document.fdatosejecucion.nombretarea.value;
 		}
 		else{
-			var  p=document.fdatosejecucion.idtarea.selectedIndex
-			var nwidtarea=document.fdatosejecucion.idtarea.options[p].value
+			var  p=document.fdatosejecucion.idtarea.selectedIndex;
+			var nwidtarea=document.fdatosejecucion.idtarea.options[p].value;
 			var nwdescritarea=document.fdatosejecucion.idtarea.options[p].text
 		}
-		wurl+="sw_ejya="+sw_ejya +"&sw_seguimiento="+sw_seguimiento+"sw_ejprg="+sw_ejprg+"&sw_mktarea="+sw_mktarea+"&nwidtarea="+nwidtarea+"&nwdescritarea="+nwdescritarea
-		wurl+="&sw_mkprocedimiento="+sw_mkprocedimiento+"&nwidprocedimiento="+nwidprocedimiento+"&nwdescriprocedimiento="+nwdescriprocedimiento
+		wurl+="sw_ejya="+sw_ejya +"&sw_seguimiento="+sw_seguimiento+"sw_ejprg="+sw_ejprg+"&sw_mktarea="+sw_mktarea+"&nwidtarea="+nwidtarea+"&nwdescritarea="+nwdescritarea;
+		wurl+="&sw_mkprocedimiento="+sw_mkprocedimiento+"&nwidprocedimiento="+nwidprocedimiento+"&nwdescriprocedimiento="+nwdescriprocedimiento;
 		return(wurl)
 }
 //________________________________________________________________________________________________________

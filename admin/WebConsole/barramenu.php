@@ -38,29 +38,29 @@ if (!$cmd)
 			var currentOp=null;
 		//________________________________________________________________________________________________________
 		function resaltar(o){
-				if (o==currentOp) return
-				o.style.borderBottomColor="#808080"
-				o.style.borderRightColor="#808080"
-				o.style.borderTopColor="#ffffff"
+				if (o==currentOp) return;
+				o.style.borderBottomColor="#808080";
+				o.style.borderRightColor="#808080";
+				o.style.borderTopColor="#ffffff";
 				o.style.borderLeftColor="#ffffff"
 		}
 		//________________________________________________________________________________________________________
 		function desresaltar(o){
-				if (o==currentOp) return
-				o.style.borderBottomColor="#d4d0c8"
-				o.style.borderRightColor="#d4d0c8"
-				o.style.borderTopColor="#d4d0c8"
+				if (o==currentOp) return;
+				o.style.borderBottomColor="#d4d0c8";
+				o.style.borderRightColor="#d4d0c8";
+				o.style.borderTopColor="#d4d0c8";
 				o.style.borderLeftColor="#d4d0c8"
 		}
 		//________________________________________________________________________________________________________
 		function eleccion(o,op){
-				var opadre=window.parent // Toma frame padre
-				opadre.frames["frame_contenidos"].document.location.href="nada.php"
+				var opadre=window.parent; // Toma frame padre
+				opadre.frames["frame_contenidos"].document.location.href="nada.php";
 				var href;
-				var 	href2="nada.php"
-				var 	href3="./api/tree.html"
-				var 	href4="./api/main.html"
-				var 	href5="./api/index.html"
+				var 	href2="nada.php";
+				var 	href3="./api/tree.html";
+				var 	href4="./api/main.html";
+				var 	href5="./api/index.html";
 				var	device="<?php echo $device;?>";
 				var	version="<?php echo $version;?>";
 
@@ -68,88 +68,88 @@ if (!$cmd)
 				switch(op){
 					case 1: 
 							if (device!="0"){
-							href="./principal/aulas.device.php"
+							href="./principal/aulas.device.php";
 							break;}
-							else{href="./principal/aulas.php" 
+							else{href="./principal/aulas.php"; 
 							break;}
 							
 					case 2:
 							if (device!="0"){
-							href="./principal/acciones.device.php"
+							href="./principal/acciones.device.php";
 							break;}
-							else{href="./principal/acciones.php"
+							else{href="./principal/acciones.php";
 							break;}
 					case 3:
 							if (device!="0"){
 								if (version=="4"){
-								href="./principal/imagenes.device4.php"
+								href="./principal/imagenes.device4.php";
 								break;}
-								else{href="./principal/imagenes.device.php"
+								else{href="./principal/imagenes.device.php";
 								break;}
-							}else{href="./principal/imagenes.php"
+							}else{href="./principal/imagenes.php";
 							break;}
 					case 4:
 							if (device!="0"){
-							href="./principal/hardwares.device.php"
+							href="./principal/hardwares.device.php";
 							break;}
-							else{href="./principal/hardwares.php"
+							else{href="./principal/hardwares.php";
 							break;}
 					case 5:
 							if (device!="0"){
-							href="./principal/softwares.device.php"
+							href="./principal/softwares.device.php";
 							break;}
-							else{href="./principal/softwares.php"
+							else{href="./principal/softwares.php";
 							break;}
 					case 6:
 							if (device!="0"){
-							href="./principal/repositorios.device.php"
+							href="./principal/repositorios.device.php";
 							break;}
-							else{href="./principal/repositorios.php"
+							else{href="./principal/repositorios.php";
 							break;}
 					case 7:
 							if (device!="0"){
-							href="./principal/menus.device.php"
+							href="./principal/menus.device.php";
 							break;}
-							else{href="./principal/menus.php"
+							else{href="./principal/menus.php";
 							break;}
 					case 8:
-							href="./principal/reservas.php"
+							href="./principal/reservas.php";
 							break;
 					case 9:
 							if (device!="0"){
-							href="./principal/administracion.device.php"
+							href="./principal/administracion.device.php";
 							break;}
-							else{href="./principal/administracion.php"
+							else{href="./principal/administracion.php";
 							break;}
 					case 10:
-							href="./images/L_Iconos.php"
-							href2="./images/M_Iconos.php"
+							href="./images/L_Iconos.php";
+							href2="./images/M_Iconos.php";
 							break;
 					case 11:
 							if (device!="0"){
-							href="./principal/administracion.device.php"
-							href2="./principal/boot_grub4dos.php"
+							href="./principal/administracion.device.php";
+							href2="./principal/boot_grub4dos.php";
 							break;}
-							else{href="./principal/administracion.php"
-							href2="./principal/boot_grub4dos.php"
+							else{href="./principal/administracion.php";
+							href2="./principal/boot_grub4dos.php";
 							break;}
 					case 13:
-							href="./principal/usuarios.php"
+							href="./principal/usuarios.php";
 							break;
 					case 14:
-						href="./principal/aulas.php"
-						href2="./varios/buscar.php"
+						href="./principal/aulas.php";
+						href2="./varios/buscar.php";
 						break;
 				}
-				var oldOp=currentOp
+				var oldOp=currentOp;
 				currentOp=o;
 				if (oldOp) desresaltar(oldOp);
-				currentOp.style.borderBottomColor="#ffffff"
-				currentOp.style.borderRightColor="#ffffff"
-				currentOp.style.borderTopColor="#808080"
-				currentOp.style.borderLeftColor="#808080"
+				currentOp.style.borderBottomColor="#ffffff";
+				currentOp.style.borderRightColor="#ffffff";
+				currentOp.style.borderTopColor="#808080";
+				currentOp.style.borderLeftColor="#808080";
 				if(op<20){
-					opadre.frames["frame_arbol"].document.location.href=href
+					opadre.frames["frame_arbol"].document.location.href=href;
 					opadre.frames["frame_contenidos"].document.location.href=href2
 				}
 				else{
@@ -158,10 +158,10 @@ if (!$cmd)
 									window.top.location.href="acceso.php";
 									break;
 							case 22: 		
-									opadre.frames["frame_contenidos"].document.location.href=href5
+									opadre.frames["frame_contenidos"].document.location.href=href5;
 									break;
 							case 23:                
-                                                                        opadre.frames["frame_contenidos"].document.location.href="./principal/acercade.php"
+                                                                        opadre.frames["frame_contenidos"].document.location.href="./principal/acercade.php";
                                                                         break;
 						}
 				}
@@ -178,25 +178,25 @@ if (!$cmd)
 						  <TR valign=baseline>
 							<TD width=10><IMG src="./images/iconos/pomo.gif"></TD>
 							<?php if($idtipousuario!=$SUPERADMINISTRADOR){?>
-								<TD  onclick=eleccion(this,1)  onmouseout=desresaltar(this) onmouseover=resaltar(this) >
+								<TD onclick=eleccion(this,1); onmouseout=desresaltar(this); onmouseover=resaltar(this) >
 									&nbsp;<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/centros.gif">&nbsp;<SPAN class="menupral"><?php echo $TbMsg[0]?></SPAN></A>&nbsp;</TD>
 								<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
-								<TD  onclick=eleccion(this,2) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>		
+								<TD onclick=eleccion(this,2); onmouseout=desresaltar(this); onmouseover=resaltar(this); align=middle>		
 									&nbsp;<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/acciones.gif">&nbsp;<SPAN class=menupral ><?php echo $TbMsg[1]?></SPAN></A>&nbsp;</TD>
 								<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
-								<TD   onclick=eleccion(this,3) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>
+								<TD onclick=eleccion(this,3); onmouseout=desresaltar(this); onmouseover=resaltar(this); align=middle>
 									&nbsp;<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/imagenes.gif">&nbsp;<SPAN class=menupral ><?php echo $TbMsg[2]?></SPAN></A>&nbsp;</TD>
 								<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
-								<TD  onclick=eleccion(this,4) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>
+								<TD onclick=eleccion(this,4); onmouseout=desresaltar(this); onmouseover=resaltar(this); align=middle>
 									&nbsp;<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/confihard.gif">&nbsp;<SPAN class=menupral ><?php echo  $TbMsg[3] ?></SPAN></A>&nbsp;</TD>
 								<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
-								<TD  onclick=eleccion(this,5) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>
+								<TD onclick=eleccion(this,5); onmouseout=desresaltar(this); onmouseover=resaltar(this); align=middle>
 									&nbsp;<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/confisoft.gif">&nbsp;<SPAN class=menupral ><?php echo  $TbMsg[4] ?></SPAN></A>&nbsp;</TD>
 								<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
-								<TD  onclick=eleccion(this,6) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>
+								<TD onclick=eleccion(this,6); onmouseout=desresaltar(this); onmouseover=resaltar(this); align=middle>
 									&nbsp;<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/repositorio.gif">&nbsp;<SPAN class=menupral ><?php echo  $TbMsg[5] ?></SPAN></A>&nbsp;</TD>
 								<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
-								<TD  onclick=eleccion(this,7) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>
+								<TD onclick=eleccion(this,7); onmouseout=desresaltar(this); onmouseover=resaltar(this); align=middle>
 									&nbsp;<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/menus.gif">&nbsp;<SPAN class=menupral ><?php echo  $TbMsg[6] ?></SPAN></A>&nbsp;</TD>
 								<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
 								<td onclick="eleccion(this,14)" onmouseout="desresaltar(this)" onmouseover="resaltar(this)" align="middle">
@@ -210,17 +210,17 @@ if (!$cmd)
 							<?php }
 							else{
 									if($idtipousuario==$SUPERADMINISTRADOR){?>
-											<TD  onclick=eleccion(this,9) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>&nbsp;
+											<TD onclick=eleccion(this,9); onmouseout=desresaltar(this); onmouseover=resaltar(this); align=middle>&nbsp;
 											<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/administracion.gif">
 											<SPAN class=menupral ><?php echo  $TbMsg[8] ?></SPAN></A>&nbsp;</TD>
 											<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
 
-											<TD  onclick=eleccion(this,10) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>&nbsp;
+											<TD onclick=eleccion(this,10); onmouseout=desresaltar(this); onmouseover=resaltar(this); align=middle>&nbsp;
 											<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/iconos.gif">
 											<SPAN class=menupral ><?php echo  $TbMsg[9] ?></SPAN></A>&nbsp;</TD>
 											<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
 
-                                            <TD  onclick=eleccion(this,11) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>&nbsp;
+                                            <TD onclick=eleccion(this,11); onmouseout=desresaltar(this); onmouseover=resaltar(this); align=middle>&nbsp;
                                             <A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/tablas.gif">
                                             <SPAN class=menupral ><?php echo  $TbMsg[15] ?></SPAN></A>&nbsp;</TD>
                                             <TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
@@ -230,17 +230,17 @@ if (!$cmd)
 									<?php }?>
 							<?php }?>
 
-											<TD  onclick=eleccion(this,22) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>
+											<TD onclick=eleccion(this,22); onmouseout=desresaltar(this); onmouseover=resaltar(this); align=middle>
 											&nbsp;<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/ayuda.gif">&nbsp;<SPAN class=menupral ><?php echo  $TbMsg[11] ?></SPAN></A>&nbsp;</TD>
  											<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
 
 
-											<TD  onclick=eleccion(this,23) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>
+											<TD onclick=eleccion(this,23); onmouseout=desresaltar(this); onmouseover=resaltar(this); align=middle>
 											&nbsp;<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/logocirculos.png">&nbsp;<SPAN class=menupral ><?php echo  $TbMsg[17] ?></SPAN></A>&nbsp;</TD>
 											<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
 
 
-											<TD  onclick=eleccion(this,21) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>
+											<TD onclick=eleccion(this,21); onmouseout=desresaltar(this); onmouseover=resaltar(this); align=middle>
 											&nbsp;<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/usuarioslog.gif">&nbsp;<SPAN class=menupral ><?php echo  $TbMsg[10] ?></SPAN></A>&nbsp;</TD>
 											<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
 

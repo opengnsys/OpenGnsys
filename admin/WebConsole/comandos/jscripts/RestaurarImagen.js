@@ -14,7 +14,7 @@
 		var disco;
 		var atributos="";
 		var tb_conf=document.getElementById("tabla_conf");
-		var ochecks=tb_conf.getElementsByTagName('INPUT')
+		var ochecks=tb_conf.getElementsByTagName('INPUT');
 		for(var i=0;i<ochecks.length;i++){
 			if(ochecks[i].checked){
 				var idradio=ochecks[i].id;
@@ -85,8 +85,8 @@
   function comprobar_datos()
 {
 		tb_conf=document.getElementById("tabla_conf");
-		var ochecks=tb_conf.getElementsByTagName('INPUT')
-		var op=0
+		var ochecks=tb_conf.getElementsByTagName('INPUT');
+		var op=0;
 		for(var i=0;i<ochecks.length;i++){
 			if(ochecks[i].checked){
 				op++;
@@ -94,23 +94,23 @@
 				despleimagenizda=document.getElementById("despleimagen_"+idradio+"_1"); // Desplegable izda.
 				despleimagendcha=document.getElementById("despleimagen_"+idradio+"_0"); // Desplegable derecha.
 				
-				var  p1=despleimagenizda.selectedIndex // Toma índice seleccionado
-				var  p2=despleimagendcha.selectedIndex // Toma índice seleccionado
+				var  p1=despleimagenizda.selectedIndex; // Toma índice seleccionado
+				var  p2=despleimagendcha.selectedIndex; // Toma índice seleccionado
 
 				if (p1==0 && p2==0){  
-						alert(TbMsg[0])
-						despleimagenizda.focus()
+						alert(TbMsg[0]);
+						despleimagenizda.focus();
 			      return(false)
 				}
 				if (p1==p2){  
-						alert(TbMsg[6])
-						despleimagenizda.focus()
+						alert(TbMsg[6]);
+						despleimagenizda.focus();
 			      return(false)
 				}				
 			}
 		}
 		if(op==0){
-			   alert(TbMsg[1])
+			   alert(TbMsg[1]);
 			 return(false);
 		}
 		return(comprobar_datosejecucion())

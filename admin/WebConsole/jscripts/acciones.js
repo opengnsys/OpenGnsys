@@ -17,9 +17,9 @@ function ejecutar_tareas(op)
 
 	reset_contextual(-1,-1); // Oculta menu contextual
 	var resul=window.confirm(TbMsg[0]);
-	if (!resul) return
-	var idtarea=currentNodo.toma_identificador() // identificador del ambito
-	var tarea=currentNodo.toma_infonodo() // Nombre de la tarea
+	if (!resul) return;
+	var idtarea=currentNodo.toma_identificador(); // identificador del ambito
+	var tarea=currentNodo.toma_infonodo(); // Nombre de la tarea
 
 	/* LLamada a la gestión */
 	var wurl="../gestores/gestor_ejecutaracciones.php";
@@ -46,7 +46,7 @@ function retornoGestion(resul)
 function resultado_ejecutar_tareas(resul,descrierror)
 {
 	if (!resul){ // Ha habido algún error en la ejecución
-		alert(descrierror)
+		alert(descrierror);
 		return
 	}
 	alert(TbMsg[2])
@@ -58,15 +58,15 @@ function resultado_ejecutar_tareas(resul,descrierror)
 
 function programacion(tipoaccion)
 {
-	reset_contextual(-1,-1)
-	var identificador=currentNodo.toma_identificador()
-	var descripcion=currentNodo.toma_infonodo()
+	reset_contextual(-1,-1);
+	var identificador=currentNodo.toma_identificador();
+	var descripcion=currentNodo.toma_infonodo();
 	switch(tipoaccion){
 		case EJECUCION_COMANDO:
-			var whref="../varios/programaciones.php?idcomando="+identificador+"&descripcioncomando="+descripcion+"&tipoaccion="+EJECUCION_COMANDO
+			var whref="../varios/programaciones.php?idcomando="+identificador+"&descripcioncomando="+descripcion+"&tipoaccion="+EJECUCION_COMANDO;
 			break;
 		case EJECUCION_TAREA:
-			var whref="../varios/programaciones.php?idtarea="+identificador+"&descripciontarea="+descripcion+"&tipoaccion="+EJECUCION_TAREA
+			var whref="../varios/programaciones.php?idtarea="+identificador+"&descripciontarea="+descripcion+"&tipoaccion="+EJECUCION_TAREA;
 			break;	alert(whref);
 	}
 	window.open(whref,"frame_contenidos")
@@ -78,10 +78,10 @@ function programacion(tipoaccion)
 
 function informacion_acciones(tipo)
 {
-	reset_contextual(-1,-1)
-	var identificador=currentNodo.toma_identificador()
-	var descripcionaccion=currentNodo.toma_infonodo()
-	var whref="../varios/informacion_acciones.php?idtipoaccion="+identificador+"&descripcionaccion="+descripcionaccion+"&tipoaccion="+tipo
+	reset_contextual(-1,-1);
+	var identificador=currentNodo.toma_identificador();
+	var descripcionaccion=currentNodo.toma_infonodo();
+	var whref="../varios/informacion_acciones.php?idtipoaccion="+identificador+"&descripcionaccion="+descripcionaccion+"&tipoaccion="+tipo;
 	window.open(whref,"frame_contenidos")
 }
 //________________________________________________________________________________________________________
@@ -91,19 +91,19 @@ function informacion_acciones(tipo)
 
 function insertar_accionmenu(tipo)
 {
-	reset_contextual(-1,-1)
-	var identificador=currentNodo.toma_identificador()
-	var descripcionaccion=currentNodo.toma_infonodo()
-	var whref="../varios/accionmenu.php?idtipoaccion="+identificador+"&descripcionaccion="+descripcionaccion+"&tipoaccion="+tipo
+	reset_contextual(-1,-1);
+	var identificador=currentNodo.toma_identificador();
+	var descripcionaccion=currentNodo.toma_infonodo();
+	var whref="../varios/accionmenu.php?idtipoaccion="+identificador+"&descripcionaccion="+descripcionaccion+"&tipoaccion="+tipo;
 	window.open(whref,"frame_contenidos")
 }
 //________________________________________________________________________________________________________
 
 function inclusion_acciones(tipo)
 {
-	reset_contextual(-1,-1)
-	var identificador=currentNodo.toma_identificador()
-	var descripcionaccion=currentNodo.toma_infonodo()
+	reset_contextual(-1,-1);
+	var identificador=currentNodo.toma_identificador();
+	var descripcionaccion=currentNodo.toma_infonodo();
 	var ambito=currentNodo.toma_atributoNodo("value");
 	var whref="../varios/inclusionacciones.php";
 	whref+="?idtipoaccion="+identificador+"&descripcionaccion="+descripcionaccion+"&tipoaccion="+tipo+"&ambito="+ambito;

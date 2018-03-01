@@ -28,13 +28,13 @@
 		//________________________________________________________________________________________________________
 	function vertabla_calendario(ofecha){
 		currentFecha=ofecha;
-		url="../varios/calendario_ventana.php?fecha="+ofecha.value
+		url="../varios/calendario_ventana.php?fecha="+ofecha.value;
 		window.open(url,"vf","top=160,left=250,height=220,width=150,scrollbars=no")
 	}
 //________________________________________________________________________________________________________
 	function vertabla_horario(ohora){
 		currentHora=ohora;
-		url="../varios/horareser_ventana.php?hora="+ohora.value
+		url="../varios/horareser_ventana.php?hora="+ohora.value;
 		window.open(url,"vh","top=200,left=250,height=120,width=160,scrollbars=no")
 	}
 //________________________________________________________________________________________________________
@@ -57,8 +57,8 @@
 //________________________________________________________________________________________________________
 	function TH_clic(o){
 		currentFecha=o.getAttribute("id");
-		document.fdatos.fechainicio.value="1/"+currentFecha
-		document.fdatos.fechafin.value="31/"+currentFecha
+		document.fdatos.fechainicio.value="1/"+currentFecha;
+		document.fdatos.fechafin.value="31/"+currentFecha;
 		document.fdatos.submit();
 	}
 //________________________________________________________________________________________________________
@@ -78,7 +78,7 @@
 		}
 
 		if(wfechafin[2]==anno) // El mismo año que el de fin
-			document.fdatos.fechainicio.value="1/1/"+anno
+			document.fdatos.fechainicio.value="1/1/"+anno;
 		else{
 			document.fdatos.fechafin.value="31/12/"+anno;
 		}

@@ -26,7 +26,7 @@ function ListarOrigenesMaster(ip) {
             var ajaxDisplay = document.getElementById('ajaxDiv');
             ajaxDisplay.innerHTML = this.responseText;
         }
-    }
+    };
 
     ajaxRequest.open("GET", "includes/asistentes/ListarOrigenesMaster.php?ip=" + ip, true);
     ajaxRequest.send();

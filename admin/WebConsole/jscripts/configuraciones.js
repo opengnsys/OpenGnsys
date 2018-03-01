@@ -5,8 +5,8 @@
 // Este fichero implementa las funciones javascript del fichero configuracionaula.php
 // ************************************************************************
 
-var currentOrdenador=null // Ordenador elegido
-var currentNombreordenador=null // Nombre del ordenador
+var currentOrdenador=null; // Ordenador elegido
+var currentNombreordenador=null; // Nombre del ordenador
 
 // Código de los ambitos
 
@@ -20,10 +20,10 @@ var LITAMBITO_ORDENADORES="ordenadores";
 //	Esta función muestra un menu contextual 
 //____________________________________________________________________________
 function resalta(id,nom,nomflo){
-	currentOrdenador=id
-	currentNombreordenador=nom
+	currentOrdenador=id;
+	currentNombreordenador=nom;
 	var menuctx=document.getElementById(nomflo); // El menu contextual
-	muestra_contextual(event.clientX,event.clientY,menuctx) // muestra menu
+	muestra_contextual(event.clientX,event.clientY,menuctx); // muestra menu
 	event.returnValue=false // Cancela efectos del evento
 }
 //____________________________________________________________________________
@@ -36,13 +36,13 @@ function confirmarcomando(ambito,idc,interac){
 	var idambito;
 	var nombreambito;
 	
-	ambito=AMBITO_ORDENADORES
+	ambito=AMBITO_ORDENADORES;
 	idambito=currentOrdenador;
-	nombreambito=currentNombreordenador
+	nombreambito=currentNombreordenador;
 	
-	var identificador=idc // identificador del comando
-	var tipotrama='CMD'
-	var wurl="../principal/dialogostramas.php?identificador="+identificador+"&tipotrama="+tipotrama+"&ambito="+ambito+"&idambito="+idambito+"&nombreambito="+nombreambito
+	var identificador=idc; // identificador del comando
+	var tipotrama='CMD';
+	var wurl="../principal/dialogostramas.php?identificador="+identificador+"&tipotrama="+tipotrama+"&ambito="+ambito+"&idambito="+idambito+"&nombreambito="+nombreambito;
 	if(interac==0){
 	   ifr=document.getElementById("iframes_comodin"); // Toma objeto Iframe
 		ifr.src=wurl; // LLama a la página gestora
@@ -60,11 +60,11 @@ function cola_acciones(tipoaccion){
 	var idambito;
 	var nombreambito;
 
-	ambito=AMBITO_ORDENADORES
+	ambito=AMBITO_ORDENADORES;
 	idambito=currentOrdenador;
 	nombreambito=currentNombreordenador;
 
-	var wurl="../principal/colasacciones.php?ambito="+ambito+"&idambito="+idambito+"&nombreambito="+nombreambito+"&tipocola="+tipoaccion
+	var wurl="../principal/colasacciones.php?ambito="+ambito+"&idambito="+idambito+"&nombreambito="+nombreambito+"&tipocola="+tipoaccion;
 	window.open(wurl,"frame_contenidos")
 }
 //____________________________________________________________________________
@@ -81,13 +81,13 @@ function configuraciones(ambito){
 		switch(ambito){
 			case AMBITO_configuracionaulaS:
 					var identificador=currentconfiguracionaula;
-					wurl="configuracionconfiguracionaula.php?idconfiguracionaula="+identificador
-					 window.open(wurl,"frame_contenidos")
+					wurl="configuracionconfiguracionaula.php?idconfiguracionaula="+identificador;
+					 window.open(wurl,"frame_contenidos");
 					break;
 			case AMBITO_ORDENADORES:
 					var identificador=currentOrdenador;
-					wurl="configuracionordenador.php?idordenador="+identificador
-					 window.open(wurl,"frame_contenidos")
+					wurl="configuracionordenador.php?idordenador="+identificador;
+					 window.open(wurl,"frame_contenidos");
 					break;
 		}
 }	

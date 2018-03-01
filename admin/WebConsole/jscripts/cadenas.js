@@ -38,7 +38,7 @@ function TrimRight( str ) {
 	}
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 function Trim( str ) {
-	var resultStr = "";
+	var resultStr;
 	resultStr = TrimLeft(str);
 	resultStr = TrimRight(resultStr);
 	return resultStr;

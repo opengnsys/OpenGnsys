@@ -30,13 +30,13 @@ function confirmar(){
 //________________________________________________________________________________________________________
 function comprobar_datos(){
 	if (document.fdatos.usu.value==""){
-		alert("Debe introducir un nombre de Usuario")
-		document.fdatos.usu.focus()
+		alert("Debe introducir un nombre de Usuario");
+		document.fdatos.usu.focus();
 		return(false)
 	}
 	if (document.fdatos.pss.value==""){
-		alert("Debe introducir una contraseña")
-		document.fdatos.pss.focus()
+		alert("Debe introducir una contraseña");
+		document.fdatos.pss.focus();
 		return(false)
 	}
 	return(true)

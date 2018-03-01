@@ -62,7 +62,7 @@ function validate_ipadress_notnull(value) {
 
 // Validar direccion MAC (sin contar caracteres ":").
 function validate_macaddress(value) {
-	var regex = '^([0-9a-fA-F]){12}$'
+	var regex = '^([0-9a-fA-F]){12}$';
 	return validate_expr(value.replace(/:/g,''), regex);
 }
 

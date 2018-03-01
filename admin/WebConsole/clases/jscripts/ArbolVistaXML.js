@@ -43,7 +43,7 @@ var gLiteralbackground;			// Fondo color nodo vista para restablecer
 					estado=-1;
 			}
 			return(estado);
-		}
+		};
 		//____________________________________________________________________________
 		//	
 		//	Devuelve el segundo dato de una cadena con formato xxxxx-xxx que es id del nodo vista
@@ -51,9 +51,9 @@ var gLiteralbackground;			// Fondo color nodo vista para restablecer
 		this.toma_identificador= function(){
 			if(this.literal==null) return(null);
 			var cadena=this.literal.getAttribute("id");
-			var iditem=cadena.split("-") // Toma el identificador 
+			var iditem=cadena.split("-"); // Toma el identificador 
 			return(iditem[1]);
-		}
+		};
 		//____________________________________________________________________________
 		//	
 		//	Devuelve el primer dato de una cadena con formato xxxxx-xxx que es sufijo del nodo vista
@@ -61,9 +61,9 @@ var gLiteralbackground;			// Fondo color nodo vista para restablecer
 		this.toma_sufijo= function(){
 			if(this.literal==null) return(null);
 			var cadena=this.literal.getAttribute("id");
-			var iditem=cadena.split("-") // Toma el identificador 
+			var iditem=cadena.split("-"); // Toma el identificador 
 			return(iditem[0]);
-		}
+		};
 		//____________________________________________________________________________
 		//	
 		//	Devuelve el literal de un nodo vista
@@ -71,14 +71,14 @@ var gLiteralbackground;			// Fondo color nodo vista para restablecer
 		this.toma_infonodo= function(){
 			if(this.literal==null) return(null);
 			return(this.literal.innerHTML);
-		}
+		};
 		//____________________________________________________________________________
 		//	
 		//	Devuelve el literal de un nodo vista
 		//____________________________________________________________________________
 		this.pone_infonodo= function(lit){
 			this.literal.innerHTML=lit;
-		}		
+		};		
 		//____________________________________________________________________________
 		//	
 		//	Devuelve el segundo dato de una cadena con formato xxxxx-xxx que es id del nodo vista
@@ -88,21 +88,21 @@ var gLiteralbackground;			// Fondo color nodo vista para restablecer
 			if(this.literal==null) return(null);
 			var atributo=this.literal.getAttribute(atr);
 			return(atributo);
-		}		
+		};		
 		//____________________________________________________________________________
 		//	
 		//	 Devuelve true si el nodo tiene hijos,false en caso contrario
 		//____________________________________________________________________________
 		this.TieneHijos= function(){
 			return(this.ArbolHijos!=null);
-		}
+		};
 		//____________________________________________________________________________
 		//	
 		//	 Devuelve true si el nodo es el último, false en caso contrario
 		//____________________________________________________________________________
 		this.UltimoHermano= function(){
 					return(this.siguienteHermano==null);
-		}
+		};
 		//____________________________________________________________________________
 		//	
 		//	 Devuelve el nodo vista padre
@@ -142,8 +142,8 @@ var gLiteralbackground;			// Fondo color nodo vista para restablecer
 		
 		while(o.tagName!="TABLE" )
 			o=o.parentNode;
-		var Mnivel=o.getAttribute("id").split("-") 
-		nodo.nivel=Mnivel[1]
+		var Mnivel=o.getAttribute("id").split("-"); 
+		nodo.nivel=Mnivel[1];
 
        	while(o.tagName!="TR" )
 			 o=o.parentNode;   
@@ -152,7 +152,7 @@ var gLiteralbackground;			// Fondo color nodo vista para restablecer
 		if(parseInt(nodo.nivel)>0){
 			o=o.previousSibling;
 			while(o.nodeType!=1 )
-				o=o.previousSibling
+				o=o.previousSibling;
 		   	nodo.NodoPadre=o;
 		}
 		else
@@ -160,9 +160,9 @@ var gLiteralbackground;			// Fondo color nodo vista para restablecer
 		o=nodo.Nodo; 
 		var auxsplit=o.getAttribute("id");
 		var idTR=auxsplit.split("-") [0];		
-        o=o.nextSibling
+        o=o.nextSibling;
         while(o!=null && o.nodeType!=1 )
-           o=o.nextSibling
+           o=o.nextSibling;
 		if(o==null){ // Es el último hermano y no tiene hijos
 			nodo.ArbolHijos=null;	
 			nodo.siguienteHermano=null;
@@ -176,9 +176,9 @@ var gLiteralbackground;			// Fondo color nodo vista para restablecer
 			return(nodo);
 		}
 		nodo.ArbolHijos=o;	
-		o=o.nextSibling
+		o=o.nextSibling;
         while(o!=null && o.nodeType!=1)
-           o=o.nextSibling
+           o=o.nextSibling;
 		if(o==null){ // El nodo  tiene hijos y  es ultimo hermano
 			nodo.siguienteHermano=null;
 			return(nodo);
@@ -195,26 +195,26 @@ function clickNodo(nodov,pathimg){
 			case "menos_t" :
 				nodov.imgsigno.setAttribute("value","mas_t",null);
 				nodov.imgsigno.setAttribute("src",pathimg+"/mas_t.gif",null);
-				nodov.ArbolHijos.style.display="none"
+				nodov.ArbolHijos.style.display="none";
 				break;
 			case "menos_c" :
 				nodov.imgsigno.setAttribute("value","mas_c",null);
 				nodov.imgsigno.setAttribute("src",pathimg+"/mas_c.gif",null);
 				if (nodov.nivel==0)
 				    nodov.imgsigno.setAttribute("src",pathimg+"/mas_root.gif",null);
-				nodov.ArbolHijos.style.display="none"
+				nodov.ArbolHijos.style.display="none";
 				break;
 			case "mas_t" :
 				nodov.imgsigno.setAttribute("value","menos_t",null);
 				nodov.imgsigno.setAttribute("src",pathimg+"/menos_t.gif",null);
-				nodov.ArbolHijos.style.display="block"
+				nodov.ArbolHijos.style.display="block";
 				break;
 			case "mas_c" :
 				nodov.imgsigno.setAttribute("value","menos_c",null);
 				nodov.imgsigno.setAttribute("src",pathimg+"/menos_c.gif",null);
 				if (nodov.nivel==0)
 				    nodov.imgsigno.setAttribute("src",pathimg+"/menos_root.gif",null);
-				nodov.ArbolHijos.style.display="block"
+				nodov.ArbolHijos.style.display="block";
 				break;
 		}
 }
@@ -243,7 +243,7 @@ function clickLiteralNodo(oLIT,pathimg){
 		currentpathimg=pathimg;
 	}
 	var signoimg=nodov.imgsigno.getAttribute("value");
-	var signo=signoimg.split("_")	
+	var signo=signoimg.split("_");	
 	if(botonraton==1){
 			if (signo[0]=="mas"  || 	signo[0]=="menos" ) clickNodo(nodov,pathimg);
 	}
@@ -376,11 +376,11 @@ function CreaCeldaVista(nodov,tablanodo){
 		var HTMLinner=nodoTBODYTR.innerHTML;
 		
 		if(nodov.TieneHijos()){
-			var  patron = new RegExp("nada_c","gi") 
+			var  patron = new RegExp("nada_c","gi"); 
 			HTMLinner=HTMLinner.replace(patron,"nada_t"); 
 		}		
 		else{
-			var  patron = new RegExp("nada_t","gi") 
+			var  patron = new RegExp("nada_t","gi"); 
 			HTMLinner=HTMLinner.replace(patron,"nada_c"); 
 		}
 		var auxnodo=nodov;
@@ -433,7 +433,7 @@ function EliminaNodo(nodov){
 		pn.removeChild(nodov.ArbolHijos); // Elimina arbol hijo
 	pn.removeChild(nodov.Nodo);	// Elimina Nodo
 
-	var antHermano=pn.lastChild
+	var antHermano=pn.lastChild;
 	if(antHermano==null){ // El nodo padre no tiene más hijos
 			var pn=papa.ArbolHijos.parentNode; // Nodo padre
 			pn.removeChild(papa.ArbolHijos); // Elimina arbol hijo
@@ -446,7 +446,7 @@ function EliminaNodo(nodov){
 			if(idTR=="TRNodoHijo"){
 				antHermano=antHermano.previousSibling;
 				while(antHermano.nodeType!=1 )
-					antHermano=antHermano.previousSibling
+					antHermano=antHermano.previousSibling;
 				var TAnchor=antHermano.getElementsByTagName('A');
 				if(TAnchor.length==2) // Imagen de signo pulsable
 					var oIMG=TAnchor[0].childNodes[0];
@@ -523,7 +523,7 @@ function QuitaANCHOR(oIMG){
 //	 Cambia la imagen de un determinado nivel 
 //-----------------------------------------------------------------------------------------------------------------------
 function ChgSignoNivel(arbolv,n){
-	if(arbolv==null) return
+	if(arbolv==null) return;
 	var nodoTD =arbolv.childNodes[0];
 	var nodoTABLE=nodoTD.childNodes[0];
 	var nodoTBODY=nodoTABLE.childNodes[0];
@@ -548,7 +548,7 @@ function ChgSignoNivel(arbolv,n){
 //____________________________________________________________________________
 function click_de_raton_prov(e){
 	if(IE){
-		botonraton=event.button
+		botonraton=event.button;
 		event.returnValue=true;
 		return;
 	}
@@ -569,6 +569,6 @@ var NS=(navigator.appName=="Netscape");
 //	Redirecciona el evento onmousedown a la función de usuario especificada. 
 //____________________________________________________________________________
 document.onmousedown = click_de_raton_prov; // Redefine el evento onmousedown
- if(NS) document.captureEvents(Event.MOUSEDOWN | Event.MOUSEMOVE | Event.MOUSEUP)
+ if(NS) document.captureEvents(Event.MOUSEDOWN | Event.MOUSEMOVE | Event.MOUSEUP);
 
 

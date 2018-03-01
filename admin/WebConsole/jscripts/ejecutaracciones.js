@@ -15,11 +15,11 @@ function gestion(op)
 {
 	reset_contextual(-1,-1); // Oculta menu contextual
 	var resul=window.confirm(TbMsg[0]);
-	if (!resul) return
-	var ambito=document.fdatos.ambito.value
-	var idambito=document.fdatos.idambito.value
-	var idprocedimiento=currentNodo.toma_identificador() // identificador del ambito
-	var procedimiento=currentNodo.toma_infonodo() // Nombre del procedimiento
+	if (!resul) return;
+	var ambito=document.fdatos.ambito.value;
+	var idambito=document.fdatos.idambito.value;
+	var idprocedimiento=currentNodo.toma_identificador(); // identificador del ambito
+	var procedimiento=currentNodo.toma_infonodo(); // Nombre del procedimiento
 	
 	/* LLamada a la gestión */
 	var wurl="../gestores/gestor_ejecutaracciones.php";
@@ -42,10 +42,10 @@ function retornoGestion(resul)
 //________________________________________________________________________________________________________
 function resultado_gestion_procedimiento(resul,descrierror){
 	if (!resul){ // Ha habido algún error en la ejecución
-		alert(descrierror)
+		alert(descrierror);
 		return
 	}
-	alert(TbMsg[1])
+	alert(TbMsg[1]);
 	location.href="../nada.php";
 }
 

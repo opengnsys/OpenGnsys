@@ -314,7 +314,7 @@
 					<TR>
 						<TD><A href="#op"><IMG border=0 src="../images/iconos/eliminar.gif"></A>&nbsp;</TD>
 						<TD><A style="text-decoration:none;COLOR:#999999;" href="#op">
-							<span	 onmouseout=desresaltar(this) onmouseover=resaltar(this)><?php echo $TbMsg[12]?><span></A></TD>
+							<span onmouseout=desresaltar(this); onmouseover=resaltar(this)><?php echo $TbMsg[12]?><span></A></TD>
 					</TR>
 				</TABLE>
 			</TD>		
@@ -325,7 +325,7 @@
 						<?php // Resaltar ?>
 						<TD><A href="#op"><IMG border=0 src="../images/iconos/reiniciar.gif"></A>&nbsp;</TD>
 						<TD><A style="text-decoration:none;COLOR:#999999;" href="#op">
-								<span	 onmouseout=desresaltar(this) onmouseover=resaltar(this)><?php echo $TbMsg[13]?><span></A></TD>
+								<span onmouseout=desresaltar(this); onmouseover=resaltar(this)><?php echo $TbMsg[13]?><span></A></TD>
 					</TR>
 				</TABLE>
 			</TD>				
@@ -336,7 +336,7 @@
 						<?php // Parar ?>
 						<TD><A href="#op"><IMG border=0 src="../images/iconos/acDetenida.gif"></A>&nbsp;</TD>
 						<TD><A style="text-decoration:none;COLOR:#999999;" href="#op">
-									<span	 onmouseout=desresaltar(this) onmouseover=resaltar(this)><?php echo $TbMsg[14]?><span></A></TD>
+									<span onmouseout=desresaltar(this); onmouseover=resaltar(this)><?php echo $TbMsg[14]?><span></A></TD>
 						
 					</TR>
 				</TABLE>
@@ -348,7 +348,7 @@
 						<?php // Seguir ?>
 						<TD><A href="#op"><IMG border=0 src="../images/iconos/acIniciada.gif"></A>&nbsp;</TD>
 						<TD>&nbsp;<A style="text-decoration:none;COLOR:#999999;" href="#op">
-							<span onmouseout=desresaltar(this) onmouseover=resaltar(this)><?php echo $TbMsg[15]?></span></A>&nbsp;</TD>
+							<span onmouseout=desresaltar(this); onmouseover=resaltar(this)><?php echo $TbMsg[15]?></span></A>&nbsp;</TD>
 					</TR>
 				</TABLE>
 			</TD>	
@@ -359,7 +359,7 @@
 						<?php // Seguir ?>
 						<TD><A href="#op"><IMG border=0 src="../images/iconos/acExitosa.gif"></A>&nbsp;</TD>
 						<TD>&nbsp;<A style="text-decoration:none;COLOR:#999999;" href="#op">
-							<span onmouseout=desresaltar(this) onmouseover=resaltar(this)><?php echo $TbMsg[55]?></span></A>&nbsp;</TD>
+							<span onmouseout=desresaltar(this); onmouseover=resaltar(this)><?php echo $TbMsg[55]?></span></A>&nbsp;</TD>
 					</TR>
 				</TABLE>
 			</TD>
@@ -369,7 +369,7 @@
 						<?php // Seguir ?>
 						<TD><A href="#op"><IMG border=0 src="../images/iconos/acFallida.gif"></A>&nbsp;</TD>
 						<TD>&nbsp;<A style="text-decoration:none;COLOR:#999999;" href="#op">
-							<span onmouseout=desresaltar(this) onmouseover=resaltar(this)><?php echo $TbMsg[56]?></span></A>&nbsp;</TD>
+							<span onmouseout=desresaltar(this); onmouseover=resaltar(this)><?php echo $TbMsg[56]?></span></A>&nbsp;</TD>
 					</TR>
 				</TABLE>
 			</TD>			

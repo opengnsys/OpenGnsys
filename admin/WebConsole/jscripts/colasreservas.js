@@ -28,13 +28,13 @@
 		//________________________________________________________________________________________________________
 	function vertabla_calendario(ofecha){
 		currentFecha=ofecha;
-		url="../varios/calendario_ventana.php?fecha="+ofecha.value
+		url="../varios/calendario_ventana.php?fecha="+ofecha.value;
 		window.open(url,"vf","top=160,left=250,height=220,width=150,scrollbars=no")
 	}
 //________________________________________________________________________________________________________
 	function vertabla_horario(ohora){
 		currentHora=ohora;
-		url="../varios/horareser_ventana.php?hora="+ohora.value
+		url="../varios/horareser_ventana.php?hora="+ohora.value;
 		window.open(url,"vh","top=200,left=250,height=120,width=160,scrollbars=no")
 	}
 //________________________________________________________________________________________________________
@@ -55,13 +55,13 @@
 	function clic(o){
 		var idaula=o.value; 
 		var wid=o.getAttribute("id");
-		var aux=wid.split("/") // Toma el identificador 
+		var aux=wid.split("/"); // Toma el identificador 
 		var onodo=document.getElementById("nodomes-"+idaula+"-"+aux[1]+"/"+aux[2]); 
 		desplieganodo(onodo); // Despliega el mes donde está el día
 		onodo=document.getElementById("nododia-"+idaula+"-"+wid); 
 		desplieganodo(onodo); 
-		nwhref="#anododia-"+idaula+"-"+wid
-		location.href=nwhref
+		nwhref="#anododia-"+idaula+"-"+wid;
+		location.href=nwhref;
 		resalta(onodo);
 }
 //________________________________________________________________________________________________________
@@ -70,8 +70,8 @@
 		var onodo=document.getElementById("nodomes-"+idaula+"-"+o.getAttribute("id")); 
 		desplieganodo(onodo); 
 
-		nwhref="#anodomes-"+idaula+"-"+o.getAttribute("id")
-		location.href=nwhref
+		nwhref="#anodomes-"+idaula+"-"+o.getAttribute("id");
+		location.href=nwhref;
 		resalta(onodo);
 	}
 //________________________________________________________________________________________________________

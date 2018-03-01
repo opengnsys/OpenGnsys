@@ -9,10 +9,10 @@
 //	Muestra formulario para gestionar los componentes incluidos en un perfil hardware 
 //________________________________________________________________________________________________________
 function insertar_perfilcomponente(){
-	reset_contextual(-1,-1)
-	var identificador=currentNodo.toma_identificador()
+	reset_contextual(-1,-1);
+	var identificador=currentNodo.toma_identificador();
 	var descripcionperfil=currentNodo.toma_infonodo();
-	var whref="../varios/perfilcomponente_hard.php?idperfilhard="+identificador+"&descripcionperfil="+descripcionperfil
+	var whref="../varios/perfilcomponente_hard.php?idperfilhard="+identificador+"&descripcionperfil="+descripcionperfil;
 	window.open(whref,"frame_contenidos")
 }
 //________________________________________________________________________________________________________
@@ -20,9 +20,9 @@ function insertar_perfilcomponente(){
 //	Muestra información sobre los perfiles hardware
 //________________________________________________________________________________________________________
 function muestra_informacion(){
-	reset_contextual(-1,-1)
-	var identificador=currentNodo.toma_identificador()
+	reset_contextual(-1,-1);
+	var identificador=currentNodo.toma_identificador();
 	var descripcionperfil=currentNodo.toma_infonodo();
-	var whref="../varios/informacion_perfileshardware.php?idperfil="+identificador+"&descripcionperfil="+descripcionperfil
+	var whref="../varios/informacion_perfileshardware.php?idperfil="+identificador+"&descripcionperfil="+descripcionperfil;
 	window.open(whref,"frame_contenidos")
 }

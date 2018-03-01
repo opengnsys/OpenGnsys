@@ -56,13 +56,13 @@ function selfclose(){
 //	Confirma la edición 
 //________________________________________________________________________________________________________
 function confirmar(ida){
-	var wurl="../gestores/gestor_ordenadorestandar.php?idaula="+ida
-	var valor
-	var o
-		var nit=document.forms[0].elements.length // Prepara la cadena de parámetros metodo get
+	var wurl="../gestores/gestor_ordenadorestandar.php?idaula="+ida;
+	var valor;
+	var o;
+		var nit=document.forms[0].elements.length; // Prepara la cadena de parámetros metodo get
 		for (i=0;i<nit;i++){
-			o=document.forms[0].elements[i]
-		valor=o.value
+			o=document.forms[0].elements[i];
+		valor=o.value;
 		if (valor=="on") {
 			if(o.checked ) 
 				valor=1; 

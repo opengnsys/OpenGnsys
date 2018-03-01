@@ -1,4 +1,4 @@
-﻿﻿// *************************************************************************************************************************************************
+﻿// *************************************************************************************************************************************************
 //	Libreria de scripts de Javascript
 // Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
 // Fecha Creación:2003-2004
@@ -7,11 +7,11 @@
 // Descripción : 
 //		Este fichero implementa las funciones javascript del fichero programaciones.php
 // *************************************************************************************************************************************************
-var gris="#bbbcb9"
-var rojo="#cc3366"
-var negro="#000000"
-var azul= "#4e4ea6"
-var blanco="#eeeeee"
+var gris="#bbbcb9";
+var rojo="#cc3366";
+var negro="#000000";
+var azul= "#4e4ea6";
+var blanco="#eeeeee";
 var fondooriginal="#EEEECC";
 var colororiginal="#003300";
 var gmes=0;
@@ -23,7 +23,7 @@ var op_suspension=4;
 var currenthoras=null;
 var currenthorasini=null;
 var currenthorasfin=null;
-var swpz=false
+var swpz=false;
 var currentVitem;
 var currentcolor;
 //___________________________________________________________________________________________________________
@@ -34,25 +34,25 @@ function ItemSeleccionado(o){
 }
 //___________________________________________________________________________________________________________
 function Marca(o){
-	o.style.color=blanco 
-	o.style.backgroundColor=rojo 
+	o.style.color=blanco; 
+	o.style.backgroundColor=rojo; 
 	o.setAttribute("selitem",1);
 }
 //___________________________________________________________________________________________________________
 function Resalta(o){
-	o.style.color=blanco 
+	o.style.color=blanco; 
 	o.style.backgroundColor=azul 
 }
 //___________________________________________________________________________________________________________
 function Desmarca(o){
-	o.style.color=colororiginal
-	o.style.backgroundColor=fondooriginal
+	o.style.color=colororiginal;
+	o.style.backgroundColor=fondooriginal;
 	o.setAttribute("selitem",0);
 }
 //___________________________________________________________________________________________________________
 function TH_clic(o){
 	var tbobj=TBSource(o); // Busca la tabla donde se pulsó
-	var oTD=tbobj.getElementsByTagName('TD')
+	var oTD=tbobj.getElementsByTagName('TD');
 	for(var i=0;i<oTD.length;i++){
 		if(oTD[i].getAttribute("id")!="")
 			clic(oTD[i],true)
@@ -117,13 +117,13 @@ function TBSource(o){
 //___________________________________________________________________________________________________________
 function activa(idbt){
 	var bt=document.getElementById(idbt);
-	bt.style.visibility="visible"
+	bt.style.visibility="visible";
 	bt.style.color=negro;
 }
 //___________________________________________________________________________________________________________
 function desactiva(idbt){
 	var bt=document.getElementById(idbt);
-	bt.style.visibility="hidden"
+	bt.style.visibility="hidden";
 	bt.style.color=gris;
 }
 //___________________________________________________________________________________________________________
@@ -164,7 +164,7 @@ function detecta_cambio(vitem){ // vitem es el valor hexdecimal a mostrar
 			gmes=wmes;
 			ganno=wanno;
 			var wurl="toma_mes.php";
-			var prm="idmes="+wmes+"&idanno="+wanno
+			var prm="idmes="+wmes+"&idanno="+wanno;
 			currentVitem=vitem;
 			CallPage(wurl,prm,"retornoMesAnno","POST");
 			return(true);
@@ -183,14 +183,14 @@ function retornoMesAnno(htmlMes){
 function visible_multiple(){
 	fm=document.getElementById("fechasmultiples");
 	fs=document.getElementById("fechassimples");
-	fm.style.visibility = "visible" 
+	fm.style.visibility = "visible"; 
 	fs.style.visibility = "hidden";
 }
 //___________________________________________________________________________________________________________
 function visible_simple(){
 	fm=document.getElementById("fechasmultiples");
 	fs=document.getElementById("fechassimples");
-	fm.style.visibility = "hidden" 
+	fm.style.visibility = "hidden"; 
 	fs.style.visibility = "visible";
 }
 //___________________________________________________________________________________________________________
@@ -226,7 +226,7 @@ function alta_programacion(ida,tia,ses){
 }
 //___________________________________________________________________________________________________________
 function duplicar_programacion(){
-	activa("bt_insertar")
+	activa("bt_insertar");
 	desactiva("bt_eliminar");
 	desactiva("bt_modificar");
 	desactiva("bt_duplicar");
@@ -268,7 +268,7 @@ function gestor_programacion(ida,tia,ses,idr,swop)
 			alert(TbMsg[3]);
 			return
 		}
-		wdias=0
+		wdias=0;
 		wsemanas=0
    }
 
@@ -294,8 +294,8 @@ function gestor_programacion(ida,tia,ses,idr,swop)
 		}
 	}
 
-	inputprogramacion=document.getElementById("nombrebloque")
-	wnombrebloque=inputprogramacion.value
+	inputprogramacion=document.getElementById("nombrebloque");
+	wnombrebloque=inputprogramacion.value;
 	if (wnombrebloque==""){
 		alert(TbMsg[5]);
 		return
@@ -304,7 +304,7 @@ function gestor_programacion(ida,tia,ses,idr,swop)
 	wminutos=document.getElementById("minutos").value;
 	if (wminutos<0 || wminutos>59){
 		alert(TbMsg[6]);
-		document.getElementById("minutos").focus()
+		document.getElementById("minutos").focus();
 		return
 	}
 	if(wtipoaccion==EJECUCION_RESERVA){
@@ -312,14 +312,14 @@ function gestor_programacion(ida,tia,ses,idr,swop)
 		wminutosini=document.getElementById("minutosini").value;
 		if (wminutosini<0 || wminutosini>59){
 			alert(TbMsg[6]);
-			document.getElementById("minutosini").focus()
+			document.getElementById("minutosini").focus();
 			return;
 		}
 		wampmfin=document.getElementById("ampmfin").value;
 		wminutosfin=document.getElementById("minutosfin").value;
 		if (wminutosfin<0 || wminutosfin>59){
 			alert(TbMsg[6]);
-			document.getElementById("minutosfin").focus()
+			document.getElementById("minutosfin").focus();
 			return;
 		}
 	}
@@ -342,14 +342,14 @@ function gestor_programacion(ida,tia,ses,idr,swop)
 	prm+="&wampmini="+wampmini+"&wminutosini="+wminutosini+"&wampmfin="+wampmfin+"&wminutosfin="+wminutosfin;
 	
 	wsw_sus=document.getElementById("sw_sus").checked;
-	prm+="&wsw_sus="+wsw_sus
-	prm+="&wsesion="+ses
+	prm+="&wsw_sus="+wsw_sus;
+	prm+="&wsesion="+ses;
 	CallPage(wurl,prm,"retornoGestor","POST");		
 
 }
 //___________________________________________________________________________________________________________
 function suspender_programacion(ida,tia,ses){
-	var listalen=lista.options.length
+	var listalen=lista.options.length;
 	if(listalen==0){
 		alert(TbMsg[8]);
 		wsw_sus=document.getElementById("sw_sus").checked=false;
@@ -359,9 +359,9 @@ function suspender_programacion(ida,tia,ses){
 	wtipoaccion=tia;
 	
 	var wurl="../gestores/gestor_programaciones.php";
-	var prm="wswop="+op_suspension+"&widentificador="+widentificador+"&wtipoaccion="+wtipoaccion
+	var prm="wswop="+op_suspension+"&widentificador="+widentificador+"&wtipoaccion="+wtipoaccion;
 	wsw_sus=document.getElementById("sw_sus").checked;
-	prm+="&wsw_sus="+wsw_sus
+	prm+="&wsw_sus="+wsw_sus;
 	
 	CallPage(wurl,prm,"retornoGestor","POST");		
 	
@@ -382,9 +382,9 @@ function valor_HEX(idtb)
 	var oTD;
 	otb=document.getElementById(idtb);
 	var aux=0x00000000;
-	filas=otb.rows.length
+	filas=otb.rows.length;
 	for (i=0;i<filas;i++){
-		columnas=otb.rows[i].cells.length
+		columnas=otb.rows[i].cells.length;
 		for (j=0;j<columnas;j++){
 			oTD=otb.rows[i].cells[j];
 			if(oTD.tagName=="TD"){
@@ -404,9 +404,9 @@ function valor_item(idtb){
 	var valor=0,sw=0;
 	var oTD;
 	otb=document.getElementById(idtb); 
-	filas=otb.rows.length
+	filas=otb.rows.length;
 	for (i=0;i<filas;i++){
-		columnas=otb.rows[i].cells.length
+		columnas=otb.rows[i].cells.length;
 		for (j=0;j<columnas;j++){
 			oTD=otb.rows[i].cells[j];
 			if(oTD.tagName=="TD"){
@@ -433,9 +433,9 @@ function opcion_simple(idtb)
 	var oTD;
 	var conta=0;
 	otb=document.getElementById(idtb); 
-	filas=otb.rows.length
+	filas=otb.rows.length;
 	for (i=0;i<filas;i++){
-		columnas=otb.rows[i].cells.length
+		columnas=otb.rows[i].cells.length;
 		for (j=0;j<columnas;j++){
 			oTD=otb.rows[i].cells[j];
 			if(oTD.tagName=="TD"){
@@ -492,7 +492,7 @@ function registro_programacion(idr,nombrere,swop)
 	nuevo_bloque();
 
 	visible_simple();
-	activa("bt_insertar")
+	activa("bt_insertar");
 	desactiva("bt_eliminar");
 	desactiva("bt_modificar");
 	desactiva("bt_duplicar");
@@ -551,19 +551,19 @@ function desmarca_tablas(){
 	document.getElementById("minutos").value="";
 	//document.getElementById("segundos").value="";
 
-	whorasini=	document.getElementById("tabla_horasini")
+	whorasini=	document.getElementById("tabla_horasini");
 	if(whorasini!=null){
 		desmarca_tabla("tabla_horasini");
-		wampmini=	document.getElementById("ampmini")
-		wminutosini=	document.getElementById("minutosini")
+		wampmini=	document.getElementById("ampmini");
+		wminutosini=	document.getElementById("minutosini");
 		wampmini.selectedIndex=1;
 		wminutosini.value="";
 	}
-	whorasfin=	document.getElementById("tabla_horasfin")
+	whorasfin=	document.getElementById("tabla_horasfin");
 	if(whorasfin!=null){
 		desmarca_tabla("tabla_horasfin");
-		wampmfin=	document.getElementById("ampmfin")
-		wminutosfin=	document.getElementById("minutosfin")
+		wampmfin=	document.getElementById("ampmfin");
+		wminutosfin=	document.getElementById("minutosfin");
 		wampmfin.selectedIndex=1;
 		wminutosfin.value="";
 	}
@@ -573,16 +573,16 @@ function desmarca_tablas(){
 //___________________________________________________________________________________________________________
 function nuevo_bloque(){
 	var lista=document.getElementById("lista_programaciones");
-	var listalen=lista.options.length
-	var nb=1
+	var listalen=lista.options.length;
+	var nb=1;
 	var cbloque="bloque";
-	var nbloque=cbloque+nb
-	var swb=false;
+	var nbloque=cbloque+nb;
+	var swb;
 	while(true){
 		swb=false;
 		for(var i=0;i<listalen;i++){
 			if(lista.options[i].text==nbloque){
-				swb=true
+				swb=true;
 				break;
 			}
 		}
@@ -594,7 +594,7 @@ function nuevo_bloque(){
 			break;
 	}
 	document.getElementById("nombrebloque").value=nbloque;
-	var lista=document.getElementById("lista_programaciones");
+	lista=document.getElementById("lista_programaciones");
 	lista.selectedIndex=-1;
 }
 //___________________________________________________________________________________________________________
@@ -602,7 +602,7 @@ function nuevo_bloque(){
 //___________________________________________________________________________________________________________
 function desmarca_tabla(idtb){
 	otb=document.getElementById(idtb);
-	if (!otb) return
+	if (!otb) return;
 	desmarcando_tabla(otb);
 }
 //___________________________________________________________________________________________________________
@@ -610,10 +610,10 @@ function desmarca_tabla(idtb){
 //___________________________________________________________________________________________________________
 function desmarcando_tabla(otb)
 {
-	var oTD
-	filas=otb.rows.length
+	var oTD;
+	filas=otb.rows.length;
 	for (var i=0;i<filas;i++){
-		columnas=otb.rows[i].cells.length
+		columnas=otb.rows[i].cells.length;
 		for (var j=0;j<columnas;j++){
 			oTD=otb.rows[i].cells[j];
 			if(oTD.tagName=="TD"){
@@ -643,7 +643,7 @@ function consulta_programacion(){
 		var wurl="consulta_programaciones.php";
 		var prm="idprogramacion="+idprogramacion;
 		CallPage(wurl,prm,"retornoConsulta","POST");		
-		desactiva("bt_insertar")
+		desactiva("bt_insertar");
 		activa("bt_eliminar");
 		activa("bt_modificar");
 		activa("bt_duplicar");
@@ -693,7 +693,7 @@ function muestra_programacion(cadena_campos)
 		wmes=parseInt(valor_item("tabla_meses")); // Recupera mes
 		wanno=parseInt(valor_item("tabla_annos")); // Recupera año
 		var wurl="toma_mes.php";
-		var prm="idmes="+wmes+"&idanno="+wanno
+		var prm="idmes="+wmes+"&idanno="+wanno;
 		currentVitem=pdiario;
 		CallPage(wurl,prm,"retornoMesAnno","POST");			
 	}
@@ -702,20 +702,20 @@ function muestra_programacion(cadena_campos)
 	document.getElementById("minutos").value=pminutos;
 	//document.getElementById("segundos").value=psegundos;
 
-	wtabla_horasini=	document.getElementById("tabla_horasini")
+	wtabla_horasini=	document.getElementById("tabla_horasini");
 	if(wtabla_horasini!=null)
 		marca_item("tabla_horasini",phorasini);
-	wampmini=	document.getElementById("ampmini")
-	wminutosini=	document.getElementById("minutosini")
+	wampmini=	document.getElementById("ampmini");
+	wminutosini=	document.getElementById("minutosini");
 	if(wampmini!=null){
 		wampmini.value=pampmini;
 		wminutosini.value=pminutosini;
 	}
-	wtabla_horasfin=	document.getElementById("tabla_horasfin")
+	wtabla_horasfin=	document.getElementById("tabla_horasfin");
 	if(wtabla_horasfin!=null)
 		marca_item("tabla_horasfin",phorasfin);
-	wampmfin=	document.getElementById("ampmfin")
-	wminutosfin=	document.getElementById("minutosfin")
+	wampmfin=	document.getElementById("ampmfin");
+	wminutosfin=	document.getElementById("minutosfin");
 	if(wampmfin!=null){
 		wampmfin.value=pampmfin;
 		wminutosfin.value=pminutosfin;
@@ -728,7 +728,7 @@ function muestra_programacion(cadena_campos)
 //___________________________________________________________________________________________________________
 function opcion_multiple(valor){ 
 	var conta=0;
-	var auxhex=0x00000001;
+	var auxhex;
 	for (auxhex=0x00000001;auxhex!=0x00000000;auxhex=auxhex<<1){
 		if (valor & auxhex){
 			conta++;
@@ -745,18 +745,18 @@ function marca_item(idtabla,vhex)
 {
 	var oTD;
 	otb=document.getElementById(idtabla);
-	filas=otb.rows.length
+	filas=otb.rows.length;
 	for (i=0;i<filas;i++){
-		columnas=otb.rows[i].cells.length
+		columnas=otb.rows[i].cells.length;
 		for (j=0;j<columnas;j++){
 			oTD=otb.rows[i].cells[j];
 			if(oTD.tagName=="TD"){
 				if (oTD.getAttribute("value") & vhex){
 					Marca(oTD);
 					if (idtabla=="tabla_horas")
-						currenthoras=oTD
+						currenthoras=oTD;
 					if (idtabla=="tabla_horasini")
-						currenthorasini=oTD
+						currenthorasini=oTD;
 					if (idtabla=="tabla_horasfin")
 						currenthorasfin=oTD
 				}
@@ -773,7 +773,7 @@ function cancela_programacion(){
 	inicializa_variables();
 	nuevo_bloque();
 	visible_simple();
-	activa("bt_insertar")
+	activa("bt_insertar");
 	desactiva("bt_eliminar");
 	desactiva("bt_modificar");
 	desactiva("bt_duplicar");

@@ -22,12 +22,12 @@ if($hora=="") $hora="8:00";
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 <SCRIPT language="JavaScript">
 
-var rojo="#cc3366"
-var negro="#ffffff"
-var verde="lightseagreen"
-var gris="#bbbcb9"
-var blanco="#eeeeee"
-var azul= "#0000cc"
+var rojo="#cc3366";
+var negro="#ffffff";
+var verde="lightseagreen";
+var gris="#bbbcb9";
+var blanco="#eeeeee";
+var azul= "#0000cc";
 var fondooriginal="#EEEECC";
 var colororiginal="#003300";
 
@@ -39,19 +39,19 @@ function ItemSeleccionado(o){
 }
 //-------------------------------------------------------------------
 function Resalta(o){
-	o.style.color=blanco 
+	o.style.color=blanco; 
 	o.style.backgroundColor=azul 
 }
 //-------------------------------------------------------------------
 function Desmarca(o){
-	o.style.color=colororiginal
+	o.style.color=colororiginal;
 	o.style.backgroundColor=fondooriginal
 
 }
 //-------------------------------------------------------------------
 function sobre(o){
 	if (currentHora!=null)
-		Desmarca(currentHora)
+		Desmarca(currentHora);
 	Resalta(o);
 	currentHora=o;
 }
@@ -61,7 +61,7 @@ function fuera(o){
 }
 //-------------------------------------------------------------------
 function clic(o){
-	window.opener.anade_hora(o.id)
+	window.opener.anade_hora(o.id);
 	self.close()
 }
 //_________________________________________________________
@@ -70,7 +70,7 @@ function cerrar_ventana(){
 }
 //_________________________________________________________
 function borrar_fecha(){
-	window.opener.anade_hora("")
+	window.opener.anade_hora("");
 	self.close()
 }
 //_________________________________________________________

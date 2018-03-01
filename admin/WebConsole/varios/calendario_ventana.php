@@ -37,12 +37,12 @@ if (isset($_POST["anno_elegido"])) $anno_elegido=$_POST["anno_elegido"];
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 <SCRIPT language="JavaScript">
 
-var rojo="#cc3366"
-var negro="#ffffff"
-var verde="lightseagreen"
-var gris="#bbbcb9"
-var blanco="#eeeeee"
-var azul= "#0000cc"
+var rojo="#cc3366";
+var negro="#ffffff";
+var verde="lightseagreen";
+var gris="#bbbcb9";
+var blanco="#eeeeee";
+var azul= "#0000cc";
 var fondooriginal="#EEEECC";
 var colororiginal="#003300";
 
@@ -68,36 +68,36 @@ function ItemSeleccionado(o){
 }
 //_________________________________________________________________________________________________________
 function elige_anno(){
-	document.forms.fdatos.dia_elegido.value=1
-	document.forms.fdatos.mes_elegido.value=1
-	document.forms.fdatos.anno_elegido.value=document.forms.fdatos.despleanno.value
+	document.forms.fdatos.dia_elegido.value=1;
+	document.forms.fdatos.mes_elegido.value=1;
+	document.forms.fdatos.anno_elegido.value=document.forms.fdatos.despleanno.value;
 	document.forms.fdatos.submit()
 }
 //_________________________________________________________________________________________________________
 function mes_siguiente(){
-	var wmes=parseInt(document.forms.fdatos.mes_elegido.value)
-	var wanno=parseInt(document.forms.fdatos.anno_elegido.value)
+	var wmes=parseInt(document.forms.fdatos.mes_elegido.value);
+	var wanno=parseInt(document.forms.fdatos.anno_elegido.value);
 	wmes++;
 	if(wmes>12){
-		wmes=1
-		wanno=wanno+1
+		wmes=1;
+		wanno=wanno+1;
 		if(wanno>2014){
 			wanno=2014
 		}
 	}
-	document.forms.fdatos.dia_elegido.value=1
-	document.forms.fdatos.mes_elegido.value=wmes
-	document.forms.fdatos.anno_elegido.value=wanno
+	document.forms.fdatos.dia_elegido.value=1;
+	document.forms.fdatos.mes_elegido.value=wmes;
+	document.forms.fdatos.anno_elegido.value=wanno;
 	document.forms.fdatos.submit()
 }
 //_________________________________________________________________________________________________________
 function mes_anterior(){
-	var wmes=parseInt(document.forms.fdatos.mes_elegido.value)
-	var wanno=parseInt(document.forms.fdatos.anno_elegido.value)
+	var wmes=parseInt(document.forms.fdatos.mes_elegido.value);
+	var wanno=parseInt(document.forms.fdatos.anno_elegido.value);
 	wmes--;
 	if(wmes<1){
-		wmes=12
-		wanno=wanno-1
+		wmes=12;
+		wanno=wanno-1;
 		if(wanno<2004){
 			wanno=2004
 		}
@@ -113,19 +113,19 @@ function mes_anterior(){
 }
 //____________________________ ____________________________________________________________________________
 function Resalta(o){
-	o.style.color=blanco 
+	o.style.color=blanco; 
 	o.style.backgroundColor=azul 
 }
 //____________________________ ____________________________________________________________________________
 function Desmarca(o){
-	o.style.color=colororiginal
+	o.style.color=colororiginal;
 	o.style.backgroundColor=fondooriginal
 
 }
 //____________________________ ____________________________________________________________________________
 function sobre(o){
 	if (currentDia!=null)
-		Desmarca(currentDia)
+		Desmarca(currentDia);
 	Resalta(o);
 	currentDia=o;
 }
@@ -136,7 +136,7 @@ function fuera(o){
 }
 //____________________________ ____________________________________________________________________________
 function clic(o){
-	window.opener.anade_fecha(o.id)
+	window.opener.anade_fecha(o.id);
 	self.close()
 }
 //____________________________ ____________________________________________________________________________
@@ -145,7 +145,7 @@ function cerrar_ventana(){
 }
 //____________________________ ____________________________________________________________________________
 function borrar_fecha(){
-	window.opener.anade_fecha("")
+	window.opener.anade_fecha("");
 	self.close()
 }
 //____________________________ ____________________________________________________________________________

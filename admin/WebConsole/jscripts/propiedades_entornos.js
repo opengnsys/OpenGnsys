@@ -39,8 +39,8 @@ function selfclose(){
 //	Esta función desabilita la marca de un checkbox en opcion "bajas"
 //________________________________________________________________________________________________________
  function desabilita(o) {
-	var b
-    b=o.checked
+	var b;
+    b=o.checked;
     o.checked=!b
  }
 //________________________________________________________________________________________________________

@@ -1,22 +1,22 @@
 // ********************************************************************************
-// Aplicación WEB: ogAdmWebCon
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creación: Año 2009-2010
-// Fecha Última modificación: Agosto-2010
+// Aplicaciï¿½n WEB: ogAdmWebCon
+// Autor: Josï¿½ Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha Creaciï¿½n: Aï¿½o 2009-2010
+// Fecha ï¿½ltima modificaciï¿½n: Agosto-2010
 // Nombre del fichero: consolaremota.php
-// Descripción : Clase para llamar páginas web usando metodología AJAX
+// Descripciï¿½n : Clase para llamar pï¿½ginas web usando metodologï¿½a AJAX
 // ********************************************************************************
 var _url;
 var _fun;
 var oXMLHttpRequest;
 //____________________________________________________________________________
 //	
-//	LLama a la página
+//	LLama a la pï¿½gina
 //
-//	Parámetros:
+//	Parï¿½metros:
 //	
-//		url			// Url de la página a la que se llama
-//		fun			// Función a la que se llama despues de descargarse la página
+//		url			// Url de la pï¿½gina a la que se llama
+//		fun			// Funciï¿½n a la que se llama despues de descargarse la pï¿½gina
 //____________________________________________________________________________
 function CallPage(url,prm,fun,met){
 	 _url=url;
@@ -26,7 +26,7 @@ function CallPage(url,prm,fun,met){
 		oXMLHttpRequest= new XMLHttpRequest();
 		oXMLHttpRequest.onreadystatechange = procesaoXMLHttpRequest;
 		oXMLHttpRequest.open("POST",_url, true);
-		oXMLHttpRequest.setRequestHeader('Content-Type','application/x-www-form-urlencoded')
+		oXMLHttpRequest.setRequestHeader('Content-Type','application/x-www-form-urlencoded');
 		oXMLHttpRequest.send(prm);    
 	} else if (window.ActiveXObject) {
 		isIE = true;
@@ -42,7 +42,7 @@ function CallPage(url,prm,fun,met){
 		if (oXMLHttpRequest) {
 			oXMLHttpRequest.onreadystatechange =procesaoXMLHttpRequest;
 			oXMLHttpRequest.open("POST",_url, true);
-			oXMLHttpRequest.setRequestHeader('Content-Type','application/x-www-form-urlencoded')
+			oXMLHttpRequest.setRequestHeader('Content-Type','application/x-www-form-urlencoded');
 			oXMLHttpRequest.send(prm);
 		}
 	}

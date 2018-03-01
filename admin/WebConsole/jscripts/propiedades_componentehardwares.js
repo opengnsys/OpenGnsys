@@ -79,10 +79,10 @@ function comprobar_datos(){
 		document.fdatos.descripcion.focus();
 		return(false);
 	}
-	var  p=document.fdatos.idtipohardware.selectedIndex
+	var  p=document.fdatos.idtipohardware.selectedIndex;
 	 if (p==0){  
-         alert(TbMsg[1])
-         document.forms.fdatos.idtipohardware.focus()
+         alert(TbMsg[1]);
+         document.forms.fdatos.idtipohardware.focus();
          return(false)
 	}
 	return(true);

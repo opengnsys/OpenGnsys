@@ -1,21 +1,21 @@
 <?php
 // *****************************************************************************
-// Aplicación WEB: ogAdmWebCon
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creación: Agosto-2010
+// Aplicaciï¿½n WEB: ogAdmWebCon
+// Autor: Josï¿½ Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha Creaciï¿½n: Agosto-2010
 // Nombre del fichero: acceso.php
-// Descripción: Pantalla principal de acceso a la consola de administración web.
-// Versión 1.0.3: Unificación de ficheros e internacionalización.
-// Autor: Ramón Gómez - ETSII, Universidad de Sevilla
+// Descripciï¿½n: Pantalla principal de acceso a la consola de administraciï¿½n web.
+// Versiï¿½n 1.0.3: Unificaciï¿½n de ficheros e internacionalizaciï¿½n.
+// Autor: Ramï¿½n Gï¿½mez - ETSII, Universidad de Sevilla
 // Fecha: 2012-02-07
 // *****************************************************************************
 session_start();
-if(isset($_SESSION)){ 	// Si existe algua sesión ...
+if(isset($_SESSION)){ 	// Si existe algua sesiï¿½n ...
 	session_unset(); // Elimina variables
-	session_destroy(); // Destruye sesión
+	session_destroy(); // Destruye sesiï¿½n
 }
 
-// Cargar configuración.
+// Cargar configuraciï¿½n.
 include_once("controlacceso.php");
 include_once("./includes/CreaComando.php");
 include_once("./clases/AdoPhp.php");
@@ -69,15 +69,15 @@ function confirmar(){
 function comprobar_datos(){
 	if (document.fdatos.usu.value==""){
 		<?php echo 'alert("'.$TbMsg["ACCESS_NOUSER"].'");' ?>
-		document.fdatos.usu.focus()
+		document.fdatos.usu.focus();
 		return(false)
 	}
 	if (document.fdatos.pss.value==""){
 		<?php echo 'alert("'.$TbMsg["ACCESS_NOPASS"].'");' ?>
-		document.fdatos.pss.focus()
+		document.fdatos.pss.focus();
 		return(false)
 	}
-	var  p=document.fdatos.idcentro.selectedIndex
+	var  p=document.fdatos.idcentro.selectedIndex;
 	if (p==0){  
 		<?php echo 'var res=confirm("'.$TbMsg["ACCESS_NOUNIT"].'");' ?>
 	if(!res)
@@ -121,7 +121,7 @@ function PulsaEnter(oEvento){
 </div>
 <div class="pie">
 <?php
-// Añadir versión y URL al proyecto.
+// Aï¿½adir versiï¿½n y URL al proyecto.
 $versionfile="../doc/VERSION.txt";
 if (file_exists ($versionfile)) {
 	echo '<span><a href="https://opengnsys.es/">';

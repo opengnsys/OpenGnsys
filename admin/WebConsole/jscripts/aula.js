@@ -15,10 +15,10 @@
 
 		this.toma_identificador= function(){
 			return(idambito);
-		}
+		};
 		this.toma_sufijo= function(){
 			return(litambito);
-		}
+		};
 		this.toma_infonodo= function(){
 			return(nombreambito);
 		}
@@ -28,7 +28,7 @@ currentNodo=new NodoAux();
 //________________________________________________________________________________________________________
 function nwmenucontextual(o,idmnctx){
 	var menuctx=document.getElementById(idmnctx); // Toma objeto DIV
-	muestra_contextual(ClickX,ClickY,menuctx) // muestra menu
+	muestra_contextual(ClickX,ClickY,menuctx); // muestra menu
 	Toma_Datos(o);
 }
 //________________________________________________________________________________________________________
@@ -54,7 +54,7 @@ function wactualizar_ordenadores(o){
 //	Refresca la visualizaci� del estado de los ordenadores(Clientes rembo y clientes Windows o Linux) 
 //________________________________________________________________________________________________________
 function Sondeo(){
-	reset_contextual(-1,-1) // Oculta menu contextual
+	reset_contextual(-1,-1); // Oculta menu contextual
 	var ambito=document.fcomandos.ambito.value; // Ámbito de aplicación
 	var idambito=document.fcomandos.idambito.value; // Identificador del ámbito
 	var wurl="../principal/sondeo.php";

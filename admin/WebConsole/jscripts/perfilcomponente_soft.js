@@ -9,13 +9,13 @@
 // *************************************************************************************************************************************************
 //________________________________________________________________________________________________________
 function gestion_componente(id,o){
-	idperfil=document.fdatos.idperfilsoft.value
+	idperfil=document.fdatos.idperfilsoft.value;
 	if (o.checked)
 		var opcion=op_alta;
 	else
 		var opcion=op_eliminacion;
 	var wurl="../gestores/gestor_perfilcomponente_soft.php";
-	var prm="opcion="+opcion+"&idperfilsoft="+idperfil+"&idsoftware="+id
+	var prm="opcion="+opcion+"&idperfilsoft="+idperfil+"&idsoftware="+id;
 	CallPage(wurl,prm,"retornoGestion","POST");
 }
 //______________________________________________________________________________________________________
@@ -27,7 +27,7 @@ function retornoGestion(resul){
 //________________________________________________________________________________________________________
 function resultado_insertar_perfilcomponente_soft(resul,descrierror,nwid,tablanodo){
 	if (!resul){ // Ha habido algún error en la inserción
-		alert(descrierror)
+		alert(descrierror);
 		return
 	}
 	alert(TbMsg[0])
@@ -35,7 +35,7 @@ function resultado_insertar_perfilcomponente_soft(resul,descrierror,nwid,tablano
 //________________________________________________________________________________________________________
 function resultado_eliminar_perfilcomponente_soft(resul,descrierror,idp,idh){
 	if (!resul){ // Ha habido algún error en la eliminación
-		alert(descrierror)
+		alert(descrierror);
 		return
 	}
 	alert(TbMsg[1])

@@ -81,7 +81,7 @@ function comprobar_datos(){
 	}
 	
 	if (document.fdatos.ambito.selectedIndex==0) {
-		var res=confirm(TbMsg[2])
+		var res=confirm(TbMsg[2]);
 		if(!res){
 			document.fdatos.ambito.focus();
 			return(false);
@@ -96,7 +96,7 @@ function comprobar_datos(){
 		desple.focus();
 		return(false);
 	}	
-	document.fdatos.idambito.value=desple.options[p].value	
+	document.fdatos.idambito.value=desple.options[p].value;	
 	return(true);
 }
 //________________________________________________________________________________________________________
@@ -105,8 +105,8 @@ function comprobar_datos(){
 //________________________________________________________________________________________________________
 function chgdespleambito(o){
 
-    var idx = o.selectedIndex
-    var ambito = o.options[idx].value 
+    var idx = o.selectedIndex;
+    var ambito = o.options[idx].value; 
 
 	var wurl="../varios/desplegablesambitos.php";
 	var prm="ambito="+ambito;

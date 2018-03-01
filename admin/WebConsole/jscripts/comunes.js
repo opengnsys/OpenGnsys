@@ -7,7 +7,7 @@
 // Descripción : 
 //		Este fichero implementa funciones de uso comn a varios fichechos
 // *************************************************************************************************************************************************
-var corte_currentNodo			// Copia del Nodo actual para mover y colocar
+var corte_currentNodo;			// Copia del Nodo actual para mover y colocar
 var currentTipo=null;				// Tipo de Nodo
 //____________________________________________________________________________
 //
@@ -24,10 +24,10 @@ var NS=(navigator.appName=="Netscape");
 //	Inserta un nuevo grupo 
 //________________________________________________________________________________________________________
 function insertar_grupos(tipo,literaltipo,swi,idu){
-	reset_contextual(-1,-1) // Oculta menu contextual
+	reset_contextual(-1,-1); // Oculta menu contextual
 	var identificador=currentNodo.toma_identificador();
 	if(swi!=null && swi==1) identificador=0;
-	if(identificador==null) identificador=0
+	if(identificador==null) identificador=0;
 
 	if(literaltipo==LITAMBITO_AULAS) // Nuevo grupo de ordenador hijo de un aula
 		var wurl="../propiedades/propiedades_grupos.php?opcion="+op_alta+"&grupoid=0"+"&idaula="+identificador+"&tipo="+AMBITO_GRUPOSORDENADORES	+"&literaltipo="+LITAMBITO_GRUPOSORDENADORES;
@@ -35,8 +35,8 @@ function insertar_grupos(tipo,literaltipo,swi,idu){
 		if(literaltipo==LITAMBITO_GRUPOSORDENADORES) // Nuevo grupo de ordenador hijo de un grupo  de ordenadores
 			var wurl="../propiedades/propiedades_grupos.php?opcion="+op_alta+"&grupoid="+identificador+"&idaula=0"+"&tipo="+AMBITO_GRUPOSORDENADORES	+"&literaltipo="+LITAMBITO_GRUPOSORDENADORES;
 		else
-			var wurl="../propiedades/propiedades_grupos.php?opcion="+op_alta+"&grupoid="+identificador+"&tipo="+tipo	+"&literaltipo="+literaltipo
-	if(idu!=null && idu==1) wurl+="&iduniversidad="+idu
+			var wurl="../propiedades/propiedades_grupos.php?opcion="+op_alta+"&grupoid="+identificador+"&tipo="+tipo	+"&literaltipo="+literaltipo;
+	if(idu!=null && idu==1) wurl+="&iduniversidad="+idu;
 	window.open(wurl,"frame_contenidos")
 }
 //________________________________________________________________________________________________________
@@ -49,9 +49,9 @@ function insertar_grupos(tipo,literaltipo,swi,idu){
 //			- tablanodo: Tabla nodo generada para el nuevo registro (árbol de un s�o un elemento)
 //________________________________________________________________________________________________________
 function resultado_insertar_grupos(resul,descrierror,nwid,tablanodo){
-	reset_contextual(-1,-1) // Oculta menu contextual
+	reset_contextual(-1,-1); // Oculta menu contextual
 	if (!resul){ // Ha habido algn error en la inserci�
-		alert(descrierror)
+		alert(descrierror);
 		return
 	}
 	InsertaNodo(currentNodo,tablanodo);
@@ -61,10 +61,10 @@ function resultado_insertar_grupos(resul,descrierror,nwid,tablanodo){
 //	Modifica el nombre de un grupo
 //________________________________________________________________________________________________________
 function modificar_grupos(){
-	reset_contextual(-1,-1) // Oculta menu contextual
-	var identificador=currentNodo.toma_identificador()
-	var literaltipo=currentNodo.toma_sufijo()
-	wurl="../propiedades/propiedades_grupos.php?opcion="+op_modificacion+"&idgrupo="+identificador+"&literaltipo="+literaltipo
+	reset_contextual(-1,-1); // Oculta menu contextual
+	var identificador=currentNodo.toma_identificador();
+	var literaltipo=currentNodo.toma_sufijo();
+	wurl="../propiedades/propiedades_grupos.php?opcion="+op_modificacion+"&idgrupo="+identificador+"&literaltipo="+literaltipo;
 	window.open(wurl,"frame_contenidos")
 }
 //________________________________________________________________________________________________________
@@ -88,7 +88,7 @@ function resultado_modificar_grupos(resul,descrierror,lit){
 //	Elimina un grupo
 //________________________________________________________________________________________________________
 function eliminar_grupos(){
-	reset_contextual(-1,-1) // Oculta menu contextual
+	reset_contextual(-1,-1); // Oculta menu contextual
 	if (currentNodo.TieneHijos()){
 		var resul=window.confirm(CTbMsg[0]);
 		if (!resul)return;
@@ -113,7 +113,7 @@ function resultado_eliminar_grupos(resul,descrierror,id){
 	}
 	var nvp=currentNodo.PapaNodo();
 	var ncel=nvp.CeldaVista;
-	EliminaNodo(currentNodo) // Elimina el nodo del árbol
+	EliminaNodo(currentNodo); // Elimina el nodo del árbol
 	var nwcurrentNodo=TomaDatosNodo(ncel);
 	resalta(nwcurrentNodo);
 	alert(CTbMsg[3]);
@@ -123,9 +123,9 @@ function resultado_eliminar_grupos(resul,descrierror,id){
 //	Muestra el formulario de captura de datos para insertar
 //________________________________________________________________________________________________________
 function insertar(l,t,w,h,pages,swi,idu){
-	reset_contextual(-1,-1) // Oculta menu contextual
-	var identificador=currentNodo.toma_identificador()
-	var literaltipo=currentNodo.toma_sufijo()
+	reset_contextual(-1,-1); // Oculta menu contextual
+	var identificador=currentNodo.toma_identificador();
+	var literaltipo=currentNodo.toma_sufijo();
 	if(swi!=null && swi==1) identificador=0; // Nodos directos (sin pertenencia a grupo)
 	if(identificador==null) identificador=0;
 
@@ -137,7 +137,7 @@ function insertar(l,t,w,h,pages,swi,idu){
 	}
 	else{
 		if(literaltipo==LITAMBITO_GRUPOSORDENADORES) // Nuevo grupo de ordendor hijo de un grupo  de ordenadores
-			var whref="../propiedades/propiedades_ordenadores.php?opcion="+op_alta+"&grupoid="+identificador+"&idaula=0"
+			var whref="../propiedades/propiedades_ordenadores.php?opcion="+op_alta+"&grupoid="+identificador+"&idaula=0";
 		else{
 			var auxsplit= pages.split('?'); // La variable pages lleva parametros
 			if(auxsplit[1]!=null)
@@ -185,8 +185,8 @@ function resultado_insertar(resul,descrierror,nwid,tablanodo){
 //	Muestra el formulario de captura de datos para modificaci�
 //________________________________________________________________________________________________________
 function modificar(l,t,w,h,pages){
-	reset_contextual(-1,-1) // Oculta menu contextual
-	var identificador=currentNodo.toma_identificador()
+	reset_contextual(-1,-1); // Oculta menu contextual
+	var identificador=currentNodo.toma_identificador();
 	if (!identificador) identificador=0;
 	var whref=pages+"?opcion="+op_modificacion+"&identificador="+identificador;
 	window.open(whref,"frame_contenidos");
@@ -212,7 +212,7 @@ function resultado_modificar(resul,descrierror,lit){
 //	Muestra el formulario de captura de datos para eliminaci�
 //________________________________________________________________________________________________________
 function eliminar(l,t,w,h,pages){
-	reset_contextual(-1,-1) // Oculta menu contextual
+	reset_contextual(-1,-1); // Oculta menu contextual
 	var identificador=currentNodo.toma_identificador();
 	var whref=pages+"?opcion="+op_eliminacion+"&identificador="+identificador;
 	window.open(whref,"frame_contenidos");
@@ -232,7 +232,7 @@ function resultado_eliminar(resul,descrierror,id){
 	}
 	var nvp=currentNodo.PapaNodo();
 	var ncel=nvp.CeldaVista;
-	EliminaNodo(currentNodo) // Elimina el nodo del árbol
+	EliminaNodo(currentNodo); // Elimina el nodo del árbol
 	var nwcurrentNodo=TomaDatosNodo(ncel);
 	resalta(nwcurrentNodo);
 	alert(CTbMsg[6]);
@@ -242,8 +242,8 @@ function resultado_eliminar(resul,descrierror,id){
 //		Copia al buffer un nodo para moverlo posteriormente
 //________________________________________________________________________________________________________
 function mover(tipo){
-	reset_contextual(-1,-1)
-	corte_currentNodo=currentNodo
+	reset_contextual(-1,-1);
+	corte_currentNodo=currentNodo;
 	currentTipo=tipo
 }
 //________________________________________________________________________________________________________
@@ -254,14 +254,14 @@ function colocar(pages,tipo){
 	reset_contextual(-1,-1);
 	if (!corte_currentNodo || tipo!=currentTipo) {
 		alert(CTbMsg[7]);
-		corte_currentNodo=null
+		corte_currentNodo=null;
 		currentTipo=null;
 		return
 	}
 	var identificadorgrupo=currentNodo.toma_identificador();
-	if (!identificadorgrupo) identificadorgrupo=0
+	if (!identificadorgrupo) identificadorgrupo=0;
 	var identificador=corte_currentNodo.toma_identificador();
-	if (!identificador) identificador=0 // Se trata de la raiz
+	if (!identificador) identificador=0; // Se trata de la raiz
 	var wurl=pages;
 	var prm="opcion="+op_movida+"&grupoid="+identificadorgrupo+"&identificador="+identificador;
 	CallPage(wurl,prm,"retornoColocar","POST");
@@ -283,24 +283,24 @@ function retornoColocar(iHTML){
 //________________________________________________________________________________________________________
 function resultado_mover(resul,descrierror,id){
 	if (!resul){
-		alert(descrierror)
+		alert(descrierror);
 		return
 	}
 	var ncel=corte_currentNodo.CeldaVista;
 	var celdaHTML=ncel.parentNode.innerHTML; // Recupera celda del nodo
 	
 	if(IE)
-		var  patron = new RegExp("<TD width=16><SPAN><IMG","gi") 
+		var  patron = new RegExp("<TD width=16><SPAN><IMG","gi"); 
 	else 
 		if(NS)
-			var  patron = new RegExp("<TD width=\"16px\"><SPAN><IMG","gi") 
+			var  patron = new RegExp("<TD width=\"16px\"><SPAN><IMG","gi"); 
 
 	var p=celdaHTML.search(patron); 
-	if(p<0) return // Ha habido algn problema
+	if(p<0) return; // Ha habido algn problema
 	var nwceldaHTML='<TABLE  border="0" cellspacing="0" cellpadding="0"><TBODY><TR height=16><TD width=3></TD>';
 	nwceldaHTML+=celdaHTML.substring(p);
 	InsertaNodo(currentNodo,nwceldaHTML);
-	EliminaNodo(corte_currentNodo) // Elimina el nodo 
+	EliminaNodo(corte_currentNodo); // Elimina el nodo 
 	corte_currentNodo=null;
 }
 //________________________________________________________________________________________________________

@@ -4,20 +4,20 @@
 // Fichero: menucontextual.js
 // Este fichero implementa las funciones javascript de la clase MenuContextual
 // ***************************************************************************
-var ctx_grissistema="#d4d0c8"
+var ctx_grissistema="#d4d0c8";
 var ctx_azulmarino="#0a266a";
 var ctx_blanco="#ffffff";
 var ctx_negro="#000000";
 var ctx_grissombra="#808080";
 
 var gmenuctx=new Array(); // Guarda el último menu flotante
-var idxmnu=0 // Indice de los menus flotantes
+var idxmnu=0; // Indice de los menus flotantes
 var currentItem=null;
 var currentPadresubmenu;
 var currentPadreY;
 
-var ClickX=null // Coordenada x del evento click del boton derecho
-var ClickY=null // Coordenada y del evento click del boton derecho
+var ClickX=null; // Coordenada x del evento click del boton derecho
+var ClickY=null; // Coordenada y del evento click del boton derecho
 var botonraton=null;
 //____________________________________________________________________________
 //	
@@ -28,17 +28,17 @@ var botonraton=null;
 //		- menuctx: Objeto DIV contenedor del menu contextual
 //____________________________________________________________________________
 function muestra_contextual(x,y,menuctx){
-	var margen=0
-	var dpzx=16
-	var dpzy=16
-	var wtop=calculatop_ctx(y,dpzy,margen,menuctx) // Calcula posición del menu contextual
-	var wleft=calculaleft_ctx(x,dpzx,margen,menuctx)
-	var ftop=wtop+parseInt(document.body.scrollTop) // Tiene en cuenta el scrolling
-	var fleft=wleft+parseInt(document.body.scrollLeft)
-	menuctx.style.top=ftop
-	menuctx.style.left=fleft
-	menuctx.style.visibility="visible"
-	menuctxSetSelectedIndex(menuctx,-1) // Coloca el nuevo indice
+	var margen=0;
+	var dpzx=16;
+	var dpzy=16;
+	var wtop=calculatop_ctx(y,dpzy,margen,menuctx); // Calcula posición del menu contextual
+	var wleft=calculaleft_ctx(x,dpzx,margen,menuctx);
+	var ftop=wtop+parseInt(document.body.scrollTop); // Tiene en cuenta el scrolling
+	var fleft=wleft+parseInt(document.body.scrollLeft);
+	menuctx.style.top=ftop;
+	menuctx.style.left=fleft;
+	menuctx.style.visibility="visible";
+	menuctxSetSelectedIndex(menuctx,-1); // Coloca el nuevo indice
 	gmenuctx[idxmnu++]=menuctx;
 }
 //____________________________________________________________________________
@@ -52,9 +52,9 @@ function muestra_contextual(x,y,menuctx){
 //____________________________________________________________________________
 function calculatop_ctx(oriy,dpzy,margen,menuctx){ // Calcula Y del menu contextual
 	var largodiv=parseInt(menuctx.offsetHeight);
-	var wtop=oriy+dpzy+margen
+	var wtop=oriy+dpzy+margen;
 	if (wtop+largodiv>parseInt(document.body.clientHeight)){
-		var nwtop=oriy-dpzy-margen-largodiv
+		var nwtop=oriy-dpzy-margen-largodiv;
 		if (nwtop>0) wtop=nwtop
 	}
 	return(wtop)
@@ -69,12 +69,12 @@ function calculatop_ctx(oriy,dpzy,margen,menuctx){ // Calcula Y del menu context
 //	- menuctx: El menu (objeto DIV) que se mostrará
 //____________________________________________________________________________
 function calculaleft_ctx(orix,dpzx,margen,menuctx){ // Calcula Y del menu contextual
-	var anchodiv=parseInt(menuctx.offsetWidth)
-	var wleft=orix+dpzx+margen
-	var maximodpl=parseInt(document.body.clientWidth)
+	var anchodiv=parseInt(menuctx.offsetWidth);
+	var wleft=orix+dpzx+margen;
+	var maximodpl=parseInt(document.body.clientWidth);
 	if (wleft+anchodiv>maximodpl){ // Si no cabe a la derecha
-		var nwleft=orix-dpzx-margen-anchodiv // lo intenta a la izda.
-		if (nwleft>0) wleft=nwleft
+		var nwleft=orix-dpzx-margen-anchodiv; // lo intenta a la izda.
+		if (nwleft>0) wleft=nwleft;
 		else{
 			wleft=maximodpl-dpzx-margen-anchodiv;
 			if(wleft<document.body.scrollLeft) wleft=document.body.scrollLeft+16
@@ -90,7 +90,7 @@ function calculaleft_ctx(orix,dpzx,margen,menuctx){ // Calcula Y del menu contex
 //____________________________________________________________________________
 function contextual(o){
 	while(o.tagName!="DIV")
-		o=o.parentNode
+		o=o.parentNode;
 	return(o)
 }
 //____________________________________________________________________________
@@ -143,8 +143,8 @@ function menuctxSelectedIndex(o){
 //	- o: El item (objeto TR) donde se ha colocado el ratón 
 //____________________________________________________________________________
 function sobre_contextual(o){
-	var oDIV=contextual(o) // Se asegura que el objeto de inicio es DIV
-	var idx=menuctxSelectedIndex(oDIV) // Indice del Item anterior seleccionado
+	var oDIV=contextual(o); // Se asegura que el objeto de inicio es DIV
+	var idx=menuctxSelectedIndex(oDIV); // Indice del Item anterior seleccionado
 	var nwid=o.getAttribute("id");
 	if (parseInt(idx)!=parseInt(nwid)){ // Si cambio de item
 		if(idx>0){ // Si existía item anterior seleccionado
@@ -165,10 +165,10 @@ function sobre_contextual(o){
 //	- item: El objeto <TR>
 //____________________________________________________________________________
 function marcar_item(item){
-	marca_desmarca(item,true) // Marca el item
+	marca_desmarca(item,true); // Marca el item
 	if (item.getAttribute("name")!=""){ // Existe submenu contextual
-		currentPadresubmenu=item
-		currentPadreY=ClickY
+		currentPadresubmenu=item;
+		currentPadreY=ClickY;
 		setTimeout ("muestra_submenu();", 300); 
 	}
 	menuctxSetSelectedIndex(contextual(item),item.getAttribute("id")); // Coloca el nuevo indice
@@ -181,11 +181,11 @@ function marcar_item(item){
 //  - idx: el indice del item, si es nulo desmarca el item(objeto TR), seleccionado
 //____________________________________________________________________________
 function desmarcar_item(o,idx){	
-	var oDIV=contextual(o) // Se asegura que el objeto de inicio es DIV
+	var oDIV=contextual(o); // Se asegura que el objeto de inicio es DIV
 	if(idx==null) // No se especificó indice
-		idx=menuctxSelectedIndex(oDIV) // Indice del Item seleccionado
-	var item=menuctxSelectedItem(oDIV,idx)
-	if(item==null) return // No hay item seleccionado
+		idx=menuctxSelectedIndex(oDIV); // Indice del Item seleccionado
+	var item=menuctxSelectedItem(oDIV,idx);
+	if(item==null) return; // No hay item seleccionado
 	marca_desmarca(item,false);
 	var nomsub=item.getAttribute("name");
 	if (nomsub!=null &&nomsub!=""){ // Tiene submenu
@@ -219,8 +219,8 @@ function marca_desmarca(o,sw){
 		if (oIMGS.length>0){
 			var oIMG=oIMGS[0];
 			if (oIMG.getAttribute("name")=="swsbfn"){ // imagen switch submenu
-				oTD.style.backgroundColor=wfondo
-				oTD.style.color=wcolor
+				oTD.style.backgroundColor=wfondo;
+				oTD.style.color=wcolor;
 				if (sw) 
 					oIMG.setAttribute("src","../images/flotantes/swsbfb.gif",null);
 				else
@@ -238,7 +238,7 @@ function marca_desmarca(o,sw){
 			}
 		}
 		else{
-				oTD.style.backgroundColor=wfondo
+				oTD.style.backgroundColor=wfondo;
 				var oSPAN=oTD.getElementsByTagName('SPAN');
 				if (oSPAN.length>0)
 							oSPAN[0].style.color=wcolor
@@ -280,12 +280,12 @@ function reset_contextual(x,y){
 //	- menuctx: El submenu (objeto DIV)
 //____________________________________________________________________________
 function EnContextual(x,y,menuctx){
-	var origen_x=parseInt(menuctx.offsetLeft)-parseInt(document.body.scrollLeft)
-	var origen_y=parseInt(menuctx.offsetTop)-parseInt(document.body.scrollTop)
-	anchodiv=parseInt(menuctx.offsetWidth)
-	largodiv=parseInt(menuctx.offsetHeight)
+	var origen_x=parseInt(menuctx.offsetLeft)-parseInt(document.body.scrollLeft);
+	var origen_y=parseInt(menuctx.offsetTop)-parseInt(document.body.scrollTop);
+	anchodiv=parseInt(menuctx.offsetWidth);
+	largodiv=parseInt(menuctx.offsetHeight);
 
-	if ( x>=origen_x && x<=origen_x+anchodiv && y>=origen_y  && y<=origen_y+largodiv  ) return true
+	if ( x>=origen_x && x<=origen_x+anchodiv && y>=origen_y  && y<=origen_y+largodiv  ) return true;
 	return(false)
 }
 //____________________________________________________________________________
@@ -296,15 +296,15 @@ function EnContextual(x,y,menuctx){
 //____________________________________________________________________________
 function muestra_submenu(){
 	if(currentPadresubmenu==currentItem){
-		var objdiv=contextual(currentPadresubmenu) 
+		var objdiv=contextual(currentPadresubmenu); 
 		var menuctx=document.getElementById(currentPadresubmenu.getAttribute("name")); // Obtiene el submenu
 		//desmarcar_item(menuctx)  // Desmarca el   submenu por si  se ha usado anteriormente
-		wleft=subcalculaleft_ctx(objdiv,menuctx) // La x en función del padre
-		wtop=subcalculatop_ctx(currentPadreY,menuctx) // La y depende de la longitud del submenu
-		menuctx.style.top=wtop
-		menuctx.style.left=wleft
+		wleft=subcalculaleft_ctx(objdiv,menuctx); // La x en función del padre
+		wtop=subcalculatop_ctx(currentPadreY,menuctx); // La y depende de la longitud del submenu
+		menuctx.style.top=wtop;
+		menuctx.style.left=wleft;
 		menuctx.style.visibility="visible";
-		menuctxSetSelectedIndex(menuctx,-1) // Coloca el nuevo indice
+		menuctxSetSelectedIndex(menuctx,-1); // Coloca el nuevo indice
 		gmenuctx[idxmnu++]=menuctx;
 	}
 }
@@ -316,11 +316,11 @@ function muestra_submenu(){
 //	- menuctx: El submenu (objeto DIV) que se mostrará
 //____________________________________________________________________________
 function subcalculatop_ctx(y,menuctx){ // Calcula el posicionamiento (y) del DIV ( SUBmenu contextual)
-	var dpl=0
-	largodiv=parseInt(menuctx.offsetHeight)
-	var wtop=y+dpl+parseInt(document.body.scrollTop)
+	var dpl=0;
+	largodiv=parseInt(menuctx.offsetHeight);
+	var wtop=y+dpl+parseInt(document.body.scrollTop);
 	if (parseInt(wtop+largodiv)>parseInt(document.body.clientHeight+parseInt(document.body.scrollTop))){
-		var nwtop=y+parseInt(document.body.scrollTop)-16-largodiv
+		var nwtop=y+parseInt(document.body.scrollTop)-16-largodiv;
 		if (nwtop>0) wtop=nwtop
 	}
 	return(wtop)
@@ -333,20 +333,20 @@ function subcalculatop_ctx(y,menuctx){ // Calcula el posicionamiento (y) del DIV
 //	- menuctx: El submenu (objeto DIV) que se mostrará
 //____________________________________________________________________________
 function subcalculaleft_ctx(padrediv,menuctx){ // Calcula el posicionamiento (x) del DIV ( SUBmenu contextual)
-	var anchopadrediv=parseInt(padrediv.offsetWidth) // Ancho del div padre
-	var anchomenuctx=parseInt(menuctx.offsetWidth) // Ancho del div 
+	var anchopadrediv=parseInt(padrediv.offsetWidth); // Ancho del div padre
+	var anchomenuctx=parseInt(menuctx.offsetWidth); // Ancho del div 
 	var leftpadrediv; // Coordenada x del div padre
 	if(IE)
-		leftpadrediv=padrediv.style.pixelLeft
+		leftpadrediv=padrediv.style.pixelLeft;
 	else 
 		if(NS)
-			leftpadrediv=parseInt(padrediv.style.left) // Coordenada x del div padre
-	var desplazamiento=leftpadrediv+anchopadrediv-4 // Desplazamiento
-	var wleft=parseInt(desplazamiento)
-	var maximodpl=parseInt(document.body.clientWidth)+parseInt(document.body.scrollLeft)
+			leftpadrediv=parseInt(padrediv.style.left); // Coordenada x del div padre
+	var desplazamiento=leftpadrediv+anchopadrediv-4; // Desplazamiento
+	var wleft=parseInt(desplazamiento);
+	var maximodpl=parseInt(document.body.clientWidth)+parseInt(document.body.scrollLeft);
 	if (wleft+anchomenuctx>maximodpl){
-		var nwleft=leftpadrediv-anchomenuctx
-		if (nwleft>0) wleft=nwleft
+		var nwleft=leftpadrediv-anchomenuctx;
+		if (nwleft>0) wleft=nwleft;
 		else{
 			wleft=maximodpl-anchomenuctx;
 			if(wleft<document.body.scrollLeft) wleft=document.body.scrollLeft+18
@@ -361,7 +361,7 @@ function subcalculaleft_ctx(padrediv,menuctx){ // Calcula el posicionamiento (x)
 //____________________________________________________________________________
 function click_de_raton(e){	
 	if(IE){
-		botonraton=event.button
+		botonraton=event.button;
 		event.returnValue=true;
 	}
 	if(NS){
@@ -378,13 +378,13 @@ function click_de_raton(e){
 //____________________________________________________________________________
 function move_de_raton(e){	
 	if(IE){
-		ClickX=event.clientX
-		ClickY=event.clientY
+		ClickX=event.clientX;
+		ClickY=event.clientY;
 		event.returnValue=true;
 	}
 	if(NS){
-		ClickX=e.clientX
-		ClickY=e.clientY
+		ClickX=e.clientX;
+		ClickY=e.clientY;
 		e.returnValue=true;
 	}
 }

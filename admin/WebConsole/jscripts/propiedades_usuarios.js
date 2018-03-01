@@ -75,30 +75,30 @@ function confirmar(op){
 //________________________________________________________________________________________________________
 function comprobar_datos(){
 	if (document.fdatos.usuario.value==""){
-         alert(TbMsg[0])
-		document.forms.fdatos.usuario.focus()
+         alert(TbMsg[0]);
+		document.forms.fdatos.usuario.focus();
 		return(false)
 	}
 	if (document.fdatos.pasguor.value.length < 8){
-		alert(TbMsg[6])
-		document.forms.fdatos.pasguor.focus()
+		alert(TbMsg[6]);
+		document.forms.fdatos.pasguor.focus();
 		return(false)
 	}
 
 	if (document.fdatos.pasguor.value != document.fdatos.confirmarpasguor.value){
-		alert(TbMsg[5])
-		document.forms.fdatos.pasguor.focus()
+		alert(TbMsg[5]);
+		document.forms.fdatos.pasguor.focus();
 		return(false)
 	}
 	if (document.fdatos.nombre.value==""){
-		alert(TbMsg[2])
-		document.forms.fdatos.nombre.focus()
+		alert(TbMsg[2]);
+		document.forms.fdatos.nombre.focus();
 		return(false)
 	}
-	p=document.fdatos.ididioma.selectedIndex
+	p=document.fdatos.ididioma.selectedIndex;
 	if (p==0){
-		alert(TbMsg[4])
-		document.forms.fdatos.ididioma.focus()		
+		alert(TbMsg[4]);
+		document.forms.fdatos.ididioma.focus();
 		return(false)
 	}
 	return(true);

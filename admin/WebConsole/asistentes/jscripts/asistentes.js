@@ -630,7 +630,7 @@ function addGPTPartition(){
 
 	table = document.getElementById("particionesGPT");
 	// Capturamos el numero de particiones, antes incrementamos
-	document.getElementById("numGPTpartitions").value = parseInt(document.getElementById("numGPTpartitions").value)+1
+	document.getElementById("numGPTpartitions").value = parseInt(document.getElementById("numGPTpartitions").value)+1;
 	numPart=document.getElementById("numGPTpartitions").value;
 	partitionRow = table.insertRow(-1);
 	partitionRow.id = "trPartition"+numPart;

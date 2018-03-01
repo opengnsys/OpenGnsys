@@ -23,14 +23,14 @@
 //________________________________________________________________________________________________________
 
 	function resaltar(o){
-		o.style.color="#999999"
+		o.style.color="#999999";
 		o.style.fontWeight="bold"
 
 	}
 //________________________________________________________________________________________________________
 
 	function desresaltar(o){
-		o.style.color="#999999"
+		o.style.color="#999999";
 		o.style.fontWeight="normal"
 	}
 //________________________________________________________________________________________________________
@@ -79,7 +79,7 @@
 	function vertabla_calendario(ofecha)
 	{
 		currentFecha=ofecha;
-		url="../varios/calendario_ventana.php?fecha="+ofecha.value
+		url="../varios/calendario_ventana.php?fecha="+ofecha.value;
 		window.open(url,"vf","top=160,left=250,height=220,width=160,scrollbars=no")
 	}
 //________________________________________________________________________________________________________
@@ -87,7 +87,7 @@
 	function vertabla_horario(ohora)
 	{
 		currentHora=ohora;
-		url="../varios/horario_ventana.php?hora="+ohora.value
+		url="../varios/horario_ventana.php?hora="+ohora.value;
 		window.open(url,"vh","top=120,left=115,height=180,width=590,scrollbars=no")
 	}
 //________________________________________________________________________________________________________
@@ -166,7 +166,7 @@
 		currentAcc=acciones;
 		/* LLamada a la gestión */
 		var wurl="../gestores/gestor_colasacciones.php";
-		var prm="opcion="+op+"&acciones="+acciones
+		var prm="opcion="+op+"&acciones="+acciones;
 		CallPage(wurl,prm,"retornoGestion","POST");
 }
 //______________________________________________________________________________________________________
@@ -257,8 +257,8 @@
 
 		//if(nodo.childNodes[isitu].childNodes[0].getAttribute('value')==ACCION_FINALIZADA){
 			nodo.childNodes[isitu].childNodes[0].setAttribute("src","../images/iconos/acIniciada.gif");	
-			nodo.childNodes[isitu].childNodes[0].setAttribute("value",ACCION_INICIADA)	
-			nodo.childNodes[iresul].childNodes[0].setAttribute("value",ACCION_SINRESULTADO)
+			nodo.childNodes[isitu].childNodes[0].setAttribute("value",ACCION_INICIADA);	
+			nodo.childNodes[iresul].childNodes[0].setAttribute("value",ACCION_SINRESULTADO);
 			nodo.childNodes[iresul].childNodes[0].setAttribute("src","../images/iconos/nada.gif");			
 			nodo.childNodes[iporcen].innerHTML="&nbsp;"
 		//}
@@ -301,18 +301,18 @@
 		if(nodo.getAttribute('value')!="D") return; // Sólo nodos de notificaciones 
 		setIndices(nodo);
 		if(nodo.childNodes[isitu].childNodes[0].getAttribute('value')==ACCION_INICIADA){
-			nodo.childNodes[isitu].childNodes[0].setAttribute("value",ACCION_FINALIZADA)
+			nodo.childNodes[isitu].childNodes[0].setAttribute("value",ACCION_FINALIZADA);
 			nodo.childNodes[isitu].childNodes[0].setAttribute("src","../images/iconos/nada.gif");
 			if(sw){
-				nodo.childNodes[iresul].childNodes[0].setAttribute("value",ACCION_EXITOSA)
+				nodo.childNodes[iresul].childNodes[0].setAttribute("value",ACCION_EXITOSA);
 				nodo.childNodes[iresul].childNodes[0].setAttribute("src","../images/iconos/acExitosa.gif");
 				nodo.childNodes[iinfor].innerHTML=LITACCION_EXITOSA;			}
 			else{
-				nodo.childNodes[iresul].childNodes[0].setAttribute("value",ACCION_FALLIDA)
+				nodo.childNodes[iresul].childNodes[0].setAttribute("value",ACCION_FALLIDA);
 				nodo.childNodes[iresul].childNodes[0].setAttribute("src","../images/iconos/acFallida.gif");
 				nodo.childNodes[iinfor].innerHTML=LITACCION_FALLIDA;
 			}
-			var ahora = new Date()
+			var ahora = new Date();
 			var fechafin=ahora.getDate()+"-"+(ahora.getMonth()+1)+"-"+ahora.getFullYear();
 			nodo.childNodes[ifechafin].innerHTML=fechafin;
 			var horafin=ahora.getHours()+":"+(ahora.getMinutes()+1)+":"+ahora.getSeconds();
@@ -380,20 +380,20 @@
 		var porcen=0;
 		if(nf>0)
 			porcen=nt*100/nf; // Calcula porcentaje de finalización
-		setIndices(nodos[c])	
+		setIndices(nodos[c]);	
 		nodos[c].childNodes[iporcen].innerHTML=Math.floor(porcen)+"%";	
 		switch(resultado){
 			case ACCION_EXITOSA:
-				nodos[c].childNodes[iresul].childNodes[0].setAttribute("value",ACCION_EXITOSA)
+				nodos[c].childNodes[iresul].childNodes[0].setAttribute("value",ACCION_EXITOSA);
 				nodos[c].childNodes[iresul].childNodes[0].setAttribute("src","../images/iconos/acExitosa.gif");			
 				break;
 
 			case ACCION_FALLIDA:
-				nodos[c].childNodes[iresul].childNodes[0].setAttribute("value",ACCION_FALLIDA)
+				nodos[c].childNodes[iresul].childNodes[0].setAttribute("value",ACCION_FALLIDA);
 				nodos[c].childNodes[iresul].childNodes[0].setAttribute("src","../images/iconos/acFallida.gif");			
 				break;
 			case ACCION_SINRESULTADO:
-				nodos[c].childNodes[iresul].childNodes[0].setAttribute("value",ACCION_SINRESULTADO)
+				nodos[c].childNodes[iresul].childNodes[0].setAttribute("value",ACCION_SINRESULTADO);
 				nodos[c].childNodes[iresul].childNodes[0].setAttribute("src","../images/iconos/nada.gif");
 			break;
 		}
@@ -429,9 +429,9 @@
 
 function programacion(idcmd,sesion,descripcion)
 {
-	reset_contextual(-1,-1)
+	reset_contextual(-1,-1);
 	var whref="../varios/programaciones.php?idcomando="+idcmd+"&sesion="+sesion;
-	whref+="&descripcioncomando="+descripcion+"&tipoaccion="+EJECUCION_COMANDO
+	whref+="&descripcioncomando="+descripcion+"&tipoaccion="+EJECUCION_COMANDO;
 	if(curentwprg)
 		curentwprg.close();
 	curentwprg=window.open(whref,"wprg","left=50,top=20,height=520,width=480,scrollbars=no")

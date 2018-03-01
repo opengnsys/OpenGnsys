@@ -9,13 +9,13 @@
 // *************************************************************************************************************************************************
 //________________________________________________________________________________________________________
 function gestion_componente(id,o){
-	idperfil=document.fdatos.idperfilhard.value
+	idperfil=document.fdatos.idperfilhard.value;
 	if (o.checked)
 		var opcion=op_alta;
 	else
 		var opcion=op_eliminacion;
 	var wurl="../gestores/gestor_perfilcomponente_hard.php";
-	var prm="opcion="+opcion+"&idperfilhard="+idperfil+"&idhardware="+id
+	var prm="opcion="+opcion+"&idperfilhard="+idperfil+"&idhardware="+id;
 	CallPage(wurl,prm,"retornoGestion","POST");
 }
 //______________________________________________________________________________________________________
@@ -27,7 +27,7 @@ function retornoGestion(resul){
 //________________________________________________________________________________________________________
 function resultado_insertar_perfilcomponente_hard(resul,descrierror,nwid){
 	if (!resul){ // Ha habido algn error en la inserci�
-		alert(descrierror)
+		alert(descrierror);
 		return
 	}
 	alert(TbMsg[0])
@@ -35,7 +35,7 @@ function resultado_insertar_perfilcomponente_hard(resul,descrierror,nwid){
 //________________________________________________________________________________________________________
 function resultado_eliminar_perfilcomponente_hard(resul,descrierror,idh){
 	if (!resul){ // Ha habido algn error en la eliminaci�
-		alert(descrierror)
+		alert(descrierror);
 		return
 	}
 	alert(TbMsg[1])

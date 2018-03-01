@@ -141,8 +141,8 @@ function confirmar(){
 //_________________________________
 function comprobar_datos(){
 	if (document.fdatos.valor.value=="" && document.fdatos.criterio.value!="duplic" && document.fdatos.criterio.value!="profe") {
-		alert("<?php echo $TbMsg["SEARCH_NOVALUE"] ?>")
-		document.fdatos.valor.focus()
+		alert("<?php echo $TbMsg["SEARCH_NOVALUE"] ?>");
+		document.fdatos.valor.focus();
 		return(false)
 	}
 	return(true)

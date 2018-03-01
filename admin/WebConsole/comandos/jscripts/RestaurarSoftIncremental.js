@@ -14,7 +14,7 @@
 		var disco;
 		var atributos="";
 		var tb_conf=document.getElementById("tabla_conf");
-		var ochecks=tb_conf.getElementsByTagName('INPUT')
+		var ochecks=tb_conf.getElementsByTagName('INPUT');
 		for(var i=0;i<ochecks.length;i++){
 			if(ochecks[i].checked && ochecks[i].name=="particion"){
 				var idradio=ochecks[i].id;	
@@ -39,15 +39,15 @@
 				atributos+="rti="+imgcanrepo[6]+RC;	// Ruta de origen de la imagen	
 				
 				var desplemet=document.getElementById("desplemet_"+idradio); // Desplegable metodo de restauración
-				var  p=desplemet.selectedIndex // Toma índice seleccionado
+				var  p=desplemet.selectedIndex; // Toma índice seleccionado
 				atributos+="met="+p+RC;	// Método de clonación 0=caché 1=repositorio	
 
 				var desplemet=document.getElementById("desplesync_"+idradio); // Desplegable metodo de syncronización
-				var  p=desplemet.selectedIndex // Toma índice seleccionado
+				var  p=desplemet.selectedIndex; // Toma índice seleccionado
 				atributos+="msy="+p+RC;	// Método de clonación 
 				
 				var desplemet=document.getElementById("despletpt_"+idradio); // Desplegable metodo de syncronización
-				var  p=desplemet.value // Toma índice seleccionado
+				var  p=desplemet.value; // Toma índice seleccionado
 				atributos+="tpt="+p+RC;	// Método de transmision 
 
 				var chrChk=document.getElementById('whl-'+idradio); // Recupera objeto fila de la tabla opciones adicionales
@@ -96,30 +96,30 @@
   function comprobar_datos()
 {
 		tb_conf=document.getElementById("tabla_conf");
-		var ochecks=tb_conf.getElementsByTagName('INPUT')
-		var op=0
+		var ochecks=tb_conf.getElementsByTagName('INPUT');
+		var op=0;
 		for(var i=0;i<ochecks.length;i++){
 			if(ochecks[i].checked && ochecks[i].name=="particion"){
 				op++;
 				var idradio=ochecks[i].id; // Toma idemtificador del desplegable de imagenes
 				despleimagenizda=document.getElementById("despleimagen_"+idradio+"_1"); // Desplegable imagenes.
-				var  p1=despleimagenizda.selectedIndex // Toma índice seleccionado
+				var  p1=despleimagenizda.selectedIndex; // Toma índice seleccionado
 				if (p1==0){  
-						alert(TbMsg[0])
-						despleimagenizda.focus()
+						alert(TbMsg[0]);
+						despleimagenizda.focus();
 			      return(false)
 				}
 				var desplemet=document.getElementById("desplesync_"+idradio); // Desplegable metodo de syncronización
-				var  p1=desplemet.selectedIndex // Toma índice seleccionado
+				var  p1=desplemet.selectedIndex; // Toma índice seleccionado
 				if (p1==0){  
-						alert(TbMsg[7])
-						desplemet.focus()
+						alert(TbMsg[7]);
+						desplemet.focus();
 			   return(false)
 				}
 			}
 		}
 		if(op==0){
-			   alert(TbMsg[1])
+			   alert(TbMsg[1]);
 			 return(false);
 		}
 		return(comprobar_datosejecucion())

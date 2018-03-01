@@ -9,18 +9,18 @@
 // *************************************************************************************************************************************************
 //________________________________________________________________________________________________________
 function gestion_componente(id,o){
-	idimagen=document.fdatos.idimagen.value
+	idimagen=document.fdatos.idimagen.value;
 	if (o.checked)
-		var wurl="../gestores/gestor_imagenincremental.php?opcion="+op_alta+"&idimagen="+idimagen+"&idsoftincremental="+id
+		var wurl="../gestores/gestor_imagenincremental.php?opcion="+op_alta+"&idimagen="+idimagen+"&idsoftincremental="+id;
 	else
-		var wurl="../gestores/gestor_imagenincremental.php?opcion="+op_eliminacion+"&idimagen="+idimagen+"&idsoftincremental="+id
+		var wurl="../gestores/gestor_imagenincremental.php?opcion="+op_eliminacion+"&idimagen="+idimagen+"&idsoftincremental="+id;
 	ifr=document.getElementById("iframes_comodin"); // Toma objeto Iframe
 	ifr.src=wurl; // LLama a la página gestora
 }
 //________________________________________________________________________________________________________
 function resultado_insertar_imagenincremental(resul,descrierror,nwid,tablanodo){
 	if (!resul){ // Ha habido algún error en la inserción
-		alert(descrierror)
+		alert(descrierror);
 		return
 	}
 	alert(TbMsg[0])
@@ -28,7 +28,7 @@ function resultado_insertar_imagenincremental(resul,descrierror,nwid,tablanodo){
 //________________________________________________________________________________________________________
 function resultado_eliminar_imagenincremental(resul,descrierror,idp,idh){
 	if (!resul){ // Ha habido algún error en la eliminación
-		alert(descrierror)
+		alert(descrierror);
 		return
 	}
 	alert(TbMsg[1])
