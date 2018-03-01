@@ -151,7 +151,7 @@ else
 	<BR>	
 <TABLE align=center>
 	<TR>
-		<TD><A href="#botones"><IMG border=0 src="../images/boton_confirmar.gif" onclick="javascript:confirmar(<?php echo $op?>)" ></A></TD>
+		<TD><A href="#botones"><IMG border=0 src="../images/boton_confirmar.gif" onclick="confirmar(<?php echo $op?>)" ></A></TD>
 	</TR>
 </TABLE>
 	<BR>		

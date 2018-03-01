@@ -507,8 +507,6 @@ function getMaxCacheSize() {
 			maxSize = cacheSizeArray[i].value;
 	}
 	document.getElementById("maxcachesize").value = maxSize;
-	return
-
 }
 
 
@@ -516,8 +514,8 @@ function getMaxCacheSize() {
 function validaCache (freedisk) {
 	var form = document.fdatos;
 	var maxcachesize = parseInt(document.getElementById("maxcachesize").value);
-        if(form.part4.value == "CACHE" && form.check4.checked && form.size4.value == 0 ){
-	    return (freedisk - maxcachesize > 0 ? true : false);
+        if(form.part4.value === "CACHE" && form.check4.checked && form.size4.value == 0 ){
+	    return ((freedisk - maxcachesize) > 0);
 	}
 	return true;
 }

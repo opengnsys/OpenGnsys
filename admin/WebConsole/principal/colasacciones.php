@@ -281,7 +281,7 @@
 	$HTMLCriterios.='<TABLE class="tabla_busquedas" align=center border="0">';
 	$HTMLCriterios.='	<TR>';
 	$HTMLCriterios.='		<TD>';	// Lupa
-	$HTMLCriterios.='			<A href="#busca"><IMG border=0 src="../images/iconos/busquedas.gif" onclick="javascript:fdatos.submit()" alt="Buscar"></A>';
+	$HTMLCriterios.= '			<A href="#busca"><IMG border=0 src="../images/iconos/busquedas.gif" onclick="fdatos.submit();" alt="Buscar"></A>';
 	$HTMLCriterios.='		</TD>';
 	$HTMLCriterios.='</TR>';
 	$HTMLCriterios.='</TABLE>';

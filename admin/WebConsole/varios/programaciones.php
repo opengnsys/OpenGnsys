@@ -208,8 +208,8 @@ $mialmanaque= new Almanaque("tabla_meses");
 								<TD>
 									<?php
 										$HTMLSELECT="";
-										$HTMLSELECT.='<SELECT onclick=consulta_programacion(); 
-										class=estilodesple id="lista_programaciones" size=2 style="height:100; width: 350">' ;
+										$HTMLSELECT.='<SELECT onclick="consulta_programacion();" 
+										class="estilodesple" id="lista_programaciones" size=2 style="height:100; width: 350">' ;
 										if ($numreg>0){
 											while (!$rs->EOF){
 												$HTMLSELECT.='<OPTION value="'.$rs->campos["idprogramacion"].'"';

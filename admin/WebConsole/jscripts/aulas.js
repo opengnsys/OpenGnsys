@@ -165,7 +165,6 @@ function eco_remoto(lit)
 	reset_contextual(-1,-1);
  	if(Ambito==null){
 		alert(TbMsg[6]);
-		 return;
 	}
 	else{
 		if(Ambito==AMBITO_ORDENADORES)

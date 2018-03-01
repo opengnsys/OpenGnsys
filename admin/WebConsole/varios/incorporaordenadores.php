@@ -70,7 +70,7 @@ if(!empty($contenido)){ // Se ha introducido contenido en lugar de fichero
 	<TR>
 		<TD><IMG src="../images/boton_cancelar.gif" style="cursor:hand"  onclick=""></TD>
 		<TD width=20></TD>
-		<TD><IMG src="../images/boton_confirmar.gif" style="cursor:hand"  onclick="javascript:document.fdatos.submit();"></TD>
+		<TD><IMG src="../images/boton_confirmar.gif" style="cursor:hand"  onclick="document.fdatos.submit();"></TD>
 	</TR>
 </TABLE>
 <?php

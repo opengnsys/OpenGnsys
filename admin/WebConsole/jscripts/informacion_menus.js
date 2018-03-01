@@ -58,7 +58,6 @@ function modificar_items(){
 		var descrierror=splitRetorno[1];
 		if (!resul){ // Ha habido algn error en la inserci�
 			alert(descrierror);
-			return
 		}
 	}
 }
@@ -79,7 +78,6 @@ function modificar_item(){
 		var descrierror=splitRetorno[1];
 		if (!resul){ // Ha habido algn error en la inserci�
 			alert(descrierror);
-			return
 		}
 	}
 }

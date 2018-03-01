@@ -957,7 +957,7 @@ function CriteriosBusquedas(){
 		$HTMLCriterios.='<TR>'.chr(13);
 		$HTMLCriterios.='<TD>';
 
-		$HTMLCriterios.='<IMG src="../images/iconos/busquedas.gif" onclick="javascript:fdatos.submit()" style="cursor:hand" alt="Buscar">';
+		$HTMLCriterios.= '<IMG src="../images/iconos/busquedas.gif" onclick="fdatos.submit();" style="cursor:hand" alt="Buscar">';
 		$HTMLCriterios.='</TD>';
 		$HTMLCriterios.='<TD>';
 		$HTMLCriterios.='</TD>'.chr(13);

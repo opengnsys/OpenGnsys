@@ -175,8 +175,8 @@ echo '</TR>';
 
 echo '<table align=center border=0>';
 echo '<tr>';
-echo '<td onclick="javascript:mes_anterior();" style="cursor:pointer;COLOR: MediumBlue;FONT-FAMILY: Arial, Helvetica, sans-serif;FONT-SIZE:10" align=left><<</td>';
-echo '<td onclick="javascript:mes_siguiente()" style="cursor:pointer;COLOR: MediumBlue;FONT-FAMILY: Arial, Helvetica, sans-serif;FONT-SIZE:10" align=right>>></td>';
+echo '<td onclick="mes_anterior();" style="cursor:pointer;COLOR: MediumBlue;FONT-FAMILY: Arial, Helvetica, sans-serif;FONT-SIZE:10" align=left><<</td>';
+echo '<td onclick="mes_siguiente();" style="cursor:pointer;COLOR: MediumBlue;FONT-FAMILY: Arial, Helvetica, sans-serif;FONT-SIZE:10" align=right>>></td>';
 echo '</tr>';
 echo '<tr>';
 echo '<td colspan=2 valign=top width=100>'.$mialmanaque->MesAnno($mes_elegido,$anno_elegido).'</td>';

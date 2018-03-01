@@ -298,10 +298,10 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 			<INPUT type="hidden" name="grupoid" value="<?php echo $grupoid ?>">
 			<?php if ($modov == "0"){?>
 				<INPUT type="hidden" name="modov" value="1">
-				<input type=button onclick=submit() value="<?php echo $TbMsg[28]; ?>"/>
+				<input type=button onclick="submit();" value="<?php echo $TbMsg[28]; ?>"/>
 			<?php }else{ ?>
 				<INPUT type="hidden" name="modov" value="0">
-				<input type=button onclick=submit() value="<?php echo $TbMsg[29]; ?>"/>
+				<input type=button onclick="submit();" value="<?php echo $TbMsg[29]; ?>"/>
 				<?php } ?>
 			</form>
 		</div>
@@ -617,7 +617,7 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 		</TR>
 		<TR>
 			<TD></TD>
-		<TD align=center><A href=#><IMG border=0 src="../images/boton_confirmar_<?php echo $idioma ?>.gif" onclick="javascript:confirmeliminar()" ></A></TD>
+		<TD align=center><A href=#><IMG border=0 src="../images/boton_confirmar_<?php echo $idioma ?>.gif" onclick="confirmeliminar()" ></A></TD>
 		</TR>
 	</TABLE>
 </FORM>
