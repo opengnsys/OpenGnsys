@@ -1065,7 +1065,6 @@ function dhcpConfigure()
 function installWebFiles()
 {
 	local COMPATDIR f
-	local XAJAXFILE="xajax_0.5_standard.zip"
 	local SLIMFILE="slim-2.6.1.zip"
 	local SWAGGERFILE="swagger-ui-2.2.5.zip"
 
@@ -1078,8 +1077,7 @@ function installWebFiles()
 	fi
         find $INSTALL_TARGET/www -name .svn -type d -exec rm -fr {} \; 2>/dev/null
 
-	# Descomprimir librerías: XAJAX, Slim y Swagger-UI.
-	unzip -o $WORKDIR/opengnsys/admin/$XAJAXFILE -d $INSTALL_TARGET/www/xajax
+	# Descomprimir librerías: Slim y Swagger-UI.
 	unzip -o $WORKDIR/opengnsys/admin/$SLIMFILE -d $INSTALL_TARGET/www/rest
 	unzip -o $WORKDIR/opengnsys/admin/$SWAGGERFILE -d $INSTALL_TARGET/www/rest
 

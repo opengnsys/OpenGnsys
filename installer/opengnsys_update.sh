@@ -590,7 +590,7 @@ function updateWebFiles()
 	rsync --exclude .svn -irplt $WORKDIR/opengnsys/admin/WebConsole $INSTALL_TARGET
 	ERRCODE=$?
 	mv $INSTALL_TARGET/WebConsole $INSTALL_TARGET/www
-	unzip -o $WORKDIR/opengnsys/admin/xajax_0.5_standard.zip -d $INSTALL_TARGET/www/xajax
+	rm -fr $INSTALL_TARGET/www/xajax
 	unzip -o $WORKDIR/opengnsys/admin/slim-2.6.1.zip -d $INSTALL_TARGET/www/rest
 	unzip -o $WORKDIR/opengnsys/admin/swagger-ui-2.2.5.zip -d $INSTALL_TARGET/www/rest
 	if [ $ERRCODE != 0 ]; then
