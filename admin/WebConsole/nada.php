@@ -8,7 +8,6 @@ include_once("./idiomas/php/".$idioma."/nada_".$idioma.".php");
 
 function getRemoteInfo () {
    $proxy="";
-   $IP = "";
    if (isSet($_SERVER)) {
        if (isSet($_SERVER["HTTP_X_FORWARDED_FOR"])) {
            $IP = $_SERVER["HTTP_X_FORWARDED_FOR"];
@@ -58,11 +57,11 @@ else{$device="0";$tipodevice="PC";}
 // ################################  PARA SABER QUE SISTEMA DEL DISPOSITIVO  ################################
 // ##########################################################################################################
 $sistem="";
-$buscasistem="";
 $buscasistem=strtolower($_SERVER['HTTP_USER_AGENT']);
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //	SISTEMAS WINDOWS //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+if(stripos($buscasistem,'windows nt 10.0') == TRUE ){$sistem="Windows 10";} 
 if(stripos($buscasistem,'windows nt 6.2') == TRUE ){$sistem="Windows 8";} 
 if(stripos($buscasistem,'windows nt 6.1') == TRUE ){$sistem="Windows 7";}
 if(stripos($buscasistem,'windows nt 6.0') == TRUE ){$sistem="Windows Vista/Server 2008";} 
@@ -82,8 +81,8 @@ if ($device == "macintosh" ){$sistem="Mac OSX";}
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 if(stripos($buscasistem,'ubuntu') == TRUE ){$sistem="Ubuntu";}
 if(stripos($buscasistem,'red hat') == TRUE ){$sistem="Red Hat";}
-if(stripos($buscasistem,'centos') == TRUE ){$sistem="CentOs";}
-if(stripos($buscasistem,'suse') == TRUE ){$sistem="Open Suse";}
+if(stripos($buscasistem,'centos') == TRUE ){$sistem="CentOS";}
+if(stripos($buscasistem,'suse') == TRUE ){$sistem="openSUSE";}
 if(stripos($buscasistem,'mandriva') == TRUE ){$sistem="Mandriva";}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -95,26 +94,18 @@ if(stripos($buscasistem,'android') == TRUE ){$sistem="Android";}
 // ##########################################################################################################
 // ##########################  PARA SABER QUE VERSION DEL SISTEMA DEL DISPOSITIVO  ##########################
 // ##########################################################################################################
-$versistem="";
-$buscaversistem="";
 $buscaversistem=strtolower($_SERVER['HTTP_USER_AGENT']);
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //	VERSION WINDOWS //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-if(stripos($buscaversistem,'windows nt 6.2') == TRUE ){$versistem="NT 6.2";}
-if(stripos($buscaversistem,'windows nt 6.1') == TRUE ){$versistem="NT 6.1";} 
-if(stripos($buscaversistem,'windows nt 6.0') == TRUE ){$versistem="NT 6.0";} 
-if(stripos($buscaversistem,'windows nt 5.2') == TRUE ){$versistem="NT 5.2";} 
-if(stripos($buscaversistem,'windows nt 5.1') == TRUE ){$versistem="NT 5.1";} 
-if(stripos($buscaversistem,'windows nt 5.0') == TRUE ){$versistem="NT 5.0";} 
+if(stripos($buscaversistem,'windows nt') == TRUE ){$versistem="-";}
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //	VERSION APPLE //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 if(stripos($buscaversistem,'os x') == TRUE ){
-$buscaversistemapple="";
 $buscaversistemapple=$_SERVER['HTTP_USER_AGENT'];
 $buscaversistemapple=str_replace("OS","OS:",$buscaversistemapple);
 $buscaversistemapple=str_replace("like",":like",$buscaversistemapple);
@@ -126,18 +117,12 @@ $versistem=$buscaversistemapple[1];}
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //	VERSION LINUX //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-if(stripos($buscaversistem,'linux') == TRUE ){
-$buscaversistemlinux="";
-$buscaversistemlinux=str_replace(")",";",$buscaversistem);
-$buscaversistemlinux=explode(";",$buscaversistemlinux);
-$versistem=$buscaversistemlinux[3];
-}
+if(stripos($buscaversistem,'linux') == TRUE ){$versistem="-";}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //	VERSION ANDROID //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 if(stripos($buscaversistem,'android') == TRUE ){
-$buscaversistemandroid="";
 $buscaversistemandroid=str_replace(")",";",$buscaversistem);
 $buscaversistemandroid=explode(";",$buscaversistemandroid);
 $versistem=$buscaversistemandroid[2];
@@ -146,40 +131,34 @@ $versistem=$buscaversistemandroid[2];
 // ##########################################################################################################
 // ##########################  PARA SABER QUE NAVEGADOR DEL SISTEMA DEL DISPOSITIVO  ########################
 // ##########################################################################################################
-$buscanav="";
 $buscanav=strtolower($_SERVER['HTTP_USER_AGENT']);
 if(stripos($buscanav,'firefox') == TRUE ){$nav="Firefox";}
 if(stripos($buscanav,'safari') == TRUE ){$nav="Safari";}
 if(stripos($buscanav,'msie') == TRUE ){$nav="Internet Explorer";}
+if(stripos($buscanav,'chrome') == TRUE ){$nav="Google Chrome";}
+if(stripos($buscanav,'opera') == TRUE ){$nav="Opera";}
+if(stripos($buscanav,'qtembedded') == TRUE ){$nav="OpenGnsys Browser";}
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // ##########################################################################################################
 // ##########################  PARA SABER VERSION DEL NAVEGADOR DEL DISPOSITIVO  ############################
 // ##########################################################################################################
-$buscavernav="";
-$buscavernav=strtolower($_SERVER['HTTP_USER_AGENT']);
-$vernav=end(explode("/",$buscavernav));
+$buscavernav=explode("/", strtolower($_SERVER['HTTP_USER_AGENT']));
+$vernav=end($buscavernav);
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-
-?>
-
-
-<?php
 if ($device == "ipad" || $device == "iphone" || $device == "android" )
 {
 ?>
-<HTML>
-<HEAD>
-       <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
-	<LINK rel="stylesheet" type="text/css" href="./estilos.css">
-	<SCRIPT language="javascript">
-	</SCRIPT>
-</HEAD>
-<BODY>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+  <link rel="stylesheet" type="text/css" href="./estilos.css">
+</head>
+<body>
 
 <table width="100%" border="0">
   <tr>
@@ -232,7 +211,7 @@ if ($device == "ipad" || $device == "iphone" || $device == "android" )
 </table>
 
 
-</BODY>
-</HTML>
+</body>
+</html>
 
 <?php } ?>

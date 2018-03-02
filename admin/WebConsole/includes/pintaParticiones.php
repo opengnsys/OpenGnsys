@@ -44,7 +44,7 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 	global $tbKeys; // Tabla contenedora de claves de configuración
 	global $conKeys; // Contador de claves de configuración
 	global $TbMsg;
-
+	$disktable = array();
 
 	// Separamos las configuraciones segun el disco al que pertenezcan
 	$diskConfigs = splitConfigurationsByDisk($configuraciones);
@@ -115,9 +115,9 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 						// Mostrar uso solo en clientes individuales.
 						$uso=tomaUso($tbKeys[$k]["numpar"],$idordenadores,$tbKeys[$k]["numdisk"]);
 						if ($uso > 0 and strpos($idordenadores, ',') === false) {
-							echo '<td style="text-align:right; background-size:' .$uso. '% 100%; background: url(../images/flotantes/lsu.gif) no-repeat;"><a title="' .$TbMsg["USAGE"].': '.$uso.'%">&nbsp;'.tomaTamano($tbKeys[$k]["numpar"],$idordenadores,$tbKeys[$k]["numdisk"]).'&nbsp;</a></td>'.chr(13);
+							echo '<td style="text-align:right; background-image:url(../images/flotantes/lsu.gif); background-size:'.$uso.'% 100%; background-repeat:no-repeat"><a title="'.$TbMsg["USAGE"].': '.$uso.'%">&nbsp;'.tomaTamano($tbKeys[$k]["numpar"],$idordenadores,$tbKeys[$k]["numdisk"]).'&nbsp;</a></td>'.chr(13);
 						} else {
-							echo'<td style="text-align:right">&nbsp;'.tomaTamano($tbKeys[$k]["numpar"],$idordenadores,$tbKeys[$k]["numdisk"]).'&nbsp;</td>'.chr(13);
+							echo '<td style="text-align:right">&nbsp;'.tomaTamano($tbKeys[$k]["numpar"],$idordenadores,$tbKeys[$k]["numdisk"]).'&nbsp;</td>'.chr(13);
 						}
 
 						// Si es CACHE incluyo campo oculto con el tamaño
