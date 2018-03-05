@@ -167,7 +167,7 @@ OSVERSION="${OSVERSION%%.*}"
 # Configuración según la distribución GNU/Linux (usar minúsculas).
 case "$OSDISTRIB" in
 	ubuntu|debian|linuxmint)
-		DEPENDENCIES=( subversion apache2 php5 php5-ldap libapache2-mod-php5 mysql-server php5-mysql isc-dhcp-server bittorrent tftp-hpa tftpd-hpa xinetd build-essential g++-multilib libmysqlclient15-dev wget curl doxygen graphviz bittornado ctorrent samba rsync unzip netpipes debootstrap schroot squashfs-tools btrfs-tools procps arp-scan realpath php5-curl gettext moreutils jq wakeonlan )
+		DEPENDENCIES=( subversion apache2 php php-ldap libapache2-mod-php mysql-server php-mysql isc-dhcp-server bittorrent tftp-hpa tftpd-hpa xinetd build-essential g++-multilib libmysqlclient15-dev wget curl doxygen graphviz bittornado ctorrent samba rsync unzip netpipes debootstrap schroot squashfs-tools btrfs-tools procps arp-scan realpath php-curl gettext moreutils jq wakeonlan )
 		UPDATEPKGLIST="apt-get update"
 		INSTALLPKG="apt-get -y install --force-yes"
 		CHECKPKG="dpkg -s \$package 2>/dev/null | grep Status | grep -qw install"
@@ -277,7 +277,7 @@ selinuxenabled 2>/dev/null && setenforce 0 2>/dev/null
 # dependiendo de la versión instalada.
 function updatePackageList()
 {
-local DHCPVERSION PHP5VERSION
+local DHCPVERSION PHP7VERSION
 
 # Si es necesario, actualizar la lista de paquetes disponibles.
 [ -n "$UPDATEPKGLIST" ] && eval $UPDATEPKGLIST
@@ -294,27 +294,25 @@ case "$OSDISTRIB" in
 			DHCPSERV=dhcp3-server
 			DHCPCFGDIR=/etc/dhcp3
 		fi
-		# Configuración para PHP 5 en Ubuntu 16.x+.
-		if [ -z "$(apt-cache pkgnames php5)" ]; then
+		# Configuración para PHP 7 en Ubuntu.
+		if [ -z "$(apt-cache pkgnames php7)" ]; then
 			eval $INSTALLPKG software-properties-common
 			add-apt-repository -y ppa:ondrej/php
 			eval $UPDATEPKGLIST
 		fi
-		PHP5VERSION=$(apt-cache pkgnames php5 | sort | head -1)
-		DEPENDENCIES=( ${DEPENDENCIES[@]//php5/$PHP5VERSION} )
+		PHP7VERSION=$(apt-cache pkgnames php7 | sort | head -1)
+		DEPENDENCIES=( ${DEPENDENCIES[@]//php/$PHP7VERSION} )
 		# Dependencias correctas para libmysqlclient.
 		[ -z "$(apt-cache pkgnames libmysqlclient15)" ] && DEPENDENCIES=( ${DEPENDENCIES[@]//libmysqlclient15/libmysqlclient} )
 		;;
 	centos)	# Postconfiguación personalizada para CentOS.
-		# Configuración para PHP 5.
-		if ! yum list php5\*w &>/dev/null; then
-			if [ $OSVERSION -ge 7 ]; then
-				yum install -y https://mirror.webtatic.com/yum/el$OSVERSION/webtatic-release.rpm
-			else
+		# Configuración para PHP 7.
+		if ! yum list php7 &>/dev/null; then
+			if [ $OSVERSION -lt 7 ]; then
 				yum install -y https://mirror.webtatic.com/yum/el$OSVERSION/latest.rpm
+				PHP7VERSION=$(yum list -q php7\*w | awk -F. '/^php/ {p=$1} END {print p}')
+				DEPENDENCIES=( ${DEPENDENCIES[@]//php/$PHP5VERSION} )
 			fi
-			PHP5VERSION=$(yum list -q php5\*w | awk -F. '/^php/ {p=$1} END {print p}')
-			DEPENDENCIES=( ${DEPENDENCIES[@]//php/$PHP5VERSION} )
 		fi
 		# Cambios a aplicar a partir de CentOS 7.
 		if [ $OSVERSION -ge 7 ]; then

@@ -96,69 +96,75 @@ LOG_FILE=/tmp/$(basename $OGLOGFILE)
 # - APACHECFGDIR, APACHESERV, DHCPSERV, INETDCFGDIR - configuración y servicios
 function autoConfigure()
 {
-local i
+	local service
 
-# Detectar sistema operativo del servidor (compatible con fichero os-release y con LSB).
-if [ -f /etc/os-release ]; then
-	source /etc/os-release
-	OSDISTRIB="$ID"
-	OSVERSION="$VERSION_ID"
-else
-	OSDISTRIB=$(lsb_release -is 2>/dev/null)
-	OSVERSION=$(lsb_release -rs 2>/dev/null)
-fi
-# Convertir distribución a minúsculas y obtener solo el 1er número de versión.
-OSDISTRIB="${OSDISTRIB,,}"
-OSVERSION="${OSVERSION%%.*}"
+	# Detectar sistema operativo del servidor (compatible con fichero os-release y con LSB).
+	if [ -f /etc/os-release ]; then
+		source /etc/os-release
+		OSDISTRIB="$ID"
+		OSVERSION="$VERSION_ID"
+	else
+		OSDISTRIB=$(lsb_release -is 2>/dev/null)
+		OSVERSION=$(lsb_release -rs 2>/dev/null)
+	fi
+	# Convertir distribución a minúsculas y obtener solo el 1er número de versión.
+	OSDISTRIB="${OSDISTRIB,,}"
+	OSVERSION="${OSVERSION%%.*}"
 
-# Configuración según la distribución de Linux.
-case "$OSDISTRIB" in
-        ubuntu|debian|linuxmint)
-		DEPENDENCIES=( curl rsync btrfs-tools procps arp-scan realpath php5-curl gettext moreutils jq wakeonlan )
+	# Configuración según la distribución de Linux.
+	if [ -f /etc/debian_version ]; then
+        	# Distribución basada en paquetes Deb.
+		DEPENDENCIES=( curl rsync btrfs-tools procps arp-scan realpath php-curl gettext moreutils jq wakeonlan )
 		UPDATEPKGLIST="add-apt-repository -y ppa:ondrej/php; apt-get update"
-		INSTALLPKGS="apt-get -y install --force-yes"
+		INSTALLPKGS="apt-get -y install"
+		DELETEPKGS="apt-get -y purge"
 		CHECKPKG="dpkg -s \$package 2>/dev/null | grep -q \"Status: install ok\""
 		if which service &>/dev/null; then
 			STARTSERVICE="eval service \$service restart"
 			STOPSERVICE="eval service \$service stop"
+			SERVICESTATUS="eval service \$service status"
 		else
 			STARTSERVICE="eval /etc/init.d/\$service restart"
 			STOPSERVICE="eval /etc/init.d/\$service stop"
+			SERVICESTATUS="eval /etc/init.d/\$service status"
 		fi
 		ENABLESERVICE="eval update-rc.d \$service defaults"
 		APACHEUSER="www-data"
 		APACHEGROUP="www-data"
 		INETDCFGDIR=/etc/xinetd.d
-		;;
-        fedora|centos)
-		DEPENDENCIES=( curl rsync btrfs-progs procps-ng arp-scan gettext moreutils jq wakeonlan )
+	elif [ -f /etc/redhat-release ]; then
+        	# Distribución basada en paquetes rpm.
+		DEPENDENCIES=( curl rsync btrfs-progs procps-ng arp-scan gettext moreutils jq net-tools )
 		# En CentOS 7 instalar arp-scan de CentOS 6.
 		[ "$OSDISTRIB$OSVERSION" == "centos7" ] && DEPENDENCIES=( ${DEPENDENCIES[*]/arp-scan/http://dag.wieers.com/redhat/el6/en/$(arch)/dag/RPMS/arp-scan-1.9-1.el6.rf.$(arch).rpm} )
 		INSTALLPKGS="yum install -y"
+		DELETEPKGS="yum remove -y"
 		CHECKPKG="rpm -q --quiet \$package"
 		if which systemctl &>/dev/null; then
-			STARTSERVICE="eval systemctl start \$service.service"
+			STARTSERVICE="eval systemctl restart \$service.service"
 			STOPSERVICE="eval systemctl stop \$service.service"
 			ENABLESERVICE="eval systemctl enable \$service.service"
+			SERVICESTATUS="eval systemctl status \$service.service"
 		else
-			STARTSERVICE="eval service \$service start"
+			STARTSERVICE="eval service \$service restart"
 			STOPSERVICE="eval service \$service stop"
 			ENABLESERVICE="eval chkconfig \$service on"
+			SERVICESTATUS="eval service \$service status"
 		fi
 		APACHEUSER="apache"
 		APACHEGROUP="apache"
 		INETDCFGDIR=/etc/xinetd.d
-		;;
-	*)	# Otras distribuciones.
-		;;
-esac
-for i in apache2 httpd; do
-	[ -d /etc/$i ] && APACHECFGDIR="/etc/$i"
-	[ -f /etc/init.d/$i ] && APACHESERV="/etc/init.d/$i"
-done
-for i in dhcpd dhcpd3-server isc-dhcp-server; do
-	[ -f /etc/init.d/$i ] && DHCPSERV="/etc/init.d/$i"
-done
+	else
+		# Otras distribuciones.
+		:
+	fi
+	for service in apache2 httpd; do
+		[ -d /etc/$service ] && APACHECFGDIR="/etc/$service"
+		if $SERVICESTATUS &>/dev/null; then APACHESERV="$service"; fi
+	done
+	for service in dhcpd dhcpd3-server isc-dhcp-server; do
+		if $SERVICESTATUS &>/dev/null; then DHCPSERV="$service"; fi
+	done
 }
 
 
@@ -355,17 +361,28 @@ function installDependencies()
 {
 	local package
 
+	# Comprobar si hay que actualizar PHP 5 a PHP 7.
+	eval $UPDATEPKGLIST
+	if [ -f /etc/debian_version ]; then
+		# Basado en paquetes Deb.
+		PHP7VERSION=$(apt-cache pkgnames php7 2>/dev/null | sort | head -1)
+		PHP5PKGS=( $(dpkg -l |awk '$2~/^php5/ {print $2}') )
+		if [ -n "$PHP5PKGS" ]; then
+			$DELETEPKGS ${PHP5PKGS[@]}
+			PHP5PKGS[0]=$PHP7VERSION
+			INSTALLDEPS=${PHP5PKGS[@]//php5*-/${PHP7VERSION}-}
+		fi
+	fi
+
 	if [ $# = 0 ]; then
 		echoAndLog "${FUNCNAME}(): no dependencies are needed"
 	else
-		PHP5VERSION=$(apt-cache pkgnames php5 2>/dev/null | sort | head -1)
 		while [ $# -gt 0 ]; do
-			package="${1/php5/$PHP5VERSION}"
+			package="${1/php/$PHP7VERSION}"
 			eval $CHECKPKG || INSTALLDEPS="$INSTALLDEPS $package"
 			shift
 		done
 		if [ -n "$INSTALLDEPS" ]; then
-			$UPDATEPKGLIST
 			$INSTALLPKGS $INSTALLDEPS
 			if [ $? -ne 0 ]; then
 				errorAndLog "${FUNCNAME}(): cannot install some dependencies: $INSTALLDEPS"
@@ -526,7 +543,7 @@ function apacheConfiguration ()
 	done
 
 	# Reiniciar Apache.
-	$APACHESERV restart
+	service=$APACHESERV; $STARTSERCICE
 
 	# Variables de ejecución de Apache.
 	# - APACHE_RUN_USER
@@ -822,7 +839,7 @@ function updateServerFiles()
 	if grep -q 'pxelinux.0' /etc/dhcp*/dhcpd*.conf; then
 		echoAndLog "${FUNCNAME}(): updating DHCP files"
 		perl -pi -e 's/pxelinux.0/grldr/' /etc/dhcp*/dhcpd*.conf
-		$DHCPSERV restart
+		service=$DHCPSERV; $STARTSERVICE
 		NEWFILES="/etc/dhcp*/dhcpd*.conf"
 	fi
 	if ! diff -q $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.init /etc/init.d/opengnsys 2>/dev/null; then
