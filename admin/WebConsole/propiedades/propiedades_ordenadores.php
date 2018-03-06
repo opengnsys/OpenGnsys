@@ -84,7 +84,7 @@ function abrir_ventana(URL){
 	<input type="hidden" name="idaula" value="<?php echo $idaula?>" />
 	<input type="hidden" name="arranque" value="<?php echo $arranque?>" />
 	<p align="center" class="cabeceras"><?php echo $TbMsg[4]?><br />
-	<span align="center" class="subcabeceras"><?php echo $opciones[$opcion]?></span></p>
+	<span class="subcabeceras"><?php echo $opciones[$opcion]?></span></p>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 	<table align="center" border="0" cellPadding="1" cellSpacing="1" class="tabla_datos">
 		<tr>
@@ -149,8 +149,6 @@ function abrir_ventana(URL){
 				else	{
 					if ($fotoordenador=="")
 					$fotoordenador="../images/fotos/fotoordenador.gif";
-					$fotoordenador;
-					
 					?>
 					<TD colspan=3><SELECT class="formulariodatos" name="fotoordenador" >
 						<?php if($fotomenu==""){
@@ -158,21 +156,19 @@ function abrir_ventana(URL){
 						echo '<option value="'.$fotomenu.'">'.$fotomenu.'</option>';}
 						if ($handle = opendir("../images/fotos")) {
 						while (false !== ($entry = readdir($handle))) {
-						if ($entry != "." && $entry != "..") {?>
-						
+			    			if ($entry != "." && $entry != "..") {?>
 						<option value="<?php echo $entry ?>"><?php echo $entry ?></option>
 						<?php }
 						}
 						closedir($handle);
-						} 
+						}
 						?>
-					 </SELECT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-<a href="javascript:abrir_ventana('../images/ver.php')" onClick="MM_openBrWindow('../images/ver.php','Imagenes','scrollbars=yes,resizable=yes,width=950,height=640')"><?php echo $TbMsg[5092] ?></a>
-					</TD>
+					</SELECT>
+<a href="javascript:abrir_ventana('../images/ver.php')" onclick="MM_openBrWindow('../images/ver.php','Imagenes','scrollbars=yes,resizable=yes,width=950,height=640')"><?php echo $TbMsg[5092] ?></a>
+            				</TD>
 					<?php
 					}
 					?>
-			
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
@@ -353,7 +349,6 @@ if ($opcion!=$op_alta) {
 //		- id: El identificador del ordenador
 //________________________________________________________________________________________________________
 function TomaPropiedades($cmd,$id){
-	global $idordenador; 
 	global $ordprofesor;
 	global $nombreordenador;
 	global $numserie;
@@ -367,17 +362,19 @@ function TomaPropiedades($cmd,$id){
 	global $netiface;
 	global $netdriver;
 ########################### UHU
-        global $validacion;
-        global $paginalogin;
-        global $paginavalidacion;
+	global $validacion;
+	global $paginalogin;
+	global $paginavalidacion;
 ########################### Ramón
-        global $arranque;
+	global $arranque;
 
 	$rs=new Recordset; 
-	$cmd->texto="SELECT *, IF(idordprofesor=idordenador,1,0) AS ordprofesor
-		       FROM ordenadores
-		       JOIN aulas USING(idaula)
-		       WHERE idordenador=".$id;
+	$cmd->texto=<<<EOD
+SELECT ordenadores.*, IF(idordprofesor=idordenador, 1, 0) AS ordprofesor
+  FROM ordenadores
+  JOIN aulas USING(idaula)
+ WHERE idordenador='$id';
+EOD;
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) return(false); // Error al abrir recordset
 	$rs->Primero(); 
@@ -404,8 +401,6 @@ function TomaPropiedades($cmd,$id){
 		$rs->Cerrar();
 		return(true);
 	}
-	else
-		return(false);
+	return(false);
 }
 ?>
-
