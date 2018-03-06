@@ -15,8 +15,8 @@
 
 /**
  * @brief    Check if user is administrator and print error messages if not.
- * @param    int adminid   Administrator id.
- * @return   boolean       "true" if admin id. is equals to global user id., otherwise "false".
+ * @param    int adminid  Administrator id.
+ * @return   boolean      "true" if admin id. is equals to global user id., otherwise "false".
  */
 function checkAdmin($adminid) {
 	global $userid;
@@ -57,18 +57,22 @@ function addClassroomGroup(&$classroomGroups, $rs){
 /**
  * @fn    getStatus(ouid, labid, [clntid])
  * @brief    Returns client execution status or status of all lab's clients.
- * @param    ouid    OU id.
- * @param    labid   Lab. id.
- * @param    clntid  Client id. (optional)
- * @return   string  JSON object or array of objects including status data.
+ * @param    int ouid    OU id.
+ * @param    int labid   Lab. id.
+ * @param    int clntid  Client id. (optional)
+ * @return   string      JSON object or array of objects including status data.
  */
 function getStatus($ouid, $labid, $clntid=0) {
 	global $userid;
 	global $cmd;
 	global $LONCABECERA;
 	global $LONHEXPRM;
+	$response = [];
+	$id = [];
+	$stat = [];
+	$ip = "";
+
 	$app = \Slim\Slim::getInstance();
-	$clientid = $clientip = "";
 	$urls = Array();
 	// Status mapping.
 	$status = Array('OFF'=>"off",
@@ -101,8 +105,6 @@ EOD;
 		$cmd->texto .= <<<EOD
    AND ordenadores.idordenador='$clntid';
 EOD;
-	} else {
-		$response = Array();
 	}
 	$rs=new Recordset;
 	$rs->Comando=&$cmd;
@@ -279,8 +281,7 @@ $app->post('/login',
 /**
  * @brief    List all defined Organizational Units
  * @note     Route: /ous, Method: GET
- * @param    no
- * @return   JSON array with id. and name for every defined OU
+ * @return   string  JSON array with id. and name for every defined OU
  */
 $app->get('/ous(/)', function() {
 	global $cmd;
@@ -305,9 +306,9 @@ $app->get('/ous(/)', function() {
 
 /**
  * @brief    Get Organizational Unit data
- * @note     Route: /ous/id, Method: GET
- * @param    id      OU id.
- * @return   JSON string with OU's parameters
+ * @note     Route: /ous/:ouid, Method: GET
+ * @param    int ouid  OU id.
+ * @return   string    JSON string with OU's parameters
  */
 $app->get('/ous/:ouid(/)', 'validateApiKey',
     function($ouid) {
@@ -341,9 +342,9 @@ EOD;
 
 /**
  * @brief    List group of labs in an Organizational Unit
- * @note     Route: /ous/id/groups, Method: GET
- * @param    id      OU id.
- * @return   JSON array of OU groups
+ * @note     Route: /ous/:ouid/groups, Method: GET
+ * @param    int ouid   OU id.
+ * @return   string      JSON array of OU groups
  */
 $app->get('/ous/:ouid/groups(/)', 'validateApiKey', function($ouid) {
 	global $cmd;
@@ -388,9 +389,9 @@ EOD;
 
 /**
  * @brief    List all labs defined in an OU
- * @note     Route: /ous/id/labs, Method: GET
- * @param    id      OU id.
- * @return   JSON array of all UO's labs data 
+ * @note     Route: /ous/:ouid/labs, Method: GET
+ * @param    int ouid  OU id.
+ * @return   string    JSON array of all UO's labs data
  */
 $app->get('/ous/:ouid/labs(/)', 'validateApiKey',
     function($ouid) {
@@ -433,7 +434,7 @@ EOD;
 					$tmp = Array();
 					$tmp['id'] = (int)$rs->campos["idaula"];
 					$tmp['name'] = $rs->campos["nombreaula"];
-					$tmp['inremotepc'] = $rs->campos["inremotepc"]==0 ? false: true;
+					$tmp['inremotepc'] = ($rs->campos["inremotepc"] == 1);
 					$tmp['group']['id'] = (int)$rs->campos["grupoid"];
 					$tmp['ou']['id'] = (int)$ouid;
 					array_push($response, $tmp);
@@ -463,10 +464,10 @@ EOD;
 
 /**
  * @brief    Get lab data
- * @note     Route: /ous/id1/labs/id2, Method: GET
- * @param    id1     OU id.
- * @param    id2     lab id.
- * @return   JSON string with lab parameters
+ * @note     Route: /ous/:ouid/labs/:labid, Method: GET
+ * @param    int ouid   OU id.
+ * @param    int labid  lab id.
+ * @return   string     JSON string with lab parameters
  */
 $app->get('/ous/:ouid/labs/:labid(/)', 'validateApiKey',
     function($ouid, $labid) {
@@ -495,11 +496,14 @@ EOD;
 		$response['name'] = $rs->campos["nombreaula"];
 		$response['location'] = $rs->campos["ubicacion"];
 		$response['description'] = $rs->campos["comentarios"];
-		$response['inremotepc'] = $rs->campos["inremotepc"]==0 ? false: true;
+		$response['inremotepc'] = ($rs->campos["inremotepc"] == 1);
 		$response['capacity'] = (int)$rs->campos["puestos"];
+		if ($rs->campos["idordprofesor"]) {
+			$response['profclient']['id'] = (int)$rs->campos["idordprofesor"];
+		}
 		$response['defclients'] = (int)$rs->campos["defclients"];
-		$response['projector'] = $rs->campos["cagnon"]==0 ? false: true;
-		$response['board'] = $rs->campos["pizarra"]==0 ? false: true;
+		$response['projector'] = ($rs->campos["cagnon"] == 1);
+		$response['board'] = ($rs->campos["pizarra"] == 1);
 		$response['routerip'] = $rs->campos["router"];
 		$response['netmask'] = $rs->campos["netmask"];
 		$response['ntp'] = $rs->campos["ntp"];
@@ -525,10 +529,10 @@ EOD;
 
 /**
  * @brief    List all clients defined in a lab
- * @note     Route: /ous/id1/labs/id2/clients, Method: GET
- * @param    id1     OU id.
- * @param    id2     lab id.
- * @return   JSON data with lab id. and array of lab parameters
+ * @note     Route: /ous/:ouid/labs/:labid/clients, Method: GET
+ * @param    int ouid   OU id.
+ * @param    int labid  lab id.
+ * @return   string     JSON data with lab id. and array of lab parameters
  */
 $app->get('/ous/:ouid/labs/:labid/clients(/)', 'validateApiKey',
     function($ouid, $labid) {
@@ -575,20 +579,20 @@ EOD;
 
 /**
  * @brief    Get execution status of all clients defined in a lab
- * @note     Route: /ous/id1/labs/id2clients/id3/status, Method: GET
- * @param    id1     OU id.
- * @param    id2     lab id.
- * @return   JSON string with array of all client status defined in a lab
+ * @note     Route: /ous/:ouid/labs/:labid/clients/:clntid/status, Method: GET
+ * @param    int ouid   OU id.
+ * @param    int labid  lab id.
+ * @return   string     JSON string with array of all client status defined in a lab
  */
 $app->get('/ous/:ouid/labs/:labid/clients/status(/)', 'validateApiKey', 'getStatus');
 
 /**
  * @brief    Get client data
  * @note     Route: /ous/id1/labs/id2clients/id3, Method: GET
- * @param    id1     OU id.
- * @param    id2     lab id.
- * @param    id3     client id.
- * @return   JSON string with hardware parameters
+ * @param    int ouid    OU id.
+ * @param    int labid   lab id.
+ * @param    int clntid  client id.
+ * @return   string      JSON string with hardware parameters
  */
 $app->get('/ous/:ouid/labs/:labid/clients/:clntid(/)', 'validateApiKey',
     function($ouid, $labid, $clntid) {
@@ -600,7 +604,8 @@ $app->get('/ous/:ouid/labs/:labid/clients/:clntid(/)', 'validateApiKey',
 	$clntid = htmlspecialchars($clntid);
 	// Database query.
 	$cmd->texto = <<<EOD
-SELECT adm.idadministradorcentro, ordenadores.*
+SELECT adm.idadministradorcentro, ordenadores.*,
+       IF(ordenadores.idordenador=aulas.idordprofesor, 1, 0) AS profclient
   FROM ordenadores
   JOIN aulas USING(idaula)
  RIGHT JOIN administradores_centros AS adm USING(idcentro)
@@ -626,9 +631,10 @@ EOD;
 		$response['netmask'] = $rs->campos["mascara"];
 		$response['routerip'] = $rs->campos["router"];
 		$response['repo']['id'] = (int)$rs->campos["idrepositorio"];
+		$response['profclient'] = ($rs->campos["profclient"] == 1);
 		//$response['hardprofile']['id'] = $rs->campos["idperfilhard"];
 		//$response['menu']['id'] = $rs->campos["idmenu"];
-		$response['validation'] = $rs->campos["validacion"]==0 ? false: true;
+		$response['validation'] = ($rs->campos["validacion"] == 1);
 		$response['boottype'] = $rs->campos["arranque"];
 		$response['picture'] = $rs->campos["fotoord"];
 		jsonResponse(200, $response);
@@ -639,11 +645,11 @@ EOD;
 
 /**
  * @brief    Get client's harware configuration data
- * @note     Route: /ous/id1/labs/id2clients/id3/hardware, Method: GET
- * @param    id1     OU id.
- * @param    id2     lab id.
- * @param    id3     client id.
- * @return   JSON string with cleint parameters
+ * @note     Route: /ous/:ouid/labs/:labid/clients/:clntid/hardware, Method: GET
+ * @param    int ouid    OU id.
+ * @param    int labid   lab id.
+ * @param    int clntid  client id.
+ * @return   string      JSON string with cleint parameters
  */
 $app->get('/ous/:ouid/labs/:labid/clients/:clntid/hardware(/)', 'validateApiKey',
     function($ouid, $labid, $clntid) {
@@ -695,11 +701,11 @@ EOD;
 
 /**
  * @brief    Get client's disk configuration data
- * @note     Route: /ous/id1/labs/id2clients/id3/diskcfg, Method: GET
- * @param    id1     OU id.
- * @param    id2     lab id.
- * @param    id3     client id.
- * @return   JSON string with disk parameters
+ * @note     Route: /ous/:ouid1/labs/:labid/clients/:clntid/diskcfg, Method: GET
+ * @param    int ouid    OU id.
+ * @param    int labid   lab id.
+ * @param    int clntid  client id.
+ * @return   string      JSON string with disk parameters
  */
 $app->get('/ous/:ouid/labs/:labid/clients/:clntid/diskcfg(/)', 'validateApiKey',
     function($ouid, $labid, $clntid) {
@@ -771,7 +777,7 @@ EOD;
 						$tmp['image']['id'] = (int)$rs->campos["idimagen"];
 						$tmp['image']['deploydate'] = $rs->campos["fechadespliegue"];
 						// Check if image is updated.
-						$tmp['image']['updated'] = ($rs->campos["difimagen"]>0 ? "false" : "true");
+						$tmp['image']['updated'] = ($rs->campos["difimagen"] == 0);
 					}
 				}
 				//$tmp['cachedata'] = $rs->campos["cache"];
@@ -787,19 +793,19 @@ EOD;
 
 /**
  * @brief    Get client's execution status
- * @note     Route: /ous/id1/labs/id2clients/id3/status, Method: GET
- * @param    id1     OU id.
- * @param    id2     lab id.
- * @param    id3     client id.
- * @return   JSON string with client status
+ * @note     Route: /ous/:ouid/labs/:labid/clients/:clntid/status, Method: GET
+ * @param    int ouid    OU id.
+ * @param    int labid   lab id.
+ * @param    int clntid  client id.
+ * @return   string      JSON string with client status
  */
 $app->get('/ous/:ouid/labs/:labid/clients/:clntid/status(/)', 'validateApiKey', 'getStatus');
 
 /**
  * @brief    List all image repositories defined in an OU
  * @note     Route: /ous/id/repos, Method: GET
- * @param    id      OU id.
- * @return   JSON array of all UO's repo data 
+ * @param    int ouid  OU id.
+ * @return   string    JSON array of all UO's repo data
  */
 $app->get('/ous/:ouid/repos(/)', 'validateApiKey',
     function($ouid) {
@@ -840,10 +846,10 @@ EOD;
 
 /**
  * @brief    Get image repository data
- * @note     Route: /ous/id1/repos/id2, Method: GET
- * @param    id1     OU id.
- * @param    id2     repo id.
- * @return   JSON string with repo parameters
+ * @note     Route: /ous/:ouid/repos/:repoid, Method: GET
+ * @param    int ouid    OU id.
+ * @param    int repoid  repository id.
+ * @return   string      JSON string with repo parameters
  */
 $app->get('/ous/:ouid/repos/:repoid(/)', 'validateApiKey',
     function($ouid, $repoid) {
@@ -881,9 +887,9 @@ EOD;
 
 /**
  * @brief    List all images defined in an OU
- * @note     Route: /ous/id/images, Method: GET
- * @param    id      OU id.
- * @return   JSON array of all UO's image data 
+ * @note     Route: /ous/:ouid/images, Method: GET
+ * @param    int ouid  OU id.
+ * @return   string    JSON array of all UO's image data
  */
 $app->get('/ous/:ouid/images(/)', 'validateApiKey',
     function($ouid) {
@@ -911,7 +917,7 @@ EOD;
 				$tmp = Array();
 				$tmp['id'] = (int)$rs->campos["idimagen"];
 				$tmp['name'] = $rs->campos["nombreca"];
-				$tmp['inremotepc'] = $rs->campos["inremotepc"]==0 ? false: true;
+				$tmp['inremotepc'] = ($rs->campos["inremotepc"] == 1);
 				$tmp['ou']['id'] = (int)$ouid;
 				array_push($response, $tmp);
 			}
@@ -924,10 +930,10 @@ EOD;
 
 /**
  * @brief    Get image data
- * @note     Route: /ous/id1/images/id2, Method: GET
- * @param    id1     OU id.
- * @param    id2     image id.
- * @return   JSON string with image parameters
+ * @note     Route: /ous/:ouid/images/:imgid, Method: GET
+ * @param    int ouid   OU id.
+ * @param    int imgid  image id.
+ * @return   string     JSON string with image parameters
  */
 $app->get('/ous/:ouid/images/:imgid(/)', 'validateApiKey',
     function($ouid, $imgid) {
@@ -958,7 +964,7 @@ EOD;
 		$response['name'] = $rs->campos["nombreca"];
 		$response['description'] = $rs->campos["descripcion"];
 		$response['comments'] = $rs->campos["comentarios"];
-		$response['inremotepc'] = $rs->campos["inremotepc"]==0 ? false: true;
+		$response['inremotepc'] = ($rs->campos["inremotepc"] == 1);
 		$response['repo']['id'] = (int)$rs->campos["idrepositorio"];
 		switch ($rs->campos["tipo"]) {
 			// Image type.
@@ -986,7 +992,13 @@ EOD;
 );
 
 // Lista de softeare instalado en una imagen.
-$app->get('/ous/:ouid/images/:imgid/software(/)', 'validateApiKey',
+/**
+ * @brief    List software installed in an image
+ * @note     Route: /ous/:ouid/images/:imgid/software, Method: GET
+ * @param    int ouid   OU id.
+ * @param    int imgid  image id.
+ * @return   string     JSON array with installed software
+ */$app->get('/ous/:ouid/images/:imgid/software(/)', 'validateApiKey',
     function($ouid, $imgid) {
 	global $userid;
 	global $cmd;
@@ -1004,6 +1016,7 @@ SELECT adm.idadministradorcentro, imagenes.idimagen, imagenes.nombreca,
   LEFT JOIN perfilessoft_softwares USING(idperfilsoft)
   LEFT JOIN softwares USING(idsoftware)
  WHERE adm.idadministradorcentro = '$userid'
+   AND adm.idcentro='$ouid'
    AND imagenes.idimagen='$imgid'
  ORDER BY softwares.descripcion ASC;
 EOD;
@@ -1038,4 +1051,3 @@ EOD;
     }
 );
 
-?>
