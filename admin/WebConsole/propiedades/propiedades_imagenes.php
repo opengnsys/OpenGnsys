@@ -109,7 +109,7 @@ if  ($opcion!=$op_alta and isset($repokey)) {
 		$imgbksize = isset($result->backupsize) ? humanSize($result->backupsize) : 0;
 		$imglock = @$result->locked;
 	} else {
-		$imgpath = "";
+		$imgpath = $imgsize = $imgbackup = $imglock = "";
 	}
 }
 
