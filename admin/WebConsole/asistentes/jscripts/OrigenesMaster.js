@@ -15,7 +15,7 @@ function ListarOrigenesMaster(ip) {
             try {
                 ajaxRequest = new ActiveXObject("Microsoft.XMLHTTP");
             } catch (e) {
-                alert("Este navegador no soporta la operación.");
+                alert(TbMsg["NOSUPPORT"]);
                 return false;
             }
         }
