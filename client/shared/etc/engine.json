@@ -1,0 +1,793 @@
+{
+  "variables": [
+    {
+      "description": "applying engine configuration (boolean)",
+      "name": "OGENGINECONFIGURATE",
+      "value": true
+    },
+    {
+      "description": "session log file (path)",
+      "name": "OGLOGSESSION",
+      "value": "/tmp/session.log"
+    },
+    {
+      "description": "command log file (path)",
+      "name": "OGLOGCOMMAND",
+      "value": "/tmp/command.log"
+    },
+    {
+      "description": "image clonation program (string)",
+      "name": "IMGPROG",
+      "value": "partclone"
+    },
+    {
+      "description": "image compresson (string)",
+      "name": "IMGCOMP",
+      "value": "lzop"
+    },
+    {
+      "description": "filesystem image extension (string)",
+      "name": "IMGEXT",
+      "value": "img"
+    },
+    {
+      "description": "disk image extension (string)",
+      "name": "DISKIMGEXT",
+      "value": "dsk"
+    },
+    {
+      "description": "trying to reduce image (boolean)",
+      "name": "IMGREDUCE",
+      "value": true
+    },
+    {
+      "description": "trying to reduce Windows filesystem before creating image (boolean)",
+      "name": "OGWINREDUCE",
+      "value": true
+    },
+    {
+      "description": "time to sleep before reboot (seconds)",
+      "name": "OGSLEEP",
+      "value": 20
+    },
+    {
+      "description": "do not show warnings in this functions (list of functions)",
+      "name": "NODEBUGFUNCTIONS",
+      "value": "ogCreateImageSyntax ogGetHivePath ogGetOsType ogRestoreImageSyntax ogUnmountAll ogUnmountCache"
+    },
+    {
+      "description": "action to take if cache is full (NONE; FORMAT)",
+      "name": "ACTIONCACHEFULL",
+      "value": "NONE"
+    },
+    {
+      "description": "restoration protocol if cache is full or it does not exists (NONE, returns error; UNICAST; MULTICAST)",
+      "name": "RESTOREPROTOCOLNOTCACHE",
+      "value": "UNICAST"
+    },
+    {
+      "description": "timout if Multicast transfer does not begins or it's interrupted (seconds)",
+      "name": "MCASTWAIT",
+      "value": 30
+    },
+    {
+      "description": "run CHKDSK after Windows depolying (boolean)",
+      "name": "OGWINCHKDISK",
+      "value": true
+    },
+    {
+      "description": "timeout factor creating synchronized image (integer, 100000k => 4s)",
+      "name": "CREATESPEED",
+      "value": 400000
+    },
+    {
+      "description": "compression factor creating synchronized image (integer)",
+      "name": "FACTORSYNC",
+      "value": 120
+    },
+    {
+      "description": "make backup before creating synchronized image (boolean)",
+      "name": "BACKUP",
+      "value": false
+    },
+    {
+      "description": "filesystem type creating synchronized image (string)",
+      "name": "IMGFS",
+      "value": "EXT4"
+    },
+    {
+      "description": "default communication speed (blank, do not use; 100Mb/s; 1000Mb/s)",
+      "name": "DEFAULTSPEED",
+      "value": ""
+    }
+  ],
+  "errors": [
+    {
+      "id": 1,
+      "description": "format error",
+      "name": "OG_ERR_FORMAT"
+    },
+    {
+      "id": 2,
+      "description": "resource not found",
+      "name": "OG_ERR_NOTFOUND"
+    },
+    {
+      "id": 3,
+      "description": "partition error",
+      "name": "OG_ERR_PARTITION"
+    },
+    {
+      "id": 4,
+      "description": "resource locked",
+      "name": "OG_ERR_LOCKED"
+    },
+    {
+      "id": 5,
+      "description": "image error",
+      "name": "OG_ERR_IMAGE"
+    },
+    {
+      "id": 6,
+      "description": "operating system not detected",
+      "name": "OG_ERR_NOTOS"
+    },
+    {
+      "id": 7,
+      "description": "program or function not executable",
+      "name": "OG_ERR_NOTEXEC"
+    },
+    {
+      "id": 14,
+      "description": "cannot write",
+      "name": "OG_ERR_NOTWRITE"
+    },
+    {
+      "id": 15,
+      "description": "cache filesystem does not exists",
+      "name": "OG_ERR_NOTCACHE"
+    },
+    {
+      "id": 16,
+      "description": "cache filesystem is full",
+      "name": "OG_ERR_CACHESIZE"
+    },
+    {
+      "id": 17,
+      "description": "error reducing filesystem",
+      "name": "OG_ERR_REDUCEFS"
+    },
+    {
+      "id": 18,
+      "description": "error extending filesystem",
+      "name": "OG_ERR_EXTENDFS"
+    },
+    {
+      "id": 19,
+      "description": "value out of limit",
+      "name": "OG_ERR_OUTOFLIMIT"
+    },
+    {
+      "id": 20,
+      "description": "filesystem error",
+      "name": "OG_ERR_FILESYS"
+    },
+    {
+      "id": 21,
+      "description": "cache error",
+      "name": "OG_ERR_CACHE"
+    },
+    {
+      "id": 22,
+      "description": "no GPT partition table",
+      "name": "OG_ERR_NOGPT"
+    },
+    {
+      "id": 23,
+      "description": "cannot mount repository",
+      "name": "OG_ERR_REPO"
+    },
+    {
+      "id": 30,
+      "description": "trying to restore an image into an smaller partition",
+      "name": "OG_ERR_IMGSIZEPARTITION"
+    },
+    {
+      "id": 31,
+      "description": "error updating cache",
+      "name": "OG_ERR_UPDATECACHE"
+    },
+    {
+      "id": 32,
+      "description": "formatting error",
+      "name": "OG_ERR_DONTFORMAT"
+    },
+    {
+      "id": 40,
+      "description": "unknown error",
+      "name": "OG_ERR_GENERIC"
+    },
+    {
+      "id": 50,
+      "description": "error preparing Unicast syntax",
+      "name": "OG_ERR_UCASTSYNTAXT"
+    },
+    {
+      "id": 51,
+      "description": "error sending partition using Unicast protocol",
+      "name": "OG_ERR_UCASTSENDPARTITION"
+    },
+    {
+      "id": 52,
+      "description": "error sending file using Unicast protocol",
+      "name": "OG_ERR_UCASTSENDFILE"
+    },
+    {
+      "id": 52,
+      "description": "error receiving partition using Unicast protocol",
+      "name": "OG_ERR_UCASTRECEIVERPARTITION"
+    },
+    {
+      "id": 53,
+      "description": "error receiving file using Unicast protocol",
+      "name": "OG_ERR_UCASTRECEIVERFILE"
+    },
+    {
+      "id": 55,
+      "description": "error preparing Multicast syntax",
+      "name": "OG_ERR_MCASTSYNTAXT"
+    },
+    {
+      "id": 56,
+      "description": "error sending file using Multicast protocol",
+      "name": "OG_ERR_MCASTSENDFILE"
+    },
+    {
+      "id": 57,
+      "description": "error receiving file using Multicast protocol",
+      "name": "OG_ERR_MCASTRECEIVERFILE"
+    },
+    {
+      "id": 58,
+      "description": "error sending partition using Multicast protocol",
+      "name": "OG_ERR_MCASTSENDPARTITION"
+    },
+    {
+      "id": 59,
+      "description": "error receiving partition using Multicast protocol",
+      "name": "OG_ERR_MCASTRECEIVERPARTITION"
+    },
+    {
+      "id": 60,
+      "description": "error connecting master node",
+      "name": "OG_ERR_PROTOCOLJOINMASTER"
+    },
+    {
+      "id": 70,
+      "description": "cannot mount a syncrhronized image",
+      "name": "OG_ERR_DONTMOUNT_IMAGE"
+    },
+    {
+      "id": 71,
+      "description": "it's not a syncrhronized image",
+      "name": "OG_ERR_DONTSYNC_IMAGE"
+    },
+    {
+      "id": 72,
+      "description": "cannot unmount a syncrhronized image",
+      "name": "OG_ERR_DONTUNMOUNT_IMAGE"
+    },
+    {
+      "id": 73,
+      "description": "there are no differences between basic image and filesystem",
+      "name": "OG_ERR_NOTDIFFERENT"
+    },
+    {
+      "id": 74,
+      "description": "synchronization error",
+      "name": "OG_ERR_SYNCHRONIZING"
+    }
+  ],
+  "disks": [
+    {
+      "type": "DISK"
+    },
+    {
+      "type": "USB"
+    },
+    {
+      "type": "CDROM"
+    },
+    {
+      "type": "RAID"
+    },
+    {
+      "type": "MAPPER"
+    }
+  ],
+  "partitiontables": [
+    {
+      "id": 1,
+      "type": "MSDOS",
+      "partitions": [
+        {
+          "id": "0",
+          "type": "EMPTY",
+          "clonable": false
+        },
+        {
+          "id": "1",
+          "type": "FAT12",
+          "clonable": true
+        },
+        {
+          "id": "5",
+          "type": "EXTENDED",
+          "clonable": false
+        },
+        {
+          "id": "6",
+          "type": "FAT16",
+          "clonable": true
+        },
+        {
+          "id": "7",
+          "type": "NTFS",
+          "clonable": true
+        },
+        {
+          "id": "b",
+          "type": "FAT32",
+          "clonable": true
+        },
+        {
+          "id": "11",
+          "type": "HFAT12",
+          "clonable": true
+        },
+        {
+          "id": "16",
+          "type": "HFAT16",
+          "clonable": true
+        },
+        {
+          "id": "17",
+          "type": "HNTFS",
+          "clonable": true
+        },
+        {
+          "id": "1b",
+          "type": "HFAT32",
+          "clonable": true
+        },
+        {
+          "id": "82",
+          "type": "LINUX-SWAP",
+          "clonable": false
+        },
+        {
+          "id": "83",
+          "type": "LINUX",
+          "clonable": true
+        },
+        {
+          "id": "8e",
+          "type": "LINUX-LVM",
+          "clonable": true
+        },
+        {
+          "id": "a5",
+          "type": "FREEBSD",
+          "clonable": true
+        },
+        {
+          "id": "a6",
+          "type": "OPENBSD",
+          "clonable": true
+        },
+        {
+          "id": "a9",
+          "type": "NETBSD",
+          "clonable": true
+        },
+        {
+          "id": "af",
+          "type": "HFS",
+          "clonable": true
+        },
+        {
+          "id": "be",
+          "type": "SOLARIS-BOOT",
+          "clonable": true
+        },
+        {
+          "id": "bf",
+          "type": "SOLARIS",
+          "clonable": true
+        },
+        {
+          "id": "ca",
+          "type": "CACHE",
+          "clonable": false
+        },
+        {
+          "id": "da",
+          "type": "DATA",
+          "clonable": true
+        },
+        {
+          "id": "ee",
+          "type": "GPT",
+          "clonable": false
+        },
+        {
+          "id": "ef",
+          "type": "EFI",
+          "clonable": true
+        },
+        {
+          "id": "fb",
+          "type": "VMFS",
+          "clonable": true
+        },
+        {
+          "id": "fd",
+          "type": "LINUX-RAID",
+          "clonable": true
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "GPT",
+      "partitions": [
+        {
+          "id": "700",
+          "type": "WINDOWS",
+          "clonable": true
+        },
+        {
+          "id": "c01",
+          "type": "WIN-RESERV",
+          "clonable": true
+        },
+        {
+          "id": "2700",
+          "type": "WIN-RECOV",
+          "clonable": true
+        },
+        {
+          "id": "7f00",
+          "type": "CHROMEOS-KRN",
+          "clonable": true
+        },
+        {
+          "id": "7f01",
+          "type": "CHROMEOS",
+          "clonable": true
+        },
+        {
+          "id": "7f02",
+          "type": "CHROMEOS-RESERV",
+          "clonable": true
+        },
+        {
+          "id": "8200",
+          "type": "LINUX-SWAP",
+          "clonable": false
+        },
+        {
+          "id": "8300",
+          "type": "LINUX",
+          "clonable": true
+        },
+        {
+          "id": "8301",
+          "type": "LINUX-RESERV",
+          "clonable": true
+        },
+        {
+          "id": "8302",
+          "type": "LINUX",
+          "clonable": true
+        },
+        {
+          "id": "8e00",
+          "type": "LINUX-LVM",
+          "clonable": true
+        },
+        {
+          "id": "a500",
+          "type": "FREEBSD-DISK",
+          "clonable": false
+        },
+        {
+          "id": "a501",
+          "type": "FREEBSD-BOOT",
+          "clonable": true
+        },
+        {
+          "id": "a502",
+          "type": "FREEBSD-SWAP",
+          "clonable": false
+        },
+        {
+          "id": "a503",
+          "type": "FREEBSD",
+          "clonable": true
+        },
+        {
+          "id": "a504",
+          "type": "FREEBSD",
+          "clonable": true
+        },
+        {
+          "id": "a901",
+          "type": "NETBSD-SWAP",
+          "clonable": false
+        },
+        {
+          "id": "a902",
+          "type": "NETBSD",
+          "clonable": true
+        },
+        {
+          "id": "a903",
+          "type": "NETBSD",
+          "clonable": true
+        },
+        {
+          "id": "a904",
+          "type": "NETBSD",
+          "clonable": true
+        },
+        {
+          "id": "a905",
+          "type": "NETBSD",
+          "clonable": true
+        },
+        {
+          "id": "a906",
+          "type": "NETBSD-RAID",
+          "clonable": true
+        },
+        {
+          "id": "ab00",
+          "type": "HFS-BOOT",
+          "clonable": true
+        },
+        {
+          "id": "af00",
+          "type": "HFS",
+          "clonable": true
+        },
+        {
+          "id": "af01",
+          "type": "HFS-RAID",
+          "clonable": true
+        },
+        {
+          "id": "af02",
+          "type": "HFS-RAID",
+          "clonable": true
+        },
+        {
+          "id": "be00",
+          "type": "SOLARIS-BOOT",
+          "clonable": true
+        },
+        {
+          "id": "bf00",
+          "type": "SOLARIS",
+          "clonable": true
+        },
+        {
+          "id": "bf01",
+          "type": "SOLARIS",
+          "clonable": true
+        },
+        {
+          "id": "bf02",
+          "type": "SOLARIS-SWAP",
+          "clonable": false
+        },
+        {
+          "id": "bf03",
+          "type": "SOLARIS-DISK",
+          "clonable": true
+        },
+        {
+          "id": "bf04",
+          "type": "SOLARIS",
+          "clonable": true
+        },
+        {
+          "id": "bf05",
+          "type": "SOLARIS",
+          "clonable": true
+        },
+        {
+          "id": "ca00",
+          "type": "CACHE",
+          "clonable": false
+        },
+        {
+          "id": "ef00",
+          "type": "EFI",
+          "clonable": true
+        },
+        {
+          "id": "ef01",
+          "type": "MBR",
+          "clonable": false
+        },
+        {
+          "id": "ef02",
+          "type": "BIOS-BOOT",
+          "clonable": false
+        },
+        {
+          "id": "fb00",
+          "type": "VMFS",
+          "clonable": true
+        },
+        {
+          "id": "fb01",
+          "type": "VMFS-RESERV",
+          "clonable": true
+        },
+        {
+          "id": "fb02",
+          "type": "VMFS-KRN",
+          "clonable": true
+        },
+        {
+          "id": "fd00",
+          "type": "LINUX-RAID",
+          "clonable": true
+        },
+        {
+          "id": "ffff",
+          "type": "UNKNOWN",
+          "clonable": true
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "LVM",
+      "partitions": [
+        {
+          "id": "10000",
+          "type": "LVM-LV",
+          "clonable": true
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "ZPOOL",
+      "partitions": [
+        {
+          "id": "10010",
+          "type": "ZFS-VOL",
+          "clonable": true
+        }
+      ]
+    }
+  ],
+  "filesystems": [
+    {
+      "id": 1,
+      "type": "EMPTY"
+    },
+    {
+      "id": 2,
+      "type": "CACHE"
+    },
+    {
+      "id": 3,
+      "type": "BTRFS"
+    },
+      "id": 4,
+      "type": "EXT2"
+    },
+    {
+      "id": 5,
+      "type": "EXT3"
+    },
+    {
+      "id": 6,
+      "type": "EXT4"
+    },
+    {
+      "id": 7,
+      "type": "FAT12"
+    },
+    {
+      "id": 8,
+      "type": "FAT16"
+    },
+    {
+      "id": 9,
+      "type": "FAT32"
+    },
+    {
+      "id": 10,
+      "type": "HFS"
+    },
+    {
+      "id": 11,
+      "type": "HFSPLUS"
+    },
+    {
+      "id": 12,
+      "type": "JFS"
+    },
+    {
+      "id": 13,
+      "type": "NTFS"
+    },
+    {
+      "id": 14,
+      "type": "REISERFS"
+    },
+    {
+      "id": 15,
+      "type": "REISER4"
+    },
+    {
+      "id": 16,
+      "type": "UFS"
+    },
+    {
+      "id": 17,
+      "type": "XFS"
+    },
+    {
+      "id": 18,
+      "type": "LINUX-SWAP"
+    },
+    {
+      "id": 19,
+      "type": "EXFAT"
+    },
+    {
+      "id": 20,
+      "type": "F2FS"
+    },
+    {
+      "id": 21,
+      "type": "NILFS2"
+    }
+  ],
+  "operatingsystems": [
+    {
+      "type": "Android"
+    },
+    {
+      "type": "BSD"
+    },
+    {
+      "type": "GrubLoader"
+    },
+    {
+      "type": "Hurd"
+    },
+    {
+      "type": "Linux"
+    },
+    {
+      "type": "MacOS"
+    },
+    {
+      "type": "Solaris"
+    },
+    {
+      "type": "Windows"
+    },
+    {
+      "type": "WinLoader"
+    }
+  ]
+}
