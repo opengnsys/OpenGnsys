@@ -35,12 +35,15 @@ INSERT INTO sistemasficheros (idsistemafichero, nemonico, descripcion) VALUES
 		idsistemafichero=VALUES(idsistemafichero), nemonico=VALUES(nemonico), descripcion=VALUES(descripcion);
 
 # Eliminar campos sin uso (ticket #730).
-# Añadir campos para aulas: servidor NTP e inclusión en proyecto Remote PC (tickets #725 y #708).
+# Modificar número de puestos del aula para valores hasta 32768 (ticket #747)
+# Añadir campos para aulas: servidor NTP, inclusión en proyecto Remote PC y directorio de ogLive  (tickets #725, #708 y #768)
 ALTER TABLE aulas
 	DROP cuadro_x,
 	DROP cuadro_y,
+	MODIFY puestos SMALLINT DEFAULT NULL,
 	ADD ntp VARCHAR(30) AFTER proxy,
-	ADD inremotepc TINYINT DEFAULT 0;
+	ADD inremotepc TINYINT DEFAULT 0,
+	ADD oglivedir VARCHAR(50) NOT NULL DEFAULT 'ogLive';
 # Añadir campos para nº de revisión de imágenes y su inclusión en proyecto Remote PC (tickets #737 y #708).
 ALTER TABLE imagenes
 	ADD revision SMALLINT UNSIGNED NOT NULL DEFAULT 0 AFTER nombreca,
@@ -78,7 +81,7 @@ ALTER TABLE parametros
 ALTER TABLE tareas
 	MODIFY restrambito TEXT;
 
-# Actualizar componentes hardware y añadir nº de serie, clave de acceso a API REST de OGAgent y directorio de ogLive(tickets #713, #718 y #768)
+# Actualizar componentes hardware y añadir nº de serie, clave de acceso a API REST de OGAgent y directorio de ogLive (tickets #713, #718 y #768)
 ALTER TABLE tipohardwares
 	DROP pci;
 INSERT INTO tipohardwares (idtipohardware, descripcion, urlimg, nemonico) VALUES
@@ -106,10 +109,6 @@ ALTER TABLE repositorios
 UPDATE repositorios
 	SET apikey = 'REPOKEY'
 	WHERE idrepositorio = 1 AND apikey = '';
-
-# Número de puestos del aula permite valores hasta 32768 (ticket #747)
-ALTER TABLE  aulas
-     MODIFY puestos smallint  DEFAULT NULL;
 
 # Nuevas tablas para datos del proyecto Remote PC y operaciones de OGAgent (ticket #708).
 CREATE TABLE IF NOT EXISTS remotepc (
