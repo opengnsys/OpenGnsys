@@ -3,12 +3,17 @@ LISTA DE CAMBIOS	CHANGELOG.es.txt
 
 
 
+Lista de cambios incluidos en OpenGnsys 1.1.1
+---------------------------------------------
+
+
 Lista de cambios incluidos en OpenGnsys 1.1.0
 ---------------------------------------------
 
 Tickets resueltos en módulo OpenGnsys Cloning Engine:
 #141	Reconstruir función ogDiskToDev (resuelto en #748)
 #544	Comprobar si Windows está en dominio antes de cambiar nombre en script de inicio de sesión (no se resolverá)
+#585	Internacionalización mensajes del cliente
 #676	Soportar sistema de ficheros ZFS
 #678	Unidades organizativas con directorio de imágenes separado (mejora)
 #716	Revisión ogCleanLinuxDevices
