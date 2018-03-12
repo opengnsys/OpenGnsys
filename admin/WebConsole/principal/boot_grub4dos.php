@@ -43,20 +43,12 @@ switch($litambito){
 // /var/lib/tftboot/menu.lst/templates
 //#########################################################################
 $dirtemplates="/var/lib/tftpboot/menu.lst/templates/";
-$directorio=dir($dirtemplates);
-$pn= array();//pila de nombres
-//bucle para llenar las pilas :P
-while ($archivo = $directorio->read())
-{
-	//no mostrar ni "." ni ".." ni "pxe"
-	if(($archivo!="pxe")&&($archivo!=".")&&($archivo!=".."))
-		{
-		array_push($pn, $archivo);
-		}
-}
-$directorio->close();
-//ordenar las pilas segun la pila de nombres
-array_multisort($pn);
+// Leer nombres de ficheros y quitar plantilla "pxe".
+chdir($dirtemplates);
+$pn=glob("*");
+unset($pn[array_search("pxe", $pn)]);
+sort($pn);
+chdir(__DIR__);
 
 //Leemos el ultimo fichero y extraemos su numero 
 $ultimofichero=end($pn);
@@ -100,18 +92,8 @@ while($encontrado==FALSE)
    		<input type="hidden" name="nombreambito" value="<?php echo $nombreambito?>">
    		<input type="hidden" name="opcion" value="<?php echo $opcion?>">
 <?php	
-	if (empty($_SESSION["widcentro"]))
-	{$modo=1;
-	/*
-		if ($modo == 1)
-			{
-		echo '<input type=hidden name=modo value=>';
-	      	echo '<input value='.$TbMsg[10].' type=submit>';
-			}else{
-		echo '<input type=hidden name=modo value=1>';
-	      	echo '<input value='.$TbMsg[11].' type=submit>';
-			}
-	*/
+	if (empty($_SESSION["widcentro"])) {
+		$modo=1;
 	}
 ?>
 </form>
@@ -119,8 +101,8 @@ while($encontrado==FALSE)
 </TD></TR>
 <tr>
 <?php
-if (empty($modo))
-{}else{?>
+if (! empty($modo))
+{?>
 <td valign="top">
 <?php include_once("./boot_grub4dos_tabla.php");?>
 </td>
