@@ -167,7 +167,7 @@ OSVERSION="${OSVERSION%%.*}"
 # Configuración según la distribución GNU/Linux (usar minúsculas).
 case "$OSDISTRIB" in
 	ubuntu|debian|linuxmint)
-		DEPENDENCIES=( subversion apache2 php php-ldap libapache2-mod-php mysql-server php-mysql isc-dhcp-server bittorrent tftp-hpa tftpd-hpa xinetd build-essential g++-multilib libmysqlclient15-dev wget curl doxygen graphviz bittornado ctorrent samba rsync unzip netpipes debootstrap schroot squashfs-tools btrfs-tools procps arp-scan realpath php-curl gettext moreutils jq wakeonlan )
+		DEPENDENCIES=( subversion apache2 php php-ldap libapache2-mod-php mysql-server php-mysql isc-dhcp-server bittorrent tftp-hpa tftpd-hpa xinetd build-essential g++-multilib libmysqlclient-dev wget curl doxygen graphviz bittornado ctorrent samba rsync unzip netpipes debootstrap schroot squashfs-tools btrfs-tools procps arp-scan realpath php-curl gettext moreutils jq wakeonlan )
 		UPDATEPKGLIST="apt-get update"
 		INSTALLPKG="apt-get -y install --force-yes"
 		CHECKPKG="dpkg -s \$package 2>/dev/null | grep Status | grep -qw install"
@@ -299,11 +299,11 @@ case "$OSDISTRIB" in
 			eval $INSTALLPKG software-properties-common
 			add-apt-repository -y ppa:ondrej/php
 			eval $UPDATEPKGLIST
+			PHP7VERSION=$(apt-cache pkgnames php7 | sort | head -1)
+			DEPENDENCIES=( ${DEPENDENCIES[@]//php/$PHP7VERSION} )
 		fi
-		PHP7VERSION=$(apt-cache pkgnames php7 | sort | head -1)
-		DEPENDENCIES=( ${DEPENDENCIES[@]//php/$PHP7VERSION} )
-		# Dependencias correctas para libmysqlclient.
-		[ -z "$(apt-cache pkgnames libmysqlclient15)" ] && DEPENDENCIES=( ${DEPENDENCIES[@]//libmysqlclient15/libmysqlclient} )
+		# Adaptar dependencias para libmysqlclient.
+		[ -z "$(apt-cache pkgnames libmysqlclient-dev)" ] && [ -n "$(apt-cache pkgnames libmysqlclient15)" ] && DEPENDENCIES=( ${DEPENDENCIES[@]//libmysqlclient-dev/libmysqlclient15} )
 		;;
 	centos)	# Postconfiguación personalizada para CentOS.
 		# Configuración para PHP 7.
@@ -1098,6 +1098,7 @@ function installWebFiles()
 # Copiar ficheros en la zona de descargas de OpenGnsys Web Console.
 function installDownloadableFiles()
 {
+	INSTVERSION=1.1.0	###  Temporal.
 	local FILENAME=ogagentpkgs-$INSTVERSION.tar.gz
 	local TARGETFILE=$WORKDIR/$FILENAME
  
