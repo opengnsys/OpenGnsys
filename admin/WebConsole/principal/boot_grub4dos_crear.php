@@ -19,9 +19,15 @@ if (isset($_POST["idambito"])) $idambito=$_POST["idambito"];
 if (isset($_POST["nombreambito"])) $nombreambito=$_POST["nombreambito"]; 
 if (isset($_POST["opcion"])) $opcion=$_POST["opcion"];
 if (isset($_POST["opcioncrear"])) $opcioncrear=$_POST["opcioncrear"];
-if (isset($_POST["ultimonumero"])) $ultimonumero=$_POST["ultimonumero"];
-if ($opcioncrear == 1){$boton = $_REQUEST["boton"];if ($boton == $TbMsg[13] && $opcioncrear == 1){$confirmado="1";}}
-if ($opcioncrear == 2){$boton = $_REQUEST["boton"];if ($boton == $TbMsg[13] && $opcioncrear == 2){$confirmado="1";}}
+$ultimonumero = isset($_POST["ultimonumero"]) ? $_POST["ultimonumero"] : "";
+$boton = isset ($_REQUEST["boton"]) ? $_REQUEST["boton"] : "";
+$confirmado = ($boton == $TbMsg[13] && ($opcioncrear == 1 || $opcioncrear == 2)) ? "1" : "";
+$guarnomb = isset($_POST["nombrenuevoboot"]) ? ucfirst($_POST["nombrenuevoboot"]) : "";
+$admin = isset($_POST["modo"]) ? $_POST["modo"] : "";
+$selecdescripcion = isset($_POST["selecdescripcion"]) ? $_POST["selecdescripcion"] : "";
+$descripcion = "";
+$modo = "";
+$seleccion = "";
 
 switch($litambito){
 	case "aulas":
@@ -59,49 +65,38 @@ if ($opcioncrear == 1)
 	if ($confirmado == 1)
 		{	
 				//$delcar=array(" "," /", "-", "@", "=");
-				$guarnomb=ucfirst($_POST["nombrenuevoboot"]);
 				$descripfich=$guarnomb;$descripfich=preg_replace("/[^A-Za-z0-9]/", "-", $descripfich);//str_replace($delcar, "-", $descripfich);
 				$guarnomb=preg_replace("/[^A-Za-z0-9]/", "", $descripfich);//str_replace($delcar, "", $guarnomb);
 				$nombrenuevoboot=$ultimonumero.$guarnomb;
 				$parametrosnuevoboot=$_POST["parametrosnuevoboot"];
 				$nuevoboot = "/var/lib/tftpboot/menu.lst/templates/".$nombrenuevoboot;
-				if(empty($_POST["nombrenuevoboot"]))
-				{}else{
+			if($guarnomb != "") {
 				$fp = fopen($nuevoboot, "w");
 				$string = $TbMsg[22].$descripfich."\n".$parametrosnuevoboot;
 				$write = fputs($fp, $string);
-				fclose($fp);}  
-			if (empty($guarnomb)){?>
-						<TABLE width="500" align=center border=1 >
-						<TR><TD align="center"><br><br><br><SPAN align=center class=subcabeceras><?php echo $TbMsg[14];?></span><br><br><br>	
-						<form name="crearranque" method="post" action="./boot_grub4dos_crear.php">
-						<input type="hidden" name="litambito" value="<?php echo $litambito?>">
-						<input type="hidden" name="idambito" value="<?php echo $idambito?>">
-						<input type="hidden" name="nombreambito" value="<?php echo $nombreambito?>">
-						<input type="hidden" name="ultimonumero" value="<?php echo $ultimonumero?>">
-						<input type="hidden" name="confirmado" value="">
-						<input type="hidden" name="opcioncrear" value="1">
-						<input type="submit" value="Continuar" name="nuevoarran">
-						</form>
-						</TR></TD>
-</TABLE>
-
-						<?php
-						}else{
-						?>
+				fclose($fp);
+			?>
 						<TABLE width="500" align=center border=1 >
 						<TR><TD align="center"><br><?php if ($guarnomb != null) echo $TbMsg[6];?><br><br><SPAN align=center class=subcabeceras><?php echo $descripfich;?></span><br><br><br>	
 						<form name="crearranque" method="post" action="./boot_grub4dos.php">
+						<input type="hidden" name="confirmado" value="1">
+			<?php }else{ ?>
+
+						<TABLE width="500" align=center border=1 >
+						<TR><TD align="center"><br><br><br><SPAN align=center class=subcabeceras><?php echo $TbMsg[14];?></span><br><br><br>	
+						<form name="crearranque" method="post" action="./boot_grub4dos_crear.php">
+						<input type="hidden" name="confirmado" value="">
+						<input type="hidden" name="ultimonumero" value="<?php echo $ultimonumero?>">
+			<?php }?>
+
 						<input type="hidden" name="litambito" value="<?php echo $litambito?>">
 						<input type="hidden" name="idambito" value="<?php echo $idambito?>">
 						<input type="hidden" name="nombreambito" value="<?php echo $nombreambito?>">
-						<input type="hidden" name="confirmado" value="1">
 						<input type="hidden" name="opcioncrear" value="1">
 						<input type="submit" value="Continuar" name="nuevoarran">
 						</form>
 						</TR></TD>
 						</TABLE>
-						<?php }?>
 <?php }else{
 ?>
 
@@ -126,7 +121,7 @@ if ($opcioncrear == 1)
 	</TD>
 
 	<TD width="500" height="10" valign="middle">
-		<input type="text" name="nombrenuevoboot" id="textfield" size="25" value="<?php echo $_POST["nombrenuevoboot"];?>">
+		<input type="text" name="nombrenuevoboot" id="textfield" size="25" value="<?php echo $guarnomb ?>">
 	</TD>
 
 </TR>
@@ -194,7 +189,7 @@ boot";
 
 if ($opcioncrear == 2)
 	{
-	$confirmado=$_POST["confirmado"];
+	$confirmado=isset($_POST["confirmado"]) ? $_POST["confirmado"] : "";
 	if ($confirmado == 1)
 		{
 				$modificadescripcion=ucfirst($_POST["modificadescripcion"]);
@@ -238,7 +233,7 @@ if ($opcioncrear == 2)
 		<input type="hidden" name="nombreambito" value="<?php echo $nombreambito?>">
 		<input type="hidden" name="confirmado" value="0">
 		<input type="hidden" name="opcioncrear" value="2">
-		<input type=hidden name=modo value=1></input>
+		<input type="hidden" name="modo" value="1">
 		<input type="submit" value="Continuar" name="nuevoarran">
 		</form>
 		</TR></TD>
@@ -250,7 +245,6 @@ if ($opcioncrear == 2)
 //#########################################################################
 // MODO USUARIO
 //#########################################################################
-$admin=$_POST["modo"];
 if (empty($admin)){
 //#########################################################################
 // LEYENDO EL DIRECTORIO
@@ -281,7 +275,7 @@ if ($numeros > 19)
 	{
 	$descripcion=exec("cat ".$dirtemplates.$pn[$b]." | awk 'NR==1  {print $2}'");//$text=trim($text);
 	//Aqui busco el fichero, parametros y descripcion segun llega de $_POST["modificafichero"]
-	if ($descripcion == $_POST["selecdescripcion"])
+	if ($descripcion == $selecdescripcion)
 		{
 		$fichero=$pn[$b];
 		$param=$dirtemplates.$fichero;
@@ -296,7 +290,7 @@ if ($numeros > 19)
 <TABLE width="850" align=CENTER border=1 cellPadding=1 cellSpacing=1 class=tabla_datos >
 <TR >
 	<TD height="70" colspan="2" valign="middle">
-		<p align=center><SPAN align=center class=cabeceras> <?php echo $TbMsg[4]?> </SPAN></p><p aling=left>
+		<p align=center><SPAN align=center class=cabeceras> <?php echo $TbMsg[4]?> </SPAN></p><p aling=left></p>
         <form name="crearranque" method="post" action="./boot_grub4dos_crear.php">
         	<input type="hidden" name="litambito" value="<?php echo $litambito?>">
 		<input type="hidden" name="idambito" value="<?php echo $idambito?>">
@@ -308,7 +302,7 @@ if ($numeros > 19)
                 <input type="submit" value=<?php echo $TbMsg[11]?> name="nuevoarran">
         <?php } ?>
 
-        </form></p>
+        </form>
 	</TD>
   </TR>
  <?php if ($numeros > 19){  ?>
@@ -356,7 +350,7 @@ if ($numeros > 19)
 <?php	} ?>
 
 
-<?php if (!empty($_POST["selecdescripcion"])) {  ?>
+<?php if ($selecdescripcion != "") {  ?>
 
 <form name="crearranque" method="post" action="./boot_grub4dos_crear.php">
 <TR>
@@ -366,7 +360,7 @@ if ($numeros > 19)
 
 	<TD width="500" height="10" valign="middle">
 	<input type="hidden" name="nombrefichero" id="nombrefichero" value="<?php echo $fichero;?>">
-	<input type="text" name="modificadescripcion" id="modificadescripcion" size="25" value="<?php echo $_POST["selecdescripcion"];?>">
+	<input type="text" name="modificadescripcion" id="modificadescripcion" size="25" value="<?php echo $selecdescripcion;?>">
 	</TD>
 </TR>
 
@@ -454,7 +448,7 @@ for ($b=0;$b<count($pn);$b++)
 	{
 		$descripcion=exec("cat ".$dirtemplates.$pn[$b]." | awk 'NR==1  {print $2}'");//$text=trim($text);
 		//Aqui busco el fichero, parametros y descripcion segun llega de $_POST["modificafichero"]
-		if ($descripcion == $_POST["selecdescripcion"])
+		if ($descripcion == $selecdescripcion)
 			{
 			$fichero=$pn[$b];
 			$param=$dirtemplates.$fichero;
@@ -472,7 +466,7 @@ for ($b=0;$b<count($pn);$b++)
 	{
 	$descripcion=exec("cat ".$dirtemplates.$pn[$b]." | awk 'NR==1  {print $2}'");//$text=trim($text);
 	//Aqui busco el fichero, parametros y descripcion segun llega de $_POST["modificafichero"]
-	if ($descripcion == $_POST["selecdescripcion"])
+	if ($descripcion == $selecdescripcion)
 		{
 		$fichero=$pn[$b];
 		$param=$dirtemplates.$fichero;
@@ -487,21 +481,23 @@ for ($b=0;$b<count($pn);$b++)
 <TABLE width="850" align=CENTER border=1 cellPadding=1 cellSpacing=1 class=tabla_datos >
 <TR >
 	<TD height="70" colspan="4" valign="middle">
-		<p align=center><SPAN align=center class=cabeceras> <?php echo $TbMsg[4]?> </SPAN></p><p align=left>
+		<p align=center><SPAN align=center class=cabeceras> <?php echo $TbMsg[4]?> </SPAN></p><p align=left></p>
         <form name="crearranque" method="post" action="./boot_grub4dos_crear.php">
         	<input type="hidden" name="litambito" value="<?php echo $litambito?>">
 		<input type="hidden" name="idambito" value="<?php echo $idambito?>">
 		<input type="hidden" name="nombreambito" value="<?php echo $nombreambito?>">
 		<input type="hidden" name="ultimonumero" value="<?php echo $ultimonumero?>">
 		<input type="hidden" name="opcioncrear" value="2">
-	<?php	echo $modo;if ($modo==1)
-			{
-			echo '<input type=hidden name=modo value=1>';
-			}else{echo '<input type=hidden name=modo value=>';}
+	<?php	echo $modo;
+	if ($modo==1) {
+		echo '		<input type="hidden" name="modo" value="1">';
+	}else{
+		echo '		<input type="hidden" name="modo" value="">';
+	}
 
 	?>
    		<input type="submit" value=<?php echo $TbMsg[10]?>  name="nuevoarran">
-        </form></p>
+        </form>
 	</TD>
   </TR>
 <TR>
@@ -537,7 +533,7 @@ for ($b=0;$b<count($pn);$b++)
 	</TD>
 	</form>
 </TR>
-<?php if (!empty($_POST["selecdescripcion"])){  ?>
+<?php if ($selecdescripcion != ""){  ?>
 <form name="crearranque" method="post" action="./boot_grub4dos_crear.php">
 <TR>
 	<TD width="600" height="10" valign="middle">
@@ -550,7 +546,7 @@ for ($b=0;$b<count($pn);$b++)
 
 	<TD width="100" valign="middle" align="right">
 	<input type="hidden" name="nombrefichero" id="nombrefichero" value="<?php echo $fichero;?>">
-	<input type="text" name="modificadescripcion" id="modificadescripcion" size="25" value="<?php echo $_POST["selecdescripcion"];?>">
+	<input type="text" name="modificadescripcion" id="modificadescripcion" size="25" value="<?php echo $selecdescripcion;?>">
 	</TD>
 
 	<TD width="500" valign="middle">
@@ -628,7 +624,7 @@ for ($b=0;$b<count($pn);$b++)
 
 if ($opcioncrear == 3)
 	{
-	$confirmado=$_POST["confirmado"];
+	$confirmado=isset($_POST["confirmado"]) ? $_POST["confirmado"] : "";
 	if ($confirmado == 1)
 		{
 				$eliminafichero=$_POST["eliminafichero"];
