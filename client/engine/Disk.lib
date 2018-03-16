@@ -494,6 +494,7 @@ fi
 # Listar dispositivos de discos.
 ALLDISKS=$((lsblk -n -e 1,2 -x MAJ:MIN 2>/dev/null || lsblk -n -e 1,2) | \
            awk '$6~/^disk$/ {gsub(/!/,"/"); printf "/dev/%s ",$1}')
+#ALLDISKS=$(lsblk -Jd -e 1,2 | jq -r '.blockdevices[] | "/dev/"+select(.type=="disk").name')
 # Listar volúmenes lógicos.
 VOLGROUPS=$(vgs -a --noheadings 2>/dev/null | awk '{printf "/dev/%s ",$1}')
 ALLDISKS="$ALLDISKS $VOLGROUPS"
@@ -651,6 +652,9 @@ case "$TYPE" in
     SD)
         TYPE="DISK"
         udevadm info -q property $1 2>/dev/null | grep -q "^ID_BUS=usb" && TYPE="USB"
+        ;;
+    BLKEXT)
+        TYPE="NVM"
         ;;
     SR|IDE*)
         TYPE="CDROM"        # FIXME Comprobar discos IDE.
