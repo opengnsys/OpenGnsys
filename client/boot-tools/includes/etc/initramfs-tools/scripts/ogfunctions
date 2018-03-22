@@ -123,7 +123,7 @@ ogExportVarEnvironment ()
 	OGPROTOCOL="${ogprotocol:-smb}"
 	[ "$ogunit" != "" ] && OGUNIT="/$ogunit"
 	# OPTIONS Para samba y local (a nfs no le afecta)
-	export OPTIONS=" -o user=opengnsys,pass=og"
+	export OPTIONS=" -o vers=1.0,sec=ntlm,user=opengnsys,pass=og"
 	DEFOGLIVE="ogclient"
 	export OGLIVEDIR="${oglivedir:-$DEFOGLIVE}" && echo "OGLIVEDIR=$OGLIVEDIR" >> $CFGINITRD
 	case "$OGPROTOCOL" in

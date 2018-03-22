@@ -2,14 +2,13 @@
 
 OGCLIENTCFG=${OGCLIENTCFG:-/tmp/ogclient.cfg}
 [ -f $OGCLIENTCFG ] && source $OGCLIENTCFG
-OSRELEASE=${OSRELEASE:-$(uname -a | awk '{print $3}')}
-
+OSRELEASE=${OSRELEASE:-$(uname -r)}
 
 rm -f /usr/lib/initramfs-tools/bin/*
 cp /bin/busybox ./
 cd /tmp/
 mkinitramfs -o /tmp/initrd.img-$OSRELEASE -v $OSRELEASE
-cp /boot/vmlinuz-$OSRELEASE /tmp
+cp -v /boot/vmlinuz-$OSRELEASE.efi.signed /tmp
 
 history -c
 

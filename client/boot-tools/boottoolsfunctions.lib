@@ -115,6 +115,20 @@ case "${1,,}" in
 		OSARCH="amd64"
 		OSHTTP="http://es.archive.ubuntu.com/ubuntu/"
 		;;
+	xenial-4.13) 	# ogLive 1.1.0-rc6 basado en Ubuntu 16.04 y Kernel 4.13.
+		OSDISTRIB="ubuntu"
+		OSCODENAME="xenial"
+		OSRELEASE="4.13.0-17-generic"
+		OSARCH="amd64"
+		OSHTTP="http://es.archive.ubuntu.com/ubuntu/"
+		;;
+	artful) 	# ogLive 1.1.1-rc1 basado en Ubuntu 17.10 y Kernel 4.13.
+		OSDISTRIB="ubuntu"
+		OSCODENAME="artful"
+		OSRELEASE="4.13.0-37-generic"
+		OSARCH="amd64"
+		OSHTTP="http://es.archive.ubuntu.com/ubuntu/"
+		;;
 	host)	# ogLive basado en la distribución del servidor.
 		OSDISTRIB=$(lsb_release -is)
 		OSCODENAME=$(lsb_release -cs)
@@ -128,7 +142,7 @@ case "${1,,}" in
 		;;
 esac
 SVNURL="https://opengnsys.es/svn/branches/version1.1/client"
-VERSIONSVN=$(LANG=C svn info $SVNURL | awk '/Rev:/ {print "r"$4}')
+VERSIONSVN=$(LC_ALL=C svn info $SVNURL | awk '/Rev:/ {print "r"$4}')
 NAMEISOCLIENT="$VERSIONBOOTTOOLS-$OSCODENAME-$OSRELEASE-$OSARCH-$VERSIONSVN"
 NAMEHOSTCLIENT="$VERSIONBOOTTOOLS-$OSCODENAME-$VERSIONSVN"
 export OSDISTRIB OSCODENAME OSRELEASE OSARCH OSHTTP
@@ -350,7 +364,7 @@ TIMEMOD=`date +%Y%m%d-%H%M%S`
 
 #copiando
 cp /tmp/initrd.img-${OSRELEASE} ${BTTARGETDIR}/oginitrd.img
-cp /tmp/vmlinuz-${OSRELEASE} ${BTTARGETDIR}/ogvmlinuz
+cp /tmp/vmlinuz-${OSRELEASE}.efi.signed ${BTTARGETDIR}/ogvmlinuz
 #generamos md5 del kernel y del initrd.
 DATASUM=`md5sum "${BTTARGETDIR}/oginitrd.img" | cut -f1 -d" "`
 echo $DATASUM > ${BTTARGETDIR}/oginitrd.img.sum

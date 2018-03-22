@@ -46,7 +46,7 @@ echoAndLog "OpenGnsys CLIENT installation begins at $(date)"
 btogGetOsInfo $TYPECLIENT
 ##########################################################################
 echo "FASE 2 - Instalación de software adicional."
-grep "http://free.nchc.org.tw/drbl-core" /etc/apt/sources.list || echo "deb http://free.nchc.org.tw/drbl-core drbl stable" >> /etc/apt/sources.list
+#grep "http://free.nchc.org.tw/drbl-core" /etc/apt/sources.list || echo "deb http://free.nchc.org.tw/drbl-core drbl stable" >> /etc/apt/sources.list
 apt-get update
 [ -n "$(apt-cache search gpxe)" ] && PXEPKG="gpxe"
 [ -n "$(apt-cache search ipxe)" ] && PXEPKG="ipxe"

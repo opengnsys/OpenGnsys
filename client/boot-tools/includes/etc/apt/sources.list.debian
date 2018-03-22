@@ -4,5 +4,5 @@ deb http://security.debian.org/ OSCODENAME/updates main contrib non-free
 deb-src http://security.debian.org/ OSCODENAME/updates main contrib non-free
 
 # DRBL
-deb http://free.nchc.org.tw/drbl-core drbl stable
+#deb http://free.nchc.org.tw/drbl-core drbl stable
 

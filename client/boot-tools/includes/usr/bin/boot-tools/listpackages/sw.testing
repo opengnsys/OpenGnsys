@@ -3,15 +3,21 @@ install screen
 install schroot 
 #install grub
 install xmlstarlet 
+############# UEFI
 install efibootmgr 
-############# Requisitos para el cliente 1.1.0 en pruebas compatible con Remote-PC
+install efitools
+install refind
+############# OGAgent
 install libxss1
 install python-prctl
 install python-six
 install python-requests
 ##############
+install fusioninventory-agent
+install nvme-cli
+install disktype
+install laptop-detect 
 #install discover 
-#install laptop-detect 
 #install casper 
 #install lupin-casper
 #install xinit 
