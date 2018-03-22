@@ -1075,3 +1075,76 @@ IMGFILE=$(ogGetPath "$1" "$2.img") || return $?
 ogGetImageInfo $IMGFILE | awk -F: '{print $4}'
 }
 
+
+#/**
+#         ogCreateGptImage int_ndisk str_repo path_image
+#@brief   Crea una imagen de la tabla de particiones GPT de un disco.
+#@param   int_ndisk    nº de orden del disco
+#@param   str_repo     repositorio de imágenes (remoto o caché local)
+#@param   path_image   camino de la imagen (sin extensión)
+#@return  (nada, por determinar)
+#@note    repo = { REPO, CACHE }
+#@exception OG_ERR_FORMAT    formato incorrecto.
+#@exception OG_ERR_NOTFOUND  fichero o dispositivo no encontrado.
+#@exception OG_ERR_IMAGE     error al crear la imagen del sistema.
+#@version 1.1 - Adaptación a OpenGnSys 1.1
+#@author  Juan Carlos Garcia. Universidad de Zaragoza
+#@date    2017/03/29
+#*/ ##
+function ogCreateGptImage ()
+{
+# Variables locales
+local DISK IMGDIR IMGFILE
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk path_dir str_image" \
+           "$FUNCNAME 1 REPO /aula1/gpt"
+    return
+fi
+# Error si no se reciben 3 parámetros.
+[ $# == 3 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+DISK=$(ogDiskToDev "$1") || return $?
+IMGDIR=$(ogGetParentPath "$2" "$3")
+[ -n "$IMGDIR" ] || ogRaiseError $OG_ERR_NOTFOUND "$2 $(dirname $3)" || return $?
+IMGFILE="$IMGDIR/$(basename "$3").gpt"
+
+# Crear imagen de la tabla GPT.
+sgdisk -b="$IMGFILE" "$DISK" || ogRaiseError $OG_ERR_IMAGE "$1 $IMGFILE" || return $?
+}
+
+#/**
+#         ogRestoreGptImage str_repo path_image int_ndisk
+#@brief   Restaura la imagen de la tabla de particiones GPT de un disco.
+#@param   str_repo     repositorio de imágenes o caché local
+#@param   path_image   camino de la imagen
+#@param   int_ndisk    nº de orden del disco
+#@return  (por determinar)
+#@exception OG_ERR_FORMAT   formato incorrecto.
+#@exception OG_ERR_NOTFOUND fichero de imagen o partición no detectados.
+#@exception OG_ERR_IMAGE    error al restaurar la imagen del sistema.
+#@version 1.1 - Adaptación a OpenGnSys 1.1
+#@author  Juan Carlos Garcia, Universidad de Zaragoza
+#@date    2017/03/29
+#*/ ##
+function ogRestoreGptImage ()
+{
+# Variables locales
+local DISK IMGFILE
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME path_dir str_image int_ndisk" \
+           "$FUNCNAME REPO /aula1/gpt 1"
+    return
+fi
+# Error si no se reciben 3 parámetros.
+[ $# == 3 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+# Procesar parámetros.
+DISK=$(ogDiskToDev "$3") || return $?
+IMGFILE=$(ogGetPath "$1" "$2.gpt") || return $?
+[ -r "$IMGFILE" ] || ogRaiseError $OG_ERR_NOTFOUND "$IMGFILE" || return $?
+
+# Restaurar tabla GPT del disco.
+sgdisk -l="$IMGFILE" "$DISK" || ogRaiseError $OG_ERR_IMAGE "$1 $IMGFILE" || return $?
+}
+

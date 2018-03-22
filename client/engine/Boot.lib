@@ -2166,3 +2166,61 @@ fi
 #Cambiamos la entrada el fichero de configuración.
 sed -i s/gfxmode=.*$/gfxmode=$NEWRESOLUTION/g $CFGFILE
 }
+
+
+#         ogRefindInstall  int_ndisk bool_autoconfig
+#@brief   Instala y actualiza el gestor rEFInd en la particion EFI
+#@param   int_ndisk
+#@param   bolean_Check__auto_config   true | false[default]
+#@return
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@version 1.1.0 - Primeras pruebas.
+#@author  Juan Carlos Garcia.   Universidad de ZAragoza.
+#@date    2017-06-26
+#*/ ##
+function ogRefindInstall {
+
+# Variables locales.
+local DISK EFIDIR CONFIG EFIPARTITIONID
+
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk boolean_autoconfig " \
+           "$FUNCNAME 1 TRUE"
+    return
+fi
+
+# Error si no se recibe 1 parÃ¡metro.
+[ $# -ge 1 ] || return $(ogRaiseError $OG_ERR_FORMAT; echo $?)
+
+
+DISK=$1
+EFIDIR=/mnt/$(ogDiskToDev $1 1 | cut -c 6-8)$1/EFI
+CONFIG=${2:-"FALSE"}
+EFIPARTITIONID=$(ogGetPartitionId $1 1)
+if [ "$EFIPARTITIONID" == "EF00" ] || [ "$EFIPARTITIONID" == "ef00" ]; then
+    cp -pr /opt/opengnsys/lib/refind ${EFIDIR}
+    case "$CONFIG" in
+        FALSE)
+        if [ -a ${EFIDIR}/ubuntu ]; then
+            echo "menuentry \"Ubuntu\" {" >> ${EFIDIR}/refind/refind.conf
+            echo "loader /EFI/ubuntu/grubx64.efi" >> ${EFIDIR}/refind/refind.conf
+            echo "icon /EFI/refind/icons/os_linux.png" >> ${EFIDIR}/refind/refind.conf
+            echo "}" >> ${EFIDIR}/refind/refind.conf
+        fi
+        if [ -a ${EFIDIR}/Microsoft ]; then
+            echo "menuentry \"Windows\" {" >> ${EFIDIR}/refind/refind.conf
+            echo "loader /EFI/Microsoft/Boot/bootmgfw.efi" >> ${EFIDIR}/refind/refind.conf
+            echo "}" >> ${EFIDIR}/refind/refind.conf
+        fi
+        ;;
+        TRUE)
+        cp  ${EFIDIR}/refind/refind.conf.auto ${EFIDIR}/refind/refind.conf
+        ;;
+    esac
+else
+$(ogRaiseError $OG_ERR_FORMAT; echo $?)
+fi
+}
+
