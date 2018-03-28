@@ -824,7 +824,7 @@ fi
 [ $# == 3 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 # Procesar parámetros.
 DISK=$(ogDiskToDev "$3") || return $?
-IMGFILE=$(ogGetPath "$1" "$2.mbr") || return $?
+IMGFILE=$(ogGetPath "$1" "$2.mbr")
 [ -r "$IMGFILE" ] || ogRaiseError $OG_ERR_NOTFOUND "$IMGFILE" || return $?
 
 # Restaurar imagen del MBR.
@@ -860,7 +860,7 @@ fi
 [ $# == 3 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 # Procesar parámetros.
 DISK=$(ogDiskToDev "$3") || return $?
-IMGFILE=$(ogGetPath "$1" "$2.mbr") || return $?
+IMGFILE=$(ogGetPath "$1" "$2.mbr")
 [ -r "$IMGFILE" ] || ogRaiseError $OG_ERR_NOTFOUND "$IMGFILE" || return $?
 
 # Restaurar imagen del MBR.
@@ -1014,7 +1014,7 @@ if [ "$*" == "help" ]; then
 fi
 # Error si no se reciben 2 parámetros.
 [ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
-IMGFILE=$(ogGetPath "$1" "$2.img") || return $?
+IMGFILE=$(ogGetPath "$1" "$2.img")
 [ -r "$IMGFILE" ] || ogRaiseError $OG_ERR_NOTFOUND "$IMGFILE" || return $?
 ogGetImageInfo $IMGFILE | awk -F: '{print $1}'
 }
@@ -1031,7 +1031,7 @@ if [ "$*" == "help" ]; then
 fi
 # Error si no se reciben 2 parámetros.
 [ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
-IMGFILE=$(ogGetPath "$1" "$2.img") || return $?
+IMGFILE=$(ogGetPath "$1" "$2.img")
 [ -r "$IMGFILE" ] || ogRaiseError $OG_ERR_NOTFOUND "$IMGFILE" || return $?
 ogGetImageInfo $IMGFILE | awk -F: '{print $2}'
 }
@@ -1048,7 +1048,7 @@ if [ "$*" == "help" ]; then
 fi
 # Error si no se reciben 2 parámetros.
 [ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
-IMGFILE=$(ogGetPath "$1" "$2.img") || return $?
+IMGFILE=$(ogGetPath "$1" "$2.img")
 [ -r "$IMGFILE" ] || ogRaiseError $OG_ERR_NOTFOUND "$IMGFILE" || return $?
 ogGetImageInfo $IMGFILE | awk -F: '{print $3}'
 }
@@ -1068,7 +1068,7 @@ fi
 # Error si no se reciben 2 parámetros.
 [ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 # Error si el fichero de imagen no es accesible.
-IMGFILE=$(ogGetPath "$1" "$2.img") || return $?
+IMGFILE=$(ogGetPath "$1" "$2.img")
 [ -r "$IMGFILE" ] || ogRaiseError $OG_ERR_NOTFOUND "$IMGFILE" || return $?
 
 # Devuelve el tamaño de la imagen en KB.
@@ -1141,7 +1141,7 @@ fi
 [ $# == 3 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 # Procesar parámetros.
 DISK=$(ogDiskToDev "$3") || return $?
-IMGFILE=$(ogGetPath "$1" "$2.gpt") || return $?
+IMGFILE=$(ogGetPath "$1" "$2.gpt")
 [ -r "$IMGFILE" ] || ogRaiseError $OG_ERR_NOTFOUND "$IMGFILE" || return $?
 
 # Restaurar tabla GPT del disco.

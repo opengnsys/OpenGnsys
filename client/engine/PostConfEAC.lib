@@ -47,9 +47,12 @@ else
 	return $(ogRaiseError $OG_ERR_NOTOS "version windows no detectada"; echo $?)
 fi
 
-hiveSAM=$(ogGetPath $DISK $PART /${SYSTEMROOT}/system32/config/SAM) && export hiveSAM || return $(ogRaiseError $OG_ERR_NOTOS " hive SAM  no detectada"; echo $?)
-hiveSYSTEM=$(ogGetPath $DISK $PART /${SYSTEMROOT}/system32/config/system) && export hiveSYSTEM || return $(ogRaiseError $OG_ERR_NOTOS "hive SYSTEM  no detectada"; echo $?)
-hiveSOFTWARE=$(ogGetPath $DISK $PART /${SYSTEMROOT}/system32/config/software) && export hiveSOFTWARE || return $(ogRaiseError $OG_ERR_NOTOS "hive SOFTWARE no detectada"; echo $?)
+hiveSAM=$(ogGetPath $DISK $PART /${SYSTEMROOT}/system32/config/SAM)
+[ -n "$hiveSAM" ] && export hiveSAM || return $(ogRaiseError $OG_ERR_NOTOS " hive SAM  no detectada"; echo $?)
+hiveSYSTEM=$(ogGetPath $DISK $PART /${SYSTEMROOT}/system32/config/system)
+[ -n "$hiveSYSTEM" ] && export hiveSYSTEM || return $(ogRaiseError $OG_ERR_NOTOS "hive SYSTEM  no detectada"; echo $?)
+hiveSOFTWARE=$(ogGetPath $DISK $PART /${SYSTEMROOT}/system32/config/software)
+[ -n "$hiveSOFTWARE" ] && export hiveSOFTWARE || return $(ogRaiseError $OG_ERR_NOTOS "hive SOFTWARE no detectada"; echo $?)
 export TEMPhive=/tmp/tmpregistry
 
 # segunda fase, carga de los hive de usuarios windows.

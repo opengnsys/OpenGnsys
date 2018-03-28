@@ -76,7 +76,8 @@ ogIsImageLocked "$3" "$5.$DIFFEXT" && exit $(ogRaiseError session $OG_ERR_LOCKED
 ogIsLocked "$1" "$2" && exit $(ogRaiseError session $OG_ERR_LOCKED  "$1 $2"; echo $?)
 
 # Comprobar si la imagen completa existe.
-IMGFILE="$(ogGetPath "$3" "$4.$IMGEXT")" || exit $(ogRaiseError session $OG_ERR_NOTFOUND "$3 $4.$IMGEXT"; echo $?)
+IMGFILE="$(ogGetPath "$3" "$4.$IMGEXT")"
+[ -n "$IMGFILE" ] || exit $(ogRaiseError session $OG_ERR_NOTFOUND "$3 $4.$IMGEXT"; echo $?)
 
 # Comprobar que la imagen completa es sincronizable
 ogIsSyncImage "$3" "$4" "img" || exit $(ogRaiseError session $OG_ERR_DONTSYNC_IMAGE "$3 $4"; echo $?)

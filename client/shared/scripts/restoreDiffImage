@@ -59,7 +59,8 @@ ogEcho log session "[1] $MSG_SCRIPTS_START $0 $*"
 # Procesar parámetros de entrada
 DIFFTYPE="diff"
 DIFFEXT="img.diff"
-REPODIFFFILE="$(ogGetPath "REPO" "$3.$DIFFEXT")" || exit $(ogRaiseError session $OG_ERR_NOTFOUND "REPO $3.$DIFFEXT";echo $?)
+REPODIFFFILE="$(ogGetPath "REPO" "$3.$DIFFEXT")"
+[ -n "$REPODIFFFILE" ] || exit $(ogRaiseError session $OG_ERR_NOTFOUND "REPO $3.$DIFFEXT";echo $?)
 
 # Comprobamos si la imagen o la particion estan bloqueada:
 ogIsImageLocked "$1" "$3.$DIFFEXT" && exit $(ogRaiseError session $OG_ERR_LOCKED "$1 $3.$DIFFEXT";echo $?)

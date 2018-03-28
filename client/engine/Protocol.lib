@@ -293,7 +293,7 @@ esac
 [ $# == "$ARG" ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
 # Comprobar fichero origen
-ogGetPath $SOURCE &> /dev/null || ogRaiseError $OG_ERR_NOTFOUND " device or file $DEVICE not found" || return $?  
+[ -n "$(ogGetPath $SOURCE)" ] || ogRaiseError $OG_ERR_NOTFOUND " device or file $DEVICE not found" || return $?  
 
 
 SESSION=${!ARG}
@@ -410,7 +410,7 @@ then
 fi
 
 #3er param check - que puede ser un dispositvo o un fichero.
-#ogGetPath "$3" > /dev/null || ogRaiseError $OG_ERR_NOTFOUND " device or file $3" || PERROR=9 #return $?  
+# [ -n "$(ogGetPath $3)" ] || ogRaiseError $OG_ERR_NOTFOUND " device or file $3" || PERROR=9 #return $?  
 DEVICE=$3
 
 #4 y 5 param check .  solo si es sobre particiones.
@@ -565,7 +565,7 @@ esac
 [ $# == "$ARG" ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
 # Comprobar fichero origen
-ogGetPath $SOURCE &> /dev/null || ogRaiseError $OG_ERR_NOTFOUND " device or file $DEVICE not found" || return $?  
+[ -n "$(ogGetPath $SOURCE)" ] || ogRaiseError $OG_ERR_NOTFOUND " device or file $DEVICE not found" || return $?  
 
 # eliminamos ficheros antiguos de log
 #rm $LOGFILE

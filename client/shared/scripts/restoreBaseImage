@@ -58,7 +58,8 @@ fi
 [ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
 
 # Procesar parámetros de entrada
-REPOFILE="$(ogGetPath "REPO" "$2.$IMGEXT")" || exit $(ogRaiseError session $OG_ERR_NOTFOUND "REPO, $2.$IMGEXT"; echo $?)
+REPOFILE="$(ogGetPath "REPO" "$2.$IMGEXT")"
+[ -n "$REPOFILE" ] || exit $(ogRaiseError session $OG_ERR_NOTFOUND "REPO, $2.$IMGEXT"; echo $?)
 
 # Comprobar que es sincronizable (con REPO)
 ogIsSyncImage REPO "$2" $IMGEXT  ||  exit $(ogRaiseError session $OG_ERR_DONTSYNC_IMAGE  "$1 $2"; echo $?)

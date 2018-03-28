@@ -42,9 +42,9 @@ case "$(ogGetOsType $1 $2)" in
         ;;
     Windows)
         # Borrar ficheros de hibernación y paginación de Windows.
-        ogGetPath $1 $2 pagefile.sys &>/dev/null && ogDeleteFile $1 $2 pagefile.sys
-        ogGetPath $1 $2 hiberfil.sys &>/dev/null && ogDeleteFile $1 $2 hiberfil.sys
-        ogGetPath $1 $2 swapfile.sys &>/dev/null && ogDeleteFile $1 $2 swapfile.sys
+        [ -n "$(ogGetPath $1 $2 pagefile.sys)" ] && ogDeleteFile $1 $2 pagefile.sys
+        [ -n "$(ogGetPath $1 $2 hiberfil.sys)" ] && ogDeleteFile $1 $2 hiberfil.sys
+        [ -n "$(ogGetPath $1 $2 swapfile.sys)" ] && ogDeleteFile $1 $2 swapfile.sys
         ;;
 esac
 

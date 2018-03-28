@@ -85,7 +85,8 @@ if ! $(ogFindCache >/dev/null); then
 fi
 
 # comprobar si la imagen existe (.img, .img.diff o directorio)
-REPOFILE=$(ogGetPath "REPO" "/$2") || exit $(ogRaiseError session $OG_ERR_NOTFOUND "REPO /$2"; echo $?) 
+REPOFILE=$(ogGetPath "REPO" "/$2")
+[ -n "$REPOFILE" ] || exit $(ogRaiseError session $OG_ERR_NOTFOUND "REPO /$2"; echo $?) 
 
 ogEcho log session "$MSG_SCRIPTS_UPDATECACHE_DOUPDATE"
 # Distingo si es monolitica o sincronizable
@@ -93,7 +94,8 @@ file "$REPOFILE" | grep -i -e " BTRFS Filesystem " -e " ext4 filesystem " -e " d
 if [ $? == 0 ]; then
 	IMGSYNC=TRUE
 	# Para imagen sincronizada, si hay imagen en cache siempre protocolo = rsync.
-	CACHEFILE="$(ogGetPath "CACHE" "/$2")"  && PROTOCOLO="RSYNC"
+	CACHEFILE="$(ogGetPath "CACHE" "/$2")"
+	[ -n "$CACHEFILE" ] && PROTOCOLO="RSYNC"
 	# Si es sincronizada tipo directorio  siempre protocolo = rsync.
 	[ -d $REPOFILE ] && PROTOCOLO="RSYNC" && IMGTYPE="dir"
 
