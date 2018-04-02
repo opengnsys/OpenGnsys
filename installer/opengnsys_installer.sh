@@ -77,17 +77,17 @@ done
 # Selección de clientes ogLive para descargar.
 while : ; do
 	echo -e "\\nChoose ogLive client to install."
-	echo -e "1) Kernel 4.8, 64-bit"
+	echo -e "1) Kernel 4.13, 64-bit, EFI-compatible"
 	echo -e "2) Kernel 3.2, 32-bit"
 	echo -e "3) Both"
 	echo -n -e "Please, type a valid number (1): "
 	read -r OPT
 	case "$OPT" in
-		1|"")	OGLIVE="ogLive-xenial-4.8.0-39-generic-amd64-r5331.iso"
+		1|"")	OGLIVE="ogLive-xenial-4.13.0-17-generic-amd64-r5520.iso"
 			break ;;
 		2)	OGLIVE="ogLive-precise-3.2.0-23-generic-r5159.iso"
 			break ;;
-		3)	OGLIVE="ogLive-xenial-4.8.0-39-generic-amd64-r5331.iso ogLive-precise-3.2.0-23-generic-r5159.iso";
+		3)	OGLIVE="ogLive-xenial-4.13.0-17-generic-amd64-r5520.iso ogLive-precise-3.2.0-23-generic-r5159.iso";
 			break ;;
 		*)	echo -e "\\aERROR: unknown option, try again."
 	esac
@@ -167,7 +167,7 @@ OSVERSION="${OSVERSION%%.*}"
 # Configuración según la distribución GNU/Linux (usar minúsculas).
 case "$OSDISTRIB" in
 	ubuntu|debian|linuxmint)
-		DEPENDENCIES=( subversion apache2 php php-ldap libapache2-mod-php mysql-server php-mysql isc-dhcp-server bittorrent tftp-hpa tftpd-hpa xinetd build-essential g++-multilib libmysqlclient-dev wget curl doxygen graphviz bittornado ctorrent samba rsync unzip netpipes debootstrap schroot squashfs-tools btrfs-tools procps arp-scan realpath php-curl gettext moreutils jq wakeonlan )
+		DEPENDENCIES=( subversion apache2 php php-ldap libapache2-mod-php mysql-server php-mysql isc-dhcp-server bittorrent tftp-hpa tftpd-hpa xinetd build-essential g++-multilib libmysqlclient-dev wget curl doxygen graphviz bittornado ctorrent samba rsync unzip netpipes debootstrap schroot squashfs-tools btrfs-tools procps arp-scan realpath php-curl gettext moreutils jq wakeonlan udpcast )
 		UPDATEPKGLIST="apt-get update"
 		INSTALLPKG="apt-get -y install --force-yes"
 		CHECKPKG="dpkg -s \$package 2>/dev/null | grep Status | grep -qw install"

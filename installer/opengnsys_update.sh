@@ -114,7 +114,7 @@ function autoConfigure()
 	# Configuración según la distribución de Linux.
 	if [ -f /etc/debian_version ]; then
         	# Distribución basada en paquetes Deb.
-		DEPENDENCIES=( curl rsync btrfs-tools procps arp-scan realpath php-curl gettext moreutils jq wakeonlan )
+		DEPENDENCIES=( curl rsync btrfs-tools procps arp-scan realpath php-curl gettext moreutils jq wakeonlan udpcast )
 		UPDATEPKGLIST="add-apt-repository -y ppa:ondrej/php; apt-get update"
 		INSTALLPKGS="apt-get -y install"
 		DELETEPKGS="apt-get -y purge"
@@ -948,7 +948,7 @@ function compileServices()
 function updateClient()
 {
 	#local FILENAME=ogLive-precise-3.2.0-23-generic-r5159.iso       # 1.1.0-rc6 (old)
-	local FILENAME=ogLive-xenial-4.8.0-39-generic-amd64-r5331.iso   # 1.1.0-rc6
+	local FILENAME=ogLive-xenial-4.13.0-17-generic-amd64-r5520.iso	# 1.1.0-rc6
 	local SOURCEFILE=$DOWNLOADURL/$FILENAME
 	local TARGETFILE=$(oglivecli config download-dir)/$FILENAME
 	local SOURCELENGTH
