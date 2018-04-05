@@ -57,12 +57,12 @@ fi
 
 # Valores para paquetes interactivos.
 cat << EOT | debconf-set-selections --
-console-setup console-setup/charmap47 select UTF-8
-console-setup console-setup/codeset47 select . Combined - Latin; Slavic Cyrillic; Greek
-console-setup console-setup/fontface47 select TerminusBold
-console-setup console-setup/fontsize-fb47 select 8x16
+console-data console-data/keymap/full select es
+console-data console-data/keymap/policy select Select keymap from full list
 davfs2 davfs2/suid_file boolean false
 kexec-tools kexec-tools/load_kexec boolean true
+openssh-server openssh-server/permit-root-login boolean true
+refind refind/install_to_esp boolean false
 EOT
 apt-get -y install sshfs console-data kexec-tools davfs2 $PKGS32
 

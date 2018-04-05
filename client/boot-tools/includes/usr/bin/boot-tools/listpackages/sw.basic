@@ -4,8 +4,7 @@ install man-db
 install fbset
 install gdebi-core
 install bash-static
-#La gestion  del busybox-static (incompatibilidades reboot y poweroff) en boottoolSoftwareCompile.sh 
-#install busybox-static  
+install busybox-static  
 install console-data
 install locales
 install lshw 
@@ -18,6 +17,7 @@ install php-cli		# ogLive a partir de Ubuntu 16.04
 install dmidecode 
 #install realpath	# ogLive hasta Ubuntu 16.04
 install rpm
+#install zypper		# PROBAR
 install sqlite3
 install os-prober
 install moreutils
