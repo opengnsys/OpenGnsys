@@ -167,7 +167,7 @@ OSVERSION="${OSVERSION%%.*}"
 # Configuración según la distribución GNU/Linux (usar minúsculas).
 case "$OSDISTRIB" in
 	ubuntu|debian|linuxmint)
-		DEPENDENCIES=( subversion apache2 php php-ldap libapache2-mod-php mysql-server php-mysql isc-dhcp-server bittorrent tftp-hpa tftpd-hpa xinetd build-essential g++-multilib libmysqlclient-dev wget curl doxygen graphviz bittornado ctorrent samba rsync unzip netpipes debootstrap schroot squashfs-tools btrfs-tools procps arp-scan realpath php-curl gettext moreutils jq wakeonlan udpcast )
+		DEPENDENCIES=( subversion apache2 php php-ldap libapache2-mod-php mysql-server php-mysql isc-dhcp-server bittorrent tftp-hpa tftpd-hpa xinetd build-essential g++-multilib libmysqlclient-dev wget curl doxygen graphviz bittornado ctorrent samba rsync unzip netpipes debootstrap schroot squashfs-tools btrfs-tools procps arp-scan realpath php-curl gettext moreutils jq wakeonlan udpcast grub-efi-amd64-signed )
 		UPDATEPKGLIST="apt-get update"
 		INSTALLPKG="apt-get -y install --force-yes"
 		CHECKPKG="dpkg -s \$package 2>/dev/null | grep Status | grep -qw install"
@@ -917,6 +917,8 @@ function tftpConfigure()
 	service=$INETDSERV
 	$ENABLESERVICE; $STARTSERVICE
 
+	# Creating default UEFI template file.
+	echo 'source "$prefix/$net_default_mac"' > $TFTPCFGDIR/grub/grub.cfg
 	# comprobamos el servicio tftp
 	sleep 1
 	testPxe
@@ -1213,7 +1215,7 @@ function createDirs()
 	mkdir -p $path_opengnsys_base/images/groups
 	mkdir -p $TFTPCFGDIR
 	ln -fs $TFTPCFGDIR $path_opengnsys_base/tftpboot
-	mkdir -p $path_opengnsys_base/tftpboot/menu.lst
+	mkdir -p $path_opengnsys_base/tftpboot/{menu.lst,grub}
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while creating dirs. Do you have write permissions?"
 		return 1
@@ -1261,6 +1263,7 @@ function copyServerFiles ()
 
 	# Lista de ficheros y directorios origen y de directorios destino.
 	local SOURCES=( server/tftpboot \
+			/usr/lib/grub/x86_64-efi-signed/grubnetx64.efi.signed \
 			server/bin \
 			repoman/bin \
 			server/lib \
@@ -1272,6 +1275,7 @@ function copyServerFiles ()
 			installer/opengnsys_import.sh \
 			doc )
 	local TARGETS=( tftpboot \
+			tftpboot \
 			bin \
 			bin \
 			lib \
