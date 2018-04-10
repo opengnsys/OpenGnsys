@@ -273,6 +273,16 @@ dmidecode -s system-serial-number | egrep -vi "(^[ 0]+$|not specified|filled by 
 
 
 #/**
+#         ogIsEfiActive
+#@brief   Comprueba si el sistema tiene activo el arranque EFI.
+#*/ ##
+function ogIsEfiActive ()
+{
+test -d /sys/firmware/efi
+}
+
+
+#/**
 #         ogListHardwareInfo
 #@brief   Lista el inventario de hardware de la máquina cliente.
 #@return  TipoDispositivo:Modelo    (por determinar)

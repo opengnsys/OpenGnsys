@@ -408,6 +408,8 @@ fi
 DEV="$1"
 case "$DEV" in
     LABEL=*)    DEV=$(blkid -L "${1#*=}") ;;
+    PARTLABEL=*) DEV=$(realpath "/dev/disk/by-partlabel/${1#*=}" 2>/dev/null) ;;
+    PARTUUID=*) DEV=$(realpath "/dev/disk/by-partuuid/${1#*=}" 2>/dev/null) ;;
     UUID=*)     DEV=$(blkid -U "${1#*=}") ;;
 esac
 
