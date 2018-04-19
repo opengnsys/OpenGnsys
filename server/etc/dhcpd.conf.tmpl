@@ -1,4 +1,5 @@
 ddns-update-style none;
+option arch code 93 = unsigned integer 16;
 option domain-name "example.org";
 log-facility local7;
 not-authoritative;
@@ -11,6 +12,12 @@ subnet NETIP netmask NETMASK {
     max-lease-time 7200;
     next-server SERVERIP;
     filename "grldr";
+    # 0007 == x64 EFI boot
+    if option arch = 00:07 {
+        filename "grubnetx64.efi.signed";
+    } else {
+        filename "grldr";
+    }
     use-host-decl-names on;
 
 # Ejemplo para PC.

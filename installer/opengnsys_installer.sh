@@ -917,8 +917,6 @@ function tftpConfigure()
 	service=$INETDSERV
 	$ENABLESERVICE; $STARTSERVICE
 
-	# Creating default UEFI template file.
-	echo 'source "$prefix/$net_default_mac"' > $TFTPCFGDIR/grub/grub.cfg
 	# comprobamos el servicio tftp
 	sleep 1
 	testPxe
