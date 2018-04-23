@@ -673,6 +673,23 @@ echo $TYPE
 
 
 #/**
+#         ogGetEsp
+#@brief   Devuelve números de disco y partición para la partición EFI (ESP).
+#*/ ##
+function ogGetEsp ()
+{
+loacl PART d
+for d in $(blkid -t TYPE=vfat -o device); do
+    PART="$(ogDevToDisk $d)"
+    if [ "$(ogGetPartitionId $PART)" == "$(ogTypeToId EFI GPT)" ]; then
+        echo $PART
+        break
+    fi
+done
+}
+
+
+#/**
 #         ogGetLastSector int_ndisk [int_npart]
 #@brief   Devuelve el último sector usable del disco o de una partición.
 #@param   int_ndisk      nº de orden del disco

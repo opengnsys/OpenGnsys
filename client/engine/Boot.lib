@@ -139,7 +139,7 @@ esac
 function ogGetWindowsName ()
 {
 # Variables locales.
-local PART MNTDIR
+local MNTDIR
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
