@@ -678,7 +678,7 @@ echo $TYPE
 #*/ ##
 function ogGetEsp ()
 {
-loacl PART d
+local PART d
 for d in $(blkid -t TYPE=vfat -o device); do
     PART="$(ogDevToDisk $d)"
     if [ "$(ogGetPartitionId $PART)" == "$(ogTypeToId EFI GPT)" ]; then
