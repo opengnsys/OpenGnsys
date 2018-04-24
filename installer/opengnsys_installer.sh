@@ -1557,7 +1557,7 @@ function installationSummary()
 	# de código o si no está incluida en el fichero de versión.
 	if [ $USESVN -eq 1 ] || [ -z "$(awk '$3~/r[0-9]*/ {print}' $VERSIONFILE)" ]; then
 		local REVISION=$(LANG=C svn info $SVN_URL|awk '/Rev:/ {print "r"$4}')
-		perl -pi -e "s/($| r[0-9]*)/ $REVISION/" $VERSIONFILE
+		sed -ri "s/($| r[0-9]*)/ $REVISION/" $VERSIONFILE
 	fi
 
 	# Mostrar información.
