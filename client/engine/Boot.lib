@@ -42,6 +42,7 @@ function ogBoot ()
 {
 # Variables locales.
 local PART TYPE MNTDIR PARAMS KERNEL INITRD APPEND FILE LOADER f
+local EFIDISK EFIPART EFIDIR BOOTLABEL BOOTNO
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -73,37 +74,87 @@ case "$TYPE" in
         fi
         read -e KERNEL INITRD APPEND <<<"$PARAMS"
         # Si no hay kernel, no hay sistema operativo.
-        [ -n "$KERNEL" ] || ogRaiseError $OG_ERR_NOTOS "$1 $2 ($TYPE)" || return $?
+        [ -n "$KERNEL" -a -e "$MNTDIR/$KERNEL" ] || ogRaiseError $OG_ERR_NOTOS "$1 $2 ($TYPE)" || return $?
         # Arrancar de partición distinta a la original.
         [ -e "$MNTDIR/etc" ] && APPEND=$(echo $APPEND | awk -v P="$PART " '{sub (/root=[-+=_/a-zA-Z0-9]* /,"root="P);print}')
-        # Configurar kernel Linux con los parámetros leídos de su GRUB.
-        kexec -l "${MNTDIR}${KERNEL}" --append="$APPEND" --initrd="${MNTDIR}${INITRD}"
-        kexec -e &
-        ;;
-    Windows|WinLoader)
-        # Compruebar si hay un cargador de Windows.
-        for f in io.sys ntldr bootmgr; do
-            FILE="$(ogGetPath $1 $2 $f 2>/dev/null)"
-            [ -n "$FILE" ] && LOADER="$f"
-        done
-        [ -n "$LOADER" ] || ogRaiseError $OG_ERR_NOTOS "$1 $2 ($TYPE)" || return $?
-        if [ "$winboot" == "kexec" ]; then
-            # Modo de arranque en caliente (con kexec).
-            cp $OGLIB/grub4dos/* $MNTDIR    # */ (Comentario Doxygen)
-            kexec -l $MNTDIR/grub.exe --append=--config-file="root (hd$[$1-1],$[$2-1]); chainloader (hd$[$1-1],$[$2-1])/$LOADER; tpm --init"
-            kexec -e &
-        else
-            # Modo de arranque por reinicio (con reboot).
-            dd if=/dev/zero of=${MNTDIR}/ogboot.me bs=1024 count=3
-            dd if=/dev/zero of=${MNTDIR}/ogboot.firstboot bs=1024 count=3
-            dd if=/dev/zero of=${MNTDIR}/ogboot.secondboot bs=1024 count=3
-            if  [ -z "$(ogGetRegistryValue $MNTDIR SOFTWARE '\Microsoft\Windows\CurrentVersion\Run\ogcleannboot')" ]; then
-                ogAddRegistryValue $MNTDIR SOFTWARE '\Microsoft\Windows\CurrentVersion\Run\ogcleanboot'
-                ogSetRegistryValue $MNTDIR SOFTWARE '\Microsoft\Windows\CurrentVersion\Run\ogcleanboot' "cmd /c del c:\ogboot.*"
+        # Comprobar tipo de sistema.
+        if ogIsEfiActive; then
+            # Obtener parcición EFI.
+            read -e EFIDISK EFIPART <<<"$(ogGetEsp)"
+            [ -n "$EFIPART" ] || ogRaiseError $OG_ERR_PARTITION "ESP" || return $?
+            # Comprobar si el Kernel está firmado.
+            if sbverify --no-verify "$MNTDIR/$KERNEL" &>/dev/null; then
+                ogRaiseError $OG_ERR_NOTFOUND "$1 $2 ($TYPE, EFI)"
+                return $?
             fi
-            # Activar la partición.
-            ogSetPartitionActive $1 $2
+            # Crear directorio para el cargador y copiar los ficheros.
+            EFIDIR=$(ogMount $EFIDISK $EFIPART) || exit $?
+            BOOTLABEL=$(printf "Part-%02d-%02d" $1 $2)
+            mkdir -p $EFIDIR/EFI/$BOOTLABEL
+            cp $MNTDIR/$KERNEL $EFIDIR/EFI/$BOOTLABEL/vmlinuz.efi
+            cp $MNTDIR/$INITRD $EFIDIR/EFI/$BOOTLABEL/initrd.img
+            # Borrar cargador guardado con la misma etiqueta.
+            BOOTNO=$(efibootmgr -v | awk -v L=$BOOTLABEL '{if ($2==L) print $1}')
+            [ -n "$BOOTNO" ] && efibootmgr -B -b ${BOOTNO:4:4}
+            # Crear orden de arranque (con unos valores por defecto).
+            efibootmgr -C -d $(ogDiskToDev $EFIDISK) -p $EFIPART -L "$BOOTLABEL" -l /EFI/$BOOTLABEL/vmlinuz.efi -u "initrd=/EFI/$BOOTLABEL/initrd.img $APPEND"
+            # Marcar próximo arranque y reiniciar.
+            BOOTNO=$(efibootmgr -v | awk -v L="$BOOTLABEL" '{if ($2==L) print $1}')
+            [ -n "$BOOTNO" ] && efibootmgr -n ${BOOTNO:4:4}
             reboot
+        else
+            # Arranque BIOS: configurar kernel Linux con los parámetros leídos de su GRUB.
+            kexec -l "${MNTDIR}${KERNEL}" --append="$APPEND" --initrd="${MNTDIR}${INITRD}"
+            kexec -e &
+        fi
+        ;;
+    Windows)
+        # Comprobar tipo de sistema.
+        if ogIsEfiActive; then
+            # Obtener parcición EFI.
+            read -e EFIDISK EFIPART <<<"$(ogGetEsp)"
+            [ -n "$EFIPART" ] || ogRaiseError $OG_ERR_PARTITION "ESP" || return $?
+            # Crear directorio para el cargador y copiar los ficheros.
+            LOADER=$(ogGetPath $1 $2 /Boot/bootmgfw.efi)
+            [ -n "$LOADER" ] || ogRaiseError $OG_ERR_NOTFOUND "$1 $2 ($TYPE, EFI)" || return $?
+            EFIDIR=$(ogMount $EFIDISK $EFIPART) || exit $?
+            BOOTLABEL=$(printf "Part-%02d-%02d" $1 $2)
+            mkdir -p $EFIDIR/EFI/$BOOTLABEL
+            cp -a $(dirname "$LOADER") $EFIDIR/EFI/$BOOTLABEL
+            # Borrar cargador guardado con la misma etiqueta.
+            BOOTNO=$(efibootmgr -v | awk -v L=$BOOTLABEL '{if ($2==L) print $1}')
+            [ -n "$BOOTNO" ] && efibootmgr -B -b ${BOOTNO:4:4}
+            # Crear orden de arranque (con unos valores por defecto).
+            efibootmgr -C -d $(ogDiskToDev $EFIDISK) -p $EFIPART -L "$BOOTLABEL" -l "/EFI/$BOOTLABEL/Boot/BOOTMGFW.EFI"
+            # Marcar próximo arranque y reiniciar.
+            BOOTNO=$(efibootmgr -v | awk -v L="$BOOTLABEL" '{if ($2==L) print $1}')
+            [ -n "$BOOTNO" ] && efibootmgr -n ${BOOTNO:4:4}
+            reboot
+        else
+            # Arranque BIOS: compruebar si hay un cargador de Windows.
+            for f in io.sys ntldr bootmgr; do
+                FILE="$(ogGetPath $1 $2 $f 2>/dev/null)"
+                [ -n "$FILE" ] && LOADER="$f"
+            done
+            [ -n "$LOADER" ] || ogRaiseError $OG_ERR_NOTOS "$1 $2 ($TYPE)" || return $?
+            if [ "$winboot" == "kexec" ]; then
+                # Modo de arranque en caliente (con kexec).
+                cp $OGLIB/grub4dos/* $MNTDIR    # */ (Comentario Doxygen)
+                kexec -l $MNTDIR/grub.exe --append=--config-file="root (hd$[$1-1],$[$2-1]); chainloader (hd$[$1-1],$[$2-1])/$LOADER; tpm --init"
+                kexec -e &
+            else
+                # Modo de arranque por reinicio (con reboot).
+                dd if=/dev/zero of=${MNTDIR}/ogboot.me bs=1024 count=3
+                dd if=/dev/zero of=${MNTDIR}/ogboot.firstboot bs=1024 count=3
+                dd if=/dev/zero of=${MNTDIR}/ogboot.secondboot bs=1024 count=3
+                if  [ -z "$(ogGetRegistryValue $MNTDIR SOFTWARE '\Microsoft\Windows\CurrentVersion\Run\ogcleannboot')" ]; then
+                    ogAddRegistryValue $MNTDIR SOFTWARE '\Microsoft\Windows\CurrentVersion\Run\ogcleanboot'
+                    ogSetRegistryValue $MNTDIR SOFTWARE '\Microsoft\Windows\CurrentVersion\Run\ogcleanboot' "cmd /c del c:\ogboot.*"
+                fi
+                # Activar la partición.
+                ogSetPartitionActive $1 $2
+                reboot
+            fi
         fi
         ;;
     MacOS)
