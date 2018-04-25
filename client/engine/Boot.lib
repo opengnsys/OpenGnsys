@@ -83,8 +83,8 @@ case "$TYPE" in
             read -e EFIDISK EFIPART <<<"$(ogGetEsp)"
             [ -n "$EFIPART" ] || ogRaiseError $OG_ERR_PARTITION "ESP" || return $?
             # Comprobar si el Kernel está firmado.
-            if sbverify --no-verify "$MNTDIR/$KERNEL" &>/dev/null; then
-                ogRaiseError $OG_ERR_NOTFOUND "$1 $2 ($TYPE, EFI)"
+            if ! sbverify --no-verify "$MNTDIR/$KERNEL" &>/dev/null; then
+                ogRaiseError $OG_ERR_NOTOS "$1 $2 ($TYPE, EFI)"
                 return $?
             fi
             # Crear directorio para el cargador y copiar los ficheros.
@@ -114,10 +114,12 @@ case "$TYPE" in
             # Obtener parcición EFI.
             read -e EFIDISK EFIPART <<<"$(ogGetEsp)"
             [ -n "$EFIPART" ] || ogRaiseError $OG_ERR_PARTITION "ESP" || return $?
-            # Crear directorio para el cargador y copiar los ficheros.
-            LOADER=$(ogGetPath $1 $2 /Boot/bootmgfw.efi)
-            [ -n "$LOADER" ] || ogRaiseError $OG_ERR_NOTFOUND "$1 $2 ($TYPE, EFI)" || return $?
             EFIDIR=$(ogMount $EFIDISK $EFIPART) || exit $?
+            # Comprobar cargador (si no existe buscar por defecto en ESP).
+            LOADER=$(ogGetPath $1 $2 /Boot/bootmgfw.efi)
+            [ -z "$LOADER" ] && LOADER=$(ogGetPath $EFIDIR/EFI/Microsoft/Boot/bootmgfw.efi)
+            [ -n "$LOADER" ] || ogRaiseError $OG_ERR_NOTOS "$1 $2 ($TYPE, EFI)" || return $?
+            # Crear directorio para el cargador y copiar los ficheros.
             BOOTLABEL=$(printf "Part-%02d-%02d" $1 $2)
             mkdir -p $EFIDIR/EFI/$BOOTLABEL
             cp -a $(dirname "$LOADER") $EFIDIR/EFI/$BOOTLABEL
