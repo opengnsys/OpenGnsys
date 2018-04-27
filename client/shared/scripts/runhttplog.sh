@@ -7,6 +7,7 @@ cp /etc/lighttpd/conf-enabled/10-cgi.conf /etc/lighttpd/conf-enabled/10-cgi.conf
 cp /opt/opengnsys/lib/httpd/10-cgi.conf /etc/lighttpd/conf-enabled/
 /etc/init.d/lighttpd start
 chmod  755 /opt
+mkdir -p /usr/lib/cgi-bin
 cp /opt/opengnsys/lib/httpd/* /usr/lib/cgi-bin
 #TODO: 
 dstat -dn 10 > /tmp/bandwidth &
