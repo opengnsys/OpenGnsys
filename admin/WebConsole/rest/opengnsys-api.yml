@@ -668,10 +668,12 @@ paths:
           schema:
             type: object
             properties:
-              logoutAt:
-                description: Time to send a logout operation to the client
-                type: string
-                format: date-time
+              deadLine:
+                description: Maximum session time, in seconds (0 for unlimited)
+                type: integer
+                format: int64
+                minimum: 0
+            required: [ deadLine ]
       responses:
         "200":
           description: Successful response

@@ -340,7 +340,7 @@ EOD;
 /*
  * @brief    Store session time (in sec).
  * @note     Route: /ous/:ouid/labs/:labid/clients/:clntid/session, Method: POST
- * @param    int    deadLine   maximum time session (in seconds)
+ * @param    int    deadLine   maximum session time, in seconds (0 for unlimited)
  * @warning  Parameters will be stored in a new "remotepc" table.
  */
 $app->post('/ous/:ouid/labs/:labid/clients/:clntid/session', 'validateApiKey',
@@ -365,7 +365,7 @@ $app->post('/ous/:ouid/labs/:labid/clients/:clntid/session', 'validateApiKey',
 		if (filter_var($deadLine, FILTER_VALIDATE_INT) === false) {
 			throw new Exception("Deadline must be integer");
 		}
-		if ($deadLine <= 0) {
+		if ($deadLine < 0) {
 			throw new Exception("Resource unavailable");
 		}
 	} catch (Exception $e) {
@@ -420,11 +420,12 @@ EOD;
 			}
 			# Add power off command at deadline time.
 			$cmd->texto .= " ($clntid, NOW() + INTERVAL $deadLine SECOND, 'poweroff');";
-			if ($cmd->Ejecutar()) {
+			if ($deadLine == 0 or $cmd->Ejecutar()) {
 				// Confirm operation.
+				$cmd->texto = "";
 				$response = "";
 				jsonResponse(200, $response);
-        		} else {
+			} else {
 				// Error message.
 				$response["message"] = "Database error";
 				jsonResponse(400, $response);
@@ -434,7 +435,7 @@ EOD;
 			$response["message"] = "Client is not reserved";
 			jsonResponse(400, $response);
 		}
-       	} else {
+	} else {
 		// Error message.
 		$response["message"] = "Client does not exist";
 		jsonResponse(404, $response);
