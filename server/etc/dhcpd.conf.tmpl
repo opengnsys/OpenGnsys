@@ -14,7 +14,7 @@ subnet NETIP netmask NETMASK {
     filename "grldr";
     # 0007 == x64 EFI boot
     if option arch = 00:07 {
-        filename "grubnetx64.efi.signed";
+        filename "shimx64.efi.signed";
     } else {
         filename "grldr";
     }

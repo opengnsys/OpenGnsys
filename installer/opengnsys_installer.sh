@@ -167,7 +167,7 @@ OSVERSION="${OSVERSION%%.*}"
 # Configuración según la distribución GNU/Linux (usar minúsculas).
 case "$OSDISTRIB" in
 	ubuntu|debian|linuxmint)
-		DEPENDENCIES=( subversion apache2 php php-ldap libapache2-mod-php mysql-server php-mysql isc-dhcp-server bittorrent tftp-hpa tftpd-hpa xinetd build-essential g++-multilib libmysqlclient-dev wget curl doxygen graphviz bittornado ctorrent samba rsync unzip netpipes debootstrap schroot squashfs-tools btrfs-tools procps arp-scan realpath php-curl gettext moreutils jq wakeonlan udpcast grub-efi-amd64-signed )
+		DEPENDENCIES=( subversion apache2 php php-ldap libapache2-mod-php mysql-server php-mysql isc-dhcp-server bittorrent tftp-hpa tftpd-hpa xinetd build-essential g++-multilib libmysqlclient-dev wget curl doxygen graphviz bittornado ctorrent samba rsync unzip netpipes debootstrap schroot squashfs-tools btrfs-tools procps arp-scan realpath php-curl gettext moreutils jq wakeonlan udpcast shim-signed grub-efi-amd64-signed )
 		UPDATEPKGLIST="apt-get update"
 		INSTALLPKG="apt-get -y install --force-yes"
 		CHECKPKG="dpkg -s \$package 2>/dev/null | grep Status | grep -qw install"
@@ -1261,6 +1261,7 @@ function copyServerFiles ()
 
 	# Lista de ficheros y directorios origen y de directorios destino.
 	local SOURCES=( server/tftpboot \
+			/usr/lib/shim/shimx64.efi.signed \
 			/usr/lib/grub/x86_64-efi-signed/grubnetx64.efi.signed \
 			server/bin \
 			repoman/bin \
@@ -1274,6 +1275,7 @@ function copyServerFiles ()
 			doc )
 	local TARGETS=( tftpboot \
 			tftpboot \
+			tftpboot/grubx64.efi \
 			bin \
 			bin \
 			lib \
@@ -1302,7 +1304,7 @@ function copyServerFiles ()
 		elif [ -d "${SOURCES[$i]}" ]; then
 			echoAndLog "Copying content of ${SOURCES[$i]} to $path_opengnsys_base/${TARGETS[$i]}"
 			cp -a "${SOURCES[$i]}"/* "${path_opengnsys_base}/${TARGETS[$i]}"
-        else
+		else
 			warningAndLog "Unable to copy ${SOURCES[$i]} to $path_opengnsys_base/${TARGETS[$i]}"
 		fi
 	done
