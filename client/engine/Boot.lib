@@ -83,7 +83,7 @@ case "$TYPE" in
             read -e EFIDISK EFIPART <<<"$(ogGetEsp)"
             [ -n "$EFIPART" ] || ogRaiseError $OG_ERR_PARTITION "ESP" || return $?
             # Comprobar si el Kernel está firmado.
-            if ! sbverify --no-verify "$MNTDIR/$KERNEL" &>/dev/null; then
+            if ! file -k "$MNTDIR/$KERNEL" | grep -q "EFI app"; then
                 ogRaiseError $OG_ERR_NOTOS "$1 $2 ($TYPE, EFI)"
                 return $?
             fi
