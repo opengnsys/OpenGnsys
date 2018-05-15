@@ -1,15 +1,14 @@
 <?php
 //________________________________________________________________________________________________________
 //
-//	Fichero de idiomas php: informacion_incrementales_eng.php 
-//	Idioma: Ingés 
+//	Php language file: informacion_incrementales_eng.php
+//	Language: English
 //________________________________________________________________________________________________________
 	$TbMsg=array();
-	$TbMsg[0]='Software profiles';
-	$TbMsg[1]='Information about profiles';
-	$TbMsg[2]='Software profile';
-	$TbMsg[3]='Software profiles information';
+	$TbMsg[0]='Incremental Softwares';
+	$TbMsg[1]='Information about incremental softwares';
+	$TbMsg[2]='Incremental Software';
+	$TbMsg[3]='Information about incremental software';
 	$TbMsg[4]='Software components';
-	$TbMsg[5]='Profiles availables';
-	$TbMsg[6]='Hardware profiles supported';
-?>
+	$TbMsg[5]='Combinable Profiles';
+	$TbMsg[6]='Supported Hardware profiles';

@@ -1,22 +1,22 @@
 <?php
 //________________________________________________________________________________________________________
 //
-//	Fichero de idiomas php: colasacciones_eng.php 
-//	Idioma: Ingés 
+//	Php language file: colasacciones_eng.php
+//	Language: English
 //________________________________________________________________________________________________________
 
-// Literales de los tipo de reservas
-$LITRESERVA_PENDIENTE="Pendings";
-$LITRESERVA_CONFIRMADA="Confirmeds";
-$LITRESERVA_DENEGADA="Refuses";
+// Literals of reservations types
+$LITRESERVA_PENDIENTE="Pending";
+$LITRESERVA_CONFIRMADA="Confirmed";
+$LITRESERVA_DENEGADA="Refused";
 
-$RESERVA_PARADA=1;  // reserva momentanemente parada
-$RESERVA_ACTIVA=0; // Reserva activa
-$LITRESERVA_PARADA='Suspended';  // Literal reserva momentanemente parada
-$LITRESERVA_ACTIVA='Active'; // Literal reserva activa
+$RESERVA_PARADA=1;  // Momentarily paused reservation
+$RESERVA_ACTIVA=0; // Active reservation
+$LITRESERVA_PARADA='Suspended';  // Literal momentarily paused reservation
+$LITRESERVA_ACTIVA='Active'; // Literal active reservation
 
 $TbMsg=array();
-	$TbMsg[0]='Labs reserves';
+	$TbMsg[0]='Lab reservations';
 	$TbMsg[1]='Searches filters';
 	$TbMsg[2]='Type';
 	$TbMsg[3]='';
@@ -25,29 +25,27 @@ $TbMsg=array();
 	$TbMsg[6]='Percentage to';
 	$TbMsg[7]='Start date';
 	$TbMsg[8]='Finish date';
-	$TbMsg[9]='Start our';
-	$TbMsg[10]='Finish our';
-	$TbMsg[11]='Environment';
+	$TbMsg[9]='Start time';
+	$TbMsg[10]='Finish time';
+	$TbMsg[11]='Scope';
 
-	$TbMsg[12]='Reserves';
-	$TbMsg[13]='Reserves group';
+	$TbMsg[12]='Reservations';
+	$TbMsg[13]='Reservation group';
 
 	$TbMsg[15]='Year';
 	$TbMsg[16]='Month';
 	$TbMsg[17]='Day';
 	$TbMsg[18]='Lab';
-	$TbMsg[19]='Ocupation';
-	$TbMsg[20]='Asociated Image';
+	$TbMsg[19]='Occupation';
+	$TbMsg[20]='Associated Image';
 	$TbMsg[21]='Description';
 
-	$TbMsg[22]='Reserves schedules';
-	$TbMsg[23]='(Not especified)';
+	$TbMsg[22]='Reservation schedules';
+	$TbMsg[23]='(Not specified)';
 	$TbMsg[24]='Lab';
 	$TbMsg[25]='Petitioner';
-	$TbMsg[26]='Previous antiicipation';
-	$TbMsg[27]="(Without previous acction)";
+	$TbMsg[26]='Previous anticipation';
+	$TbMsg[27]="(Without previous action)";
 	$TbMsg[28]="Previous Task";
-	$TbMsg[29]="Previous Jobs";
+	$TbMsg[29]="Previous Job";
 	$TbMsg[30]="Reserve data";
-
-

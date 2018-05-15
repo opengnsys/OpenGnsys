@@ -1,14 +1,13 @@
 <?php
 //________________________________________________________________________________________________________
 //
-//	Fichero de idiomas php: administradores_centros_eng.php 
-//	Idioma: Español 
+//	Php language file: administradores_centros_eng.php
+//	Language: English
 //________________________________________________________________________________________________________
 	$TbMsg=array();
 	$TbMsg[0]='Administrative Units';
 	$TbMsg[1]='Assign Administrators';
-	$TbMsg[2]='Administrators assigned';
-	$TbMsg[3]='Admin Name';
-	$TbMsg[4]='(*)To include an administrator in this Organizational Unit must click on the check box.';
-	$TbMsg[5]='Administrators available';
-?>
+	$TbMsg[2]='Assigned Administrators';
+	$TbMsg[3]='Administrator Name';
+	$TbMsg[4]='(*)To include an administrator into this Organizational Unit please check the box.';
+	$TbMsg[5]='Available Administrators';

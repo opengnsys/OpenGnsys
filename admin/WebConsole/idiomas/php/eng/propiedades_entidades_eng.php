@@ -1,16 +1,15 @@
 <?php
 //________________________________________________________________________________________________________
 //
-//	Fichero de idiomas php: propiedades_ordenadores_eng.php 
-//	Idioma: Ingés 
+//	Php language file: propiedades_ordenadores_eng.php
+//	Language: English
 //________________________________________________________________________________________________________
 $TbMsg=array();
 $TbMsg[0]="No Option";
 $TbMsg[1]="Insert";
 $TbMsg[2]="Modify";
-$TbMsg[3]="Remove";
+$TbMsg[3]="Delete";
 $TbMsg[4]="Entity Management";
-$TbMsg[5]="Name of entity";
-$TbMsg[6]="Coments";
-$TbMsg['OGUNIT']="Separar unidades organizativas";
-?>
+$TbMsg[5]="Name of Entity";
+$TbMsg[6]="Comments";
+$TbMsg['OGUNIT']="Separate Organizational Units";

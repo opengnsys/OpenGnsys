@@ -1,21 +1,19 @@
 <?php
 //________________________________________________________________________________________________________
 //
-//	Fichero de idiomas php: incorporaordenadores_esp.php (Comandos)
-//	Idioma: Español
+//	Php language file: incorporaordenadores_esp.php (Commands)
+//	Language: English
 //________________________________________________________________________________________________________
 	$TbMsg=array();
-	$TbMsg[0]='Centros';
-	$TbMsg[1]='Grupo de aulas';
-	$TbMsg[2]='Aulas';
-	$TbMsg[3]='Grupo de ordenadores';
-	$TbMsg[4]='Ordenador';
+	$TbMsg[0]='Centers';
+	$TbMsg[1]='Labs Group';
+	$TbMsg[2]='Labs';
+	$TbMsg[3]='Computers Group';
+	$TbMsg[4]='Computer';
 	$TbMsg[5]='';
-	$TbMsg[6]='Ámbito';	
-	$TbMsg[7]='Eco de consola remota';
+	$TbMsg[6]='Scope';
+	$TbMsg[7]='Remote console echo';
 	$TbMsg[8]='';
-	$TbMsg[9]='Se ha enviado una petición de eco consola remota a este ámbito, espere unos segundos para empezar a recibir información de esta consola...';
-	$TbMsg[10]='ATENCIÓN: Ha habido algún problema al enviar una petición de eco consola remota a este ámbito';
-	$TbMsg[11]='... espere por favor.';
-
-?>
+	$TbMsg[9]='A remote console echo request has been sent to this scope, please wait a moment to start receiving information from it...';
+	$TbMsg[10]='WARNING: Error sending remote console echo request to this scope';
+	$TbMsg[11]='... Please wait.';

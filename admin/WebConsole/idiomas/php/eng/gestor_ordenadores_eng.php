@@ -6,5 +6,4 @@
 //______________________________________________________________
 $TbMsg=array();
 $TbMsg["DUPLICADO"]="Error al insertar el ordenador, se han encontrado datos duplicados: ";
-?>
 

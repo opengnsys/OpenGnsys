@@ -12,5 +12,3 @@
 	$TbMsg[4]='Computers';
 	$TbMsg[5]='Hardware Inventory';
 	$TbMsg[6]='Scope';
-
-?>

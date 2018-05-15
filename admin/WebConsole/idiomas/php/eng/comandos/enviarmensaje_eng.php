@@ -14,11 +14,8 @@
 	$TbMsg[6]='Scope';
 	$TbMsg[7]='Title';
 	$TbMsg[8]='Description';
-	$TbMsg[9]=' Texto del mensaje ';
-	$TbMsg[10]='Datos a suministrar';
+	$TbMsg[9]=' Message content ';
+	$TbMsg[10]='Data to supply';
 
-        $TbMsg["OGAGENT"]="AVISO: Sólo se puede utilizar en los equipos que se haya iniciado la sesión <br>y tengan instalado en nuevo agente de OpenGnsys.";
-	$TbMsg["OPTION"]="AVISO: El nuevo agente, en esta versión, no permite utilizar la cola de acciones.";
-
-?>
-
+	$TbMsg["OGAGENT"]="WARNING: Only the computers with a started session and <br>with new OG agent installed, can be used.";
+	$TbMsg["OPTION"]="WARNING: The new OG agent, in this version, does not allow using the actions queue.";

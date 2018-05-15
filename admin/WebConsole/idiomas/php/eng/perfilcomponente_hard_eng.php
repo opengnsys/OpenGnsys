@@ -1,13 +1,12 @@
 <?php
 //________________________________________________________________________________________________________
 //
-//	Fichero de idiomas php: perfilcomponente_hard_eng.php 
-//	Idioma: Ingés 
+//	Php language file: perfilcomponente_hard_eng.php
+//	Language: English
 //________________________________________________________________________________________________________
 	$TbMsg=array();
 	$TbMsg[0]='Hardware profiles';
-	$TbMsg[1]='Components management ';
+	$TbMsg[1]='Hardware components management ';
 	$TbMsg[2]='Hardware profile';
 	$TbMsg[3]='Component name';
-	$TbMsg[4]='(*)To include some component in this profile you must  click in the corresponding checkbox.';
-?>
+	$TbMsg[4]='(*)Please check the box to include any component in this profile.';

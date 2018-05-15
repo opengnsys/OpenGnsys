@@ -1,10 +1,9 @@
 <?php
 //________________________________________________________________________________________________________
 //
-//	Fichero de idiomas php: sondeo_esp.php 
-//	Idioma: Español 
+//	Php language file: sondeo_esp.php 
+//	Language: English 
 //________________________________________________________________________________________________________
 	$TbMsg=array();
 	$TbMsg[0]='';
-	$TbMsg[1]='ATENCIÓN: Ha habido algún problema al consultar el estado de los ordenadore';
-?>
+	$TbMsg[1]='WARNING: Error found consulting computers status';

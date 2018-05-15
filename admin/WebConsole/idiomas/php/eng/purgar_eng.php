@@ -1,10 +1,9 @@
 <?php
 //________________________________________________________________________________________________________
 //
-//	Fichero de idiomas php: actualizar_eng.php 
-//	Idioma: Ingés 
+//	Php language file: actualizar_eng.php
+//	Language: English
 //________________________________________________________________________________________________________
 	$TbMsg=array();
-	$TbMsg[0]='This environment has been successfully purged';
-	$TbMsg[1]='WARNING: Having some problem to purge this environment';
-?>
+	$TbMsg[0]='This scope has been successfully purged';
+	$TbMsg[1]='WARNING: Errors found purging this scope';

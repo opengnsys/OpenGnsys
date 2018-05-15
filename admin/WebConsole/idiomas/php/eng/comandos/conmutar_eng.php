@@ -1,8 +1,8 @@
 <?php
 //________________________________________________________________________________________________________
 //
-//	Fichero de idiomas php: apagar_eng.php (Comandos)
-//	Idioma: Ingés 
+//	Php language file: apagar_eng.php (Comandos)
+//	Language: English
 //________________________________________________________________________________________________________
 	$TbMsg=array();
 	$TbMsg[0]='Centers';
@@ -11,6 +11,4 @@
 	$TbMsg[3]='Group of computers';
 	$TbMsg[4]='Computers';
 	$TbMsg[5]='Switch computers';
-	$TbMsg[6]='Environment';
-
-?>
+	$TbMsg[6]='Scope';

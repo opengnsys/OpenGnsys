@@ -1,17 +1,14 @@
 <?php
 //________________________________________________________________________________________________________
 //
-//	Fichero de idiomas php: propiedades_aulas_eng.php 
-//	Idioma: Ingés 
+//	Php language file: propiedades_aulas_eng.php
+//	Language: English
 //________________________________________________________________________________________________________
 $TbMsg=array();
 $TbMsg[0]="No Option";
 $TbMsg[1]="Insert";
 $TbMsg[2]="Modify";
-$TbMsg[3]="Remove";
+$TbMsg[3]="Delete";
 $TbMsg[4]="University Management";
-$TbMsg[4]="Gestión Universidades";
-$TbMsg[5]="Nombre";
-$TbMsg[6]="Comentarios";
-
-?>
+$TbMsg[5]="Name";
+$TbMsg[6]="Comments";

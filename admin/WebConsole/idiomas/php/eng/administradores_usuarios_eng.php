@@ -1,14 +1,13 @@
 <?php
 //________________________________________________________________________________________________________
 //
-//	Fichero de idiomas php: administradores_usuarios_eng.php 
-//	Idioma: ingles 
+//	Php language file: administradores_usuarios_eng.php
+//	Language: English
 //________________________________________________________________________________________________________
 	$TbMsg=array();
 	$TbMsg[0]='Administrative Units';
-	$TbMsg[1]='Assign Organizacional Unit';
-	$TbMsg[2]='Assigned Organizational Unit';
-	$TbMsg[3]='Name of Organizational Unit';
-	$TbMsg[4]='(*)To assign a Organizational Unit -center- to a particular administrator must click on the check box.';
-	$TbMsg[5]='Organizational Units available';
-?>
+	$TbMsg[1]='Assign OU';
+	$TbMsg[2]='Assigned OU';
+	$TbMsg[3]='OU Name';
+	$TbMsg[4]='(*)To assign an Organizational Unit -center- to a particular administrator please check the box.';
+	$TbMsg[5]='Available OU';

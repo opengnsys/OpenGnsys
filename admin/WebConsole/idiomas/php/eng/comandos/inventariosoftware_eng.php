@@ -12,7 +12,6 @@
 	$TbMsg[4]='Computers';
 	$TbMsg[5]='Software Inventory';
 	$TbMsg[6]='Scope';
-	$TbMsg[7]='Providing data';
+	$TbMsg[7]='Data to supply';
 	$TbMsg[8]='Par';
-	$TbMsg[9]='O.S. name';
-?>
+	$TbMsg[9]='OS name';

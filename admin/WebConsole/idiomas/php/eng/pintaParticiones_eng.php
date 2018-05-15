@@ -1,16 +1,16 @@
 <?php
 //______________________________________________________
 //
-//	Fichero de idiomas php: pintaParticiones_esp.php 
-//	Idioma: Español
+//	Php language file: pintaParticiones_esp.php
+//	Language: English
 //______________________________________________________
-// Si ya existe TbMsg, solo agregamos lo nuevo
+// If exist TbMsg, only the new is added
 if(!isset($TbMsg)){
 	$TbMsg=array();
 }
 
 $TbMsg["PARTITION"]='Partition';
-$TbMsg["INSTALLED_OS"]='Installed Operating System';
+$TbMsg["INSTALLED_OS"]='Installed O.S.';
 $TbMsg["INST_SO"]='Installed O.S.';
 $TbMsg["SIZE_KB"]='Size (KB)';
 $TbMsg["PARTITION_TYPE"]='Type';
@@ -20,7 +20,7 @@ $TbMsg["FILESYSTEM"]='Filesystem';
 $TbMsg["FILESYSTEM_SHORT"]='F.S.';
 
 $TbMsg["REFORMAT"]='Reformat';
-$TbMsg["REMOVE"]='Remove';
+$TbMsg["REMOVE"]='Delete';
 
 $TbMsg["DISK"]='Disk';
 $TbMsg["CONFIG_PARTTABLE"]='Partition Table';
@@ -29,7 +29,7 @@ $TbMsg["USAGE"]='Usage';
 
 $TbMsg["VARIABLE"]='Variable';
 $TbMsg["CACHE_CONTENT"]='Date/Cache Content';
-$TbMsg["CACHE_FREESPACE"]='Cach&eacute; libre';
+$TbMsg["CACHE_FREESPACE"]='Free Cache ';
 $TbMsg["CACHE_COMPLETE"]='CACHE IS FULL';
 
 $TbMsg["SAMESYSTEM_IMAGE"]='Image (same partition type)';
@@ -43,20 +43,18 @@ $TbMsg["DESTINATION_REPOSITORY"]='Destination Repository';
 $TbMsg["IMAGE_REPOSITORY"]='Image / Repository';
 $TbMsg["INCREMENTAL_IMAGE_REPOSITORY"]='Incremental Image / Repository';
 
-$TbMsg["CONFIG_NOCONFIG"]='No configuration: client does not connect to server.';
-$TbMsg["CONFIG_NODISK1MSDOS"]='Warning: this command only uses disk 1 with a MSDOS partition table.';
+$TbMsg["CONFIG_NOCONFIG"]='No configuration: client not connected to server.';
+$TbMsg["CONFIG_NODISK1MSDOS"]='Warning: this command only uses disk 1 with MSDOS partition table.';
 
 $TbMsg["SYNC_METHOD"]='Method';
-$TbMsg["SYNC1_DIR"]='Based on directory';
-$TbMsg["SYNC2_FILE"]='Based on file';
+$TbMsg["SYNC1_DIR"]='Directory based';
+$TbMsg["SYNC2_FILE"]='File based';
 
-$TbMsg["TITLE_W"]='Rsync option:  delta-transfer algorithm is not used and the whole file is sent as-is instead. This is the default when both the source and  destination   are   specified  as  local  paths.';
-$TbMsg["TITLE_E"]="Rsync option: delete extraneous files from  the  receiving side  (ones  that  aren't on the sending side).";
-$TbMsg["TITLE_C"]='Rsync option: compresses the file data as it  is  sent to  the  destination  machine,  which reduces the amount of data being transmitted.';
+$TbMsg["TITLE_W"]='Rsync option: Rsync incremental algorithm is not used and the whole file is sent as-is instead. This is the default when both the source and destination are specified as local paths.';
+$TbMsg["TITLE_E"]="Rsync option: Delete extraneous files from the receiving side (ones  that  aren't on the sending side).";
+$TbMsg["TITLE_C"]='Rsync option: Compresses data files sent to  the  destination  machine, which reduces the amount of data being transmitted.';
 $TbMsg["SEND"]='Protocol';
 // WARNINGS.
-$TbMsg["WARN_PROTOCOL"]='La opción "protocolo" sólo se utiliza en las sincronizadas tipo archivo la primera vez que se envía la imagen a caché. <br>En otro caso el protocolo es RSYNC.';
-$TbMsg["WARN_DIFFIMAGE"]='There is a new image version (showing revision difference).';
-$TbMsg["WARN_DIFFDISKSIZE"]='ATENTION: a group of computers with different disk sizes can not be partitioned.<br>Check &quotUngroup by partition size&quot option and press &quot;Accept&quot; in the top menu to apply this operation properly.';
-?>
-
+$TbMsg["WARN_PROTOCOL"]='"Protocol" option is only used in incremental file-type, the first time that image is sent to cache. <br>In other case protocol is RSYNC.';
+$TbMsg["WARN_DIFFIMAGE"]='There is a new version of  the image(showing revision difference).';
+$TbMsg["WARN_DIFFDISKSIZE"]='WARNING: A group of computers with different disk sizes can not be partitioned.<br>Check &quotUngroup by partition size&quot option and press &quot;Accept&quot; in the top menu to apply this operation properly.';

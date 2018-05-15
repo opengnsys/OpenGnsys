@@ -1,13 +1,12 @@
 <?php
 //________________________________________________________________________________________________________
 //
-//	Fichero de idiomas php:imagenincremental_eng.php
-//	Idioma: Ingés 
+//	Php Language file:imagenincremental_eng.php
+//	Language: English
 //________________________________________________________________________________________________________
 	$TbMsg=array();
 	$TbMsg[0]='Images';
-	$TbMsg[1]='Incrementals software  management ';
+	$TbMsg[1]='Incremental Software Management ';
 	$TbMsg[2]='Image';
-	$TbMsg[3]='Incremental software name';
-	$TbMsg[4]='(*)To include some incremental software in this image software you must  click in the corresponding checkbox.';
-?>
+	$TbMsg[3]='Incremental Software Name';
+	$TbMsg[4]='(*)Please check the box to include any incremental software in this image.';

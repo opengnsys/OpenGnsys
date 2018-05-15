@@ -1,27 +1,26 @@
 <?php
 //________________________________________________________________________________________________________
 //
-//	Fichero de idiomas php: colasacciones_eng.php 
-//	Idioma: Ingés 
-//________________________________________________________________________________________________________
+//	Php language file:p: colasacciones_eng.php
+//	Language: English_________________________________________________________________________________
 
-// Literales de los tipo de acciones
+// Literals of action-types
 $LITEJECUCION_COMANDO="Commands";
 $LITEJECUCION_PROCEDIMIENTO="Procedures";
 $LITEJECUCION_TAREA="Tasks";
 //$LITEJECUCION_TRABAJO="Jobs";
 
-$LITACCION_EXITOSA='Finished successfully'; // Literal  Finalizada con exito
-$LITACCION_FALLIDA='Finished with errors'; // Literal  Finalizada con errores
+$LITACCION_EXITOSA='Successfully finished'; // Literal  Successfully finished
+$LITACCION_FALLIDA='Finished with errors'; // Literal  Finished with errors
 //$LITACCION_SINRESULTADO='Without final result'
-$LITACCION_TERMINADA='Finished manualy'; //Literal   Finalizada manualmente con indicacion de exito 
-$LITACCION_ABORTADA='Canceled manualy'; // Literal  Finalizada manualmente con indicacion de errores 
-$LITACCION_SINERRORES='Active without errors'; // Literal  Activa y sin ningún error
-$LITACCION_CONERRORES='Active with errors'; // Literal  Activa y con algún error
+$LITACCION_TERMINADA='Manually finished'; //Literal   Manually finished successfully
+$LITACCION_ABORTADA='Manually canceled'; // Literal  Manually finished with errors
+$LITACCION_SINERRORES='Active without errors'; // Literal  Active without errors
+$LITACCION_CONERRORES='Active with errors'; // Literal  Active with errors
 
-$LITACCION_DETENIDA='Stopped'; // Literal acción momentanemente parada
-$LITACCION_INICIADA='Active'; // Literal acción activa
-$LITACCION_FINALIZADA='Finished'; // Literal acción finalizada
+$LITACCION_DETENIDA='Stopped'; // Literal Paused
+$LITACCION_INICIADA='Active'; // Literal Active action
+$LITACCION_FINALIZADA='Finished'; // Literal Finished action
 $LITACCION_PROGRAMADA="Scheduled";
 
 $TbMsg=array();
@@ -33,22 +32,22 @@ $TbMsg=array();
 	$TbMsg[5]='Percentage from';
 	$TbMsg[6]='to';
 	$TbMsg[7]='Start date';
-	$TbMsg[8]='Finish date';
-	$TbMsg[9]='Start our';
-	$TbMsg[10]='Finish our';
+	$TbMsg[8]='End date';
+	$TbMsg[9]='Start time';
+	$TbMsg[10]='End time';
 	$TbMsg[11]='Scope';
-	$TbMsg[12]='Remove';
-	$TbMsg[13]='Reinitialize';
+	$TbMsg[12]='Delete';
+	$TbMsg[13]='Start again';
 	$TbMsg[14]='Stop';
 	$TbMsg[15]='Go';
 	$TbMsg[16]='Cancel';
 	$TbMsg[17]='Finish';
 
 	$TbMsg[18]='Action';
-	$TbMsg[19]='Finish date';
-	$TbMsg[20]='Finish hour';
+	$TbMsg[19]='End date';
+	$TbMsg[20]='End time';
 	$TbMsg[21]='Start date';
-	$TbMsg[22]='Start hour';
+	$TbMsg[22]='Start time';
 	$TbMsg[23]='Name';
 
 	$TbMsg[24]='Centers';
@@ -58,20 +57,20 @@ $TbMsg=array();
 	$TbMsg[28]='Computers';
 
 	$TbMsg[30]='Commands';
-	$TbMsg[31]='Tasks';
-	$TbMsg[32]='Jobs';
+	$TbMsg[31]='Procedures';
+	$TbMsg[32]='Tasks';
 
-	$TbMsg[41]='"Accion filter"';
-	$TbMsg[42]='"Environment filter"';
-	$TbMsg[43]='"Remove filter"';
-	$TbMsg[44]='"Modify Acción"';
-	$TbMsg[45]='"Reinitialize"';
-	$TbMsg[46]='"Remove"';
-	$TbMsg[47]='Parent Task';
-	$TbMsg[48]='Parent Job';
-	$TbMsg[49]='See commands';
-	$TbMsg[50]='See task';
-	$TbMsg[51]='"Stop"';
+	$TbMsg[41]='"Action filter"';
+	$TbMsg[42]='"Scope filter"';
+	$TbMsg[43]='"Delete filter"';
+	$TbMsg[44]='"Modify Action"';
+	$TbMsg[45]='"Start again"';
+	$TbMsg[46]='"Delete"';
+	$TbMsg[47]='Display options';
+	$TbMsg[48]='Display parameters';
+	$TbMsg[49]='Display subprocess';
+	$TbMsg[50]='Display notifications';
+	$TbMsg[51]='***Action-filter active***';
 	$TbMsg[52]='"Go"';
 	$TbMsg[53]='"Cancel"';
 	$TbMsg[54]='"Finish"';
@@ -82,4 +81,3 @@ $TbMsg=array();
         $TbMsg[59]='Scope';
         $TbMsg[60]='All';
         $TbMsg[61]='All';
-?>

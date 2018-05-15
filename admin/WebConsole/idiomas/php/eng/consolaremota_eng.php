@@ -1,8 +1,8 @@
 <?php
 //________________________________________________________________________________________________________
 //
-//	Fichero de idiomas php: consolaremota_eng.php (Comandos)
-//	Idioma: Ingles
+//	Php Language file: consolaremota_eng.php (Commands)
+//	Language: English
 //________________________________________________________________________________________________________
 	$TbMsg=array();
 	$TbMsg[0]='Centers';
@@ -11,14 +11,13 @@
 	$TbMsg[3]='Computer group';
 	$TbMsg[4]='Computers';
 	$TbMsg[5]='Turn off computers';
-	$TbMsg[6]='Environment';	
+	$TbMsg[6]='Scope';
 	$TbMsg[7]='Remote console';
-	$TbMsg[8]='WARNING: To execute a command, type the syntax in the textarea and press enter';
-	$TbMsg[9]='The remote console request is send to this environment, you can write command into textarea to receive the echo in the output window';
-	$TbMsg[10]='WARNING: There is something wrong with the remote console request to this environment';
+	$TbMsg[8]='WARNING: Please type the syntax in the text area to execute a command and press enter';
+	$TbMsg[9]='A remote console request has been sent to this scope; you can type commands into text area to receive echo in the output window';
+	$TbMsg[10]='WARNING: Error in remote console requesting to this scope';
 	$TbMsg[11]='Script code';
 	$TbMsg[12]='Remote echo ';
-	$TbMsg[13]='WARNING: You select a remote console environment  distinct of "computer". </br> To view the client echo, press over pc with right boton and select "Console echo". </br>This opens a window that automatically refreshes where you can track the command / script entered.';
-	$TbMsg[14]="...Wait, please. It's sending  the script code";
-	$TbMsg[15]='...It has sent the script code. To view the client echo, press over pc with right boton and select "Console echo".';
-?>
+	$TbMsg[13]='WARNING: You have chosen a scope for the remote console other than "computer". </br> Please, left click on a client and choose "Console echo" to display any client echo. </br>A new refreshed window will be opened where you can track the entered command or script.';
+	$TbMsg[14]="...Please wait. Sending script code";
+	$TbMsg[15]='...Script code sent. Please click on "Console Echo" to view any client echo, .';

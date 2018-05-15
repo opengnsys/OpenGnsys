@@ -10,7 +10,7 @@
 	$TbMsg[2]='Labs';
 	$TbMsg[3]='Group of computers';
 	$TbMsg[4]='Computers';
-	$TbMsg[5]='Perfom Script';
+	$TbMsg[5]='Run Script';
 	$TbMsg[6]='Scope';
 	$TbMsg[7]='Title';
 	$TbMsg[8]='Description';
@@ -20,28 +20,27 @@
 	$TbMsg[12]='&nbsp;Execution mode *&nbsp;';
 	$TbMsg[13]='System';
 	$TbMsg[14]='User';
-	$TbMsg[15]="AVISO El modo de ejecución sólo se aplica a los agentes de sistema operativo nuevos: <br>\n
-		    * El modo usuario sólo es válido si está iniciada la sesión en modo gráfico.<br>\n
-		    * El lenguaje del script a enviar debe corresponder al estado de cliente.<br>\n
-		    * Para Windows hay que escapar las contrabarras.";
+	$TbMsg[15]="Warning:  Execution mode is only applied to new OS agents: <br>\n
+		    * User mode is only valid if a graphic mode session is started.<br>\n
+		    * Script language to send must correspond with the client status.<br>\n
+		    * For Windows you have to escape backslash.";
 
-	$TbMsg["WDI10"]='Modificar código';
+	$TbMsg["WDI10"]='Modify code';
 	$TbMsg["WDI11"]='Deploy Image Wizard';
 	$TbMsg["WDI12"]='Generate OG Code';
 
-	$TbMsg["WDI13"]='Choose whether you just want to store the image on the Cache - UpdateCache';
+	$TbMsg["WDI13"]='Choose if you just want to store the image on Cache - UpdateCache';
 	$TbMsg["WDI14"]='deployImage (update+restore)';
 	$TbMsg["WDI15"]='updateCache (only download)';
-
 	$TbMsg["WDI16"]='basic options';
 	$TbMsg["WDI17"]='multicast options';
 	$TbMsg["WDI18"]='torrent options';
 	$TbMsg["WDI19"]='unicast options';
-	$TbMsg["WDI20"]='Select the partition where the restore disk image:';
-	$TbMsg["WDI20"]='Select the disk partition where to restore the image:';
+	$TbMsg["WDI20"]='Select the partition where the image will be restored:';
 	$TbMsg["WDI21"]='Select the image to distribute:';
 	$TbMsg["WDI22"]='--Select image --';
-	$TbMsg["WDI23"]='Select the transfer mode ';
+	$TbMsg["WDI23"]='Select transfer mode ';
+
 	$TbMsg["WDI24"]='port : ';
 	$TbMsg["WDI25"]='Mcast address : ';
 	$TbMsg["WDI26"]='mode : ';
@@ -51,14 +50,12 @@
 
 	$TbMsg["WDI30"]='Seed time';
 
-	$TbMsg["WDI31"]='AVISO: Si modifica el código no se guardará la información de los equipos después de desplegar la imagen.';
+	$TbMsg["WDI31"]='WARNING: If you modify the code, the information about the computers will not be saved after image deployment.';
 
-	$TbMsg["WCRP31"]='Clone to Remote Partition Wizard';
+	$TbMsg["WCRP31"]='Remote partitions cloning Wizard';
 	$TbMsg["WCRP32"]='Select MASTER PC:';
 	$TbMsg["WCRP33"]='Select the image or partition to send from Master PC';
-	$TbMsg["WCRP34"]='Select the destine partition in the clients';
+	$TbMsg["WCRP34"]='Select the client target partition';
 	$TbMsg["WCRP35"]='Select the transfer mode';
-	$TbMsg["WCRP36"]='Select cloning tool';        
+	$TbMsg["WCRP36"]='Select cloning tool';
 	$TbMsg["WCRP37"]='Select compressor for cloning tool:';
-?>
-

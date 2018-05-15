@@ -25,4 +25,3 @@
 	$TbMsg[17]='¡¡ Free  space !!';
 
 	$TbMsg["HD"]='Disk';
-?>

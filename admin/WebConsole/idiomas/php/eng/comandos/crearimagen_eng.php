@@ -2,7 +2,7 @@
 //________________________________________________________________________________________________________
 //
 //	Fichero de idiomas php: crearimagen_eng.php (Comandos)
-//	Idioma: Ingles 
+//	Idioma: Ingles
 //________________________________________________________________________________________________________
 	$TbMsg=array();
 	$TbMsg[0]='Creation of Image';
@@ -20,5 +20,4 @@
 	$TbMsg[12]='Unknown';
 	$TbMsg[13]='Type';
 	$TbMsg[14]='Scope';
-	$TbMsg[15]='Computers';	
-?>
+	$TbMsg[15]='Computers';

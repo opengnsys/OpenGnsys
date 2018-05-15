@@ -1,13 +1,12 @@
 <?php
 //________________________________________________________________________________________________________
 //
-//	Fichero de idiomas php: gestor_ejecutarscripts_eng.php (Comandos)
-//	Idioma: Ingés 
+//	Php language file: gestor_ejecutarscripts_eng.php (Comandos)
+//	Language: English
 //________________________________________________________________________________________________________
 	$TbMsg=array();
 	$TbMsg[1]='"WARNING: The command Perform Script has successfully registered"';
-	$TbMsg[2]='"WARNING: There are some problem to perform the script"';
-	$TbMsg[3]='"WARNING: The file do not have the .rbc extension"';
+	$TbMsg[2]='"WARNING: Error found performing script"';
+	$TbMsg[3]='"WARNING: The file do not have .rbc extension"';
 	$TbMsg[4]='"WARNING: The file do not have Rembo-C code lines"';
-	$TbMsg[5]='"WARNING: There are some problem to save the file script"';
-?>
+	$TbMsg[5]='"WARNING: Error found saving script file"';

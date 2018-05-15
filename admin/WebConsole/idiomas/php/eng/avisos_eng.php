@@ -1,18 +1,16 @@
 <?php
 //________________________________________
 //
-//	Php language file: avisos_eng.php 
-//	Language: Inglés
+//	Php language file: avisos_eng.php
+//	Language: English
 //________________________________________
 
 if (empty ($TbMsg)) $TbMsg=array();
-$TbMsg["WARN_NAMELENGTH"]='WARNING: The hostname must not exceed 15 characters if you install Windows systems.';
-$TbMsg["WARN_NETBOOT"]='ATENCI&Oacute;N: El equipo iniciar&aacute; en local por defecto; usar NetBoot Avanzado para modificar su arranque.';
-$TbMsg["WARN_DISKSIZE"]='AVISO: El cálculo del tamaño del disco tiene un margen de error, si se utiliza completamente puede fallar la creación de la cache. Es conveniente dejar un espacio libre, que en disco grandes puede llegar a un 1GB';
-$TbMsg["WARN_REBOOTAFTER"]='AVISO: En algunos casos puede ser conveniente realizar un reinicio despu&eacute;s de ejecutar la operaci&oacute;n.';
-$TbMsg["WARN_NOTESOFMENU"]='NOTAS: Los men&uacute;s personalizados tienen mayor prioridad que los men&uacute;s autom&aacute;ticos.<br>Un men&uacute; personalizado se define introduciendo la URL de la p&aacute;gina HTML que lo define.<br>Un men&uacute; autom&aacute;tico se compone a partir de los procedimientos definidos.';
-$TbMsg["WARN_GPT"]='AVISO: Para tabla de particiones GPT es necesario que la primera partici&oacute;n sea tipo EFI <br>y se recomienda un tamaño en torno a 512Mb.';
-$TbMsg["WARN_SCHEDULER"]='WARNING: turn on database event scheduler to enable this property.';
-$TbMsg["WARN_SOURCE_PATH"]='WARNING: The route origin is only used in directory-type synchronized.';
-?>
-
+$TbMsg["WARN_NAMELENGTH"]='WARNING: Hostname must not exceed 15 characters if installing Windows systems.';
+$TbMsg["WARN_NETBOOT"]='WARNING: Default boot mode is local mode; Please use Advanced NetBoot to modify boot order.';
+$TbMsg["WARN_DISKSIZE"]='WARNING: There is an error range on disk size calculation. Using the whole size, cache creation might fail.It is recommended leaving a free space that in large disks can be about 1 GB';
+$TbMsg["WARN_REBOOTAFTER"]='WARNING: In some cases, it may be appropriate to restart after running a command.';
+$TbMsg["WARN_NOTESOFMENU"]='NOTES: Personalized messages have priority over atomatic ones. A personalized message is defined introducing URL of his HMTL page. An automatic message is composed of defined procedures';
+$TbMsg["WARN_GPT"]='WARNING: In GPT partitions table first partition must be EFI, and it is recommended it has about 512 MB.';
+$TbMsg["WARN_SCHEDULER"]='WARNING: Turn on database event scheduler to enable this property.';
+$TbMsg["WARN_SOURCE_PATH"]='WARNING: The source path is only used in directory-type synchronized images.';
