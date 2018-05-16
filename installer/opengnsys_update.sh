@@ -64,16 +64,19 @@ if [ -z "$OPENGNSYS_DATABASE" -o -z "$OPENGNSYS_DBUSER" -o -z "$OPENGNSYS_DBPASS
 	exit 1
 fi
 
-# Comprobar si se ha descargado el paquete comprimido (USESVN=0) o sólo el instalador (USESVN=1).
+# Comprobar si se ha descargado el paquete comprimido (REMOTE=0) o sólo el instalador (REMOTE=1).
 PROGRAMDIR=$(readlink -e $(dirname "$0"))
 PROGRAMNAME=$(basename "$0")
 OPENGNSYS_SERVER="opengnsys.es"
 if [ -d "$PROGRAMDIR/../installer" ]; then
-	USESVN=0
+	REMOTE=0
 else
-	USESVN=1
+	REMOTE=1
 fi
-SVN_URL="https://$OPENGNSYS_SERVER/svn/trunk/"
+BRANCH="master"
+CODE_URL="https://codeload.github.com/opengnsys/OpenGnsys/zip/$BRANCH"
+API_URL="https://api.github.com/repos/opengnsys/OpenGnsys/branches/$BRANCH"
+RAW_URL="https://raw.githubusercontent.com/opengnsys/OpenGnsys/$BRANCH"
 
 WORKDIR=/tmp/opengnsys_update
 mkdir -p $WORKDIR
@@ -168,8 +171,8 @@ function checkAutoUpdate()
 	local update=0
 
 	# Actaulizar el script si ha cambiado o no existe el original.
-	if [ $USESVN -eq 1 ]; then
-		svn export $SVN_URL/installer/$PROGRAMNAME
+	if [ $REMOTE -eq 1 ]; then
+		curl -s $RAW_URL/installer/$PROGRAMNAME -o $PROGRAMNAME
 		if ! diff -q $PROGRAMNAME $INSTALL_TARGET/lib/$PROGRAMNAME 2>/dev/null || ! test -f $INSTALL_TARGET/lib/$PROGRAMNAME; then
 			mv $PROGRAMNAME $INSTALL_TARGET/lib
 			update=1
@@ -377,10 +380,10 @@ function installDependencies()
 
 
 #####################################################################
-####### Funciones para el manejo de Subversion
+####### Funciones para descargar código
 #####################################################################
 
-function svnExportCode()
+function downloadCode()
 {
 	if [ $# -ne 1 ]; then
 		errorAndLog "${FUNCNAME}(): invalid number of parameters"
@@ -389,14 +392,15 @@ function svnExportCode()
 
 	local url="$1"
 
-	echoAndLog "${FUNCNAME}(): downloading subversion code..."
+	echoAndLog "${FUNCNAME}(): downloading code..."
 
-	svn checkout "${url}" opengnsys
+	curl "${url}" -o opengnsys.zip && unzip opengnsys.zip && mv "OpenGnsys-$BRANCH" opengnsys
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error getting code from ${url}, verify your user and password"
 		return 1
 	fi
-	echoAndLog "${FUNCNAME}(): subversion code downloaded"
+	rm -f opengnsys.zip
+	echoAndLog "${FUNCNAME}(): code was downloaded"
 	return 0
 }
 
@@ -409,7 +413,14 @@ function svnExportCode()
 function checkNetworkConnection()
 {
 	OPENGNSYS_SERVER=${OPENGNSYS_SERVER:-"opengnsys.es"}
-	wget --spider -q $OPENGNSYS_SERVER
+	if which curl &>/dev/null; then
+		curl --connect-timeout 10 -s $OPENGNSYS_SERVER -o /dev/null
+	elif which wget &>/dev/null; then
+		wget --spider -q $OPENGNSYS_SERVER
+	else
+		echoAndLog "${FUNCNAME}(): Cannot execute \"wget\" nor \"curl\"."
+		return 1
+	fi
 }
 
 # Comprobar si la versión es anterior a la actual.
@@ -419,8 +430,8 @@ function checkVersion()
 
 	# Obtener versión actual y versión a actualizar.
 	OLDVERSION=$(awk '{print $2}' $INSTALL_TARGET/doc/VERSION.txt 2>/dev/null)
-	if [ $USESVN -eq 1 ]; then
-		NEWVERSION=$(curl -s $SVN_URL/doc/VERSION.txt 2>/dev/null | awk '{print $2}')
+	if [ $REMOTE -eq 1 ]; then
+		NEWVERSION=$(curl -s $RAW_URL/doc/VERSION.txt 2>/dev/null | awk '{print $2}')
 	else
 		NEWVERSION=$(awk '{print $2}' $PROGRAMDIR/doc/VERSION.txt 2>/dev/null)
 	fi
@@ -463,16 +474,15 @@ function updateClientFiles()
 	# Actualizar ficheros del cliente.
 	backupFile $ENGINECFG
 	echoAndLog "${FUNCNAME}(): Updating OpenGnsys Client files"
-	rsync --exclude .svn -irplt $WORKDIR/opengnsys/client/shared/* $INSTALL_TARGET/client
+	rsync -irplt $WORKDIR/opengnsys/client/shared/* $INSTALL_TARGET/client
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while updating client structure"
 		exit 1
 	fi
-	find $INSTALL_TARGET/client -name .svn -type d -exec rm -fr {} \; 2>/dev/null
 
 	# Actualizar librerías del motor de clonación.
 	echoAndLog "${FUNCNAME}(): Updating OpenGnsys Cloning Engine files"
-	rsync --exclude .svn -irplt $WORKDIR/opengnsys/client/engine/*.lib* $INSTALL_TARGET/client/lib/engine/bin
+	rsync -irplt $WORKDIR/opengnsys/client/engine/*.lib* $INSTALL_TARGET/client/lib/engine/bin
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while updating engine files"
 		exit 1
@@ -587,7 +597,7 @@ function updateWebFiles()
 	# Copiar los ficheros nuevos conservando el archivo de configuración de acceso.
 	backupFile $INSTALL_TARGET/www/controlacceso.php
 	mv $INSTALL_TARGET/www $INSTALL_TARGET/WebConsole
-	rsync --exclude .svn -irplt $WORKDIR/opengnsys/admin/WebConsole $INSTALL_TARGET
+	rsync -irplt $WORKDIR/opengnsys/admin/WebConsole $INSTALL_TARGET
 	ERRCODE=$?
 	mv $INSTALL_TARGET/WebConsole $INSTALL_TARGET/www
 	unzip -o $WORKDIR/opengnsys/admin/xajax_0.5_standard.zip -d $INSTALL_TARGET/www/xajax
@@ -632,7 +642,7 @@ function updateDownloadableFiles()
 		mv $PROGRAMDIR/$FILENAME $TARGETFILE
 	else
 		echoAndLog "${FUNCNAME}(): Downloading $FILENAME"
-		wget $DOWNLOADURL/$FILENAME -O $TARGETFILE
+		curl $DOWNLOADURL/$FILENAME -o $TARGETFILE
 	fi
 	if [ ! -s $TARGETFILE ]; then
 		errorAndLog "${FUNCNAME}(): Cannot download $FILENAME"
@@ -655,7 +665,7 @@ function updateInterfaceAdm()
 	# Crear carpeta y copiar Interface 
 	echoAndLog "${FUNCNAME}(): Copying Administration Interface Folder" 
 	mv $INSTALL_TARGET/client/interfaceAdm $INSTALL_TARGET/client/Interface
-	rsync --exclude .svn -irplt $WORKDIR/opengnsys/admin/Interface $INSTALL_TARGET/client
+	rsync -irplt $WORKDIR/opengnsys/admin/Interface $INSTALL_TARGET/client
 	errcoce=$?
 	mv $INSTALL_TARGET/client/Interface $INSTALL_TARGET/client/interfaceAdm
 	if [ $errcode -ne 0 ]; then 
@@ -812,7 +822,7 @@ function updateServerFiles()
 	local i
 	for (( i = 0; i < ${#SOURCES[@]}; i++ )); do
 		if [ -d "$INSTALL_TARGET/${TARGETS[i]}" ]; then
-			rsync --exclude .svn -irplt "${SOURCES[i]}" $(dirname $(readlink -e "$INSTALL_TARGET/${TARGETS[i]}"))
+			rsync -irplt "${SOURCES[i]}" $(dirname $(readlink -e "$INSTALL_TARGET/${TARGETS[i]}"))
 		else
 			rsync -irplt "${SOURCES[i]}" $(readlink -m "$INSTALL_TARGET/${TARGETS[i]}")
 		fi
@@ -945,7 +955,7 @@ function updateClient()
 		oglivecli convert
 	fi
 	# Comprobar si debe actualizarse el cliente.
-	SOURCELENGTH=$(LANG=C wget --spider $SOURCEFILE 2>&1 | awk '/Length:/ {print $2}')
+	SOURCELENGTH=$(curl -sI $SOURCEFILE 2>&1 | awk '/Content-Length:/ {print $2}')
 	TARGETLENGTH=$(stat -c "%s" $TARGETFILE 2>/dev/null)
 	[ -z $TARGETLENGTH ] && TARGETLENGTH=0
 	if [ "$SOURCELENGTH" != "$TARGETLENGTH" ]; then
@@ -1000,9 +1010,10 @@ function checkFiles()
 function updateSummary()
 {
 	# Actualizar fichero de versión y revisión.
-	local VERSIONFILE="$INSTALL_TARGET/doc/VERSION.txt"
-	local REVISION=$(LANG=C svn info $SVN_URL|awk '/Rev:/ {print "r"$4}')
+	local VERSIONFILE REVISION
 
+	VERSIONFILE="$INSTALL_TARGET/doc/VERSION.txt"
+	REVISION=$(curl -s "$API_URL" | jq -r ".commit.commit.committer.date" | awk '{gsub(/[^0-9]/,""); print}')
 	[ -f $VERSIONFILE ] || echo "OpenGnsys" >$VERSIONFILE
 	perl -pi -e "s/($| r[0-9]*)/ $REVISION/" $VERSIONFILE
 
@@ -1095,10 +1106,10 @@ if [ $? -ne 0 ]; then
 fi
 
 # Si es necesario, descarga el repositorio de código en directorio temporal
-if [ $USESVN -eq 1 ]; then
-	svnExportCode $SVN_URL
+if [ $REMOTE -eq 1 ]; then
+	downloadCode $CODE_URL
 	if [ $? -ne 0 ]; then
-		errorAndLog "Error while getting code from svn server"
+		errorAndLog "Error while getting code from repository"
 		exit 1
 	fi
 else
