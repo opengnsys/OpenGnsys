@@ -114,7 +114,7 @@ function autoConfigure()
 	# Configuración según la distribución de Linux.
 	if [ -f /etc/debian_version ]; then
         	# Distribución basada en paquetes Deb.
-		DEPENDENCIES=( curl rsync btrfs-tools procps arp-scan realpath php-curl gettext moreutils jq wakeonlan udpcast )
+		DEPENDENCIES=( curl rsync btrfs-tools procps arp-scan realpath php-curl gettext moreutils jq wakeonlan udpcast python-pip )
 		UPDATEPKGLIST="add-apt-repository -y ppa:ondrej/php; apt-get update"
 		INSTALLPKGS="apt-get -y install"
 		DELETEPKGS="apt-get -y purge"
@@ -134,7 +134,7 @@ function autoConfigure()
 		INETDCFGDIR=/etc/xinetd.d
 	elif [ -f /etc/redhat-release ]; then
         	# Distribución basada en paquetes rpm.
-		DEPENDENCIES=( curl rsync btrfs-progs procps-ng arp-scan gettext moreutils jq net-tools )
+		DEPENDENCIES=( curl rsync btrfs-progs procps-ng arp-scan gettext moreutils jq net-tools python-pip )
 		# En CentOS 7 instalar arp-scan de CentOS 6.
 		[ "$OSDISTRIB$OSVERSION" == "centos7" ] && DEPENDENCIES=( ${DEPENDENCIES[*]/arp-scan/http://dag.wieers.com/redhat/el6/en/$(arch)/dag/RPMS/arp-scan-1.9-1.el6.rf.$(arch).rpm} )
 		INSTALLPKGS="yum install -y"
@@ -390,6 +390,8 @@ function installDependencies()
 			fi
 		fi
 	fi
+	# Dependencias Python.
+	pip install -U pjlink
 }
 
 
