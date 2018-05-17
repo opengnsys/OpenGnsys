@@ -783,6 +783,23 @@ CREATE TABLE `programaciones` (
 -- --------------------------------------------------------
 
 --
+-- Estructura de tabla para la tabla `projector`
+--
+
+DROP TABLE IF EXISTS projectors;
+CREATE TABLE `projectors` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(50) NOT NULL DEFAULT '',
+  `model` varchar(50) NOT NULL DEFAULT '',
+  `type` enum('standalone', 'pjlink', 'unknown') NOT NULL DEFAULT 'standalone',
+  `ipaddr` varchar(16) NOT NULL DEFAULT '',
+  `lab_id` int(11) DEFAULT NULL,
+  PRIMARY KEY(`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
+
+-- --------------------------------------------------------
+
+--
 -- Estructura de tabla para la tabla `remotepc`
 --
 
