@@ -1,8 +1,48 @@
 <?php
+define("ENGINEJSON", __DIR__ . "/../../client/etc/engine.json");
 include_once("pintaParticiones.php");
 
+/**
+ * Busca en la configuración JSON los datos de partición para el código hexadecimal correspondiente.
+ * @param object $json  datos JSON de configuración
+ * @param string $code  código hexadecimal de partición
+ * @return array        tipo de partición (string) e indicador de clonable (bool)
+ */
+function getPartitionData($json, $code) {
+    if (isset($json->partitiontables)) {
+        foreach ($json->partitiontables as $tab) {
+            if (isset($tab->partitions)) {
+                foreach ($tab->partitions as $par) {
+                    if (hexdec($par->id) == $code) {
+                        return [$par->type, $par->clonable];
+                    }
+                }
+            }
+        }
+    }
+    return [$partcode, true];
+}
+
+/**
+ * Busca en la configuración JSON los datos de tabla de particiones para el código correspondiente.
+ * @param object $json  datos JSON de configuración
+ * @param string $code  código de tabla de particiones
+ * @return string       tipo de tabla de particiones
+ */
+function getParttableData($json, $code) {
+    if (isset($json->partitiontables)) {
+        foreach ($json->partitiontables as $tab) {
+            if (hexdec($tab->id) == $code) {
+                return $tab->type;
+            }
+        }
+    return "";
+}
+
 /*________________________________________________________________________________________________________
-	UHU  - 2013/05/14 - Se añade la clave número de disco
+	UHU   - 2013/05/14 - Se añade la clave número de disco
+	Ramón - 2018/03/09 - Usar fichero de configuración JSON para datos estáticos
+
 	La clave de configuración está formada por una serie de valores separados por ";"
 	 
 		Ejemplo:1;1;7;30000000;3;3;0;11
@@ -57,13 +97,15 @@ function cargaCaves($cmd,$idambito,$ambito,$sws,$swr)
 	global $AMBITO_AULAS;
 	global $AMBITO_GRUPOSORDENADORES;
 	global $AMBITO_ORDENADORES;
-	
 	global $msk_sysFi;
 	global $msk_nombreSO;
 	global $msk_tamano;
 	global $msk_imagen;
 	global $msk_perfil;	
 	global $msk_cache;
+
+	// Cargar datos JSON de configuración.
+	$json=json_decode(file_get_contents(ENGINEJSON));
 
 	// Comprobar modos SQL para hacer que la consulta sea compatible.
 	$cmd->texto="SELECT @@sql_mode AS mode";
@@ -95,8 +137,6 @@ function cargaCaves($cmd,$idambito,$ambito,$sws,$swr)
 				ANY_VALUE(ordenadores_particiones.numdisk) AS numdisk,
 				ANY_VALUE(ordenadores_particiones.numpar) AS numpar,
 				ANY_VALUE(ordenadores_particiones.codpar) AS codpar,
-				IFNULL (ANY_VALUE(tipospar.tipopar), ANY_VALUE(ordenadores_particiones.codpar)) AS tipopar,
-				ANY_VALUE(tipospar.clonable) AS clonable,
 				ANY_VALUE(ordenadores_particiones.tamano) AS tamano,
 				ANY_VALUE(ordenadores_particiones.uso) AS uso,
 				ANY_VALUE(sistemasficheros.descripcion) AS sistemafichero,
@@ -113,7 +153,6 @@ function cargaCaves($cmd,$idambito,$ambito,$sws,$swr)
 				FROM ordenadores
 			  INNER JOIN ordenadores_particiones ON ordenadores_particiones.idordenador=ordenadores.idordenador
 			  LEFT OUTER JOIN nombresos ON nombresos.idnombreso=ordenadores_particiones.idnombreso
-			  LEFT OUTER JOIN tipospar ON tipospar.codpar=ordenadores_particiones.codpar
 			  LEFT OUTER JOIN imagenes ON imagenes.idimagen=ordenadores_particiones.idimagen
 			  LEFT OUTER JOIN perfilessoft ON perfilessoft.idperfilsoft=ordenadores_particiones.idperfilsoft
 			  LEFT OUTER JOIN sistemasficheros ON sistemasficheros.idsistemafichero=ordenadores_particiones.idsistemafichero";
@@ -133,7 +172,7 @@ function cargaCaves($cmd,$idambito,$ambito,$sws,$swr)
 	}
 
 	if($swr) // Si se trata de restauración no se tiene en cuenta las partciones no clonables
-		$cmd->texto.=" AND tipospar.clonable=1 AND ordenadores_particiones.numpar>0 ";
+		$cmd->texto.=" AND ordenadores_particiones.numpar>0 ";
 
 	$cmd->texto.=" GROUP BY configuracion";
 	// Comprobar compatiblidad de cláusula GROUP BY.
@@ -145,13 +184,26 @@ function cargaCaves($cmd,$idambito,$ambito,$sws,$swr)
 	if (!$rs->Abrir()) return(false); // Error al abrir recordset
 	$rs->Primero();
 	$idx=0; 
-	while (!$rs->EOF){
+	while (!$rs->EOF) {
+		$numpar=$rs->campos["numpar"];
+		$codpar=$rs->campos["codpar"];
+		if ($numpar == 0) {
+			// Tipo de tabla de particiones.
+			$tipopar = getParttableData($json, $codpar);
+		} else {
+			// Saltar si no es clonable en restauración.
+			list($tipopar, $clonable) = getPartitionData($json, $codpar);
+			if ($swr and $clonable == false) {
+				continue;
+			}
+		}
+		// Leer datos.
 		$tbKeys[$idx]["cfg"]=$rs->campos["configuracion"];
 		$tbKeys[$idx]["numdisk"]=$rs->campos["numdisk"];
 		$tbKeys[$idx]["numpar"]=$rs->campos["numpar"];
-		$tbKeys[$idx]["codpar"]=$rs->campos["codpar"];
-		$tbKeys[$idx]["tipopar"]=$rs->campos["tipopar"];
-		$tbKeys[$idx]["clonable"]=$rs->campos["clonable"];
+		$tbKeys[$idx]["codpar"]=$codpar;
+		$tbKeys[$idx]["tipopar"]=$tipopar;
+		$tbKeys[$idx]["clonable"]=$clonable;
 		$tbKeys[$idx]["tamano"]=$rs->campos["tamano"];
 		$tbKeys[$idx]["uso"]=$rs->campos["uso"];
 		$tbKeys[$idx]["sistemafichero"]=$rs->campos["sistemafichero"];
@@ -243,7 +295,6 @@ function pintaConfiguraciones($cmd,$idambito,$ambito,$colums,$sws,$swr,$pintaPar
 						FROM ordenadores
 						INNER JOIN ordenadores_particiones ON ordenadores_particiones.idordenador=ordenadores.idordenador
 						LEFT OUTER JOIN nombresos ON nombresos.idnombreso=ordenadores_particiones.idnombreso
-						LEFT JOIN tipospar ON tipospar.codpar=ordenadores_particiones.codpar
 						LEFT OUTER JOIN imagenes ON imagenes.idimagen=ordenadores_particiones.idimagen
 						LEFT OUTER JOIN perfilessoft ON perfilessoft.idperfilsoft=ordenadores_particiones.idperfilsoft
 						LEFT OUTER JOIN sistemasficheros ON sistemasficheros.idsistemafichero=ordenadores_particiones.idsistemafichero";
@@ -261,7 +312,7 @@ function pintaConfiguraciones($cmd,$idambito,$ambito,$colums,$sws,$swr,$pintaPar
 	}
 
 	if ($swr) // Si se trata de restauración no se tiene en cuenta las particiones no clonables
-		$cmd->texto.=" AND tipospar.clonable=1 AND ordenadores_particiones.numpar>0";
+		$cmd->texto.=" AND ordenadores_particiones.numpar>0";
 
 	$cmd->texto.="	ORDER BY ordenadores_particiones.idordenador, ordenadores_particiones.numdisk, ordenadores_particiones.numpar) AS temp1
 					GROUP BY temp1.idordenador) AS temp2
@@ -833,5 +884,3 @@ function tomaCache($numpar,$ordenadores,$numdisk = 1)
 		}
 	}
 }
-
-
