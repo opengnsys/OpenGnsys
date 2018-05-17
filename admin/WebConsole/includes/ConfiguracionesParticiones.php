@@ -2,6 +2,43 @@
 include_once(__DIR__ . "/configfunctions.php");
 include_once(__DIR__ . "/pintaParticiones.php");
 
+/**
+ * Busca en la configuración JSON los datos de partición para el código hexadecimal correspondiente.
+ * @param object $json  datos JSON de configuración
+ * @param string $code  código hexadecimal de partición
+ * @return array        tipo de partición (string) e indicador de clonable (bool)
+ */
+function getPartitionData($json, $code) {
+    if (isset($json->partitiontables)) {
+        foreach ($json->partitiontables as $tab) {
+            if (isset($tab->partitions)) {
+                foreach ($tab->partitions as $par) {
+                    if (hexdec($par->id) == $code) {
+                        return [$par->type, $par->clonable];
+                    }
+                }
+            }
+        }
+    }
+    return [$partcode, true];
+}
+
+/**
+ * Busca en la configuración JSON los datos de tabla de particiones para el código correspondiente.
+ * @param object $json  datos JSON de configuración
+ * @param string $code  código de tabla de particiones
+ * @return string       tipo de tabla de particiones
+ */
+function getParttableData($json, $code) {
+    if (isset($json->partitiontables)) {
+        foreach ($json->partitiontables as $tab) {
+            if (hexdec($tab->id) == $code) {
+                return $tab->type;
+            }
+        }
+    return "";
+}
+
 /*________________________________________________________________________________________________________
 	UHU   - 2013/05/14 - Se añade la clave número de disco
 	Ramón - 2018/03/09 - Usar fichero de configuración JSON para datos estáticos
@@ -66,6 +103,9 @@ function cargaCaves($cmd,$idambito,$ambito,$sws,$swr)
 	global $msk_imagen;
 	global $msk_perfil;	
 	global $msk_cache;
+
+	// Cargar datos JSON de configuración.
+	$json=json_decode(file_get_contents(ENGINEJSON));
 
 	// Comprobar modos SQL para hacer que la consulta sea compatible.
 	$cmd->texto="SELECT @@sql_mode AS mode";
