@@ -33,16 +33,16 @@ timeout -k 5s -s KILL 3s $(which parted) "$@"
 #@todo    Definir atributos (arranque, oculta) y tamaños en MB, GB, etc.
 #@version 0.9 - Primera versión para OpenGnSys
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2009/09/09
+#@date    2009-09-09
 #@version 0.9.1 - Corrección del redondeo del tamaño del disco.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2010/03/09
+#@date    2010-03-09
 #@version 1.0.4 - Llamada a función específica para tablas GPT.
 #@author  Universidad de Huelva
-#@date    2012/03/30
+#@date    2012-03-30
 #@version 1.1.1 - El inicio de la primera partición logica es el de la extendida más 4x512
 #@author  Irina Gomez, ETSII Universidad de Sevilla
-#@date    2016/07/11
+#@date    2016-07-11
 #*/ ##
 function ogCreatePartitions ()
 {
@@ -186,7 +186,7 @@ rm -f $tmpsfdisk
 #@todo    Definir atributos (arranque, oculta) y tamaños en MB, GB, etc.
 #@version 1.0.4 - Primera versión para OpenGnSys
 #@author  Universidad de Huelva
-#@date    2012/03/30
+#@date    2012-03-30
 #*/ ##
 function ogCreateGptPartitions ()
 {
@@ -281,10 +281,10 @@ sgdisk $DELOPTIONS $OPTIONS $DISK 2>/dev/null && partprobe $DISK
 #@note    Requisitos: fdisk, gdisk, parted
 #@version 1.0.4 - Primera versión compatible con OpenGnSys.
 #@author  Universidad de Huelva
-#@date    2012/03/06
+#@date    2012-03-06
 #@version 1.0.6a - Adaptar creación de nueva tabla MSDOS.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2016/01/29
+#@date    2016-01-29
 #*/ ##
 function ogCreatePartitionTable ()
 {
@@ -351,10 +351,10 @@ esac
 #@return  la informacion propia del fdisk
 #@version 0.1 -  Integracion para OpenGnSys
 #@author  Antonio J. Doblas Viso. Universidad de Malaga
-#@date    2008/10/27
+#@date    2008-10-27
 #@version 1.0.4 - Adaptado para su uso con discos GPT
 #@author  Universidad de Huelva
-#@date    2012/03/13
+#@date    2012-03-13
 #*/ ##
 function ogDeletePartitionTable ()
 {
@@ -392,13 +392,13 @@ esac
 #@note    Solo se acepta en cada llamada 1 de los 3 tipos de parámetros.
 #@version 0.1 -  Integracion para Opengnsys  -  EAC: DiskEAC() en ATA.lib 
 #@author  Antonio J. Doblas Viso, Universidad de Malaga
-#@date    2008/10/27
+#@date    2008-10-27
 #@version 0.9 - Primera version para OpenGnSys
 #@author  Ramon Gomez, ETSII Universidad Sevilla
-#@date    2009/07/20
+#@date    2009-07-20
 #@version 1.0.6 - Soporta parámetro con UIID o etiqueta.
 #@author  Ramon Gomez, ETSII Universidad Sevilla
-#@date    2014/07/13
+#@date    2014-07-13
 #*/ ##
 function ogDevToDisk ()
 {
@@ -467,7 +467,7 @@ return $OG_ERR_NOTFOUND
 #@author Ramon Gomez, ETSII Universidad de Sevilla 
 #@Date    2008/06/19
 #@author  Antonio J. Doblas Viso, Universidad de Malaga
-#@date    2008/10/27
+#@date    2008-10-27
 #@version 0.9 - Primera version para OpenGnSys
 #@author  Ramon Gomez, ETSII Universidad Sevilla
 #@date    2009-07-20
@@ -512,9 +512,7 @@ fi
 
 # Continuar para detectar nuevos dispositivos.
 # Listar dispositivos de discos.
-ALLDISKS=$((lsblk -n -e 1,2 -x MAJ:MIN 2>/dev/null || lsblk -n -e 1,2) | \
-           awk '$6~/^disk$/ {gsub(/!/,"/"); printf "/dev/%s ",$1}')
-#ALLDISKS=$(lsblk -Jdp | jq -r '.blockdevices[] | select(.type=="disk").name')
+ALLDISKS=$(lsblk -Jdp | jq -r '.blockdevices[] | select(.type=="disk").name')
 # Listar volúmenes lógicos.
 VOLGROUPS=$(vgs -a --noheadings 2>/dev/null | awk '{printf "/dev/%s ",$1}')
 ALLDISKS="$ALLDISKS $VOLGROUPS"
@@ -607,10 +605,10 @@ esac
 #@note    Requisitos: sfdisk, awk
 #@version 0.9.2 - Primera version para OpenGnSys
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2010/09/15
+#@date    2010-09-15
 #@version 1.0.6 - Soportar LVM.
 #@author  Universidad de Huelva
-#@date    2014/09/04
+#@date    2014-09-04
 #*/ ##
 function ogGetDiskSize ()
 {
@@ -775,7 +773,7 @@ echo $LASTSECTOR
 #@todo    Queda definir formato para atributos (arranque, oculta, ...).
 #@version 0.9 - Primera version compatible con OpenGnSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2009/09/17
+#@date    2009-09-17
 #*/ ##
 function ogGetPartitionActive ()
 {
@@ -821,7 +819,7 @@ LANG=C parted -sm $DISK print 2>/dev/null | awk -F: '$7~/boot/ {print $1}'
 function ogGetPartitionId ()
 {
 # Variables locales.
-local DISK ID
+local DISK PTTYPE ID
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -834,15 +832,16 @@ fi
 
 # Detectar y mostrar el id. de tipo de partición.
 DISK=$(ogDiskToDev $1) || return $?
-case "$(ogGetPartitionTableType $1)" in
+PTTYPE=$(ogGetPartitionTableType $1)
+case "$PTTYPE" in
     GPT)    ID=$(sgdisk -p $DISK 2>/dev/null | awk -v p="$2" '{if ($1==p) print $6;}') || ogRaiseError $OG_ERR_NOTFOUND "$1,$2" || return $?
             [ "$ID" == "8300" -a "$1 $2" == "$(ogFindCache)" ] && ID=CA00
             ;;
     MSDOS)  ID=$(sfdisk --id $DISK $2 2>/dev/null) || ogRaiseError $OG_ERR_NOTFOUND "$1,$2" || return $? ;;
-    LVM)    ID=10000 ;;
-    ZPOOL)  ID=10010 ;;
+    *)      ID=$(jq -r ".partitiontables[] | select(.type==\"$PTTYPE\").partitions[0].id") $ENGINECFG ;;
 esac
-echo $ID
+# Id. hexadecimal en minúsculas.
+echo ${ID,,}
 }
 
 
@@ -857,13 +856,13 @@ echo $ID
 #@note    Requisitos: sfdisk, awk
 #@version 0.1 -  Integracion para Opengnsys  -  EAC: SizePartition () en ATA.lib 
 #@author  Antonio J. Doblas Viso, Universidad de Malaga
-#@date    2008/10/27
+#@date    2008-10-27
 #@version 0.9 - Primera version para OpenGnSys
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2009/07/24
+#@date    2009-07-24
 #@version 1.1.0 - Sustituir "sfdisk" por "partx".
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2016/05/04
+#@date    2016-05-04
 #*/ ##
 function ogGetPartitionSize ()
 {
@@ -898,7 +897,7 @@ echo ${SIZE:-0}
 #@note	  Notas sin especificar
 #@version 0.1 -  Integracion para Opengnsys  -  EAC:  DetectNumberPartition () en ATA.lib
 #@author  Antonio J. Doblas Viso. Universidad de Malaga
-#@date    Date: 27/10/2008
+#@date    2008-10-27
 #@version 1.0 - Uso de sfdisk Primera version para OpenGnSys
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-07-24
@@ -951,7 +950,7 @@ esac
 #@note    Requisitos: blkid, parted, vgs
 #@version 1.0.4 - Primera versión para OpenGnSys
 #@author  Universidad de Huelva
-#@date    2012/03/01
+#@date    2012-03-01
 #@version 1.0.6 - Soportar LVM.
 #@author  Universidad de Huelva
 #@date    2014-09-04
@@ -1089,6 +1088,9 @@ ogSetPartitionType $1 $2 $NEWTYPE
 #@version 1.0.5 - Primera version para OpenGnSys
 #@author  Ramon Gomez, ETSII Universidad Sevilla
 #@date    2013-02-07
+#@version 1.1.1 - Usar fichero de configuración JSON
+#@author  Ramon Gomez, ETSII Universidad Sevilla
+#@date    2018-02-27
 #*/ ##
 function ogIdToType ()
 {
@@ -1104,56 +1106,9 @@ fi
 # Error si no se recibe 1 parámetro.
 [ $# == 1 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
-# Obtener valor hexadecimal de 4 caracteres rellenado con 0 por delante.
-ID=$(printf "%4s" "$1" | tr ' ' '0')
-case "${ID,,}" in
-     0000)      TYPE="EMPTY" ;;
-     0001)      TYPE="FAT12" ;;
-     0005|000f) TYPE="EXTENDED" ;;
-     0006|000e) TYPE="FAT16" ;;
-     0007)      TYPE="NTFS" ;;
-     000b|000c) TYPE="FAT32" ;;
-     0011)      TYPE="HFAT12" ;;
-     0012)      TYPE="COMPAQDIAG" ;;
-     0016|001e) TYPE="HFAT16" ;;
-     0017)      TYPE="HNTFS" ;;
-     001b|001c) TYPE="HFAT32" ;;
-     0042)      TYPE="WIN-DYNAMIC" ;;
-     0082|8200) TYPE="LINUX-SWAP" ;;
-     0083|8300) TYPE="LINUX" ;;
-     008e|8E00) TYPE="LINUX-LVM" ;;
-     00a5|a503) TYPE="FREEBSD" ;;
-     00a6)      TYPE="OPENBSD" ;;
-     00a7)      TYPE="CACHE" ;;         # (compatibilidad con Brutalix)
-     00af|af00) TYPE="HFS" ;;
-     00be|be00) TYPE="SOLARIS-BOOT" ;;
-     00bf|bf0[0145]) TYPE="SOLARIS" ;;
-     00ca|ca00) TYPE="CACHE" ;;
-     00da)      TYPE="DATA" ;;
-     00ee)      TYPE="GPT" ;;
-     00ef|ef00) TYPE="EFI" ;;
-     00fb)      TYPE="VMFS" ;;
-     00fd|fd00) TYPE="LINUX-RAID" ;;
-     0700)      TYPE="WINDOWS" ;;
-     0c01)      TYPE="WIN-RESERV" ;;
-     7f00)      TYPE="CHROMEOS-KRN" ;;
-     7f01)      TYPE="CHROMEOS" ;;
-     7f02)      TYPE="CHROMEOS-RESERV" ;;
-     8301)      TYPE="LINUX-RESERV" ;;
-     a500)      TYPE="FREEBSD-DISK" ;;
-     a501)      TYPE="FREEBSD-BOOT" ;;
-     a502)      TYPE="FREEBSD-SWAP" ;;
-     ab00)      TYPE="HFS-BOOT" ;;
-     af01)      TYPE="HFS-RAID" ;;
-     bf02)      TYPE="SOLARIS-SWAP" ;;
-     bf03)      TYPE="SOLARIS-DISK" ;;
-     ef01)      TYPE="MBR" ;;
-     ef02)      TYPE="BIOS-BOOT" ;;
-     10000)     TYPE="LVM-LV" ;;
-     10010)     TYPE="ZFS-VOL" ;;
-     *)         TYPE="UNKNOWN" ;;
-esac
-echo "$TYPE"
+# Consulta JSON del valor hexadecimal quitando 0 no significativos.
+ID=$(printf "%x" "$((0x$1))" 2>/dev/null)
+jq -r "(.partitiontables[].partitions[]) | select(.id==\"${ID,,}\").type" $ENGINECFG 2>/dev/null
 }
 
 
@@ -1199,7 +1154,7 @@ test -f $LOCKFILE
 #@attention Las tuplas de valores están separadas por espacios.
 #@version 0.9 - Primera versión para OpenGnSys
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2009/07/24
+#@date    2009-07-24
 #*/ ##
 function ogListPartitions ()
 {
@@ -1324,10 +1279,10 @@ touch $LOCKFILE
 #@note    Requisitos: parted
 #@version 0.1 -  Integracion para Opengnsys  -  EAC: SetPartitionActive() en ATA.lib
 #@author  Antonio J. Doblas Viso, Universidad de Malaga
-#@date    2008/10/27
+#@date    2008-10-27
 #@version 0.9 - Primera version compatible con OpenGnSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2009/09/17
+#@date    2009-09-17
 #*/ ##
 function ogSetPartitionActive ()
 {
@@ -1368,13 +1323,13 @@ parted -s $DISK set $2 boot on 2>/dev/null
 #@attention Requisitos: fdisk, sgdisk
 #@version 0.1 -  Integracion para Opengnsys  - SetPartitionType() en ATA.lib
 #@author  Antonio J. Doblas Viso. Universidad de Malaga
-#@date    2008/10/27
+#@date    2008-10-27
 #@version 1.0.4 - Soporte para discos GPT.
 #@author  Universidad de Huelva
-#@date    2012/03/13
+#@date    2012-03-13
 #@version 1.0.5 - Utiliza el id. de tipo de partición (no el mnemónico)
 #@author  Universidad de Huelva
-#@date    2012/05/14
+#@date    2012-05-14
 #*/ ##
 function ogSetPartitionId ()
 {
@@ -1430,7 +1385,7 @@ fi
 #@todo    Compruebar que el tamaño sea numérico positivo y evitar que pueda solaparse con la siguiente partición.
 #@version 0.9 - Primera versión para OpenGnSys
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2009/07/24
+#@date    2009-07-24
 #*/ ##
 function ogSetPartitionSize ()
 {
@@ -1467,13 +1422,13 @@ partprobe $DISK 2>/dev/null
 #@attention Requisitos: fdisk, sgdisk
 #@version 0.1 -  Integracion para Opengnsys  - SetPartitionType() en ATA.lib
 #@author  Antonio J. Doblas Viso. Universidad de Malaga
-#@date    2008/10/27
+#@date    2008-10-27
 #@version 1.0.4 - Soporte para discos GPT.
 #@author  Universidad de Huelva
-#@date    2012/03/13
+#@date    2012-03-13
 #@version 1.0.5 - Renombrada de ogSetPartitionId.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2013/03/07
+#@date    2013-03-07
 #*/ ##
 function ogSetPartitionType ()
 {
@@ -1511,18 +1466,21 @@ ogSetPartitionId $1 $2 $ID
 #@note    tabletype = { MSDOS, GPT },   (MSDOS, por defecto)
 #@version 0.1 -  Integracion para Opengnsys  -  EAC: TypeFS () en ATA.lib 
 #@author  Antonio J. Doblas Viso, Universidad de Malaga
-#@date    2008/10/27
+#@date    2008-10-27
 #@version 0.9 - Primera version para OpenGnSys
 #@author  Ramon Gomez, ETSII Universidad Sevilla
 #@date    2009-12-14
 #@version 1.0.4 - Soportar discos GPT (sustituye a ogFsToId).
 #@author  Universidad de Huelva
-#@date    2012/03/30
+#@date    2012-03-30
+#@version 1.1.1 - Usar fichero de configuración JSON
+#@author  Ramon Gomez, ETSII Universidad Sevilla
+#@date    2018-02-27
 #*/ ##
 function ogTypeToId ()
 {
 # Variables locales
-local PTTYPE ID=""
+local PTTYPE
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -1534,82 +1492,9 @@ fi
 # Error si no se reciben 1 o 2 parámetros.
 [ $# -lt 1 -o $# -gt 2 ] && (ogRaiseError $OG_ERR_FORMAT; return $?)
 
-# Asociar id. de partición para su mnemónico.
+# Consulta JSON con tipo de tabla y tipo de partición.
 PTTYPE=${2:-"MSDOS"}
-case "$PTTYPE" in
-    GPT) # Se incluyen mnemónicos compatibles con tablas MSDOS.
-        case "$1" in
-            EMPTY)      ID=0 ;;
-            WINDOWS|NTFS|EXFAT|FAT32|FAT16|FAT12|HNTFS|HFAT32|HFAT16|HFAT12)
-                        ID=0700 ;;
-            WIN-RESERV) ID=0C01 ;;
-            CHROMEOS-KRN) ID=7F00 ;;
-            CHROMEOS)   ID=7F01 ;;
-            CHROMEOS-RESERV) ID=7F02 ;;
-            LINUX-SWAP) ID=8200 ;;
-            LINUX|EXT[234]|REISERFS|REISER4|XFS|JFS)
-                        ID=8300 ;;
-            LINUX-RESERV) ID=8301 ;;
-            LINUX-LVM)  ID=8E00 ;;
-            FREEBSD-DISK) ID=A500 ;;
-            FREEBSD-BOOT) ID=A501 ;;
-            FREEBSD-SWAP) ID=A502 ;;
-            FREEBSD)    ID=A503 ;;
-            HFS-BOOT)   ID=AB00 ;;
-            HFS|HFS+)   ID=AF00 ;;
-	    HFSPLUS)	ID=AF00 ;;
-            HFS-RAID)   ID=AF01 ;;
-            SOLARIS-BOOT) ID=BE00 ;;
-            SOLARIS)    ID=BF00 ;;
-            SOLARIS-SWAP) ID=BF02 ;;
-            SOLARIS-DISK) ID=BF03 ;;
-            CACHE)      ID=CA00;;
-            EFI)        ID=EF00 ;;
-            LINUX-RAID) ID=FD00 ;;
-        esac
-        ;;
-    MSDOS)
-        case "$1" in
-            EMPTY)      ID=0  ;;
-            FAT12)      ID=1  ;;
-            EXTENDED)   ID=5  ;;
-            FAT16)      ID=6  ;;
-            WINDOWS|NTFS|EXFAT) 
-                        ID=7  ;;
-            FAT32)      ID=b  ;;
-            HFAT12)     ID=11 ;;
-            HFAT16)     ID=16 ;;
-            HNTFS)      ID=17 ;;
-            HFAT32)     ID=1b ;;
-            LINUX-SWAP) ID=82 ;;
-            LINUX|EXT[234]|REISERFS|REISER4|XFS|JFS)
-                        ID=83 ;;
-            LINUX-LVM)  ID=8e ;;
-            FREEBSD)    ID=a5 ;;
-            OPENBSD)    ID=a6 ;;
-            HFS|HFS+)   ID=af ;;
-            SOLARIS-BOOT) ID=be ;;
-            SOLARIS)    ID=bf ;;
-            CACHE)      ID=ca ;;
-            DATA)       ID=da ;;
-            GPT)        ID=ee ;;
-            EFI)        ID=ef ;;
-            VMFS)       ID=fb ;;
-            LINUX-RAID) ID=fd ;;
-        esac
-        ;;
-    LVM)
-        case "$1" in
-            LVM-LV)     ID=10000 ;;
-        esac
-        ;;
-    ZVOL)
-        case "$1" in
-            ZFS-VOL)    ID=10010 ;;
-        esac
-        ;;
-esac
-echo $ID
+jq -r "(.partitiontables[] | select(.type==\"${PTTYPE^^}\").partitions[]) | select(.type==\"${1^^}\").id" $ENGINECFG 2>/dev/null
 }
 
 
@@ -1703,7 +1588,7 @@ rm -f $LOCKFILE
 #@warning pendiente estructurar la funcion a opengnsys
 #@version 0.1 -  Integracion para Opengnsys  -  EAC: UpdatePartitionTable() en ATA.lib
 #@author  Antonio J. Doblas Viso. Universidad de Malaga
-#@date    27/10/2008
+#@date    2008-10-27
 #*/ ##
 function ogUpdatePartitionTable ()
 {

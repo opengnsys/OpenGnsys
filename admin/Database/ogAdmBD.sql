@@ -608,7 +608,7 @@ INSERT INTO `parametros` (`idparametro`, `nemonico`, `descripcion`, `nomidentifi
 (16, 'exe', 'Identificador del procedimiento que será el que ejecute el cliente al arrancar (Autoexec)', '', '', '', 0, 0),
 (17, 'res', 'Respuesta del comando: Puede tomar los valores 1 o 2 en el caso de que la respuesta sea correcta o que haya un error al ejecutarse.', '', '', '', 0, 0),
 (19, 'ipr', 'Repositorio', 'ip', 'repositorios', 'nombrerepositorio', 1, 1),
-(20, 'cpt', 'Tipo partición', 'codpar', 'tipospar', 'tipopar', 1, 1),
+(20, 'cpt', 'Tipo partición', '', '', '', 1, 1),
 (21, 'sfi', 'Sistema de fichero', 'nemonico', 'sistemasficheros', 'nemonico', 1, 0),
 (22, 'tam', 'Tamaño', '', '', '', 0, 1),
 (23, 'ope', 'Operación', ';', '', 'Sin operación;Formatear;Ocultar;Mostrar', 3, 1),
@@ -1001,96 +1001,6 @@ INSERT INTO `tiposos` (`idtiposo`, `tiposo`, `idplataforma`) VALUES
 (18, 'Windows Vista', 2),
 (19, 'Linux Red Hat', 3),
 (20, 'Windows 7', 2);
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `tipospar`
---
-
-DROP TABLE IF EXISTS `tipospar`;
-CREATE TABLE `tipospar` (
-  `codpar` int(8) NOT NULL,
-  `tipopar` varchar(250) NOT NULL DEFAULT '',
-  `clonable` tinyint(4) NOT NULL DEFAULT '0',
-  UNIQUE KEY `codpar` (`codpar`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
---
--- Volcar la base de datos para la tabla `tipospar`
---
-
-INSERT INTO `tipospar` (`codpar`, `tipopar`, `clonable`) VALUES
-(0, 'EMPTY', 0),
-(1, 'FAT12', 1),
-(5, 'EXTENDED', 0),
-(6, 'FAT16', 1),
-(7, 'NTFS', 1),
-(CONV('0B',16,10), 'FAT32', 1),
-(CONV('11',16,10), 'HFAT12', 1),
-(CONV('16',16,10), 'HFAT16', 1),
-(CONV('17',16,10), 'HNTFS', 1),
-(CONV('1B',16,10), 'HFAT32', 1),
-(CONV('82',16,10), 'LINUX-SWAP', 0),
-(CONV('83',16,10), 'LINUX', 1),
-(CONV('8E',16,10), 'LINUX-LVM', 1),
-(CONV('A5',16,10), 'FREEBSD', 1),
-(CONV('A6',16,10), 'OPENBSD', 1),
-(CONV('A9',16,10), 'NETBSD', 1),
-(CONV('AF',16,10), 'HFS', 1),
-(CONV('BE',16,10), 'SOLARIS-BOOT', 1),
-(CONV('BF',16,10), 'SOLARIS', 1),
-(CONV('CA',16,10), 'CACHE', 0),
-(CONV('DA',16,10), 'DATA', 1),
-(CONV('EE',16,10), 'GPT', 0),
-(CONV('EF',16,10), 'EFI', 1),
-(CONV('FB',16,10), 'VMFS', 1),
-(CONV('FD',16,10), 'LINUX-RAID', 1),
-(CONV('0700',16,10), 'WINDOWS', 1),
-(CONV('0C01',16,10), 'WIN-RESERV', 1),
-(CONV('2700',16,10), 'WIN-RECOV', 1),
-(CONV('7F00',16,10), 'CHROMEOS-KRN', 1),
-(CONV('7F01',16,10), 'CHROMEOS', 1),
-(CONV('7F02',16,10), 'CHROMEOS-RESERV', 1),
-(CONV('8200',16,10), 'LINUX-SWAP', 0),
-(CONV('8300',16,10), 'LINUX', 1),
-(CONV('8301',16,10), 'LINUX-RESERV', 1),
-(CONV('8302',16,10), 'LINUX', 1),
-(CONV('8E00',16,10), 'LINUX-LVM', 1),
-(CONV('A500',16,10), 'FREEBSD-DISK', 0),
-(CONV('A501',16,10), 'FREEBSD-BOOT', 1),
-(CONV('A502',16,10), 'FREEBSD-SWAP', 0),
-(CONV('A503',16,10), 'FREEBSD', 1),
-(CONV('A504',16,10), 'FREEBSD', 1),
-(CONV('A901',16,10), 'NETBSD-SWAP', 0),
-(CONV('A902',16,10), 'NETBSD', 1),
-(CONV('A903',16,10), 'NETBSD', 1),
-(CONV('A904',16,10), 'NETBSD', 1),
-(CONV('A905',16,10), 'NETBSD', 1),
-(CONV('A906',16,10), 'NETBSD-RAID', 1),
-(CONV('AB00',16,10), 'HFS-BOOT', 1),
-(CONV('AF00',16,10), 'HFS', 1),
-(CONV('AF01',16,10), 'HFS-RAID', 1),
-(CONV('AF02',16,10), 'HFS-RAID', 1),
-(CONV('BE00',16,10), 'SOLARIS-BOOT', 1),
-(CONV('BF00',16,10), 'SOLARIS', 1),
-(CONV('BF01',16,10), 'SOLARIS', 1),
-(CONV('BF02',16,10), 'SOLARIS-SWAP', 0),
-(CONV('BF03',16,10), 'SOLARIS-DISK', 1),
-(CONV('BF04',16,10), 'SOLARIS', 1),
-(CONV('BF05',16,10), 'SOLARIS', 1),
-(CONV('CA00',16,10), 'CACHE', 0),
-(CONV('EF00',16,10), 'EFI', 1),
-(CONV('EF01',16,10), 'MBR', 0),
-(CONV('EF02',16,10), 'BIOS-BOOT', 0),
-(CONV('FB00',16,10), 'VMFS', 1),
-(CONV('FB01',16,10), 'VMFS-RESERV', 1),
-(CONV('FB02',16,10), 'VMFS-KRN', 1),
-(CONV('FD00',16,10), 'LINUX-RAID', 1),
-(CONV('FFFF',16,10), 'UNKNOWN', 1),
-(CONV('10000',16,10), 'LVM-LV', 1),
-(CONV('10010',16,10), 'ZFS-VOL', 1);
-
 
 -- --------------------------------------------------------
 
