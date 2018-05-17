@@ -1,9 +1,9 @@
 // ********************************************************************************************************// Libreria de scripts de Javascript
-// Autor: Jos� Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creaci�n: 2009-2010
-// Fecha �ltima modificaci�n: Noviembre-2005
+// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha Creación: 2009-2010
+// Fecha última modificación: Noviembre-2005
 // Nombre del fichero:M_Iconos
-// Descripci�n : 
+// Descripción:
 //		Este fichero implementa las funciones javascript del fichero M_Iconos.php
 // ********************************************************************************************************
 // Opciones
@@ -75,7 +75,6 @@ function Confirmar() {
 }
 //----------------------------------------------------------------------------------------------
 function comprobar_datos(){
-	
 	if (document.fdatos.descripcion.value==""){
 		alert(TbMsg["DESCRIP"]);
 		document.forms.fdatos.descripcion.focus();

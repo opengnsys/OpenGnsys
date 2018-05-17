@@ -1,7 +1,7 @@
 //________________________________________________________________________________________________________
 //	
 //	Fichero de idiomas javascript: propiedades_aulas_eng.js 
-//	Idioma: Inglés 
+//	Idioma: Inglés
 //________________________________________________________________________________________________________
 TbMsg=new Array;
 TbMsg[0]="El nombre del aula debe contener caracteres alfanumericos";

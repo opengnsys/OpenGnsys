@@ -178,10 +178,10 @@ if (!$cmd)
 						  <TR valign=baseline>
 							<TD width=10><IMG src="./images/iconos/pomo.gif"></TD>
 							<?php if($idtipousuario!=$SUPERADMINISTRADOR){?>
-								<TD onclick=eleccion(this,1); onmouseout=desresaltar(this); onmouseover=resaltar(this) >
+								<TD onclick=eleccion(this,1); onmouseout=desresaltar(this); onmouseover=resaltar(this)>
 									&nbsp;<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/centros.gif">&nbsp;<SPAN class="menupral"><?php echo $TbMsg[0]?></SPAN></A>&nbsp;</TD>
 								<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
-								<TD onclick=eleccion(this,2); onmouseout=desresaltar(this); onmouseover=resaltar(this); align=middle>		
+								<TD onclick=eleccion(this,2); onmouseout=desresaltar(this); onmouseover=resaltar(this); align=middle>
 									&nbsp;<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/acciones.gif">&nbsp;<SPAN class=menupral ><?php echo $TbMsg[1]?></SPAN></A>&nbsp;</TD>
 								<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
 								<TD onclick=eleccion(this,3); onmouseout=desresaltar(this); onmouseover=resaltar(this); align=middle>
@@ -202,11 +202,11 @@ if (!$cmd)
 								<td onclick="eleccion(this,14)" onmouseout="desresaltar(this)" onmouseover="resaltar(this)" align="middle">
 									&nbsp;<a href="#" style="text-decoration: none"><img border="0" src="./images/iconos/busquedas.gif">&nbsp;<span class="menupral"><?php echo  $TbMsg[14] ?></span></a>&nbsp;</td>
 								<td width="4" align="middle"><img src="./images/iconos/separitem.gif"></td>
-								
+
 								<!--TD  onclick=eleccion(this,8) onmouseout=desresaltar(this) onmouseover=resaltar(this) align=middle>
 									&nbsp;<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/reservas.gif">&nbsp;<SPAN class=menupral ><?php echo  $TbMsg[7] ?></SPAN></A>&nbsp;</TD>
 								<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD-->
-								
+
 							<?php }
 							else{
 									if($idtipousuario==$SUPERADMINISTRADOR){?>

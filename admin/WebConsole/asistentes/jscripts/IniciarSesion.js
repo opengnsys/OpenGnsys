@@ -22,7 +22,7 @@ function confirmar(){
 		document.fdatosejecucion.atributos.value="par="+particion+RC;
 		document.fdatosejecucion.submit();
 	}
- }
+  }
 //________________________________________________________________________________________________________
   function cancelar()
 {
@@ -36,11 +36,12 @@ function confirmar(){
 		var ochecks=tb_conf.getElementsByTagName('INPUT');
 		var op=0;
 		for(var i=0;i<ochecks.length;i++){
-			if(ochecks[i].checked)		op++;
+			if(ochecks[i].checked)
+				op++;
 		}
 		if(op==0){
-			   alert(TbMsg[1]);
-			 return(false);
+			alert(TbMsg[1]);
+			return(false);
 		}
 		return(comprobar_datosejecucion())
 }
