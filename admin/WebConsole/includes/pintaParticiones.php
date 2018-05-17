@@ -81,17 +81,7 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 						if (empty ($disksize)) {
 							$disksize = '<em>'.$TbMsg["VARIABLE"].'</em>';
 						}
-						switch ($tbKeys[$k]["codpar"]) {
-							case 1:  $disktable[$tbKeys[$k]["numdisk"]] = "MSDOS";
-								 break;
-							case 2:  $disktable[$tbKeys[$k]["numdisk"]] = "GPT";
-								 break;
-							case 3:  $disktable[$tbKeys[$k]["numdisk"]] = "LVM";
-								 break;
-							case 4:  $disktable[$tbKeys[$k]["numdisk"]] = "ZPOOL";
-								 break;
-							default: $disktable[$tbKeys[$k]["numdisk"]] = "";
-						}
+						$disktable[$tbKeys[$k]["numdisk"]] = $tbKeys[$k]["tipopar"];
 					}
 					else {  // Información de partición (numpart>0)
 						echo'<tr height="16">'.chr(13);
