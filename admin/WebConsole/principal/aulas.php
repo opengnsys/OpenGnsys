@@ -72,8 +72,10 @@ $XMLcontextual=ContextualXMLGruposOrdenadores();  // Grupos de ordenadores
 echo $flotante->CreaMenuContextual($XMLcontextual);
 $XMLcontextual=ContextualXMLOrdenadores();  // Ordenadores
 echo $flotante->CreaMenuContextual($XMLcontextual);
+$XMLcontextual=ContextualXMLProyectores();  // Proyectores
+echo $flotante->CreaMenuContextual($XMLcontextual);
 
-// Crea contextual de los comandos para los distintos �bitos
+// Crea contextual de los comandos para los distintos ámbitos
 $XMLcontextual=ContextualXMLComandos($LITAMBITO_CENTROS,$AMBITO_CENTROS);
 echo $flotante->CreaMenuContextual($XMLcontextual);
 $XMLcontextual=ContextualXMLComandos($LITAMBITO_GRUPOSAULAS,$AMBITO_GRUPOSAULAS);
@@ -85,7 +87,7 @@ echo $flotante->CreaMenuContextual($XMLcontextual);
 $XMLcontextual=ContextualXMLComandos($LITAMBITO_ORDENADORES,$AMBITO_ORDENADORES);
 echo $flotante->CreaMenuContextual($XMLcontextual);
 
-// Crea contextual de los comandos para los distintos �bitos
+// Crea contextual de los comandos para los distintos ámbitos
 $XMLcontextual=ContextualXMLSincronizacion($LITAMBITO_AULAS,$AMBITO_AULAS);
 echo $flotante->CreaMenuContextual($XMLcontextual);
 $XMLcontextual=ContextualXMLSincronizacion($LITAMBITO_GRUPOSORDENADORES,$AMBITO_GRUPOSORDENADORES);
@@ -177,6 +179,7 @@ function SubarbolXML_grupos_aulas($cmd,$idcentro,$grupoid){
 		$cadenaXML.=' nodoid='.$LITAMBITO_AULAS.'-'.$rs->campos["idaula"];
 		$cadenaXML.='>';
 		$cadenaXML.=SubarbolXML_aulas_ordenadores($cmd,$rs->campos["idaula"],0);
+		$cadenaXML.=SubarbolXML_aulas_proyectores($cmd,$rs->campos["idaula"],0);
 		// La siguiente línea está prevista para añadir operatores de aulas.
 		//$cadenaXML.=SubarbolXML_aulas_operadores($cmd,$rs->campos["idaula"],$cc);
 		$cadenaXML.='</AULA>';
@@ -251,6 +254,34 @@ function SubarbolXML_aulas_ordenadores($cmd,$idaula,$grupoid){
 		$cadenaXML.=' infonodo="'.$rs->campos["nombreordenador"].'"';
 		$cadenaXML.=' nodoid='.$LITAMBITO_ORDENADORES.'-'.$rs->campos["idordenador"];
 		$cadenaXML.='></ORDENADOR>';
+		$rs->Siguiente();
+	}
+	$rs->Cerrar();
+	return($cadenaXML);
+}
+//________________________________________________________________________________________________________
+function SubarbolXML_aulas_proyectores($cmd,$idaula){
+	global $TbMsg;
+	global $LITAMBITO_PROYECTORES;
+	$cadenaXML="";
+	$rs=new Recordset;
+	$cmd->texto = "SELECT id, name
+			 FROM projectors
+			WHERE lab_id='$idaula'";
+	$rs->Comando=&$cmd;
+	if (!$rs->Abrir()) return($cadenaXML); // Error al abrir recordset
+	$rs->Primero();
+	while (!$rs->EOF){
+		$cadenaXML.='<PROYECTOR';
+		// Atributos.
+		$cadenaXML.=' imagenodo="../images/iconos/proyector.gif"';
+		$wpages="../propiedades/propiedades_proyectores.php";
+		$wParam="0,0,0,0,'". $wpages."'";
+		$cadenaXML.=' clickcontextualnodo="menu_contextual(this,' ."'flo_".$LITAMBITO_PROYECTORES."'" .')"';
+		$cadenaXML.=' clicksupnodo="modificar('.$wParam.')"';
+		$cadenaXML.=' infonodo="'.$rs->campos["name"].'"';
+		$cadenaXML.=' nodoid='.$LITAMBITO_PROYECTORES.'-'.$rs->campos["id"];
+		$cadenaXML.='></PROYECTOR>';
 		$rs->Siguiente();
 	}
 	$rs->Cerrar();
@@ -513,7 +544,7 @@ function ContextualXMLAulas(){
 	$layerXML.=' imgitem="../images/iconos/carpeta.gif"';
 	$layerXML.=' textoitem='.$TbMsg[8];
 	$layerXML.='></ITEM>';
-	
+
 	$layerXML.='<ITEM';
 	$layerXML.=' alpulsar="colocar_ordenador(1)"';
 	$layerXML.=' imgitem="../images/iconos/colocar.gif"';
@@ -540,7 +571,23 @@ function ContextualXMLAulas(){
 	$layerXML.=' imgitem="../images/iconos/aula.gif"';
 	$layerXML.=' textoitem='.$TbMsg[27];
 	$layerXML.='></ITEM>';
+
+	$layerXML.='<SEPARADOR>';
+	$layerXML.='</SEPARADOR>';
 	
+	$wLeft=170;
+	$wTop=80;
+	$wWidth=480;
+	$wHeight=480;
+	$wpages="../propiedades/propiedades_proyectores.php";
+	$wParam=$wLeft .",".$wTop.",".$wWidth.",".$wHeight.",'". $wpages."'";
+	$layerXML.='<ITEM';
+	$layerXML.=' alpulsar="insertar('.$wParam.')"';
+	$layerXML.=' imgitem="../images/iconos/proyector.gif"';
+	//$layerXML.=' textoitem='.$TbMsg[9];
+	$layerXML.=' textoitem="Nuevo Proyector"';
+	$layerXML.='></ITEM>';
+
 	$layerXML.='<SEPARADOR>';
 	$layerXML.='</SEPARADOR>';
 
@@ -661,9 +708,55 @@ function CreacontextualXMLUsuarios(){
 	$wpages="../propiedades/propiedades_usuarios.php";
 	$wParam=$wLeft .",".$wTop.",".$wWidth.",".$wHeight.",'". $wpages."'";
 	$layerXML.='<ITEM';
+	$layerXML.=' alpulsar="modificar('.$wParam.')"';
+	$layerXML.=' textoitem='.$TbMsg[13];
+	$layerXML.=' imgitem="../images/iconos/propiedades.gif"';
+	$layerXML.='></ITEM>';
+
+	$layerXML.='<SEPARADOR>';
+	$layerXML.='</SEPARADOR>';
+
+	$layerXML.='<ITEM';
+	$layerXML.=' alpulsar="eliminar('.$wParam.')"';
+	$layerXML.=' imgitem="../images/iconos/eliminar.gif"';
+	$layerXML.=' textoitem='.$TbMsg[36];
+	$layerXML.='></ITEM>';
+
+	$layerXML.='</MENUCONTEXTUAL>';
+	return($layerXML);
+}
+//________________________________________________________________________________________________________
+function CreacontextualXMLProyectores(){
+	global $LITAMBITO_PROYECTORES;
+	global $TbMsg;
+
+	$layerXML='<MENUCONTEXTUAL';
+	$layerXML.=' idctx="flo_'.$LITAMBITO_PROYECTORES.'"';
+	$layerXML.=' maxanchu=130';
+	$layerXML.=' swimg=1';
+	$layerXML.=' clase="menu_contextual"';
+	$layerXML.='>';
+
+	// Modificar proyector
+	$wLeft=140;
+	$wTop=115;
+	$wWidth=400;
+	$wHeight=320;
+	$wpages="../propiedades/propiedades_proyector.php";
+	$wParam=$wLeft .",".$wTop.",".$wWidth.",".$wHeight.",'". $wpages."'";
+	$layerXML.='<ITEM';
 	$layerXML.=' alpulsar="modificar('.$wParam.')"';	
 	$layerXML.=' textoitem='.$TbMsg[13];
 	$layerXML.=' imgitem="../images/iconos/propiedades.gif"';
+	$layerXML.='></ITEM>';
+
+	$layerXML.='<SEPARADOR>';
+	$layerXML.='</SEPARADOR>';
+
+	$layerXML.='<ITEM';
+	$layerXML.=' alpulsar="estatus('.$wParam.')"';
+	$layerXML.=' imgitem="../images/iconos/estatus.gif"';
+	$layerXML.=' textoitem='.$TbMsg['STATUS'];
 	$layerXML.='></ITEM>';
 
 	$layerXML.='<SEPARADOR>';
@@ -949,6 +1042,22 @@ function ContextualXMLOrdenadores(){
 	$layerXML.=' imgitem="../images/iconos/eliminar.gif"';
 	$layerXML.=' textoitem='.$TbMsg[18];
 	$layerXML.='></ITEM>';
+
+	$layerXML.='</MENUCONTEXTUAL>';
+	return($layerXML);
+}
+//________________________________________________________________________________________________________
+function ContextualXMLProyectores(){
+	global $TbMsg;
+	global $AMBITO_PROYECTORES;
+	global $LITAMBITO_PROYECTORES;
+
+	$layerXML='<MENUCONTEXTUAL';
+	$layerXML.=' idctx="flo_'.$LITAMBITO_PROYECTORES.'"';
+	$layerXML.=' maxanchu=140';
+	$layerXML.=' swimg=1';
+	$layerXML.=' clase="menu_contextual"';
+	$layerXML.='>';
 
 	$layerXML.='</MENUCONTEXTUAL>';
 	return($layerXML);
