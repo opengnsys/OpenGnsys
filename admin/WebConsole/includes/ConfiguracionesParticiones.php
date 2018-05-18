@@ -20,7 +20,7 @@ function getPartitionData($json, $code) {
             }
         }
     }
-    return [$partcode, true];
+    return [$code, true];
 }
 
 /**
@@ -36,6 +36,7 @@ function getParttableData($json, $code) {
                 return $tab->type;
             }
         }
+    }
     return "";
 }
 
