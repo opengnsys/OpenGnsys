@@ -76,6 +76,9 @@ echo "--- uname -a ---"                 >> $backup_dir/kernel.txt
 uname -a                                >> $backup_dir/kernel.txt 2>&1
 echo -e "\n--- lsmod ---"               >> $backup_dir/kernel.txt
 lsmod                                   >> $backup_dir/kernel.txt 2>&1
+echo "- Kernel boot messages"
+echo "--- dmesg ---"                    >> $backup_dir/kernel.txt
+dmesg                                   >> $backup_dir/kernel.txt 2>&1
 
 echo "- Packages"
 if [ -f /etc/debian_version ]; then
