@@ -1,4 +1,5 @@
 <?php
+include_once(__DIR__ . "/ConfiguracionesParticiones.php");
 include_once("../idiomas/php/".$idioma."/pintaParticiones_".$idioma.".php");
 
 /*________________________________________________________________________________________________________
@@ -125,13 +126,11 @@ function tablaConfiguracionesInventarioSoftware($cmd,$idordenador){
 	$cmd->texto="SELECT	ordenadores_particiones.numdisk,ordenadores_particiones.numpar,
 				ordenadores_particiones.tamano,
 				ordenadores_particiones.idnombreso, nombresos.nombreso,
-				tipospar.tipopar, imagenes.descripcion AS imagen,
-				perfilessoft.descripcion AS perfilsoft,
+				imagenes.descripcion AS imagen, perfilessoft.descripcion AS perfilsoft,
 				sistemasficheros.descripcion AS sistemafichero
 			FROM ordenadores
 			INNER JOIN ordenadores_particiones ON ordenadores_particiones.idordenador=ordenadores.idordenador
 			LEFT OUTER JOIN nombresos ON nombresos.idnombreso=ordenadores_particiones.idnombreso
-			INNER JOIN tipospar ON tipospar.codpar=ordenadores_particiones.codpar
 			LEFT OUTER JOIN imagenes ON imagenes.idimagen=ordenadores_particiones.idimagen
 			LEFT OUTER JOIN perfilessoft ON perfilessoft.idperfilsoft=ordenadores_particiones.idperfilsoft
 			LEFT OUTER JOIN sistemasficheros ON sistemasficheros.idsistemafichero=ordenadores_particiones.idsistemafichero
@@ -193,14 +192,14 @@ function tablaConfiguracionesCrearImagen($cmd,$idordenador,$idrepositorio)
 	global $idcentro;
 	global $TbMsg;
 	$tablaHtml="";
-	$cmd->texto="SELECT ordenadores.ip AS masterip,ordenadores_particiones.numdisk, ordenadores_particiones.numpar,ordenadores_particiones.codpar,ordenadores_particiones.tamano,
-				ordenadores_particiones.idnombreso,nombresos.nombreso,tipospar.tipopar,tipospar.clonable,
-				imagenes.nombreca,imagenes.descripcion as imagen,perfilessoft.idperfilsoft,
-				perfilessoft.descripcion as perfilsoft,sistemasficheros.descripcion as sistemafichero
+	$cmd->texto="SELECT ordenadores.ip AS masterip, ordenadores_particiones.numdisk, ordenadores_particiones.numpar,
+        ordenadores_particiones.codpar, ordenadores_particiones.tamano,
+				ordenadores_particiones.idnombreso, nombresos.nombreso,
+				imagenes.nombreca, imagenes.descripcion AS imagen, perfilessoft.idperfilsoft,
+				perfilessoft.descripcion AS perfilsoft, sistemasficheros.descripcion AS sistemafichero
 				FROM ordenadores
 				INNER JOIN ordenadores_particiones ON ordenadores_particiones.idordenador=ordenadores.idordenador
 				LEFT OUTER JOIN nombresos ON nombresos.idnombreso=ordenadores_particiones.idnombreso
-				INNER JOIN tipospar ON tipospar.codpar=ordenadores_particiones.codpar
 				LEFT OUTER JOIN imagenes ON imagenes.idimagen=ordenadores_particiones.idimagen
 				LEFT OUTER JOIN perfilessoft ON perfilessoft.idperfilsoft=ordenadores_particiones.idperfilsoft
 				LEFT OUTER JOIN sistemasficheros ON sistemasficheros.idsistemafichero=ordenadores_particiones.idsistemafichero
@@ -218,7 +217,7 @@ function tablaConfiguracionesCrearImagen($cmd,$idordenador,$idrepositorio)
 			$actualDisk = $rs->campos["numdisk"];
 			$tablaHtml.='<TR><td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;<strong>'.$TbMsg["DISK"].'&nbsp;'.$actualDisk.'</strong></td></TR>'.chr(13);
 		}
-		
+        list($rs->campos["tipopar"], $rs->campos["clonable"]) = getPartitionData($json, $rs->campos["codpar"]);
 		$swcc=$rs->campos["clonable"] && !empty($rs->campos["idnombreso"]);
 		$swc=$rs->campos["idperfilsoft"]>0; // Una partición es clonable si posee un identificador de perfil software		
 		$swccc=$swcc && $swcc;
@@ -281,10 +280,8 @@ function tablaConfiguracionesSincronizacion1($idordenador)
 	
 	$cmd->texto="SELECT DISTINCT ordenadores_particiones.numdisk,ordenadores_particiones.numpar, ordenadores_particiones.idnombreso, nombresos.nombreso,
 					ordenadores_particiones.idimagen, ordenadores_particiones.codpar,
-					tipospar.clonable, perfilessoft.idperfilsoft,
-					nombresos.idnombreso, nombresos.nombreso
+					perfilessoft.idperfilsoft, nombresos.idnombreso, nombresos.nombreso
 					FROM ordenadores_particiones 
-					INNER JOIN tipospar ON tipospar.codpar=ordenadores_particiones.codpar		
 					LEFT OUTER JOIN nombresos ON nombresos.idnombreso=ordenadores_particiones.idnombreso
 					LEFT OUTER JOIN perfilessoft ON perfilessoft.idperfilsoft=ordenadores_particiones.idperfilsoft										
 					WHERE ordenadores_particiones.idordenador=".$idordenador."
@@ -303,8 +300,9 @@ function tablaConfiguracionesSincronizacion1($idordenador)
 			$actualDisk = $rs->campos["numdisk"];
 			$tablaHtml.='<td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;<strong>'.$TbMsg["DISK"].'&nbsp;'.$actualDisk.'</strong></td>'.chr(13);
 		}
-		//$swcc=$rs->campos["clonable"] && !empty($rs->campos["idnombreso"]) && !empty($rs->campos["idperfilsoft"]); 
-		$sw=$rs->campos["clonable"] && !empty($rs->campos["idnombreso"]); 
+        list($rs->campos["tipopar"], $rs->campos["clonable"]) = getPartitionData($json, $rs->campos["codpar"]);
+        //$swcc=$rs->campos["clonable"] && !empty($rs->campos["idnombreso"]) && !empty($rs->campos["idperfilsoft"]);
+		$sw=$rs->campos["clonable"] && !empty($rs->campos["idnombreso"]);
 		if($sw){// Una partici�n es clonable si es cierta esta variable	
 			$tbPAR.=$rs->campos["numpar"].";"; // Cadena con las particiones a procesar	
 			$tablaHtml.='<tr id="trPar-'.$rs->campos["numpar"].'">';
