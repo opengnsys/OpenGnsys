@@ -1,0 +1,6 @@
+#!/bin/bash
+# This script is executed before the package it belongs to is unpacked 
+# from its Debian archive (".deb") file. Many 'preinst' scripts stop 
+# services for packages which are being upgraded until their installation
+# or upgrade is completed (following the successful execution of the
+# 'postinst' script).

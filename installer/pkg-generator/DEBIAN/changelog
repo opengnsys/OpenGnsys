@@ -1,0 +1,7 @@
+package (version) distribution; urgency=low
+
+ * change details
+  - more change details
+ * even more change details
+
+-- maintainer Opengnsys <opengnsys-devel@unizar.es>  Tue, 08 May 2018 10:26:46 +0200

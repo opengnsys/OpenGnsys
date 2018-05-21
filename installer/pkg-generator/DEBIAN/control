@@ -1,0 +1,9 @@
+Package: opengnsys-full
+Priority: optional
+Section: misc
+Maintainer: opengnsys-devel@unizar.es
+Architecture: amd64
+Version: VERSION
+Depends: debconf, subversion, apache2, php, php-ldap, libapache2-mod-php, isc-dhcp-server, bittorrent, tftp-hpa, tftpd-hpa, xinetd, build-essential, g++-multilib, libmysqlclient-dev, wget, curl, doxygen, graphviz, bittornado, ctorrent, samba, rsync, unzip, netpipes, debootstrap, schroot, squashfs-tools, btrfs-tools, procps, arp-scan, realpath, php-curl, gettext ,moreutils, jq, wakeonlan, mysql-server, php-mysql, udpcast, grub-efi-amd64-signed, shim-signed
+Description: Opengnsys Deploy Generator
+Homepage: https://opengnsys.es

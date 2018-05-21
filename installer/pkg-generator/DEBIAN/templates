@@ -1,0 +1,57 @@
+Template: opengnsys-full/MYSQL_ROOT_PASSWORD
+Type: password
+Default: passwordroot
+Description: MySQL root PassWord:
+ .
+ If you are installing Opengnsys in a "clean" system then mysql-server 
+ should be installed among the dependencies. So it is problably the 3rd 
+ time you are asked to introduce MySQL root password.
+ .
+ If you have MySQL server already installed then, please use your 
+ current MySQL root password to allow Opengnsys installation.
+ .
+
+Template: opengnsys-full/OPENGNSYS_IS_INSTALLED
+Type: boolean
+Default: false
+Description: This is a flag used to perform a fresh install or an update
+ .
+
+Template: opengnsys-full/OPENGNSYS_DB_USER
+Type: string
+Default: admin
+Description: Please set USER NAME for Opengnsys Data Base:
+ .
+ Opengnsys uses a Data Base to save its configuration and elements.
+ .
+ Here you are given the chance to select a custom username or let it
+ by default => "admin".
+ .
+
+Template: opengnsys-full/OPENGNSYS_DB_PASSWORD
+Type: password
+Default: admin
+Description: Please set PASSWORD for Opengnsys DATABASE:
+ .
+ By default this password will be => "admin".
+ .
+ You can just press enter safely
+
+Template: opengnsys-full/OPENGNSYS_CLIENT_PASSWORD
+Type: password
+Default: og
+Description: Please set PASSWORD for Opengnsys Control Panel:
+ .
+ By default this password is "og". You can set your own now
+ .
+
+Template: opengnsys-full/OPENGNSYS_SUMMARY
+Type: note
+Description: Opengnsys Installation Summary:
+ .
+ Project version: 1.1.1pre
+ .
+ Web Console URL: "https://[server IP]/opengnsys/"
+ .
+ Web Console Login default data:  admin / admin
+ .

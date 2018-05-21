@@ -1,0 +1,28 @@
+#!/bin/sh
+
+# Exit on error
+set -e
+
+# Source debconf library.
+. /usr/share/debconf/confmodule
+
+db_set debconf/frontend Dialog
+
+# Check mysql password if exist.
+db_get mysql-server/root_password || true
+
+if [ "$RET" = "" ]; then
+    # If we can not obtain it we will ask user to input
+    db_input high opengnsys-full/MYSQL_ROOT_PASSWORD || true
+    db_go || true
+else
+    db_set high opengnsys-full/MYSQL_ROOT_PASSWORD "$RET" || true
+    db_go || true
+fi
+
+db_input high opengnsys-full/OPENGNSYS_DB_USER || true
+db_go || true
+db_input high opengnsys-full/OPENGNSYS_DB_PASSWORD || true
+db_go || true
+db_input high opengnsys-full/OPENGNSYS_CLIENT_PASSWORD || true
+db_go || true
