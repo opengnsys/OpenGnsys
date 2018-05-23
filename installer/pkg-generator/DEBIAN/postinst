@@ -1260,7 +1260,7 @@ db_get opengnsys-full/OPENGNSYS_IS_INSTALLED
 if [ "$RET" = "true" ]; then
 	echo "Opengnsys already installed; Updating"
 	
-	/tmp/opengnsys_installer/opengnsys_pkg_update.sh
+	/tmp/opengnsys_installer/opengnsys_git_update.sh
 	echo "Updated!!"
 	exit 0
 fi
