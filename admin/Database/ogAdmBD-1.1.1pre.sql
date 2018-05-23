@@ -20,3 +20,6 @@ DELIMITER ';'
 CALL addcols();
 DROP PROCEDURE addcols;
 
+# Eliminar tabla sustituida por fichero de configuracion (ticket #812).
+DROP TABLE IF EXISTS tipospar;
+

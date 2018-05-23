@@ -328,11 +328,11 @@ function pintaParticionesConfigurar($cmd,$configuraciones,$idordenadores,$cc)
 						echo '<tr id="TR_'.$icp.'" align="center">';
 						echo '<td><input type="checkbox" onclick="eliminaParticion(this,\''.$icp.'\')"></td>';
 						echo '<td>'.HTMLSELECT_particiones($tbKeys[$k]["numpar"]).'</td>';
-						echo '<td>'.HTMLSELECT_tipospar($cmd,$tbKeys[$k]["tipopar"]).'</td>';
+						echo '<td>'.HTMLSELECT_tipospar($tbKeys[$k]["tipopar"]).'</td>';
 						$sf=tomaSistemasFicheros($tbKeys[$k]["numpar"],$idordenadores,true);
 						echo '<td>'.HTMLSELECT_sistemasficheros($cmd,$sf).'</td>';
 						$tm=tomaTamano($tbKeys[$k]["numpar"],$idordenadores);
-						echo '<td><input type="text" style="width:100" value="'.$tm.'"></td>';		
+						echo '<td><input type="text" style="width:100px" value="'.$tm.'"></td>';
 						echo '<td>'.tomaNombresSO($tbKeys[$k]["numpar"],$idordenadores).'</td>';					
 						echo '<td>'.opeFormatear().'</td>';
 						echo '</tr>';
@@ -351,8 +351,9 @@ function pintaParticionesConfigurar($cmd,$configuraciones,$idordenadores,$cc)
 	// Datos del disco
 	$tm=tomaTamano(0,$idordenadores);
 	echo '<tr id="TRIMG_'.$cc.'" align="center">'.
-	     "\n<td></td>\n<td></td>\n<td".' style="font-size: 1em; padding: 1px 0px;  "'.">".$TbMsg["DISK"]."</td>".
-     "\n<td></td>\n<td".' style="font-size: 1em; padding: 1px 0px; "> '.(isset($tm)?$tm:("<em>".$TbMsg["VARIABLE"]."</em>"))." <input type='hidden' id='hdsize$cc' name='hdsize$cc' style='width:100' value='".$tm."'></td>".
+	     "\n<td></td>\n<td></td>\n<td".' style="font-size: 1em; padding: 1px 0;  "'.">".$TbMsg["DISK"]."</td>".
+     "\n<td></td>\n<td".' style="font-size: 1em; padding: 1px 0;"> '.(isset($tm)?$tm:("<em>".$TbMsg["VARIABLE"]."</em>")).
+      "<input type='hidden' id='hdsize$cc' name='hdsize$cc' style='width:100px' value='".$tm."'></td>".
 	     "\n<td></td>\n<td></td>\n</tr>";
 	echo '<tr><th colspan="'.$colums.'">&nbsp;'.$TbMsg["WARN_DISKSIZE"].'</th></tr>';
 	// Mostrar aviso: solo disco 1 con tabla MSDOS.
