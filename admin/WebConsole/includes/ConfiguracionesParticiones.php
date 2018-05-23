@@ -1,44 +1,6 @@
 <?php
-define("ENGINEJSON", __DIR__ . "/../../client/etc/engine.json");
-include_once("pintaParticiones.php");
-
-/**
- * Busca en la configuración JSON los datos de partición para el código hexadecimal correspondiente.
- * @param object $json  datos JSON de configuración
- * @param string $code  código hexadecimal de partición
- * @return array        tipo de partición (string) e indicador de clonable (bool)
- */
-function getPartitionData($json, $code) {
-    if (isset($json->partitiontables)) {
-        foreach ($json->partitiontables as $tab) {
-            if (isset($tab->partitions)) {
-                foreach ($tab->partitions as $par) {
-                    if (hexdec($par->id) == $code) {
-                        return [$par->type, $par->clonable];
-                    }
-                }
-            }
-        }
-    }
-    return [$code, true];
-}
-
-/**
- * Busca en la configuración JSON los datos de tabla de particiones para el código correspondiente.
- * @param object $json  datos JSON de configuración
- * @param string $code  código de tabla de particiones
- * @return string       tipo de tabla de particiones
- */
-function getParttableData($json, $code) {
-    if (isset($json->partitiontables)) {
-        foreach ($json->partitiontables as $tab) {
-            if (hexdec($tab->id) == $code) {
-                return $tab->type;
-            }
-        }
-    }
-    return "";
-}
+include_once(__DIR__ . "/configfunctions.php");
+include_once(__DIR__ . "/pintaParticiones.php");
 
 /*________________________________________________________________________________________________________
 	UHU   - 2013/05/14 - Se añade la clave número de disco
@@ -177,9 +139,9 @@ function cargaCaves($cmd,$idambito,$ambito,$sws,$swr)
 
 	$cmd->texto.=" GROUP BY configuracion";
 	// Comprobar compatiblidad de cláusula GROUP BY.
-	if (strpos($mode, 'ONLY_FULL_GROUP_BY') === false)
+	if (strpos($mode, 'ONLY_FULL_GROUP_BY') === false) {
 		$cmd->texto=preg_replace('/ANY_VALUE/', '', $cmd->texto);
-
+	}
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) return(false); // Error al abrir recordset
@@ -191,6 +153,7 @@ function cargaCaves($cmd,$idambito,$ambito,$sws,$swr)
 		if ($numpar == 0) {
 			// Tipo de tabla de particiones.
 			$tipopar = getParttableData($json, $codpar);
+			$clonable = "";
 		} else {
 			// Saltar si no es clonable en restauración.
 			list($tipopar, $clonable) = getPartitionData($json, $codpar);
@@ -224,6 +187,7 @@ function cargaCaves($cmd,$idambito,$ambito,$sws,$swr)
 	}
 	$conKeys=$idx; // Guarda contador
 	$rs->Cerrar();
+	return(true);
 }
 /*________________________________________________________________________________________________________
 			UHU  - 2013/05/14 - Se añade la clave número de disco
@@ -297,8 +261,7 @@ function pintaConfiguraciones($cmd,$idambito,$ambito,$colums,$sws,$swr,$pintaPar
 						INNER JOIN ordenadores_particiones ON ordenadores_particiones.idordenador=ordenadores.idordenador
 						LEFT OUTER JOIN nombresos ON nombresos.idnombreso=ordenadores_particiones.idnombreso
 						LEFT OUTER JOIN imagenes ON imagenes.idimagen=ordenadores_particiones.idimagen
-						LEFT OUTER JOIN perfilessoft ON perfilessoft.idperfilsoft=ordenadores_particiones.idperfilsoft
-						LEFT OUTER JOIN sistemasficheros ON sistemasficheros.idsistemafichero=ordenadores_particiones.idsistemafichero";
+						LEFT OUTER JOIN perfilessoft ON perfilessoft.idperfilsoft=ordenadores_particiones.idperfilsoft";
 
 	switch($ambito){
 		case $AMBITO_AULAS :
@@ -410,7 +373,7 @@ function cargaSistemasFicheros($cmd,$idambito,$ambito)
 	global $AMBITO_AULAS;
 	global $AMBITO_GRUPOSORDENADORES;
 	global $AMBITO_ORDENADORES;
-	
+
 	$cmd->texto="SELECT	COUNT(*) AS con,
 				ordenadores_particiones.idsistemafichero,
 				ordenadores_particiones.numdisk,

@@ -1,5 +1,5 @@
 <?php
-include_once(__DIR__ . "/ConfiguracionesParticiones.php");
+include_once(__DIR__ . "/configfunctions.php");
 include_once("../idiomas/php/".$idioma."/pintaParticiones_".$idioma.".php");
 
 /*________________________________________________________________________________________________________
@@ -37,7 +37,6 @@ function tablaConfiguracionesIniciarSesion($cmd,$idambito,$ambito){
         $tablaSinConfiguracion.='<tr><th align="center" >'.$TbMsg["CONFIG_NOOS"].'</th><tr>'.chr(13).'</table>'.chr(13);
 
 	// CONSULTA BD: grupo de equipos con iguales sistemas operativos: idordenadores,configuracion
-        $cmd->texto="";
         // agrupamos equipos con igual conf de disco.
         $cmd->texto="SELECT GROUP_CONCAT(pcconf.idordenador SEPARATOR ',') AS idordenadores, pcconf.configuraciones FROM (";
 
@@ -126,14 +125,12 @@ function tablaConfiguracionesInventarioSoftware($cmd,$idordenador){
 	$cmd->texto="SELECT	ordenadores_particiones.numdisk,ordenadores_particiones.numpar,
 				ordenadores_particiones.tamano,
 				ordenadores_particiones.idnombreso, nombresos.nombreso,
-				imagenes.descripcion AS imagen, perfilessoft.descripcion AS perfilsoft,
-				sistemasficheros.descripcion AS sistemafichero
+				imagenes.descripcion AS imagen, perfilessoft.descripcion AS perfilsoft
 			FROM ordenadores
 			INNER JOIN ordenadores_particiones ON ordenadores_particiones.idordenador=ordenadores.idordenador
 			LEFT OUTER JOIN nombresos ON nombresos.idnombreso=ordenadores_particiones.idnombreso
 			LEFT OUTER JOIN imagenes ON imagenes.idimagen=ordenadores_particiones.idimagen
 			LEFT OUTER JOIN perfilessoft ON perfilessoft.idperfilsoft=ordenadores_particiones.idperfilsoft
-			LEFT OUTER JOIN sistemasficheros ON sistemasficheros.idsistemafichero=ordenadores_particiones.idsistemafichero
 			WHERE ordenadores.idordenador=".$idordenador."
 			  AND nombresos.nombreso!='DATA'
 			ORDER BY ordenadores_particiones.numdisk,ordenadores_particiones.numpar";
@@ -191,18 +188,19 @@ function tablaConfiguracionesCrearImagen($cmd,$idordenador,$idrepositorio)
 {
 	global $idcentro;
 	global $TbMsg;
+	$json = json_decode(file_get_contents(ENGINEJSON));
+
 	$tablaHtml="";
 	$cmd->texto="SELECT ordenadores.ip AS masterip, ordenadores_particiones.numdisk, ordenadores_particiones.numpar,
         ordenadores_particiones.codpar, ordenadores_particiones.tamano,
 				ordenadores_particiones.idnombreso, nombresos.nombreso,
 				imagenes.nombreca, imagenes.descripcion AS imagen, perfilessoft.idperfilsoft,
-				perfilessoft.descripcion AS perfilsoft, sistemasficheros.descripcion AS sistemafichero
+				perfilessoft.descripcion AS perfilsofttemafichero
 				FROM ordenadores
 				INNER JOIN ordenadores_particiones ON ordenadores_particiones.idordenador=ordenadores.idordenador
 				LEFT OUTER JOIN nombresos ON nombresos.idnombreso=ordenadores_particiones.idnombreso
 				LEFT OUTER JOIN imagenes ON imagenes.idimagen=ordenadores_particiones.idimagen
 				LEFT OUTER JOIN perfilessoft ON perfilessoft.idperfilsoft=ordenadores_particiones.idperfilsoft
-				LEFT OUTER JOIN sistemasficheros ON sistemasficheros.idsistemafichero=ordenadores_particiones.idsistemafichero
 				WHERE ordenadores.idordenador=".$idordenador." ORDER BY ordenadores_particiones.numdisk,ordenadores_particiones.numpar";
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
