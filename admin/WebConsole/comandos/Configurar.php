@@ -124,7 +124,7 @@ if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 	echo '<TABLE style="visibility:hidden"><TR id="TR_patron">';
 	echo '<TD align=center><input id="CHK_patron" type="checkbox"></TD>';
 	echo '<TD align=center>'.HTMLSELECT_particiones(0).'</TD>';
-	echo '<TD align=center>'.HTMLSELECT_tipospar($cmd,"").'</TD>';
+	echo '<TD align=center>'.HTMLSELECT_tipospar("").'</TD>';
 	echo '<TD align=center>'.HTMLSELECT_sistemasficheros($cmd,"").'</TD>';
 	echo '<TD align=center><INPUT type="text" style="width:100px" value="0"></TD>';
 	echo '<TD align=center>&nbsp;</TD>';
@@ -167,10 +167,11 @@ function opeFormatear()
 /*________________________________________________________________________________________________________
 	Crea la etiqueta html <SELECT> de los tipos de particiones
 ________________________________________________________________________________________________________*/
-function HTMLSELECT_tipospar($cmd,$codpar)
+function HTMLSELECT_tipospar($codpar)
 {
-	return(HTMLSELECT($cmd,0,"tipospar",$codpar,"tipopar","tipopar",150,"","formulariodatos","codpar<256"));
-}	
+    $json=json_decode(file_get_contents(ENGINEJSON));
+    return(htmlSelectPartitions($json, $codpar, "tipopar", 150, "", "formulariodatos", "MSDOS"));
+}
 /*________________________________________________________________________________________________________
 	Crea la etiqueta html <SELECT> de los sistemas de ficheros
 ________________________________________________________________________________________________________*/
@@ -178,5 +179,4 @@ function HTMLSELECT_sistemasficheros($cmd,$idsistemafichero)
 {
 	return(HTMLSELECT($cmd,0,"sistemasficheros",$idsistemafichero,"idsistemafichero","descripcion",150,"","formulariodatos"));
 }	
-?>
 
