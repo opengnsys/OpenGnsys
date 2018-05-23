@@ -90,12 +90,12 @@ function getStatus($ouid, $labid, $clntid=0) {
 
 	// Database query.
 	$cmd->texto = <<<EOD
-SELECT adm.idadministradorcentro, entornos.ipserveradm, entornos.portserveradm,
+SELECT adm.idusuario, entornos.ipserveradm, entornos.portserveradm,
        aulas.idaula, ordenadores.idordenador, ordenadores.ip
   FROM entornos, ordenadores
   JOIN aulas USING(idaula)
  RIGHT JOIN administradores_centros AS adm USING(idcentro)
- WHERE adm.idadministradorcentro = '$userid'
+ WHERE adm.idusuario = '$userid'
    AND adm.idcentro='$ouid'
    AND aulas.idaula='$labid'
 EOD;
@@ -111,7 +111,7 @@ EOD;
 	if (!$rs->Abrir()) return(false);	// Error oppening recordset.
 	$rs->Primero();
 	// Check if user is an UO admin and asset exists.
-	if (checkAdmin($rs->campos["idadministradorcentro"]) and (($single and checkParameter($rs->campos["idordenador"])) or (! $single and checkParameter($rs->campos["idaula"])))) {
+	if (checkAdmin($rs->campos["idusuario"]) and (($single and checkParameter($rs->campos["idordenador"])) or (! $single and checkParameter($rs->campos["idaula"])))) {
 		// First, try to connect to ogAdmCleint service.
 		$serverip = $rs->campos["ipserveradm"];
 		$serverport = $rs->campos["portserveradm"];
@@ -321,7 +321,7 @@ $app->get('/ous/:ouid(/)', 'validateApiKey',
 SELECT *
   FROM centros
  RIGHT JOIN administradores_centros USING(idcentro)
- WHERE administradores_centros.idadministradorcentro = '$userid'
+ WHERE administradores_centros.idusuario = '$userid'
    AND centros.idcentro = '$ouid'
  LIMIT 1;
 EOD;
@@ -329,7 +329,7 @@ EOD;
 	$rs->Comando=&$cmd;
 	if (!$rs->Abrir()) return(false);	// Error oppening recordset.
 	$rs->Primero();
-	if (checkAdmin($rs->campos["idadministradorcentro"]) and
+	if (checkAdmin($rs->campos["idusuario"]) and
 	    checkParameter($rs->campos["idcentro"])) {
 		$response['id'] = (int)$ouid;
 		$response['name'] = $rs->campos["nombrecentro"];
@@ -353,10 +353,10 @@ $app->get('/ous/:ouid/groups(/)', 'validateApiKey', function($ouid) {
 	$ouid = htmlspecialchars($ouid);
 	// List group of labs if user is OU's admin.
 	$cmd->texto = <<<EOD
-SELECT adm.idadministradorcentro, grupos.*
+SELECT adm.idusuario, grupos.*
   FROM grupos
  RIGHT JOIN administradores_centros AS adm USING(idcentro)
- WHERE adm.idadministradorcentro = '$userid'
+ WHERE adm.idusuario = '$userid'
    AND idcentro='$ouid';
 EOD;
 	$rs=new Recordset;
@@ -364,7 +364,7 @@ EOD;
 	if (!$rs->Abrir()) return(false);	// Error oppening recordset.
 	$rs->Primero();
 	// Check if user is an UO admin.
-	if (checkAdmin($rs->campos["idadministradorcentro"])) {
+	if (checkAdmin($rs->campos["idusuario"])) {
 		$response = Array();
 		// Read data.
 		if (! is_null($rs->campos["idcentro"])) {
@@ -401,12 +401,12 @@ $app->get('/ous/:ouid/labs(/)', 'validateApiKey',
 	$ouid = htmlspecialchars($ouid);
 	// Database query.
 	$cmd->texto = <<<EOD
-SELECT adm.idadministradorcentro, aulas.*, grp.idgrupo AS group_id,
+SELECT adm.idusuario, aulas.*, grp.idgrupo AS group_id,
        grp.nombregrupoordenador, grp.grupoid AS group_group_id, grp.comentarios
   FROM aulas
  RIGHT JOIN administradores_centros AS adm USING(idcentro)
   LEFT JOIN gruposordenadores AS grp USING(idaula)
- WHERE adm.idadministradorcentro = '$userid'
+ WHERE adm.idusuario = '$userid'
    AND adm.idcentro='$ouid'
  ORDER BY aulas.idaula, grp.idgrupo
 EOD;
@@ -415,7 +415,7 @@ EOD;
 	if (!$rs->Abrir()) return(false);	// Error opening recordset.
 	// Check if user is an UO admin.
 	$rs->Primero();
-	if (checkAdmin($rs->campos["idadministradorcentro"])) {
+	if (checkAdmin($rs->campos["idusuario"])) {
 		$response = Array();
 		if (! is_null($rs->campos["idcentro"])) {
 			while (!$rs->EOF) {
@@ -478,11 +478,11 @@ $app->get('/ous/:ouid/labs/:labid(/)', 'validateApiKey',
 	$labid = htmlspecialchars($labid);
 	// Database query.
 	$cmd->texto = <<<EOD
-SELECT adm.idadministradorcentro, COUNT(idordenador) AS defclients, aulas.*
+SELECT adm.idusuario, COUNT(idordenador) AS defclients, aulas.*
   FROM aulas
  RIGHT JOIN administradores_centros AS adm USING(idcentro)
   LEFT JOIN ordenadores USING(idaula)
- WHERE adm.idadministradorcentro = '$userid'
+ WHERE adm.idusuario = '$userid'
    AND idcentro='$ouid'
    AND idaula='$labid';
 EOD;
@@ -491,7 +491,7 @@ EOD;
 	if (!$rs->Abrir()) return(false);	// Error oppening recordset.
 	$rs->Primero();
 	// Check if user is an UO admin and lab exists.
-	if (checkAdmin($rs->campos["idadministradorcentro"]) and checkParameter($rs->campos["idaula"])) {
+	if (checkAdmin($rs->campos["idusuario"]) and checkParameter($rs->campos["idaula"])) {
 		$response['id'] = (int)$rs->campos["idaula"];
 		$response['name'] = $rs->campos["nombreaula"];
 		$response['location'] = $rs->campos["ubicacion"];
@@ -543,11 +543,11 @@ $app->get('/ous/:ouid/labs/:labid/clients(/)', 'validateApiKey',
 	$labid = htmlspecialchars($labid);
 	// Database query.
 	$cmd->texto = <<<EOD
-SELECT adm.idadministradorcentro, ordenadores.*, aulas.idaula AS labid
+SELECT adm.idusuario, ordenadores.*, aulas.idaula AS labid
   FROM ordenadores
  RIGHT JOIN aulas USING(idaula)
  RIGHT JOIN administradores_centros AS adm USING(idcentro)
- WHERE adm.idadministradorcentro = '$userid'
+ WHERE adm.idusuario = '$userid'
    AND adm.idcentro='$ouid'
    AND aulas.idaula='$labid';
 EOD;
@@ -556,7 +556,7 @@ EOD;
 	if (!$rs->Abrir()) return(false);	// Error oppening recordset.
 	$rs->Primero();
 	// Check if user is an UO admin and lab exists.
-	if (checkAdmin($rs->campos["idadministradorcentro"]) and checkParameter($rs->campos["labid"])) {
+	if (checkAdmin($rs->campos["idusuario"]) and checkParameter($rs->campos["labid"])) {
 		$response = Array();
 		while (!$rs->EOF) {
 			if (!is_null($rs->campos["idordenador"])) {
@@ -604,12 +604,12 @@ $app->get('/ous/:ouid/labs/:labid/clients/:clntid(/)', 'validateApiKey',
 	$clntid = htmlspecialchars($clntid);
 	// Database query.
 	$cmd->texto = <<<EOD
-SELECT adm.idadministradorcentro, ordenadores.*,
+SELECT adm.idusuario, ordenadores.*,
        IF(ordenadores.idordenador=aulas.idordprofesor, 1, 0) AS profclient
   FROM ordenadores
   JOIN aulas USING(idaula)
  RIGHT JOIN administradores_centros AS adm USING(idcentro)
- WHERE adm.idadministradorcentro = '$userid'
+ WHERE adm.idusuario = '$userid'
    AND idcentro='$ouid'
    AND idaula='$labid'
    AND idordenador='$clntid';
@@ -619,7 +619,7 @@ EOD;
 	if (!$rs->Abrir()) return(false);	// Error oppening recordset.
 	$rs->Primero();
 	// Check if user is an UO admin, lab exists and client exists.
-	if (checkAdmin($rs->campos["idadministradorcentro"]) and checkParameter($rs->campos["idaula"]) and checkParameter($rs->campos["idordenador"])) {
+	if (checkAdmin($rs->campos["idusuario"]) and checkParameter($rs->campos["idaula"]) and checkParameter($rs->campos["idordenador"])) {
 		// Read data.
 		$response['id'] = (int)$rs->campos["idordenador"];
 		$response['name'] = $rs->campos["nombreordenador"];
@@ -661,7 +661,7 @@ $app->get('/ous/:ouid/labs/:labid/clients/:clntid/hardware(/)', 'validateApiKey'
 	$clntid = htmlspecialchars($clntid);
 	// Database query.
 	$cmd->texto = <<<EOD
-SELECT adm.idadministradorcentro, ordenadores.idordenador, ordenadores.nombreordenador,
+SELECT adm.idusuario, ordenadores.idordenador, ordenadores.nombreordenador,
        tipohardwares.nemonico, hardwares.descripcion
   FROM ordenadores
   JOIN aulas USING(idaula)
@@ -669,7 +669,7 @@ SELECT adm.idadministradorcentro, ordenadores.idordenador, ordenadores.nombreord
   LEFT JOIN perfileshard_hardwares USING(idperfilhard)
   LEFT JOIN hardwares ON perfileshard_hardwares.idhardware=hardwares.idhardware
   LEFT JOIN tipohardwares ON tipohardwares.idtipohardware=hardwares.idtipohardware
- WHERE adm.idadministradorcentro = '$userid'
+ WHERE adm.idusuario = '$userid'
    AND adm.idcentro='$ouid'
    AND aulas.idaula='$labid'
    AND ordenadores.idordenador='$clntid';
@@ -679,7 +679,7 @@ EOD;
 	if (!$rs->Abrir()) return(false);	// Error oppening recordset.
 	$rs->Primero();
 	// Check if user is an UO admin and client exists.
-	if (checkAdmin($rs->campos["idadministradorcentro"]) and checkParameter($rs->campos["idordenador"])) {
+	if (checkAdmin($rs->campos["idusuario"]) and checkParameter($rs->campos["idordenador"])) {
 		// Read data.
 		$response['id'] = (int)$rs->campos["idordenador"];
 		$response['name'] = $rs->campos["nombreordenador"];
@@ -717,7 +717,7 @@ $app->get('/ous/:ouid/labs/:labid/clients/:clntid/diskcfg(/)', 'validateApiKey',
 	$clntid = htmlspecialchars($clntid);
 	// Database query.
 	$cmd->texto = <<<EOD
-SELECT adm.idadministradorcentro, ordenadores.idordenador AS clientid,
+SELECT adm.idusuario, ordenadores.idordenador AS clientid,
        ordenadores.nombreordenador, ordenadores_particiones.*, tipospar.tipopar,
        sistemasficheros.nemonico, nombresos.nombreso, imagenes.nombreca,
        (imagenes.revision - ordenadores_particiones.revision) AS difimagen
@@ -729,7 +729,7 @@ SELECT adm.idadministradorcentro, ordenadores.idordenador AS clientid,
   LEFT JOIN sistemasficheros USING(idsistemafichero)
   LEFT JOIN nombresos USING(idnombreso)
   LEFT JOIN imagenes USING(idimagen)
- WHERE adm.idadministradorcentro = '$userid'
+ WHERE adm.idusuario = '$userid'
    AND adm.idcentro='$ouid'
    AND aulas.idaula='$labid'
    AND ordenadores.idordenador='$clntid'
@@ -740,7 +740,7 @@ EOD;
 	if (!$rs->Abrir()) return(false);	// Error oppening recordset.
 	$rs->Primero();
 	// Check if user is an UO admin and client exists.
-	if (checkAdmin($rs->campos["idadministradorcentro"]) and checkParameter($rs->campos["clientid"])) {
+	if (checkAdmin($rs->campos["idusuario"]) and checkParameter($rs->campos["clientid"])) {
 		// Read data.
 		$response['id'] = (int)$rs->campos["clientid"];
 		$response['name'] = $rs->campos["nombreordenador"];
@@ -815,10 +815,10 @@ $app->get('/ous/:ouid/repos(/)', 'validateApiKey',
 	$ouid = htmlspecialchars($ouid);
 	// Database query.
 	$cmd->texto = <<<EOD
-SELECT adm.idadministradorcentro, adm.idcentro AS ouid, repositorios.*
+SELECT adm.idusuario, adm.idcentro AS ouid, repositorios.*
   FROM repositorios
  RIGHT JOIN administradores_centros AS adm USING(idcentro)
- WHERE adm.idadministradorcentro = '$userid'
+ WHERE adm.idusuario = '$userid'
    AND adm.idcentro='$ouid';
 EOD;
 	$rs=new Recordset;
@@ -826,7 +826,7 @@ EOD;
 	if (!$rs->Abrir()) return(false);	// Error oppening recordset.
 	$rs->Primero();
 	// Check if user is an UO admin.
-	if (checkAdmin($rs->campos["idadministradorcentro"]) and checkParameter($rs->campos["ouid"])) {
+	if (checkAdmin($rs->campos["idusuario"]) and checkParameter($rs->campos["ouid"])) {
 		$response = Array();
 		while (!$rs->EOF) {
 			if (! is_null($rs->campos["idcentro"])) {
@@ -860,10 +860,10 @@ $app->get('/ous/:ouid/repos/:repoid(/)', 'validateApiKey',
 	$repoid = htmlspecialchars($repoid);
 	// Database query.
 	$cmd->texto = <<<EOD
-SELECT adm.idadministradorcentro, repositorios.*
+SELECT adm.idusuario, repositorios.*
   FROM repositorios
  RIGHT JOIN administradores_centros AS adm USING(idcentro)
- WHERE adm.idadministradorcentro = '$userid'
+ WHERE adm.idusuario = '$userid'
    AND adm.idcentro='$ouid'
    AND idrepositorio='$repoid';
 EOD;
@@ -872,7 +872,7 @@ EOD;
 	if (!$rs->Abrir()) return(false);	// Error oppening recordset.
 	$rs->Primero();
 	// Check if user is an UO admin and repo exists.
-	if (checkAdmin($rs->campos["idadministradorcentro"]) and checkParameter($rs->campos["idrepositorio"])) {
+	if (checkAdmin($rs->campos["idusuario"]) and checkParameter($rs->campos["idrepositorio"])) {
 		// Read data.
 		$response['id'] = (int)$rs->campos["idrepositorio"];
 		$response['name'] = $rs->campos["nombrerepositorio"];
@@ -899,10 +899,10 @@ $app->get('/ous/:ouid/images(/)', 'validateApiKey',
 	$ouid = htmlspecialchars($ouid);
 	// Database query.
 	$cmd->texto = <<<EOD
-SELECT adm.idadministradorcentro, adm.idcentro AS ouid, imagenes.*
+SELECT adm.idusuario, adm.idcentro AS ouid, imagenes.*
   FROM imagenes
  RIGHT JOIN administradores_centros AS adm USING(idcentro)
- WHERE adm.idadministradorcentro = '$userid'
+ WHERE adm.idusuario = '$userid'
    AND adm.idcentro='$ouid';
 EOD;
 	$rs=new Recordset;
@@ -910,7 +910,7 @@ EOD;
 	if (!$rs->Abrir()) return(false);	// Error oppening recordset.
 	$rs->Primero();
 	// Check if user is an UO admin.
-	if (checkAdmin($rs->campos["idadministradorcentro"]) and checkParameter($rs->campos["ouid"])) {
+	if (checkAdmin($rs->campos["idusuario"]) and checkParameter($rs->campos["ouid"])) {
 		$response = Array();
 		while (!$rs->EOF) {
 			if (! is_null($rs->campos["idcentro"])) {
@@ -944,12 +944,12 @@ $app->get('/ous/:ouid/images/:imgid(/)', 'validateApiKey',
 	$imgid = htmlspecialchars($imgid);
 	// Database query.
 	$cmd->texto = <<<EOD
-SELECT adm.idadministradorcentro, imagenes.*, nombreso AS os
+SELECT adm.idusuario, imagenes.*, nombreso AS os
   FROM imagenes
  RIGHT JOIN administradores_centros AS adm USING(idcentro)
   LEFT JOIN perfilessoft USING(idperfilsoft)
   LEFT JOIN nombresos USING(idnombreso)
- WHERE adm.idadministradorcentro = '$userid'
+ WHERE adm.idusuario = '$userid'
    AND adm.idcentro='$ouid'
    AND idimagen='$imgid';
 EOD;
@@ -958,7 +958,7 @@ EOD;
 	if (!$rs->Abrir()) return(false);	// Error oppening recordset.
 	$rs->Primero();
 	// Check if user is an UO admin and repo exists.
-	if (checkAdmin($rs->campos["idadministradorcentro"]) and checkParameter($rs->campos["idimagen"])) {
+	if (checkAdmin($rs->campos["idusuario"]) and checkParameter($rs->campos["idimagen"])) {
 		// Read data.
 		$response['id'] = (int)$rs->campos["idimagen"];
 		$response['name'] = $rs->campos["nombreca"];
@@ -1007,7 +1007,7 @@ EOD;
 	$imgid = htmlspecialchars($imgid);
 	// Database query.
 	$cmd->texto = <<<EOD
-SELECT adm.idadministradorcentro, imagenes.idimagen, imagenes.nombreca,
+SELECT adm.idusuario, imagenes.idimagen, imagenes.nombreca,
        nombresos.nombreso, softwares.descripcion
   FROM imagenes
  RIGHT JOIN administradores_centros AS adm USING(idcentro)
@@ -1015,7 +1015,7 @@ SELECT adm.idadministradorcentro, imagenes.idimagen, imagenes.nombreca,
   LEFT JOIN nombresos USING(idnombreso)
   LEFT JOIN perfilessoft_softwares USING(idperfilsoft)
   LEFT JOIN softwares USING(idsoftware)
- WHERE adm.idadministradorcentro = '$userid'
+ WHERE adm.idusuario = '$userid'
    AND adm.idcentro='$ouid'
    AND imagenes.idimagen='$imgid'
  ORDER BY softwares.descripcion ASC;
@@ -1025,7 +1025,7 @@ EOD;
 	if (!$rs->Abrir()) return(false);	// Error oppening recordset.
 	$rs->Primero();
 	// Check if user is an UO admin and repo exists.
-	if (checkAdmin($rs->campos["idadministradorcentro"]) and checkParameter($rs->campos["idimagen"])) {
+	if (checkAdmin($rs->campos["idusuario"]) and checkParameter($rs->campos["idimagen"])) {
 		$response['id'] = (int)$rs->campos["idimagen"];
 		$response['name'] = $rs->campos["nombreca"];
 		if (is_null($rs->campos["nombreso"])) {
