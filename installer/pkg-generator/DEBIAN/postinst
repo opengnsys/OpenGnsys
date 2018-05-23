@@ -279,7 +279,7 @@ function getDateTime()
 function echoAndLog()
 {
 	local DATETIME=`getDateTime`
-	# echo "$1" #no queremos salidas por pantalla
+	echo "$1" #no queremos salidas por pantalla
 	echo "$DATETIME;$SSH_CLIENT;$1" >> $LOG_FILE
 }
 
