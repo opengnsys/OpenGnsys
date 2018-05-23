@@ -441,20 +441,21 @@ echo "Finished cleaning duplicated files"
 local VERSIONFILE="$INSTALL_TARGET/doc/VERSION.txt"
 [ -f $VERSIONFILE ] || echo "OpenGnsys Server" >$VERSIONFILE
 local VERSION=$(cat $VERSIONFILE | awk '{print $2}')
-local REVISION=$(LANG=C svn info $SVNURL|awk '/Rev:/ {print "r"$4}')
+local REVISION=$(cat $VERSIONFILE | awk '{print $3}')
+local TIMESTAMP=`getDateTime`
 local ARCH=$(grep Architecture $ROOTDIR/DEBIAN/control | awk '{print $2}')
 echo -e "\n"
-echo "Version is: $VERSION    Revision: $REVISION"
+echo "Version is: $VERSION    Revision: $REVISION"   Timestamp: $TIMESTAMP
 echo -e "\n"
 sed -ri "s/($| r[0-9]*)/ $REVISION/" $VERSIONFILE
-sed -ri "s/^Version\: VERSION/Version\: $VERSION$REVISION/" $ROOTDIR/DEBIAN/control
+sed -ri "s/^Version\: VERSION/Version\: $VERSION-$TIMESTAMP/" $ROOTDIR/DEBIAN/control
 
 # Finally Generate package
 cd $PKG_GEN_PATH
 dpkg --build $PKG_NAME .
 if [ $? = 0 ]; then
 	echo -e "\n"
-	echo -e " Package Generated: ${PKG_GEN_PATH}/${PKG_NAME}_${VERSION}${REVISION}_${ARCH}.deb \n"
+	echo -e " Package Generated: ${PKG_GEN_PATH}/${PKG_NAME}_${VERSION}-${TIMESTAMP}_${ARCH}.deb \n"
 	echo -e "\n"
 fi
 }
