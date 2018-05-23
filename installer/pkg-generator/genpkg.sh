@@ -364,7 +364,8 @@ function cleanFiles()
 			admin/WebConsole \
 			client/shared
 			client/engine
-			pkg-generator )
+			pkg-generator
+			.git )
 			
 	pushd $ROOTDIR/tmp/opengnsys_installer
 	local i
