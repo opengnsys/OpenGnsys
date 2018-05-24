@@ -95,17 +95,19 @@ done
 
 echo -e "\\n=============================="
 
-# Comprobar si se ha descargado el paquete comprimido (USESVN=0) o sólo el instalador (USESVN=1).
+# Comprobar si se ha descargado el paquete comprimido (REMOTE=0) o sólo el instalador (REMOTE=1).
 PROGRAMDIR=$(readlink -e "$(dirname "$0")")
 PROGRAMNAME=$(basename "$0")
 OPENGNSYS_SERVER="opengnsys.es"
 DOWNLOADURL="https://$OPENGNSYS_SERVER/trac/downloads"
 if [ -d "$PROGRAMDIR/../installer" ]; then
-	USESVN=0
+	REMOTE=0
 else
-	USESVN=1
+	REMOTE=1
 fi
-SVN_URL="https://$OPENGNSYS_SERVER/svn/branches/version1.1/"
+BRANCH="devel"
+CODE_URL="https://codeload.github.com/opengnsys/OpenGnsys/zip/$BRANCH"
+API_URL="https://api.github.com/repos/opengnsys/OpenGnsys/branches/$BRANCH"
 
 WORKDIR=/tmp/opengnsys_installer
 mkdir -p $WORKDIR
@@ -167,7 +169,7 @@ OSVERSION="${OSVERSION%%.*}"
 # Configuración según la distribución GNU/Linux (usar minúsculas).
 case "$OSDISTRIB" in
 	ubuntu|debian|linuxmint)
-		DEPENDENCIES=( subversion apache2 php php-ldap libapache2-mod-php mysql-server php-mysql isc-dhcp-server bittorrent tftp-hpa tftpd-hpa xinetd build-essential g++-multilib libmysqlclient-dev wget curl doxygen graphviz bittornado ctorrent samba rsync unzip netpipes debootstrap schroot squashfs-tools btrfs-tools procps arp-scan realpath php-curl gettext moreutils jq wakeonlan udpcast shim-signed grub-efi-amd64-signed )
+		DEPENDENCIES=( apache2 php php-ldap libapache2-mod-php mysql-server php-mysql isc-dhcp-server bittorrent tftp-hpa tftpd-hpa xinetd build-essential g++-multilib libmysqlclient-dev wget curl doxygen graphviz bittornado ctorrent samba rsync unzip netpipes debootstrap schroot squashfs-tools btrfs-tools procps arp-scan realpath php-curl gettext moreutils jq wakeonlan udpcast shim-signed grub-efi-amd64-signed )
 		UPDATEPKGLIST="apt-get update"
 		INSTALLPKG="apt-get -y install --force-yes"
 		CHECKPKG="dpkg -s \$package 2>/dev/null | grep Status | grep -qw install"
@@ -204,7 +206,7 @@ case "$OSDISTRIB" in
 		TFTPCFGDIR=/var/lib/tftpboot
 		;;
 	fedora|centos)
-		DEPENDENCIES=( subversion httpd mod_ssl php php-ldap mysql-server mysql-devel mysql-devel.i686 php-mysql dhcp tftp-server tftp xinetd binutils gcc gcc-c++ glibc-devel glibc-devel.i686 glibc-static glibc-static.i686 libstdc++-devel.i686 make wget curl doxygen graphviz ctorrent samba samba-client rsync unzip debootstrap schroot squashfs-tools python-crypto arp-scan procps-ng gettext moreutils jq net-tools http://ftp.altlinux.org/pub/distributions/ALTLinux/5.1/branch/$(arch)/RPMS.classic/netpipes-4.2-alt1.$(arch).rpm )
+		DEPENDENCIES=( httpd mod_ssl php php-ldap mysql-server mysql-devel mysql-devel.i686 php-mysql dhcp tftp-server tftp xinetd binutils gcc gcc-c++ glibc-devel glibc-devel.i686 glibc-static glibc-static.i686 libstdc++-devel.i686 make wget curl doxygen graphviz ctorrent samba samba-client rsync unzip debootstrap schroot squashfs-tools python-crypto arp-scan procps-ng gettext moreutils jq net-tools http://ftp.altlinux.org/pub/distributions/ALTLinux/5.1/branch/$(arch)/RPMS.classic/netpipes-4.2-alt1.$(arch).rpm )
 		INSTALLEXTRADEPS=( 'pushd /tmp; wget -t3 http://download.bittornado.com/download/BitTornado-0.3.18.tar.gz && tar xvzf BitTornado-0.3.18.tar.gz && cd BitTornado-CVS && python setup.py install && ln -fs btlaunchmany.py /usr/bin/btlaunchmany && ln -fs bttrack.py /usr/bin/bttrack; popd' )
 		INSTALLPKG="yum install -y libstdc++ libstdc++.i686"
 		CHECKPKG="rpm -q --quiet \$package"
@@ -786,11 +788,11 @@ EOF
 
 
 #####################################################################
-####### Funciones para el manejo de Subversion
+####### Funciones para la descarga de código
 #####################################################################
 
-# Obtiene el código fuente del proyecto desde el servidor SVN.
-function svnExportCode()
+# Obtiene el código fuente del proyecto desde el repositorio de GitHub.
+function downloadCode()
 {
 	if [ $# -ne 1 ]; then
 		errorAndLog "${FUNCNAME}(): invalid number of parameters"
@@ -799,14 +801,15 @@ function svnExportCode()
 
 	local url="$1"
 
-	echoAndLog "${FUNCNAME}(): downloading subversion code..."
+	echoAndLog "${FUNCNAME}(): downloading code..."
 
-	svn export --force "$url" opengnsys
+	curl "${url}" -o opengnsys.zip && unzip opengnsys.zip && mv "OpenGnsys-$BRANCH" opengnsys
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error getting OpenGnsys code from $url"
 		return 1
 	fi
-	echoAndLog "${FUNCNAME}(): subversion code downloaded"
+	rm -f opengnsys.zip
+	echoAndLog "${FUNCNAME}(): code was downloaded"
 	return 0
 }
 
@@ -1073,7 +1076,6 @@ function installWebFiles()
 		errorAndLog "${FUNCNAME}(): Error copying web files."
 		exit 1
 	fi
-        find $INSTALL_TARGET/www -name .svn -type d -exec rm -fr {} \; 2>/dev/null
 
 	# Descomprimir librerías: Slim y Swagger-UI.
 	unzip -o $WORKDIR/opengnsys/admin/$SLIMFILE -d $INSTALL_TARGET/www/rest
@@ -1397,7 +1399,6 @@ function copyClientFiles()
 		errorAndLog "${FUNCNAME}(): error while copying client estructure"
 		errstatus=1
 	fi
-	find $INSTALL_TARGET/client -name .svn -type d -exec rm -fr {} \; 2>/dev/null
 	
 	echoAndLog "${FUNCNAME}(): Copying OpenGnsys Cloning Engine files."
 	mkdir -p $INSTALL_TARGET/client/lib/engine/bin
@@ -1557,8 +1558,8 @@ function installationSummary()
 	[ -f $VERSIONFILE ] || echo "OpenGnsys Server" >$VERSIONFILE
 	# Incluir datos de revisión, si se está instaladno desde el repositorio
 	# de código o si no está incluida en el fichero de versión.
-	if [ $USESVN -eq 1 ] || [ -z "$(awk '$3~/r[0-9]*/ {print}' $VERSIONFILE)" ]; then
-		local REVISION=$(LANG=C svn info $SVN_URL|awk '/Rev:/ {print "r"$4}')
+	if [ $REMOTE -eq 1 ] || [ -z "$(awk '$3~/r[0-9]*/ {print}' $VERSIONFILE)" ]; then
+		local REVISION=$(curl -s "$API_URL" | jq -r ".commit.commit.committer.date" | awk '{gsub(/[^0-9]/,""); print}')
 		sed -ri "s/($| r[0-9]*)/ $REVISION/" $VERSIONFILE
 	fi
 
@@ -1656,10 +1657,10 @@ if [ $? -ne 0 ]; then
 fi
 
 # Si es necesario, descarga el repositorio de código en directorio temporal
-if [ $USESVN -eq 1 ]; then
-	svnExportCode $SVN_URL
+if [ $REMOTE -eq 1 ]; then
+	downloadCode $CODE_URL
 	if [ $? -ne 0 ]; then
-		errorAndLog "Error while getting code from svn"
+		errorAndLog "Error while getting code from the repository"
 		exit 1
 	fi
 else
