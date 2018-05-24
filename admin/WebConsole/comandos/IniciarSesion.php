@@ -142,6 +142,7 @@ function tabla_configuraciones($cmd,$idordenador){
 	$rs=new Recordset; 
 >>>>>>> #812: Usar fichero de configuración JSON en comandos Configurar e Iniciar Sesión.
 	$rs->Comando=&$cmd; 
+	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) return($tablaHtml); // Error al abrir recordset
 	$rs->Primero(); 
 	while (!$rs->EOF){

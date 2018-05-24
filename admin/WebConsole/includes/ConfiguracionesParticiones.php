@@ -105,9 +105,6 @@ function cargaCaves($cmd,$idambito,$ambito,$sws,$swr)
 	global $msk_perfil;	
 	global $msk_cache;
 
-	// Cargar datos JSON de configuración.
-	$json=json_decode(file_get_contents(ENGINEJSON));
-
 	// Comprobar modos SQL para hacer que la consulta sea compatible.
 	$cmd->texto="SELECT @@sql_mode AS mode";
 	$cmd->ejecutar();
