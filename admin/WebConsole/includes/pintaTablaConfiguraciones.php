@@ -188,7 +188,6 @@ function tablaConfiguracionesCrearImagen($cmd,$idordenador,$idrepositorio)
 {
 	global $idcentro;
 	global $TbMsg;
-	$json = json_decode(file_get_contents(ENGINEJSON));
 
 	$tablaHtml="";
 	$cmd->texto="SELECT ordenadores.ip AS masterip, ordenadores_particiones.numdisk, ordenadores_particiones.numpar,
@@ -215,7 +214,7 @@ function tablaConfiguracionesCrearImagen($cmd,$idordenador,$idrepositorio)
 			$actualDisk = $rs->campos["numdisk"];
 			$tablaHtml.='<TR><td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;<strong>'.$TbMsg["DISK"].'&nbsp;'.$actualDisk.'</strong></td></TR>'.chr(13);
 		}
-        list($rs->campos["tipopar"], $rs->campos["clonable"]) = getPartitionData($json, $rs->campos["codpar"]);
+        list($rs->campos["tipopar"], $rs->campos["clonable"]) = getPartitionData($rs->campos["codpar"]);
 		$swcc=$rs->campos["clonable"] && !empty($rs->campos["idnombreso"]);
 		$swc=$rs->campos["idperfilsoft"]>0; // Una partición es clonable si posee un identificador de perfil software		
 		$swccc=$swcc && $swcc;
@@ -298,10 +297,10 @@ function tablaConfiguracionesSincronizacion1($idordenador)
 			$actualDisk = $rs->campos["numdisk"];
 			$tablaHtml.='<td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;<strong>'.$TbMsg["DISK"].'&nbsp;'.$actualDisk.'</strong></td>'.chr(13);
 		}
-        list($rs->campos["tipopar"], $rs->campos["clonable"]) = getPartitionData($json, $rs->campos["codpar"]);
+        list($rs->campos["tipopar"], $rs->campos["clonable"]) = getPartitionData($rs->campos["codpar"]);
         //$swcc=$rs->campos["clonable"] && !empty($rs->campos["idnombreso"]) && !empty($rs->campos["idperfilsoft"]);
 		$sw=$rs->campos["clonable"] && !empty($rs->campos["idnombreso"]);
-		if($sw){// Una partici�n es clonable si es cierta esta variable	
+		if($sw){// Una partición es clonable si es cierta esta variable
 			$tbPAR.=$rs->campos["numpar"].";"; // Cadena con las particiones a procesar	
 			$tablaHtml.='<tr id="trPar-'.$rs->campos["numpar"].'">';
 			$tablaHtml.='<td align=center><input type=radio name="particion" value="'.$rs->campos["codpar"].'"></td>';

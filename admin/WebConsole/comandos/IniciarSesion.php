@@ -58,8 +58,14 @@ if (!$cmd)
                 RecopilaIpesMacs($cmd,$ambito,$idambito);
 
         ?>
+<<<<<<< HEAD
 	<P align=center><SPAN class=subcabeceras><?php echo $TbMsg[7] ?></SPAN></P>
 	<BR>
+=======
+	<P align=center>
+	<SPAN align=center class=subcabeceras><?php echo $TbMsg[7] ?></SPAN>
+	<br>
+>>>>>>> #812: Usar fichero de configuración JSON en comandos Configurar e Iniciar Sesión.
 <form  align=center name="fdatos" method="POST"> 
 	<INPUT type="hidden" name="idambito" value="<?php echo $idambito?>">
 	<INPUT type="hidden" name="ambito" value="<?php echo $ambito?>">
@@ -94,6 +100,7 @@ function toma_propiedades($cmd,$idordenador){
 	global $idperfilhard;
 	global $idservidordhcp;
 	global $idservidorrembo;
+
 	$rs=new Recordset; 
 	$cmd->texto="SELECT nombreordenador,ip,mac,idperfilhard FROM ordenadores WHERE idordenador='".$idordenador."'";
 	$rs->Comando=&$cmd; 
@@ -115,30 +122,30 @@ function toma_propiedades($cmd,$idordenador){
 ________________________________________________________________________________________________________*/
 function tabla_configuraciones($cmd,$idordenador){
 	global $idcentro;
+
 	$tablaHtml="";
 	$cmd->texto="SELECT	ordenadores_particiones.numpar,
-				ordenadores_particiones.tamano,
+				ordenadores_particiones.codpar, ordenadores_particiones.tamano,
 				ordenadores_particiones.idnombreso, nombresos.nombreso,
-				tipospar.tipopar, imagenes.descripcion AS imagen,
+				imagenes.descripcion AS imagen,
 				perfilessoft.descripcion AS perfilsoft,
 				sistemasficheros.descripcion AS sistemafichero
 			FROM ordenadores
 			INNER JOIN ordenadores_particiones ON ordenadores_particiones.idordenador=ordenadores.idordenador
 			LEFT OUTER JOIN nombresos ON nombresos.idnombreso=ordenadores_particiones.idnombreso
-			INNER JOIN tipospar ON tipospar.codpar=ordenadores_particiones.codpar
 			LEFT OUTER JOIN imagenes ON imagenes.idimagen=ordenadores_particiones.idimagen
 			LEFT OUTER JOIN perfilessoft ON perfilessoft.idperfilsoft=ordenadores_particiones.idperfilsoft
 			LEFT OUTER JOIN sistemasficheros ON sistemasficheros.idsistemafichero=ordenadores_particiones.idsistemafichero
 			WHERE ordenadores.idordenador=".$idordenador."
-			  AND tipospar.clonable=1
 			  AND nombresos.nombreso!='DATA'
 			ORDER BY ordenadores_particiones.numpar";
 	$rs=new Recordset;
 	$rs->Comando=&$cmd; 
+	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) return($tablaHtml); // Error al abrir recordset
 	$rs->Primero(); 
 	while (!$rs->EOF){
-		if(!empty($rs->campos["idnombreso"])){
+		if(!empty($rs->campos["idnombreso"]) and isClonable($rs->campos["codpar"])){
 			$tablaHtml.='<TR>'.chr(13);
 			$tablaHtml.='<TD ><input type="radio" name="particion"  value='.$rs->campos["numpar"].'></TD>'.chr(13);
 			$tablaHtml.='<TD align=center>&nbsp;'.$rs->campos["numpar"].'&nbsp;</TD>'.chr(13);
