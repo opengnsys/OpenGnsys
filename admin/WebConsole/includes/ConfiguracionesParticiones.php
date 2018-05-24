@@ -67,9 +67,6 @@ function cargaCaves($cmd,$idambito,$ambito,$sws,$swr)
 	global $msk_perfil;	
 	global $msk_cache;
 
-	// Cargar datos JSON de configuración.
-	$json=json_decode(file_get_contents(ENGINEJSON));
-
 	// Comprobar modos SQL para hacer que la consulta sea compatible.
 	$cmd->texto="SELECT @@sql_mode AS mode";
 	$cmd->ejecutar();
@@ -152,11 +149,11 @@ function cargaCaves($cmd,$idambito,$ambito,$sws,$swr)
 		$codpar=$rs->campos["codpar"];
 		if ($numpar == 0) {
 			// Tipo de tabla de particiones.
-			$tipopar = getParttableData($json, $codpar);
-			$clonable = "";
+			$tipopar = getParttableData($codpar);
+			$clonable = false;
 		} else {
 			// Saltar si no es clonable en restauración.
-			list($tipopar, $clonable) = getPartitionData($json, $codpar);
+			list($tipopar, $clonable) = getPartitionData($codpar);
 			if ($swr and $clonable == false) {
 				continue;
 			}

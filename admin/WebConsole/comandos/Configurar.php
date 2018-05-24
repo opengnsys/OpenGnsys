@@ -74,7 +74,7 @@ if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 
 	//________________________________________________________________________________________________________
 				
-	echo '<P align=center><SPAN align=center class=subcabeceras>'.$TbMsg[19].'</SPAN></P>';		
+	echo '<p align="center"><span class="subcabeceras">'.$TbMsg[19].'</span></p>';
 	if($ambito!=$AMBITO_ORDENADORES){	
 		$cadenaid="";
 		$cadenaip="";
@@ -172,10 +172,13 @@ function opeFormatear()
 /*________________________________________________________________________________________________________
 	Crea la etiqueta html <SELECT> de los tipos de particiones
 ________________________________________________________________________________________________________*/
-function HTMLSELECT_tipospar($codpar)
+function HTMLSELECT_tipospar($tablapar="MSDOS", $codpar)
 {
-    $json=json_decode(file_get_contents(ENGINEJSON));
-    return(htmlSelectPartitions($json, $codpar, "tipopar", 150, "", "formulariodatos", "MSDOS"));
+    $html ='<select class="formulariodatos" name="tipopar" style="width: 150px">'."\n";
+    $html.='    <option value="0"></option>'."\n";
+    $html.=htmlOptionPartitions($tablapar, $codpar, "");
+    $html.='</select>'."\n";
+    return($html);
 }
 /*________________________________________________________________________________________________________
 	Crea la etiqueta html <SELECT> de los sistemas de ficheros
