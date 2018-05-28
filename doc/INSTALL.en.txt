@@ -1,10 +1,10 @@
-Installing OpenGnsys Server v 1.0.5
-=======================================
+Installing OpenGnsys Server v 1.1.1
+===================================
 
 Before installation
 -------------------
 
-OpenGnsys Server 1.0.5 is meant to be installed under Ubuntu Server 12.04 LTS or newer, though it has also been tested under operating systems based on Fedora 20
+OpenGnsys Server 1.1.1 is meant to be installed under Ubuntu Server 16.04 LTS or newer, though it has also been tested under operating systems based on CentOS 7.
 
 Network connection is needed in order to download the required packages, the source code and the preconfigured client.
 
@@ -17,19 +17,19 @@ Minimum storage requirements:
 Installation
 ------------
 
-To install OpenGnsys, run opengnsys_installer.sh after unpacking the release file (opengnsys-release.tar.gz) o downloading it directly from https://opengnsys.es/svn/trunk/installer/opengnsys_installer.sh.
+To install OpenGnsys, run opengnsys_installer.sh after unpacking the release file (opengnsys-release.tar.gz) o downloading it directly from https://raw.githubusercontent.com/opengnsys/OpenGnsys/devel/installer/opengnsys_installer.sh
 
 Unpacking example:
-	tar xvzf opengnsys-1.0.5.tar.gz
+	tar xvzf opengnsys-1.1.0.tar.gz
 	cd opengnsys/installer
 
 Download examples:
 
     * Download with wget.
-	wget https://opengnsys.es/svn/trunk/installer/opengnsys_installer.sh -O opengnsys_installer.sh
+	wget https://raw.githubusercontent.com/opengnsys/OpenGnsys/devel/installer/opengnsys_installer.sh
 
     * Download with curl.
-	curl https://opengnsys.es/svn/trunk/installer/opengnsys_installer.sh > opengnsys_installer.sh
+	curl https://raw.githubusercontent.com/opengnsys/OpenGnsys/devel/installer/opengnsys_installer.sh -o opengnsys_installer.sh
 
 
 You must be root to run the installation script:

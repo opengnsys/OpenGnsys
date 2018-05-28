@@ -33,7 +33,7 @@ wget -q https://atom.io/download/rpm -O /tmp/atom.rpm && dnf install -y /tmp/ato
 # Comment out next line if you prefer to install Eclipse IDE for Python (it needs more disk space).
 #dnf install -y eclipse-pydev eclipse-nls-${LANG%_*}
 # Download OGAgent environment installer.
-svn export https://opengnsys.es/svn/branches/version1.1/installer/ogagent-devel-installer.sh /home/vagrant
+wget -q https://raw.githubusercontent.com/opengnsys/OpenGnsys/devel/installer/ogagent-devel-installer.sh -O /home/vagrant/ogagent-devel-installer.sh
 # Instructions.
 echo "Manual operations:"
 echo "- Reboot VM or launch desktop: startxfce4 &"

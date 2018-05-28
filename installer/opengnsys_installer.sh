@@ -1204,7 +1204,7 @@ function createDirs()
 	echoAndLog "${FUNCNAME}(): creating directory paths in $path_opengnsys_base"
 	mkdir -p $path_opengnsys_base
 	mkdir -p $path_opengnsys_base/bin
-	mkdir -p $path_opengnsys_base/client/{images,log}
+	mkdir -p $path_opengnsys_base/client/{cache,images,log}
 	mkdir -p $path_opengnsys_base/doc
 	mkdir -p $path_opengnsys_base/etc
 	mkdir -p $path_opengnsys_base/lib
