@@ -1,4 +1,4 @@
-# Vagrantfile to install OpenGnsys Trunk (v1.1.0) virtual environment using VirtualBox provider.
+# Vagrantfile to install OpenGnsys virtual environment (production version) using VirtualBox provider.
 
 VAGRANTFILE_API_VERSION = "2"
 # VM provider: Oracle VM VirtualBox.
@@ -38,7 +38,7 @@ if [ -z "$(blkid /dev/mapper/og-images | grep ext4)" ]; then
     mount -a
 fi
 # Install OpenGnsys and change server address.
-wget -q https://opengnsys.es/svn/trunk/installer/opengnsys_installer.sh -O - | bash || exit $?
+curl -s https://raw.githubusercontent.com/opengnsys/OpenGnsys/master/installer/opengnsys_installer.sh | bash || exit $?
 mv /opt/opengnsys/log/bash.log /opt/opengnsys/log/opengnsys_installer.log
 echo y | /opt/opengnsys/bin/setserveraddr enp0s8
 # Insert DHCP data.
@@ -73,7 +73,7 @@ OGAGENTPKG = "ogagent_1.1.0_all.deb"
 MODELSCRIPT = <<EOT
 # Comment out next lines to install and configure OGAgent for Ubuntu.
 #apt-get update -y
-#wget -q --no-check-certificate https://#{SERVERIP}/opengnsys/descargas/#{OGAGENTPKG}
+#curl -ks https://#{SERVERIP}/opengnsys/descargas/#{OGAGENTPKG} -o #{OGAGENTPKG}
 #if [ -f #{OGAGENTPKG} ]; then
 #    dpkg -i #{OGAGENTPKG}
 #    apt-get install -fy || exit $?
