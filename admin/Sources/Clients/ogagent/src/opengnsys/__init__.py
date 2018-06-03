@@ -26,9 +26,9 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-'''
+"""
 @author: Adolfo Gómez, dkmaster at dkmon dot com
-'''
+"""
 from __future__ import unicode_literals
 
 # On centos, old six release does not includes byte2int, nor six.PY2
@@ -37,7 +37,11 @@ import six
 import modules
 from RESTApi import REST, RESTError
 
-VERSION = '1.1.0'
+try:
+    with open('VERSION', 'r') as v:
+        VERSION = v.read()
+except IOError:
+    VERSION = '1.1.0'
 
 __title__ = 'OpenGnsys Agent'
 __version__ = VERSION
@@ -45,7 +49,6 @@ __build__ = 0x010750
 __author__ = 'Adolfo Gómez'
 __license__ = "BSD 3-clause"
 __copyright__ = "Copyright VirtualCable S.L.U."
-
 
 if not hasattr(six, 'byte2int'):
     if six.PY3:
