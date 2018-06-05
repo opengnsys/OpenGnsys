@@ -1029,10 +1029,11 @@ function updateSummary()
 	# Actualizar fichero de versión y revisión.
 	local VERSIONFILE REVISION
 	VERSIONFILE="$INSTALL_TARGET/doc/VERSION.txt"
-	REVISION=$(curl -s "$API_URL" | jq -r ".commit.commit.committer.date" | awk '{gsub(/[^0-9]/,""); print}')
+	# Revisión: rAñoMesDía.Gitcommit (8 caracteres de fecha y 7 primeros de commit).
+	REVISION=$(curl -s "$API_URL" | jq -r '"r" + (.commit.commit.committer.date | gsub("-"; "")[:8]) + "." + (.commit.sha[:7])')
 
 	[ -f $VERSIONFILE ] || echo "OpenGnsys" >$VERSIONFILE
-	perl -pi -e "s/($| r[0-9]*)/ $REVISION/" $VERSIONFILE
+	sed -ri "s/($| r[.0-9a-f]+)/ $REVISION/" $VERSIONFILE
 
 	echo
 	echoAndLog "OpenGnsys Update Summary"

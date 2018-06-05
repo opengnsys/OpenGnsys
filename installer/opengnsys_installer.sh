@@ -1553,14 +1553,17 @@ EOT
 
 function installationSummary()
 {
+	local VERSIONFILE REVISION
+
 	# Crear fichero de versión y revisión, si no existe.
-	local VERSIONFILE="$INSTALL_TARGET/doc/VERSION.txt"
+	VERSIONFILE="$INSTALL_TARGET/doc/VERSION.txt"
 	[ -f $VERSIONFILE ] || echo "OpenGnsys Server" >$VERSIONFILE
 	# Incluir datos de revisión, si se está instaladno desde el repositorio
 	# de código o si no está incluida en el fichero de versión.
 	if [ $REMOTE -eq 1 ] || [ -z "$(awk '$3~/r[0-9]*/ {print}' $VERSIONFILE)" ]; then
-		local REVISION=$(curl -s "$API_URL" | jq -r ".commit.commit.committer.date" | awk '{gsub(/[^0-9]/,""); print}')
-		sed -ri "s/($| r[0-9]*)/ $REVISION/" $VERSIONFILE
+		# Revisión: rAñoMesDía.Gitcommit (8 caracteres de fecha y 7 primeros de commit).
+		REVISION=$(curl -s "$API_URL" | jq -r '"r" + (.commit.commit.committer.date | gsub("-"; "")[:8]) + "." + (.commit.sha[:7])')
+		sed -ri "s/($| r[.0-9a-f]+)/ $REVISION/" $VERSIONFILE
 	fi
 
 	# Mostrar información.
