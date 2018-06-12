@@ -29,6 +29,8 @@
 #@version 1.1.0 - Instalación de API REST y configuración de zona horaria.
 #@author  Ramón Gómez - ETSII Univ. Sevilla
 #@date    2015/11/09
+#@author  Fredy - aluque@soleta.eu
+#@date    2018/06/11
 #*/
 
 
@@ -356,6 +358,7 @@ EOT
 # Instalar las deependencias necesarias para el actualizador.
 function installDependencies()
 {
+return 0	#  Skipped. We will include all deps in .deb
 	local package
 
 	if [ $# = 0 ]; then
@@ -385,6 +388,7 @@ function installDependencies()
 
 function downloadCode()
 {
+return 0	#  Skipped. We will include all files in .deb
 	if [ $# -ne 1 ]; then
 		errorAndLog "${FUNCNAME}(): invalid number of parameters"
 		exit 1
@@ -1079,24 +1083,24 @@ if [ $? -ne 0 ]; then
 fi
 
 # Comprobar auto-actualización del programa.
-if [ "$PROGRAMDIR" != "$INSTALL_TARGET/bin" ]; then
-	checkAutoUpdate
-	if [ $? -ne 0 ]; then
-		echoAndLog "OpenGnsys updater has been overwritten"
-		echoAndLog "Please, rerun this script"
-		exit
-	fi
-fi
+#~ if [ "$PROGRAMDIR" != "$INSTALL_TARGET/bin" ]; then
+	#~ checkAutoUpdate
+	#~ if [ $? -ne 0 ]; then
+		#~ echoAndLog "OpenGnsys updater has been overwritten"
+		#~ echoAndLog "Please, rerun this script"
+		#~ exit
+	#~ fi
+#~ fi
 
 # Detectar datos de auto-configuración del instalador.
 autoConfigure
 
 # Instalar dependencias.
-installDependencies ${DEPENDENCIES[*]}
-if [ $? -ne 0 ]; then
-	errorAndLog "Error: you must to install all needed dependencies"
-	exit 1
-fi
+#~ installDependencies ${DEPENDENCIES[*]}
+#~ if [ $? -ne 0 ]; then
+	#~ errorAndLog "Error: you must to install all needed dependencies"
+	#~ exit 1
+#~ fi
 
 # Arbol de directorios de OpenGnsys.
 createDirs ${INSTALL_TARGET}
