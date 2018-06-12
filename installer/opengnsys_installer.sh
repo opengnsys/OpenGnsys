@@ -1711,7 +1711,7 @@ if [ $? -ne 0 ]; then
 	errorAndLog "Error while copying the server files!"
 	exit 1
 fi
-INSTVERSION=$(awk '{print $2}' $INSTALL_TARGET/doc/VERSION.txt)
+INSTVERSION=$(jq -r '.version' $INSTALL_TARGET/doc/VERSION.json)
 
 # Instalar base de datos de OpenGnsys Admin.
 isInArray notinstalled "mysql-server" || isInArray notinstalled "mariadb-server"
@@ -1771,7 +1771,7 @@ if [ $? -eq 0 ]; then
 	fi
 else
 	# Si existe fichero ogBDAdmin-VersLocal-VersRepo.sql; aplicar cambios.
-	REPOVERSION=$(awk '{print $2}' $WORKDIR/opengnsys/doc/VERSION.txt)
+	REPOVERSION=$(jq -r '.version' $WORKDIR/opengnsys/doc/VERSION.json)
 	OPENGNSYS_DB_UPDATE_FILE="opengnsys/admin/Database/$OPENGNSYS_DATABASE-$INSTVERSION-$REPOVERSION.sql"
  	if [ -f $WORKDIR/$OPENGNSYS_DB_UPDATE_FILE ]; then
  		echoAndLog "Updating tables from version $INSTVERSION to $REPOVERSION"

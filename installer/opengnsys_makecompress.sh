@@ -24,7 +24,7 @@ done
 BRANCH="devel"
 CODE_URL="https://codeload.github.com/opengnsys/OpenGnsys/zip/$BRANCH"
 API_URL="https://api.github.com/repos/opengnsys/OpenGnsys/branches/$BRANCH"
-REVISION=$(curl -s "$API_URL" | jq -r '"r" + (.commit.commit.committer.date | gsub("-"; "")[:8]) + "." + (.commit.sha[:7])')
+REVISION=$(curl -s "$API_URL" | jq '"r" + (.commit.commit.committer.date | gsub("-"; "")[:8]) + "." + (.commit.sha[:7])')
 
 # Descargar repositorio SVN
 cd /tmp
@@ -36,10 +36,10 @@ chown -R root.root opengnsys
 WARNING=$?
 
 # Parchear datos de revisión del código.
-sed -ri "s/$/ $REVISION/" opengnsys/doc/VERSION.txt
+jq ".release=$REVISION" opengnsys/doc/VERSION.json | sponge opengnsys/doc/VERSION.json
 
 # Generar fichero comprimido.
-VERSION=$(awk '{print $2"-"$3}' opengnsys/doc/VERSION.txt)
+VERSION=$(jq -r '.version+"-"+.release' opengnsys/doc/VERSION.json)
 tar cvzf opengnsys-$VERSION.tar.gz opengnsys
 rm -fr opengnsys opengnsys.zip
 

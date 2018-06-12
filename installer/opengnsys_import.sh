@@ -220,12 +220,12 @@ if [ $? -ne 0 ]; then
 fi
 
 # Comprobamos si es la misma versión
-OLDVERSION=$(awk '{print $2}' $TMPDIR/VERSION.txt)
-NEWVERSION=$(awk '{print $2}' $OPENGNSYS/doc/VERSION.txt)
+OLDVERSION=$(jq -r '.version' $TMPDIR/VERSION.json)
+NEWVERSION=$(jq -r '.version' $OPENGNSYS/doc/VERSION.json)
 # FALTA: Comprobar que la versión OLD es menor que la NEW
 if [ $OLDVERSION != $NEWVERSION ] ; then
     echo "La versión del servidor no coincide con la del backup."
-    cat $OPENGNSYS/doc/VERSION.txt $TMPDIR/VERSION.txt
+    jq -r '[.project, .version, .codename] | join(" ")' $OPENGNSYS/doc/VERSION.json $TMPDIR/VERSION.json
     read -p "¿Quiere continuar? (y/n): " ANSWER
     if [ "${ANSWER^^}" != "Y" ]; then
         echo "Operación cancelada."

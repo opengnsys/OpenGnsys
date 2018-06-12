@@ -446,11 +446,12 @@ function checkVersion()
 	local PRE
 
 	# Obtener versión actual y versión a actualizar.
-	OLDVERSION=$(awk '{print $2}' $INSTALL_TARGET/doc/VERSION.txt 2>/dev/null)
+	[ -f $INSTALL_TARGET/doc/VERSION.txt ] && OLDVERSION=$(awk '{print $2}' $INSTALL_TARGET/doc/VERSION.txt 2>/dev/null)
+	[ -f $INSTALL_TARGET/doc/VERSION.json ] && OLDVERSION=$(jq -r '.version' $INSTALL_TARGET/doc/VERSION.json 2>/dev/null)
 	if [ $REMOTE -eq 1 ]; then
-		NEWVERSION=$(curl -s $RAW_URL/doc/VERSION.txt 2>/dev/null | awk '{print $2}')
+		NEWVERSION=$(curl -s $RAW_URL/doc/VERSION.json 2>/dev/null | jq -r '.version')
 	else
-		NEWVERSION=$(awk '{print $2}' $PROGRAMDIR/doc/VERSION.txt 2>/dev/null)
+		NEWVERSION=$(jq -r '.version' $PROGRAMDIR/doc/VERSION.json 2>/dev/null)
 	fi
 	[[ "$NEWVERSION" =~ pre ]] && PRE=1
 
