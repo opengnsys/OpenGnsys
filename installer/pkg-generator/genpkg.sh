@@ -402,7 +402,8 @@ function createFullPackage()
 PKG_NAME="opengnsys-full"
 ROOTDIR=$PKG_GEN_PATH/$PKG_NAME
 # Delete previously package structure
-if [ -d $ROOTDIR ]; then rm -Rf $ROOTDIR; fi
+if [ -d $ROOTDIR ]; then rm -Rf $ROOTDIR && echoAndLog "Limpiando $ROOTDIR"; fi
+if [ -d $WORKDIR ]; then rm -Rf $WORKDIR && echoAndLog "Limpiando $WORKDIR"; fi
 INSTALL_TARGET=$ROOTDIR/opt/opengnsys
 mkdir -p $WORKDIR $ROOTDIR $INSTALL_TARGET
 #svn export --force $SVNURL $WORKDIR

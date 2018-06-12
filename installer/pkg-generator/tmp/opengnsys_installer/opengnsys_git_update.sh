@@ -167,32 +167,6 @@ for i in dhcpd dhcpd3-server isc-dhcp-server; do
 done
 }
 
-
-# Comprobar auto-actualización.
-function checkAutoUpdate()
-{
-	local update=0
-
-	# Actaulizar el script si ha cambiado o no existe el original.
-	if [ $REMOTE -eq 1 ]; then
-		curl -s $RAW_URL/installer/$PROGRAMNAME -o $PROGRAMNAME
-		if ! diff -q $PROGRAMNAME $INSTALL_TARGET/lib/$PROGRAMNAME 2>/dev/null || ! test -f $INSTALL_TARGET/lib/$PROGRAMNAME; then
-			mv $PROGRAMNAME $INSTALL_TARGET/lib
-			update=1
-		else
-			rm -f $PROGRAMNAME
-		fi
-	else
-		if ! diff -q $PROGRAMDIR/$PROGRAMNAME $INSTALL_TARGET/lib/$PROGRAMNAME 2>/dev/null || ! test -f $INSTALL_TARGET/lib/$PROGRAMNAME; then
-			cp -a $PROGRAMDIR/$PROGRAMNAME $INSTALL_TARGET/lib
-			update=1
-		fi
-	fi
-
-	return $update
-}
-
-
 function getDateTime()
 {
 	date "+%Y%m%d-%H%M%S"
@@ -350,82 +324,6 @@ EOT
 
         echoAndLog "${FUNCNAME}(): MySQL configuration has checked"
         return 0
-}
-
-#####################################################################
-####### Funciones de instalación de paquetes
-#####################################################################
-
-# Instalar las deependencias necesarias para el actualizador.
-function installDependencies()
-{
-return 0	#  Skipped. We will include all deps in .deb
-	local package
-
-	if [ $# = 0 ]; then
-		echoAndLog "${FUNCNAME}(): no dependencies are needed"
-	else
-		PHP5VERSION=$(apt-cache pkgnames php5 2>/dev/null | sort | head -1)
-		while [ $# -gt 0 ]; do
-			package="${1/php5/$PHP5VERSION}"
-			eval $CHECKPKG || INSTALLDEPS="$INSTALLDEPS $package"
-			shift
-		done
-		if [ -n "$INSTALLDEPS" ]; then
-			$UPDATEPKGLIST
-			$INSTALLPKGS $INSTALLDEPS
-			if [ $? -ne 0 ]; then
-				errorAndLog "${FUNCNAME}(): cannot install some dependencies: $INSTALLDEPS"
-				return 1
-			fi
-		fi
-	fi
-}
-
-
-#####################################################################
-####### Funciones para descargar código
-#####################################################################
-
-function downloadCode()
-{
-return 0	#  Skipped. We will include all files in .deb
-	if [ $# -ne 1 ]; then
-		errorAndLog "${FUNCNAME}(): invalid number of parameters"
-		exit 1
-	fi
-
-	local url="$1"
-
-	echoAndLog "${FUNCNAME}(): downloading code..."
-
-	curl "${url}" -o opengnsys.zip && unzip opengnsys.zip && mv "OpenGnsys-$BRANCH" opengnsys
-	if [ $? -ne 0 ]; then
-		errorAndLog "${FUNCNAME}(): error getting code from ${url}, verify your user and password"
-		return 1
-	fi
-	rm -f opengnsys.zip
-	echoAndLog "${FUNCNAME}(): code was downloaded"
-	return 0
-}
-
-
-############################################################
-###  Detectar red
-############################################################
-
-# Comprobar si existe conexión.
-function checkNetworkConnection()
-{
-	OPENGNSYS_SERVER=${OPENGNSYS_SERVER:-"opengnsys.es"}
-	if which curl &>/dev/null; then
-		curl --connect-timeout 10 -s $OPENGNSYS_SERVER -o /dev/null
-	elif which wget &>/dev/null; then
-		wget --spider -q $OPENGNSYS_SERVER
-	else
-		echoAndLog "${FUNCNAME}(): Cannot execute \"wget\" nor \"curl\"."
-		return 1
-	fi
 }
 
 # Comprobar si la versión es anterior a la actual.
@@ -696,52 +594,6 @@ function makeDoxygenFiles()
 	echoAndLog "${FUNCNAME}(): Doxygen web files created successfully"
 }
 
-
-# Crea la estructura base de la instalación de opengnsys
-function createDirs()
-{
-	# Crear estructura de directorios.
-	echoAndLog "${FUNCNAME}(): creating directory paths in ${INSTALL_TARGET}"
-	local dir
-
-	mkdir -p ${INSTALL_TARGET}/{bin,doc,etc,lib,sbin,www}
-	mkdir -p ${INSTALL_TARGET}/{client,images/groups}
-	mkdir -p ${INSTALL_TARGET}/log/clients
-	ln -fs ${INSTALL_TARGET}/log /var/log/opengnsys
-	# Detectar directorio de instalación de TFTP.
-	if [ ! -L ${INSTALL_TARGET}/tftpboot ]; then
-		for dir in /var/lib/tftpboot /srv/tftp; do
-			[ -d $dir ] && ln -fs $dir ${INSTALL_TARGET}/tftpboot
-		done
-	fi
-	mkdir -p $INSTALL_TARGET/tftpboot/menu.lst/examples
-	if [ $? -ne 0 ]; then
-		errorAndLog "${FUNCNAME}(): error while creating dirs. Do you have write permissions?"
-		return 1
-	fi
-	! [ -f $INSTALL_TARGET/tftpboot/menu.lst/templates/00unknown ] && mv $INSTALL_TARGET/tftpboot/menu.lst/templates/* $INSTALL_TARGET/tftpboot/menu.lst/examples
-
-	# Crear usuario ficticio.
-	if id -u $OPENGNSYS_CLIENTUSER &>/dev/null; then
-		echoAndLog "${FUNCNAME}(): user \"$OPENGNSYS_CLIENTUSER\" is already created"
-	else
-		echoAndLog "${FUNCNAME}(): creating OpenGnsys user"
-		useradd $OPENGNSYS_CLIENTUSER 2>/dev/null
-		if [ $? -ne 0 ]; then
-			errorAndLog "${FUNCNAME}(): error creating OpenGnsys user"
-			return 1
-		fi
-	fi
-
-	# Mover el fichero de registro al directorio de logs. 
-	echoAndLog "${FUNCNAME}(): moving update log file" 
-	mv $LOG_FILE $OGLOGFILE && LOG_FILE=$OGLOGFILE 
-	chmod 600 $LOG_FILE
-
-	echoAndLog "${FUNCNAME}(): directory paths created"
-	return 0
-}
-
 # Actualización incremental de la BD (versión actaul a actaul+1, hasta final-1 a final).
 function updateDatabase()
 {
@@ -795,44 +647,44 @@ function updateDatabase()
 # Copia ficheros de configuración y ejecutables genéricos del servidor.
 function updateServerFiles()
 {
-	# No copiar ficheros del antiguo cliente Initrd
-	local SOURCES=(	repoman/bin \
-			server/bin \
-			server/lib \
-			admin/Sources/Services/ogAdmServerAux \
-			admin/Sources/Services/ogAdmRepoAux \
-			server/tftpboot \
-			installer/opengnsys_uninstall.sh \
-			installer/opengnsys_export.sh \
-			installer/opengnsys_import.sh \
-			doc )
-	local TARGETS=(	bin \
-			bin \
-			lib \
-			sbin/ogAdmServerAux \
-			sbin/ogAdmRepoAux \
-			tftpboot \
-			lib/opengnsys_uninstall.sh \
-			lib/opengnsys_export.sh \
-			lib/opengnsys_import.sh \
-			doc )
+	#~ # No copiar ficheros del antiguo cliente Initrd
+	#~ local SOURCES=(	repoman/bin \
+			#~ server/bin \
+			#~ server/lib \
+			#~ admin/Sources/Services/ogAdmServerAux \
+			#~ admin/Sources/Services/ogAdmRepoAux \
+			#~ server/tftpboot \
+			#~ installer/opengnsys_uninstall.sh \
+			#~ installer/opengnsys_export.sh \
+			#~ installer/opengnsys_import.sh \
+			#~ doc )
+	#~ local TARGETS=(	bin \
+			#~ bin \
+			#~ lib \
+			#~ sbin/ogAdmServerAux \
+			#~ sbin/ogAdmRepoAux \
+			#~ tftpboot \
+			#~ lib/opengnsys_uninstall.sh \
+			#~ lib/opengnsys_export.sh \
+			#~ lib/opengnsys_import.sh \
+			#~ doc )
 
-	if [ ${#SOURCES[@]} != ${#TARGETS[@]} ]; then
-		errorAndLog "${FUNCNAME}(): inconsistent number of array items"
-		exit 1
-	fi
+	#~ if [ ${#SOURCES[@]} != ${#TARGETS[@]} ]; then
+		#~ errorAndLog "${FUNCNAME}(): inconsistent number of array items"
+		#~ exit 1
+	#~ fi
 
-	echoAndLog "${FUNCNAME}(): updating files in server directories"
-	pushd $WORKDIR/opengnsys >/dev/null
-	local i
-	for (( i = 0; i < ${#SOURCES[@]}; i++ )); do
-		if [ -d "$INSTALL_TARGET/${TARGETS[i]}" ]; then
-			rsync -irplt "${SOURCES[i]}" $(dirname $(readlink -e "$INSTALL_TARGET/${TARGETS[i]}"))
-		else
-			rsync -irplt "${SOURCES[i]}" $(readlink -m "$INSTALL_TARGET/${TARGETS[i]}")
-		fi
-	done
-	popd >/dev/null
+	#~ echoAndLog "${FUNCNAME}(): updating files in server directories"
+	#~ pushd $WORKDIR/opengnsys >/dev/null
+	#~ local i
+	#~ for (( i = 0; i < ${#SOURCES[@]}; i++ )); do
+		#~ if [ -d "$INSTALL_TARGET/${TARGETS[i]}" ]; then
+			#~ rsync -irplt "${SOURCES[i]}" $(dirname $(readlink -e "$INSTALL_TARGET/${TARGETS[i]}"))
+		#~ else
+			#~ rsync -irplt "${SOURCES[i]}" $(readlink -m "$INSTALL_TARGET/${TARGETS[i]}")
+		#~ fi
+	#~ done
+	#~ popd >/dev/null
 	NEWFILES=""		# Ficheros de configuración que han cambiado de formato.
 	if grep -q 'pxelinux.0' /etc/dhcp*/dhcpd*.conf; then
 		echoAndLog "${FUNCNAME}(): updating DHCP files"
@@ -1064,15 +916,6 @@ echoAndLog "OpenGnsys update begins at $(date)"
 
 pushd $WORKDIR
 
-# Comprobar si hay conexión y detectar parámetros de red por defecto.
-checkNetworkConnection
-if [ $? -ne 0 ]; then
-	errorAndLog "Error connecting to server. Causes:"
-	errorAndLog " - Network is unreachable, check device parameters"
-	errorAndLog " - You are inside a private network, configure the proxy service"
-	errorAndLog " - Server is temporally down, try again later"
-	exit 1
-fi
 getNetworkSettings
 
 # Comprobar si se intanta actualizar a una versión anterior.
@@ -1096,30 +939,10 @@ fi
 # Detectar datos de auto-configuración del instalador.
 autoConfigure
 
-# Instalar dependencias.
-#~ installDependencies ${DEPENDENCIES[*]}
-#~ if [ $? -ne 0 ]; then
-	#~ errorAndLog "Error: you must to install all needed dependencies"
-	#~ exit 1
-#~ fi
+# Revisar
 
-# Arbol de directorios de OpenGnsys.
-createDirs ${INSTALL_TARGET}
-if [ $? -ne 0 ]; then
-	errorAndLog "Error while creating directory paths"
-	exit 1
-fi
-
-# Si es necesario, descarga el repositorio de código en directorio temporal
-if [ $REMOTE -eq 1 ]; then
-	downloadCode $CODE_URL
-	if [ $? -ne 0 ]; then
-		errorAndLog "Error while getting code from repository"
-		exit 1
-	fi
-else
 	ln -fs "$(dirname $PROGRAMDIR)" opengnsys
-fi
+
 
 # Comprobar configuración de MySQL.
 checkMysqlConfig $OPENGNSYS_DBUSER $OPENGNSYS_DBPASSWORD
