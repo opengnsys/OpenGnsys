@@ -80,8 +80,9 @@ CODE_URL="https://codeload.github.com/opengnsys/OpenGnsys/zip/$BRANCH"
 API_URL="https://api.github.com/repos/opengnsys/OpenGnsys/branches/$BRANCH"
 RAW_URL="https://raw.githubusercontent.com/opengnsys/OpenGnsys/$BRANCH"
 
-WORKDIR=/tmp/opengnsys_update
-mkdir -p $WORKDIR
+#WORKDIR=/tmp/opengnsys_update
+WORKDIR=/tmp/opengnsys_installer
+#mkdir -p $WORKDIR
 
 # Registro de incidencias.
 OGLOGFILE=$INSTALL_TARGET/log/${PROGRAMNAME%.sh}.log 
