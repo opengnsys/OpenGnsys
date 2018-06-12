@@ -378,13 +378,6 @@ function updateClientFiles()
 	backupFile $ENGINECFG
 	echoAndLog "${FUNCNAME}(): Updating OpenGnsys Client files"
 
-	# Actualizar librerías del motor de clonación.
-	echoAndLog "${FUNCNAME}(): Updating OpenGnsys Cloning Engine files"
-	rsync -irplt $WORKDIR/opengnsys/client/engine/*.lib* $INSTALL_TARGET/client/lib/engine/bin
-	if [ $? -ne 0 ]; then
-		errorAndLog "${FUNCNAME}(): error while updating engine files"
-		exit 1
-	fi
 	# Actualizar fichero de configuración del motor de clonación.
 	if ! grep -q "^TZ" $ENGINECFG; then
 		TZ=$(timedatectl status | awk -F"[:()]" '/Time.*zone/ {print $2}')
