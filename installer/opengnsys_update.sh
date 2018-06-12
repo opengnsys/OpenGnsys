@@ -1028,17 +1028,19 @@ function updateSummary()
 {
 	# Actualizar fichero de versión y revisión.
 	local VERSIONFILE REVISION
-	VERSIONFILE="$INSTALL_TARGET/doc/VERSION.txt"
+	VERSIONFILE="$INSTALL_TARGET/doc/VERSION.json"
 	# Revisión: rAñoMesDía.Gitcommit (8 caracteres de fecha y 7 primeros de commit).
-	REVISION=$(curl -s "$API_URL" | jq -r '"r" + (.commit.commit.committer.date | gsub("-"; "")[:8]) + "." + (.commit.sha[:7])')
-
-	[ -f $VERSIONFILE ] || echo "OpenGnsys" >$VERSIONFILE
-	sed -ri "s/($| r[.0-9a-f]+)/ $REVISION/" $VERSIONFILE
+	REVISION=$(curl -s "$API_URL" | jq '"r" + (.commit.commit.committer.date | gsub("-"; "")[:8]) + "." + (.commit.sha[:7])')
+	[ -f $VERSIONFILE ] || echo '{ "project": "OpenGnsys" }' > $VERSIONFILE
+	jq ".release=$REVISION" $VERSIONFILE | sponge $VERSIONFILE
+	VERSION="$(jq -r '[.project, .version, .codename, .release] | join(" ")' $VERSIONFILE 2>/dev/null)"
+	# Borrar antiguo fichero de versión.
+	rm -f "${VERSIONFILE/json/txt}"
 
 	echo
 	echoAndLog "OpenGnsys Update Summary"
 	echo       "========================"
-	echoAndLog "Project version:                  $(cat $VERSIONFILE)"
+	echoAndLog "Project version:                  $VERSION"
 	echoAndLog "Update log file:                  $LOG_FILE"
 	if [ -n "$NEWFILES" ]; then
 		echoAndLog "Check new config files:           $(echo $NEWFILES)"
