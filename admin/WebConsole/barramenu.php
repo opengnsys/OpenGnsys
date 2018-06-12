@@ -13,7 +13,7 @@ if(stripos($device,'iphone') !== false ){$device="iphone";}
 elseif  (stripos($device,'ipad') !== false) {$device="ipad";}
 elseif (stripos($device,'android') !== false){$device="android";}
 else{$device=0;}
-$version=exec("cat /opt/opengnsys/doc/VERSION.txt");
+$version=@json_decode(file_get_contents("/opt/opengnsys/doc/VERSION.json"))->version;
 if(preg_match("/1.0.4/",$version) == TRUE ){$version=4;}
 // ********************************************************************************************************
 include_once("./includes/ctrlacc.php");

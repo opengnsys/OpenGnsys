@@ -152,6 +152,13 @@ $vernav=end($buscavernav);
 
 if ($device == "ipad" || $device == "iphone" || $device == "android" )
 {
+$data = json_decode(@file_get_contents(__DIR__ . '/../doc/VERSION.json'));
+if (empty($data->project)) {
+    $version = "OpenGnsys";
+} else {
+    $version = @$data->project.' ' . @$data->version.' '
+             . (isset($data->codename) ? '('.$data->codename.') ' : '') . @$data->release;
+}
 ?>
 <html>
 <head>
@@ -168,7 +175,7 @@ if ($device == "ipad" || $device == "iphone" || $device == "android" )
     <td colspan="3" align="center"><SPAN align=center class=cabeceras><font size="4"><?php echo $TbMsg[0] ;?></font></SPAN></td>
   </tr>
   <tr>
-    <td colspan="3" align="center"><SPAN align=center class=cabeceras><font size="4"><?php $versionfile="../doc/VERSION.txt";if (file_exists ($versionfile)){include ($versionfile);} ;?></font></SPAN></td>
+    <td colspan="3" align="center"><SPAN align=center class=cabeceras><font size="4"><?php echo $version; ?></font></SPAN></td>
   </tr>
   <tr>
     <td colspan="3" align="center">&nbsp;</td>

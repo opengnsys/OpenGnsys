@@ -220,7 +220,8 @@ if [ $? -ne 0 ]; then
 fi
 
 # Comprobamos si es la misma versión
-OLDVERSION=$(jq -r '.version' $TMPDIR/VERSION.json)
+[ -f $TMPDIR/VERSION.txt ] && OLDVERSION=$(awk '{print $2}' $TMPDIR/VERSION.txt)
+[ -f $TMPDIR/VERSION.json ] && OLDVERSION=$(jq -r '.version' $TMPDIR/VERSION.json)
 NEWVERSION=$(jq -r '.version' $OPENGNSYS/doc/VERSION.json)
 # FALTA: Comprobar que la versión OLD es menor que la NEW
 if [ $OLDVERSION != $NEWVERSION ] ; then

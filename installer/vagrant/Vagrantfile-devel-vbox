@@ -25,7 +25,7 @@ LOCALWEBPORT = 8443
 # OpenGnsys Server provisioning script: prepare repo disk, install OpenGnsys, change default interface, configure DHCP server.
 OGSERVERSCRIPT = <<EOT
 # Exit if OpenGnsys is installed.
-[ -f /opt/opengnsys/doc/VERSION.txt ] && echo "Cannot provision, OpenGnsys is already installed." && exit 1
+[ -f /opt/opengnsys/doc/VERSION.json ] && echo "Cannot provision, OpenGnsys is already installed." && exit 1
 # Create repository disk using LVM, if necesary.
 if [ -z "$(blkid /dev/mapper/og-images | grep ext4)" ]; then
     pvcreate /dev/sdb
