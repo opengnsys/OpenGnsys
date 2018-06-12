@@ -487,11 +487,11 @@ function updateWebFiles()
 
 	# Copiar los ficheros nuevos conservando el archivo de configuración de acceso.
 	backupFile $INSTALL_TARGET/www/controlacceso.php
-	mv $INSTALL_TARGET/www $INSTALL_TARGET/WebConsole
-	rsync -irplt $WORKDIR/opengnsys/admin/WebConsole $INSTALL_TARGET
-	ERRCODE=$?
-	mv $INSTALL_TARGET/WebConsole $INSTALL_TARGET/www
-	unzip -o $WORKDIR/opengnsys/admin/xajax_0.5_standard.zip -d $INSTALL_TARGET/www/xajax
+	#~ mv $INSTALL_TARGET/www $INSTALL_TARGET/WebConsole
+	#~ rsync -irplt $WORKDIR/opengnsys/admin/WebConsole $INSTALL_TARGET
+	#~ ERRCODE=$?
+	#~ mv $INSTALL_TARGET/WebConsole $INSTALL_TARGET/www
+#	unzip -o $WORKDIR/opengnsys/admin/xajax_0.5_standard.zip -d $INSTALL_TARGET/www/xajax
 	unzip -o $WORKDIR/opengnsys/admin/slim-2.6.1.zip -d $INSTALL_TARGET/www/rest
 	unzip -o $WORKDIR/opengnsys/admin/swagger-ui-2.2.5.zip -d $INSTALL_TARGET/www/rest
 	if [ $ERRCODE != 0 ]; then
