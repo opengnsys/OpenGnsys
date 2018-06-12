@@ -377,11 +377,6 @@ function updateClientFiles()
 	# Actualizar ficheros del cliente.
 	backupFile $ENGINECFG
 	echoAndLog "${FUNCNAME}(): Updating OpenGnsys Client files"
-	rsync -irplt $WORKDIR/opengnsys/client/shared/* $INSTALL_TARGET/client
-	if [ $? -ne 0 ]; then
-		errorAndLog "${FUNCNAME}(): error while updating client structure"
-		exit 1
-	fi
 
 	# Actualizar librerías del motor de clonación.
 	echoAndLog "${FUNCNAME}(): Updating OpenGnsys Cloning Engine files"
@@ -798,7 +793,8 @@ function compileServices()
 function updateClient()
 {
 	#local FILENAME=ogLive-precise-3.2.0-23-generic-r5159.iso       # 1.1.0-rc6 (old)
-	local FILENAME=ogLive-xenial-4.8.0-39-generic-amd64-r5331.iso   # 1.1.0-rc6
+	#local FILENAME=ogLive-xenial-4.8.0-39-generic-amd64-r5331.iso   # 1.1.0-rc6
+	local FILENAME=ogLive-xenial-4.13.0-17-generic-amd64-r5520.iso
 	local SOURCEFILE=$DOWNLOADURL/$FILENAME
 	local TARGETFILE=$(oglivecli config download-dir)/$FILENAME
 	local SOURCELENGTH
