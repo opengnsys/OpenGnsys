@@ -411,6 +411,9 @@ mkdir -p $WORKDIR $ROOTDIR $INSTALL_TARGET
 #downloadCode $CODE_URL
 # for testing and development:
 git clone gituser@opengnsys.es:/git/opengnsys -b $DEV_BRANCH $WORKDIR
+# for local testing and development:
+#cp -a /home/fredy/opgn/git-repo/* $WORKDIR
+
 mkdir -p $ROOTDIR/DEBIAN $ROOTDIR/tmp
 echoAndLog "Copying $WORKDIR/pkg-generator/* to $ROOTDIR"
 cp -a $WORKDIR/installer/pkg-generator/* $ROOTDIR
