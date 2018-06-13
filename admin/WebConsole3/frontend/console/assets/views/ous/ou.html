@@ -1,0 +1,121 @@
+<section class="content-header">
+  <h1>
+  		<span translate="ou"></span> {{vm.vm.ou.name}}
+  </h1>
+  <ol class="breadcrumb">
+    <li><a ui-sref="app.dashboard"><i class="fa fa-dashboard"></i> {{'dashboard'|translate}}</a></li>
+    <li><a ui-sref="app.ous" ><i class="fa fa-th"></i> {{'ous'|translate}}</a></li>
+    <li class="active" translate="ou"></li>
+  </ol>
+</section>
+<section fixed-toolboxbar class="toolboxbar">
+	<div>
+		<div class="col-md-12">
+			<div class="box-tools pull-right">
+				<button class="btn btn-primary" translate="save" ng-click="vm.save()"></button>
+			</div>
+		</div>
+	</div>
+</section>
+<section class="content">
+	<!-- /.row -->
+	<div class="row">
+		<form role="form" name="vm.ouForm">
+			 <div class="col-lg-12">
+			    <div class="panel panel-primary">
+			     	<div class="panel-heading" translate="main_options">
+		            </div>
+		            <div class="panel-body">
+					    <div class="form-group" ng-class="{'has-error':vm.ouForm.name.$dirty && vm.ouForm.name.$invalid, 'has-success':vm.ouForm.name.$valid}">
+					        <label for="name" translate="name"></label>
+					        <input ng-model="vm.ou.name" name="name" required="true" class="form-control">
+					    </div>
+					    <div class="form-group">
+					        <label translate="description"></label>
+					        <textarea ng-model="vm.ou.description" class="form-control"></textarea>
+					    </div>
+					</div>
+				</div>
+			</div>
+		    <div class="col-lg-12">
+			    <div class="panel panel-primary">
+			     	<div class="panel-heading" translate="connectivity_options">
+		            </div>
+		            <div class="panel-body">
+					    <div>
+					     	<div class="col-md-4 form-group" ng-class="{'has-error':vm.ouForm.router.$dirty && vm.ouForm.router.$invalid, 'has-success':vm.ouForm.router.$valid}" >
+						        <label translate="router_ip"></label>
+						        <input type="text" name="router" required="true" ng-model="vm.ou.networkSettings.router" class="form-control">
+					        </div>
+					        <div class="col-md-4 form-group" ng-class="{'has-error':vm.ouForm.netmask.$dirty && vm.ouForm.netmask.$invalid, 'has-success':vm.ouForm.netmask.$valid}" >
+						        <label translate="netmask"></label>
+						        <input type="text" name="netmask" required="true" ng-model="vm.ou.networkSettings.netmask" class="form-control">
+					        </div>
+					         <div class="col-md-4 form-group" ng-class="{'has-error':vm.ouForm.proxy.$dirty && vm.ouForm.proxy.$invalid, 'has-success':vm.ouForm.proxy.$valid}">
+						        <label translate="proxy"></label> (<span translate="optional"></span>)
+						        <input type="text" name="proxy" ng-model="vm.ou.networkSettings.proxy" class="form-control">
+					        </div>
+						</div>
+						<div class="form-group">
+					         <div class="col-md-4 form-group" ng-class="{'has-error':vm.ouForm.dns.$dirty && vm.ouForm.dns.$invalid, 'has-success':vm.ouForm.dns.$valid}" >
+						        <label translate="dns"></label> (<span translate="optional"></span>)
+						        <input type="text" name="dns" ng-model="vm.ou.networkSettings.dns" class="form-control">
+					        </div>
+					        <div class="col-md-4 form-group" ng-class="{'has-error':vm.ouForm.ntp.$dirty && vm.ouForm.ntp.$invalid, 'has-success':vm.ouForm.ntp.$valid}">
+						        <label translate="ntp"></label> (<span translate="optional"></span>)
+						        <input type="text" name="ntp" ng-model="vm.ou.networkSettings.ntp" class="form-control">
+						        <p class="help-block" translate="ntp_hint"></p>
+					        </div>
+					    </div>
+				    </div>
+			    </div>
+		    </div>
+		    <div class="col-lg-12">
+			    <div class="panel panel-primary">
+		            <div class="panel-heading" translate="multicast_options">
+		            </div>
+		            <div class="panel-body">
+		                <div>
+					     	<div class="col-md-3 form-group" ng-class="{'has-error':vm.ouForm.mcastMode.$dirty && vm.ouForm.mcastMode.$invalid, 'has-success':vm.ouForm.mcastMode.$valid}" >
+						        <label translate="multicast_mode"></label>
+						        <select name="mcastMode" required="true" ng-options="mode as mode for mode in constants.ou.options.multicast.modes" ng-model="vm.ou.networkSettings.mcastMode" class="form-control"></select>
+					        </div>
+					        <div class="col-md-3 form-group" ng-class="{'has-error':vm.ouForm.mcastIp.$dirty && vm.ouForm.mcastIp.$invalid, 'has-success':vm.ouForm.mcastIp.$valid}" >
+						        <label translate="multicast_ip"></label>
+						        <input name="mcastIp" required="true" type="text" ng-model="vm.ou.networkSettings.mcastIp" class="form-control">
+						        <p class="help-block">Ej. 239.194.{{vm.ou.networkSettings.router.split(".")[1]+"."+vm.ou.networkSettings.router.split(".")[2]}}</p>
+					        </div>
+					        <div class="col-md-3 form-group" ng-class="{'has-error':vm.ouForm.mcastPort.$dirty && vm.ouForm.mcastPort.$invalid, 'has-success':vm.ouForm.mcastPort.$valid}" >
+						        <label translate="multicast_port"></label>
+						        <select name="mcastPort" required="true" ng-options="port as port for port in constants.ou.options.multicast.ports()" ng-model="vm.ou.networkSettings.mcastPort" class="form-control"></select>
+					        </div>
+					        <div class="col-md-3 form-group" ng-class="{'has-error':vm.ouForm.mcastSpeed.$dirty && vm.ouForm.mcastSpeed.$invalid, 'has-success':vm.ouForm.mcastSpeed.$valid}" >
+						        <label translate="multicast_speed"></label>
+						        <input name="mcastSpeed" required="true" type="text" ng-model="vm.ou.networkSettings.mcastSpeed" class="form-control">
+					        </div>
+					    </div>
+		            </div>
+		        </div>
+		    </div>
+		      <div class="col-lg-12">
+			    <div class="panel panel-primary">
+		            <div class="panel-heading" translate="p2p_options">
+		            </div>
+		            <div class="panel-body">
+		                <div>
+					     	<div class="col-md-6 form-group" ng-class="{'has-error':vm.ouForm.p2pMode.$dirty && vm.ouForm.p2pMode.$invalid, 'has-success':vm.ouForm.p2pMode.$valid}" >
+						        <label translate="p2p_mode"></label>
+						        <select name="p2pMode" required="true" ng-options="mode as mode for mode in constants.ou.options.p2p.modes" ng-model="vm.ou.networkSettings.p2pMode" class="form-control"></select>
+					        </div>
+					        <div class="col-md-6 form-group" ng-class="{'has-error':vm.ouForm.p2pTime.$dirty && vm.ouForm.p2pTime.$invalid, 'has-success':vm.ouForm.p2pTime.$valid}" >
+						        <label translate="p2p_time"></label>
+						        <input name="p2pTime" required="true" type="text" ng-model="vm.ou.networkSettings.p2pTime" class="form-control">
+					        </div>
+					    </div>
+		            </div>
+		        </div>
+		    </div>
+		   
+		</form>
+	</div>
+</section>

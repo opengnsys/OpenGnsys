@@ -1,0 +1,192 @@
+  <!-- Logo -->
+  <a href="index2.html" class="logo">
+    <img src="assets/img/logo-og-64.png">
+    <!-- mini logo for sidebar mini 50x50 pixels -->
+    <span class="logo-mini">{{app.shortName}}</span>
+    <!-- logo for regular state and mobile devices -->
+    <span class="logo-lg">{{app.name}}</span>
+  </a>
+
+  <!-- Header Navbar: style can be found in header.less -->
+  <nav class="navbar navbar-static-top">
+    <!-- Sidebar toggle button-->
+    <a href="javascript:void(0)" class="sidebar-toggle" data-toggle="offcanvas" role="button" ng-click="collapse()">
+      <span class="sr-only">Toggle navigation</span>
+    </a>
+    <!-- Navbar Right Menu -->
+    <div class="navbar-custom-menu">
+      <ul class="nav navbar-nav">
+        <!-- Messages: style can be found in dropdown.less-->
+        <!--li class="dropdown messages-menu">
+          <a href="javascript:void(0)" class="dropdown-toggle" data-toggle="dropdown">
+            <i class="fa fa-envelope-o"></i>
+            <span class="label label-success">4</span>
+          </a>
+          <ul class="dropdown-menu">
+            <li class="header">You have 4 messages</li>
+            <li>
+              <!-- inner menu: contains the actual data --
+              <ul class="menu">
+                <li><!-- start message --
+                  <a href="javascript:void(0)">
+                    <div class="pull-left">
+                      <img src="assets/img/user2-160x160.jpg" class="img-circle" alt="User Image">
+                    </div>
+                    <h4>
+                      Support Team
+                      <small><i class="fa fa-clock-o"></i> 5 mins</small>
+                    </h4>
+                    <p>Why not buy a new awesome theme?</p>
+                  </a>
+                </li>
+                <!-- end message --
+                <li>
+                  <a href="javascript:void(0)">
+                    <div class="pull-left">
+                      <img src="assets/img/user3-128x128.jpg" class="img-circle" alt="User Image">
+                    </div>
+                    <h4>
+                      AdminLTE Design Team
+                      <small><i class="fa fa-clock-o"></i> 2 hours</small>
+                    </h4>
+                    <p>Why not buy a new awesome theme?</p>
+                  </a>
+                </li>
+                <li>
+                  <a href="javascript:void(0)">
+                    <div class="pull-left">
+                      <img src="assets/img/user4-128x128.jpg" class="img-circle" alt="User Image">
+                    </div>
+                    <h4>
+                      Developers
+                      <small><i class="fa fa-clock-o"></i> Today</small>
+                    </h4>
+                    <p>Why not buy a new awesome theme?</p>
+                  </a>
+                </li>
+                <li>
+                  <a href="javascript:void(0)">
+                    <div class="pull-left">
+                      <img src="assets/img/user3-128x128.jpg" class="img-circle" alt="User Image">
+                    </div>
+                    <h4>
+                      Sales Department
+                      <small><i class="fa fa-clock-o"></i> Yesterday</small>
+                    </h4>
+                    <p>Why not buy a new awesome theme?</p>
+                  </a>
+                </li>
+                <li>
+                  <a href="javascript:void(0)">
+                    <div class="pull-left">
+                      <img src="assets/img/user4-128x128.jpg" class="img-circle" alt="User Image">
+                    </div>
+                    <h4>
+                      Reviewers
+                      <small><i class="fa fa-clock-o"></i> 2 days</small>
+                    </h4>
+                    <p>Why not buy a new awesome theme?</p>
+                  </a>
+                </li>
+              </ul>
+            </li>
+            <li class="footer"><a href="javascript:void(0)">See All Messages</a></li>
+          </ul>
+        </li-->
+        <!-- Notifications: style can be found in dropdown.less -->
+        <li class="dropdown notifications-menu" ng-controller="TracesController as vm">
+          <a ui-sref="app.traces" ng-if="executionTasks.length == 0" class="dropdown-toggle" data-toggle="dropdown">
+            <i class="fa fa-bell-o"></i>
+            <span class="label label-warning" ng-if="executionTasks.length > 0">{{executionTasks.length}}</span>
+          </a>
+          <a href="javascript:void(0)" ng-if="executionTasks.length > 0" class="dropdown-toggle" data-toggle="dropdown">
+            <i class="fa fa-bell-o"></i>
+            <span class="label label-warning" ng-if="executionTasks.length > 0">{{executionTasks.length}}</span>
+          </a>
+          <ul class="dropdown-menu" ng-if="executionTasks.length > 0">
+            <li class="header">
+              <span translate="you_have_x_exectution_taks" translate-values="{values: executionTasks.length}"></span>
+            </li>
+            <li>
+              <!-- inner menu: contains the actual data -->
+              <ul class="menu" ng-repeat="task in executionTasks|limitTo:5">
+                <li>
+                  <div href="javascript:void(0)" class="pull-right btn-group-vertical">
+                    <a href="javascript:void(0)" ng-click="vm.deleteExecutionTace(task)" class="btn btn-sm pull-right small-box-footer">
+                      <i class="fa fa-times"></i>
+                    </a>
+                    <a href="javascript:void(0)" ng-click="vm.relaunchExecutionTask(task)" class="btn btn-sm pull-right small-box-footer">
+                      <i class="fa fa-refresh"></i>
+                    </a>
+                  </div>
+                  <a href="javascript:void(0)" ng-click="OGCommandsService.execute('REALTIME_LOG', {clientIp: task.client.ip})">
+                    <i class="fa fa-warning text-yellow"></i> {{task.client.name}} ({{task.client.ip}})<br>{{task.commandType|translate}}
+                  </a>
+                </li>
+              </ul>
+            </li>
+            <li class="footer"><a href="javascript:void(0)" translate="view_all" ui-sref="app.traces"></a></li>
+          </ul>
+        </li>
+        <!-- Tasks: style can be found in dropdown.less -->
+        <li class="dropdown tasks-menu">
+          <a href="javascript:void(0)" class="dropdown-toggle" data-toggle="dropdown">
+            <i class="fa fa-language"></i>
+            <span translate="language"></span>
+          </a>
+          <ul class="dropdown-menu fit">
+            <li ng-repeat="lang in constants.languages" >
+              <a href="javascript:void(0)" ng-click="OGCommonService.changeLanguage(lang.id)">{{lang.name}}</a>
+            </li>
+          </ul>
+        </li>
+        <!-- User Account: style can be found in dropdown.less -->
+        <li class="dropdown user user-menu">
+          <a href="javascript:void(0)" class="dropdown-toggle" data-toggle="dropdown">
+            <img src="assets/img/no-image.png" class="user-image" alt="User Image">
+            <span class="hidden-xs">{{user.username}}</span>
+          </a>
+          <ul class="dropdown-menu">
+            <!-- User image -->
+            <li class="user-header">
+              <img src="assets/img/no-image.png" class="img-circle" alt="User Image">
+
+              <p>
+                {{user.username}} - Web Admin
+                <small>Member since Nov. 2012</small>
+              </p>
+            </li>
+            <!-- Menu Body -->
+            <li class="user-body">
+              <div class="row">
+                <div class="col-xs-4 text-center">
+                  <span></span>
+                </div>
+                <div class="col-xs-4 text-center">
+                  <span></span>
+                </div>
+                <div class="col-xs-4 text-center">
+                  <a ui-sref="app.users">Users</a>
+                </div>
+              </div>
+              <!-- /.row -->
+            </li>
+            <!-- Menu Footer-->
+            <li class="user-footer">
+              <div class="pull-left">
+                <a href="javascript:void(0)" class="btn btn-default btn-flat" translate="profile" ui-sref="app.user.profile"></a>
+              </div>
+              <div class="pull-right" ng-controller="LoginController as vm">
+                <a href="javascript:void(0)" ng-click="vm.logout()" class="btn btn-default btn-flat">Sign out</a>
+              </div>
+            </li>
+          </ul>
+        </li>
+        <!-- Control Sidebar Toggle Button -->
+        <li>
+          <a href="javascript:void(0)" data-toggle="control-sidebar"><i class="fa fa-gears"></i></a>
+        </li>
+      </ul>
+    </div>
+
+  </nav>

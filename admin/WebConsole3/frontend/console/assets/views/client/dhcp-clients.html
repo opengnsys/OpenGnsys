@@ -1,0 +1,127 @@
+<section class="content-header">
+  <h1 translate="dhcp_clients">
+  </h1>
+  <ol class="breadcrumb">
+    <li><a ui-sref="app.dashboard"><i class="fa fa-dashboard"></i> {{'dashboard'|translate}}</a></li>
+    <li><a ui-sref="app.ous" ><i class="fa fa-th"></i> {{'ous'|translate}}</a></li>
+    <li class="active" translate="dhcp_clients"></li>
+  </ol>
+</section>
+<section fixed-toolboxbar class="toolboxbar">
+	<div>
+		<div class="col-md-12">
+			<div class="box-tools pull-right">
+				<button class="btn btn-primary" translate="save" ng-click="vm.save()"></button>
+			</div>
+		</div>
+	</div>
+</section>
+<section class="content">
+	<div class="row">
+		<div class="col-md-12">
+			<div class="box box-primary">
+				<div class="box-header with-border">
+					<h3 class="box-title" translate="load_clients_from_dhcp"></h3>
+					<div ng-if="vm.clients.length == 0" class="btn-group pull-right">
+						<button type="button" name="search" id="search-btn" class="btn btn-flat" ng-click="vm.downloadFromServer()">
+							<i class="fa fa-download"></i>
+							<span translate="download_from_server"></span>
+						</button>
+						<button class="btn btn-primary" ng-click="vm.proccessDhcp()" translate="proccess_dhcp"></button>
+					</div>
+					<div ng-if="vm.clients.length > 0" class="pull-right">
+						<button class="btn btn-danger" ng-click="vm.clients = []" translate="back"></button>
+					</div>
+		        </div>
+		        <div ng-if="vm.clients.length == 0" class="box-body">
+		        	<div class="row">
+						<div class="col-md-12">
+			            	<textarea ng-model="vm.dhcpText" class="og-instructions">
+			            		
+			            	</textarea>
+			            </div>
+	            	</div>
+				</div>
+				<div class="box-body" ng-if="vm.clients.length > 0">
+					<div class="row">
+						<div class="col-md-12">
+							<div class="box box-default">
+					            <div class="box-header with-border">
+					              <h3 class="box-title" translate="common_options"></h3>
+					            </div>
+				            	<div class="box-body">
+									<div class="row">
+										<div class="col-xs-2">
+											<div class="form-group">
+												<label class="control-label" for="repository" translate="repository"></label>
+												<select name="repository" ng-options="repository.id as repository.name for repository in vm.repositories" class="form-control" ng-model="vm.commonProperties.repository"></select>
+											</div>
+										</div>
+										<div class="col-xs-2">
+											<div class="form-group">
+												<label class="control-label" for="hardwareProfile" translate="hardware_profile"></label>
+												<select name="hardwareProfile" ng-options="profile.id as profile.description for profile in vm.hardwareProfiles" class="form-control" ng-model="vm.commonProperties.hardwareProfile"></select>
+											</div>
+										</div>
+										<div class="col-xs-1">
+											<div class="form-group">
+												<label class="control-label" for="netiface" translate="netiface"></label>
+												<input type="text" name="netiface" class="form-control" ng-model="vm.commonProperties.netiface"></select>
+											</div>
+										</div>
+										<div class="col-xs-2">
+											<div class="form-group">
+												<label class="control-label" for="netdriver" translate="netdriver"></label>
+												<input type="text" name="netdriver" class="form-control" ng-model="vm.commonProperties.netdriver"></select>
+											</div>
+										</div>
+										<div class="form-group col-md-3">
+											<label for="oglive" translate="oglive">
+												<span class="symbol required ng-scope"></span>
+											</label>
+											<select class="form-control" ng-options="item as item.directory for item in constants.ogliveinfo track by item.directory" required="true" ng-model="vm.commonProperties.oglive" name="oglive"><select>
+										</div>
+										<div class="form-group col-md-2">
+											<label for="netboot" translate="netboot">
+												<span class="symbol required ng-scope"></span>
+											</label>
+											<select class="form-control" ng-options="item as item.name for item in vm.netboots track by item.id" required="true" ng-model="vm.commonProperties.netboot" name="netboot"></select>
+										</div>
+									</div>
+				            	</div>
+				            <!-- /.box-body -->
+				          </div>
+						</div>
+						<div class="col-md-12">
+							<table class="table table-striped">
+								<thead>
+									<tr>
+										<th>
+											<input icheck checkbox-class="icheckbox_square-blue" radio-class="iradio_square-blue" type="checkbox" class="selection-checkbox" ng-change="vm.selectedUnselectAll()" ng-model="vm.selectAll" />
+											<span translate="select"></span>
+										</th>
+										<th translate="name"></th>
+										<th translate="ip"></th>
+										<th translate="mac"></th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr ng-repeat="client in vm.clients">
+										<td>
+											<input icheck checkbox-class="icheckbox_square-blue" radio-class="iradio_square-blue" type="checkbox" class="selection-checkbox" ng-model="client.$$selected" />
+										</td>
+										<td>{{client.name}}</td>
+										<td>{{client.ip}}</td>
+										<td>{{client.mac}}</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+				<div class="box-footer">
+				</div>
+			</div>
+		</div>
+	</div>
+</section>

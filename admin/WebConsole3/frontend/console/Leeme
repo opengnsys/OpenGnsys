@@ -1,0 +1,7 @@
+Install nodejs y npm
+https://www.digitalocean.com/community/tutorials/how-to-install-node-js-on-an-ubuntu-14-04-server
+
+
+ln -s /usr/local/lib/node_modules/ node_modules
+
+npm install gulp-contains gulp-util gulp-find gulp-debug gulp-replace gulp-minify-css gulp-uncss jshint gulp-jshint gulp-uglify gulp-imagemin gulp-rename gulp-clean gulp-concat gulp-notify gulp-if gulp-useref gulp-angular-templatecache gulp-jsonminify gulp-clean gulp-l10n gulp-inject gulp-string-replace through-gulp gulp-angular-translate-extract 

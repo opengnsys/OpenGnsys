@@ -1,0 +1,90 @@
+<section class="content-header">
+  <h1 translate="create_image">
+  </h1>
+  <ol class="breadcrumb">
+    <li><a ui-sref="app.dashboard"><i class="fa fa-dashboard"></i>{{'dashboard'|translate}}</a></li>
+    <li><a ui-sref="app.ous"><i class="fa fa-th"></i>{{'ous'|translate}}</a></li>
+    <li class="active" translate="create_image"></li>
+  </ol>
+</section>
+<section fixed-toolboxbar class="toolboxbar">
+	<div>
+		<div class="col-md-12">
+			<div class="box-tools pull-right">
+				<button class="btn btn-primary" translate="execute" ng-click="vm.sendCommand()"></button>
+			</div>
+		</div>
+	</div>
+</section>
+<section style="padding: 0 30px;">
+	<h3 translate="selected_clients"></h3>
+	<ng-include src="'assets/views/partials/og-options/og-selected-clients.html'"></ng-include>
+</section>
+<!-- Main content -->
+<section class="content">
+	<div class="row">
+		<div class="col-md-12">
+			<div class="box box-primary" ng-repeat="(key, clients) in vm.clientGroups">
+				<div class="box-header with-border">
+				</div>
+				<div class="box-body">
+					<div>
+						<div class="form-group">
+							<span translate="clients"></span>
+							<label ng-repeat="client in clients">								
+								{{client.name}}
+							</label>
+						</div>
+						<div>
+							<table class="table" ng-init="client = clients[0]">
+								<thead>
+									<tr>
+										<th translate="select">
+										</th>
+										<th translate="disk">
+										</th>
+										<th translate="partition">
+										</th>
+										<th translate="type">
+										</th>
+										<th translate="filesystem">
+										</th>
+										<th translate="size">
+										</th>
+										<th translate="osname">
+										</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr ng-init="partitionTypes = vm.getPartitionTypes(client.partitions)" ng-repeat="partition in client.partitions" ng-if="partition.numPartition != 0 && partition.size > 0">
+										<td>
+											<input icheck type="checkbox" checkbox-class="icheckbox_square-blue" radio-class="iradio_square-blue" type="checkbox" class="selection-checkbox" ng-model="partition.selected" ng-value="true" />
+										</td>
+										<td>
+											{{partition.numDisk}}
+										</td>
+										<td>
+											{{partition.numPartition}}
+										</td>
+										<td>
+											<select ng-model="partition.partitionCode" ng-options="type.id as type.type for type in partitionTypes"></select>
+										</td>
+										<td>
+											<select ng-model="partition.filesystem" ng-options="filesystem for filesystem in constants.filesystems"></select>
+										</td>
+										<td>
+											{{OGCommonService.getUnits(partition.size*1024)}}
+										</td>
+										<td>
+											{{partition.osName}}
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>

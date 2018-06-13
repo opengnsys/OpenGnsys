@@ -1,0 +1,63 @@
+<ui-view>
+  <section class="content-header">
+    <h1 translate="software">
+    </h1>
+    <ol class="breadcrumb">
+      <li><a ui-sref="app.dashboard"><i class="fa fa-dashboard"></i> {{'dashboard'|translate}}</a></li>
+      <li class="active" translate="software"></li>
+    </ol>
+  </section>
+    <section fixed-toolboxbar class="toolboxbar">
+    <div >
+      <div class="col-md-12">
+        <div class="input-group">
+            <input type="text" name="q" class="form-control" placeholder="{{'search'|translate}}..." ng-model="vm.searchText">
+                <span class="input-group-btn">
+                  <button type="button" name="search" id="search-btn" class="btn btn-flat"><i class="fa fa-search"></i>
+                  </button>
+                </span>
+          </div>
+      </div>
+      <div class="col-md-12" style="margin-top: 5px;margin-bottom: 5px;">
+          <div class="box-tools pull-right">
+            <div class="btn-group">
+              <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                  <span translate="new"></span><span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu">
+                  <li role="presentation"><a role="menuitem" tabindex="-1" ui-sref="app.software.profile.new" translate="profile"></a></li>
+                  <li role="presentation"><a role="menuitem" tabindex="-1" ui-sref="app.software.component.new"  translate="component"></a></li>
+                  <!--li role="presentation"><a role="menuitem" tabindex="-1" ui-sref="app.software.type.new"  translate="software_type"></a></li-->
+                </ul>
+            </div>
+          </div>
+      </div>
+    </div>
+  </section>
+  <section class="content">
+    <div class="row">
+      <span style="padding: 0 10px"></span>
+      <div class="col-md-12">
+        <div class="nav-tabs-custom">
+          <ul class="nav nav-tabs">
+            <li class="active"><a href="javascript:void(0)" data-target="#tab_1" data-toggle="tab" aria-expanded="false" translate="software_profiles"></a></li>
+            <li class=""><a href="javascript:void(0)" data-target="#tab_2" data-toggle="tab" aria-expanded="false" translate="software_components"></a></li>
+            <li class=""><a href="javascript:void(0)" data-target="#tab_3" data-toggle="tab" aria-expanded="true" translate="software_types"></a></li>
+          </ul>
+          <div class="tab-content">
+            <div class="tab-pane active" id="tab_1" ng-include="'assets/views/software/software-profiles.html'">
+            </div>
+            <!-- /.tab-pane -->
+            <div class="tab-pane" id="tab_2" ng-include="'assets/views/software/software-components.html'">
+            </div>
+            <!-- /.tab-pane -->
+            <div class="tab-pane " id="tab_3" ng-include="'assets/views/software/software-types.html'">
+            </div>
+            <!-- /.tab-pane -->
+          </div>
+          <!-- /.tab-content -->
+        </div>
+      </div>
+    </div>
+  </section>
+</ui-view>

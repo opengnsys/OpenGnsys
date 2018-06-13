@@ -1,0 +1,27 @@
+<div class="btn-group">
+	<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+      <span translate="options"></span><span class="caret"></span>
+    </button>
+    <ul class="dropdown-menu">
+		<li role="presentation"><a role="menuitem" tabindex="-1" ui-sref="app.ous.new" translate="add_ou"></a></li>
+		<li role="presentation" ng-class="{'disable-links': OGCommonService.getSelectionSize() == 0}">
+			<a role="menuitem" tabindex="-1" href="javascript:void(0)" ng-click="vm.moveClientsToOu()">
+				<span ng-if="!vm.isMovingClients()" translate="move_clients_to_ou"></span>
+				<span ng-if="vm.isMovingClients()" translate="cancel_move_clients_to_ou"></span>
+			</a>
+		</li>
+		<li role="presentation" class="delete-option" ng-class="{'disable-links': OGCommonService.getSelectionSize() == 0}">
+			<a role="menuitem" tabindex="-1" href="javascript:void(0)" ng-click="vm.deleteSelectedClients()" translate="delete_selected_clients"></a>
+		</li>
+		<li role="presentation" class="divider"></li>
+    	<li role="presentation" ng-class="{'disable-links': OGCommonService.getSelectionSize() == 0}">
+    		<a role="menuitem" tabindex="-1" ui-sref="app.netboot.clients" translate="netboot" ></a>
+    	</li>
+    	<!--
+		<li role="presentation"><a role="menuitem" tabindex="-1" href="#" translate="clients_status"></a></li>
+		<li role="presentation" class="divider"></li>
+		<li role="presentation"><a role="menuitem" tabindex="-1" href="#" translate="procedures"></a></li>
+		<li role="presentation"><a role="menuitem" tabindex="-1" href="#" translate="actions_queue"></a></li>
+	-->
+    </ul>
+</div>

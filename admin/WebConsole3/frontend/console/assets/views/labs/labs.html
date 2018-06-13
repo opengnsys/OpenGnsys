@@ -1,0 +1,220 @@
+<ui-view>
+	<section class="content-header">
+	  <h1 translate="labs">
+	  </h1>
+	  <ol class="breadcrumb">
+	    <li><a ui-sref="app.dashboard"><i class="fa fa-dashboard"></i> {{'dashboard'|translate}}</a></li>
+	    <li class="active" translate="labs"></li>
+	  </ol>
+	</section>
+	<section fixed-toolboxbar class="toolboxbar">
+		<div >
+			<div class="col-md-12">
+				<div class="input-group">
+			      <input type="text" name="q" class="form-control" placeholder="Search..." ng-model="searchText">
+			          <span class="input-group-btn">
+			            <button type="button" name="search" id="search-btn" class="btn btn-flat"><i class="fa fa-search"></i>
+			            </button>
+			          </span>
+			    </div>
+			</div>
+			<div class="col-md-12" style="margin-top: 5px;margin-bottom: 5px;">
+					<span translate="display"></span>
+					<div class="btn-group">
+						<button type="button" class="btn btn-default" ng-class="{'btn-primary': vm.showGrid == true}" ng-click="vm.showGrid	= true"><i class="fa fa-th"></i></button>
+						<button type="button" class="btn btn-default" ng-class="{'btn-primary': vm.showGrid == false}" ng-click="vm.showGrid = false"><i class="fa fa-list"></i></button>
+					</div>
+					<div class="btn-group">
+					    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+					      <span translate="status_filter"></span><span class="caret"></span>
+					    </button>
+					    <ul class="dropdown-menu">
+					    	<li role="presentation" ng-repeat="status in constants.clientStatus">
+					    		<label role="menuitem" for="{{status}}">
+									<input icheck value="{{status}}" name="{{status}}" checkbox-class="icheckbox_square-blue" radio-class="iradio_square-blue" type="checkbox" class="selection-checkbox" ng-model="vm.selectedStatus[status]" />
+									{{status}}
+								</label>
+						    </li>
+					    </ul>
+					</div>
+					<div class="box-tools pull-right">
+						<ng-include src="'assets/views/partials/og-options/og-ou-options.html'"></ng-include>
+						<ng-include src="'assets/views/partials/og-options/og-commands-options.html'"></ng-include>
+					</div>
+			</div>
+		</div>
+	</section>
+	<!-- Main content -->
+  	<section class="content">
+	<!-- /.row -->
+	<div class="row">
+		<div class="col-md-12">
+			<!-- Nested node template -->
+			<script type="text/ng-template" id="group_renderer.html">
+				<div class="box box-warning" >
+		            <div class="box-header with-border">
+		            	<i class="fa fa-folder-open-o"></i>
+		              	<h3 class="box-title">
+		              		<div class="btn-group" ng-if="!content.editing">
+		              			<div>
+		              				<input icheck checkbox-class="icheckbox_square-blue" radio-class="iradio_square-blue" type="checkbox" class="selection-checkbox" ng-model="content.selected" />
+			              			<a href="javascript:void(0)" data-toggle="dropdown" class="dropdown-toggle" >
+			              				{{content.name}}
+			              			</a>
+			              			<ul class="dropdown-menu">
+			              				<li role="presentation">
+			              					<a role="menuitem" tabindex="-1" href="#" translate="add_group"></a>
+			              				</li>
+										<li role="presentation">
+											<a role="menuitem" tabindex="-1" href="#" translate="add_client"></a>
+										</li>
+										<li role="presentation" class="divider"></li>
+										<li>
+											<a class="" href="javascript:void(0)" translate="edit" ng-click="content.tmpName = content.name; content.editing = true"></a>
+										</li>
+										<li role="presentation" class="divider"></li>
+					                    <li role="presentation" class="delete-option">
+					                    	<a class="" href="javascript:void(0)" translate="delete" ng-click="vm.deleteGroup(content.id)"></a>
+					                    </li>
+			                        </ul>
+		                        </div>
+		              		</div>
+		              		<div ng-if="content.editing" class="col-xs-6">
+								<input type="text" class="form-control" ng-model="content.tmpName">
+			                    <span class="input-group-btn">
+			                      <button type="button" class="btn btn-default btn-flat" translate="done" ng-click="vm.changeGroupName(content)"></button>
+			                      <button type="button" class="btn btn-info btn-flat" translate="cancel" ng-click="content.editing = false"></button>
+			                    </span>
+				            </div>
+		              	</h3>
+			            <div class="box-tools pull-right">
+			            	<button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+			            	</button>
+			            </div>
+		              <!-- /.box-tools -->
+		            </div>
+		            <!-- /.box-header -->
+		            <div class="box-body folders" style="display: block;">
+
+		             	<div ng-repeat="content in content.groups" ng-include="'group_renderer.html'">
+		             	</div>
+		             	<div ng-repeat="content in content.classroomGroups" ng-include="'group_renderer.html'"></div>
+		             	<div ng-if="content.clients" ng-include="'clients_renderer.html'"></div>
+		            	<div ng-repeat="content in content.labs" ng-include="'lab_renderer.html'"></div>
+		            </div>
+		          </div>
+			</script>
+			<script type="text/ng-template" id="lab_renderer.html">
+				<div class="box box-default" ng-init="vm.labClientStatus(content.id)">
+		            <div class="box-header with-border">
+		            	<i class="fa fa-th"></i>
+		              	<h3 class="box-title">
+		              		<div class="btn-group">
+		              			<input icheck checkbox-class="icheckbox_square-blue" radio-class="iradio_square-blue" type="checkbox" class="selection-checkbox" ng-model="content.selected" ng-change="vm.selectLab(content)"/>
+		              			<a href="javascript:void(0)" data-toggle="dropdown" class="dropdown-toggle" >{{content.name}}</a>
+		              			<ul class="dropdown-menu">
+		              				<li role="presentation">
+		              					<a role="menuitem" tabindex="-1" href="#" translate="add_group"></a>
+		              				</li>
+									<li role="presentation">
+										<a role="menuitem" tabindex="-1" href="#" translate="add_client"></a>
+									</li>
+									<li role="presentation" class="divider"></li>
+									<li>
+										<a class="" href="javascript:void(0)" translate="edit" ui-sref="app.labs.view({labId: content.id})"></a>
+									</li>
+									<li role="presentation" class="divider"></li>
+				                    <li>
+				                    	<a class="" href="javascript:void(0)" translate="delete" ng-click="vm.deleteLab(content.id)"></a>
+				                    </li>
+		                        </ul>
+		              		</div>
+		              	</h3>
+			            <div class="box-tools pull-right">
+			            	<button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+			            	</button>
+			            </div>
+		              <!-- /.box-tools -->
+		            </div>
+		            <!-- /.box-header -->
+		            <div class="box-body" style="display: block;">
+		             	<div ng-repeat="content in content.classroomGroups" ng-include="'group_renderer.html'"></div>
+		             	<div ng-if="content.clients" ng-include="'clients_renderer.html'"></div>
+		            </div>
+		            <!-- /.box-body -->
+		          </div>
+			</script>
+			<script type="text/ng-template" id="clients_renderer.html">
+				<table ng-if="vm.showGrid == false" class="table table-hover">
+	                <tbody><tr>
+	                  <th translate="select"></th>
+	                  <th translate="name"></th>
+	                  <th translate="ip"></th>
+	                  <th translate="mac"></th>
+	                  <th translate="status"></th>
+	                  <th translate="options"></th>
+	                </tr>
+	                <tr ng-repeat="client in content.clients | filter: searchText" ng-if="vm.selectedStatus[vm.status[client.ip]] == true" ng-class="{'odd': $index%2 == 0, 'even': $index%2 != 0}">
+	                  <td><input icheck checkbox-class="icheckbox_square-blue" radio-class="iradio_square-blue" type="checkbox" class="selection-checkbox" ng-model="client.selected" /></td>
+	                  <td>{{client.name}}</td>
+	                  <td>{{client.ip}}</td>
+	                  <td>{{client.mac}}</td>
+	                  <td>
+		                  <span class="badge client-color-{{vm.status[client.ip]}}">{{vm.status[client.ip]}}</span>
+	                  </td>
+	                  <td class="right">
+			              <div class="btn-group visible-md visible-lg hidden-sm hidden-xs">
+			                <button class="btn btn-default " translate="edit" ui-sref="app.labs.view.client.edit({labId: client.lab.id, clientId: client.id})"></button>
+			                <button class="btn btn-danger " translate="delete" ng-click="vm.deleteClient(client.id)"></button>
+			              </div>
+			              <div class="btn-group hidden-md hidden-lg">
+			                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+			                  <i class="fa fa-gear"></i>
+			                  <span class="caret"></span>
+			                  <span class="sr-only">Toggle Dropdown</span>
+			                </button>
+			                <ul class="dropdown-menu" role="menu">
+			                  <li class="btn-group-vertical">
+			                    <button class="btn btn-default" href="javascript:void(0)" translate="edit" ui-sref="app.labs.view.client.edit({labId: client.lab.id, clientId: client.id})"></button>
+			                    <button class="btn btn-danger" href="javascript:void(0)" translate="delete" ng-click="vm.deleteClient(client.id)"></button>
+			                  </li>
+			                </ul>
+			              </div>
+			           </td>
+	                </tr>
+	              </tbody>
+				</table>
+				<div ng-if="vm.showGrid	 == true" class="box-body bg-lab">
+					<div class="col-md-2 padding-10" ng-repeat="client in content.clients | filter: searchText" ng-if="vm.selectedStatus[vm.status[client.ip]] == true">
+						<div class="info-box client">
+							<span style="position: absolute;">
+								<input icheck checkbox-class="icheckbox_square-blue" radio-class="iradio_square-blue" type="checkbox" class="selection-checkbox" ng-model="client.selected" />
+							</span>
+				            <span class="info-box-icon">
+				            	<i class="fa fa-desktop">
+				            	</i>
+				            	<small class="label client-color-{{vm.status[client.ip]}}">{{vm.status[client.ip]}}</small>
+				            </span>
+				            <div class="info-box-content">
+				            	<a href="javascript:void(0)" ng-click="vm.deleteClient(client.id)" class="small-box-footer pull-right">
+									<i class="fa fa-times"></i>
+								</a>
+								<span class="info-box-text">{{client.name}}</span>
+								<span class="info-box-text">{{client.ip}}</span>
+								<span class="info-box-text">{{client.mac}}</span>
+								<a href="javascript:void(0)" ui-sref="app.labs.view.client.edit({labId: client.lab.id, clientId: client.id})" class="small-box-footer pull-right">
+									<span translate="edit"></span> <i class="fa fa-arrow-circle-right"></i>
+								</a>
+				            </div>
+
+				            <!-- /.info-box-content -->
+				        </div>
+					</div>
+				</div>
+			</script>
+			<div ng-repeat="content in vm.labs.groups" ng-include="'group_renderer.html'"></div>
+			<div ng-repeat="content in vm.labs.labs" ng-include="'lab_renderer.html'"></div>
+		</div>
+	</div>
+</section>
+</ui-view>

@@ -141,3 +141,43 @@ export OG_ERR_DONTUNMOUNT_IMAGE=72 # Error al desmontar la imagen
 export OG_ERR_NOTDIFFERENT=73	# No se detectan diferencias entre la imagen basica y la particion.
 export OG_ERR_SYNCHRONIZING=74  # Error al sincronizar, puede afectar la creacion/restauracion de la imagen
 
+
+function createCacheInfoFile() {
+	 # Generamos el fichero con el contenido de la cache, si existe
+        FILEINFOCACHE=$OGLOG/`ogGetIpAddress`.cache.txt
+        ogMountCache 2>/dev/null
+        CACHECONTENIDO=$(ls -ms --file-type $OGCAC/$OGIMG | sed /^total/d 2>/dev/null)
+	CACHESIZEFREE=$(ogGetFreeSize `ogFindCache`)
+	if [ $CACHESIZEFREE == 0 ]; then
+        	echo '0.MB,' > $FILEINFOCACHE
+	else
+        	expr $CACHESIZEFREE / 1024 > $FILEINFOCACHE 2>/dev/null && echo '.MB,' >> $FILEINFOCACHE
+	fi
+	echo $CACHECONTENIDO >> $FILEINFOCACHE
+}
+
+function sendConfigToServer() {
+        createCacheInfoFile
+	if ! [ -f /tmp/getconfig ]; then
+                $OPENGNSYS/interfaceAdm/getConfiguration
+        fi
+	# Url de la api
+	URL=$(cat $OGETC/ogAdmClient.cfg | grep UrlApi | cut -d"=" -f2)"clients/configs.json"
+        CONFIG=$(cat /tmp/getconfig)
+        wget --no-check-certificate --post-data="ip=$(ogGetIpAddress)&config=$CONFIG" $URL
+}
+
+function sendStatusToServer() {
+        STATUS=$1
+	URL=$(cat $OGETC/ogAdmClient.cfg | grep UrlApi | cut -d"=" -f2)"clients/statuses.json"
+        wget --no-check-certificate --post-data="ip=$(ogGetIpAddress)&status=$STATUS" $URL
+}
+
+
+export sendConfigToServer
+export sendStatusToServer
+export createCacheInfoFile
+
+
+
+

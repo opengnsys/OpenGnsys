@@ -1,0 +1,72 @@
+<section class="content-header">
+  <h1 translate="new_image">
+  </h1>
+  <ol class="breadcrumb">
+    <li><a ui-sref="app.dashboard"><i class="fa fa-dashboard"></i> {{'dashboard'|translate}}</a></li>
+    <li><a ui-sref="app.images"><i class="fa fa-cubes"></i> {{'images'|translate}}</a></li>
+    <li class="active" translate="edit_image"></li>
+  </ol>
+</section>
+<section fixed-toolboxbar class="toolboxbar">
+	<div>
+		<div class="col-md-12">
+			<div class="box-tools pull-right">
+				<button class="btn btn-primary" translate="save" ng-click="vm.save(Form)"></button>
+			</div>
+		</div>
+	</div>
+</section>
+<!-- Main content -->
+<section class="content">
+	<div class="row">
+		<div class="col-md-12">
+			<div class="box box-primary">
+		        <div class="box-header with-border">
+		        </div>
+		        <div class="box-body">
+		        	<form role="form" gbn-auto-form name="Form" ng-submit="vm.saveImage(Form)" form-options="vm.formOptions" form-model="vm.image">
+						
+					</form>
+		        	<table class="table table-bordered">
+	                <tbody>
+		                <tr>
+		                  <th translate="disk"></th>
+		                  <th translate="partition"></th>
+		                  <th translate="filesystem"></th>
+		                  <th translate="osName"></th>
+		                  <th translate="revision"></th>
+		                  <th translate="creation_date"></th>
+						</tr>
+						<tr>
+							<td>
+								<span ng-if="vm.image.partitionInfo">{{vm.image.partitionInfo.numDisk}}</span>
+			         			<span ng-if="!vm.image.partitionInfo" translate="not_available"></span>
+							</td>
+							<td>
+								<span ng-if="vm.image.partitionInfo">{{vm.image.partitionInfo.numPartition}}</span>
+			         			<span ng-if="!vm.image.partitionInfo" translate="not_available"></span>
+							</td>
+							<td>
+								<span ng-if="vm.image.partitionInfo">{{vm.image.partitionInfo.filesystem}} ({{vm.image.partitionInfo.partitionCode}})</span>
+			         			<span ng-if="!vm.image.partitionInfo" translate="not_available"></span>
+							</td>
+							<td>
+								<span ng-if="vm.image.partitionInfo">{{vm.image.partitionInfo.osName}}</span>
+			         			<span ng-if="!vm.image.partitionInfo" translate="not_available"></span>
+							</td>
+							<td>
+								<span ng-if="vm.image.revision" class="badge bg-green">{{vm.image.revision}}</span>
+			         			<span ng-if="!vm.image.revision" translate="not_available"></span>
+							</td>
+							<td>
+								<span ng-if="vm.image.createdAt">{{vm.image.createdAt | date: "DD/MM/YYYY HH:mm"}}</span>
+		         				<span ng-if="!vm.image.createdAt" translate="not_available"></span>
+							</td>
+						</tr>
+	              	</tbody>
+	              </table>
+		        </div>
+		    </div>
+	    </div>
+	</div>
+</section>

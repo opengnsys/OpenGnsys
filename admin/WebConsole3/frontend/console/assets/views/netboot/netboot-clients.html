@@ -1,0 +1,44 @@
+<section class="content-header">
+  <h1 translate="netboot_templates">
+  </h1>
+  <ol class="breadcrumb">
+    <li><a ui-sref="app.ous"><i class="fa fa-th"></i> {{'ous'|translate}}</a></li>
+    <li class="active" translate="netboot"></li>
+  </ol>
+</section>
+<section fixed-toolboxbar class="toolboxbar">
+	<div>
+		<div class="col-md-12">
+			<div class="box-tools pull-right">
+				<button class="btn btn-primary" translate="save" ng-click="vm.save()"></button>
+			</div>
+		</div>
+	</div>
+</section>
+<section class="content">
+	<div class="row table netboot">
+		<div class="col-md-2" ng-repeat="netboot in vm.netboots">
+			<div class="box box-primary">
+				<div class="box-header with-border">
+					<h3 class="box-title">{{netboot.name}}</h3>
+					<div class="box-tools pull-right">
+						<button type="button" class="btn btn-xs btn-flat hidden-md hidden-lg" ng-class="{'btn-default': vm.multiSelection == false, 'btn-primary': vm.multiSelection == true}" ng-click="vm.multiSelection = !vm.multiSelection"><i class="fa fa-list-ul"></i></button>
+						<button ng-disabled="vm.selectionForMove.length == 0" type="button" class="btn btn-xs btn-default btn-flat" ng-click="vm.moveSelectionToNetboot(netboot.id)">
+							<i class="fa  fa-download"></i>
+						</button>
+					</div>
+				</div>
+				<!-- /.box-header -->
+				<div class="box-body">
+					<select ng-model="vm.selectionForMove" multiple>
+						<option ng-click="vm.checkSelection(netboot.id, clientId)" ng-repeat="clientId in vm.assignedNetboots[netboot.id]" value="{{netboot.id}}_{{clientId}}">{{selectedClients[clientId].name}}</option>
+					</select>
+				</div>
+				<!-- /.box-body -->
+				<div class="box-footer">
+				</div>
+			<!-- /.box-footer-->
+			</div>
+		</div>
+	</div>
+</section>

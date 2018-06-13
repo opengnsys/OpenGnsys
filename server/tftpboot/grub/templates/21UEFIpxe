@@ -1,7 +1,0 @@
-##NO-TOCAR-ESTA-LINEA UEFI-pxe
-set ISODIR=ogLive
-linux (tftp)/$ISODIR/ogvmlinuz ro boot=oginit quiet splash vga=788 irqpoll acpi=on og2nd=sqfs ogprotocol=smb ogactiveadmin=false ogdebug=false ogtmpfs=15 oglivedir=$ISODIR INFOHOST
-initrd (tftp)/$OGLIVE/oginitrd.img
-boot
-
-

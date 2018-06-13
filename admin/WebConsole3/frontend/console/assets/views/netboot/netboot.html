@@ -1,0 +1,71 @@
+<ui-view>
+<section class="content-header">
+  <h1 translate="netboot">
+  </h1>
+  <ol class="breadcrumb">
+    <li><a ui-sref="app.dashboard"><i class="fa fa-dashboard"></i> {{'dashboard'|translate}}</a></li>
+    <li class="active" translate="netboot_templates"></li>
+  </ol>
+</section>
+<section fixed-toolboxbar class="toolboxbar">
+	<div >
+		<div class="col-md-12">
+			<div class="input-group">
+		      <input type="text" name="q" class="form-control" placeholder="Search..." ng-model="searchText">
+		          <span class="input-group-btn">
+		            <button type="button" name="search" id="search-btn" class="btn btn-flat"><i class="fa fa-search"></i>
+		            </button>
+		          </span>
+		    </div>
+		</div>
+		<div class="col-md-12" style="margin-top: 5px;margin-bottom: 5px;">
+			<div class="box-tools pull-right">
+				<button class="btn btn-default" ui-sref="app.netboot.new" translate="new_netboot"></button>
+			</div>
+		</div>
+	</div>
+</section>
+<section class="content">
+	<div class="row">
+		<div class="col-md-12">
+			<table class="table table-hover">
+	            <tbody><tr>
+	              <th translate="name"></th>
+	              <th translate="filename"></th>
+	              <th translate="options"></th>
+	            </tr>
+	            <tr ng-repeat="netboot in vm.netboots | filter: vm.searchText" ng-class="{'odd': $index%2 == 0, 'even': $index%2 != 0}">
+					<td>
+						<span >{{netboot.name}}</span>
+					</td>
+					<td>
+						<span >{{netboot.filename}}</span>
+					</td>
+					<td class="right">
+						<div class="btn-group visible-md visible-lg hidden-sm hidden-xs">
+							<button class="btn btn-default " translate="edit" ui-sref="app.netboot.edit({netbootId: netboot.id})"></button>
+							<button class="btn btn-default " translate="copy" ui-sref="app.netboot.new({copyId: netboot.id})"></button>
+							<button class="btn btn-danger " translate="delete" ng-click="vm.deleteNetboot(netboot.id)"></button>
+						</div>
+						<div class="btn-group hidden-md hidden-lg">
+							<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+								<i class="fa fa-gear"></i>
+								<span class="caret"></span>
+								<span class="sr-only">Toggle Dropdown</span>
+							</button>
+							<ul class="dropdown-menu" role="menu">
+								<li class="btn-group-vertical">
+									<button class="btn btn-default" href="javascript:void(0)" translate="edit" ui-sref="app.netboot.edit({netbootId: netboot.id})"></button>
+									<button class="btn btn-default " translate="copy" ui-sref="app.netboot.new({copyId: netboot.id})"></button>
+									<button class="btn btn-danger" href="javascript:void(0)" translate="delete" ng-click="vm.deleteNetboot(netboot.id)"></button>
+								</li>
+							</ul>
+						</div>
+					</td>
+	            </tr>
+	          </tbody>
+			</table>
+		</div>
+	</div>
+</section>
+</ui-view>

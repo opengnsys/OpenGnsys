@@ -1,0 +1,10 @@
+{
+  "globunet":{
+  	"GbnNgFormValidatorService": {
+  		"errorTitle": "Error",
+  		"errorMessage": "{{field}}: {{error}}",
+  		"errorSavingMessage": "Error saving",
+  		"successSavingMessage": "Saved successfully"
+  	}
+  }
+}

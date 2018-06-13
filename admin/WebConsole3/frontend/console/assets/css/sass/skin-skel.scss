@@ -1,0 +1,190 @@
+$skin-name: uhu-light;
+$navbar-font-color: #fff;
+$navbar-background: #950002;
+$navbar-mainheader-logo-background: #950002;
+$navbar-mainheader-logo-background-hover: #950002;
+$navbar-mainheader-logo-color: #fff;
+$navbar-mainheader-logo-color-hover: #fff;
+$navbar-mainheader-logo-background-sd: #222222;
+$navbar-mainheader-logo-background-sd-hover: #1f1f1f;
+$navbar-mainheader-logo-color-sd: #fff;
+$navbar-item-background: #950002;
+$navbar-item-font-color: #999999;
+$navbar-user-header-background: #222;
+$navbar-user-panel-color: #444444;
+$sidebar-background: #fff;
+$sidebar-header-color: #444444;
+$sidebar-header-background: #fff;
+$sidebar-menu-color: #000;
+$sidebar-menu-background: #fffff;
+$sidebar-menu-border-left-color: #950002;
+$sidebar-treeview-background: #2c3b41;
+$sidebar-treeview-item-color: #000;
+$sidebar-treeview-item-color-hover: #000;
+$sidebar-item-color: #444444;
+$sidebar-form-input-background: #eee;
+$sidebar-form-input-color: #666;
+$sidebar-form-input-background-focus: #fff;
+$sidebar-form-input-color-focus: #666;
+
+/*
+ * Skin: #{$skin-name}
+ * -----------
+ */
+/* skin-#{$skin-name} navbar */
+.skin-#{$skin-name} .main-header {
+  -webkit-box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.05);
+  box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.05);
+}
+.skin-#{$skin-name} .main-header .navbar-toggle {
+  color: $navbar-font-color;
+}
+.skin-#{$skin-name} .main-header .navbar-brand {
+  color: $navbar-font-color;
+  border-right: 1px solid #eee;
+}
+.skin-#{$skin-name} .main-header > .navbar {
+  background-color: $navbar-background;
+}
+.skin-#{$skin-name} .main-header > .navbar .nav > li > a {
+  color: $navbar-font-color;
+}
+.skin-#{$skin-name} .main-header > .navbar .nav > li > a:hover,
+.skin-#{$skin-name} .main-header > .navbar .nav > li > a:active,
+.skin-#{$skin-name} .main-header > .navbar .nav > li > a:focus,
+.skin-#{$skin-name} .main-header > .navbar .nav .open > a,
+.skin-#{$skin-name} .main-header > .navbar .nav .open > a:hover,
+.skin-#{$skin-name} .main-header > .navbar .nav .open > a:focus,
+.skin-#{$skin-name} .main-header > .navbar .nav > .active > a {
+  background:  $navbar-item-background;
+  color: $navbar-item-font-color;
+}
+.skin-#{$skin-name} .main-header > .navbar .sidebar-toggle {
+  color: $navbar-font-color;
+}
+.skin-#{$skin-name} .main-header > .navbar .sidebar-toggle:hover {
+  color: $navbar-item-font-color;
+  background: $navbar-background;
+}
+.skin-#{$skin-name} .main-header > .navbar > .sidebar-toggle {
+  color: $navbar-font-color;
+  border-right: 1px solid #eee;
+}
+.skin-#{$skin-name} .main-header > .navbar .navbar-nav > li > a {
+  border-right: 1px solid #eee;
+}
+.skin-#{$skin-name} .main-header > .navbar .navbar-custom-menu .navbar-nav > li > a,
+.skin-#{$skin-name} .main-header > .navbar .navbar-right > li > a {
+  border-left: 1px solid #eee;
+  border-right-width: 0;
+}
+.skin-#{$skin-name} .main-header > .logo {
+  background-color: $navbar-mainheader-logo-background;
+  color: $navbar-mainheader-logo-color;
+  border-bottom: 0 solid transparent;
+  border-right: 1px solid #eee;
+}
+.skin-#{$skin-name} .main-header > .logo:hover {
+  background-color: $navbar-mainheader-logo-background;
+}
+@media (max-width: 767px) {
+  .skin-#{$skin-name} .main-header > .logo {
+    background-color: $navbar-mainheader-logo-background-sd;
+    color: $navbar-mainheader-logo-color-sd;
+    border-bottom: 0 solid transparent;
+    border-right: none;
+  }
+  .skin-#{$skin-name} .main-header > .logo:hover {
+    background-color: $navbar-mainheader-logo-background-sd-hover;
+  }
+}
+.skin-#{$skin-name} .main-header li.user-header {
+  background-color: $navbar-user-header-background;
+}
+.skin-#{$skin-name} .content-header {
+  background: transparent;
+  box-shadow: none;
+}
+.skin-#{$skin-name} .wrapper,
+.skin-#{$skin-name} .main-sidebar,
+.skin-#{$skin-name} .left-side {
+  background-color: $sidebar-background;
+}
+.skin-#{$skin-name} .user-panel > .info,
+.skin-#{$skin-name} .user-panel > .info > a {
+  color: $navbar-user-panel-color;
+}
+.skin-#{$skin-name} .sidebar-menu > li.header {
+  color: $sidebar-header-color;
+  background: $sidebar-header-background;
+}
+.skin-#{$skin-name} .sidebar-menu > li > a {
+  border-left: 3px solid transparent;
+}
+.skin-#{$skin-name} .sidebar-menu > li:hover > a,
+.skin-#{$skin-name} .sidebar-menu > li.active > a {
+  color: $sidebar-menu-color;
+  background: $sidebar-menu-background;
+  border-left-color: $sidebar-menu-border-left-color;
+}
+.skin-#{$skin-name} .sidebar-menu > li > .treeview-menu {
+  margin: 0 1px;
+  background: $sidebar-treeview-background;
+}
+.skin-#{$skin-name} .sidebar a {
+  color: $sidebar-item-color;
+}
+.skin-#{$skin-name} .sidebar a:hover {
+  text-decoration: none;
+}
+.skin-#{$skin-name} .treeview-menu > li > a {
+  color: $sidebar-treeview-item-color;
+}
+.skin-#{$skin-name} .treeview-menu > li.active > a,
+.skin-#{$skin-name} .treeview-menu > li > a:hover {
+  color: $sidebar-treeview-item-color-hover;
+}
+.skin-#{$skin-name} .sidebar-form {
+  border-radius: 3px;
+  border: 1px solid #374850;
+  margin: 10px 10px;
+}
+.skin-#{$skin-name} .sidebar-form input[type="text"],
+.skin-#{$skin-name} .sidebar-form .btn {
+  box-shadow: none;
+  background-color: $sidebar-form-input-background;
+  border: 1px solid transparent;
+  height: 35px;
+  -webkit-transition: all 0.3s ease-in-out;
+  -o-transition: all 0.3s ease-in-out;
+  transition: all 0.3s ease-in-out;
+}
+.skin-#{$skin-name} .sidebar-form input[type="text"] {
+  color: $sidebar-form-input-color;
+  border-top-left-radius: 2px;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 2px;
+}
+.skin-#{$skin-name} .sidebar-form input[type="text"]:focus,
+.skin-#{$skin-name} .sidebar-form input[type="text"]:focus + .input-group-btn .btn {
+  background-color: $sidebar-form-input-background-focus;
+  color: $sidebar-form-input-color-focus;
+}
+.skin-#{$skin-name} .sidebar-form input[type="text"]:focus + .input-group-btn .btn {
+  border-left-color: #fff;
+}
+.skin-#{$skin-name} .sidebar-form .btn {
+  color: #999;
+  border-top-left-radius: 0;
+  border-top-right-radius: 2px;
+  border-bottom-right-radius: 2px;
+  border-bottom-left-radius: 0;
+}
+.skin-#{$skin-name} .pace .pace-progress {
+  background: #222;
+}
+.skin-#{$skin-name} .pace .pace-activity {
+  border-top-color: #222;
+  border-left-color: #222;
+}

@@ -48,6 +48,9 @@ BUSYBOX=${BUSYBOX:-"busybox"}
 sleep $TIME
 # Parar Browser para evitar "cuelgues".
 [ "$ogstatus" == "offline" ] || pkill browser
+
+sendStatusToServer "off"
+
 # Reiniciar.
 $BUSYBOX reboot
 

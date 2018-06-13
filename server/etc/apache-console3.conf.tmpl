@@ -1,0 +1,56 @@
+# OpenGnsys Web Admin Console 3 template configuration for Apache.
+
+Alias /opengnsys3 CONSOLEDIR
+
+RewriteEngine On
+
+# Overrides default CentOS php.ini configuration.
+<IfModule mod_php5.c>
+        php_value short_open_tag on
+</IfModule>
+
+# Redirect HTTP to HTTPS and default configuration.
+<Directory CONSOLEDIR>
+        RewriteCond %{HTTPS} !=on
+        RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R]
+        Require all granted
+        Options -Indexes +FollowSymLinks
+        DirectoryIndex index.html index.php
+        AddType octet/stream .pkg
+</Directory>
+
+# Redirect HTTP to HTTPS and RESTful configuration.
+<Directory CONSOLEDIR/rest/web>
+        #RewriteBase /opengnsys3/rest/web
+        #RewriteRule .? - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+        #RewriteCond %{HTTPS} !=on
+        #RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R]
+        #RewriteCond %{REQUEST_FILENAME} !-f
+        #RewriteRule ^ index.php [QSA,L]
+        DirectoryIndex app.php
+
+        <IfModule mod_rewrite.c>
+                RewriteEngine On
+                RewriteCond %{REQUEST_URI}::$1 ^(/.+)/(.*)::\2$
+                RewriteRule ^(.*) - [E=BASE:%1]
+
+                # Sets the HTTP_AUTHORIZATION header removed by apache
+                RewriteCond %{HTTP:Authorization} .
+                RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+                RewriteCond %{ENV:REDIRECT_STATUS} ^$
+                RewriteRule ^app\.php(/(.*)|$) %{ENV:BASE}/$2 [R=301,L]
+
+                RewriteCond %{REQUEST_FILENAME} -f
+                RewriteRule .? - [L]
+
+                # Rewrite all other queries to the front controller.
+                RewriteRule .? %{ENV:BASE}/app.php [L]
+        </IfModule>
+
+        <IfModule !mod_rewrite.c>
+                <IfModule mod_alias.c>
+                        RedirectMatch 302 ^/$ /app.php/
+                </IfModule>
+        </IfModule>
+</Directory>

@@ -1,0 +1,122 @@
+<section class="content-header">
+  <h1 translate="{{vm.client.name||'new_client'}}">
+  </h1>
+  <ol class="breadcrumb">
+    <li><a ui-sref="app.dashboard"><i class="fa fa-dashboard"></i> {{'dashboard'|translate}}</a></li>
+    <li><a ui-sref="app.ous" ><i class="fa fa-th"></i> {{'ous'|translate}}</a></li>
+    <li class="active" translate="client"></li>
+  </ol>
+</section>
+<section fixed-toolboxbar class="toolboxbar">
+	<div>
+		<div class="col-md-12">
+			<div class="box-tools pull-right">
+				<button class="btn btn-primary" translate="save" ng-click="vm.save()"></button>
+			</div>
+		</div>
+	</div>
+</section>
+<section class="content">
+	<div class="row">
+		<div class="col-md-12">
+			<div class="box box-primary">
+				<div class="box-header with-border">
+		          <h3 class="box-title" translate="client_data"></h3>
+					<div class="box-tools pull-right">
+						<div class="btn-group" ng-if="vm.client.id">
+							<ng-include src="'assets/views/partials/og-options/og-information-options.html'"></ng-include>
+							<ng-include src="'assets/views/partials/og-options/og-commands-options.html'"></ng-include>
+			                <button type="button" class="btn btn-box-tool pull-right" data-widget="collapse"><i class="fa fa-minus"></i>
+			                </button>
+			            </div>
+		            </div>
+		        </div>
+		        <div class="box-body">
+					<form role="form" gbn-auto-form name="vm.Form" form-options="vm.formOptions" form-model="vm.client">
+						
+					</form>
+				</div>
+				<div class="box-footer">
+					<div class="box box-default box-solid" ng-repeat="diskConfig in vm.client.diskConfig">
+			            <div class="box-header with-border">
+			              <div class="row">
+								<div class="col-md-4">
+									<span translate="num_disk"></span>: <b>{{diskConfig.disk}}</b>
+								</div>
+								<div class="col-md-4">
+									<span translate="part_table"></span>: <b>{{diskConfig.parttable}}</b>
+								</div>
+								<div class="col-md-4">
+									<span translate="size"></span>: <b>{{vm.getSizeInGB(diskConfig.size)}} GB</b>
+								</div>
+							</div>
+			              <div class="box-tools pull-right">
+			                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+			                </button>
+			              </div>
+			              <!-- /.box-tools -->
+			            </div>
+			            <!-- /.box-header -->
+			            <div class="box-body">
+			            	<div class="row">
+			            		<div class="col-md-8">
+					              	<table class="table table-condensed table-striped">
+										<tbody>
+											<tr>
+												<th translate="partition"></th>
+												<th translate="part_type"></th>
+												<th translate="filesystem"></th>
+												<th translate="size"></th>
+												<th translate="usage"></th>
+												<th translate="os"></th>
+											</tr>
+										</tbody>
+										<tbody ng-repeat="partition in diskConfig.partitions" ng-if="partition.size > 0">
+											<tr ng-class="{'odd': $index%2 == 0, 'even': $index%2 != 0}">
+												<td>{{partition.numPartition}}</td>
+												<td>{{partition.parttype}}</td>
+												<td>{{partition.filesystem}}</td>
+												<td>{{vm.getSizeInGB(partition.size)}} GB</td>
+								 				<td><span class="badge" ng-class="{'bg-green': partition.usage < 60, 'bg-yellow': partition.usage >= 60 && partition.usage < 80, 'bg-red': partition.usage >= 80}">{{partition.usage}}%</span></td>
+								 				<td>{{partition.osName}}</td>
+											</tr>
+											<tr ng-if="partition.partitionCode == 'ca' && partition.cacheContent.files.length > 0" class="client-cache-info" ng-class="{'odd': $index%2 == 0, 'even': $index%2 != 0}">
+												<td colspan="6">
+													<span style="font-weight: bold" translate="cache_content"></span>
+													<table class="table">
+														<thead>
+															<tr>
+																<th translate="type"></th>
+																<th translate="name"></th>
+																<th translate="size"></th>
+															</tr>
+														</thead>
+														<tbody>
+															<tr ng-repeat="file in partition.cacheContent.files">
+																<td>{{file.type}}</td>
+																<td>{{file.name}}</td>
+																<td>{{file.size}}</td>
+															</tr>
+															<tr>
+																<td style="font-weight: bold" translate="free_space" colspan="2"></td>
+																<td>{{partition.cacheContent.freeSpace}}</td>
+															</tr>
+														</tbody>
+													</table>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+								<div class="col-md-4">
+									<flot dataset="diskConfig.diskChartData" options="diskConfig.diskChartOptions" height="200px"></flot>
+								</div>
+							</div>
+			            </div>
+			            <!-- /.box-body -->
+			        </div>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>

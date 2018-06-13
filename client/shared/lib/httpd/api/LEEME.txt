@@ -1,0 +1,6 @@
+gcc -m32 wrapper.c -o exec_root
+chown root exec_root
+chmod u=rwx,go=xr,+s exec_root
+
+
+https://stackoverflow.com/questions/8532304/execute-root-commands-via-php?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa

@@ -1,0 +1,119 @@
+<ui-view>
+<section class="content-header">
+  <h1 translate="traces">
+  </h1>
+  <ol class="breadcrumb">
+    <li><a ui-sref="app.dashboard"><i class="fa fa-dashboard"></i> {{'dashboard'|translate}}</a></li>
+    <li class="active" translate="traces"></li>
+  </ol>
+</section>
+<section fixed-toolboxbar class="toolboxbar">
+	<div >
+		<div class="col-md-12">
+			<div class="input-group">
+		      <input type="text" name="q" class="form-control" placeholder="Search..." ng-model="vm.filters.searchText">
+		          <span class="input-group-btn">
+		            <button type="button" name="search" id="search-btn" class="btn btn-flat"><i class="fa fa-search"></i>
+		            </button>
+		          </span>
+		    </div>
+		</div>
+		<div class="col-md-12" style="margin-top: 5px;margin-bottom: 5px;">
+				<div class="box-tools pull-left row traces-filters">
+					<div class="btn-group col-md-1">
+						<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+					      <span translate="status_filter"></span><span class="caret"></span>
+					    </button>
+					    <ul class="dropdown-menu">
+					    	<li role="presentation" ng-repeat="status in vm.filters.status">
+					    		<label role="menuitem" for="{{status.name}}">
+									<input icheck value="true" name="{{status.name}}" checkbox-class="icheckbox_square-blue" radio-class="iradio_square-blue" type="checkbox" class="selection-checkbox" ng-model="status.selected" />
+									{{status.name|translate}}
+								</label>
+						    </li>
+					    </ul>
+					</div>
+					<div class="btn-group col-md-1">
+						<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+					      <span translate="finished_status"></span><span class="caret"></span>
+					    </button>
+					    <ul class="dropdown-menu">
+					    	<li role="presentation" ng-repeat="finishedStatus in vm.filters.finishedStatus">
+					    		<label role="menuitem" for="noErrors">
+									<input icheck value="true" name="finishedStatus.name" checkbox-class="icheckbox_square-blue" radio-class="iradio_square-blue" type="checkbox" class="selection-checkbox" ng-model="finishedStatus.selected" />
+									{{finishedStatus.name|translate}}
+								</label>
+						    </li>
+					    </ul>
+					</div>
+					<div class="form-group col-md-10">
+						<div class="input-group">
+							<div class="input-group-addon">
+								<i class="fa fa-clock-o"></i>
+							</div>
+							<input date-range-picker placeholder="{{'executed_at_range'|translate}}" type="text" class="form-control pull-right" ng-model="vm.filters.dateRange" options="vm.datePickerOptions">
+						</div>
+						<!-- /.input group -->
+					</div>
+				</div>
+				<div class="box-tools pull-right">
+					<button class="btn btn-default " ng-disabled="vm.selection.length < 1" translate="relaunch" ui-sref="vm.relaunchTraces()"></button>
+					<button class="btn btn-danger " ng-disabled="vm.selection.length < 1" translate="delete" ng-click="vm.deleteTraces()"></button>
+				</div>
+		</div>
+	</div>
+</section>
+<section class="content">
+	<div class="row">
+		<table class="table table-hover">
+            <tbody>
+            	<tr>
+            		<th>
+            			<div class="checkbox clip-check check-primary checkbox-inline" style="margin-top: 0">
+							<input name="format" icheck checkbox-class="icheckbox_square-blue" radio-class="iradio_square-blue" type="checkbox" class="selection-checkbox" ng-model="vm.selectAll" ng-change="vm.selectAllTraces()"/>
+						</div>
+						<span translate="select"></span>
+            		</th>
+					<th translate="command"></th>
+					<th translate="client"></th>
+					<th translate="executed_at"></th>
+					<th translate="finished_at"></th>
+					<th translate="status"></th>
+	            </tr>
+            <tr ng-repeat="trace in vm.traces | filter: vm.filters.searchText | filter: vm.filterTraceStatus | orderBy: 'executedAt': true" ng-class="{'odd': $index%2 == 0, 'even': $index%2 != 0}">
+            	<td>
+	            	<div class="checkbox clip-check check-primary checkbox-inline" style="margin-top: 0">
+						<input name="format" icheck checkbox-class="icheckbox_square-blue" radio-class="iradio_square-blue" type="checkbox" class="selection-checkbox" value="true" ng-model="trace.selected" ng-change="vm.selectTrace(trace)"/>
+					</div>
+				</td>
+				<td>
+					<a href="javascript:void(0)" ng-click="(vm.showInfo == 'script_'+trace.id)?vm.showInfo='':(vm.showInfo = 'script_'+trace.id)">{{trace.commandType|translate}}</a>
+					<div ng-if="vm.showInfo == 'script_'+trace.id" class="og-floating-script">
+						<pre ng-bind-html="trace.script|ogCommands"></pre>
+					</div>
+				</td>
+				<td>
+					{{trace.client.name}}
+					<br>
+					({{trace.client.ip}})
+				</td>
+				<td>
+					{{trace.executedAt | date: "DD/MM/YYYY HH:mm"}}
+				</td>
+				<td>
+					{{trace.finishedAt | date: "DD/MM/YYYY HH:mm"}}
+				</td>
+				<td>
+					<a href="javascript:void(0)" ng-click="(vm.showInfo == 'output_'+trace.id)?vm.showInfo='':(vm.showInfo = 'output_'+trace.id)">
+						<span class="fa" ng-class="{'fa-warning text-yellow': !trace.finishedAt, 'fa-check-circle text-green': trace.status == 0, 'fa-times-circle text-red': trace.status != 0}"></span>
+					</a>
+					<div ng-if="vm.showInfo == 'output_'+trace.id" class="og-floating-script right">
+						<pre ng-bind-html="'Status: '+trace.status+'\n'+ (trace.status == 0?trace.output:trace.error)"></pre>
+					</div>
+				</td>
+            </tr>
+          </tbody>
+		</table>
+	</div>
+</section>
+</ui-view>

@@ -1,14 +1,22 @@
 #!/bin/bash
 # Proceso general de arranque de OpenGnsys Client.
 
-
 # Fichero de registro de incidencias (en el servidor; si no, en local).
 OPENGNSYS=${OPENGNSYS:-/opt/opengnsys}
-OGLOGFILE=${OGLOGFILE:-$OPENGNSYS/log/$(ogGetIpAdderss).log}
+OGLOGFILE=${OGLOGFILE:-$OPENGNSYS/log/$(ogGetIpAddress).log}
 if ! touch $OGLOGFILE 2>/dev/null; then
     OGLOGFILE=/var/log/opengnsys.log
 fi
 LOGLEVEL=5
+
+# TODO - PRUEBA
+AGENT_FILE="/var/tmp/ogAdmClient"
+touch $AGENT_FILE
+chmod a+wxs $AGENT_FILE
+chown root:root $AGENT_FILE
+# Exportar funciones para comunicacion con el servidor
+sendConfigToServer
+sendStatusToServer "initializing"
 
 # Matando plymount para inicir browser o shell
 pkill -9 plymouthd
@@ -33,5 +41,4 @@ fi
 if [ "$ogactiveadmin" == "true" ]; then
     bash
 fi
-
 

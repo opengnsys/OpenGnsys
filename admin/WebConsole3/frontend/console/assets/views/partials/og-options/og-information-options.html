@@ -1,0 +1,12 @@
+<div class="btn-group">
+	<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+      <span translate="info"></span><span class="caret"></span>
+    </button>
+    <ul class="dropdown-menu">
+    	<li role="presentation" ng-class="{'disable-links': OGCommonService.getSelectionSize() < 1}"><a role="menuitem" tabindex="-1" href="javascript:void(0)" ng-click="OGCommandsService.execute('REFRESH_INFO')" translate="refresh_info"></a></li>
+    	<li role="presentation" class="divider"></li>
+    	<li role="presentation" ng-class="{'disable-links': OGCommonService.getSelectionSize() != 1}" ui-sref="app.traces"><a role="menuitem" tabindex="-1" href="javascript:void(0)" translate="actions_queue"></a></li>
+		<li role="presentation" ng-class="{'disable-links': OGCommonService.getSelectionSize() != 1}"><a role="menuitem" tabindex="-1" href="javascript:void(0)" ng-click="OGCommandsService.execute('HISTORY_LOG')" translate="history_log"></a></li>
+		<li role="presentation" ng-class="{'disable-links': OGCommonService.getSelectionSize() != 1}"><a role="menuitem" tabindex="-1" href="javascript:void(0)" ng-click="OGCommandsService.execute('REALTIME_LOG')" translate="realtime_log"></a></li>
+    </ul>
+</div>

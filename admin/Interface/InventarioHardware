@@ -1,6 +1,0 @@
-#!/bin/bash
-# Script de interfaz para guardar en un fichero el inventario de hardware de un cliente.
-
-file=$(listHardwareInfo)
-tail -n+2 $file >$1
-

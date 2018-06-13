@@ -1,0 +1,67 @@
+<div class="box box-warning" >
+    <div class="box-header with-border">
+    	<i class="fa fa-folder-open-o"></i>
+    	<h3 class="box-title">
+    		 <div class="btn-group">
+                <div>
+			    	<a href="javascript:void(0)" data-toggle="dropdown" class="dropdown-toggle" translate="hardware_types">
+			        </a>
+			         <ul class="dropdown-menu">
+			          <li role="presentation">
+			            <a role="menuitem" tabindex="-1" href="#" translate="add_hardware_type"></a>
+			          </li>
+			        </ul>
+	        	</div>
+	    	</div>
+	    </h3>
+        <div class="box-tools pull-right">
+        	<button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+        	</button>
+        </div>
+      <!-- /.box-tools -->
+    </div>
+    <!-- /.box-header -->
+    <div class="box-body folders" style="display: block;">
+ 		<table class="table table-hover">
+            <tbody><tr>
+              <th translate="name"></th>
+              <th translate="options"></th>
+            </tr>
+            <tr ng-repeat="hardwareType in vm.hardwareTypes | filter: vm.searchText" ng-class="{'odd': $index%2 == 0, 'even': $index%2 != 0}">
+				<td>
+					<span ng-if="!hardwareType.editing">{{hardwareType.name}}</span>
+					<span ng-if="hardwareType.editing"><input type="text" class="form-control" ng-model="hardwareType.tmpName" /></span>
+				</td>
+				<td class="right">
+					<span ng-if="hardwareType.editing">
+						<div class="btn-group ">
+							<button class="btn btn-primary " translate="ok" ng-click="vm.saveHardwareType(hardwareType)"></button>
+							<button class="btn btn-default " translate="cancel" ng-click="hardwareType.editing = false"></button>
+						</div>
+					</span>
+					<span ng-if="!hardwareType.editing">
+						<div class="btn-group visible-md visible-lg hidden-sm hidden-xs">
+							<button class="btn btn-default " translate="edit" ng-click="vm.editHardwareType(hardwareType)"></button>
+							<button class="btn btn-danger " translate="delete" ng-click="vm.deleteClient(client.id)"></button>
+						</div>
+						<div class="btn-group hidden-md hidden-lg">
+							<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+								<i class="fa fa-gear"></i>
+								<span class="caret"></span>
+								<span class="sr-only">Toggle Dropdown</span>
+							</button>
+							<ul class="dropdown-menu" role="menu">
+								<li class="btn-group-vertical">
+									<button class="btn btn-default" href="javascript:void(0)" translate="edit" ng-click="vm.editHardwareType(hardwareType)"></button>
+									<button class="btn btn-danger" href="javascript:void(0)" translate="delete" ng-click="vm.deleteClient(client.id)"></button>
+								</li>
+							</ul>
+						</div>
+					</span>
+				</td>
+            </tr>
+          </tbody>
+		</table>
+	</div>
+</div>
+

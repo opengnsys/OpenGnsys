@@ -1,1 +1,0 @@
-ogAdmBD-1.0.6a-1.0.6b.sql

@@ -1,0 +1,58 @@
+<section class="content-header">
+  <h1 translate="new_command">
+  </h1>
+  <ol class="breadcrumb">
+    <li><a ui-sref="app.dashboard"><i class="fa fa-dashboard"></i> {{'dashboard'|translate}}</a></li>
+    <li><a ui-sref="app.commands"><i class="fa fa-terminal"></i> {{'commands'|translate}}</a></li>
+    <li class="active" translate="command"></li>
+  </ol>
+</section>
+<section fixed-toolboxbar class="toolboxbar">
+	<div>
+		<div class="col-md-12">
+			<div class="box-tools pull-right">
+				<button class="btn btn-primary" translate="save" ng-click="vm.save()"></button>
+			</div>
+		</div>
+	</div>
+</section>
+<!-- Main content -->
+<section class="content">
+	<div class="row">
+		<div class="col-md-12">
+			<div class="box box-primary">
+				<div class="box-header with-border">
+				</div>
+				<div class="box-body">
+					<form role="form" name="vm.Form">
+						<div class="form-group" ng-class="{'has-error':vm.Form.title.$dirty && vm.Form.title.$invalid, 'has-success':vm.Form.title.$valid}">
+							<label for="title">
+								<span translate="title">
+								<span ng-if="required='true'" class="symbol required"></span>
+							</label>
+							<input class="form-control" type="text" required="true" ng-model="vm.command.title" name="title">
+						</div>
+						<div class="form-group" ng-class="{'has-error':vm.Form.script.$dirty && vm.Form.script.$invalid, 'has-success':vm.Form.script.$valid}">
+							<label for="script">
+								<span translate="script"></span>
+								<span ng-if="required='true'" class="symbol required"></span>
+							</label>
+							<textarea class="form-control" type="text" required="true" ng-model="vm.command.script" name="script"></textarea>
+						</div>
+						<div class="form-group" ng-class="{'has-error':vm.Form.parameters.$dirty && vm.Form.parameters.$invalid, 'has-success':vm.Form.parameters.$valid}">
+							<label for="parameters">
+								<span translate="parameters"></span>
+							</label>
+							<div class="checkbox clip-check check-primary checkbox-inline">
+								<input id="parameters" name="parameters" icheck checkbox-class="icheckbox_square-blue" radio-class="iradio_square-blue" type="checkbox" class="selection-checkbox" value="true" ng-model="vm.command.parameters" />
+							</div>
+							<p class="help-block" translate="help_command_parameters">
+							</p>
+						</div>
+						
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>

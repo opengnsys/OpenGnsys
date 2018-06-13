@@ -1,0 +1,129 @@
+<section class="content-header">
+	<h1 translate="menu"></h1>
+	<ol class="breadcrumb">
+	  <li><a ui-sref="app.dashboard"><i class="fa fa-dashboard"></i> {{'dashboard'|translate}}</a></li>
+	  <li><a ui-sref="app.menus"><i class="fa  fa-server"></i> {{'menus'|translate}}</a></li>
+	  <li class="active" translate="menu"></li>
+	</ol>
+</section>
+<section fixed-toolboxbar class="toolboxbar">
+	<div>
+		<div class="col-md-12">
+			<div class="box-tools pull-right">
+				<button class="btn btn-primary" translate="save" ng-click="vm.save(Form)"></button>
+			</div>
+		</div>
+	</div>
+</section>
+ <section class="content">
+ 	<div class="nav-tabs-custom">
+      <ul class="nav nav-tabs">
+        <li class="active"><a href="#tab_1" data-toggle="tab" aria-expanded="false" translate="menu_properties"></a></li>
+        <li class=""><a href="#tab_2" data-toggle="tab" aria-expanded="false" translate="menu_items"></a></li>
+      </ul>
+      <div class="tab-content">
+        <div class="tab-pane active" id="tab_1">
+        	<form role="form" gbn-auto-form name="Form" ng-submit="vm.modifyMenu(Form)" form-options="vm.formOptions" form-model="vm.menu"></form>
+        </div>
+        <!-- /.tab-pane -->
+        <div class="tab-pane" id="tab_2">
+        	<div class="btn-group">
+				<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+			      <span translate="options"></span><span class="caret"></span>
+			    </button>
+			    <ul class="dropdown-menu">
+					<li role="presentation"><a role="menuitem" tabindex="-1" href="#" translate="add_item"></a></li>
+			    </ul>
+			</div>
+        	<div class="box" ng-repeat="private in [false, true]">
+        		<div class="box-header">
+	        		<h3 class="box-title" ng-if="private == false" translate="public_items">
+	        		</h3>
+	        		<h3 class="box-title" ng-if="private == true" translate="private_items">
+	        		</h3>
+	        	</div>
+	        	<div class="box-body">
+		        	<table class="table table-hover">
+		             	<tbody>
+			              <tr>
+			                <th translate="private" class="col-md-2"></th>
+			                <th translate="imageUrl" class="col-md-2"></th>
+			                <th translate="description" class="col-md-4"></th>
+			                <th translate="order" class="col-md-2"></th>
+			                <th translate="options" class="col-md-2"></th>
+			              </tr>
+			              <tr ng-repeat="item in vm.menu.items | filter: searchText | filter: {private: private} | orderBy: 'order'" ng-class="{'odd': $index%2 == 0, 'even': $index%2 != 0}">
+			                <td>
+			                	<span ng-if="!item.editing">
+				                    <span>{{(item.private ? 'private' : 'public')| translate}}</span>
+				                </span>
+				                <span ng-if="item.editing">
+				                    <select ng-options="option.text for option in constants.menus.privateOptions track by option.id" ng-model="item.tmpPrivate">
+				                    </select>
+				                </span>
+			                </td>
+			                <td>
+			                	<span ng-if="!item.editing" ng-repeat="image in constants.menus.itemImage | filter: item.imgUrl" >
+			                    	{{image.text}}
+			                	</span>
+			                	<span ng-if="item.editing">
+			                		<select ng-options="option.text for option in constants.menus.itemImage track by option.value" ng-model="item.tmpImgUrl">
+				                    </select>
+			                		
+			                	</span>
+			                </td>
+			                <td>
+			                	<span ng-if="!item.editing">
+			                    	{{item.description}}
+			                    </span>
+			                    <span ng-if="item.editing">
+			                    	<input type="text" ng-model="item.tmpDescription" />
+			                    </span>
+			                </td>
+			                <td>
+			                	<span ng-if="!item.editing">
+				                    {{item.order}}
+				                </span>
+				                <span ng-if="item.editing">
+				                    <input type="number" ng-model="item.tmpOrder" />
+				                </span>
+			                </td>
+			                <td class="right">
+			                  <span ng-if="item.editing">
+			                    <div class="btn-group ">
+			                      <button class="btn btn-primary " translate="ok" ng-click="vm.saveMenuItem(item)"></button>
+			                      <button class="btn btn-default " translate="cancel" ng-click="item.editing = false"></button>
+			                    </div>
+			                  </span>
+			                  <span ng-if="!item.editing">
+			                    <div class="btn-group visible-md visible-lg hidden-sm hidden-xs">
+			                      <button class="btn btn-default " translate="edit"  ng-click="vm.editMenuItem(item)"></button>
+			                      <button class="btn btn-danger " translate="delete" ng-click="vm.deleteItem(item.id)"></button>
+			                    </div>
+			                    <div class="btn-group hidden-md hidden-lg">
+			                      <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+			                        <i class="fa fa-gear"></i>
+			                        <span class="caret"></span>
+			                        <span class="sr-only">Toggle Dropdown</span>
+			                      </button>
+			                      <ul class="dropdown-menu" role="menu">
+			                        <li class="btn-group-vertical">
+			                          <button class="btn btn-default" translate="edit" ng-click="vm.editMenuItem(item)"></button>
+			                          <button class="btn btn-danger"  translate="delete" ng-click="vm.deleteMenuItem(item.id)"></button>
+			                        </li>
+			                      </ul>
+			                    </div>
+			                  </span>
+			               </td>
+			              </tr>
+		            	</tbody>
+		          	</table>
+	          	</div>
+	        </div>
+        </div>
+        <!-- /.tab-pane -->
+      </div>
+      <!-- /.tab-content -->
+    </div>
+ 	
+</section>

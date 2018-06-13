@@ -1,0 +1,19 @@
+<div class="row">
+	<div ng-repeat="(id, client) in selectedClients track by id" class="col-md-2 col-xs-6 padding-5" ng-if="client.id">
+		<div class="info-box client" >
+			<span style="position: absolute;">
+				<input icheck checkbox-class="icheckbox_square-blue" radio-class="iradio_square-blue" type="checkbox" class="selection-checkbox" ng-model="client.selected" ng-change="vm.selectClient(client, content)" />
+			</span>
+            <span class="info-box-icon">
+            	<i class="fa fa-desktop">
+            	</i>
+            </span>
+            <div class="info-box-content">
+				<span class="info-box-text">{{client.name}}</span>
+				<span class="info-box-text">{{client.ip}}</span>
+				<span class="info-box-text">{{client.mac}}</span>
+            </div>
+            <!-- /.info-box-content -->
+        </div>
+	</div>
+</div>
