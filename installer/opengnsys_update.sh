@@ -179,6 +179,7 @@ function checkAutoUpdate()
 	# Actaulizar el script si ha cambiado o no existe el original.
 	if [ $REMOTE -eq 1 ]; then
 		curl -s $RAW_URL/installer/$PROGRAMNAME -o $PROGRAMNAME
+		chmod +x $PROGRAMNAME
 		if ! diff -q $PROGRAMNAME $INSTALL_TARGET/lib/$PROGRAMNAME 2>/dev/null || ! test -f $INSTALL_TARGET/lib/$PROGRAMNAME; then
 			mv $PROGRAMNAME $INSTALL_TARGET/lib
 			update=1
@@ -204,7 +205,7 @@ function getDateTime()
 # Escribe a fichero y muestra por pantalla
 function echoAndLog()
 {
-	echo $1
+	echo "$1"
 	DATETIME=`getDateTime`
 	echo "$DATETIME;$SSH_CLIENT;$1" >> $LOG_FILE
 }
