@@ -917,20 +917,6 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 
-VFILE=/opt/opengnsys/doc/VERSION.txt     
-if [ -f $VFILE ]; then
-   echo "##############################################################"
-   echo "ERROR: File $VFILE exists. This could" 
-   echo "mean that OpenGnsys has been previously installed using the"
-   echo "installer script." 
-   echo "This apt package is not suitable for upgrading and may break"
-   echo "the system. If you are shure what you are doing you could"
-   echo "delete or rename that file and try again"
-   echo "Terminating!"
-   echo "##############################################################"
-   exit 1
-fi
-
 # Detectar datos de auto-configuración del instalador.
 autoConfigure
 
