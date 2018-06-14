@@ -1263,11 +1263,7 @@ if [ "$RET" = "true" ]; then
 	echo "Opengnsys already installed; Updating"
 	
 	/tmp/opengnsys_installer/opengnsys_git_update.sh
-   if [ $? -eq 0 ]; then 
-	echo "Updated!!"
-	exit 0
-   fi	
-fi
+ fi
 
 
 echoAndLog "OpenGnsys installation begins at $(date)"

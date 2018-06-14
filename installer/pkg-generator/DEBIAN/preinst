@@ -1,22 +1,22 @@
 #!/bin/bash
 # This script is executed before the package it belongs to is unpacked 
-# from its Debian archive (".deb") file. Many 'preinst' scripts stop 
+# from its Debian archive (".deb") file. Many 'preinst' scripts stop
 # services for packages which are being upgraded until their installation
 # or upgrade is completed (following the successful execution of the
 # 'postinst' script).
 
 # test if it is already installed using old installer script
 
-VFILE=/opt/opengnsys/doc/VERSION.txt     
+VFILE=/opt/opengnsys/doc/VERSION.txt
 if [ -f $VFILE ]; then
    echo "##############################################################"
-   echo "ERROR: File $VFILE exists. This could" 
+   echo "ERROR: File $VFILE exists. This could"
    echo "mean that OpenGnsys has been previously installed using the"
-   echo "installer script." 
+   echo "installer script."
    echo "This apt package is not suitable for upgrading and may break"
    echo "the system. If you are shure what you are doing you could"
    echo "delete or rename that file and try again"
-   echo "Terminating!"
+   echo "Terminating from preinst!"
    echo "##############################################################"
    exit 1
 fi
