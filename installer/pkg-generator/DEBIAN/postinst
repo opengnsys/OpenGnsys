@@ -1255,24 +1255,31 @@ db_go || true
 ####### Proceso de instalación de OpenGnsys
 #####################################################################
 
-# test if it is already installed
+# test if it is already installed using old installer script
+
+VFILE=/opt/opengnsys/doc/VERSION.txt     
+if [ -f $VFILE ]; then
+   echo "File $VFILE exists. This could mean that OpenGnsys has been previously" 
+   echo "installed using the installer script. This apt package is not suitable" 
+   echo "for upgrading and may break the system. If you are shure what you are"
+   echo "doing you could delete or rename that file and try again"
+   echo "Terminating!"
+   exit 1
+fi
+
+# test if it is already installed using new debian packake
+
 db_get opengnsys-full/OPENGNSYS_IS_INSTALLED
 if [ "$RET" = "true" ]; then
 	echo "Opengnsys already installed; Updating"
 	
 	/tmp/opengnsys_installer/opengnsys_git_update.sh
+   if [ $? -eq 0 ]; then 
 	echo "Updated!!"
 	exit 0
+   fi	
 fi
 
-VFILE=/opt/opengnsys/doc/VERSION.txt     
-if [ -f $VFILE ]; then
-   echo "File $FILE exists. This could mean that OpenGnsys has been previously" 
-   echo "installed using the installer script. This apt package is not suitable" 
-   echo "for upgrading and may break the system"
-   echo "Terminating!"
-   exit 1
-fi
 
 echoAndLog "OpenGnsys installation begins at $(date)"
 pushd $WORKDIR

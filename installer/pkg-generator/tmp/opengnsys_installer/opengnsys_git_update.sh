@@ -933,7 +933,6 @@ autoConfigure
 
 	ln -fs "$(dirname $PROGRAMDIR)" opengnsys
 
-
 # Comprobar configuración de MySQL.
 checkMysqlConfig $OPENGNSYS_DBUSER $OPENGNSYS_DBPASSWORD
 
@@ -986,4 +985,4 @@ updateSummary
 echoAndLog "OpenGnsys update finished at $(date)"
 
 popd
-
+return 0
