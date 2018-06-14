@@ -1344,6 +1344,8 @@ INSTVERSION=$(awk '{print $2}' $INSTALL_TARGET/doc/VERSION.txt)
 
 $STARTSERVICE
 
+mysqlSetRootPassword "${MYSQL_ROOT_PASSWORD}"
+
 mysqlTestConnection "${MYSQL_ROOT_PASSWORD}"
 if [ $? -ne 0 ]; then
 	errorAndLog "Error while connection to mysql"

@@ -928,7 +928,11 @@ autoConfigure
 checkMysqlConfig $OPENGNSYS_DBUSER $OPENGNSYS_DBPASSWORD
 
 # Actualizar la BD.
+
+echo "DEBUG: UpdateDatabase"
 updateDatabase
+echo "DEBUG: end UpdateDatabase"
+
 
 # Actualizar ficheros complementarios del servidor
 updateServerFiles
@@ -976,4 +980,4 @@ updateSummary
 echoAndLog "OpenGnsys update finished at $(date)"
 
 popd
-return 0
+
