@@ -919,10 +919,14 @@ fi
 
 VFILE=/opt/opengnsys/doc/VERSION.txt     
 if [ -f $VFILE ]; then
-   echo "File $FILE exists. This could mean that OpenGnsys has been previously" 
-   echo "installed using the installer script. This apt package is not suitable" 
-   echo "for upgrading and may break the system"
+   echo "##############################################################"
+   echo "ERROR: File $VFILE exists. This could mean that OpenGnsys" 
+   echo "has been previously installed using the installer script." 
+   echo "This apt package is not suitable for upgrading and may break"
+   echo "the system. If you are shure what you are doing you could"
+   echo "delete or rename that file and try again"
    echo "Terminating!"
+   echo "##############################################################"
    exit 1
 fi
 
