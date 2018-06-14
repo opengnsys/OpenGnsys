@@ -55,15 +55,15 @@
 				despleimagen=document.getElementById("despleimagen_"+particion);
 				var  p=despleimagen.selectedIndex;
 				if (p==0){  
-				  alert(TbMsg[0]);
-				 	despleimagen.focus();
-			    return(false)
+					alert(TbMsg[0]);
+					despleimagen.focus();
+					return(false)
 				}
 			}
 		}
 		if(op==0){
-			   alert(TbMsg[1]);
-			 return(false);
+			alert(TbMsg[1]);
+			return(false);
 		}
 		return(comprobar_datosejecucion())
 }

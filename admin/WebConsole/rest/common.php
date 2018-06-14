@@ -13,6 +13,7 @@
 
 // Common constants.
 define('REST_LOGFILE', '/opt/opengnsys/log/rest.log');
+define('VERSION_FILE', '/opt/opengnsys/doc/VERSION.json');
 
 // Set time zone.
 if (function_exists("date_default_timezone_set")) {
@@ -247,25 +248,28 @@ $app->hook('slim.after', function() use ($app) {
  * @return   JSON object with basic server information (version, services, etc.)
  */
 $app->get('/info', function() {
+      $response = new \stdClass;
       // Reading version file.
-      @list($project, $version, $release) = explode(' ', file_get_contents('/opt/opengnsys/doc/VERSION.txt'));
-      $response['project'] = trim($project);
-      $response['version'] = trim($version);
-      $response['release'] = trim($release);
+      $data = json_decode(@file_get_contents(VERSION_FILE));
+      if (isset($data->project)) {
+          $response = $data;
+      } else {
+          $response->project = 'OpenGnsys';
+      }
       // Getting actived services.
       @$services = parse_ini_file('/etc/default/opengnsys');
-      $response['services'] = Array();
+      $response->services = Array();
       if (@$services["RUN_OGADMSERVER"] === "yes") {
-          array_push($response['services'], "server");
+          array_push($response->services, "server");
           $hasOglive = true;
       }
-      if (@$services["RUN_OGADMREPO"] === "yes")  array_push($response['services'], "repository");
-      if (@$services["RUN_BTTRACKER"] === "yes")  array_push($response['services'], "tracker");
+      if (@$services["RUN_OGADMREPO"] === "yes")  array_push($response->services, "repository");
+      if (@$services["RUN_BTTRACKER"] === "yes")  array_push($response->services, "tracker");
       // Reading installed ogLive information file.
       if ($hasOglive === true) {
           $data = json_decode(@file_get_contents('/opt/opengnsys/etc/ogliveinfo.json'));
           if (isset($data->oglive)) {
-              $response['oglive'] = $data->oglive;
+              $response->oglive = $data->oglive;
           }
       }
       jsonResponse(200, $response);

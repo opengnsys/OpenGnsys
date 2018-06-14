@@ -120,15 +120,20 @@ function PulsaEnter(oEvento){
 </form>
 </div>
 <div class="pie">
+<span><a href="https://opengnsys.es/">
 <?php
-// Añadir versión y URL al proyecto.
-$versionfile="../doc/VERSION.txt";
-if (file_exists ($versionfile)) {
-	echo '<span><a href="https://opengnsys.es/">';
-	include ($versionfile);
-	echo '</a></span>';
+// Añadir versión en el enlace a la URL del proyecto.
+$data = json_decode(@file_get_contents(__DIR__ . '/../doc/VERSION.json'));
+if (empty($data->project)) {
+    echo "OpenGnsys";
+} else {
+    echo @$data->project.' '
+        .@$data->version.' '
+        .(isset($data->codename) ? '('.$data->codename.') ' : '')
+        .@$data->release;
 }
 ?>
+</a></span>
 <form action="#" name="lang" method="post">
       <?php echo HTMLSELECT($cmd,0,'idiomas',$idi,'nemonico','descripcion',80); ?>
       <button type="submit"><?php echo $TbMsg["ACCESS_CHOOSE"]; ?></button>

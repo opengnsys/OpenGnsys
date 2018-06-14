@@ -24,10 +24,15 @@ include_once("../idiomas/php/".$idioma."/acercade_".$idioma.".php");
 <p>
 <?php
 // Añadir versión.
-$versionfile="../../doc/VERSION.txt";
-if (file_exists ($versionfile))
-        include ($versionfile);
-
+$data = json_decode(@file_get_contents(__DIR__ . '/../../doc/VERSION.json'));
+if (empty($data->project)) {
+    echo "OpenGnsys";
+} else {
+    echo @$data->project.' '
+        .@$data->version.' '
+        .(isset($data->codename) ? '(<a href="'.@$data->definition.'" target="_blank">'.$data->codename.'</a>) ' : '')
+        .@$data->release;
+}
 ?>
 </p>
 <?php
@@ -129,8 +134,9 @@ fclose($crearficheroinicio);
 <p><?php
  if (file_exists ($changelogfile)){ 
 	system("cp ../../doc/$buschangelog ../api");
-	echo "<strong><a href='../api/$buschangelog' target='_blank'>".$TbMsg["CHANGE"]."</a></strong>";
-	include ($versionfile);}
+	echo "<strong><a href='../api/$buschangelog' target='_blank'>".$TbMsg["CHANGE"]."</a></strong>"
+	    .@$data->project.' '.@$data->version.' '.(isset($data->codename)?'('.$data->codename.')':'');
+ }
 ?></p>
 
 <p><?php echo "<strong><a href='$ficheroinicio' target='_blank'>".$TbMsg["MANUAL"]."</a></strong>";?></p>

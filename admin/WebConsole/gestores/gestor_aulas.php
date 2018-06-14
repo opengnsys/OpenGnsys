@@ -276,7 +276,7 @@ INSERT INTO aulas
 	(idcentro, grupoid, nombreaula, urlfoto, inremotepc, cagnon, pizarra,
 	 ubicacion, comentarios, puestos, horaresevini, horaresevfin, router,
 	 netmask, ntp, dns, proxy, modomul, ipmul, pormul, velmul, modp2p,
-	 timep2p, validacion, paginalogin, paginavalidacion, oglivedir) 
+	 timep2p, validacion, paginalogin, paginavalidacion, oglivedir)
  VALUES (@idcentro, @grupoid, @nombreaula, @urlfoto, @inremotepc, @cagnon, @pizarra,
 	 @ubicacion, @comentarios, @puestos, @horaresevini, @horaresevfin, @router,
 	 @netmask, @ntp, @dns, @proxy, @modomul, @ipmul, @pormul, @velmul, @modp2p,

@@ -1,4 +1,4 @@
-# Vagrantfile to install OpenGnsys 1.1 virtual environment using VirtualBox provider.
+# Vagrantfile to install OpenGnsys virtual environment (development version) using VirtualBox provider.
 
 VAGRANTFILE_API_VERSION = "2"
 # VM provider: Oracle VM VirtualBox.
@@ -25,7 +25,7 @@ LOCALWEBPORT = 8443
 # OpenGnsys Server provisioning script: prepare repo disk, install OpenGnsys, change default interface, configure DHCP server.
 OGSERVERSCRIPT = <<EOT
 # Exit if OpenGnsys is installed.
-[ -f /opt/opengnsys/doc/VERSION.txt ] && echo "Cannot provision, OpenGnsys is already installed." && exit 1
+[ -f /opt/opengnsys/doc/VERSION.json ] && echo "Cannot provision, OpenGnsys is already installed." && exit 1
 # Create repository disk using LVM, if necesary.
 if [ -z "$(blkid /dev/mapper/og-images | grep ext4)" ]; then
     pvcreate /dev/sdb
@@ -38,7 +38,7 @@ if [ -z "$(blkid /dev/mapper/og-images | grep ext4)" ]; then
     mount -a
 fi
 # Install OpenGnsys and change server address.
-wget -q https://opengnsys.es/svn/branches/version1.1/installer/opengnsys_installer.sh -O - | bash || exit $?
+curl -s https://raw.githubusercontent.com/opengnsys/OpenGnsys/devel/installer/opengnsys_installer.sh | bash || exit $?
 mv /opt/opengnsys/log/bash.log /opt/opengnsys/log/opengnsys_installer.log
 echo y | /opt/opengnsys/bin/setserveraddr enp0s8
 # Insert DHCP data.
@@ -94,7 +94,7 @@ OGAGENTPKG = "ogagent_1.1.0_all.deb"
 MODELSCRIPT = <<EOT
 # Comment out next lines to install and configure OGAgent for Ubuntu.
 #apt-get update -y
-#wget -q --no-check-certificate https://#{SERVERIP}/opengnsys/descargas/#{OGAGENTPKG}
+#curl -ks https://#{SERVERIP}/opengnsys/descargas/#{OGAGENTPKG} -o #{OGAGENTPKG}
 #if [ -f #{OGAGENTPKG} ]; then
 #    dpkg -i #{OGAGENTPKG}
 #    apt-get install -fy || exit $?

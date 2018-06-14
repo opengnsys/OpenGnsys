@@ -99,8 +99,8 @@ tar -cvzf $BACKUPFILE --transform="s!^!$BACKUPPREFIX/!" \
           -C $TMPDIR IPSERVER.txt \
           -C $DHCPDIR dhcpd.conf \
           -C $OPENGNSYS/tftpboot menu.lst \
-          -C $OPENGNSYS/doc VERSION.txt \
-          -C $OPENGNSYS/client/etc engine.cfg \
+          -C $OPENGNSYS/doc VERSION.json \
+          -C $OPENGNSYS/client/etc engine.cfg engine.json \
           -C $OPENGNSYS/www menus \
           -C /etc default/opengnsys &>/dev/null
 

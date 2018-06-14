@@ -37,6 +37,7 @@ if [ -z "$(getent passwd "$APACHE_USER" 2>/dev/null)" -o -z "$(getent group "$AP
 	exit 1
 fi
 
+mkdir -p $OPENGNSYS_DIR/{log/clients,images/groups}
 chown -R :$OPENGNSYS_USER $OPENGNSYS_DIR/{log/clients,images/groups}
 find $OPENGNSYS_DIR/log/clients -type f -exec chmod 664 {} \;
 find $OPENGNSYS_DIR/images -maxdepth 1 -exec chown :$OPENGNSYS_USER {} \;
@@ -50,8 +51,8 @@ chmod 600 $OPENGNSYS_DIR/etc/{ogAdmServer,ogAdmAgent}*.cfg
 chown root:$APACHE_GROUP $OPENGNSYS_DIR/{www/controlacceso*.php,etc/ogAdmRepo*.cfg}
 chmod 640 $OPENGNSYS_DIR/{www/controlacceso*.php,etc/ogAdmRepo*.cfg}
 chown -R $APACHE_USER:$APACHE_GROUP $OPENGNSYS_DIR/www/images/{fotos,iconos}
-chown -R $APACHE_USER:$APACHE_GROUP $OPENGNSYS_DIR/www/api
-chown -R $APACHE_USER:$APACHE_GROUP $OPENGNSYS_DIR/www/tmp	# ???
+mkdir -p $OPENGNSYS_DIR/www/{api,tmp}
+chown -R $APACHE_USER:$APACHE_GROUP $OPENGNSYS_DIR/www/{api,tmp}
 chown -R $APACHE_USER:$APACHE_GROUP $OPENGNSYS_DIR/tftpboot/menu.lst
 chown -R :$OPENGNSYS_USER $OPENGNSYS_DIR/tftpboot/ogLive*
 find -L $OPENGNSYS_DIR/tftpboot -type d -exec chmod 755 {} \;
