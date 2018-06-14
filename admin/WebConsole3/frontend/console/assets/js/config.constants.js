@@ -1,13 +1,17 @@
 (function(){
 	'use strict';
-	var URL_BASE = "https://172.16.140.210/opengnsys3";
-	var API_BASE_URL = "/rest/web/app_dev.php/api";
-	//var URL_BASE = "http://localhost:81/OG_version1.1/admin/WebConsole"
+	var OGSERVER = "172.16.140.210";
+	// Variable ENV app.php para producción, app_dev.php para desarrollo
+	var ENV = "app_dev.php";
+	var URL_BASE = "https://"+OGSERVER+"/opengnsys3";
+	var API_ENTRY_POINT = "/rest/web/"+ENV;
+	var API_BASE_URL = API_ENTRY_POINT+"/api";
+	
 	angular.module(appName)
 	.constant('URL_BASE', URL_BASE)
 	.constant('API_BASE_URL', API_BASE_URL)
 	.constant('BASE_DIR', "opengnsys3")
-	.constant('OAUTH_DOMAIN','/rest/web/app_dev.php/oauth/v2/token')
+	.constant('OAUTH_DOMAIN',API_ENTRY_POINT+'/oauth/v2/token')
 	.constant('OAUTH_CLIENT_ID', '1_23amzbdp4kskg80444oscko4w0w8wokocs88k0g8w88o4oggs4')
 	.constant('OAUTH_CLIENT_SECRET', '46rttt2trwo4gocgoc4w80k4s8ok48sg8s84kk0cw48csks8o8')
 	.constant("API_URL",URL_BASE+API_BASE_URL)
