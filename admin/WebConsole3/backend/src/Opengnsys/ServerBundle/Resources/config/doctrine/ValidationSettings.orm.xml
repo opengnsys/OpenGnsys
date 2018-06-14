@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+  <entity name="Opengnsys\ServerBundle\Entity\ValidationSettings" table="og_validation_settings">
+
+    <id name="id" type="integer" column="id">
+      <generator strategy="AUTO"/>
+    </id>
+
+    <field name="loginpage" type="string" column="loginpage" length="100" nullable="true"/>
+    <field name="validationpage" type="string" column="validationpage" length="100" nullable="true"/>
+    <field name="validation" type="boolean" column="validation" nullable="true"/>
+
+  </entity>
+</doctrine-mapping>

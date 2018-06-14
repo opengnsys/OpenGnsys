@@ -1,0 +1,4 @@
+opengnsys_repository__api:
+    type: rest
+    resource: "@OpengnsysRepositoryBundle/Resources/config/routing/api.yml"
+    prefix: /api/repository

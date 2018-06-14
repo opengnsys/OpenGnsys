@@ -1,0 +1,39 @@
+Opengnsys\ServerBundle\Entity\OrganizationalUnit:
+    exclusion_policy: ALL
+    properties:
+        id:
+            groups: [opengnsys_server__organizational_unit_get, opengnsys_server__organizational_unit_cget, opengnsys_server__organizational_unit_cget_h]
+            expose: true
+            serialized_name: id
+        name:
+            groups: [opengnsys_server__organizational_unit_get, opengnsys_server__organizational_unit_cget, opengnsys_server__organizational_unit_cget_h]
+            expose: true
+            serialized_name: name
+        description:
+            groups: [opengnsys_server__organizational_unit_get, opengnsys_server__organizational_unit_cget, opengnsys_server__organizational_unit_cget_h]
+            expose: true
+            serialized_name: description
+        urlphoto:
+            groups: [opengnsys_server__organizational_unit_get, opengnsys_server__organizational_unit_cget, opengnsys_server__organizational_unit_cget_h]
+            expose: true
+            serialized_name: urlphoto
+        comments:
+            groups: [opengnsys_server__organizational_unit_get, opengnsys_server__organizational_unit_cget, opengnsys_server__organizational_unit_cget_h]
+            expose: true
+            serialized_name: comments
+        networkSettings:
+            groups: [opengnsys_server__organizational_unit_get, opengnsys_server__organizational_unit_cget, opengnsys_server__organizational_unit_cget_h]
+            expose: true
+            serialized_name: networkSettings
+        parent:
+            groups: [opengnsys_server__organizational_unit_get_parent]
+            expose: true
+            serialized_name: parent
+        children:
+            groups: [opengnsys_server__organizational_unit_get_children, opengnsys_server__organizational_unit_cget]
+            expose: true
+            serialized_name: children
+        clients:
+            groups: [opengnsys_server__organizational_unit_get, opengnsys_server__organizational_unit_cget, opengnsys_server__organizational_unit_cget_h]
+            expose: true
+            serialized_name: clients

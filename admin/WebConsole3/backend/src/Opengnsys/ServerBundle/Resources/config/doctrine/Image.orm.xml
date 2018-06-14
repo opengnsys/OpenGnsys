@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+    <entity name="Opengnsys\ServerBundle\Entity\Image" table="og_images">
+
+        <id name="id" type="integer" column="id">
+            <generator strategy="AUTO"/>
+        </id>
+
+        <field name="canonicalName" type="string" column="canonical_name" length="50" nullable="false" unique="true"/>
+        <field name="description" type="string" column="description" length="250" nullable="false"/>
+
+        <field name="comments" type="text" column="comments" length="65535" nullable="true"/>
+        <field name="path" type="string" column="path" length="250" nullable="true"/>
+
+        <field name="type" column="type" type="integer" nullable="true"/>
+
+        <field name="revision" column="revision" type="integer" nullable="true"/>
+
+        <field name="partitionInfo" column="partition_info" type="text" nullable="true"/>
+
+        <field name="fileSize" column="file_size" type="string" length="20" nullable="true"/>
+
+        <field name="createdAt" type="datetime" column="created_at" nullable="true"/>
+        <field name="updatedAt" type="datetime" column="updated_at" nullable="true"/>
+
+        <!--
+        <field name="filesystem" column="filesystem" type="string" length="250" nullable="true"/>
+        <field name="partitionCode" column="partition_code" type="string" length="250"  nullable="true"/>
+        <field name="osType" column="os_type" type="string" length="250" nullable="true"/>
+        -->
+
+        <many-to-one field="softwareProfile" target-entity="\Opengnsys\ServerBundle\Entity\SoftwareProfile">
+            <join-columns>
+                <join-column name="sotfware_profile_id" referenced-column-name="id"/>
+            </join-columns>
+        </many-to-one>
+
+        <!-- De qué Cliente se ha obtenido la imagen -->
+        <many-to-one field="client" target-entity="\Opengnsys\ServerBundle\Entity\Client">
+            <join-columns>
+                <join-column name="client_id" referenced-column-name="id"/>
+            </join-columns>
+        </many-to-one>
+
+        <!-- Es para la imágenes incrementales. Sería mejor llamarle de otra forma -->
+        <many-to-one field="parent" target-entity="\Opengnsys\ServerBundle\Entity\Image">
+            <join-columns>
+                <join-column name="parent_id" referenced-column-name="id"/>
+            </join-columns>
+        </many-to-one>
+
+        <many-to-one field="repository" target-entity="\Opengnsys\ServerBundle\Entity\Repository">
+            <join-columns>
+                <join-column name="repository_id" referenced-column-name="id"/>
+            </join-columns>
+        </many-to-one>
+
+    </entity>
+</doctrine-mapping>

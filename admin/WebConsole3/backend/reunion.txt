@@ -1,0 +1,25 @@
+MSDOS
+GPT
+
+Cliente/ServidorWeb
+
+
+Hacer loging a medios intermedios.
+
+Nodo intermedio con perfil de red o sin perfil de red.
+
+- Si tiene o no perfil de red y si tiene punto de acceso para hacer login.
+- Un equipo de que puediera estar en varias Unidades Organizativas.
+
+
+- Crear grupos Virtuales. a través de un filtro. Vista virtuales --> Para crear operaciones concretas.
+
+
+Tickets: --> Tiecket tarea puede terner subticketrs
+- Adaptar apirest version 3
+- Modificaciones base de datos
+
+
+Podría ser un Enum:
+- HardwareType
+- SoftwareType

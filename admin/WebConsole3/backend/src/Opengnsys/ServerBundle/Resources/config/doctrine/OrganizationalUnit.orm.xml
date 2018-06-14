@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+    <entity name="Opengnsys\ServerBundle\Entity\OrganizationalUnit" table="og_organizational_units"
+            repository-class="Opengnsys\ServerBundle\Entity\Repository\OrganizationalUnitRepository">
+
+        <id name="id" type="integer" column="id">
+            <generator strategy="AUTO"/>
+        </id>
+
+        <field name="name" type="string" column="name" length="200" nullable="false"/>
+        <field name="description" type="text" column="description" nullable="true"/>
+
+        <!--
+        <field name="urlphoto" type="string" column="url_photo" length="250" nullable="true"/>
+        <field name="cuadroY" type="string" column="cuadro_y" length="3" nullable="true"/>
+        <field name="cuadroX" type="string" column="cuadro_x" length="3" nullable="true"/>
+        <field name="cannon" type="boolean" column="cannon" nullable="true"/>
+        <field name="blackboard" type="boolean" column="blackboard" nullable="true"/>
+        <field name="location" type="string" column="location" length="255" nullable="true"/>
+        <field name="comments" type="text" column="comments" nullable="true"/>
+        <field name="numcomputers" type="boolean" column="numcomputers" nullable="true"/>
+        <field name="horaresevini" type="boolean" column="horaresevini" nullable="true"/>
+        <field name="horaresevfin" type="boolean" column="horaresevfin" nullable="true"/>
+        -->
+
+        <one-to-many field="clients" target-entity="\Opengnsys\ServerBundle\Entity\Client"
+                     mapped-by="organizationalUnit">
+        </one-to-many>
+
+        <one-to-many field="children" target-entity="\Opengnsys\ServerBundle\Entity\OrganizationalUnit"
+                     mapped-by="parent">
+        </one-to-many>
+
+        <many-to-one field="parent" target-entity="\Opengnsys\ServerBundle\Entity\OrganizationalUnit"
+                     inversed-by="children">
+            <join-columns>
+                <join-column name="parent_id" referenced-column-name="id" on-delete="SET NULL"/>
+            </join-columns>
+        </many-to-one>
+
+        <many-to-one field="validationSettings" target-entity="\Opengnsys\ServerBundle\Entity\ValidationSettings">
+            <join-columns>
+                <join-column name="validation_settings_id" referenced-column-name="id"/>
+            </join-columns>
+        </many-to-one>
+
+        <many-to-one field="networkSettings" target-entity="\Opengnsys\ServerBundle\Entity\NetworkSettings">
+            <cascade>
+                <cascade-persist/>
+                <cascade-remove/>
+                <!--<cascade-all/>-->
+            </cascade>
+            <join-columns>
+                <join-column name="network_settings_id" referenced-column-name="id"/>
+            </join-columns>
+        </many-to-one>
+
+        <!--
+        <many-to-many field="user" target-entity="\Opengnsys\ServerBundle\Entity\User" mapped-by="organizationalUnit"/>
+        -->
+
+    </entity>
+</doctrine-mapping>

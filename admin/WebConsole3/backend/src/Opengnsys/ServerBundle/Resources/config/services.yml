@@ -1,0 +1,21 @@
+services:
+
+    # SECURITY - VOTER
+    opengnsys_server.security.ou_voter:
+        class: Opengnsys\ServerBundle\Security\OrganizationalUnitVoter
+        arguments: ['@doctrine.orm.entity_manager', '@session']
+        tags:
+            - { name: security.voter }
+
+    # DOCTRINE DATA-FIXTURES
+    opengnsys_server.data_fixtures.load_netboot:
+        class: Opengnsys\ServerBundle\DataFixtures\LoadNetboot
+        tags: [doctrine.fixture.orm]
+    opengnsys_server.data_fixtures.load_client_api:
+        class: Opengnsys\ServerBundle\DataFixtures\LoadClientApi
+        tags: [doctrine.fixture.orm]
+
+    # SERVICE
+    opengnsys_service.netboot:
+        class: Opengnsys\ServerBundle\Service\NetbootService
+        arguments: ["%pxedir%", '@doctrine.orm.entity_manager']

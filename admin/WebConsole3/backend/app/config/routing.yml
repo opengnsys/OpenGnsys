@@ -1,0 +1,27 @@
+opengnsys_server:
+    resource: "@OpengnsysServerBundle/Resources/config/routing.yml"
+    prefix:   /
+
+opengnsys_repository:
+    resource: "@OpengnsysRepositoryBundle/Resources/config/routing.yml"
+    prefix:   /
+
+
+#globunet_user:
+#    resource: "@GlobunetUserBundle/Resources/config/routing.yml"
+#    prefix:   /
+
+# GlobunetUser Api
+globunet_user_api:
+    resource: "@GlobunetUserBundle/Resources/config/routing_api.yml"
+    prefix:   /
+
+# GlobunetUser OAuth
+globunet_user_oauth:
+    resource: "@GlobunetUserBundle/Resources/config/routing_oauth.yml"
+    prefix:   /
+
+# Nelmio
+NelmioApiDocBundle:
+    resource: "@NelmioApiDocBundle/Resources/config/routing.yml"
+    prefix:   /api/doc

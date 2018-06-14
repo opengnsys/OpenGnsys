@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+    <entity name="Opengnsys\ServerBundle\Entity\Partition" table="og_partitions">
+
+        <unique-constraints>
+            <unique-constraint name="unique_Partition_id_numDisk_numPartition" columns="id,num_disk,num_partition"/>
+        </unique-constraints>
+
+        <id name="id" type="integer" column="id">
+            <generator strategy="AUTO"/>
+        </id>
+
+        <field name="numDisk" type="integer" column="num_disk" nullable="false"/>
+        <field name="numPartition" type="integer" column="num_partition" nullable="false"/>
+        <field name="size" type="integer" column="size_" nullable="false"/>
+        <field name="usage" type="float" column="usage_" nullable="false"/>
+        <field name="cacheContent" type="string" column="cache_content" length="500" nullable="true"/>
+
+        <field name="filesystem" column="filesystem" type="string" length="50" nullable="true"/>
+        <field name="partitionCode" column="partition_code" type="string" length="50" nullable="true"/>
+        <field name="osName" column="os_name" type="string" length="80" nullable="true"/>
+
+        <many-to-one field="image" target-entity="\Opengnsys\ServerBundle\Entity\Image">
+            <join-columns>
+                <join-column name="image_id" referenced-column-name="id"/>
+            </join-columns>
+        </many-to-one>
+
+        <many-to-one field="client" target-entity="\Opengnsys\ServerBundle\Entity\Client" inversed-by="partitions">
+            <join-columns>
+                <join-column name="client_id" referenced-column-name="id"/>
+            </join-columns>
+        </many-to-one>
+
+    </entity>
+</doctrine-mapping>

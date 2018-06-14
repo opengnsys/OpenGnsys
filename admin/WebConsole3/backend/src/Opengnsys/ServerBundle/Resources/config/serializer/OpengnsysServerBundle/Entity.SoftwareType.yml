@@ -1,0 +1,15 @@
+Opengnsys\ServerBundle\Entity\SoftwareType:
+    exclusion_policy: ALL
+    properties:
+        description:
+            groups: [opengnsys_server__software_type_get, opengnsys_server__software_type_cget]
+            expose: true
+            serialized_name: description
+        urlimage:
+            groups: [opengnsys_server__software_type_get, opengnsys_server__software_type_cget]
+            expose: true
+            serialized_name: urlimage
+        id:
+            groups: [opengnsys_server__software_type_get, opengnsys_server__software_type_cget]
+            expose: true
+            serialized_name: id

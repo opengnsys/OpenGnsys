@@ -1,0 +1,39 @@
+Opengnsys\ServerBundle\Entity\Repository:
+    exclusion_policy: ALL
+    properties:
+        name:
+            groups: [opengnsys_server__repository_get, opengnsys_server__repository_cget]
+            expose: true
+            serialized_name: name
+        ip:
+            groups: [opengnsys_server__repository_get, opengnsys_server__repository_cget]
+            expose: true
+            serialized_name: ip
+        password:
+            groups: [opengnsys_server__repository_get, opengnsys_server__repository_cget]
+            expose: true
+            serialized_name: password
+        configurationpath:
+            groups: [opengnsys_server__repository_get, opengnsys_server__repository_cget]
+            expose: true
+            serialized_name: configurationpath
+        adminpath:
+            groups: [opengnsys_server__repository_get, opengnsys_server__repository_cget]
+            expose: true
+            serialized_name: adminpath
+        pxepath:
+            groups: [opengnsys_server__repository_get, opengnsys_server__repository_cget]
+            expose: true
+            serialized_name: pxepath
+        description:
+            groups: [opengnsys_server__repository_get, opengnsys_server__repository_cget]
+            expose: true
+            serialized_name: description
+        port:
+            groups: [opengnsys_server__repository_get, opengnsys_server__repository_cget]
+            expose: true
+            serialized_name: port
+        id:
+            groups: [opengnsys_server__repository_get, opengnsys_server__repository_cget]
+            expose: true
+            serialized_name: id

@@ -1,0 +1,59 @@
+Opengnsys\ServerBundle\Entity\Menu:
+    exclusion_policy: ALL
+    properties:
+        description:
+            groups: [opengnsys_server__menu_get, opengnsys_server__menu_cget]
+            expose: true
+            serialized_name: description
+        idurlimg:
+            groups: [opengnsys_server__menu_get, opengnsys_server__menu_cget]
+            expose: true
+            serialized_name: idurlimg
+        title:
+            groups: [opengnsys_server__menu_get, opengnsys_server__menu_cget]
+            expose: true
+            serialized_name: title
+        publicxcoordinate:
+            groups: [opengnsys_server__menu_get, opengnsys_server__menu_cget]
+            expose: true
+            serialized_name: publicxcoordinate
+        publicycoordinate:
+            groups: [opengnsys_server__menu_get, opengnsys_server__menu_cget]
+            expose: true
+            serialized_name: publicycoordinate
+        publicmode:
+            groups: [opengnsys_server__menu_get, opengnsys_server__menu_cget]
+            expose: true
+            serialized_name: publicmode
+        privatexcoordinate:
+            groups: [opengnsys_server__menu_get, opengnsys_server__menu_cget]
+            expose: true
+            serialized_name: privatexcoordinate
+        privateycoordinate:
+            groups: [opengnsys_server__menu_get, opengnsys_server__menu_cget]
+            expose: true
+            serialized_name: privateycoordinate
+        privatemode:
+            groups: [opengnsys_server__menu_get, opengnsys_server__menu_cget]
+            expose: true
+            serialized_name: privatemode
+        comments:
+            groups: [opengnsys_server__menu_get, opengnsys_server__menu_cget]
+            expose: true
+            serialized_name: comments
+        publicmenuhtml:
+            groups: [opengnsys_server__menu_get, opengnsys_server__menu_cget]
+            expose: true
+            serialized_name: publicmenuhtml
+        privatemenuhtml:
+            groups: [opengnsys_server__menu_get, opengnsys_server__menu_cget]
+            expose: true
+            serialized_name: privatemenuhtml
+        resolution:
+            groups: [opengnsys_server__menu_get, opengnsys_server__menu_cget]
+            expose: true
+            serialized_name: resolution
+        id:
+            groups: [opengnsys_server__menu_get, opengnsys_server__menu_cget]
+            expose: true
+            serialized_name: id

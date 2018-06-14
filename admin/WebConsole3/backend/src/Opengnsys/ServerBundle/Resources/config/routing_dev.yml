@@ -1,0 +1,8 @@
+opengnsys_server_homepage:
+    path:     /
+    defaults: { _controller: OpengnsysServerBundle:Default:index }
+
+opengnsys_server__api:
+    type: rest
+    resource: "@OpengnsysServerBundle/Resources/config/routing/api.yml"
+    prefix: /api

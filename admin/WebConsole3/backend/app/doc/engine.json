@@ -1,0 +1,550 @@
+{
+  "partitiontable": [
+    {
+      "id": 1,
+      "type": "MSDOS",
+      "partitions": [
+        {
+          "id": "00",
+          "type": "EMPTY",
+          "clonable": false
+        },
+        {
+          "id": "01",
+          "type": "FAT12",
+          "clonable": true
+        },
+        {
+          "id": "05",
+          "type": "EXTENDED",
+          "clonable": false
+        },
+        {
+          "id": "06",
+          "type": "FAT16",
+          "clonable": true
+        },
+        {
+          "id": "07",
+          "type": "NTFS",
+          "clonable": true
+        },
+        {
+          "id": "0B",
+          "type": "FAT32",
+          "clonable": true
+        },
+        {
+          "id": "11",
+          "type": "HFAT12",
+          "clonable": true
+        },
+        {
+          "id": "16",
+          "type": "HFAT16",
+          "clonable": true
+        },
+        {
+          "id": "17",
+          "type": "HNTFS",
+          "clonable": true
+        },
+        {
+          "id": "1B",
+          "type": "HFAT32",
+          "clonable": true
+        },
+        {
+          "id": "82",
+          "type": "LINUX-SWAP",
+          "clonable": false
+        },
+        {
+          "id": "83",
+          "type": "LINUX",
+          "clonable": true
+        },
+        {
+          "id": "8E",
+          "type": "LINUX-LVM",
+          "clonable": true
+        },
+        {
+          "id": "A5",
+          "type": "FREEBSD",
+          "clonable": true
+        },
+        {
+          "id": "A6",
+          "type": "OPENBSD",
+          "clonable": true
+        },
+        {
+          "id": "A9",
+          "type": "NETBSD",
+          "clonable": true
+        },
+        {
+          "id": "AF",
+          "type": "HFS",
+          "clonable": true
+        },
+        {
+          "id": "BE",
+          "type": "SOLARIS-BOOT",
+          "clonable": true
+        },
+        {
+          "id": "BF",
+          "type": "SOLARIS",
+          "clonable": true
+        },
+        {
+          "id": "CA",
+          "type": "CACHE",
+          "clonable": false
+        },
+        {
+          "id": "DA",
+          "type": "DATA",
+          "clonable": true
+        },
+        {
+          "id": "EE",
+          "type": "GPT",
+          "clonable": false
+        },
+        {
+          "id": "EF",
+          "type": "EFI",
+          "clonable": true
+        },
+        {
+          "id": "FB",
+          "type": "VMFS",
+          "clonable": true
+        },
+        {
+          "id": "FD",
+          "type": "LINUX-RAID",
+          "clonable": true
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "GPT",
+      "partitions": [
+        {
+          "id": "0700",
+          "type": "WINDOWS",
+          "clonable": true
+        },
+        {
+          "id": "0C01",
+          "type": "WIN-RESERV",
+          "clonable": true
+        },
+        {
+          "id": "2700",
+          "type": "WIN-RECOV",
+          "clonable": true
+        },
+        {
+          "id": "7F00",
+          "type": "CHROMEOS-KRN",
+          "clonable": true
+        },
+        {
+          "id": "7F01",
+          "type": "CHROMEOS",
+          "clonable": true
+        },
+        {
+          "id": "7F02",
+          "type": "CHROMEOS-RESERV",
+          "clonable": true
+        },
+        {
+          "id": "8200",
+          "type": "LINUX-SWAP",
+          "clonable": false
+        },
+        {
+          "id": "8300",
+          "type": "LINUX",
+          "clonable": true
+        },
+        {
+          "id": "8301",
+          "type": "LINUX-RESERV",
+          "clonable": true
+        },
+        {
+          "id": "8302",
+          "type": "LINUX",
+          "clonable": true
+        },
+        {
+          "id": "8E00",
+          "type": "LINUX-LVM",
+          "clonable": true
+        },
+        {
+          "id": "A500",
+          "type": "FREEBSD-DISK",
+          "clonable": false
+        },
+        {
+          "id": "A501",
+          "type": "FREEBSD-BOOT",
+          "clonable": true
+        },
+        {
+          "id": "A502",
+          "type": "FREEBSD-SWAP",
+          "clonable": false
+        },
+        {
+          "id": "A503",
+          "type": "FREEBSD",
+          "clonable": true
+        },
+        {
+          "id": "A504",
+          "type": "FREEBSD",
+          "clonable": true
+        },
+        {
+          "id": "A901",
+          "type": "NETBSD-SWAP",
+          "clonable": false
+        },
+        {
+          "id": "A902",
+          "type": "NETBSD",
+          "clonable": true
+        },
+        {
+          "id": "A903",
+          "type": "NETBSD",
+          "clonable": true
+        },
+        {
+          "id": "A904",
+          "type": "NETBSD",
+          "clonable": true
+        },
+        {
+          "id": "A905",
+          "type": "NETBSD",
+          "clonable": true
+        },
+        {
+          "id": "A906",
+          "type": "NETBSD-RAID",
+          "clonable": true
+        },
+        {
+          "id": "AB00",
+          "type": "HFS-BOOT",
+          "clonable": true
+        },
+        {
+          "id": "AF00",
+          "type": "HFS",
+          "clonable": true
+        },
+        {
+          "id": "AF01",
+          "type": "HFS-RAID",
+          "clonable": true
+        },
+        {
+          "id": "AF02",
+          "type": "HFS-RAID",
+          "clonable": true
+        },
+        {
+          "id": "BE00",
+          "type": "SOLARIS-BOOT",
+          "clonable": true
+        },
+        {
+          "id": "BF00",
+          "type": "SOLARIS",
+          "clonable": true
+        },
+        {
+          "id": "BF01",
+          "type": "SOLARIS",
+          "clonable": true
+        },
+        {
+          "id": "BF02",
+          "type": "SOLARIS-SWAP",
+          "clonable": false
+        },
+        {
+          "id": "BF03",
+          "type": "SOLARIS-DISK",
+          "clonable": true
+        },
+        {
+          "id": "BF04",
+          "type": "SOLARIS",
+          "clonable": true
+        },
+        {
+          "id": "BF05",
+          "type": "SOLARIS",
+          "clonable": true
+        },
+        {
+          "id": "CA00",
+          "type": "CACHE",
+          "clonable": false
+        },
+        {
+          "id": "EF00",
+          "type": "EFI",
+          "clonable": true
+        },
+        {
+          "id": "EF01",
+          "type": "MBR",
+          "clonable": false
+        },
+        {
+          "id": "EF02",
+          "type": "BIOS-BOOT",
+          "clonable": false
+        },
+        {
+          "id": "FB00",
+          "type": "VMFS",
+          "clonable": true
+        },
+        {
+          "id": "FB01",
+          "type": "VMFS-RESERV",
+          "clonable": true
+        },
+        {
+          "id": "FB02",
+          "type": "VMFS-KRN",
+          "clonable": true
+        },
+        {
+          "id": "FD00",
+          "type": "LINUX-RAID",
+          "clonable": true
+        },
+        {
+          "id": "FFFF",
+          "type": "UNKNOWN",
+          "clonable": true
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "type": "LVM",
+      "partitions": [
+        {
+          "id": "10000",
+          "type": "LVM-LV",
+          "clonable": true
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "type": "ZPOOL",
+      "partitions": [
+        {
+          "id": "10010",
+          "type": "ZFS-VOL",
+          "clonable": true
+        }
+      ]
+    }
+  ],
+  "filesystems": [
+    "BTRFS",
+    "CACHE",
+    "EMPTY",
+    "EXFAT",
+    "EXT2",
+    "EXT3",
+    "EXT4",
+    "F2FS",
+    "FAT12",
+    "FAT16",
+    "FAT32",
+    "HFS",
+    "HFSPLUS",
+    "JFS",
+    "LINUX-SWAP",
+    "NILFS2",
+    "NTFS",
+    "REISER4",
+    "REISERFS",
+    "UFS",
+    "XFS"
+  ],
+  "operatingsystems": [
+    "Android",
+    "BSD",
+    "GrubLoader",
+    "Hurd",
+    "Linux",
+    "MacOS",
+    "Solaris",
+    "Windows",
+    "WinLoader"
+  ],
+  "hardwaretypes": [
+    {
+      "id": 1,
+      "nemonic": "boa",
+      "name": "Placas"
+    },
+    {
+      "id": 2,
+      "nemonic": "mul",
+      "name": "Dispositivos Multimedia"
+    },
+    {
+      "id": 3,
+      "nemonic": "net",
+      "name": "Tarjetas de Red"
+    },
+    {
+      "id": 4,
+      "nemonic": "cpu",
+      "name": "Microprocesadores"
+    },
+    {
+      "id": 5,
+      "nemonic": "mem",
+      "name": "Memorias"
+    },
+    {
+      "id": 6,
+      "nemonic": "vga",
+      "name": "Tarjetas gráficas"
+    },
+    {
+      "id": 7,
+      "nemonic": "dis",
+      "name": "Discos"
+    },
+    {
+      "id": 8,
+      "nemonic": "aud",
+      "name": "Dispositivos de sonido"
+    },
+    {
+      "id": 9,
+      "nemonic": "mod",
+      "name": "Marca y modelo del equipo"
+    },
+    {
+      "id": 10,
+      "nemonic": "bio",
+      "name": "Modelo y version de la bios"
+    },
+    {
+      "id": 11,
+      "nemonic": "cdr",
+      "name": "Modelo de grabadora o  grabadora de CD/DVD"
+    },
+    {
+      "id": 12,
+      "nemonic": "ide",
+      "name": "Controladores IDE"
+    },
+    {
+      "id": 13,
+      "nemonic": "fir",
+      "name": "Controladores FireWire"
+    },
+    {
+      "id": 14,
+      "nemonic": "usb",
+      "name": "Controladores USB"
+    },
+    {
+      "id": 15,
+      "nemonic": "bus",
+      "name": "Bus del Sistema"
+    },
+    {
+      "id": 16,
+      "nemonic": "cha",
+      "name": "Chasis del Sistema"
+    },
+    {
+      "id": 17,
+      "nemonic": "sto",
+      "name": "Controladores de almacenamiento"
+    },
+    {
+      "id": 18,
+      "nemonic": "boo",
+      "name": "Tipo de proceso de arranque"
+    }
+  ],
+  "sofwaretypes": [
+    {
+      "id": 1,
+      "nemonic": "os",
+      "name": "Sistemas Operativos"
+    },
+    {
+      "id": 2,
+      "nemonic": "app",
+      "name": "Aplicaciones"
+    },
+    {
+      "id": 3,
+      "nemonic": "file",
+      "name": "Archivos"
+    }
+  ],
+  "clientstatus": [
+    {
+      "id": "off",
+      "name": "Off"
+    },
+    {
+      "id": "initializing",
+      "name": "initializing"
+    },
+    {
+      "id": "busy",
+      "name": "busy"
+    },
+    {
+      "id": "linux",
+      "name": "linux"
+    },
+    {
+      "id": "linux_session",
+      "name": "linux_session"
+    },
+    {
+      "id": "macos",
+      "name": "macos"
+    },
+    {
+      "id": "windows",
+      "name": "windows"
+    },
+    {
+      "id": "windows_session",
+      "name": "windows_session"
+    }
+  ]
+}

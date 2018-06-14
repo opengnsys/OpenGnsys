@@ -1,0 +1,11 @@
+# Crea la base de datos
+php app/console doctrine:database:create --if-not-exists
+
+# Genera las tablas de la base de datos
+php app/console doctrine:schema:update --force
+
+# Genera la estructura inicial de la base de datos
+php app/console doctrine:fixtures:load
+php app/console doctrine:fixtures:load --append
+
+

@@ -1,0 +1,43 @@
+Opengnsys\ServerBundle\Entity\Trace:
+    exclusion_policy: ALL
+    properties:
+        id:
+            groups: [opengnsys_server__trace_get, opengnsys_server__trace_cget]
+            expose: true
+            serialized_name: id
+        title:
+            groups: [opengnsys_server__trace_get, opengnsys_server__trace_cget]
+            expose: true
+            serialized_name: title
+        commandType:
+            groups: [opengnsys_server__trace_get, opengnsys_server__trace_cget]
+            expose: true
+            serialized_name: commandType
+        script:
+            groups: [opengnsys_server__trace_get, opengnsys_server__trace_cget]
+            expose: true
+            serialized_name: script
+        status:
+            groups: [opengnsys_server__trace_get, opengnsys_server__trace_cget]
+            expose: true
+            serialized_name: status
+        output:
+            groups: [opengnsys_server__trace_get, opengnsys_server__trace_cget]
+            expose: true
+            serialized_name: output
+        error:
+            groups: [opengnsys_server__trace_get, opengnsys_server__trace_cget]
+            expose: true
+            serialized_name: error
+        executedAt:
+            groups: [opengnsys_server__trace_get, opengnsys_server__trace_cget]
+            expose: true
+            serialized_name: executedAt
+        finishedAt:
+            groups: [opengnsys_server__trace_get, opengnsys_server__trace_cget]
+            expose: true
+            serialized_name: finishedAt
+        client:
+            groups: [opengnsys_server__client_get, opengnsys_server__client_cget]
+            expose: true
+            serialized_name: client

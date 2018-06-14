@@ -1,0 +1,23 @@
+Opengnsys\ServerBundle\Entity\Command:
+    exclusion_policy: ALL
+    properties:
+        id:
+            groups: [opengnsys_server__command_get, opengnsys_server__command_cget]
+            expose: true
+            serialized_name: id
+        title:
+            groups: [opengnsys_server__command_get, opengnsys_server__command_cget]
+            expose: true
+            serialized_name: title
+        type:
+            groups: [opengnsys_server__command_get, opengnsys_server__command_cget]
+            expose: true
+            serialized_name: type
+        script:
+            groups: [opengnsys_server__command_get, opengnsys_server__command_cget]
+            expose: true
+            serialized_name: script
+        parameters:
+            groups: [opengnsys_server__command_get, opengnsys_server__command_cget]
+            expose: true
+            serialized_name: parameters

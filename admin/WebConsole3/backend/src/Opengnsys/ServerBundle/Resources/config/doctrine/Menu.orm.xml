@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+    <entity name="Opengnsys\ServerBundle\Entity\Menu" table="og_menus">
+
+        <id name="id" type="integer" column="id">
+            <generator strategy="AUTO"/>
+        </id>
+
+        <field name="description" type="string" column="description" length="250" nullable="false"/>
+        <field name="idurlimg" type="integer" column="idurlimg" nullable="false"/>
+        <field name="title" type="string" column="title" length="250" nullable="true"/>
+        <field name="publicxcoordinate" type="integer" column="publicxcoordinate" nullable="true"/>
+        <field name="publicycoordinate" type="integer" column="publicycoordinate" nullable="true"/>
+        <field name="publicmode" type="boolean" column="publicmode" nullable="true"/>
+        <field name="privatexcoordinate" type="integer" column="privatexcoordinate" nullable="true"/>
+        <field name="privateycoordinate" type="integer" column="privateycoordinate" nullable="true"/>
+        <field name="privatemode" type="boolean" column="privatemode" nullable="true"/>
+        <field name="comments" type="text" column="comments" length="65535" nullable="true"/>
+        <field name="publicmenuhtml" type="string" column="publicmenuhtml" length="250" nullable="true"/>
+        <field name="privatemenuhtml" type="string" column="privatemenuhtml" length="250" nullable="true"/>
+        <field name="resolution" type="string" column="resolution" length="50" nullable="true"/>
+
+        <many-to-one field="organizationalUnit" target-entity="\Opengnsys\ServerBundle\Entity\OrganizationalUnit">
+            <join-columns>
+                <join-column name="organizational_unit_id" referenced-column-name="id"/>
+            </join-columns>
+        </many-to-one>
+
+    </entity>
+</doctrine-mapping>
