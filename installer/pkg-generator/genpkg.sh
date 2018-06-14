@@ -356,15 +356,14 @@ function cleanFiles()
 	local TO_CLEAN=( server/bin \
 			repoman/bin \
 			server/lib \
-			admin/Sources/Services/ogAdmServerAux
-			admin/Sources/Services/ogAdmRepoAux
+			admin/Sources/Services/ogAdmServerAux \
+			admin/Sources/Services/ogAdmRepoAux \
 			installer \
 			doc \
 			ogagentpkgs-1.1.0.tar.gz \
-			admin/WebConsole \
-			client/shared
-			client/engine
-			pkg-generator
+			client/shared \
+			client/engine \
+			pkg-generator \
 			.git )
 			
 	pushd $ROOTDIR/tmp/opengnsys_installer
