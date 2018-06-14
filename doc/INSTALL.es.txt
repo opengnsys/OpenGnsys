@@ -1,10 +1,10 @@
-Instalación de OpenGnsys Server v 1.1.0
-=======================================
+Instalación de OpenGnsys Server 1.1.1 (Espeto)
+==============================================
 
 Notas iniciales
 ---------------
 
-Se presupone que el servidor de OpenGnsys va a ser instalado en una distribución del sistema operativo Ubuntu Server a partir de la versión 14.04 LTS (también ha sido probado en sistemas basados en CentOS 7).
+Se presupone que el servidor de OpenGnsys va a ser instalado en una distribución del sistema operativo Ubuntu Server a partir de la versión 16.04 LTS (también ha sido probado en sistemas basados en CentOS 7).
 
 El serividor debe tener acceso a Internet para descargar los paquetes necesarios, el código del proyecto y el cliente preconfigurado.
 
@@ -18,20 +18,20 @@ Requisitos mínimos de almacenamiento:
 Instalación
 -----------
 
-La instalación de OpenGnsys se realiza ejecutando el script de instalación opengnsys_installer.sh, el cual puede obtenerse descomprimiendo el fichero de la versión opengnsys-Version.tar.gz o descargándolo directamente de la dirección: https://opengnsys.es/svn/branches/version1.1/installer/opengnsys_installer.sh
+La instalación de OpenGnsys se realiza ejecutando el script de instalación opengnsys_installer.sh, el cual puede obtenerse descomprimiendo el fichero de la versión opengnsys-Version.tar.gz o descargándolo directamente de la dirección: https://raw.githubusercontent.com/opengnsys/OpenGnsys/devel/installer/opengnsys_installer.sh
 
 Ejemplos de descompresión del programa:
 
-	tar xvzf opengnsys-1.0.5.tar.gz
+	tar xvzf opengnsys-1.1.0.tar.gz
 	cd opengnsys/installer
 
 Ejemplos de descarga con varias herramientas:
 
     * Descargar con wget.
-	wget https://opengnsys.es/svn/branches/version1.1/installer/opengnsys_installer.sh -O opengnsys_installer.sh
+	wget https://raw.githubusercontent.com/opengnsys/OpenGnsys/devel/installer/opengnsys_installer.sh
 
     * Descargar con curl.
-	curl https://opengnsys.es/svn/branches/version1.1/installer/opengnsys_installer.sh > opengnsys_installer.sh
+	curl https://raw.githubusercontent.com/opengnsys/OpenGnsys/devel/installer/opengnsys_installer.sh -o opengnsys_installer.sh
 
 
 El script de instalación debe ser ejecutado como usuario root:

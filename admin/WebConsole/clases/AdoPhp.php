@@ -447,7 +447,7 @@ class Comando{
 		return(true);
 	}
 	/* -------------------------------------------------------------------------------------------
-		Esta funci� recupera el ltimo nmero asignado a una clave autonum�ica de una tabla
+		Esta función recupera el ltimo nmero asignado a una clave autonum�ica de una tabla
 	---------------------------------------------------------------------------------------------*/
 	function Autonumerico(){
 		$ulreg=mysqli_insert_id($this->Conexion->controlador);

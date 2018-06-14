@@ -5,7 +5,7 @@ Preparar entorno virtual de desarrollo para OpenGnsys
 
 Ficheros de configuración disponibles:
 
- - Vagrantfile-trunk-vbox  Vagrantfile para OpenGnsys estable con proveedor VirtualBox.
+ - Vagrantfile-prod-vbox   Vagrantfile para OpenGnsys estable con proveedor VirtualBox.
  - Vagrantfile-devel-vbox  Vagrantfile para OpenGnsys en desarrollo con proveedor VirtualBox.
  - Vagrantfile-boottools-vbox  Vagrantfile para preparar el entorno de generación del cliente ogLive (recomendado solo para desarrolladores experimentados).
  - Vagrantfile-browser-vbox    Vagrantfile para preparar el entorno de desarrollo del Browser del cliente (recomendado solo para miembros del grupo de desarrollo).
@@ -25,7 +25,7 @@ El entorno de trabajo de OpenGnsys.
  - pc12 - ogclientN: MV clientes para restaurar con disco vacío.
 
 
-Ejecutar el entorno virtual (Vagrantfile-trunk-vbox y Vagrantfile-devel-vbox).
+Ejecutar el entorno virtual (Vagrantfile-prod-vbox y Vagrantfile-devel-vbox).
 
  - Crear un directorio de trabajo.
  - Copiar el fichero Vagrantfile-...-vbox correspondiente en dicho directorio como Vagrantfile.

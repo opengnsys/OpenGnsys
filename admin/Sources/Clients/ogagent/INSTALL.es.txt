@@ -36,10 +36,8 @@ Instalar OGAgent en cliente modelo
 - Descargar el fichero correspondiente en el sistema operativo del cliente.
 
 - Ubuntu, Debian y derivados:
-  - Instalar dependencias (NOTA: revisar dependencias para Ubuntu 12.04):
-	sudo apt-get install -y libxss1 policykit-1 python python-requests python-qt4 python-six python-prctl
   - Descargar e instalar el agente:
-	sudo dpkg -i ogagent_Version_all.deb
+	sudo apt install ./ogagent_Version_all.deb
   - Configurar el agente:
 	sudo sed -i "0,/remote=/ s,remote=.*,remote=https://IPServidorOpenGnsys/opengnsys/rest/," /usr/share/OGAgent/cfg/ogagent.cfg
   - Iniciar el servicio (se iniciará automáticamente en el proceso de arranque):

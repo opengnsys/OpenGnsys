@@ -37,8 +37,8 @@
 			if(ochecks[i].checked)		op++;
 		}
 		if(op==0){
-			   alert(TbMsg[1]);
-			 return(false);
+			 alert(TbMsg[1]);
+			return(false);
 		}
 		return(comprobar_datosejecucion());
 }

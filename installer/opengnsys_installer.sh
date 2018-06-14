@@ -95,17 +95,19 @@ done
 
 echo -e "\\n=============================="
 
-# Comprobar si se ha descargado el paquete comprimido (USESVN=0) o sólo el instalador (USESVN=1).
+# Comprobar si se ha descargado el paquete comprimido (REMOTE=0) o sólo el instalador (REMOTE=1).
 PROGRAMDIR=$(readlink -e "$(dirname "$0")")
 PROGRAMNAME=$(basename "$0")
 OPENGNSYS_SERVER="opengnsys.es"
 DOWNLOADURL="https://$OPENGNSYS_SERVER/trac/downloads"
 if [ -d "$PROGRAMDIR/../installer" ]; then
-	USESVN=0
+	REMOTE=0
 else
-	USESVN=1
+	REMOTE=1
 fi
-SVN_URL="https://$OPENGNSYS_SERVER/svn/branches/version1.1/"
+BRANCH="devel"
+CODE_URL="https://codeload.github.com/opengnsys/OpenGnsys/zip/$BRANCH"
+API_URL="https://api.github.com/repos/opengnsys/OpenGnsys/branches/$BRANCH"
 
 WORKDIR=/tmp/opengnsys_installer
 mkdir -p $WORKDIR
@@ -788,11 +790,11 @@ EOF
 
 
 #####################################################################
-####### Funciones para el manejo de Subversion
+####### Funciones para la descarga de código
 #####################################################################
 
-# Obtiene el código fuente del proyecto desde el servidor SVN.
-function svnExportCode()
+# Obtiene el código fuente del proyecto desde el repositorio de GitHub.
+function downloadCode()
 {
 	if [ $# -ne 1 ]; then
 		errorAndLog "${FUNCNAME}(): invalid number of parameters"
@@ -801,14 +803,15 @@ function svnExportCode()
 
 	local url="$1"
 
-	echoAndLog "${FUNCNAME}(): downloading subversion code..."
+	echoAndLog "${FUNCNAME}(): downloading code..."
 
-	svn export --force "$url" opengnsys
+	curl "${url}" -o opengnsys.zip && unzip opengnsys.zip && mv "OpenGnsys-$BRANCH" opengnsys
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error getting OpenGnsys code from $url"
 		return 1
 	fi
-	echoAndLog "${FUNCNAME}(): subversion code downloaded"
+	rm -f opengnsys.zip
+	echoAndLog "${FUNCNAME}(): code was downloaded"
 	return 0
 }
 
@@ -1075,7 +1078,6 @@ function installWebFiles()
 		errorAndLog "${FUNCNAME}(): Error copying web files."
 		exit 1
 	fi
-        find $INSTALL_TARGET/www -name .svn -type d -exec rm -fr {} \; 2>/dev/null
 
 	# Descomprimir librerías: Slim y Swagger-UI.
 	unzip -o $WORKDIR/opengnsys/admin/$SLIMFILE -d $INSTALL_TARGET/www/rest
@@ -1204,7 +1206,7 @@ function createDirs()
 	echoAndLog "${FUNCNAME}(): creating directory paths in $path_opengnsys_base"
 	mkdir -p $path_opengnsys_base
 	mkdir -p $path_opengnsys_base/bin
-	mkdir -p $path_opengnsys_base/client
+	mkdir -p $path_opengnsys_base/client/{cache,images,log}
 	mkdir -p $path_opengnsys_base/doc
 	mkdir -p $path_opengnsys_base/etc
 	mkdir -p $path_opengnsys_base/lib
@@ -1399,7 +1401,6 @@ function copyClientFiles()
 		errorAndLog "${FUNCNAME}(): error while copying client estructure"
 		errstatus=1
 	fi
-	find $INSTALL_TARGET/client -name .svn -type d -exec rm -fr {} \; 2>/dev/null
 	
 	echoAndLog "${FUNCNAME}(): Copying OpenGnsys Cloning Engine files."
 	mkdir -p $INSTALL_TARGET/client/lib/engine/bin
@@ -1554,21 +1555,25 @@ EOT
 
 function installationSummary()
 {
+	local VERSIONFILE REVISION
+
 	# Crear fichero de versión y revisión, si no existe.
-	local VERSIONFILE="$INSTALL_TARGET/doc/VERSION.txt"
-	[ -f $VERSIONFILE ] || echo "OpenGnsys Server" >$VERSIONFILE
-	# Incluir datos de revisión, si se está instaladno desde el repositorio
+	VERSIONFILE="$INSTALL_TARGET/doc/VERSION.json"
+	[ -f $VERSIONFILE ] || echo '{ "project": "OpenGnsys" }' >$VERSIONFILE
+	# Incluir datos de revisión, si se está instalando desde el repositorio
 	# de código o si no está incluida en el fichero de versión.
-	if [ $USESVN -eq 1 ] || [ -z "$(awk '$3~/r[0-9]*/ {print}' $VERSIONFILE)" ]; then
-		local REVISION=$(LANG=C svn info $SVN_URL|awk '/Rev:/ {print "r"$4}')
-		sed -ri "s/($| r[0-9]*)/ $REVISION/" $VERSIONFILE
+	if [ $REMOTE -eq 1 ] || [ -z "$(jq -r '.release' $VERSIONFILE)" ]; then
+		# Revisión: rAñoMesDía.Gitcommit (8 caracteres de fecha y 7 primeros de commit).
+		REVISION=$(curl -s "$API_URL" | jq '"r" + (.commit.commit.committer.date | gsub("-"; "")[:8]) + "." + (.commit.sha[:7])')
+		jq ".release=$REVISION" $VERSIONFILE | sponge $VERSIONFILE
 	fi
+	VERSION="$(jq -r '[.project, .version, .codename, .release] | join(" ")' $VERSIONFILE 2>/dev/null)"
 
 	# Mostrar información.
 	echo
 	echoAndLog "OpenGnsys Installation Summary"
 	echo       "=============================="
-	echoAndLog "Project version:                  $(cat $VERSIONFILE 2>/dev/null)"
+	echoAndLog "Project version:                  $VERSION"
 	echoAndLog "Installation directory:           $INSTALL_TARGET"
 	echoAndLog "Installation log file:            $LOG_FILE"
 	echoAndLog "Repository directory:             $INSTALL_TARGET/images"
@@ -1658,10 +1663,10 @@ if [ $? -ne 0 ]; then
 fi
 
 # Si es necesario, descarga el repositorio de código en directorio temporal
-if [ $USESVN -eq 1 ]; then
-	svnExportCode $SVN_URL
+if [ $REMOTE -eq 1 ]; then
+	downloadCode $CODE_URL
 	if [ $? -ne 0 ]; then
-		errorAndLog "Error while getting code from svn"
+		errorAndLog "Error while getting code from the repository"
 		exit 1
 	fi
 else
@@ -1708,7 +1713,7 @@ if [ $? -ne 0 ]; then
 	errorAndLog "Error while copying the server files!"
 	exit 1
 fi
-INSTVERSION=$(awk '{print $2}' $INSTALL_TARGET/doc/VERSION.txt)
+INSTVERSION=$(jq -r '.version' $INSTALL_TARGET/doc/VERSION.json)
 
 # Instalar base de datos de OpenGnsys Admin.
 isInArray notinstalled "mysql-server" || isInArray notinstalled "mariadb-server"
@@ -1768,7 +1773,7 @@ if [ $? -eq 0 ]; then
 	fi
 else
 	# Si existe fichero ogBDAdmin-VersLocal-VersRepo.sql; aplicar cambios.
-	REPOVERSION=$(awk '{print $2}' $WORKDIR/opengnsys/doc/VERSION.txt)
+	REPOVERSION=$(jq -r '.version' $WORKDIR/opengnsys/doc/VERSION.json)
 	OPENGNSYS_DB_UPDATE_FILE="opengnsys/admin/Database/$OPENGNSYS_DATABASE-$INSTVERSION-$REPOVERSION.sql"
  	if [ -f $WORKDIR/$OPENGNSYS_DB_UPDATE_FILE ]; then
  		echoAndLog "Updating tables from version $INSTVERSION to $REPOVERSION"

@@ -33,7 +33,8 @@ MYSQLFILE="$TMPDIR/$CATALOG.sql"
 MYSQLBCK="$OPENGNSYS/doc/$CATALOG.sql-$DATE"
 
 LOG_FILE=$OPENGNSYS/log/${PROG%.sh}.log
-OPENGNSYS_SERVER="opengnsys.es"
+BRANCH="branches/devel"
+SVN_URL="https://github.com/opengnsys/OpenGnsys/$BRANCH/admin/Database"
 DEFAULT_MYSQL_ROOT_PASSWORD="passwordroot"      # Clave por defecto root de MySQL
 
 # Si se solicita, mostrar ayuda.
@@ -219,19 +220,19 @@ if [ $? -ne 0 ]; then
 fi
 
 # Comprobamos si es la misma versión
-OLDVERSION=$(awk '{print $2}' $TMPDIR/VERSION.txt)
-NEWVERSION=$(awk '{print $2}' $OPENGNSYS/doc/VERSION.txt)
+[ -f $TMPDIR/VERSION.txt ] && OLDVERSION=$(awk '{print $2}' $TMPDIR/VERSION.txt)
+[ -f $TMPDIR/VERSION.json ] && OLDVERSION=$(jq -r '.version' $TMPDIR/VERSION.json)
+NEWVERSION=$(jq -r '.version' $OPENGNSYS/doc/VERSION.json)
 # FALTA: Comprobar que la versión OLD es menor que la NEW
 if [ $OLDVERSION != $NEWVERSION ] ; then
     echo "La versión del servidor no coincide con la del backup."
-    cat $OPENGNSYS/doc/VERSION.txt $TMPDIR/VERSION.txt
+    jq -r '[.project, .version, .codename] | join(" ")' $OPENGNSYS/doc/VERSION.json $TMPDIR/VERSION.json
     read -p "¿Quiere continuar? (y/n): " ANSWER
     if [ "${ANSWER^^}" != "Y" ]; then
         echo "Operación cancelada."
         exit 0
     fi
     # Nos bajamos los archivos de actualización de la base de datos
-    SVN_URL="https://$OPENGNSYS_SERVER/svn/branches/version${NEWVERSION%.*}/admin/Database"
     svn checkout "$SVN_URL" $TMPDIR/Database
     [ $? -ne 0 ] && errorAndLog "$PROG: Error getting code from $SVN_URL" && exit 6
     

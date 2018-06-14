@@ -21,26 +21,26 @@ include_once("../includes/RecopilaIpesMacs.php");
 
 $opcion=0; // Inicializa parametros
 
-$idprocedimiento=0; 
-$idtarea=0; 
-$ambito=0; 
-$idambito=0; 
-$swc=0; // switch de cliente, esta pagina la llama el cliente a través del browser 
+$idprocedimiento=0;
+$idtarea=0;
+$ambito=0;
+$idambito=0;
+$swc=0; // switch de cliente, esta pagina la llama el cliente a través del browser
 
 if (isset($_POST["opcion"])) $opcion=$_POST["opcion"];
 if (isset($_POST["idprocedimiento"]))	$idprocedimiento=$_POST["idprocedimiento"];
 if (isset($_POST["descriprocedimiento"]))	$descriprocedimiento=$_POST["descriprocedimiento"];
-if (isset($_POST["ambito"])) $ambito=$_POST["ambito"]; 
-if (isset($_POST["idambito"])) $idambito=$_POST["idambito"]; 
-if (isset($_POST["idtarea"]))	$idtarea=$_POST["idtarea"]; 
+if (isset($_POST["ambito"])) $ambito=$_POST["ambito"];
+if (isset($_POST["idambito"])) $idambito=$_POST["idambito"];
+if (isset($_POST["idtarea"]))	$idtarea=$_POST["idtarea"];
 if (isset($_POST["descritarea"]))	$descritarea=$_POST["descritarea"];
 
 if (isset($_GET["opcion"])) $opcion=$_GET["opcion"];
 if (isset($_GET["idprocedimiento"])) $idprocedimiento=$_GET["idprocedimiento"];
 if (isset($_GET["descriprocedimiento"]))$descriprocedimiento=$_GET["descriprocedimiento"];
-if (isset($_GET["ambito"])) $ambito=$_GET["ambito"]; 
-if (isset($_GET["idambito"])) $idambito=$_GET["idambito"]; 
-if (isset($_GET["idtarea"])) $idtarea=$_GET["idtarea"]; 
+if (isset($_GET["ambito"])) $ambito=$_GET["ambito"];
+if (isset($_GET["idambito"])) $idambito=$_GET["idambito"];
+if (isset($_GET["idtarea"])) $idtarea=$_GET["idtarea"];
 if (isset($_GET["descritarea"])) $descritarea=$_GET["descritarea"];
 
 if (isset($_GET["swc"])) $swc=$_GET["swc"]; // Switch que indica que la página la solicita un cliente a través del browser
@@ -58,7 +58,7 @@ if ($cmd){
 		RecopilaIpesMacs($cmd,$ambito,$idambito); // Recopila Ipes del ámbito
 	if(opcion!=$EJECUCION_AUTOEXEC){
 		//Creación parametros para inserción en tabla acciones
-		$sesion=time();	
+		$sesion=time();
 		$cmd->CreaParametro("@tipoaccion",$opcion,1);
 		$cmd->CreaParametro("@idtipoaccion",0,1);
 		$cmd->CreaParametro("@descriaccion","",0);
@@ -71,13 +71,13 @@ if ($cmd){
 		$cmd->CreaParametro("@fechahorafin","",0);
 		$cmd->CreaParametro("@estado",$ACCION_INICIADA,1);
 		$cmd->CreaParametro("@resultado",$ACCION_SINRESULTADO,1);
-		$cmd->CreaParametro("@descrinotificacion","",0);	
-		$cmd->CreaParametro("@idprocedimiento",0,1);	
+		$cmd->CreaParametro("@descrinotificacion","",0);
+		$cmd->CreaParametro("@idprocedimiento",0,1);
 		$cmd->CreaParametro("@idtarea",0,1);
-		$cmd->CreaParametro("@idcentro",$idcentro,1);	
+		$cmd->CreaParametro("@idcentro",$idcentro,1);
 		$cmd->CreaParametro("@ambito",0,1);
 		$cmd->CreaParametro("@idambito",0,1);
-		$cmd->CreaParametro("@restrambito","",0);		
+		$cmd->CreaParametro("@restrambito","",0);
 	}
 	switch($opcion){
 		case $EJECUCION_AUTOEXEC:
@@ -92,11 +92,11 @@ if ($cmd){
 			break;
 		case $EJECUCION_TAREA:
 			$cmd->ParamSetValor("@idtipoaccion",$idtarea);
-			$cmd->ParamSetValor("@descriaccion",$descritarea);		
-			$cmd->ParamSetValor("@idtarea",$idtarea);	
+			$cmd->ParamSetValor("@descriaccion",$descritarea);
+			$cmd->ParamSetValor("@idtarea",$idtarea);
 			$resul=ejecucionTarea($idtarea);
 			$literal="resultado_ejecutar_tareas";
-			break;					
+			break;
 	}
 	$cmd->Conexion->Cerrar();
 }
@@ -242,7 +242,7 @@ function insertaComando($idcomando,$parametros,$idprocedimiento,$ambito,$idambit
 	global $cmd;	
 	global $sesion;
 	global $vez;
-	
+
 	if($ambito==0){ // Ambito restringido a un subconjuto de ordenadores con formato (idordenador1,idordenador2,etc)
 		$cmd->ParamSetValor("@restrambito",$idambito);
 		$idambito=0;
@@ -254,9 +254,9 @@ function insertaComando($idcomando,$parametros,$idprocedimiento,$ambito,$idambit
 	$cmd->ParamSetValor("@fechahorareg",date("y/m/d H:i:s"));
 	$cmd->ParamSetValor("@ambito",$ambito);
 	$cmd->ParamSetValor("@idambito",$idambito);
-			
+
 	if(strlen($cadenaip)==0) return(true);	
-	
+
 	$auxID=explode(",",$cadenaid);
 	$auxIP=explode(";",$cadenaip);
 

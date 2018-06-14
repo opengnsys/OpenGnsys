@@ -78,7 +78,7 @@ var gLiteralbackground;			// Fondo color nodo vista para restablecer
 		//____________________________________________________________________________
 		this.pone_infonodo= function(lit){
 			this.literal.innerHTML=lit;
-		};		
+		};
 		//____________________________________________________________________________
 		//	
 		//	Devuelve el segundo dato de una cadena con formato xxxxx-xxx que es id del nodo vista
@@ -88,7 +88,7 @@ var gLiteralbackground;			// Fondo color nodo vista para restablecer
 			if(this.literal==null) return(null);
 			var atributo=this.literal.getAttribute(atr);
 			return(atributo);
-		};		
+		};
 		//____________________________________________________________________________
 		//	
 		//	 Devuelve true si el nodo tiene hijos,false en caso contrario
@@ -140,9 +140,9 @@ var gLiteralbackground;			// Fondo color nodo vista para restablecer
 			 o=o.parentNode;   
 		nodo.Nodo=o;
 		
-		while(o.tagName!="TABLE" )
+		while(o.tagName!="TABLE")
 			o=o.parentNode;
-		var Mnivel=o.getAttribute("id").split("-"); 
+		var Mnivel=o.getAttribute("id").split("-");
 		nodo.nivel=Mnivel[1];
 
        	while(o.tagName!="TR" )
@@ -243,7 +243,7 @@ function clickLiteralNodo(oLIT,pathimg){
 		currentpathimg=pathimg;
 	}
 	var signoimg=nodov.imgsigno.getAttribute("value");
-	var signo=signoimg.split("_");	
+	var signo=signoimg.split("_");
 	if(botonraton==1){
 			if (signo[0]=="mas"  || 	signo[0]=="menos" ) clickNodo(nodov,pathimg);
 	}
@@ -374,13 +374,13 @@ function CreaCeldaVista(nodov,tablanodo){
 		var nodoTBODYTR=nodoTBODY.childNodes[0];
 		var oIMG=nodoTBODYTR.getElementsByTagName('IMG')[0];
 		var HTMLinner=nodoTBODYTR.innerHTML;
-		
+
 		if(nodov.TieneHijos()){
-			var  patron = new RegExp("nada_c","gi"); 
+			var  patron = new RegExp("nada_c","gi");
 			HTMLinner=HTMLinner.replace(patron,"nada_t"); 
 		}		
 		else{
-			var  patron = new RegExp("nada_t","gi"); 
+			var  patron = new RegExp("nada_t","gi");
 			HTMLinner=HTMLinner.replace(patron,"nada_c"); 
 		}
 		var auxnodo=nodov;

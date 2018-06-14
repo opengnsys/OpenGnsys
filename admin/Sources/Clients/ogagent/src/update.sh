@@ -33,6 +33,7 @@ function process {
 }    
 
 cd $(dirname "$0")
+[ -r VERSION ] && sed -i "s/Version [^<]*/Version $(cat VERSION)/" about-dialog.ui
 pyrcc4 -py3 OGAgent.qrc -o OGAgent_rc.py
 
 

@@ -236,8 +236,8 @@
     FONT-FAMILY:  Arial, Helvetica, sans-serif;
     FONT-SIZE: 12px;
     FONT-WEIGHT: 500;
-    BORDER-BOTTOM:#4f4f4f 1px solid;   
-    BORDER-RIGHT:#4f4f4f 1px solid; 
+    BORDER-BOTTOM:#4f4f4f 1px solid;
+    BORDER-RIGHT:#4f4f4f 1px solid;
 }
 
 .tabla_listados_sin TD{
@@ -391,7 +391,7 @@ A.tabla_listados_sin:link{
 }
 
 .tablaprogramacion TD{
-    FONT-SIZE: 9pt;				    
+    FONT-SIZE: 9pt;
     FONT-FAMILY:  Arial, Helvetica, sans-serif;
     COLOR: #000000;
 }
@@ -401,7 +401,7 @@ A.tabla_listados_sin:link{
     border-right-color: #666666;
     border-bottom-color: #666666;
     BACKGROUND-COLOR: #EEEECC;
-    FONT-SIZE: 9pt;		
+    FONT-SIZE: 9pt;
     COLOR: #000000;
     FONT-FAMILY:  Arial, Helvetica, sans-serif;
 }
@@ -415,7 +415,7 @@ A.tabla_listados_sin:link{
     FONT-FAMILY:  Arial, Helvetica, sans-serif;
     FONT-SIZE: 11px;
     FONT-WEIGHT: 500;
-    BORDER-BOTTOM:#000000 1px solid ;
+    BORDER-BOTTOM:#000000 1px solid;
 }
 
 .tabla_accesos TD{

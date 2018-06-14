@@ -87,6 +87,12 @@ paths:
               version:
                 description: project version
                 type: string
+              codename:
+                description: version codename
+                type: string
+              definition:
+                description: codename definition URL
+                type: string
               release:
                 description: project release
                 type: string
@@ -122,7 +128,7 @@ paths:
                       description: ISO file
                       type: string
                   required: [ distribution, kernel, architecture, revision, directory, iso ]
-            required: [ project, version, release, services ]
+            required: [ project, services ]
       tags:
         - server
         - repository 

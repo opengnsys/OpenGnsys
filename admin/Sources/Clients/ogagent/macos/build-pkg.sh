@@ -2,11 +2,11 @@
 # Create macOS installation packages.
 # Based on bomutils tutorail: http://bomutils.dyndns.org/tutorial.html
 
-VERSION=1.1.0
+cd $(dirname $0)
+[ -r ../src/VERSION ] && VERSION="$(cat ../src/VERSION)" || VERSION="1.1.0"
 AUTHOR="OpenGnsys Project"
 
 # Create empty directories.
-cd $(dirname $0)
 rm -fr build
 mkdir -p build && cd build
 mkdir -p flat/base.pkg flat/Resources/en.lproj
@@ -57,7 +57,7 @@ mkbom -u 0 -g 80 root flat/base.pkg/Bom
 cat << EOT > flat/Distribution
 <?xml version="1.0" encoding="utf-8"?>
 <installer-script minSpecVersion="1.000000" authoringTool="com.apple.PackageMaker" authoringToolVersion="3.0.3" authoringToolBuild="174">
-    <title>OGAgent 1.1.0</title>
+    <title>OGAgent $VERSION</title>
     <options customize="never" allow-external-scripts="no"/>
     <domains enable_anywhere="true"/>
     <installation-check script="pm_install_check();"/>

@@ -26,12 +26,10 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-'''
+"""
 @author: Adolfo Gómez, dkmaster at dkmon dot com
 @author: Ramón M. Gómez, ramongomez at us dot es
-'''
-
-VERSION = '1.1.0'
+"""
 
 # ModuleFinder can't handle runtime changes to __path__, but win32com uses them
 try:
@@ -44,7 +42,8 @@ try:
         import py2exe.mf as modulefinder
     except ImportError:
         import modulefinder
-    import win32com, sys
+    import win32com
+    import sys
     for p in win32com.__path__[1:]:
         modulefinder.AddPackagePath("win32com", p)
     for extra in ["win32com.shell"]:  # ,"win32com.mapi"
@@ -56,12 +55,20 @@ except ImportError:
     # no build path setup, no worries.
     pass
 
-from distutils.core import setup
-import py2exe
-import sys
 import os
+from distutils.core import setup
+
+import sys
+
+# Reading version file:
+try:
+    with open('VERSION', 'r') as v:
+        VERSION = v.read()
+except IOError:
+    VERSION = '1.1.0'
 
 sys.argv.append('py2exe')
+
 
 def get_requests_cert_file():
     """Add Python requests or certifi .pem file for installers."""
@@ -115,7 +122,7 @@ setup(
         }
     ],
     service=[udsservice],
-    data_files=[('', [get_requests_cert_file()]),('cfg', ['cfg/ogagent.cfg', 'cfg/ogclient.cfg'])],
+    data_files=[('', [get_requests_cert_file()]), ('cfg', ['cfg/ogagent.cfg', 'cfg/ogclient.cfg'])],
     options={
         'py2exe': {
             'bundle_files': 3,

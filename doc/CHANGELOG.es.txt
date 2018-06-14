@@ -3,8 +3,17 @@ LISTA DE CAMBIOS	CHANGELOG.es.txt
 
 
 
-Lista de cambios incluidos en OpenGnsys 1.1.1
----------------------------------------------
+Lista de cambios incluidos en OpenGnsys 1.1.1 Espeto
+----------------------------------------------------
+
+Tickets resueltos en módulo OpenGnsys Web Admin Console:
+#772	Módulo de administración web para dispositivos smartphones y tablets (no se resolverá)
+#816	Marcar ordenador de profesor
+#824	Iniciar sistema restaurado (no integrado)
+#835	Problemas al listar plantillas en Nerboot Avanzado
+
+Tickets genéricos resueltos:
+#843	Incluir nombre de versión
 
 
 Lista de cambios incluidos en OpenGnsys 1.1.0

@@ -239,26 +239,25 @@ function TomaPropiedades($cmd,$idambito)
 
                 $ordenadores=$rs->campos["numordenadores"];
                 $idmenu=$rs->campos["idmenus"];
-                if(count(explode(",",$idmenu))>1) $idmenu=0;              
+                if(count(explode(",",$idmenu))>1) $idmenu=0;
                 $idrepositorio=$rs->campos["idrepositorios"];
-                if(count(explode(",",$idrepositorio))>1) $idrepositorio=0;                
-                $idperfilhard=$rs->campos["idperfileshard"];            
-                if(count(explode(",",$idperfilhard))>1) $idperfilhard=0;          
-                $cache=$rs->campos["caches"];           
-                if(count(explode(",",$cache))>1) $cache=0;        
+                if(count(explode(",",$idrepositorio))>1) $idrepositorio=0;
+                $idperfilhard=$rs->campos["idperfileshard"];
+                if(count(explode(",",$idperfilhard))>1) $idperfilhard=0;
+                $cache=$rs->campos["caches"];
+                if(count(explode(",",$cache))>1) $cache=0;
                 $idmenu=$rs->campos["idmenus"];
-                if(count(explode(",",$idmenu))>1) $idmenu=0;              
+                if(count(explode(",",$idmenu))>1) $idmenu=0;
                 $idprocedimiento=$rs->campos["idprocedimientos"];
-                if(count(explode(",",$idprocedimiento))>1) $idprocedimiento=0;    
-        
+                if(count(explode(",",$idprocedimiento))>1) $idprocedimiento=0;
+
                 $gidmenu=$idmenu;
                 $gidprocedimiento=$idprocedimiento;
                 $gidrepositorio=$idrepositorio;
                 $gidperfilhard=$idperfilhard;
                 $gcache=$cache; 
-        
+
                 $rs->Cerrar();
-                
                 return(true);
         }
         return(false);
