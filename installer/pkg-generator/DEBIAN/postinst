@@ -1265,8 +1265,8 @@ if [ "$RET" = "true" ]; then
 	exit 0
 fi
 
-FILE=/opt/opengnsys/doc/VERSION.txt     
-if [ -f $FILE ]; then
+VFILE=/opt/opengnsys/doc/VERSION.txt     
+if [ -f $VFILE ]; then
    echo "File $FILE exists. This could mean that OpenGnsys has been previously" 
    echo "installed using the installer script. This apt package is not suitable" 
    echo "for upgrading and may break the system"

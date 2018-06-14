@@ -917,15 +917,14 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 
-# Comprobar auto-actualización del programa.
-#~ if [ "$PROGRAMDIR" != "$INSTALL_TARGET/bin" ]; then
-	#~ checkAutoUpdate
-	#~ if [ $? -ne 0 ]; then
-		#~ echoAndLog "OpenGnsys updater has been overwritten"
-		#~ echoAndLog "Please, rerun this script"
-		#~ exit
-	#~ fi
-#~ fi
+VFILE=/opt/opengnsys/doc/VERSION.txt     
+if [ -f $VFILE ]; then
+   echo "File $FILE exists. This could mean that OpenGnsys has been previously" 
+   echo "installed using the installer script. This apt package is not suitable" 
+   echo "for upgrading and may break the system"
+   echo "Terminating!"
+   exit 1
+fi
 
 # Detectar datos de auto-configuración del instalador.
 autoConfigure
