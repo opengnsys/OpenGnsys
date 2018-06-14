@@ -3,8 +3,8 @@ LISTA DE CAMBIOS	CHANGELOG.es.txt
 
 
 
-Lista de cambios incluidos en OpenGnsys 1.1.1
----------------------------------------------
+Lista de cambios incluidos en OpenGnsys 1.1.1 Espeto
+----------------------------------------------------
 
 Tickets resueltos en módulo OpenGnsys Web Admin Console:
 #772	Módulo de administración web para dispositivos smartphones y tablets (no se resolverá)

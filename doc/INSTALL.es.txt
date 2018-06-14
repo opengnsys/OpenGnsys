@@ -1,5 +1,5 @@
-Instalación de OpenGnsys Server v 1.1.1
-=======================================
+Instalación de OpenGnsys Server 1.1.1 (Espeto)
+==============================================
 
 Notas iniciales
 ---------------
