@@ -1,0 +1,1171 @@
+#!/bin/bash
+#/**
+#@file    Protocol.lib
+#@brief   Librería o clase Protocol
+#@class   Protocol
+#@brief   Funciones para transmisión de datos
+#@version 1.0.5
+#@warning License: GNU GPLv3+
+#*/
+
+
+##################### FUNCIONES UNICAST ################
+
+#/**
+#         ogUcastSyntax
+#@brief   Función para generar la instrucción de transferencia de datos unicast
+#@param 1 Tipo de operación [ SENDPARTITION RECEIVERPARTITION SENDFILE RECEIVERFILE ] 
+#@param 2 Sesion Unicast 
+#@param 3 Dispositivo (opción PARTITION) o fichero(opción FILE) que será enviado.
+#@param 4 Tools de clonación (opcion PARTITION)
+#@param 5 Tools de compresion (opcion PARTITION) 
+#@return  instrucción para ser ejecutada.
+#@exception OG_ERR_FORMAT     formato incorrecto.
+#@exception OG_ERR_UCASTSYNTAXT     formato de la sesion unicast incorrecta.
+#@note    Requisitos: mbuffer
+#@todo: controlar que mbuffer esta disponible para los clientes.
+#@version 1.0 - 
+#@author  Antonio Doblas Viso, Universidad de Málaga
+#@date    2011/03/09
+#*/ ##
+      
+function ogUcastSyntax ()
+{
+
+local PARM SESSION SESSIONPARM MODE PORTBASE PERROR ADDRESS
+local TOOL LEVEL DEVICE MBUFFER SYNTAXSERVER SYNTAXCLIENT
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" -o "$2" == "help" ]; then
+    ogHelp "$FUNCNAME SENDPARTITION      str_sessionSERVER     str_device str_tools str_level" \
+		   "$FUNCNAME RECEIVERPARTITION  str_sessionCLIENT     str_device str_tools str_level "\
+		   "$FUNCNAME SENDFILE           str_sessionSERVER     str_file "\
+		   "$FUNCNAME RECEIVERFILE       str_sessionCLIENT     str_file " \
+                   "sessionServer syntax:        portbase:ipCLIENT-1:ipCLIENT-2:ipCLIENT-N " \
+                   "sessionServer example:       8000:172.17.36.11:172.17.36.12" \
+                   "sessionClient syntax:        portbase:ipMASTER " \
+                   "sessionClient example:       8000:172.17.36.249 "
+    return
+fi
+PERROR=0
+
+
+
+
+# Error si no se reciben $PARM parámetros.
+echo "$1" | grep "PARTITION" > /dev/null && PARM=5 || PARM=3
+[ "$#" -eq "$PARM" ] || ogRaiseError $OG_ERR_FORMAT "sin parametros"|| return $?
+
+
+# 1er param check
+ogCheckStringInGroup "$1" "SENDPARTITION sendpartition RECEIVERPARTITION receiverpartition SENDFILE sendfile RECEIVERFILE receiverfile" || ogRaiseError $OG_ERR_FORMAT "1st param: $1" || PERROR=1 #return $?
+
+# 2º param check
+echo "$1" | grep "SEND" > /dev/null && MODE=server || MODE=client
+
+######### No controlamos el numero de elementos de la session unicast porque en el master es variable en numero
+#TODO: diferenciamos los paramatros especificos de la sessión unicast  
+#SI: controlamos todos los parametros de la sessión unicast.
+#[ $MODE == "client" ] && SESSIONPARM=2 || SESSIONPARM=6
+OIFS=$IFS; IFS=':' ; SESSION=($2); IFS=$OIFS
+
+
+#[[ ${#SESSION[*]} == $SESSIONPARM ]]  || ogRaiseError $OG_ERR_FORMAT "parametros session multicast no completa" || PERROR=2# return $?
+
+
+#controlamos el PORTBASE de la sesion. Comun.-
+PORTBASE=${SESSION[0]}
+ogCheckStringInGroup ${SESSION[0]} "8000 8001 8002 8003 8004 8005" || ogRaiseError $OG_ERR_FORMAT "McastSession portbase ${SESSION[0]}" || PERROR=3 #return $?
+
+if [ $MODE == "server" ]
+then    
+    SIZEARRAY=${#SESSION[@]}
+    for (( i = 1 ; i < $SIZEARRAY ; i++ )) 
+	do
+		ADDRESS="$ADDRESS  -O ${SESSION[$i]}:$PORTBASE"
+        #echo " -O ${SESSION[$i]}:$PORTBASE"
+	done
+    
+else
+	ADDRESS=${SESSION[1]}:${PORTBASE}
+fi
+
+#3er param check - que puede ser un dispositvo o un fichero.
+#[ -n "$(ogGetPath "$3")" ] || ogRaiseError $OG_ERR_NOTFOUND " device or file $3" || PERROR=9 #return $?  
+DEVICE=$3
+
+#4 y 5 param check .  solo si es sobre particiones.
+if [ "$PARM" == "5" ]
+then
+	# 4 param check 
+	ogCheckStringInGroup "$4" "partclone PARTCLONE partimage PARTIMAGE ntfsclone NTFSCLONE" || ogRaiseError $OG_ERR_NOTFOUND " herramienta $4 no soportada" || PERROR=10 #return $?
+	TOOL=$4
+	ogCheckStringInGroup "$5" "lzop gzip LZOP GZIP 0 1" || ogRaiseError $OG_ERR_NOTFOUND " compresor $5 no valido" || PERROR=11 #return $?
+	LEVEL=$5
+fi
+
+[ "$PERROR" == "0" ] || ogRaiseError $OG_ERR_UCASTSYNTAXT " $PERROR" || return $?
+
+# Generamos la instrucción base de unicast -Envio,Recepcion-
+SYNTAXSERVER="mbuffer $ADDRESS"
+SYNTAXCLIENT="mbuffer -I $ADDRESS "
+
+
+case "$1" in
+SENDPARTITION)
+		PROG1=`ogCreateImageSyntax $DEVICE " " $TOOL $LEVEL | awk -F"|" '{print $1 "|" $3}' | tr -d ">"`
+		echo "$PROG1 | $SYNTAXSERVER"
+	;;
+    RECEIVERPARTITION)
+		COMPRESSOR=`ogRestoreImageSyntax " " $DEVICE $TOOL $LEVEL | awk -F\| '{print $1}'`
+		TOOLS=`ogRestoreImageSyntax " " $DEVICE $TOOL $LEVEL | awk -F\| '{print $NF}'`
+		echo "$SYNTAXCLIENT | $COMPRESSOR | $TOOLS "
+	;;
+	SENDFILE)
+		echo "$SYNTAXSERVER -i $3"
+    ;;
+    RECEIVERFILE)
+		echo "$SYNTAXCLIENT -i $3"
+    ;;
+   *)
+   ;;
+esac
+}
+
+
+#/**
+#         ogUcastSendPartition
+#@brief   Función para enviar el contenido de una partición a multiples particiones remotas usando UNICAST.
+#@param 1  disk
+#@param 2  partition
+#@param 3  sesionUcast
+#@param 4  tool image
+#@param 5  tool compresor
+#@return
+#@exception $OG_ERR_FORMAT
+#@exception $OG_ERR_UCASTSENDPARTITION
+#@note
+#@todo: ogIsLocked siempre devuelve 1
+#@version 1.0 - 
+#@author  Antonio Doblas Viso, Universidad de Málaga
+#@date    2011/03/09
+#*/ ##
+
+function ogUcastSendPartition ()
+{
+
+# Variables locales
+local PART COMMAND RETVAL
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npart SessionUNICAST-SERVER tools compresor" \
+           "$FUNCNAME 1 1 8000:172.17.36.11:172.17.36.12 partclone lzop"
+    return
+fi
+# Error si no se reciben 5 parámetros.
+[ "$#" == 5 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+#chequeamos la particion.
+PART=$(ogDiskToDev "$1" "$2") || return $?
+
+#ogIsLocked $1 $2 || ogRaiseError $OG_ERR_LOCKED "$1,$2" || return $?
+ogUnmount $1 $2
+
+#generamos la instrucción a ejecutar.  
+COMMAND=`ogUcastSyntax SENDPARTITION "$3" $PART $4 $5`
+RETVAL=$?
+
+if [ "$RETVAL" -gt "0" ]
+then  
+	return $RETVAL
+else
+	echo $COMMAND
+	eval $COMMAND || ogRaiseError $OG_ERR_UCASTSENDPARTITION " "; return $?
+fi
+
+}
+
+
+#/**
+#         ogUcastReceiverPartition
+#@brief   Función para recibir directamente en la partición el contenido de un fichero imagen remoto enviado por UNICAST.
+#@param 1   disk
+#@param 2   partition 
+#@param 3   session unicast
+#@return
+#@exception OG_ERR_FORMAT
+#@exception OG_ERR_UCASTRECEIVERPARTITION
+#@note
+#@todo:
+#@version 1.0 - Integración para OpenGNSys.
+#@author  Antonio Doblas Viso, Universidad de Málaga
+#@date    2011/03/09
+#*/ ##
+function ogUcastReceiverPartition ()
+{
+# Variables locales
+local PART COMMAND RETVAL
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npart SessionMulticastCLIENT tools compresor" \
+           "$FUNCNAME 1 1 8000:ipMASTER partclone lzop"
+    return
+fi
+# Error si no se reciben 5 parámetros.
+[ "$#" == 5 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+#chequeamos la particion.
+PART=$(ogDiskToDev "$1" "$2") || return $?
+
+#ogIsLocked $1 $2 || ogRaiseError $OG_ERR_LOCKED "$1,$2" || return $?
+ogUnmount $1 $2
+
+#generamos la instrucción a ejecutar.  
+COMMAND=`ogUcastSyntax RECEIVERPARTITION "$3" $PART $4 $5`
+RETVAL=$?
+
+if [ "$RETVAL" -gt "0" ]
+then  
+	return $RETVAL
+else
+	echo $COMMAND
+	eval $COMMAND || ogRaiseError $OG_ERR_UCASTRECEIVERPARTITION " "; return $?
+fi
+}
+
+
+
+#/**
+#         ogUcastSendFile [ str_repo | int_ndisk int_npart ] /Relative_path_file  sessionMulticast
+#@brief   Envía un fichero por unicast   ORIGEN(fichero) DESTINO(sessionmulticast)
+#@param (2 parámetros)  $1 path_aboluto_fichero  $2 sesionMcast
+#@param (3 parámetros)  $1 Contenedor REPO|CACHE $2 path_absoluto_fichero $3 sesionMulticast
+#@param (4 parámetros)  $1 disk $2 particion $3 path_absoluto_fichero $4 sesionMulticast
+#@return  
+#@exception OG_ERR_FORMAT     formato incorrecto.
+#@exception $OG_ERR_NOTFOUND
+#@exception OG_ERR_UCASTSENDFILE
+#@note    Requisitos: 
+#@version 1.0 - Definición de Protocol.lib
+#@author  Antonio Doblas Viso, Universidad de Málaga
+#@date    2010/05/09
+#*/ ##
+# 
+
+function ogUcastSendFile ()
+{
+# Variables locales.
+local ARG ARGS SOURCE TARGET COMMAND DEVICE RETVAL LOGFILE
+
+
+#ARGS usado para controlar ubicación de la sesion multicast
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME [str_REPOSITORY] [int_ndisk int_npart] /Relative_path_file sesionMcast(puerto:ip:ip:ip)" \
+           "$FUNCNAME  1 1 /aula1/winxp.img 8000:172.17.36.11:172.17.36.12" \
+           "$FUNCNAME  REPO /aula1/ubuntu.iso sesionUcast" \
+           "$FUNCNAME  CACHE /aula1/winxp.img sesionUcast" \
+           "$FUNCNAME  /opt/opengnsys/images/aula1/hd500.vmx sesionUcast"
+    return
+fi
+
+ARGS="$@"
+case "$1" in
+    /*)     # Camino completo.               */ (Comentrio Doxygen)
+        SOURCE=$(ogGetPath "$1")
+        ARG=2
+        DEVICE="$1"
+		;;
+    [1-9]*) # ndisco npartición.
+        SOURCE=$(ogGetPath "$1" "$2" "$3")
+        ARG=4
+        DEVICE="$1 $2 $3"
+        ;;
+    *)      # Otros: repo, cache, cdrom (no se permiten caminos relativos).
+        SOURCE=$(ogGetPath "$1" "$2")
+        ARG=3
+        DEVICE="$1 $2 "
+        ;;
+esac
+
+
+# Error si no se reciben los argumentos ARG necesarios según la opcion.
+[ $# == "$ARG" ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+# Comprobar fichero origen
+[ -n "$(ogGetPath $SOURCE)" ] || ogRaiseError $OG_ERR_NOTFOUND " device or file $DEVICE not found" || return $?  
+
+
+SESSION=${!ARG}
+
+#generamos la instrucción a ejecutar.  
+COMMAND=`ogUcastSyntax "SENDFILE" "$SESSION" "$SOURCE"`
+RETVAL=$?
+
+if [ "$RETVAL" -gt "0" ]
+then  
+	return $RETVAL
+else
+	echo $COMMAND
+	eval $COMMAND || ogRaiseError $OG_ERR_UCASTSENDFILE " "; return $?
+fi
+
+}
+
+
+
+#/**
+#         ogMcastSyntax
+#@brief   Función para generar la instrucción de ejucción la transferencia de datos multicast
+#@param 1 Tipo de operación [ SENDPARTITION RECEIVERPARTITION SENDFILE RECEIVERFILE ] 
+#@param 2 Sesión Mulicast 
+#@param 3 Dispositivo (opción PARTITION) o fichero(opción FILE) que será enviado.
+#@param 4 Tools de clonación (opcion PARTITION)
+#@param 5 Tools de compresion (opcion PARTITION) 
+#@return  instrucción para ser ejecutada.
+#@exception OG_ERR_FORMAT     formato incorrecto.
+#@exception OG_ERR_NOTEXEC
+#@exception OG_ERR_MCASTSYNTAXT
+#@note    Requisitos: upd-cast 2009 o superior
+#@todo    localvar  check versionudp
+#@version 1.0 - 
+#@author  Antonio Doblas Viso, Universidad de Málaga
+#@date    2010/05/09
+#@version 2.0 - cambios en udp-receiver para permitir multicast entre subredes
+#@author  Juan Carlos Garcia, Universidad de Zaragoza
+#@date    2015/11/17
+#@version 1.1 - Control de errores en transferencia multicast (ticket #781) 
+#@author  Irina Gomez, ETSII Universidad de Sevilla 
+#@date    2017/04/20
+#*/ ##
+#         
+
+function ogMcastSyntax ()
+{
+
+local ISUDPCAST RECEIVERTIMEOUT PARM SESSION SESSIONPARM MODE PORTBASE PERROR
+local METHOD ADDRESS BITRATE NCLIENTS MAXTIME CERROR 
+local TOOL LEVEL DEVICE MBUFFER SYNTAXSERVER SYNTAXCLIENT 
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" -o "$2" == "help" ]; then
+    ogHelp "$FUNCNAME SENDPARTITION      str_sessionSERVER     str_device str_tools str_level" \
+		   "$FUNCNAME RECEIVERPARTITION  str_sessionCLIENT     str_device str_tools str_level "\
+		   "$FUNCNAME SENDFILE           str_sessionSERVER     str_file "\
+		   "$FUNCNAME RECEIVERFILE       str_sessionCLIENT     str_file " \
+                   "sessionServer syntax:        portbase:method:mcastaddress:speed:nclients:ntimeWaitingUntilNclients " \
+                   "sessionServer example:       9000:full-duplex|half-duplex|broadcast:239.194.17.36:80M:50:60 " \
+                   "sessionClient syntax:        portbase " \
+                   "sessionClient example:       9000 "
+    return
+fi
+PERROR=0
+
+#si no tenemos updcast o su version superior 2009 udpcast error.
+ISUDPCAST=$(udp-receiver --help 2>&1)
+echo $ISUDPCAST | grep start-timeout > /dev/null || ogRaiseError $OG_ERR_NOTEXEC "upd-cast no existe o version antigua -requerida 2009-"|| return $?
+
+# Si la version de  udp-receiver permite --receive-timeout utilizamos la opción
+if echo $ISUDPCAST | grep receive-timeout &>/dev/null; then
+    RECEIVERTIMEOUT=" --receive-timeout $MCASTWAIT"
+else
+    RECEIVERTIMEOUT=""
+fi
+
+# Error si no se reciben $PARM parámetros.
+echo "$1" | grep "PARTITION" > /dev/null && PARM=5 || PARM=3
+[ "$#" -eq "$PARM" ] || ogRaiseError $OG_ERR_FORMAT "sin parametros"|| return $?
+
+
+# 1er param check
+ogCheckStringInGroup "$1" "SENDPARTITION sendpartition RECEIVERPARTITION receiverpartition SENDFILE sendfile RECEIVERFILE receiverfile" || ogRaiseError $OG_ERR_FORMAT "1st param: $1" || PERROR=1 #return $?
+
+# 2º param check
+echo "$1" | grep "SEND" > /dev/null && MODE=server || MODE=client
+
+#TODO: diferenciamos los paramatros especificos de la sessión multicast  
+#SI: controlamos todos los parametros de la sessión multicast.
+[ $MODE == "client" ] && SESSIONPARM=1 || SESSIONPARM=6
+OIFS=$IFS; IFS=':' ; SESSION=($2); IFS=$OIFS
+
+
+[[ ${#SESSION[*]} == $SESSIONPARM ]]  || ogRaiseError $OG_ERR_FORMAT "parametros session multicast no completa" || PERROR=2# return $?
+
+
+#controlamos el PORTBASE de la sesion. Comun.-
+PORTBASE=${SESSION[0]}
+ogCheckStringInGroup ${SESSION[0]} "$(seq 9000 2 9050)" || ogRaiseError $OG_ERR_FORMAT "McastSession portbase ${SESSION[0]}" || PERROR=3 #return $?
+if [ $MODE == "server" ]
+then    
+	ogCheckStringInGroup ${SESSION[1]} "full-duplex FULL-DUPLEX half-duplex HALF-DUPLEX broadcast BROADCAST" || ogRaiseError $OG_ERR_FORMAT "McastSession method ${SESSION[1]}" || PERROR=4 #return $?
+	METHOD=${SESSION[1]}
+	ogCheckIpAddress ${SESSION[2]}  || ogRaiseError $OG_ERR_FORMAT "McastSession address ${SESSION[2]}" || PERROR=5 #return $?
+	ADDRESS=${SESSION[2]}
+	ogCheckStringInReg ${SESSION[3]} "^[0-9]{1,3}\M$" || ogRaiseError $OG_ERR_FORMAT "McastSession bitrate ${SESSION[3]}" || PERROR=6 # return $?
+	BITRATE=${SESSION[3]}
+	ogCheckStringInReg ${SESSION[4]} "^[0-9]{1,10}$" || ogRaiseError $OG_ERR_FORMAT "McastSession nclients ${SESSION[4]}" || PERROR=7 # return $?
+	NCLIENTS=${SESSION[4]}
+	ogCheckStringInReg ${SESSION[5]} "^[0-9]{1,10}$" || ogRaiseError $OG_ERR_FORMAT "McastSession maxtime ${SESSION[5]}" || PERROR=8 # return $?
+	MAXTIME=${SESSION[5]}
+fi
+
+#3er param check - que puede ser un dispositvo o un fichero.
+# [ -n "$(ogGetPath $3)" ] || ogRaiseError $OG_ERR_NOTFOUND " device or file $3" || PERROR=9 #return $?  
+DEVICE=$3
+
+#4 y 5 param check .  solo si es sobre particiones.
+if [ "$PARM" == "5" ]
+then
+	# 4 param check 
+	ogCheckStringInGroup "$4" "partclone PARTCLONE partimage PARTIMAGE ntfsclone NTFSCLONE" || ogRaiseError $OG_ERR_NOTFOUND " herramienta $4 no soportada" || PERROR=10 #return $?
+	TOOL=$4
+	ogCheckStringInGroup "$5" "lzop LZOP gzip GZIP 0 1" || ogRaiseError $OG_ERR_NOTFOUND " compresor $5 no valido" || PERROR=11 #return $?
+	LEVEL=$5
+fi
+
+
+if [ "$PERROR" != "0" ]; then
+	ogRaiseError $OG_ERR_MCASTSYNTAXT " $PERROR"; return $?
+fi
+
+
+# Valores estandar no configurables.
+CERROR="8x8/128"
+
+# opción del usuo de tuberia intermedia en memoria mbuffer.
+which mbuffer > /dev/null && MBUFFER=" --pipe 'mbuffer -q -m 20M' " 
+
+# Generamos la instrucción base de multicast -Envio,Recepcion-
+SYNTAXSERVER="udp-sender $MBUFFER --nokbd --portbase $PORTBASE --$METHOD --mcast-data-address $ADDRESS --fec $CERROR --max-bitrate $BITRATE --ttl 16 --min-clients $NCLIENTS --max-wait $MAXTIME --autostart $MAXTIME --log /tmp/mcast.log"
+#SYNTAXCLIENT="udp-receiver $MBUFFER --portbase $PORTBASE "
+
+
+# Deteccion automatica de la subred del cliente para anadir la  IP del repositorio a la orden udp-receiver en el caso de encontrarse en distinta subred del repo
+REPOIP="$(ogGetRepoIp)"
+CLIENTIP=$(ip -o address show up | awk '$2!~/lo/ {if ($3~/inet$/) {printf ("%s ", $4)}}')
+MASCARA=`echo $CLIENTIP | cut -f2 -d/`
+CLIENTIP=`echo $CLIENTIP | cut -f1 -d/`
+RIPBT=""
+IPBT=""
+for (( i = 1 ; i < 5 ; i++ ))
+do
+	RIP=`echo $REPOIP | cut -f$i -d.`
+	RIP=`echo "$[$RIP + 256]"`
+	RIPB=""
+	while [ $RIP -gt 0 ]
+	do
+		let COCIENTE=$RIP/2
+		let RESTO=$RIP%2
+		RIPB=$RESTO$RIPB
+		RIP=$COCIENTE
+	done
+	RIPB=`echo "$RIPB" | cut -c2-`
+	RIPBT=$RIPBT$RIPB
+	IP=`echo $CLIENTIP | cut -f$i -d.`
+	IP=`echo "$[$IP + 256]"`
+	IPB=""
+	while [ $IP -gt 0 ]
+	do
+		let COCIENTE=$IP/2
+		let RESTO=$IP%2
+		IPB=$RESTO$IPB
+		IP=$COCIENTE
+	done
+	IPB=`echo "$IPB" | cut -c2-`
+	IPBT=$IPBT$IPB
+done
+MCASTWAIT=${MCASTWAIT:-120}
+REPOSUBRED=`echo $RIPBT | cut -c1-$MASCARA`
+CLIENTSUBRED=`echo $IPBT | cut -c1-$MASCARA`
+if [ $REPOSUBRED == $CLIENTSUBRED ]; then
+	SYNTAXCLIENT="udp-receiver $MBUFFER --portbase $PORTBASE $RECEIVERTIMEOUT --start-timeout $MCASTWAIT"
+else
+	SYNTAXCLIENT="udp-receiver $MBUFFER --portbase $PORTBASE --mcast-rdv-address $REPOIP $RECEIVERTIMEOUT --start-timeout $MCASTWAIT"
+fi
+
+case "$1" in
+SENDPARTITION)
+		PROG1=`ogCreateImageSyntax $DEVICE " " $TOOL $LEVEL | awk -F"|" '{print $1 "|" $3}' | tr -d ">"`
+		echo "$PROG1 | $SYNTAXSERVER"
+	;;
+    RECEIVERPARTITION)
+		COMPRESSOR=`ogRestoreImageSyntax " " $DEVICE $TOOL $LEVEL | awk -F\| '{print $1}'`
+		TOOLS=`ogRestoreImageSyntax " " $DEVICE $TOOL $LEVEL | awk -F\| '{print $NF}'`
+		echo "$SYNTAXCLIENT | $COMPRESSOR | $TOOLS "
+	;;
+	SENDFILE)
+		echo "$SYNTAXSERVER --file $3"
+    ;;
+    RECEIVERFILE)
+		echo "$SYNTAXCLIENT --file $3"
+    ;;
+   *)
+   ;;
+esac
+}
+
+
+
+#/**
+#         ogMcastSendFile [ str_repo | int_ndisk int_npart ] /Relative_path_file  sessionMulticast
+#@brief   Envía un fichero por multicast   ORIGEN(fichero) DESTINO(sessionmulticast)
+#@param (2 parámetros)  $1 path_aboluto_fichero  $2 sesionMcast
+#@param (3 parámetros)  $1 Contenedor REPO|CACHE $2 path_absoluto_fichero $3 sesionMulticast
+#@param (4 parámetros)  $1 disk $2 particion $3 path_absoluto_fichero $4 sesionMulticast
+#@return  
+#@exception OG_ERR_FORMAT     formato incorrecto.
+#@exception $OG_ERR_NOTFOUND
+#@exception OG_ERR_MCASTSENDFILE
+#@note    Requisitos: 
+#@version 1.0 - Definición de Protocol.lib
+#@author  Antonio Doblas Viso, Universidad de Málaga
+#@date    2010/05/09
+#*/ ##
+# 
+
+function ogMcastSendFile ()
+{
+# Variables locales.
+local ARGS ARG SOURCE TARGET COMMAND DEVICE RETVAL LOGFILE
+
+#LOGFILE="/tmp/mcast.log"
+
+#ARGS usado para controlar ubicación de la sesion multicast
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME [str_REPOSITORY] [int_ndisk int_npart] /Relative_path_file sesionMcast" \
+           "$FUNCNAME  1 1 /aula1/winxp.img sesionMcast" \
+           "$FUNCNAME  REPO /aula1/ubuntu.iso sesionMcast" \
+           "$FUNCNAME  CACHE /aula1/winxp.img sesionMcast" \
+           "$FUNCNAME  /opt/opengnsys/images/aula1/hd500.vmx sesionMcast"
+    return
+fi
+
+ARGS="$@"
+case "$1" in
+    /*)     # Camino completo.               */ (Comentrio Doxygen)
+        SOURCE=$(ogGetPath "$1")
+        ARG=2
+        DEVICE="$1"
+		;;
+    [1-9]*) # ndisco npartición.
+        SOURCE=$(ogGetPath "$1" "$2" "$3")
+        ARG=4
+        DEVICE="$1 $2 $3"
+        ;;
+    *)      # Otros: repo, cache, cdrom (no se permiten caminos relativos).
+        SOURCE=$(ogGetPath "$1" "$2")
+        ARG=3
+        DEVICE="$1 $2 "
+        ;;
+esac
+
+
+# Error si no se reciben los argumentos ARG necesarios según la opcion.
+[ $# == "$ARG" ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+# Comprobar fichero origen
+[ -n "$(ogGetPath $SOURCE)" ] || ogRaiseError $OG_ERR_NOTFOUND " device or file $DEVICE not found" || return $?  
+
+# eliminamos ficheros antiguos de log
+#rm $LOGFILE
+
+SESSION=${!ARG}
+
+
+#generamos la instrucción a ejecutar.  
+COMMAND=`ogMcastSyntax "SENDFILE" "$SESSION" "$SOURCE"`
+RETVAL=$?
+
+if [ "$RETVAL" -gt "0" ]
+then  
+	return $RETVAL
+else
+	echo $COMMAND
+	eval $COMMAND || ogRaiseError $OG_ERR_MCASTSENDFILE " "; return $?
+	#[ -s "$LOGFILE" ] || return 21
+fi
+
+}
+
+
+
+#/**
+#         ogMcastReceiverFile  sesion Multicast [ str_repo | int_ndisk int_npart ] /Relative_path_file
+#@brief   Recibe un fichero multicast   ORIGEN(sesionmulticast) DESTINO(fichero)
+#@param (2 parámetros)  $1 sesionMcastCLIENT $2 path_aboluto_fichero_destino  
+#@param (3 parámetros)  $1 sesionMcastCLIENT $2 Contenedor REPO|CACHE $3 path_absoluto_fichero_destino
+#@param (4 parámetros)  $1 sesionMcastCLIENT $2 disk $3 particion $4 path_absoluto_fichero_destino
+#@return  
+#@exception OG_ERR_FORMAT     formato incorrecto.
+#@exception $OG_ERR_MCASTRECEIVERFILE
+#@note    Requisitos: 
+#@version 1.0 - Definición de Protocol.lib
+#@author  Antonio Doblas Viso, Universidad de Málaga
+#@date    2010/05/09
+#*/ ##
+# 
+
+function ogMcastReceiverFile ()
+{
+
+# Variables locales.
+local ARGS ARG TARGETDIR TARGETFILE
+
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME [ str_portMcast] [ [Relative_path_file] | [str_REPOSITORY path_file] |  [int_ndisk int_npart path_file ]  ]" \
+           "$FUNCNAME 9000 /PS1_PH1.img" \
+           "$FUNCNAME 9000 CACHE /aula1/PS2_PH4.img" \
+           "$FUNCNAME 9000 1 1 /isos/linux.iso" 
+    return
+fi
+
+ARGS="$@"
+case "$2" in
+    /*)     # Camino completo.          */ (Comentrio Doxygen)
+    	TARGETDIR=$(ogGetParentPath "$2")
+		ARG=2		
+	;;
+    [1-9]*) # ndisco npartición.
+    	TARGETDIR=$(ogGetParentPath "$2" "$3" "$4")
+        ARG=4      
+    ;;
+    *)      # Otros: repo, cache, cdrom (no se permiten caminos relativos).
+    	TARGETDIR=$(ogGetParentPath "$2" "$3")
+        ARG=3 
+    ;;
+esac
+
+# Error si no se reciben los argumentos ARG necesarios según la opcion.
+[ $# == "$ARG" ] || ogRaiseError $OG_ERR_FORMAT "Parametros no admitidos"|| return $?
+
+#obtenemos el nombre del fichero a descargar.
+TARGETFILE=`basename ${!ARG}`
+
+#generamos la instrucción a ejecutar.  
+COMMAND=`ogMcastSyntax RECEIVERFILE "$1" $TARGETDIR/$TARGETFILE `
+RETVAL=$?
+
+if [ "$RETVAL" -gt "0" ]
+then  
+	return $RETVAL
+else
+	echo $COMMAND
+	eval $COMMAND || ogRaiseError $OG_ERR_MCASTRECEIVERFILE "$TARGETFILE"; return $?
+	#[ -s "$LOGFILE" ] || return 21
+fi
+}
+
+
+#/**
+#         ogMcastSendPartition
+#@brief   Función para enviar el contenido de una partición a multiples particiones remotas.
+#@param 1   disk
+#@param 2  partition
+#@param 3  session multicast
+#@param 4  tool clone
+#@param 5  tool compressor
+#@return
+#@exception OG_ERR_FORMAT
+#@exception OG_ERR_MCASTSENDPARTITION
+#@note
+#@todo: ogIsLocked siempre devuelve 1. crear ticket
+#@version 1.0 - Definición de Protocol.lib
+#@author  Antonio Doblas Viso, Universidad de Málaga
+#@date    2010/05/09
+#*/ ##
+
+function ogMcastSendPartition ()
+{
+
+# Variables locales
+local PART COMMAND RETVAL
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npart SessionMulticastSERVER tools compresor" \
+           "$FUNCNAME 1 1 9000:full-duplex:239.194.37.31:50M:20:2 partclone lzop"
+    return
+fi
+# Error si no se reciben 5 parámetros.
+[ "$#" == 5 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+#chequeamos la particion.
+PART=$(ogDiskToDev "$1" "$2") || return $?
+
+#ogIsLocked $1 $2 || ogRaiseError $OG_ERR_LOCKED "$1,$2" || return $?
+ogUnmount $1 $2
+
+#generamos la instrucción a ejecutar.  
+COMMAND=`ogMcastSyntax SENDPARTITION "$3" $PART $4 $5`
+RETVAL=$?
+
+if [ "$RETVAL" -gt "0" ]
+then  
+	return $RETVAL
+else
+	echo $COMMAND
+	eval $COMMAND || ogRaiseError $OG_ERR_MCASTSENDPARTITION " "; return $?
+fi
+
+
+}
+
+#/**
+#         ogMcastReceiverPartition
+#@brief   Función para recibir directamente en la partición el contenido de un fichero imagen remoto enviado por multicast.
+#@param 1   disk
+#@param 2  partition
+#@param 3  session multicast
+#@param 4  tool clone
+#@param 5  tool compressor
+#@return
+#@exception $OG_ERR_FORMAT
+#@note
+#@todo:
+#@version 1.0 - Definición de Protocol.lib
+#@author  Antonio Doblas Viso, Universidad de Málaga
+#@date    2010/05/09
+#*/ ##
+function ogMcastReceiverPartition ()
+{
+# Variables locales
+local PART COMMAND RETVAL
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npart SessionMulticastCLIENT tools compresor" \
+           "$FUNCNAME 1 1 9000 partclone lzop"
+    return
+fi
+# Error si no se reciben 5 parámetros.
+[ "$#" == 5 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+#chequeamos la particion.
+PART=$(ogDiskToDev "$1" "$2") || return $?
+
+#ogIsLocked $1 $2 || ogRaiseError $OG_ERR_LOCKED "$1,$2" || return $?
+ogUnmount $1 $2
+
+#generamos la instrucción a ejecutar.  
+COMMAND=`ogMcastSyntax RECEIVERPARTITION "$3" $PART $4 $5`
+RETVAL=$?
+
+if [ "$RETVAL" -gt "0" ]
+then  
+	return $RETVAL
+else
+	echo $COMMAND
+	eval $COMMAND || ogRaiseError $OG_ERR_MCASTSENDPARTITION " "; return $?
+fi
+
+}
+
+
+#/**
+#         ogMcastRequest
+#@brief   Función temporal para solicitar al ogRepoAux el envio de un fichero por multicast
+#@param 1  Fichero a enviar ubicado en el REPO. puede ser ruta absoluta o relatica a /opt/opengnsys/images
+#@param 2  PROTOOPT   opciones protocolo multicast
+#@return
+#@exception 
+#@note
+#@todo:
+#@version 1.0.5
+#@author  Antonio Doblas Viso, Universidad de Málaga
+#@date    2012/05/29
+#@version 1.1 - Control de errores en transferencia multicast (ticket #781) 
+#@author  Irina Gomez, ETSII Universidad de Sevilla 
+#@date    2017/04/20
+#@version 1.1 - Unidades organizativas con directorio de imágenes separado. (ticket #678)
+#@author  Irina Gomez, ETSII Universidad de Sevilla 
+#@date    2017/06/23
+#*/ ##
+function ogMcastRequest {
+# Variables locales
+local FILE PROTOOPT PORT PORTAUX REPOIP REPOPORTAUX REPEAT OGUNIT
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME path_filename str_mcastoptions"
+    return
+fi
+# Error si no se reciben 2 parámetros.
+[ "$#" == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+OGUNIT="$(df|awk '/ogimages/ {print $1}'|cut -d/ -f5)/"
+FILE="$OGUNIT$1"
+PROTOOPT="$2"
+
+#TODO: CONTROL PARAMETROS
+
+PORT=$(echo $2 | cut -f1 -d":")
+let PORTAUX=$PORT+1
+REPOIP=$(ogGetRepoIp)
+REPOPORTAUX=2009
+REPEAT=0
+until nmap -n -sU -p $PORTAUX $REPOIP | grep open
+do
+    let REPEAT=$REPEAT+1
+    [ "$REPEAT" -lt 6 ] || ogRaiseError session log $OG_ERR_PROTOCOLJOINMASTER "MULTICAST \"$FILE\" \"$PROTOOPT\" $FILELIST" || return $?
+    echo "$MSG_SCRIPTS_TASK_START :  hose $REPOIP $REPOPORTAUX --out sh -c "echo -ne START_MULTICAST $FILE $2""
+    #update-cache:
+    hose $REPOIP $REPOPORTAUX --out sh -c "echo -ne START_MULTICAST "$FILE" "$PROTOOPT""
+    #multicas-direct:  hose $REPOIP 2009 --out sh -c "echo -ne START_MULTICAST /$IMAGE.img $OPTPROTOCOLO"
+    sleep 10
+done
+}
+
+
+##########################################
+############## funciones torrent
+#/**
+#         ogTorrentStart  [ str_repo | int_ndisk int_npart ] Relative_path_file.torrent | SessionProtocol
+#@brief   Función iniciar P2P - requiere un tracker para todos los modos, y un seeder para los modos peer y leecher y los ficheros .torrent.
+#@param   str_pathDirectory  str_Relative_path_file
+#@param  int_disk    int_partition   str_Relative_path_file
+#@param  str_REPOSITORY(CACHE - LOCAL)  str_Relative_path_file
+#@param (2 parámetros)  $1 path_aboluto_fichero_torrent  $2 Parametros_Session_Torrent  
+#@param (3 parámetros)  $1 Contenedor CACHE $2 path_absoluto_fichero_Torrent $3 Parametros_Session_Torrent
+#@param (4 parámetros)  $1 disk $2 particion $3 path_absoluto_fichero_Torrent 4$ Parametros_Session_Torrent
+
+#@return
+#@note
+#@todo: 
+#@version 0.1 - Integración para OpenGNSys.
+#@author        Antonio J. Doblas Viso. Universidad de Málaga
+#@date
+#@version 0.2 - Chequeo del tamaño de imagen descargado.
+#@author        Irina . Univesidad de Sevilla.
+#@date
+#@version 0.3 - Control de los modos de operación, y estado de descarga.
+#@author        Antonio J. Doblas Viso. Univesidad de Málaga.
+#@date
+#@version 0.4 - Enviadando señal (2) a ctorrent permiendo la comunicación final con tracker
+#@author        Antonio J. Doblas Viso. Univesidad de Málaga.
+#@date
+#*/ ##
+
+#protocoloTORRENT    mode:time
+#mode=seeder  -> Dejar el equipo seedeando hasta que transcurra el tiempo indicado o un kill desde consola, 
+#mode=peer    -> seedear mientras descarga
+#mode=leecher  -> NO seedear mientras descarga
+#time tiempo que una vez descargada la imagen queremos dejar al cliente como seeder.
+
+function ogTorrentStart ()
+{
+
+# Variables locales.
+local ARGS ARG TARGETDIR TARGETFILE SESSION ERROR
+ERROR=0
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME $FUNCNAME [ str_repo] [ [Relative_path_fileTORRENT] | [str_REPOSITORY path_fileTORRENT] |  [int_ndisk int_npart path_fileTORRENT ]  ] SessionTorrent" \
+           "$FUNCNAME CACHE /PS1_PH1.img.torrent seeder:10000" \
+           "$FUNCNAME /opt/opengnsys/cache/linux.iso peer:60" \
+           "$FUNCNAME 1 1 /linux.iso.torrent leecher:60" 
+    return
+fi
+
+case "$1" in
+    /*)     # Camino completo.          */ (Comentrio Doxygen)
+           SOURCE=$(ogGetPath "$1")
+           ARG=2
+     ;;
+    [1-9]*) # ndisco npartición.
+           SOURCE=$(ogGetPath "$1" "$2" "$3")
+           ARG=4
+     ;;
+    *) # Otros: Solo cache (no se permiten caminos relativos).
+        SOURCE=$(ogGetPath "$1" "$2" 2>/dev/null)
+        ARG=3
+     ;;
+esac
+
+# Error si no se reciben los argumentos ARG necesarios según la opcion.
+[ $# == "$ARG" ] || ogRaiseError $OG_ERR_FORMAT "Parametros no admitidos"|| return $?
+
+#controlar source, que no se haga al repo.
+if [ $ARG == "3" ]
+then
+    ogCheckStringInGroup "$1" "CACHE cache" || ogRaiseError $OG_ERR_FORMAT "La descarga torrent solo se hace desde local, copia el torrent a la cache y realiza la operación desde esa ubicación" || return $?
+fi
+if [ $ARG == "2" ]
+then
+    if `ogCheckStringInReg "$1" "^/opt/opengnsys/images"` 
+    then
+    	ogRaiseError $OG_ERR_FORMAT "La descarga torrent solo se hace desde local, copia el torrent a la cache y realiza la operación desde esa ubicación" 
+    	return $?
+	fi
+fi
+
+#controlar el source, para que sea un torrent.
+ctorrent -x ${SOURCE} &> /dev/null; [ $? -eq 0 ] ||  ogRaiseError $OG_ERR_NOTFOUND "${ARGS% $*}" || return $?
+
+TARGET=`echo $SOURCE | awk -F.torrent '{print $1}'`
+DIRSOURCE=`ogGetParentPath $SOURCE`
+cd $DIRSOURCE
+
+
+
+SESSION=${!ARG}
+OIFS=$IFS; IFS=':' ; SESSION=($SESSION); IFS=$OIFS
+[[ ${#SESSION[*]} == 2 ]]  || ogRaiseError $OG_ERR_FORMAT "parametros session Torrent no completa:  modo:tiempo" || ERROR=1# return $?
+#controlamos el modo de operación del cliente-
+ogCheckStringInGroup ${SESSION[0]} "seeder SEEDER peer PEER leecher LEECHER" || ogRaiseError $OG_ERR_FORMAT "valor modo Torrent no valido ${SESSION[0]}" || ERROR=1 #return $?
+MODE=${SESSION[0]}
+#contolamos el tiempo para el seeder o una vez descargada la imagen como peer o leecher.
+ogCheckStringInReg ${SESSION[1]} "^[0-9]{1,10}$" || ogRaiseError $OG_ERR_FORMAT "valor tiempo no valido ${SESSION[1]}" || ERROR=1 # return $?
+TIME=${SESSION[1]}
+# si ha habido error en el control de parametros error.
+[ "$ERROR" == "1" ] && return 1
+
+
+#SYNTAXSEEDER="echo MODE seeder ctorrent ; (sleep \$TIME && kill -9 \`pidof ctorrent\`) & ; ctorrent \${SOURCE}"
+
+# si No fichero .bf, y Si fichero destino    imagen ya descargada y su chequeo fue comprobado en su descarga inicial.
+if [ ! -f ${SOURCE}.bf -a -f ${TARGET} ]
+then
+  echo "imagen ya descargada"
+  case "$MODE" in 
+	seeder|SEEDER)
+		echo "MODE seeder ctorrent"     #### ${SOURCE} -X 'sleep $TIME; kill -9 \$(pidof ctorrent)' -C 100"
+		(sleep $TIME && kill -2 `pidof ctorrent`) &
+		ctorrent -f ${SOURCE}		
+  esac
+  return 0
+fi
+
+#Si no existe bf ni fichero destino         descarga inicial.
+if [ ! -f ${SOURCE}.bf -a ! -f ${TARGET} ]
+then
+	OPTION=DOWNLOAD
+    echo "descarga inicial" 
+fi 
+
+# Si fichero bf           descarga anterior no completada -.
+if [ -f ${SOURCE}.bf -a -f ${TARGET} ]
+then       
+        echo Continuar con Descargar inicial no terminada.
+        OPTION=DOWNLOAD
+fi
+
+if [ "$OPTION" == "DOWNLOAD" ]
+then
+	case "$MODE" in
+        peer|PEER)
+        	echo "Donwloading Torrent as peer"  ### echo "ctorrent -X 'sleep $TIME; kill -9 \$(pidof ctorrent)' -C 100 $SOURCE -s $TARGET -b ${SOURCE}"
+			# Creamos el fichero de resumen por defecto
+			touch ${SOURCE}.bf
+			# ctorrent controla otro fichero -b ${SOURCE}.bfog
+			ctorrent -f -c -X "sleep $TIME; kill -2 \$(pidof ctorrent)" -C 100 ${SOURCE} -s ${TARGET} -b ${SOURCE}.bfog
+        ;;
+        leecher|LEECHER)
+           	echo "Donwloading Torrent as leecher" # echo "ctorrent ${SOURCE} -X 'sleep 30; kill -9 \$(pidof ctorrent)' -C 100 -U 0"
+         	ctorrent ${SOURCE} -X "sleep 30; kill -2 \$(pidof ctorrent)" -C 100 -U 0
+        ;;
+        seeder|SEEDER)
+        	echo "MODE seeder ctorrent"     #### ${SOURCE} -X 'sleep $TIME; kill -9 \$(pidof ctorrent)' -C 100"
+			# Creamos el fichero de resumen por defecto
+			touch ${SOURCE}.bf
+			# ctorrent controla otro fichero -b ${SOURCE}.bfog
+           	ctorrent -f -c -X "sleep $TIME; kill -2 \$(pidof ctorrent)" -C 100 ${SOURCE} -s ${TARGET} -b ${SOURCE}.bfog
+		;;
+	esac
+fi
+cd /tmp
+}
+
+#/**
+#         ogCreateTorrent  [ str_repo | int_ndisk int_npart ] Relative_path_file
+#@brief   Función para crear el fichero torrent.
+#@param   str_pathDirectory  str_Relative_path_file
+#@param  int_disk    int_partition   str_Relative_path_file
+#@param  str_REPOSITORY(CACHE - LOCAL)  str_Relative_path_file
+#@return
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_NOTFOUND  Disco o particion no corresponden con un dispositivo.
+#@exception OG_ERR_PARTITION Tipo de partición desconocido o no se puede montar.
+#@exception OG_ERR_NOTOS     La partición no tiene instalado un sistema operativo.
+#@note
+#@version 0.1 - Integración para OpenGNSys.
+#@author        Antonio J. Doblas Viso. Universidad de Málaga
+#@date
+#@version 0.2 - Integración para btlaunch.
+#@author        Irina . Univesidad de Sevilla.
+#@date
+#*/ ##
+
+function ogCreateTorrent ()
+{
+# Variables locales.
+local ARGS ARG SOURCE EXT IPTORRENT
+
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME [str_REPOSITORY] [int_ndisk int_npart] Relative_path_file IpBttrack" \           "$FUNCNAME 1 1 /aula1/winxp 10.1.15.23" \
+       "$FUNCNAME REPO /aula1/winxp 10.1.15.45"
+
+    return
+fi
+
+# Error si se quiere crear el fichero en cache y no existe
+[ "$1" != "CACHE" ] || `ogFindCache >/dev/null` || ogRaiseError $OG_ERR_NOTFOUND "CACHE"|| return $?
+
+case "$1" in
+    /*)     # Camino completo.          */ (Comentrio Doxygen)
+           SOURCE=$(ogGetPath "$1.img")
+        ARG=2
+		;;
+    [1-9]*) # ndisco npartición.
+           SOURCE=$(ogGetPath "$1" "$2" "$3.img")
+        ARG=4
+        ;;
+    *)      # Otros: repo, cache, cdrom (no se permiten caminos relativos).
+	EXT=$(ogGetImageType "$1" "$2")
+        SOURCE=$(ogGetPath "$1" "$2.$EXT")
+        ARG=3
+        ;;
+esac
+
+# Error si no se reciben los argumentos ARG necesarios según la opcion.
+[ $# -eq "$ARG" ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+
+# Error si no existe la imagen
+[ $SOURCE ] || ogRaiseError $OG_ERR_NOTFOUND || return $?
+
+[ -r $SOURCE.torrent ] && mv "$SOURCE.torrent" "$SOURCE.torrent.ant" && echo "Esperamos que se refresque el servidor" && sleep 20
+
+IPTORRENT="${!#}"
+# Si ponemos el path completo cuando creamos el fichero torrent da error
+cd `dirname $SOURCE`
+echo ctorrent -t `basename $SOURCE` -u http://$IPTORRENT:6969/announce -s $SOURCE.torrent
+ctorrent -t `basename $SOURCE` -u http://$IPTORRENT:6969/announce -s $SOURCE.torrent
+
+}
+
+
+#/**
+#         ogUpdateCacheIsNecesary  [ str_repo ] Relative_path_file_OGIMG_with_/
+#@brief   Comprueba que el fichero que se desea almacenar en la cache del cliente, no esta. 
+#@param   1 str_REPO
+#@param   2 str_Relative_path_file_OGIMG_with_/ 
+#@param   3 md5 to check: use full to check download image torrent 
+#@return    0 (true) cache sin imagen, SI es necesario actualizar el fichero.
+#@return    1 (false) imagen en la cache, NO es necesario actualizar el fichero
+#@return   >1 (false) error de sintaxis (TODO)
+#@note
+#@todo:      Proceso en el caso de que el fichero tenga el mismo nombre, pero su contenido sea distinto.
+#@todo:      Se dejan mensajes mientras se confirma su funcionamiento.
+#@version 0.1 - Integracion para OpenGNSys.
+#@author        Antonio J. Doblas Viso. Universidad de Malaga
+#@date
+#@version 1.6 - gestiona ficheros hash full.sum (TORRENT) y .sum (MULTICAST)
+#@author        Antonio J. Doblas Viso. Universidad de Malaga
+#@date
+#*/ ##
+function ogUpdateCacheIsNecesary ()
+{
+#echo "admite full check con 3param TORRENT"
+# Variables locales.
+local ERROR SOURCE CACHE FILESOURCE MD5SOURCE FILETARGET MD5TARGET
+ERROR=0
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME str_repo  relative_path_image [protocol|FULL]" \
+           "$FUNCNAME REPO /PS1_PH1.img UNICAST" \
+           "$FUNCNAME REPO /ogclient.sqfs FULL"
+	   
+    return
+fi
+
+#Control de la cache
+ogFindCache &>/dev/null || return $(ogRaiseError $OG_ERR_NOTCACHE; echo $?)
+
+#Control de parametros:  ahora admite tres.
+[ $# -ge 2 ] || return $(ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG str_repo relative_path_image [protocol|FULL]"; echo $?)
+
+ogCheckStringInGroup "$1" "REPO repo" || return $(ogRaiseError $OG_ERR_NOTFOUND " $1 $2"; echo $?)
+FILESOURCE=`ogGetPath $1 $2`
+[ -n "$FILESOURCE" ] || return $(ogRaiseError $OG_ERR_NOTFOUND " $1 $2"; echo $?)
+
+#echo "paso 1. si no existe la imagen, confirmar que es necesario actualizar la cache."
+FILETARGET=`ogGetPath CACHE $2`
+if [ -z "$FILETARGET" ]
+then
+    # borramos el fichero bf del torrent, en el caso de que se hubiese quedado de algun proceso fallido
+    [ -n "$(ogGetPath CACHE "/$2.torrent.bf")" ] && ogDeleteFile CACHE "/$2.torrent.bf" &> /dev/null
+    [ -n "$(ogGetPath CACHE "/$2.sum")" ] && ogDeleteFile CACHE "/$2.sum" &> /dev/null
+    [ -n "$(ogGetPath CACHE "/$2.full.sum")" ] && ogDeleteFile CACHE "/$2.full.sum" &> /dev/null
+    echo "TRUE(0), es necesario actualizar. Paso 1, la cache no contiene esa imagen "
+    return 0 
+fi
+
+#echo "Paso 2. Comprobamos que la imagen no estuviese en un proceso previo torrent"
+if [ -n "$(ogGetPath "$FILETARGET.torrent.bf")" ]; then
+    #TODO: comprobar los md5 del fichero .torrent para asegurarnos que la imagen a descarga es la misma.
+    echo "TRUE(0), es necesario actualizar. Paso 2, la imagen esta en un estado de descarga torrent interrumpido"
+    return 0
+fi
+
+## En este punto la imagen en el repo y en la cache se llaman igual, 
+#echo "paso 4. Obtener los md5 del fichero imagen en la cacha segun PROTOCOLO  $3"
+case "${3^^}" in 
+	FULL|TORRENT)
+		#Buscamos MD5 en el REPO SOURCE
+		if [ -f $FILESOURCE.full.sum ]
+		then
+        		MD5SOURCE=$(cat $FILESOURCE.full.sum)
+		else
+        		MD5SOURCE=$(ogCalculateFullChecksum $FILESOURCE)
+		fi
+		# Generamos el MD5 (full) en la CACHE
+		[ ! -f $FILETARGET.full.sum ] && ogCalculateFullChecksum $FILETARGET > $FILETARGET.full.sum
+		MD5TARGET=$(cat $FILETARGET.full.sum)
+		# Generamos el MD5 (little) en la CACHE para posteriores usos del protocolo MULTICAST
+		[ ! -f $FILETARGET.sum ] &&  ogCalculateChecksum $FILETARGET > $FILETARGET.sum
+	;;
+	*)
+		#Buscamos MD5 en el REPO SOURCE
+		if [ -f $FILESOURCE.sum ]
+		then
+        		MD5SOURCE=$(cat $FILESOURCE.sum)
+		else
+        		MD5SOURCE=$(ogCalculateChecksum $FILESOURCE)
+		fi
+		# Generamos el MD5 (little) en la CACHE
+		[ ! -f $FILETARGET.sum ] && ogCalculateChecksum $FILETARGET > $FILETARGET.sum
+		MD5TARGET=$(cat $FILETARGET.sum)
+        #Generamos o copiamos MD5 (full) en la CACHE para posteriores usos con Torrent
+        # Si no existe el full.sum y si existe el .sum es porque el upateCACHE multicast o unicast ha sido correcto.
+        if [ ! -f $FILETARGET.full.sum -a $FILETARGET.sum ]
+        then
+            if [ -f $FILESOURCE.full.sum ]
+            then
+                #Existe el .full.sum en REPO realizamos COPIA
+                cp $FILESOURCE.full.sum $FILETARGET.full.sum
+            else
+                #No existe .full.sum no en REPO LO GENERAMOS en la cache: situacion dificil que ocurra
+                ogCalculateFullChecksum $FILETARGET > $FILETARGET.full.sum
+            fi
+        fi		
+		
+esac
+
+#echo "Paso 5. comparar los md5"
+if [ "$MD5SOURCE" == "$MD5TARGET" ]
+then	
+	echo "FALSE (1), No es neceario actualizar. Paso5.A la imagen esta en cache"
+    return 1
+else
+    echo "imagen en cache distinta,  borramos la imagen anterior"
+    rm -f $FILETARGET $FILETARGET.sum $FILETARGET.torrent $FILETARGET.full.sum
+    echo "TRUE (0), Si es necesario actualizar."
+    return 0
+fi
+}
+

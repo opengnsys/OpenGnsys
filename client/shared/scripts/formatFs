@@ -1,0 +1,19 @@
+#!/bin/bash
+# Scirpt de ejemplo para formatear un sistema de archivos.
+# Nota: se usa como base para el programa de formateo de OpenGnsys Admin).
+
+TIME1=$SECONDS
+PROG="$(basename $0)"
+if [ $# -ne 2 ]; then
+    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG ndisco nparticion"
+    exit $?
+fi
+
+# Desmontar y formatear el sistema de archivos.
+echo "[5] Desmontando sistema de archivos"
+ogUnmountFs "$@" || exit $?
+echo "[20] Formateando sistema de archivos"
+ogFormatFs "$@"
+
+TIME=$[SECONDS-TIME1]
+echo "[100] Duración de la operación $[TIME/60]m $[TIME%60]s"

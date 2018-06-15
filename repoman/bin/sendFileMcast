@@ -1,0 +1,61 @@
+#!/bin/bash
+#@brief   Envía un fichero por multicast   ORIGEN(fichero) DESTINO(sessionmulticast)
+#@param   path_file      Camino completo del fichero a enviar
+#@param   str_session    Datos de sesión (Puerto:Duplex:IP:Mpbs:Nclientes:Timeout)
+
+
+PROG=$(basename $0)
+OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
+OGIMG=$OPENGNSYS/images
+OGBIN=$OPENGNSYS/bin
+PATH=$PATH:$OGBIN
+ 
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    echo "Formato: $PROG fichero|nombreImagen datosMulticast"
+    echo "Ejemplo: $PROG /opt/opengnsys/images/imagen1.pgz 9000:full-duplex:239.194.17.2:70M:20:120"
+    echo "Ejemplo: $PROG imagen1 9000:full:239.194.17.2:70M:20:120"
+    exit 0
+fi
+# Error si no se reciben 2 parámetros.
+if [ $# -ne 2 ]; then
+    echo "$PROG Error: Formato: $PROG fichero|nombreImagen datosMulticast" 
+    exit 1
+fi
+
+# Fichero a enviar (camino completo o relativo al directorio del repositorio).
+FICH="$1"
+if [ "${FICH:0:15}" != "$OPENGNSYS" ]; then
+    FICHIMG="$OGIMG/$FICH"
+else
+    FICHIMG="$FICH"
+fi
+if [ ! -f "$FICHIMG" ]; then
+    echo "$PROG Error: Fichero \"$FICHIMG\" no accesible" 
+    exit 2
+fi
+
+# Parámetros de sesión separado por ":".
+PARAMS=$(echo $2 | \
+	awk -F: '$1~/^[0-9]*$/ {print $1}
+		 tolower($2)~/^(half)(-duplex)?$/ {print "half-duplex"}
+		 tolower($2)~/^(full)(-duplex)?$/ {print "full-duplex"}
+		 $3~/^[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*$/ {print $3}
+		 $4~/^[0-9]*[mM]/ {print toupper($4)}
+		 $5~/^[0-9]*/ {print $5}
+		 $6~/^[0-9]*/ {print $6}
+		')
+read -e PORTBASE METHOD ADDRESS BITRATE NCLIENTS MAXTIME <<< $PARAMS
+if [ -z "$MAXTIME" ]; then
+    echo "$PROG Error: Datos de sesión incorrectos: \"$2\"" 
+    exit 3
+fi
+
+# Valores estandar no configurables.
+CERROR="8x8/128"
+
+# Envío de fichero por Multicast.
+# Se desabilita el uso de mbuffer: eesta versión del upd-sender no la admite.
+#which mbuffer &> /dev/null && MBUFFER="--pipe 'mbuffer -m 20M'" 
+$OGBIN/udp-sender $MBUFFER --nokbd --retries-until-drop 65 --portbase $PORTBASE --$METHOD --mcast-data-address $ADDRESS --fec $CERROR --max-bitrate $BITRATE --ttl 16 --min-clients $NCLIENTS --max-wait $MAXTIME --file "$FICHIMG" 
+

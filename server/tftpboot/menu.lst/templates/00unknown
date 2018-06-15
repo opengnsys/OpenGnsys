@@ -1,0 +1,6 @@
+##NO-TOCAR-ESTA-LINEA Sin-designar
+timeout 1
+title  MBR
+chainloader (hd0)+1
+rootnoverify (hd0) 
+boot

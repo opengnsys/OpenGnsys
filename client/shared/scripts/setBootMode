@@ -1,0 +1,47 @@
+#!/bin/bash
+# #/**
+#        setBootMode
+#@brief   Script to configure the  PXE mode to client
+#@param 1 template 
+#@date   2012-02-2-9
+#@version  1.0.1 - Recoge como parametro el nombre interno de la plantilla en vez del nombre de fichero para que funcione correctamente al llamar a setclientmode y anade un nuevo parametro de modo de trabajo (0 o 1) que indica que el cambio del fichero PXE del servidor sera temporal o permanente
+#@author  Juan Carlos Garcia - Univ. Zaragoza
+#@date   2015-11-17
+#*/ ##
+
+#REPOIP="$(ogGetRepoIp)" 
+
+# Asignamos la IP del servidor de administracion que es el destino del script 
+SERVERIP="$(ogGetServerIp)"
+PORT=2011
+TEMPLATE=$(grep -l "^#.* $1 *$" /opt/oglive/tftpboot/menu.lst/templates/*)
+PCNAME="$(hostname)"
+
+PROG="$(basename $0)"
+if [ "$*" == "help" ]; then
+    ogHelp "$PROG" "$PROG template [ 0 | 1 ] (0 - Temporary 1, - Permanent) " \
+           "$PROG ogLive 1" \
+           "$PROG 1hd-1partition 0"
+    exit
+fi
+
+
+# Control básico de errores.
+if [ $# -ne 2 ]; then
+	ogRaiseError $OG_ERR_FORMAT "$MSG_ERR_FORMAT: $PROG TEMPLATE_NAME [ 0 | 1 ] (0 - Temporary, 1 - Permanent)"
+        exit $?
+fi
+
+if [ -z  "$TEMPLATE" ]; then
+	ogRaiseError $OG_ERR_NOTFOUND "$MSG_ERR_NOTFOUND: $1"
+        exit $?
+fi
+
+if [ $2 != "0" ] && [ $2 != "1" ]; then
+	ogRaiseError $OG_ERR_NOTFOUND "$MSG_ERR_FORMAT: modo $2 no existe"
+        exit $?
+fi
+# Crea un pipe con el servidor de administracion que llama a setclientmode pasandole los parametros de nombre de plantilla, nombre PC y modo de trabajo (0 o 1)
+hose $SERVERIP $PORT --out sh -c "echo -ne SET_CLIENTMODE $1 $PCNAME $2"
+
+

@@ -1,0 +1,86 @@
+#!/bin/bash
+#/**
+#@file    security-config
+#@brief   OpenGnsys Server security configuration.
+#@note    Security configuration tipsx for UFW, FirewallD and SELinux.
+#@version 1.1.0 - Initial version.
+#@author  Ramón M. Gómez, ETSII Univ. Sevilla
+#@date    2016-04-18
+#*/ ##
+
+
+# Variables.
+PROG=$(basename "$0")
+OPENGNSYS=/opt/opengnsys
+# Errors control.
+if [ "$USER" != "root" ]; then
+	echo "$PROG: Need to be root." >&2
+	exit 1
+fi
+
+# UFW configuration.
+if which ufw 2>/dev/null; then
+	# Adding active services.
+	ufw allow "Apache Secure"
+	ufw allow OpenSSH
+	ufw allow Samba
+	ufw allow mysql
+	ufw allow rsync
+	ufw allow tftp
+	ufw allow 67,68/udp		# DHCP
+	ufw allow 2002,2008/tcp		# OpenGnsys services
+	ufw allow 9000:9051/udp		# Multicast
+	ufw allow 6881:6999/udp		# BitTorrent
+	# Applying configuration.
+	ufw enable
+# FirewallD configuration.
+elif which firewall-cmd 2>/dev/null; then
+	# Defining OpenGnsys services.
+	python -c "
+import firewall.core.io.service as ios
+s=ios.Service()
+s.short = 'OpenGnsys Server'
+s.name = 'ogAdmServer'
+s.ports = [('2008', 'tcp')]
+ios.service_writer(s, '/etc/firewalld/services')
+s.short = 'OpenGnsys Repository'
+s.name = 'ogAdmRepo'
+s.ports = [('2002', 'tcp')]
+ios.service_writer(s, '/etc/firewalld/services')"
+	# Adding active services.
+	firewall-cmd --permanent --add-service=dhcp
+	firewall-cmd --permanent --add-service=https
+	firewall-cmd --permanent --add-service=mysql --zone internal
+	firewall-cmd --permanent --add-service=ogAdmRepo
+	firewall-cmd --permanent --add-service=ogAdmServer
+	# Ubuntu 14.04 does not define "rsyncd" service.
+	firewall-cmd --permanent --add-service=rsyncd || \
+		firewall-cmd --permanent --add-port=873/tcp
+	firewall-cmd --permanent --add-service=samba
+	firewall-cmd --permanent --add-service=ssh
+	firewall-cmd --permanent --add-service=tftp
+	# Adding Multicast ports.
+	firewall-cmd --permanent --add-port=9000-9051/udp
+	# Adding BitTorent ports.
+	firewall-cmd --permanent --add-port=6881-6999/udp
+	# Applying configuration.
+	firewall-cmd --reload
+else
+	echo "$PROG: Warning: Firewall won't be configured (neither ufw or firewalld are installed)."
+fi
+
+# SELinux configuration.
+if which setsebool 2>/dev/null; then
+	# Configuring Apache.
+	setsebool -P httpd_can_connect_ldap on
+	semanage fcontext -at httpd_sys_content_t "$OPENGNSYS/www(/.*)?"
+	# Configuring Samba. 
+	setsebool -P samba_export_all_ro=1 samba_export_all_rw=1
+	semanage fcontext -at samba_share_t "$OPENGNSYS/client(/.*)?"
+	semanage fcontext -at samba_share_t "$OPENGNSYS/images(/.*)?"
+	# Applying configuration.
+	restorecon -R $OPENGNSYS
+else
+	echo "$PROG: Warning: SELinux won't be configured (policycoreutils is not installed)."
+fi
+

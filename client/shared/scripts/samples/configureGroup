@@ -1,0 +1,65 @@
+#!/bin/bash
+#/**
+#@file    configureGroup
+#@brief   Script de ejemplo de post-configuracion del sistema operativo especifica de cada grupo de ordenadores.
+#@brief   El directorio del grupo en el repositorio se situa en /opt/opengnsys/groups/Nombre_Grupo
+#@brief	  Se ponen archivos o marcas dentro del directorio del grupo (si queremos que afecte a todas las imagenes)
+#@brief	  o del subdirectorio de la imagen dentro del grupo. Los archivos se copian en el sitio correcto del sistema 
+#@brief   y las marcas se comprueba que existen para inicar una accion (ej: cambiar registro)
+#@param   str_repo       repositorio de imágenes (remoto o caché local)
+#@param   path_image     camino de la imagen (sin extensión)
+#@param   int_ndisk      nº de orden del disco
+#@param   int_npartition nº de orden de la particion
+#@return
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_PARTITION Tipo de partición desconocido o no se puede montar.
+#@warning License: GNU GPLv3+
+#*/
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+	ogHelp "$0" "$0 path_dir str_image int_ndisk int_npart" \
+        "$0 REPO /aula1/winxp 1 1"
+    	exit
+fi
+
+# Error si no se reciben 4 parámetros.
+[ $# -eq 4 ] || ogRaiseError $OG_ERR_FORMAT || exit $?
+
+# Procesar parámetros.
+PART=$(ogMount $3 $4) || ogRaiseError $OG_ERR_PARTITION "$3 $4" || exit $?
+IMGNAME=$(basename $2)
+GROUPDIR=$(ogGetGroupDir)
+IMGDIR=$GROUPDIR/$IMGNAME
+
+# Comprobamos que exista GROUPDIR. Si no existe no es error, nada que configurar
+[ ! -x "$GROUPDIR" ] && exit 0
+
+
+TYPE=$(ogGetOsVersion $3 $4)
+
+case "$TYPE" in
+   Linux*)   echo "PostConfiguracion de Linux para el grupo $group"
+ 	# Si existen estos ficheros en el directorio del grupo o de la imagen se copian a la particion
+   	[ -e $IMGDIR/menu.lst ] && echo "cp -f $IMGDIR/menu.lst $PART/boot/grub/menu.lst" && cp -f $IMGDIR/menu.lst $PART/boot/grub/menu.lst
+   	[ -e $IMGDIR/grub.cfg ] && echo "cp $IMGDIR/grub.cfg $PART/boot/grub/grub.cfg" && cp -f $IMGDIR/grub.cfg $PART/boot/grub/grub.cfg
+   	[ -e $IMGDIR/hosts ] && echo "cp -f $IMGDIR/hosts $PART/etc/hosts" && cp -f  $IMGDIR/hosts $PART/etc/hosts
+   	[ -e $IMGDIR/fstab ] && echo "cp -f $IMGDIR/fstab $PART/etc/fstab" && cp -f $IMGDIR/fstab $PART/etc/fstab
+   	[ -e $IMGDIR/xorg.conf ] && echo "cp -f $IMGDIR/xorg.conf $PART/etc/X11/xorg.conf" && cp -f $IMGDIR/xorg.conf $PART/etc/X11/xorg.conf
+   	[ -e $IMGDIR/rc.local ] && echo "cp -f $IMGDIR/rc.local $PART/etc/rc.local" && cp -f $IMGDIR/rc.local $PART/etc/rc.local
+   	[ -e $IMGDIR/interfaces ] && echo "cp -f $IMGDIR/interfaces $PART/etc/network/interfaces" && cp -f $IMGDIR/interfaces $PART/etc/network/interfaces
+   	[ -e $IMGDIR/passwd ] && echo "cp -f $IMGDIR/passwd $PART/etc/passwd" && cp -f $IMGDIR/passwd $PART/etc/passwd
+	;;
+
+   *Windows\ XP) echo "PostConfiguracion de XP para el grupo $group"
+   	# Si existen estos ficheros en el directorio del grupo o de la imagen se copian a la particion
+   	[ -e $IMGDIR/SAM ] && echo "cp -f $IMGDIR/SAM $PART/Windows/System32/config/SAM" && cp -f $IMGDIR/SAM $PART/Windows/System32/config/SAM
+	;;
+   *Windows\ 7*)  echo "Postconfiguracion de W7 para el grupo $group"
+   	# Si existen estos ficheros en el directorio del grupo o de la imagen se copian a la particion
+   	[ -e $IMGDIR/SAM ] && echo "cp -f $IMGDIR/SAM $PART/Windows/System32/config/SAM" && cp -f $IMGDIR/SAM $PART/Windows/System32/config/SAM
+	;;
+    *)            exit 0 
+	;;
+   esac
+

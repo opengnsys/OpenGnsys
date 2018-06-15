@@ -1,0 +1,65 @@
+#!/bin/bash
+
+#/**
+#         updateBootCache
+#@brief   acelerador arranque pxe. incorpora a la cache el initrd y el kernel.
+#@param 1 
+#@param ejemplo:  
+#@return  
+#@exception OG_ERR_NOTCACHE   # 15 si cache no existe 15
+#@exception OG_ERR_NOTFOUND=2        # Fichero o dispositivo no encontrado.
+#@note   
+#@todo: 
+#@version 1.0.1 - requiere el gestor de arranque grub2dos
+#@author  Antonio J. Doblas Viso. Universidad de Malaga.
+#@date    2010/07/27
+#@version 1.1.0 - Permite varios ogLive dentro de subdirectorios
+#@author Irina Gómez. ETSII Universidad de Sevilla
+#@date    2017/04/27
+#@version 1.1.0 - Se permite varios ogLives en la CACHE
+#@author Antonio J. Doblas Viso. Universidad de Malaga
+#@date    2017/05/31
+#@version 1.1.0 - Limpieza de codigo, control errores
+#@author  Antonio J. Doblas Viso. Universidad de Malaga
+#@date    2018-01-21
+#*/ ##
+
+OGLIVEDIR=${oglivedir:-"ogLive"}
+OGBTFTP="/opt/oglive/tftpboot/$OGLIVEDIR"
+OGBCACHE="$OGCAC/boot/$OGLIVEDIR"
+
+#control de errores
+[ -d  "$OGBTFTP" ] || exit $(ogRaiseError $OG_ERR_NOTFOUND "$OGBTFTP"; echo $?)
+ogMountCache || exit $(ogRaiseError $OG_ERR_NOTCACHE "CACHE "; echo $?)
+
+[ -d $OGBCACHE ] || mkdir -p $OGBCACHE 
+	
+	# comparamos los del server
+	SERVERVMLINUZ=`cat ${OGBTFTP}/ogvmlinuz.sum 2>/dev/null`
+	SERVERINITRD=`cat  ${OGBTFTP}/oginitrd.img.sum 2>/dev/null`
+	
+	#comparamos los de la cache
+	CACHEVMLINUZ=`cat ${OGBCACHE}/ogvmlinuz.sum 2>/dev/null`
+	CACHEINITRD=`cat ${OGBCACHE}/oginitrd.img.sum 2>/dev/null`
+	
+	echo "MD5 on SERVER: $SERVERVMLINUZ $SERVERINITRD"
+	echo "MD5  on CACHE: $CACHEVMLINUZ $CACHEINITRD"
+	
+
+	if [ "$CACHEVMLINUZ" != "$SERVERVMLINUZ" ]
+	then		
+		echo "ogvmlinuz updating"
+		cp "${OGBTFTP}/ogvmlinuz" "${OGBCACHE}/ogvmlinuz"
+		cp "${OGBTFTP}/ogvmlinuz.sum" "${OGBCACHE}/ogvmlinuz.sum"
+		DOREBOOT=true
+	fi
+	if [ "$CACHEINITRD" != "$SERVERINITRD" ]
+	then
+		echo "oginitrd updating"
+		cp "${OGBTFTP}/oginitrd.img" "${OGBCACHE}/oginitrd.img"
+		cp "${OGBTFTP}/oginitrd.img.sum" "${OGBCACHE}/oginitrd.img.sum"
+		DOREBOOT=true
+	fi
+
+echo $DOREBOOT
+#	[ "$DOREBOOT" == "true" ] && busybox reboot -f

@@ -1,0 +1,11 @@
+install build-essential 
+#install libattr*		# Satura el tamaño del archivo en Ubuntu 15.04
+install libattr1
+install libattr1-dev
+install uuid-dev
+install attr 
+install make 
+install m4 
+install gettext 
+install libmhash-dev 
+

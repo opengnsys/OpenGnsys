@@ -1,0 +1,91 @@
+#!/bin/bash
+
+#___________________________________________________
+#
+# PARAMETROS RECIBIDOS DESDE EL CLIENTE:
+# $1 Número de disco
+# $2 Número de particion
+# $3 Nombre canónico de la imagen (sin extensión)
+# $4 Dirección del repositorio (REPO, por defecto)
+#___________________________________________________
+
+
+#$OG_ERR_NOTEXEC    Si no es llamada por OG client
+#$OG_ERR_LOCKED=4    Si la particion está bloqueada.
+
+
+#Codigos de error del scripts createImage
+#@exception OG_ERR_FORMAT     # 1 formato incorrecto.
+#@exception OG_ERR_PARTITION  # 3 Error en partición de disco o en su sistema de archivos
+#@exception OG_ERR_IMAGE      # 5 Error en funcion ogCreateImage o ogRestoreImage.
+#@exception OG_ERR_NOTWRITE   # 14 error de escritura
+#@exception OG_ERR_NOTCACHE   # 15 si cache no existe 15
+#@exception OG_ERR_CACHESIZE  # 16 si espacio de la cache local o remota no tiene espacio 16
+#@exception OG_ERR_REDUCEFS   # 17 error al reducir sistema de archivos.
+#@exception OG_ERR_EXTENDFS   # 18 Errror al expandir el sistema de archivos.
+
+
+#Códigos de error de la funcion ogCreateImage
+
+
+
+TIME1=$SECONDS
+
+#Load engine configurator from engine.cfg file.
+#Carga el configurador del engine desde el fichero engine.cfg
+[ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
+
+# Clear temporary file used as log track by httpdlog
+# Limpia los ficheros temporales usados como log de seguimiento para httpdlog
+echo " " > $OGLOGSESSION; echo " " > $OGLOGCOMMAND; echo " " > ${OGLOGCOMMAND}.tmp
+
+# Registro de inicio de ejecución
+ogEcho log session "$MSG_INTERFACE_START $0 $*"
+
+# Solo ejecutable por OpenGnsys Client.
+PATH=$PATH:$(dirname $0)
+PROG=$(basename $0)
+CALLER=$(ogGetCaller)
+if [ "$CALLER" != "ogAdmClient" ]; then
+	ogRaiseError $OG_ERR_NOTEXEC "$CALLER -> $PROG"
+	exit $?
+fi
+
+# Valor por defecto para el repositorio.
+REPO=${4:-"REPO"}
+[ "$REPO" == "$(ogGetIpAddress)" ] && REPO="CACHE"
+# Si es una ip y es distinta a la del recurso samba cambiamos de REPO.
+ogCheckIpAddress $REPO
+if [ $? == 0 -o $REPO == "REPO" ] ; then
+	# Unidad organizativa
+	[ "$ogunit" != "" ] && OGUNIT="$ogunit"
+        # Si falla el cambio -> salimos con error repositorio no valido
+        ogChangeRepo $REPO $OGUNIT || exit $(ogRaiseError $OG_ERR_NOTFOUND '$REPO'; echo $?)
+        REPO="REPO"
+fi
+
+# Si el destino es REPO y el cliente no está en modo "admin"; activar repositorio para escritura,
+if [ "$REPO" == "REPO" -a "$boot" != "admin"  ] 
+then 
+	CambiarAcceso admin &>> $OGLOGFILE
+	RETVAL=$?
+	[ $RETVAL -gt 0 ] && exit $RETVAL 	
+fi
+
+ogEcho	createImage "$1" "$2" "$4" /"$3" 
+# Si existe, ejecuta script personalizado "createImageCustom"; si no, llama al genérico "createImage".
+if which createImageCustom &>/dev/null; then
+	createImageCustom "$1" "$2" "$4" /"$3" &>> $OGLOGCOMMAND
+else
+	createImage "$1" "$2" "$4" /"$3" &>> $OGLOGCOMMAND
+fi
+RETVAL=$?
+
+# Cambiar acceso a modo usuario, si es necesario.
+[ "$REPO" == "REPO" -a "$boot" != "admin" ] && CambiarAcceso user
+
+# Registro de fin de ejecución
+ogEcho log session "$MSG_INTERFACE_END $RETVAL"
+
+exit $RETVAL
+

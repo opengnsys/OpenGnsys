@@ -1,0 +1,22 @@
+#!/bin/bash
+BTTRACK=/usr/bin/bttrack.bittorrent
+BTSEEDER=/usr/bin/btlaunchmany.bittornado
+BTTRACKPORT=6969
+BTTRACKDFILE=/tmp/dstate
+BTTRACKLOG=/opt/opengnsys/log/bttrack.log
+BTINTERVAL=10
+BTTORRENTSDIR=/opt/opengnsys/images
+# Desactivar descarga de torrents desde clientes no autorizados.
+BTALLOW_GET=0
+# parametros basados en EAC 05-04-2009 antonio doblas viso.
+BTTRACK_OPTIONS=" --save_dfile_interval $BTINTERVAL --timeout_downloaders_interval $BTINTERVAL --port $BTTRACKPORT --dfile $BTTRACKDFILE --reannounce_interval $BTINTERVAL --logfile $BTTRACKLOG --allowed_dir $BTTORRENTSDIR --allow_get $BTALLOW_GET "
+BTTRACKPID="/var/run/bttrack.pid"
+BTSEEDERPID="/var/run/btseeder.pid"
+
+###################  #######################################
+
+pkill bttrack
+rm $BTTRACKDFILE
+sleep 2
+bttrack $BTTRACK_OPTIONS &>> $BTTRACKLOG &
+ps aux | grep bttrack | grep -v grep | awk -F: '{print $3}'

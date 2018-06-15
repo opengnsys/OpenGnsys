@@ -1,0 +1,15 @@
+#!/bin/bash
+#_______________________________________________________________________________________________________________________________
+#
+# PARAMETROS RECIBIDOS DESDE EL CLIENTE:
+# $1 disco
+# $2 par=Número de particion
+# $3 Nombre canónico de la imagen
+# $4 Dirección IP del repositorio
+# $5 Protocolo  UNICAST  MULTICAST  TORRENT
+# $6 Opciones del protocolo
+#_______________________________________________________________________________________________________________________________
+
+# Llamar al script de despliegue "deployImage".
+deployImage "$4" "$3" "$1" "$2" "$5" "$6" "$7" "$8" || exit $?
+

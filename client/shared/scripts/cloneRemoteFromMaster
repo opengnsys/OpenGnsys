@@ -1,0 +1,313 @@
+#!/bin/bash
+
+#/**
+#         cloneremoteFromMaster
+#@brief   Restaura una particion o imagen sobre las particiones de equipos cliente remotos
+#@param 1 str_origen admite dirección IP del equipo Master.
+#@param 2 str_origen  admite int_disk    str_REPO|str_CACHE
+#@param 3 str_origen  admite int partorigen   stre_imagen
+#@param 4 str_sesion multicast|unicast
+#@param $5 int_disco_destino
+#@param $6 init_particion_destino
+#@param $7 str_tool_clone
+#@param $8 str_tool_compresor
+#@param ejemplo: cloneRemoteFromMaster 172.17.36.11 1 1 9000:full-duplex:239.194.17.36:70M:50:100 1 1 partclone lzop
+#@param ejemplo: cloneRemoteFromMaster 172.17.36.11 REPO /imagen1 9000:full-duplex:239.194.17.36:70M:50:100 1 1 partclone lzop 
+#@param ejemplo: cloneRemoteFromMaster 172.17.36.11 CACHE /imagen1 9000:full-duplex:239.194.17.36:70M:50:100 1 1 partclone lzop 
+#@return  
+#@exception OG_ERR_FORMAT     formato incorrecto.
+#@exception $OG_ERR_IMGSIZEPARTITION=30   #Imagen demasiado pequeña para ser clonada
+#@exception OG_ERR_REDUCEFS=17     #error al reducir sistema de archivos.
+#@exception OG_ERR_EXTENDFS=18     #errror al expandir el sistema de archivos.
+#@exception OG_ERR_UCASTSYNTAXT=50  # Error en la generación de sintaxis de transferenica unicast
+#@exception OG_ERR_UCASTSENDPARTITION=51  # Error en envio UNICAST de una particion
+#@exception OG_ERR_UCASTSENDFILE=52  # Error en envio UNICAST de un fichero
+#@exception OG_ERR_UCASTRECEIVERPARTITION=53  #Error en la recepcion UNICAST de una particion
+#@exception OG_ERR_UCASTRECEIVERFILE=54  #Error en la recepcion UNICAST de un fichero
+#@exception OG_ERR_MCASTSYNTAXT=55 # Error en la generacion de sintaxis de transferenica Multicast.
+#@exception OG_ERR_MCASTSENDFILE=56  # Error en envio MULTICAST de un fichero
+#@exception OG_ERR_MCASTRECEIVERFILE=57  #Error en la recepcion MULTICAST de un fichero
+#@exception OG_ERR_MCASTSENDPARTITION=58  # Error en envio MULTICAST de una particion
+#@exception OG_ERR_MCASTRECEIVERPARTITION=59  # Error en la recepcion MULTICAST de una particion
+#@exception OG_ERR_PROTOCOLJOINMASTER=60 # Error en la conexion de una sesion UNICAST|MULTICAST con el MASTER
+#@note   
+#@todo: 
+#@version 0.9.1 - integración con OpenGnsys
+#@author  Antonio J. Doblas Viso. Universidad de Malaga.
+#@date   2009/03/17
+#@version 0.9.2 - adaptacion a OpenGnsys
+#@author  Antonio J. Doblas Viso. Universidad de Malaga.
+#@date    2010/07/27
+#@version 0.1.0 - gestion unicast
+#@author  Antonio J. Doblas Viso. Universidad de Malaga.
+#@date    2011/01/26
+#@version 1.0 - control de errores para el ogAdmServer
+#@author  Antonio J. Doblas Viso. Universidad de Malaga.
+#@date    2011/04/24
+#@version 1.0 - Uso de parted para controlar tamaño particion destino. Requiere Formateo FS previo -parted usa FS para el tamanyo".
+#@author  Antonio J. Doblas Viso. Universidad de Malaga.
+#@date    2011/04/24
+#@version 1.0.1 - Se elimina la operación de reducir la particion.
+#@author  Antonio J. Doblas Viso. Universidad de Malaga.
+#@date    2011/05/16
+#@version 1.0.3 - se integra con httpd-log.
+#@version 1.0.3 - Habilita el uso de la variable OGWINREDUCE=TRUE|TRUE para reducir el sistema de archivos a enviar
+#@author  Antonio J. Doblas Viso. Universidad de Malaga.
+#@date    2011/12/22
+#@version 1.0.6 - Uso de la funcion ogExecuteAndLog
+#@author  Antonio J. Doblas Viso. Universidad de Malaga.
+#@date    2012/02/12 
+#*/ ##
+
+#test 1. cliente sin particiones.    Detectado  TODO: crear estrucutras de particiones
+#test 2. cliente con particion mas pequeña. Detectado.
+#test 3. cleinte con particion destinio no formateado.  Detectado.
+#test 4. cliente con particion destino ocupado por el usuario pwd .  FALLO.
+#test 5. master sin origen particion.
+#test 6. master sin origen fichero.
+
+TIME1=$SECONDS
+PROG="$(basename $0)"
+
+trap "pkill faucet; exit 1" 0 1 2 3 6 9 14 15
+
+#AYUDA
+if [ $# -lt 1 -o "$1" == "help" ]; then
+        echo "cloneRemoteFromMaster ipmaster disk init [MULTICAST|UNICAST] session disk part tool comp"
+        exit 1
+fi
+
+#ERROR
+if [ $# -lt 6 ]; then
+    ogRaiseError session $OG_ERR_FORMAT "$MSG_FORMAT: $PROG ipMaster SOURCE_disco SOURCE_particion [MULTICAST|UNICAST] SESSION TARGET_disk TARGET_partition"
+    exit $?
+fi
+
+#Load engine configurator from engine.cfg file.
+#Carga el configurador del engine desde el fichero engine.cfg
+# Valores por defecto: #IMGPROG="partclone" ; #IMGCOMP="lzop" ; #IMGEXT="img" #IMGREDUCE="TRUE"
+[ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
+
+# Clear temporary file used as log track by httpdlog
+# Limpia los ficheros temporales usados como log de seguimiento para httpdlog
+echo " " > $OGLOGCOMMAND
+
+ogEcho log session "[1] $MSG_SCRIPTS_START $0 $*"
+
+# Procesar parámetros de entrada
+HOSTIP=`ogGetIpAddress`
+if [ -z "$HOSTIP" ] 
+then
+	source /tmp/net-eth* 
+	HOSTIP=`ogGetIpAddress`
+fi
+MASTERIP="$1"
+PROTOCOL="$4"
+case "${PROTOCOL^^}" in 
+ 	MULTICAST)
+		SESSIONMCASTSERVER=$5
+		SESSIONMCASTCLIENT=`echo $5 | awk -F: '{print $1}'`
+	;;
+	UNICAST) 
+		SESSIONUCASTSERVER=$5
+    		SESSIONUCASTCLIENT=`echo $5 | awk -F: '{print $1}'`:$MASTERIP
+	;;
+	*)
+		exit $(ogRaiseError $OG_ERR_FORMAT "Protocolo $PROTOCOL no soportado en esta operacion"; echo $?)
+;;
+esac
+# contenedor destino (disco particion)
+DISKTARGET="$6"
+PARTTARGET="$7"
+#herramienta de compresión.
+TOOLCLONE="$8"
+COMPRESOR="$9"
+
+pkill faucet
+
+# Preparando Instrucción según sea Master o Client
+case $MASTERIP in
+	$HOSTIP)
+		ogEcho log session  "[1] Equipo Master preparando el origen de los datos a enviar"
+		ogGetPath $2 $3.img &>/dev/null; RC=$?; 
+		ogDiskToDev $2 $3 &>/dev/null; RETVAL=$?; 
+
+		if [ "$RC" == "0" ]; then 
+			IMG=$(ogGetPath $2 $3.img); MODEMASTER=SENDFILE
+		elif [ "$RETVAL" == "0" ]; then
+			DISKSOURCE=$2; PARTSOURCE=$3; MODEMASTER=SENDPARTITION
+		else
+			ogRaiseError $OG_ERR_NOTFOUND "$2 $3"; exit $?
+		fi 
+		echo $MODEMASTER
+		# Preparando instrucción del Master segun $MODEMASTER{SENDPARTITION SENDFILE}					
+		case "$MODEMASTER" in
+			SENDPARTITION)
+				ogEcho log session "[5] Master en modo $MODEMASTER: informacion inicial a los clientes-slaves"
+				if ps aux | grep -v grep | grep "faucet 4000" 
+				then
+					ogRaiseError $OG_ERR_NOTFOUND "MASTER: puerto en uso: 118"; exit $?	
+				else
+					faucet 4000 --out echo "WORKING" &	
+				fi				
+				ogEcho log session "[10]: Desmontando DISK:$DISKSOURCE PARTITION:$PARTSOURCE"
+				ogUnmount $2 $3 ||  exit $(ogRaiseError $OG_ERR_LOCKED "no se puede desmontar $2 $3  l124"; echo $?)
+				#Obtener tamaño de la partición.
+				SIZE=$(ogGetPartitionSize $2 $3)  || exit $(ogRaiseError $OG_ERR_REDUCEFS "Error al detectar tamaño partcion $2 $3  l127"; echo $?)
+				
+				if [ "$OGWINREDUCE" == "TRUE" ]
+				then 
+					ogEcho log session "[15]: Calculando la reduccion del sistema de archivos DISK:$DISKSOURCE PARTITION:$PARTSOURCE SIZE:$SIZE"
+					ogReduceFs $2 $3 || exit $(ogRaiseError $OG_ERR_REDUCEFS "Error al reducir el FS $2 $3  l129"; echo $?)
+				fi
+					
+				REDSIZE=$(ogGetFsSize $2 $3) || exit $(ogRaiseError $OG_ERR_REDUCEFS "Error al detectar el nuevo FS $2 $3  l130"; echo $?)	
+				TIMEAUX=$[SECONDS-TIME1]
+				ogEcho log session "[20]: Preparada para enviar el sistema de archivos: Tamaño datos: $REDSIZE  origne: $DISKSOURCE $PARTSOURCE"
+				ogEcho log session "      tiempo de reducción del sistema de archivos: $[TIMEAUX/60]m $[TIMEAUX%60]s"
+				
+				#if [ $REDSIZE -lt $SIZE ]; then
+    			#		echo "[24] Redimensionar partición a $REDSIZE KB."
+    			#		ogSetPartitionSize $2 $3 $REDSIZE
+				#fi
+
+				ogEcho log session "[25] Master en Modo $MODEMASTER: informacion de transferencia a los clientes-slaves $PROTOCOL $TOOLCLONE $COMPRESOR $REDSIZE"
+				pkill faucet
+				if ps aux | grep -v grep | grep "faucet 4000" 
+				then
+					ogRaiseError $OG_ERR_NOTFOUND "MASTER: puerto en uso: 140"; exit $?	
+				else
+					faucet 4000 --out echo "READY $TOOLCLONE $COMPRESOR $REDSIZE" &
+				fi
+				case "${PROTOCOL^^}" in
+					MULTICAST)
+ 						ogEcho log session "[29] Transferencia Multicast: ogMcastSendPartition $DISKSOURCE $PARTSOURCE $SESSIONMCASTSERVER $TOOLCLONE $COMPRESOR "
+						ogExecAndLog session "ogMcastSendPartition" "$DISKSOURCE" "$PARTSOURCE" "$SESSIONMCASTSERVER" "$TOOLCLONE" "$COMPRESOR" || RETVAL=$?
+ 					;;
+ 					UNICAST)
+ 						sleep 60
+ 						ogEcho log session "[29] Transferencia Unicast: ogUcastSendPartition $DISKSOURCE $PARTSOURCE $SESSIONUCASTSERVER $TOOLCLONE $COMPRESOR"
+ 						ogExecAndLog session "ogUcastSendPartition" "$DISKSOURCE" "$PARTSOURCE" "$SESSIONUCASTSERVER" "$TOOLCLONE" "$COMPRESOR" || RETVAL=$?
+ 					;;
+ 				esac
+ 				
+ 				#if [ $REDSIZE -lt $SIZE ]; then
+   				#	echo "[85] Redimensionar partición a $SIZE KB."
+   		 		#	ogSetPartitionSize $2 $3 $SIZE
+   		 			ogEcho log session "[90] Extender sistema de archivos."
+   		 			ogExtendFs $2 $3
+				#fi
+				pkill faucet
+				if [ $RETVAL == 0 ]
+				then 
+					exit 0
+				else
+				    exit $(ogRaiseError $OG_ERR_MCASTSENDPARTITION "Error al enviar la particion  $2 $3 con protocolo $PROTOCOL l167"; echo $?)
+				fi
+
+			;;
+			SENDFILE)				
+				ogEcho log session "[5] Master en modo  $MODEMASTER: informacion inicial a los clientes-slaves"
+				ogEcho log session "[10]: Preparando Imagen: $IMG"
+				TOOLCLONE=$(ogGetImageProgram $2 $3) || exit $(ogRaiseError $OG_ERR_LOCKED "TOOLCLONE no detectado l174"; echo $?)
+				COMPRESOR=$(ogGetImageCompressor $2 $3) || exit $(ogRaiseError $OG_ERR_LOCKED "COMPRESOR NO DETECTADO l175"; echo $?)
+				REDSIZE=$(ogGetImageSize $2 $3) || exit $(ogRaiseError $OG_ERR_LOCKED "REDSIZE NO DETECTADO l176"; echo $?)
+				ogEcho log session "[25] Master en Modo $MODEMASTER"
+				ogEcho log "Informacion de transferencia a los clientes-slaves $PROTOCOL $TOOLCLONE $COMPRESOR $REDSIZE"
+				if ps aux | grep -v grep | grep "faucet 4000" 
+				then
+					ogRaiseError $OG_ERR_NOTFOUND "MASTER: puerto en uso: 140"; exit $?	
+				else
+					faucet 4000 --out echo "READY $TOOLCLONE $COMPRESOR $REDSIZE" &
+				fi
+				case "${PROTOCOL^^}" in
+					MULTICAST)
+						echo "[29] ogMcastSendFile $2 $3.img $SESSIONMCASTSERVER "
+						ogMcastSendFile  $2 $3.img $SESSIONMCASTSERVER	|| RETVAL=$?
+						;;
+ 					UNICAST)
+ 						sleep 60
+ 						echo "[29] ogUcastSendFile $2 $3.img $SESSIONUCASTSERVER"
+ 						ogUcastSendFile $2 $3.img $SESSIONUCASTSERVER || RETVAL=$?
+ 					;;
+ 				esac							
+				pkill faucet	
+				if [ $RETVAL == 0 ]
+				then 
+					exit 0
+				else
+					exit $(ogRaiseError $OG_ERR_MCASTSENDFILE "Error al enviar la image $2 $3.img con protocolo $PROTOCOL l200"; echo $?)
+				fi
+			;;
+		esac
+		# FIN Preparando instrucción del Master segun $MODEMASTER{SENDPARTITION SENDFILE}
+	;;
+	*)	
+		ogEcho log session "[1] Equipo -Client- preparando para recibir datos $PROTOCOL"
+		ogDiskToDev $DISKTARGET $PARTTARGET &>/dev/null || exit $(ogRaiseError $OG_ERR_LOCKED "El cliente no tiene esas particiones $DISKTARGET $PARTTARGET l211"; echo $?) 	
+		# TODO: si el cliente no está en la lista de clientes UNICAST salir.
+		case "${PROTOCOL^^}" in
+			UNICAST)
+ 				echo "$SESSIONUCASTSERVER" | grep $HOSTIP || exit $(ogRaiseError $OG_ERR_PROTOCOLJOINMASTER "Este cliente no pertence a la sesion UNICAST l214"; echo $?)
+			;;
+ 		esac	
+ 		ogEcho log session "[2] Desmontando particion destino"
+		ogUnmount $DISKTARGET $PARTTARGET || exit $(ogRaiseError $OG_ERR_LOCKED "no se puede desmontar la particion destino $2 $3  l218"; echo $?)
+		ogEcho log session  "[25] Buscando informacion extra sobre la clonacion con el master $MASTERIP: "
+		sleep 10
+		TIMEWAITMASTER=120
+		TIMEWAITING=0
+		GETINFO="NONE"
+		while [ "${GETINFO}" != "OK" ]
+		do
+			INFOEXTRA=`hose $MASTERIP 4000 --in cat 2>/dev/null`
+			sleep 10; echo -n "."
+			#echo comienza el timeout $TIMEWAITMASTER para abortar
+			[ -z "$INFOEXTRA" ] && let TIMEWAITMASTER=$TIMEWAITMASTER-10
+			[ "$TIMEWAITMASTER" -gt "0" ] || exit $(ogRaiseError $OG_ERR_PROTOCOLJOINMASTER " l230 "; echo $?)
+			#Si primer parametro desde el server es READY, salimos del bucle
+			GETINFO=$(echo $INFOEXTRA | awk '{print $1}')
+			[ "$GETINFO" == "READY" ] && GETINFO="OK"
+		done		
+		echo $INFOEXTRA
+		TOOLCLONE=$(echo $INFOEXTRA | awk '{print $2}')
+		COMPRESOR=$(echo $INFOEXTRA | awk '{print $3}')
+		SIZEIMAGE=$(echo $INFOEXTRA | awk '{print $4}')
+		ogEcho log "$INFOEXTRA = herramienta= $TOOLCLONE  compresor= $COMPRESOR size= $SIZEIMAGE"
+		ogMount $DISKTARGET $PARTTARGET || ogFormat $DISKTARGET $PARTTARGET
+		#SIZEPARTTARGET=$(parted `ogDiskToDev $DISKTARGET $PARTTARGET` unit kB print | grep Disk | awk -F" " '{print $3}' | tr -d kB);
+		SIZEPARTTARGET=$(ogGetPartitionSize $DISKTARGET $PARTTARGET )
+		ogEcho log session  "[28] comprobando que el tamaño de la imagen $SIZEIMAGE es menor que el de la particion destino $SIZEPARTTARGET"
+		# comprobamos que el tamaño de a imagen es menor que la del cliente.
+		if [ "$SIZEIMAGE" -lt "$SIZEPARTTARGET" ]
+ 		then 				
+			ogEcho log session "[30] Iniciando Cliente $PROTOCOL "
+				case "${PROTOCOL^^}" in
+					MULTICAST)
+						ogEcho log session  "ogMcastReceiverPartition $DISKTARGET $PARTTARGET $SESSIONMCASTCLIENT $TOOLCLONE $COMPRESOR"
+						ogExecAndLog command "ogMcastReceiverPartition" "$DISKTARGET" "$PARTTARGET" "$SESSIONMCASTCLIENT" "$TOOLCLONE" "$COMPRESOR"  || exit $(ogRaiseError $OG_ERR_MCASTRECEIVERPARTITION " l251 "; echo $?)
+		 			;;
+ 					UNICAST)
+ 						ogEcho log session "ogUcastReceiverPartition $DISKTARGET $PARTTARGET $SESSIONUCASTCLIENT $TOOLCLONE $COMPRESOR"
+ 						ogExecAndLog command "ogUcastReceiverPartition" "$DISKTARGET" "$PARTTARGET" "$SESSIONUCASTCLIENT" "$TOOLCLONE" "$COMPRESOR" || exit $(ogRaiseError $OG_ERR_UCASTRECEIVERPARTITION " l230 "; echo $?)
+ 					;;
+ 				esac						
+			if which configureOsCustom &>/dev/null; then
+				ogEcho log session "[90] configureOsCustom $DISKTARGET $PARTTARGET"
+				# Si $2 = num_disk las varibles REPO IMGNAME estan vacias
+				! [[  $2 =~ ^[0-9]+$ ]] && REPO="$2" && IMGNAME="$3"
+				configureOsCustom $DISKTARGET $PARTTARGET $REPO $IMGNAME
+			else
+				ogEcho log session "[90] $MSG_SCRIPTS_OS_CONFIGURE $DISKTARGET $PARTTARGET"
+				configureOs $DISKTARGET $PARTTARGET			
+			fi
+
+		else
+		    # Si el tamaño de los datos recibidos es más grande que la particion destino
+			ogRaiseError $OG_ERR_IMGSIZEPARTITION "ERROR tamanio particion= $SIZEPARTTARGET  menor que la imagen= $SIZEIMAGE"; exit $?
+		fi
+	;;
+esac
+TIME=$[SECONDS-TIME1]
+ogEcho log session "[100] Duración de la operación $[TIME/60]m $[TIME%60]s"
+

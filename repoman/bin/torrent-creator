@@ -1,0 +1,67 @@
+#!/bin/bash
+# Genera los ficheros .torrent de las imágenes almacenadas en el repositorio.
+#Version 0.3   Ejecución desde cron cada minuto, 
+##  echo "* * * * *   root   /opt/opengnsys/bin/torrent-creator" > /etc/cron.d/torrentcreator
+
+## ver moficifcacione en linea 41 - 46
+
+# Comprobar si el proceso ya está en ejecución.
+PROG=$(basename $0)
+[ "$(pgrep "$PROG")" != "$$" ] && exit
+
+# Variables.
+OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
+PATH=$PATH:$OPENGNSYS/bin
+OGIMG="$OPENGNSYS/images"
+REPOCFG="$OPENGNSYS/etc/ogAdmRepo.cfg"
+LOGFILE="$OPENGNSYS/log/$PROG.log"
+# Error si no está bien configurado el repositorio de imágenes.
+[ -d $OGIMG -a -f $REPOCFG ] || exit 1
+source $REPOCFG
+TRACKERURL="http://$IPlocal:6969/announce"
+
+# Directorio de imágenes.
+pushd $OGIMG >/dev/null
+
+# Procesar ficheros de imágenes.
+trap 'echo "`date` : Proceso interrumpido" >> $LOGFILE; exit ' 1 2 3 6 9 15
+for IMG in *.{img,pgz,diff,dsk} */*.{img,pgz,diff,dsk} ; do
+	# Saltar al siguiente si la imagen está bloqueada o si no existe el fichero.
+	LOCKFILE="$IMG.lock"
+	if [ -f "$LOCKFILE" -o ! -f "$IMG" ]; then
+		continue
+	fi
+	# Comprobar si ya existe el fichero Torrent para esa imagen.
+	TORRENT="$IMG.torrent"	
+	SUMFILE="$IMG.sum"
+	#MD5 completo de todo el fichero imagen
+	SUMFULLFILE="$IMG.full.sum"
+	if [ -f "$TORRENT" -a -f "$SUMFULLFILE" ]; then
+		FILESIZE="$(ls -l $IMG | awk '{print $5}')"
+		read -e TORRFILE TORRSIZE <<<"$(ctorrent -x $TORRENT 2>/dev/null | awk '$1~/<1>/ {print $2,$3}')"
+		[ "$(basename $IMG)" = "$TORRFILE" -a "[$FILESIZE]" = "$TORRSIZE" ] && continue
+	fi
+	# Bloquear imagen, crear ficheros Torrent y Checksum y desbloquear imagen.
+	echo "`date` : Inicio creación de fichero $TORRENT" >> $LOGFILE
+	touch "$LOCKFILE"
+	trap "rm -f $LOCKFILE" 1 2 3 6 9
+	rm -f "$TORRENT" "$SUMFILE"	
+	# datasum de los ultimos megas del fichero para transferencias unicast y multicast
+	DATASUM=$(tail -c1M "$IMG" | md5sum -b | cut -f1 -d" ")
+	echo $DATASUM > "$SUMFILE"
+	# Datasum completo para transferencias torrent
+	DATAFULLSUM=$(md5sum -b "$IMG"| cut -f1 -d" ")
+	echo $DATAFULLSUM > "$SUMFULLFILE"
+	nice -8 ctorrent -t "$IMG" -u $TRACKERURL -s "$TORRENT" -c $DATAFULLSUM -l 4194304 2>/dev/null
+	rm -f "$LOCKFILE"
+	if [ -f "$TORRENT"  ]; then
+		echo "`date` : Fin creación de fichero $TORRENT" >> $LOGFILE
+	else
+		echo "`date` : ERROR en creación de fichero $TORRENT" >> $LOGFILE
+	fi
+	# Modificación realizada en la corrección temporal de la incidencia #535
+	break	
+done
+
+popd >/dev/null
+

@@ -1,0 +1,75 @@
+Test de compribación de la libreria File No modifica nada
+========================================
+Este test NECESITA LA CACHE 
+
+Comprobamos que existe CACHE 
+$ ls -d $OGCAC$OGIMG            # Este test NECESITA LA CACHE ##############################
+/opt/opengnsys/cache/opt/opengnsys/images
+
+
+$ ogMakeDir CACHE prueba
+$ ls -d $OGCAC$OGIMG/prueba
+/opt/opengnsys/cache/opt/opengnsys/images/prueba
+
+$ touch $OGCAC$OGIMG/fichero_prueba
+$ ogCopyFile CACHE fichero_prueba CACHE prueba
+$ ls $OGCAC$OGIMG/prueba
+fichero_prueba
+
+$ ogGetPath CACHE fichero_prueba
+/opt/opengnsys/cache/opt/opengnsys/images/fichero_prueba
+
+# Si no existe el fichero
+$ ogGetPath CACHE fichero_prueba3; echo $?
+1
+
+$ ogGetParentPath CACHE fichero_prueba
+/opt/opengnsys/cache/opt/opengnsys/images
+
+# si el fichero no existe
+$ ogGetParentPath CACHE prueba/fichero_prueba3q23
+/opt/opengnsys/cache/opt/opengnsys/images/prueba
+
+# Si dir padre no existe
+$ ogGetParentPath CACHE pruebaNO/fichero_prueba3; echo $?
+1
+
+$ AUX=$(ogCalculateChecksum $OGCAC$OGIMG/fichero_prueba); AUX2=$(md5sum $OGCAC$OGIMG/fichero_prueba| cut -f1 -d\ ); if [ "$AUX" == "$AUX2"  ]; then echo si; else echo no; fi
+si
+
+$ ogCompareChecksumFiles CACHE fichero_prueba CACHE prueba/fichero_prueba; echo $?
+0
+
+$ echo 333 >> $OGCAC$OGIMG/fichero_prueba2
+$ ogMakeChecksumFile CACHE fichero_prueba2
+$ ls $OGCAC$OGIMG/fichero_prueba2.sum
+/opt/opengnsys/cache/opt/opengnsys/images/fichero_prueba2.sum
+
+$ ogMakeChecksumFile CACHE prueba/fichero_prueba
+$ ogCompareChecksumFiles CACHE fichero_prueba2 CACHE prueba/fichero_prueba; echo $?
+1
+
+$ ogIsNewerFile CACHE fichero_prueba2 CACHE prueba/fichero_prueba; echo $?
+0
+
+$ ogIsNewerFile CACHE prueba/fichero_prueba CACHE fichero_prueba2; echo $?
+1
+
+$ ogIsNewerFile CACHE fichero_prueba CACHE prueba/fichero_prueba; echo $?
+1
+
+$ ogDeleteTree CACHE prueba
+$ ls -d $OGCAC$OGIMG/prueba 
+ls: cannot access /opt/opengnsys/cache/opt/opengnsys/images/prueba: No such file or directory
+
+$ ogDeleteFile CACHE fichero_prueba
+$ ls $OGCAC$OGIMG/fichero_prueba
+ls: cannot access /opt/opengnsys/cache/opt/opengnsys/images/fichero_prueba: No such file or directory
+
+# Limpiamos el directorio
+$ rm -rf $OGCAC$OGIMG/fichero_prueba2* $OGCAC$OGIMG/prueba2
+
+
+MEJORAS
+=======
+ogCompareChecksumFiles -> si no existen los ficheros de Checksum da verdadero. Deberia dar falso

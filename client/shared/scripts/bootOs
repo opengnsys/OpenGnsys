@@ -1,0 +1,30 @@
+#!/bin/bash
+# Script de ejemplo para arancar un sistema operativo instalado.
+# Nota: se usa como base para el programa de arranque de OpenGnsys Admin.
+
+PROG="$(basename $0)"
+if [ $# -lt 2 -o $# -gt 3 ]; then
+    ogRaiseError $OG_ERR_FORMAT "Formato: $PROG ndisco nfilesys [str_kernel str_initrd str_kernelparams]"
+    exit $?
+fi
+
+# Comprobar errores.
+PART=$(ogDiskToDev "$1" "$2") || exit $?
+ogMount $1 $2  &>/dev/null || exit $?
+
+echo "[0] Inicio del proceso de arranque."
+
+if which bootOsCustom  &>/dev/null; then
+    echo "[10] Configuración personalizada del inicio."
+    bootOsCustom $@
+fi
+
+echo "[70] Desmontar todos los sistemas de archivos."
+sync 
+for (( i=1; i <= $(ogDiskToDev | wc -w); i++ )); do
+    ogUnmountAll $i &>/dev/null
+done
+echo "[80] Desmontar cache local."
+ogUnmountCache
+echo "[90] Arrancar sistema operativo."
+ogBoot "$@"

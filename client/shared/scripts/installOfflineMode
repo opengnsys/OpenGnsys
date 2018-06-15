@@ -1,0 +1,60 @@
+#!/bin/bash
+
+#/**
+#         installOfflineMode
+#@brief   Prepara el equipo cliente para el modo offline.
+#@param   no
+#@return  
+#@exception OG_ERR_NOTFOUND Fichero o dispositivo no encontrado.
+#@exception OG_ERR_NOTCACHE No existe cache.
+#@author  Irina Gomez. ETSII. Universidad de Sevilla
+#@date    2013/12/5
+#*/ ##
+
+PROG="$(basename $0)"
+if [ "$*" == "help" ]; then
+    ogHelp  "$PROG $MSG_HELP_installOfflineMode" \
+            "$PROG [ no param ]" 
+   exit 0
+fi
+
+ogEcho log session "$MSG_HELP_installOfflineMode"
+# Cargamos las variables de entorno.
+[ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
+DIRTFTP="/opt/oglive/tftpboot"
+DIROGCLIENT="$DIRTFTP/ogclient"
+# Comprobamos que el DIROGCLIENT esta montado desde repo
+df |grep "$(ogGetRepoIp).*$DIRTFTP" &>/dev/null || ogRaiseError $OG_ERR_NOTFOUND  "REPO OGclient" || exit $?
+
+# Copiamos el kernel y el initrd.
+ogEcho log session " [10] updateBootCache"
+updateBootCache ||  ogRaiseError $OG_ERR_NOTCACHE || exit $?
+
+# Creamos los dir necesarios.
+ogEcho log session " [40] mkdir -p $OGCAC/{ogclient, menus, log}." 
+[ -d $OGCAC/menus/images/iconos ] || mkdir -p $OGCAC/menus/images/iconos
+[ -d $OGCAC/ogclient ] || mkdir -p $OGCAC/ogclient
+[ -d $OGCAC/log ] || mkdir -p $OGCAC/log
+[ -d $OGCAC/opt/opengnsys/images ] || mkdir -p $OGCAC/opt/opengnsys/images
+
+# Comparamos el cliente en el server y en cache
+ogEcho log session " [60] cp  $DIROGCLIENT/ogclient.sqfs $OGCAC/ogclient/"
+SERVEROGCLIENT=$(cat $DIROGCLIENT/ogclient.sqfs.sum 2>/dev/null)
+CACHEOGCLIENT=$(cat $OGCAC/ogclient/ogclient.sqfs.sum 2>/dev/null)
+
+if [ "$CACHEOGCLIENT" != "$SERVEROGCLIENT" ]; then
+    cp  $DIROGCLIENT/ogclient.sqfs $OGCAC/ogclient/
+    cp  $DIROGCLIENT/ogclient.sqfs.sum $OGCAC/ogclient/
+fi
+
+# Si se ha generado el menu de inicio lo copiamos a cache.
+IPCLIENT=$(ogGetIpAddress)
+MENU=$OGLOG/$IPCLIENT.info.html
+ICONO="images/iconos/logoopengnsys.png"
+[ -f $MENU ] || generateMenuDefault
+ogEcho log session " [90] cp $MENU $OGCAC/menus/$IPCLIENT.html"
+cp $MENU $OGCAC/menus/$IPCLIENT.html
+sed -i s/"..\/images"/"images"/g $OGCAC/menus/$IPCLIENT.html
+wget  --no-check-certificate https://$(ogGetRepoIp)/opengnsys/$ICONO -O $OGCAC/menus/$ICONO
+
+

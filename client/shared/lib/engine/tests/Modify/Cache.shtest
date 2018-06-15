@@ -1,0 +1,93 @@
+Test de comprobacion de la librería Cache.lib y los script relacionados
+=======================================================================
+Este test destruye la cache
+Necesita que las particiones sean tres como máximo
+=================================================
+
+$ ogUnmountCache 2>/dev/null ; df|grep cache
+
+
+$ ogCreateCache 10000000 1>/dev/null 2>&1
+
+$ AUX=$(ogListPartitions 1) ; echo ${AUX##*CACHE:} | sed s/\ .*\$//g
+10000000
+
+# Comprobamos que no esta formateada
+$ ogCheckFs 1 4
+OpenGnsys error:  ogCheckFs:  "1, 4, CACHE"
+
+$ ogFormatCache|tail -1
+ReiserFS is successfully created on /dev/sda4.
+
+$ ogMountCache
+/opt/opengnsys/cache
+
+$ echo $OGCAC
+/opt/opengnsys/cache
+
+$ touch $OGCAC$OGIMG/lll
+$ ls $OGCAC$OGIMG
+lll
+
+$ rm $OGCAC$OGIMG/lll
+
+$ ogFindCache
+1 4
+
+$ ogGetCacheSize
+10000000
+
+
+$ ogDeleteCache >/dev/null 2>&1
+$ ogFindCache
+
+$ initCache  2000000 1>/dev/null 2>&1
+$ touch $OGCAC$OGIMG/lll
+$ ls $OGCAC$OGIMG
+lll
+
+$ rm $OGCAC$OGIMG/lll
+
+#################################################33
+# No permite unicast
+#################################################33
+#$ echo ooo > $OGCAC$OGIMG/_test_.img
+#$ echo jjjjjjjjjjjjjjjjjjjjjjjjjjjjjj > $OGIMG/_test_.img
+#$ touch $OGIMG/_test_.torrent
+#$ updateCache REPO _test_ UNICAST
+
+
+Comprobamos los errores de las entradas de datos
+================================================
+$ ogCreateCache
+OpenGnsys error:  ogCreateCache:  ""
+
+$ ogCreateCache -1
+OpenGnsys error:  ogCreateCache:  "-1"
+
+$ ogCreateCache 0
+OpenGnsys error:  ogCreateCache:  "0"
+
+# cuando se está usando la cuarta partitión no debe crearse la cache
+#$ ogCreatePartition 1 NTFS:200000 EXT3:2000000 EXT3:2000000 NTFS:30000000
+#$ ogListPartitions 1
+#NTFS:200000 EXT3:2000000 EXT3:2000000 EXTENDED:20000000 LINUX-SWAP:199999
+#$ ogCreateCache 1000000
+#$ ogFindCache
+
+
+# si hay cache no podemos 
+$ ogDeleteCache 1>/dev/null 2>&1
+$ ogCreatePartitions 1 NTFS:200000 EXT3:2000000 EXT3:2000000 1>/dev/null 2>&1
+$ ogCreateCache 1000000 1>/dev/null 2>&1
+$ ogCreatePartitions 1 NTFS:200000 EXT2:2000000 EXT2:2000000 LINUX-SWAP:200000 1>/dev/null 2>&1; echo $?
+1
+
+FALTA
+====
+ogGetCacheSpace 
+updateCache 
+
+Error
+=====
+Al crear la cache no se comprueba si existe una cuarta particion. La machaca

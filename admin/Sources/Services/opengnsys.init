@@ -1,0 +1,235 @@
+#!/bin/bash
+
+### BEGIN INIT INFO
+# Provides:          opengnsys
+# Required-Start:
+# Required-Stop:
+# Default-Start:     2 3 4 5
+# Default-Stop:      1
+# Short-Description: Servicios del sistema OpenGnsys
+# Description:       Servicios del sistema OpenGnsys
+### END INIT INFO
+
+#
+# Definiciones globales
+#
+BASEDIR=/opt/opengnsys
+OPENGNSYSUSER="opengnsys"
+IMAGEDIR=$BASEDIR/images
+CLIENTLOGDIR=$BASEDIR/log/clients
+
+#
+# Servidor de OpenGnsys
+#
+SERVERNAME=ogAdmServer
+SERVERDAEMON=$BASEDIR/sbin/$SERVERNAME
+SERVERCFG=$BASEDIR/etc/$SERVERNAME.cfg
+SERVERLOG=$BASEDIR/log/$SERVERNAME.log
+SERVERDAEMON_OPTIONS="-f $SERVERCFG -l $SERVERLOG"
+
+#
+# Servidor de Repositorio
+#
+REPONAME=ogAdmRepo
+REPODAEMON=$BASEDIR/sbin/$REPONAME
+REPOCFG=$BASEDIR/etc/$REPONAME.cfg
+REPOLOG=$BASEDIR/log/$REPONAME.log
+REPODAEMON_OPTIONS="-f $REPOCFG -l $REPOLOG"
+############## ADV
+REPOAUXNAME=ogAdmRepoAux
+REPOAUXDAEMON=$BASEDIR/sbin/$REPOAUXNAME
+REPOAUXPORT=$(awk -F= '/PUERTO/ {print $2+1}' $SERVERCFG 2>/dev/null)
+############## ADV
+############# IRINA # para setBootMode desde el cliente
+SERVERAUXNAME=ogAdmServerAux
+SERVERAUXDAEMON=$BASEDIR/sbin/$SERVERAUXNAME
+SERVERAUXPORT=2011  
+############# IRINA
+
+#
+# Servidor de tareas programadas
+#
+AGENTNAME=ogAdmAgent
+AGENTDAEMON=$BASEDIR/sbin/$AGENTNAME
+AGENTCFG=$BASEDIR/etc/$AGENTNAME.cfg
+AGENTLOG=$BASEDIR/log/$AGENTNAME.log
+AGENTDAEMON_OPTIONS="-f $AGENTCFG -l $AGENTLOG"
+
+#
+# Opciones Bittorrent
+#
+
+BTTRACK=/usr/bin/bttrack.bittorrent
+BTSEEDER=/usr/bin/btlaunchmany.bittornado
+BTTRACKPORT=6969
+BTTRACKDFILE=/tmp/dstate
+BTTRACKLOG=$BASEDIR/log/bttrack.log
+BTINTERVAL=30
+BTTORRENTSDIR=$BASEDIR/images
+BTTRACK_OPTIONS=" --port $BTTRACKPORT --dfile $BTTRACKDFILE --reannounce_interval $BTINTERVAL --logfile $BTTRACKLOG --allowed_dir $BTTORRENTSDIR --allow_get 1"
+BTTRACKPID="/var/run/bttrack.pid"
+BTSEEDERPID="/var/run/btseeder.pid"
+
+
+export PATH="${PATH:+$PATH:}/usr/sbin:/sbin:/usr/bin"
+
+# Read config file if it is present.
+if [ -r /etc/default/opengnsys ]; then
+    source /etc/default/opengnsys
+fi
+
+# Configuración de arranque según la distribución Linux usada.
+config() {
+    if [ -f /etc/os-release ]; then
+	source /etc/os-release
+	OSDISTRIB="$ID"
+    else
+	OSDISTRIB=$(lsb_release -is 2>/dev/null)
+    fi
+    OSDISTRIB="${OSDISTRIB,,}"
+    case "$OSDISTRIB" in
+        ubuntu|debian|linuxmint)
+            INITFUNCTIONS=/lib/lsb/init-functions
+            DAEMONSTART="start-stop-daemon --start --quiet --background --exec"
+            EXTRAOPTS="--"
+            DAEMONSTOP="start-stop-daemon --stop --quiet --oknodo --name"
+            ACTIONMSG="log_daemon_msg"
+            SUCCESSMSG="log_end_msg 0"
+            FAILMSG="log_end_msg 1"
+            TRACKERSTART="start-stop-daemon --make-pidfile --pidfile $BTTRACKPID --start --quiet --background --exec"
+            BTTRACK_OPTIONS="$BTTRACK_OPTIONS --parse_allowed_interval 1"
+            TRACKERSTOP="start-stop-daemon --stop --quiet --oknodo --retry 30 --pidfile $BTTRACKPID"
+            SEEDERSTART="start-stop-daemon --make-pidfile --pidfile $BTSEEDERPID --start --quiet --background --exec"
+            SEEDERSTOP="start-stop-daemon --stop --quiet --oknodo --pidfile $BTSEEDERPID"
+            ;;
+        centos|fedora)
+            INITFUNCTIONS=/etc/init.d/functions
+            DAEMONSTART="daemon"
+            ENDOPTS="&"
+            DAEMONSTOP="killproc"
+            ACTIONMSG="echo -n"
+            SUCCESSMSG="eval ( success; echo )"
+            FAILMSG="eval ( failure; echo )"
+            BTTRACK=/usr/bin/bttrack.py
+            BTSEEDER=/usr/bin/btlaunchmany.py
+            TRACKERSTART="daemon --pidfile $BTTRACKPID"
+            TRACKERSTOP="killproc -p $BTTRACKPID $BTTRACK"
+            SEEDERSTART="daemon --pidfile $BTSEEDERPID"
+            SEEDERSTOP="killproc -p $BTSEEDERPID $BTSEEDER"
+            ;;
+        *)  echo "Distribución Linux desconcocida o no soportada."
+            exit ;;
+    esac
+    if [ -r $INITFUNCTIONS ]; then
+        source $INITFUNCTIONS
+    fi
+}
+
+arranca_demonios() {
+  # Comprobar que está instalado OpenGnsys.
+  if [ ! -d $BASEDIR ]; then
+     $ACTIONMSG "ERROR: No existe el directorio $BASEDIR"
+     $FAILMSG
+     exit $?
+  fi
+  # Deshabilitar modo reforzado de SELinux.
+  [ -f /selinux/enforce ] && echo 0 > /selinux/enforce
+  # Verificar permisos básicos.
+  if [ "$(stat --printf="%A%G" $IMAGEDIR 2>/dev/null)" != "drwxrwxr-x$OPENGNSYSUSER" ]; then
+     mkdir $IMAGEDIR 2>/dev/null
+     chmod 775 $IMAGEDIR
+     chgrp $OPENGNSYSUSER $IMAGEDIR
+  fi
+  if [ "$(stat --printf="%A%G" $CLIENTLOGDIR 2>/dev/null)" != "drwxrwxr-x$OPENGNSYSUSER" ]; then
+     mkdir -p $CLIENTLOGDIR 2>/dev/null
+     chmod 775 $CLIENTLOGDIR
+     chgrp $OPENGNSYSUSER $CLIENTLOGDIR
+  fi
+  # Arrancar los servicios indicados.
+  if [ $RUN_OGADMSERVER = "yes" ]; then
+     $ACTIONMSG "Iniciando demonio: $SERVERNAME"
+     $DAEMONSTART $SERVERDAEMON $EXTRAOPTS $SERVERDAEMON_OPTIONS $ENDOPTS
+     [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
+     # Para SetBootmode desde el cliente
+     $ACTIONMSG "Iniciando demonio: $SERVERAUXNAME"                    #
+     faucet $SERVERAUXPORT --daemon --in bash -c "$SERVERAUXDAEMON"    #   NUEVO
+     [ $? = 0 ] && $SUCCESSMSG || $FAILMSG 
+  fi
+  if [ $RUN_OGADMSERVER = "yes" ] && [ $RUN_OGADMREPO = "yes" ]; then
+     sleep 5 # Damos tiempo a que ogAdmServer este funcionando
+  fi
+  if [ $RUN_OGADMREPO = "yes" ]; then
+     $ACTIONMSG "Iniciando demonio: $REPONAME"
+     $DAEMONSTART $REPODAEMON $EXTRAOPTS $REPODAEMON_OPTIONS $ENDOPTS
+     [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
+     $ACTIONMSG "Iniciando demonio: $REPOAUXNAME"
+     faucet $REPOAUXPORT --daemon --in bash -c "$REPOAUXDAEMON"
+     [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
+  fi
+  if [ $RUN_OGADMAGENT = "yes" ]; then
+     $ACTIONMSG "Iniciando demonio: $AGENTNAME"
+     $DAEMONSTART $AGENTDAEMON $EXTRAOPTS $AGENTDAEMON_OPTIONS $ENDOPTS
+     [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
+  fi    
+  if [ $RUN_BTTRACKER = "yes" ]; then
+     $ACTIONMSG "Iniciando demonio: $BTTRACK"
+     $TRACKERSTART $BTTRACK $EXTRAOPTS $BTTRACK_OPTIONS $ENDOPTS
+     [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
+  fi
+  if [ $RUN_BTSEEDER = "yes" ]; then
+     $ACTIONMSG "Iniciando demonio: $BTSEEDER"
+     $SEEDERSTART $BTSEEDER $EXTRAOPTS $BTTORRENTSDIR &>/dev/null $ENDOPTS
+     [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
+  fi
+
+}
+
+para_demonios() {
+  if [ -e $BTSEEDERPID ]; then
+    $ACTIONMSG "Parando demonio: $BTSEEDER"
+    $SEEDERSTOP
+    [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
+    rm -f $BTSEEDERPID
+  fi
+  if [ -e $BTTRACKPID ]; then
+    $ACTIONMSG "Parando demonio: $BTTRACK"
+    $TRACKERSTOP
+    [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
+    rm -f $BTTRACKPID
+  fi 
+  $ACTIONMSG "Parando demonio: $AGENTNAME"
+  $DAEMONSTOP $AGENTNAME
+  [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
+  $ACTIONMSG "Parando demonio: $REPONAME"
+  $DAEMONSTOP $REPONAME
+  [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
+  $ACTIONMSG "Parando demonio: $REPOAUXNAME"
+  pkill faucet
+  [ $? -le 1 ] && $SUCCESSMSG || $FAILMSG
+  $ACTIONMSG "Parando demonio: $SERVERNAME"
+  $DAEMONSTOP $SERVERNAME
+  [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
+}
+
+config
+
+case "$1" in
+  start)
+        arranca_demonios
+        ;;
+  stop)
+        para_demonios
+        ;;
+  restart)
+        para_demonios
+        arranca_demonios
+        ;;
+
+  *)
+        echo "Uso: $0 {start|stop|restart}"
+        exit 1
+        ;;
+esac
+
+exit 0
+

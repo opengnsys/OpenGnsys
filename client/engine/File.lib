@@ -1,0 +1,416 @@
+#!/bin/bash
+#/**
+#@file    File.lib
+#@brief   Librería o clase File
+#@class   File
+#@brief   Funciones para gestión de archivos y directorios.
+#@version 1.0.4
+#@warning License: GNU GPLv3+
+#*/
+
+
+#/**
+#         ogCalculateChecksum [ str_repo | int_ndisk int_npart ] path_filepath
+#@brief   Devuelve la suma de comprobación (checksum) de un fichero.
+#@param   path_filepath     camino del fichero (independiente de mayúsculas)
+#@param   str_repo          repositorio de ficheros
+#@param   int_ndisk         nº de orden del disco
+#@param   int_npartition    nº de orden de la partición
+#@return  hex_checksum      Checksum del fichero
+#@version 0.9.2 - Primera versión para OpenGnSys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2010-07-24
+#@version 1.0.4 - Calcula solo el checksum del último MB del fichero.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2012-03-16
+#*/ ##
+function ogCalculateChecksum ()
+{
+# Variables locales.
+local FILE
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME [ str_repo | int_ndisk int_npartition ] path_filepath" \
+           "$FUNCNAME REPO ubuntu.img  ==>  ef899299caf8b517ce36f1157a93d8bf"
+    return
+fi
+
+# Comprobar que existe el fichero y devolver sus datos.
+FILE=$(ogGetPath "$@")
+[ -n "$FILE" ] || ogRaiseError $OG_ERR_NOTFOUND "$*" || return $?
+tail -c1M "$FILE" | md5sum -b 2>&1 | cut -f1 -d" "
+}
+
+
+#/**
+#         ogCompareChecksumFiles [ str_repo | int_ndisk int_npart ] path_source [ str_repo | int_ndisk int_npart ] path_target
+#@brief   Metafunción que compara las sumas de comprobación almacenadas de 2 ficheros.
+#@return  bool_compare   Valor de comparación.
+#@warning No es necesario especificar la extensión ".sum".
+#@version 0.9.2 - Primera versión para OpenGnSys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2010-07-24
+#*/ ##
+function ogCompareChecksumFiles ()
+{
+# Variables locales.
+local ARGS SOURCE TARGET
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME [ str_repo | int_ndisk int_npartition ] path_filepath" \
+           "if $FUNCNAME REPO ubuntu.img CACHE ubuntu.img; then ...;  fi"
+    return
+fi
+
+ARGS="$@"
+case "$1" in
+    /*)     # Camino completo.          */ (Comentrio Doxygen)
+        SOURCE=$(ogGetPath "$1")
+        shift ;;
+    [1-9]*) # ndisco npartición.
+        SOURCE=$(ogGetPath "$1" "$2" "$3")
+        shift 3 ;;
+    *)      # Otros: repo, cache, cdrom (no se permiten caminos relativos).
+        SOURCE=$(ogGetPath "$1" "$2")
+        shift 2 ;;
+esac
+TARGET=$(ogGetPath "$@")
+
+# Comparar los ficheros de checksum.
+test "$(cat "$SOURCE.sum" 2>/dev/null)" == "$(cat "$TARGET.sum" 2>/dev/null)"
+}
+
+
+#/**
+#         ogCalculateFullChecksum [ str_repo | int_ndisk int_npart ] path_filepath
+#@brief   Devuelve la suma COMPLETA de comprobación (checksum) de un fichero.
+#@param   path_filepath     camino del fichero (independiente de mayúsculas)
+#@param   str_repo          repositorio de ficheros
+#@param   int_ndisk         nº de orden del disco
+#@param   int_npartition    nº de orden de la partición
+#@return  hex_checksum      Checksum del fichero
+#@version 1.0.5 - Primera versión para OpenGnSys.
+#@author  Antonio Doblas Viso, EVLT Universidad de Málaga
+#@date    2014-07-09
+#*/ ##
+function ogCalculateFullChecksum ()
+{
+# Variables locales.
+local FILE
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME [ str_repo | int_ndisk int_npartition ] path_filepath" \
+           "$FUNCNAME REPO ubuntu.img  ==>  ef899299caf8b517ce36f1157a93d8bf"
+    return
+fi
+
+# Comprobar que existe el fichero y devolver sus datos.
+FILE=$(ogGetPath "$@")
+[ -n "$FILE" ] || ogRaiseError $OG_ERR_NOTFOUND "$*" || return $?
+#ADV
+md5sum "$FILE" -b 2>&1 | cut -f1 -d" "
+# tail -c1M "$FILE" | md5sum -b 2>&1 | cut -f1 -d" "
+}
+
+
+
+
+#/**
+#         ogCopyFile [ str_repo | int_ndisk int_npart ] path_source [ str_repo | int_ndisk int_npart ] path_target
+#@brief   Metafunción para copiar un fichero de sistema OpenGnSys a un directorio.
+#@see     ogGetPath
+#@return  Progreso de la copia.
+#@warning Deben existir tanto el fichero origen como el directorio destino.
+#@version 0.9 - Pruebas con OpenGnSys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2009-10-20
+#@version 1.0.4 - Copiar usando rsync.
+#@author  Universidad de Huelva
+#@date    2012-07-06
+#*/ ##
+function ogCopyFile ()
+{
+# Variables locales.
+local ARGS SOURCE TARGET
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME [ str_repo | int_ndisk int_npartition ] path_source [ str_repo | int_ndisk int_npartition ] path_target" \
+           "$FUNCNAME REPO newfile.txt 1 2 /tmp/newfile.txt"
+    return
+fi
+
+ARGS="$@"
+case "$1" in
+    /*)     # Camino completo.          */ (Comentrio Doxygen)
+        SOURCE="$(ogGetPath "$1")"
+        shift ;;
+    [1-9]*) # ndisco npartición.
+        SOURCE="$(ogGetPath "$1" "$2" "$3")"
+        shift 3 ;;
+    *)      # Otros: repo, cache, cdrom (no se permiten caminos relativos).
+        SOURCE="$(ogGetPath "$1" "$2")"
+        shift 2 ;;
+esac
+# Comprobar fichero origen y directorio destino.
+[ -n "$SOURCE" ] || ogRaiseError $OG_ERR_NOTFOUND "${ARGS% $*}" || return $?
+TARGET="$(ogGetPath "$@")"
+[ -n "$TARGET" ] || ogRaiseError $OG_ERR_NOTFOUND "$*" || return $?
+# Copiar fichero (para evitar problemas de comunicaciones las copias se hacen con rsync en vez de cp).
+rsync --progress --inplace -avh "$SOURCE" "$TARGET"
+}
+
+
+#/**
+#         ogDeleteFile [ str_repo | int_ndisk int_npartition ] path_filepath
+#@brief   Metafunción que borra un fichero de un dispositivo.
+#@see     ogGetPath
+#@version 0.9 - Pruebas con OpenGnSys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2009-09-29
+#*/ ##
+function ogDeleteFile ()
+{
+# Variables locales.
+local FILE
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME [ str_repo | int_ndisk int_npartition ] path_file" \
+           "$FUNCNAME 1 2 /tmp/newfile.txt"
+    return
+fi
+
+# Comprobar que existe el fichero y borrarlo.
+FILE="$(ogGetPath "$@")"
+[ -n "$FILE" ] || ogRaiseError $OG_ERR_NOTFOUND "$*" || return $?
+rm -f "$FILE" || ogRaiseError $OG_ERR_NOTFOUND "$*" || return $?
+}
+
+
+#/**
+#         ogDeleteTree [ str_repo | int_ndisk int_npartition ] path_dirpath
+#@brief   Metafunción que borra todo un subárbol de directorios de un dispositivo.
+#@see     ogGetPath
+#@version 0.9 - Pruebas con OpenGnSys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2009-09-29
+#*/ ##
+function ogDeleteTree ()
+{
+# Variables locales.
+local DIR
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME [ str_repo | int_ndisk int_npartition ] path_dir" \
+           "$FUNCNAME 1 2 /tmp/newdir"
+    return
+fi
+
+# Comprobar que existe el directorio y borrarlo con su contenido.
+DIR="$(ogGetPath "$@")"
+[ -n "$DIR" ] || ogRaiseError $OG_ERR_NOTFOUND "$*" || return $?
+rm -fr "$DIR" || ogRaiseError $OG_ERR_NOTFOUND "$*" || return $?
+}
+
+
+#/**
+#         ogGetPath [ str_repo | int_ndisk int_npartition ] path_filepath
+#@brief   Inicia el proceso de arranque de un sistema de archivos.
+#@param   path_filepath   camino del fichero (independiente de mayúsculas)
+#@param   str_repo        repositorio de ficheros
+#@param   int_ndisk       nº de orden del disco
+#@param   int_npartition  nº de orden de la partición
+#@return  path_file - camino completo real del fichero.
+#@note    repo = { REPO, CACHE, CDROM }
+#@note    Requisitos: \c grep \c sed
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_NOTFOUND  Fichero o dispositivo no encontrado.
+#@exception OG_ERR_PARTITION Tipo de partición desconocido o no se puede montar.
+#@warning En caso de error, sólo devuelve el código y no da mensajes.
+#@todo    Terminar de definir parámetros para acceso a repositorios.
+#@version 0.1 -  Integracion para Opengnsys  -  HIDRA: CaminoWindows.sh; EAC: GetPath(), FormatSintaxSpacePath(), FormatSintaxBackSlashPath (),  en FileSystem.lib 
+#@author Ramon Gomez, ETSII Universidad de Sevilla 
+#@Date    2008/10/10
+#@author  Antonio J. Doblas Viso. Universidad de Malaga
+#@date    2008/10/27
+#@version 0.9 - Pruebas con OpenGnSys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2009-09-15
+#*/ ##
+function ogGetPath ()
+{
+# Variables locales.
+local MNTDIR FILE PREVFILE FILEPATH CURRENTDIR
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME [ str_repo | int_ndisk int_npartition ] path_filepath" \
+           "$FUNCNAME \"/mnt/sda1/windows/system32\"  ==>  /mnt/sda1/WINDOWS/System32" \
+           "$FUNCNAME REPO /etc/fstab  ==>  /opt/opengnsys/images/etc/fstab" \
+           "$FUNCNAME 1 1 \"/windows/system32\"  ==>  /mnt/sda1/WINDOWS/System32"
+    return
+fi
+
+# Procesar camino según el número de parámetros.
+case $# in
+    1)  FILE="$1" ;;
+    2)  case "${1^^}" in
+            REPO)
+                FILE="$OGIMG/$2" ;;
+            CACHE)
+                MNTDIR="$(ogMountCache)" || return $?
+                FILE="$MNTDIR/$OGIMG/$2" ;;
+            CDROM)
+                MNTDIR="$(ogMountCdrom)" || return $?
+                FILE="$MNTDIR/$2" ;;
+            *)  ogRaiseError $OG_ERR_FORMAT
+                return $? ;;
+        esac ;;
+    3)  MNTDIR="$(ogMount $1 $2)" || return $?
+        FILE="$MNTDIR/$3" ;;
+    *)  ogRaiseError $OG_ERR_FORMAT
+        return $? ;;
+esac
+
+# Eliminar caracteres \c / duplicados y finales.
+        # /* (comentario Doxygen)
+FILE="$(echo $FILE|sed -e 's/\(\/\)*\1/\//g; s/\/$//')"
+# Comprobar si existe el fichero para reducir tiempos.
+if [ -e "$FILE" ]; then
+    FILEPATH="$FILE"
+else
+    # Buscar el nombre correcto en cada subdirectorio del camino.
+    FILEPATH="/"
+    while [ "$FILE" != "$PREVFILE" ]; do
+        FILEPATH="$(ls -d "${FILEPATH%/}/${FILE%%/*}" 2>/dev/null || find "$FILEPATH" -maxdepth 1 -iname "${FILE%%/*}" -print 2>/dev/null)"
+        PREVFILE="$FILE"
+        FILE="${FILE#*/}"
+    done
+fi
+        # (comentario Doxygen) */
+[ -n "$FILEPATH" ] && echo "$FILEPATH"
+return 0
+}
+
+
+#/**
+#         ogGetParentPath [ str_repo | int_ndisk int_npartition ] path_filepath
+#@brief   Metafunción que devuelve el camino del directorio padre.
+#@see     ogGetPath
+#@version 0.9 - Pruebas con OpenGnSys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2009-09-29
+#*/ ##
+function ogGetParentPath ()
+{
+local PARENT
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME [ str_repo | int_ndisk int_npartition ] path_filepath" \
+           "$FUNCNAME \"/mnt/sda1/windows/system32\"  ==>  /mnt/sda1/WINDOWS" \
+           "$FUNCNAME REPO /etc/fstab  ==>  /opt/opengnsys/images/etc" \
+           "$FUNCNAME 1 1 \"/windows/system32\"  ==>  /mnt/sda1/WINDOWS"
+    return
+fi
+
+case $# in
+    1)	PARENT="$(dirname "$1")" ;;
+    2)	PARENT="$1 $(dirname "/$2")" ;;
+    3)	PARENT="$1 $2 $(dirname "/$3")" ;;
+    *)	ogRaiseError $OG_ERR_FORMAT
+        return $? ;;
+esac
+ogGetPath $PARENT
+}
+
+
+#/**
+#         ogIsNewerFile [ str_repo | int_ndisk int_npart ] path_source [ str_repo | int_ndisk int_npart ] path_target
+#@brief   Metafunción que indica se un fichero es más nuevo que otro.
+#@see     ogGetPath
+#@return  Código de salida: 0 - nuevo, 1 - antiguo o error
+#@warning Deben existir tanto el fichero origen como el destino.
+#@version 0.9.2 - Primera versión para OpenGnSys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2010-07-24
+#@version 1.0.1 - Devolver falso en caso de error.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2011-05-18
+#*/ ##
+function ogIsNewerFile ()
+{
+# Variables locales.
+local ARGS SOURCE TARGET
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME [ str_repo | int_ndisk int_npartition ] path_source [ str_repo | int_ndisk int_npartition ] path_target" \
+           "if $FUNCNAME REPO ubuntu.img CACHE ubuntu.img; then ...  fi"
+    return
+fi
+
+ARGS="$@"
+case "$1" in
+    /*)     # Camino completo.          */ (Comentrio Doxygen)
+        SOURCE="$(ogGetPath "$1")"
+        shift ;;
+    [1-9]*) # ndisco npartición.
+        SOURCE="$(ogGetPath "$1" "$2" "$3")"
+        shift 3 ;;
+    *)      # Otros: repo, cache, cdrom (no se permiten caminos relativos).
+        SOURCE="$(ogGetPath "$1" "$2")"
+        shift 2 ;;
+esac
+# Comprobar que existen los ficheros origen y destino.
+[ -n "$SOURCE" ] || ogRaiseError $OG_ERR_NOTFOUND "${ARGS% $*}" || return 1
+TARGET=$(ogGetPath "$@")
+[ -n "$TARGET" ] || ogRaiseError $OG_ERR_NOTFOUND "$*" || return 1
+# Devolver si el primer fichero se ha modificado después que el segundo.
+test "$SOURCE" -nt "$TARGET"
+}
+
+
+#/**
+#         ogMakeChecksumFile [ str_repo | int_ndisk int_npart ] path_filepath
+#@brief   Metafunción que guarda el valor de comprobación de un fichero.
+#@see     ogCalculateChecksum
+#@warning Genera un fichero con extensión ".sum".
+#@version 0.9.2 - Primera versión para OpenGnSys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2010-07-24
+#*/ ##
+function ogMakeChecksumFile ()
+{
+# Variables locales.
+local FILE
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME [ str_repo | int_ndisk int_npartition ] path_filepath" \
+           "$FUNCNAME REPO ubuntu.img"
+    return
+fi
+
+# Comprobar que existe el fichero y guardar su checksum.
+FILE="$(ogGetPath "$@")"
+[ -n "$FILE" ] || ogRaiseError $OG_ERR_NOTFOUND "$*" || return $?
+ogCalculateChecksum "$FILE" > "$FILE.sum"
+}
+
+
+#/**
+#         ogMakeDir [ str_repo | int_ndisk int_npartition ] path_dirpath
+#@brief   Metafunción que crea un subdirectorio vacío en un dispositivo.
+#@see     ogGetParentPath
+#@version 0.1 -  Integracion para Opengnsys  -   HIDRA: CrearDirectorio.sh, EAC: MkdirPath() en FileSystem.lib
+#@author Ramon Gomez, ETSII Universidad de Sevilla 
+#@Date    2008/10/10
+#@author  Antonio J. Doblas Viso. Universidad de Malaga
+#@date    2008/10/27
+#@version 0.9 - Pruebas con OpenGnSys.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2009-09-29
+#*/ ##
+function ogMakeDir ()
+{
+local PARENT DIR
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME [ str_repo | int_ndisk int_npartition ] path_dir" \
+           "$FUNCNAME 1 2 /tmp/newdir"
+    return
+fi
+
+PARENT="$(ogGetParentPath "$@")" || return $?
+DIR="$(basename "${!#}")"
+mkdir -p "$PARENT/$DIR" || ogRaiseError $OG_ERR_NOTFOUND "$*" || return $?
+}
+ 

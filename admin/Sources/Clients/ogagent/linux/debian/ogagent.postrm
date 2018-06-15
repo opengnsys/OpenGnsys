@@ -1,0 +1,10 @@
+#!/bin/sh -e
+
+. /usr/share/debconf/confmodule
+
+set -e
+
+if [ "$1" = "purge" ] ; then
+    rm -rf /usr/share/OGAgent || true > /dev/null 2>&1
+fi
+
