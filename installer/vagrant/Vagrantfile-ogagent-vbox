@@ -21,7 +21,7 @@ localectl set-x11-keymap ${LANG%_*}
 # Update repositories.
 dnf install -y http://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
 # Install main dependencies.
-dnf install -y gcc-c++ debhelper dpkg-dev pyqt4-devel rpm-build subversion samba-winbind wine.i686 mingw32-wine-gecko wine-mono cabextract xar
+dnf install -y gcc-c++ perl-Digest-SHA debhelper dpkg-dev pyqt4-devel rpm-build subversion samba-winbind wine.i686 mingw32-wine-gecko wine-mono cabextract xar
 setsebool -P wine_mmap_zero_ignore=on mmap_low_allowed=on
 # Install desktop (XFCE) and GUI utils.
 dnf install -y @xfce-desktop-environment firefox VirtualBox-guest kmod-VirtualBox akmod-VirtualBox akmods

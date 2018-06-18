@@ -26,9 +26,9 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-'''
-@author: Adolfo Gómez, dkmaster at dkmon dot com
-'''
+"""
+@author: Ramón M. Gómez, ramongomez at us dot es
+"""
 # pylint: disable=unused-wildcard-import,wildcard-import
 
 from __future__ import unicode_literals
@@ -39,19 +39,19 @@ import os
 # Importing platform operations and getting operating system data.
 if sys.platform == 'win32':
     from .windows.operations import *  # @UnusedWildImport
-    osType = 'Windows'
-    osVersion = getWindowsVersion()
+    os_type = 'Windows'
+    os_version = getWindowsVersion()
 else:
     if sys.platform == 'darwin':
         from .macos.operations import *  # @UnusedWildImport
-        osType = 'MacOS'
-        osVersion = getMacosVersion().replace(',','')
+        os_type = 'MacOS'
+        os_version = getMacosVersion().replace(',', '')
     else:
         if os.path.exists('/scripts/oginit'):
             from .oglive.operations import *  # @UnusedWildImport
-            osType = 'ogLive'
-            osVersion = getOgliveVersion().replace(',','')
+            os_type = 'ogLive'
+            os_version = get_oglive_version()
         else:
             from .linux.operations import *  # @UnusedWildImport
-            osType = 'Linux'
-            osVersion = getLinuxVersion().replace(',','')
+            os_type = 'Linux'
+            os_version = getLinuxVersion().replace(',', '')

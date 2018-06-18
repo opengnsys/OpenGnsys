@@ -26,17 +26,14 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-'''
+"""
 @author: Ramón M. Gómez, ramongomez at us dot es
-'''
+"""
 from __future__ import unicode_literals
 
 import socket
 import platform
 import fcntl
-import os
-import ctypes  # @UnusedImport
-import ctypes.util
 import subprocess
 import struct
 import array
@@ -44,37 +41,11 @@ import six
 from opengnsys import utils
 
 
-def checkLockedPartition(sync=False):
-    '''
-    Decorator to check if a partition is locked
-    '''
-    def outer(fnc):
-        def wrapper(*args, **kwargs):
-            partId = 'None'
-            try:
-                this, path, getParams, postParams = args  # @UnusedVariable
-                partId = postParams['disk'] + postParams['part']
-                if this.locked.get(partId, False):
-                    this.locked[partId] = True
-                    fnc(*args, **kwargs)
-                else:
-                    return 'partition locked'
-            except Exception as e:
-                this.locked[partId] = False
-                return 'error {}'.format(e)
-            finally:
-                if sync is True:
-                    this.locked[partId] = False
-            logger.debug('Lock status: {} {}'.format(fnc, this.locked))
-        return wrapper
-    return outer
-
-
 def _getMacAddr(ifname):
-    '''
+    """
     Returns the mac address of an interface
     Mac is returned as unicode utf-8 encoded
-    '''
+    """
     if isinstance(ifname, list):
         return dict([(name, _getMacAddr(name)) for name in ifname])
     if isinstance(ifname, six.text_type):
@@ -88,10 +59,10 @@ def _getMacAddr(ifname):
 
 
 def _getIpAddr(ifname):
-    '''
+    """
     Returns the ip address of an interface
     Ip is returned as unicode utf-8 encoded
-    '''
+    """
     if isinstance(ifname, list):
         return dict([(name, _getIpAddr(name)) for name in ifname])
     if isinstance(ifname, six.text_type):
@@ -108,9 +79,9 @@ def _getIpAddr(ifname):
 
 
 def _getInterfaces():
-    '''
+    """
     Returns a list of interfaces names coded in utf-8
-    '''
+    """
     max_possible = 128  # arbitrary. raise if needed.
     space = max_possible * 16
     if platform.architecture()[0] == '32bit':
@@ -134,32 +105,32 @@ def _getInterfaces():
 
 def _getIpAndMac(ifname):
     ip, mac = _getIpAddr(ifname), _getMacAddr(ifname)
-    return (ip, mac)
+    return ip, mac
 
 
-def _exec_ogcommand(self, ogcmd):
-    '''
+def _exec_ogcommand(ogcmd):
+    """
     Loads OpenGnsys environment variables, executes the command and returns the result
-    '''
-    ret = subprocess.check_output('source /opt/opengnsys/etc/preinit/loadenviron.sh >/dev/null; {}'.format(ogcmd), shell=True)
+    """
+    ret = subprocess.check_output(ogcmd, shell=True)
     return ret
 
 
 def getComputerName():
-    '''
+    """
     Returns computer name, with no domain
-    '''
+    """
     return socket.gethostname().split('.')[0]
 
 
 def getNetworkInfo():
-    '''
+    """
     Obtains a list of network interfaces
-    @return: A "generator" of elements, that are dict-as-object, with this elements:
+    :return: A "generator" of elements, that are dict-as-object, with this elements:
       name: Name of the interface
       mac: mac of the interface
       ip: ip of the interface
-    '''
+    """
     for ifname in _getInterfaces():
         ip, mac = _getIpAndMac(ifname)
         if mac != '00:00:00:00:00:00':  # Skips local interfaces
@@ -170,56 +141,44 @@ def getDomainName():
     return ''
 
 
-def getOgliveVersion():
-    lv = platform.linux_distribution()
-    return lv[0] + ', ' + lv[1]
+def get_oglive_version():
+    """
+    Returns ogLive Kernel version and architecture
+    :return: kernel version
+    """
+    kv = platform.os.uname()
+    return kv[2] + ', ' + kv[4]
 
 
 def reboot():
-    '''
+    """
     Simple reboot using OpenGnsys script
-    '''
+    """
     # Workaround for dummy thread
     if six.PY3 is False:
         import threading
         threading._DummyThread._Thread__stop = lambda x: 42
 
-    _exec_ogcommand('/opt/opengnsys/scripts/reboot', shell=True)
+    _exec_ogcommand('/opt/opengnsys/scripts/reboot')
 
 
 def poweroff():
-    '''
+    """
     Simple poweroff using OpenGnsys script
-    '''
+    """
     # Workaround for dummy thread
     if six.PY3 is False:
         import threading
         threading._DummyThread._Thread__stop = lambda x: 42
 
-    _exec_ogcommand('/opt/opengnsys/scripts/poweroff', shell=True)
+    _exec_ogcommand('/opt/opengnsys/scripts/poweroff')
 
 
-def logoff():
-    pass
-
-
-def renameComputer(newName):
-    pass
-
-
-def joinDomain(domain, ou, account, password, executeInOneStep=False):
-    pass
-
-
-def changeUserPassword(user, oldPassword, newPassword):
-    pass
-
-
-def diskconfig():
-    '''
-    Returns disk configuration.
-    Warning: this operation may take some time.
-    '''
+def get_disk_config():
+    """
+    Returns disk configuration
+    Warning: this operation may take some time
+    """
     try:
         _exec_ogcommand('/opt/opengnsys/interfaceAdm/getConfiguration')
         # Returns content of configuration file.
