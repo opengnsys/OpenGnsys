@@ -1,0 +1,15 @@
+Opengnsys\ServerBundle\Entity\OsName:
+    exclusion_policy: ALL
+    properties:
+        name:
+            groups: [opengnsys_server__os_name_get, opengnsys_server__os_name_cget, opengnsys_server__partition_get, opengnsys_server__partition_cget]
+            expose: true
+            serialized_name: name
+        type:
+            groups: [opengnsys_server__os_name_get, opengnsys_server__os_name_cget, opengnsys_server__partition_get, opengnsys_server__partition_cget]
+            expose: true
+            serialized_name: type
+        id:
+            groups: [opengnsys_server__os_name_get, opengnsys_server__os_name_cget]
+            expose: true
+            serialized_name: id

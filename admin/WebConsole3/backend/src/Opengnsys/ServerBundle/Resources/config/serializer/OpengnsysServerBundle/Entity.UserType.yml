@@ -1,0 +1,11 @@
+Opengnsys\ServerBundle\Entity\UserType:
+    exclusion_policy: ALL
+    properties:
+        name:
+            groups: [opengnsys_server__user_type_get, opengnsys_server__user_type_cget]
+            expose: true
+            serialized_name: name
+        id:
+            groups: [opengnsys_server__user_type_get, opengnsys_server__user_type_cget]
+            expose: true
+            serialized_name: id

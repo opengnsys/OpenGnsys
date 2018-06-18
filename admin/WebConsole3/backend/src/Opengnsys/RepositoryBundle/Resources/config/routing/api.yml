@@ -1,0 +1,4 @@
+image:
+    type: rest
+    resource: Opengnsys\RepositoryBundle\Controller\Api\ImageController
+    name_prefix: opengnsys_repository__api_

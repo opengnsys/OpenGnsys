@@ -1,21 +1,22 @@
-####  AVISO: NO EDITAR variables de configuraciÃ³n.
+#!/bin/bash
+####  AVISO: NO EDITAR variables de configuracion.
 ####  WARNING: DO NOT EDIT configuration variables.
-INSTALL_TARGET=/opt/opengnsys           # Directorio de instalaciÃ³n
+INSTALL_TARGET=/opt/opengnsys           # Directorio de instalacion
 PATH=$PATH:$INSTALL_TARGET/bin
 OPENGNSYS_CLIENTUSER="opengnsys"        # Usuario Samba
 
 
-# SÃ³lo ejecutable por usuario root
+# Solo ejecutable por usuario root
 if [ "$(whoami)" != 'root' ]; then
         echo "ERROR: this program must run under root privileges!!"
         exit 1
 fi
-# Error si OpenGnsys no estÃ¡ instalado (no existe el directorio del proyecto)
+# Error si OpenGnsys no esta instalado (no existe el directorio del proyecto)
 if [ ! -d $INSTALL_TARGET ]; then
         echo "ERROR: OpenGnsys is not installed, cannot update!!"
         exit 1
 fi
-# Cargar configuraciÃ³n de acceso a la base de datos.
+# Cargar configuración de acceso a la base de datos.
 if [ -r $INSTALL_TARGET/etc/ogAdmServer.cfg ]; then
         source $INSTALL_TARGET/etc/ogAdmServer.cfg
 elif [ -r $INSTALL_TARGET/etc/ogAdmAgent.cfg ]; then
@@ -30,7 +31,7 @@ if [ -z "$OPENGNSYS_DATABASE" -o -z "$OPENGNSYS_DBUSER" -o -z "$OPENGNSYS_DBPASS
         exit 1
 fi
 
-# Comprobar si se ha descargado el paquete comprimido (USESVN=0) o sÃ³lo el instalador (USESVN=1).
+# Comprobar si se ha descargado el paquete comprimido (USESVN=0) o sólo el instalador (USESVN=1).
 PROGRAMDIR=$(readlink -e $(dirname "$0"))
 PROGRAMNAME=$(basename "$0")
 OPENGNSYS_SERVER="opengnsys.es"
@@ -41,7 +42,8 @@ else
 fi
 SVN_URL="https://$OPENGNSYS_SERVER/svn/branches/version1.1/"
 
-WORKDIR=/tmp/console3_installer
+# El directorio de trabajo es directamente donde se descargue el tar.gz con la instalació
+WORKDIR=..
 mkdir -p $WORKDIR
 
 # Registro de incidencias.
@@ -53,7 +55,7 @@ LOG_FILE=/tmp/$(basename $OGLOGFILE)
 ###  Detectar red
 ############################################################
 
-# Comprobar si existe conexiÃ³n.
+# Comprobar si existe conexión.
 function checkNetworkConnection()
 {
         OPENGNSYS_SERVER=${OPENGNSYS_SERVER:-"opengnsys.es"}
@@ -72,7 +74,7 @@ function getNetworkSettings()
 
         echoAndLog "${FUNCNAME}(): Detecting network parameters"
         SERVERIP="$ServidorAdm"
-        DEVICES="$(ip -o link show up | awk '!/loopback/ {sub(/:.*/,"",$2); print $2}')"
+        DEVICES=$(ip -o link show up | awk '!/loopback/ {sub(/:.*/,"",$2); print $2}')
         for dev in $DEVICES; do
                 [ -z "$SERVERIP" ] && SERVERIP=$(ip -o addr show dev $dev | awk '$3~/inet$/ {sub (/\/.*/, ""); print ($4)}')
         done
@@ -80,15 +82,15 @@ function getNetworkSettings()
 
 
 
-function downloadFiles() {
-	git clone gituser@opengnsys.es:/git/opengnsys -b webconsole3 $WORKDIR
-}
+#function downloadFiles() {
+	#git clone gituser@opengnsys.es:/git/opengnsys -b webconsole3 $WORKDIR
+#}
 
 
 function installDependencies() {
 	apt-add-repository ppa:ondrej/php
 	apt-get update
-	apt-get upgrade
+	apt-get upgrade -y
 	apt-get install php7.0 php7.0-mysql php7.0-xml libcurl3 php7.0-curl
 	apt-get install git
 	apt-get install nodejs
@@ -99,7 +101,7 @@ function installDependencies() {
 }
 
 function configureApache() {
-	# Usar el fichero de configuración de apache y moverlo al directorio sites-available de apache
+	# Usar el fichero de configuracióe apache y moverlo al directorio sites-available de apache
 	configFile="opengnsys3.conf"
 	template=$WORKDIR/server/etc/apache-console3.conf.tmpl
 	sed -e "s,CONSOLEDIR,$INSTALL_TARGET/www3,g" $template > /etc/apache2/sites-available/$configFile
@@ -112,11 +114,21 @@ function configureApache() {
 
 function configureClient() {
 	local clientFilesDir ogClientFilesDir
-	clientFilesDir=$WORKDIR/client/shared
-	ogClientFilesDir=$INSTALL_TARGET"/client"
+	clientFilesDir=$PWD/client/shared
+	ogClientFilesDir=$INSTALL_TARGET/client/
+	# asignar permisos a los ficheros antes de copiar
+	chmod +x $clientFilesDir/etc/init/default.sh
+	chmod +x $clientFilesDir/etc/preinit/loadenviron.sh
+	chmod +x $clientFilesDir/lib/httpd/httpd-history-log.sh
+	chmod +sx $clientFilesDir/lib/httpd/api/exec_root
+        chmod +sx $clientFilesDir/lib/httpd/api/LogCommand.sh
+        chmod +sx $clientFilesDir/lib/httpd/api/ogAgent.sh
+	chmod +x $clientFilesDir/scripts/generateMenuDefault
+	chmod +x $clientFilesDir/scripts/poweroff
+	chmod +x $clientFilesDir/scripts/reboot
 
 	# Copiar haciendo backup de los originales
-	cp -rb $clientFilesDir $ogClientFilesDir
+	cp -ab $clientFilesDir/* $ogClientFilesDir
 }
 
 function configureBackend() {
@@ -131,9 +143,9 @@ function configureBackend() {
 	php app/console doctrine:fixtures:load
 	php app/console fos:user:create test test@opengnsys.es test
 	popd
-	# Añadir al fichero de configuracion del cliente "ogAdmClient.cfg" la Url de la nueva API Rest
+	# Añr al fichero de configuracion del cliente "ogAdmClient.cfg" la Url de la nueva API Rest
 	echo "UrlApi=https://$SERVERIP/opengnsys3/rest/web/app_dev.php/api/" >> $INSTALL_TARGET/client/etc/ogAdmClient.cfg
-	# TODO - añadir la url del endpoint para la gestion de menus cuando este hecho
+	# TODO - añr la url del endpoint para la gestion de menus cuando este hecho
 	#sed -e "s,\(UrlMenu=.*\),UrlMenu=nuevaurl,g" $INSTALL_TARGET/client/etc/ogAdmClient.cfg >> $WORKDIR/ogAdmClient.cfg
 	#
 	cp $WORKDIR/ogAdmClient.cfg $INSTALL_TARGET/client/etc/ogAdmClient.cfg
@@ -185,7 +197,7 @@ function warningAndLog()
 }
 
 #####################################################################
-####### Proceso de actualizaciÃ³n de OpenGnsys
+####### Proceso de actualización de OpenGnsys
 #####################################################################
 
 
@@ -193,7 +205,7 @@ echoAndLog "OpenGnsys WebConsole 3 installation begins at $(date)"
 
 pushd $WORKDIR
 
-# Comprobar si hay conexiÃ³n y detectar parÃ¡metros de red por defecto.
+# Comprobar si hay conexión y detectar parámetros de red por defecto.
 checkNetworkConnection
 if [ $? -ne 0 ]; then
         errorAndLog "Error connecting to server. Causes:"
@@ -204,17 +216,18 @@ if [ $? -ne 0 ]; then
 fi
 getNetworkSettings
 echoAndLog "Install dependencies"
-installDependencies
-echoAndLog "Download source files"
-downloadFiles
+#installDependencies
+#echoAndLog "Download source files"
+#downloadFiles
 echoAndLog "Configuring apache"
-configureApache
+#configureApache
 echoAndLog "Configuring opengnsys client"
 configureClient
 echoAndLog "Configuring backend"
-configureBackend
+#configureBackend
 echoAndLog "Configuring frontend"
-configureFrontend
+#configureFrontend
 
 
 popd
+

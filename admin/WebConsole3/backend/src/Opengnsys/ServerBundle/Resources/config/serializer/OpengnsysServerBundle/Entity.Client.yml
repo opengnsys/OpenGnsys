@@ -1,0 +1,63 @@
+Opengnsys\ServerBundle\Entity\Client:
+    exclusion_policy: ALL
+    properties:
+        name:
+            groups: [opengnsys_server__client_get, opengnsys_server__client_cget]
+            expose: true
+            serialized_name: name
+        serialno:
+            groups: [opengnsys_server__client_get, opengnsys_server__client_cget]
+            expose: true
+            serialized_name: serialno
+        netiface:
+            groups: [opengnsys_server__client_get, opengnsys_server__client_cget]
+            expose: true
+            serialized_name: netiface
+        netdriver:
+            groups: [opengnsys_server__client_get, opengnsys_server__client_cget]
+            expose: true
+            serialized_name: netdriver
+        mac:
+            groups: [opengnsys_server__client_get, opengnsys_server__client_cget]
+            expose: true
+            serialized_name: mac
+        ip:
+            groups: [opengnsys_server__client_get, opengnsys_server__client_cget]
+            expose: true
+            serialized_name: ip
+        status:
+            groups: [opengnsys_server__client_get, opengnsys_server__client_cget]
+            expose: true
+            serialized_name: status
+        cache:
+            groups: [opengnsys_server__client_get, opengnsys_server__client_cget]
+            expose: true
+            serialized_name: cache
+        oglive:
+            groups: [opengnsys_server__client_get]
+            expose: true
+            serialized_name: oglive
+        idproautoexec:
+            groups: [opengnsys_server__client_get, opengnsys_server__client_cget]
+            expose: true
+            serialized_name: idproautoexec
+        id:
+            groups: [opengnsys_server__client_get, opengnsys_server__client_cget]
+            expose: true
+            serialized_name: id
+        repository:
+            groups: [opengnsys_server__client_get]
+            expose: true
+            serialized_name: repository
+        hardwareProfile:
+            groups: [opengnsys_server__client_get]
+            expose: true
+            serialized_name: hardwareProfile
+        partitions:
+            groups: [opengnsys_server__partition_get]
+            expose: true
+            serialized_name: partitions
+        netboot:
+            groups: [opengnsys_server__netboot_get]
+            expose: true
+            serialized_name: netboot

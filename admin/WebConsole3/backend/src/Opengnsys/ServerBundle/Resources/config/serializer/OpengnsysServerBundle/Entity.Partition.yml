@@ -1,0 +1,43 @@
+Opengnsys\ServerBundle\Entity\Partition:
+    exclusion_policy: ALL
+    properties:
+        numDisk:
+            groups: [opengnsys_server__partition_get, opengnsys_server__partition_cget]
+            expose: true
+            serialized_name: numDisk
+        numPartition:
+            groups: [opengnsys_server__partition_get, opengnsys_server__partition_cget]
+            expose: true
+            serialized_name: numPartition
+        size:
+            groups: [opengnsys_server__partition_get, opengnsys_server__partition_cget]
+            expose: true
+            serialized_name: size
+        cacheContent:
+            groups: [opengnsys_server__partition_get, opengnsys_server__partition_cget]
+            expose: true
+            serialized_name: cacheContent
+        filesystem:
+            groups: [opengnsys_server__partition_get, opengnsys_server__partition_cget]
+            expose: true
+            serialized_name: filesystem
+        partitionCode:
+            groups: [opengnsys_server__partition_get, opengnsys_server__partition_cget]
+            expose: true
+            serialized_name: partitionCode
+        id:
+            groups: [opengnsys_server__partition_get, opengnsys_server__partition_cget]
+            expose: true
+            serialized_name: id
+        image:
+            groups: [opengnsys_server__partition_get, opengnsys_server__partition_cget]
+            expose: true
+            serialized_name: image
+        osName:
+            groups: [opengnsys_server__partition_get, opengnsys_server__partition_cget]
+            expose: true
+            serialized_name: osName
+        usage:
+            groups: [opengnsys_server__partition_get, opengnsys_server__partition_cget]
+            expose: true
+            serialized_name: usage

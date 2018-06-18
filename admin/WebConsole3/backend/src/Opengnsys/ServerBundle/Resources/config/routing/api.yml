@@ -1,0 +1,68 @@
+core:
+    type: rest
+    resource: Opengnsys\ServerBundle\Controller\Api\CoreController
+    name_prefix: opengnsys_server__api_
+client:
+    type: rest
+    resource: Opengnsys\ServerBundle\Controller\Api\ClientController
+    name_prefix: opengnsys_server__api_
+hardware:
+    type: rest
+    resource: Opengnsys\ServerBundle\Controller\Api\HardwareController
+    name_prefix: opengnsys_server__api_
+hardware_profile:
+    type: rest
+    resource: Opengnsys\ServerBundle\Controller\Api\HardwareProfileController
+    name_prefix: opengnsys_server__api_
+image:
+    type: rest
+    resource: Opengnsys\ServerBundle\Controller\Api\ImageController
+    name_prefix: opengnsys_server__api_
+menu:
+    type: rest
+    resource: Opengnsys\ServerBundle\Controller\Api\MenuController
+    name_prefix: opengnsys_server__api_
+network_settings:
+    type: rest
+    resource: Opengnsys\ServerBundle\Controller\Api\NetworkSettingsController
+    name_prefix: opengnsys_server__api_
+organizational_unit:
+    type: rest
+    resource: Opengnsys\ServerBundle\Controller\Api\OrganizationalUnitController
+    name_prefix: opengnsys_server__api_
+partition:
+    type: rest
+    resource: Opengnsys\ServerBundle\Controller\Api\PartitionController
+    name_prefix: opengnsys_server__api_
+repository:
+    type: rest
+    resource: Opengnsys\ServerBundle\Controller\Api\RepositoryController
+    name_prefix: opengnsys_server__api_
+software:
+    type: rest
+    resource: Opengnsys\ServerBundle\Controller\Api\SoftwareController
+    name_prefix: opengnsys_server__api_
+software_profile:
+    type: rest
+    resource: Opengnsys\ServerBundle\Controller\Api\SoftwareProfileController
+    name_prefix: opengnsys_server__api_
+user:
+    type: rest
+    resource: Opengnsys\ServerBundle\Controller\Api\UserController
+    name_prefix: opengnsys_server__api_
+#validation_settings:
+#    type: rest
+#    resource: Opengnsys\ServerBundle\Controller\Api\ValidationSettingsController
+#    name_prefix: opengnsys_server__api_
+command:
+    type: rest
+    resource: Opengnsys\ServerBundle\Controller\Api\CommandController
+    name_prefix: opengnsys_server__api_
+trace:
+    type: rest
+    resource: Opengnsys\ServerBundle\Controller\Api\TraceController
+    name_prefix: opengnsys_server__api_
+netboot:
+    type: rest
+    resource: Opengnsys\ServerBundle\Controller\Api\NetbootController
+    name_prefix: opengnsys_server__api_

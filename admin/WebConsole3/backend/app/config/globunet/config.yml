@@ -1,0 +1,12 @@
+imports:
+    # GlobunetApi
+    - { resource: "@GlobunetApiBundle/Resources/config/config.yml" }
+
+    # Globunet User
+    - { resource: "@GlobunetUserBundle/Resources/config/config.yml" }
+    - { resource: "@GlobunetUserBundle/Resources/config/parameters.yml" }
+
+parameters:
+    globunet_user__user_class:  Opengnsys\ServerBundle\Entity\User
+    globunet_user__group_class:  Opengnsys\ServerBundle\Entity\Group
+    globunet_user__provider_default: fos_user.user_provider.username

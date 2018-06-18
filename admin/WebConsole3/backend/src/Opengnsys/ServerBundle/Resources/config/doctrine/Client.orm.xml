@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <entity name="Opengnsys\ServerBundle\Entity\Client" table="og_clients"
+            repository-class="Opengnsys\ServerBundle\Entity\Repository\ClientRepository">
+
+        <id name="id" type="integer" column="id">
+            <generator strategy="AUTO"/>
+        </id>
+
+        <field name="name" type="string" column="name" length="100" nullable="true"/>
+        <field name="serialno" type="string" column="serial_no" length="100" nullable="true"/>
+        <field name="netiface" type="string" column="netiface" nullable="true"/>
+        <field name="netdriver" type="string" column="netdriver" length="30" nullable="false"/>
+        <field name="mac" type="string" column="mac" length="18" nullable="true"/>
+        <field name="ip" type="string" column="ip" length="36" nullable="false"/>
+
+        <field name="status" type="string" column="status" length="50" nullable="true"/>
+
+        <field name="cache" type="integer" column="cache" nullable="true"/>
+        <field name="idproautoexec" type="integer" column="idproautoexec" nullable="false"/>
+        <field name="oglive" type="string" length="255" column="oglive" nullable="true"/>
+
+        <one-to-many field="partitions" target-entity="\Opengnsys\ServerBundle\Entity\Partition" mapped-by="client">
+            <cascade>
+                <cascade-persist/>
+                <cascade-remove/>
+            </cascade>
+        </one-to-many>
+
+        <many-to-one field="validationSettings" target-entity="\Opengnsys\ServerBundle\Entity\ValidationSettings">
+            <join-columns>
+                <join-column name="validation_settings_id" referenced-column-name="id"/>
+            </join-columns>
+        </many-to-one>
+
+        <many-to-one field="hardwareProfile" target-entity="\Opengnsys\ServerBundle\Entity\HardwareProfile">
+            <join-columns>
+                <join-column name="hardware_profile_id" referenced-column-name="id"/>
+            </join-columns>
+        </many-to-one>
+
+        <many-to-one field="menu" target-entity="\Opengnsys\ServerBundle\Entity\Menu">
+            <join-columns>
+                <join-column name="menu_id" referenced-column-name="id"/>
+            </join-columns>
+        </many-to-one>
+
+        <many-to-one field="repository" target-entity="\Opengnsys\ServerBundle\Entity\Repository">
+            <join-columns>
+                <join-column name="repository_id" referenced-column-name="id"/>
+            </join-columns>
+        </many-to-one>
+
+        <many-to-one field="organizationalUnit" target-entity="OrganizationalUnit" inversed-by="children">
+            <join-columns>
+                <join-column name="organizational_unit_id" referenced-column-name="id"/>
+            </join-columns>
+        </many-to-one>
+
+        <many-to-one field="netboot" target-entity="\Opengnsys\ServerBundle\Entity\Netboot">
+            <join-columns>
+                <join-column name="netboot_id" referenced-column-name="id"/>
+            </join-columns>
+        </many-to-one>
+
+    </entity>
+</doctrine-mapping>

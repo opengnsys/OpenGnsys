@@ -1,0 +1,23 @@
+Opengnsys\ServerBundle\Entity\HardwareProfile:
+    exclusion_policy: ALL
+    properties:
+        description:
+            groups: [opengnsys_server__hardware_profile_get, opengnsys_server__hardware_profile_cget]
+            expose: true
+            serialized_name: description
+        comments:
+            groups: [opengnsys_server__hardware_profile_get, opengnsys_server__hardware_profile_cget]
+            expose: true
+            serialized_name: comments
+        windowsboot:
+            groups: [opengnsys_server__hardware_profile_get, opengnsys_server__hardware_profile_cget]
+            expose: true
+            serialized_name: windowsboot
+        id:
+            groups: [opengnsys_server__hardware_profile_get, opengnsys_server__hardware_profile_cget]
+            expose: true
+            serialized_name: id
+        hardwares:
+            groups: [opengnsys_server__hardware_cget]
+            expose: true
+            serialized_name: hardwares

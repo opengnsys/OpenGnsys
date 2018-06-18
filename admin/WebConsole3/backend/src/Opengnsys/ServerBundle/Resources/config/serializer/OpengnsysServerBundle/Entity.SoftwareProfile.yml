@@ -1,0 +1,19 @@
+Opengnsys\ServerBundle\Entity\SoftwareProfile:
+    exclusion_policy: ALL
+    properties:
+        description:
+            groups: [opengnsys_server__software_profile_get, opengnsys_server__software_profile_cget]
+            expose: true
+            serialized_name: description
+        comments:
+            groups: [opengnsys_server__software_profile_get, opengnsys_server__software_profile_cget]
+            expose: true
+            serialized_name: comments
+        id:
+            groups: [opengnsys_server__software_profile_get, opengnsys_server__software_profile_cget]
+            expose: true
+            serialized_name: id
+        softwares:
+            groups: [opengnsys_server__software_profile_get]
+            expose: true
+            serialized_name: softwares

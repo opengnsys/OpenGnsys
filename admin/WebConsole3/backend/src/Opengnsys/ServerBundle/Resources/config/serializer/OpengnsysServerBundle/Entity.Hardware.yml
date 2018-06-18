@@ -1,0 +1,15 @@
+Opengnsys\ServerBundle\Entity\Hardware:
+    exclusion_policy: ALL
+    properties:
+        description:
+            groups: [opengnsys_server__hardware_get, opengnsys_server__hardware_cget]
+            expose: true
+            serialized_name: description
+        type:
+            groups: [opengnsys_server__hardware_get, opengnsys_server__hardware_cget]
+            expose: true
+            serialized_name: type
+        id:
+            groups: [opengnsys_server__hardware_get, opengnsys_server__hardware_cget]
+            expose: true
+            serialized_name: id

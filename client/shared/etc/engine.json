@@ -790,5 +790,148 @@
     {
       "type": "WinLoader"
     }
+  ],
+"hardwaretypes": [
+    {
+      "id": 1,
+      "nemonic": "boa",
+      "name": "Placas"
+    },
+    {
+      "id": 2,
+      "nemonic": "mul",
+      "name": "Dispositivos Multimedia"
+    },
+    {
+      "id": 3,
+      "nemonic": "net",
+      "name": "Tarjetas de Red"
+    },
+    {
+      "id": 4,
+      "nemonic": "cpu",
+      "name": "Microprocesadores"
+    },
+    {
+      "id": 5,
+      "nemonic": "mem",
+      "name": "Memorias"
+    },
+    {
+      "id": 6,
+      "nemonic": "vga",
+      "name": "Tarjetas gráficas"
+    },
+    {
+      "id": 7,
+      "nemonic": "dis",
+      "name": "Discos"
+    },
+    {
+      "id": 8,
+      "nemonic": "aud",
+      "name": "Dispositivos de sonido"
+    },
+    {
+      "id": 9,
+      "nemonic": "mod",
+      "name": "Marca y modelo del equipo"
+    },
+    {
+      "id": 10,
+      "nemonic": "bio",
+      "name": "Modelo y version de la bios"
+    },
+    {
+      "id": 11,
+      "nemonic": "cdr",
+      "name": "Modelo de grabadora o  grabadora de CD/DVD"
+    },
+    {
+      "id": 12,
+      "nemonic": "ide",
+      "name": "Controladores IDE"
+    },
+    {
+      "id": 13,
+      "nemonic": "fir",
+      "name": "Controladores FireWire"
+    },
+    {
+      "id": 14,
+      "nemonic": "usb",
+      "name": "Controladores USB"
+    },
+    {
+      "id": 15,
+      "nemonic": "bus",
+      "name": "Bus del Sistema"
+    },
+    {
+      "id": 16,
+      "nemonic": "cha",
+      "name": "Chasis del Sistema"
+    },
+    {
+      "id": 17,
+      "nemonic": "sto",
+      "name": "Controladores de almacenamiento"
+    },
+    {
+      "id": 18,
+      "nemonic": "boo",
+      "name": "Tipo de proceso de arranque"
+    }
+  ],
+  "sofwaretypes": [
+    {
+      "id": 1,
+      "nemonic": "os",
+      "name": "Sistemas Operativos"
+    },
+    {
+      "id": 2,
+      "nemonic": "app",
+      "name": "Aplicaciones"
+    },
+    {
+      "id": 3,
+      "nemonic": "file",
+      "name": "Archivos"
+    }
+  ],
+"clientstatus": [
+    {
+      "id": "off",
+      "name": "Off"
+    },
+    {
+      "id": "initializing",
+      "name": "initializing"
+    },
+    {
+      "id": "busy",
+      "name": "busy"
+    },
+    {
+      "id": "linux",
+      "name": "linux"
+    },
+    {
+      "id": "linux_session",
+      "name": "linux_session"
+    },
+    {
+      "id": "macos",
+      "name": "macos"
+    },
+    {
+      "id": "windows",
+      "name": "windows"
+    },
+    {
+      "id": "windows_session",
+      "name": "windows_session"
+    }
   ]
 }

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+    <entity name="Opengnsys\ServerBundle\Entity\NetworkSettings" table="og_network_settings">
+
+        <id name="id" type="integer" column="id">
+            <generator strategy="AUTO"/>
+        </id>
+
+        <field name="proxy" type="string" column="proxy" length="30" nullable="true"/>
+        <field name="dns" type="string" column="dns" length="30" nullable="true"/>
+        <field name="netmask" type="string" column="netmask" length="30" nullable="true"/>
+        <field name="router" type="string" column="router" length="30" nullable="true"/>
+        <field name="ntp" type="string" column="ntp" length="30" nullable="true"/>
+
+        <field name="p2pTime" type="integer" column="p2p_time" nullable="false"/>
+        <field name="p2pMode" type="string" column="p2p_mode" length="30"  nullable="true"/>
+
+        <field name="mcastIp" type="string" column="mcast_ip" length="16" nullable="false"/>
+        <field name="mcastSpeed" type="smallint" column="mcast_speed" nullable="false"/>
+        <field name="mcastPort" type="integer" column="mcast_port" nullable="false"/>
+        <field name="mcastMode" type="string" column="mcast_mode" length="30" nullable="false"/>
+
+    </entity>
+</doctrine-mapping>

@@ -1,0 +1,47 @@
+Opengnsys\ServerBundle\Entity\NetworkSettings:
+    exclusion_policy: ALL
+    properties:
+        proxy:
+            groups: [opengnsys_server__network_settings_get, opengnsys_server__network_settings_cget]
+            expose: true
+            serialized_name: proxy
+        dns:
+            groups: [opengnsys_server__network_settings_get, opengnsys_server__network_settings_cget]
+            expose: true
+            serialized_name: dns
+        netmask:
+            groups: [opengnsys_server__network_settings_get, opengnsys_server__network_settings_cget]
+            expose: true
+            serialized_name: netmask
+        router:
+            groups: [opengnsys_server__network_settings_get, opengnsys_server__network_settings_cget]
+            expose: true
+            serialized_name: router
+        p2pTime:
+            groups: [opengnsys_server__network_settings_get, opengnsys_server__network_settings_cget]
+            expose: true
+            serialized_name: p2pTime
+        p2pMode:
+            groups: [opengnsys_server__network_settings_get, opengnsys_server__network_settings_cget]
+            expose: true
+            serialized_name: p2pMode
+        mcastIp:
+            groups: [opengnsys_server__network_settings_get, opengnsys_server__network_settings_cget]
+            expose: true
+            serialized_name: mcastIp
+        mcastSpeed:
+            groups: [opengnsys_server__network_settings_get, opengnsys_server__network_settings_cget]
+            expose: true
+            serialized_name: mcastSpeed
+        mcastPort:
+            groups: [opengnsys_server__network_settings_get, opengnsys_server__network_settings_cget]
+            expose: true
+            serialized_name: mcastPort
+        mcastMode:
+            groups: [opengnsys_server__network_settings_get, opengnsys_server__network_settings_cget]
+            expose: true
+            serialized_name: mcastMode
+        id:
+            groups: [opengnsys_server__network_settings_get, opengnsys_server__network_settings_cget]
+            expose: true
+            serialized_name: id

@@ -1,0 +1,19 @@
+Opengnsys\ServerBundle\Entity\Netboot:
+    exclusion_policy: ALL
+    properties:
+        id:
+            groups: [opengnsys_server__netboot_get, opengnsys_server__netboot_cget]
+            expose: true
+            serialized_name: id
+        name:
+            groups: [opengnsys_server__netboot_get, opengnsys_server__netboot_cget]
+            expose: true
+            serialized_name: name
+        filename:
+            groups: [opengnsys_server__netboot_get, opengnsys_server__netboot_cget]
+            expose: true
+            serialized_name: filename
+        template:
+            groups: [opengnsys_server__netboot_get, opengnsys_server__netboot_cget]
+            expose: true
+            serialized_name: template

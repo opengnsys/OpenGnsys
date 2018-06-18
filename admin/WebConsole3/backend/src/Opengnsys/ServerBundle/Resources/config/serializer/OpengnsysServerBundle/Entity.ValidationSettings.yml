@@ -1,0 +1,19 @@
+Opengnsys\ServerBundle\Entity\ValidationSettings:
+    exclusion_policy: ALL
+    properties:
+        loginpage:
+            groups: [opengnsys_server__validation_settings_get, opengnsys_server__validation_settings_cget]
+            expose: true
+            serialized_name: loginpage
+        validationpage:
+            groups: [opengnsys_server__validation_settings_get, opengnsys_server__validation_settings_cget]
+            expose: true
+            serialized_name: validationpage
+        validation:
+            groups: [opengnsys_server__validation_settings_get, opengnsys_server__validation_settings_cget]
+            expose: true
+            serialized_name: validation
+        id:
+            groups: [opengnsys_server__validation_settings_get, opengnsys_server__validation_settings_cget]
+            expose: true
+            serialized_name: id
