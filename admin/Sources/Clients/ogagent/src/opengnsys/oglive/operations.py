@@ -27,7 +27,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 '''
-@author: Adolfo Gómez, dkmaster at dkmon dot com
+@author: Ramón M. Gómez, ramongomez at us dot es
 '''
 from __future__ import unicode_literals
 
@@ -35,7 +35,6 @@ import socket
 import platform
 import fcntl
 import os
-import locale
 import ctypes  # @UnusedImport
 import ctypes.util
 import subprocess
@@ -43,7 +42,32 @@ import struct
 import array
 import six
 from opengnsys import utils
-from .renamer import rename
+
+
+def checkLockedPartition(sync=False):
+    '''
+    Decorator to check if a partition is locked
+    '''
+    def outer(fnc):
+        def wrapper(*args, **kwargs):
+            partId = 'None'
+            try:
+                this, path, getParams, postParams = args  # @UnusedVariable
+                partId = postParams['disk'] + postParams['part']
+                if this.locked.get(partId, False):
+                    this.locked[partId] = True
+                    fnc(*args, **kwargs)
+                else:
+                    return 'partition locked'
+            except Exception as e:
+                this.locked[partId] = False
+                return 'error {}'.format(e)
+            finally:
+                if sync is True:
+                    this.locked[partId] = False
+            logger.debug('Lock status: {} {}'.format(fnc, this.locked))
+        return wrapper
+    return outer
 
 
 def _getMacAddr(ifname):
@@ -113,6 +137,14 @@ def _getIpAndMac(ifname):
     return (ip, mac)
 
 
+def _exec_ogcommand(self, ogcmd):
+    '''
+    Loads OpenGnsys environment variables, executes the command and returns the result
+    '''
+    ret = subprocess.check_output('source /opt/opengnsys/etc/preinit/loadenviron.sh >/dev/null; {}'.format(ogcmd), shell=True)
+    return ret
+
+
 def getComputerName():
     '''
     Returns computer name, with no domain
@@ -138,50 +170,41 @@ def getDomainName():
     return ''
 
 
-def getLinuxVersion():
+def getOgliveVersion():
     lv = platform.linux_distribution()
     return lv[0] + ', ' + lv[1]
 
 
-def reboot(flags=0):
+def reboot():
     '''
-    Simple reboot using os command
-    '''
-    # Workaround for dummy thread
-    if six.PY3 is False:
-        import threading
-        threading._DummyThread._Thread__stop = lambda x: 42
-
-    subprocess.call(['/sbin/reboot'])
-
-
-def poweroff(flags=0):
-    '''
-    Simple poweroff using os command
+    Simple reboot using OpenGnsys script
     '''
     # Workaround for dummy thread
     if six.PY3 is False:
         import threading
         threading._DummyThread._Thread__stop = lambda x: 42
 
-    subprocess.call(['/sbin/poweroff'])
+    _exec_ogcommand('/opt/opengnsys/scripts/reboot', shell=True)
+
+
+def poweroff():
+    '''
+    Simple poweroff using OpenGnsys script
+    '''
+    # Workaround for dummy thread
+    if six.PY3 is False:
+        import threading
+        threading._DummyThread._Thread__stop = lambda x: 42
+
+    _exec_ogcommand('/opt/opengnsys/scripts/poweroff', shell=True)
 
 
 def logoff():
-    '''
-    Kills all curent user processes, which must send a logogof
-    caveat: If the user has other sessions, will also disconnect from them
-    '''
-    # Workaround for dummy thread
-    if six.PY3 is False:
-        import threading
-        threading._DummyThread._Thread__stop = lambda x: 42
-
-    subprocess.call(['/usr/bin/pkill', '-u', os.environ['USER']])
+    pass
 
 
 def renameComputer(newName):
-    rename(newName)
+    pass
 
 
 def joinDomain(domain, ou, account, password, executeInOneStep=False):
@@ -189,90 +212,19 @@ def joinDomain(domain, ou, account, password, executeInOneStep=False):
 
 
 def changeUserPassword(user, oldPassword, newPassword):
+    pass
+
+
+def diskconfig():
     '''
-    Simple password change for user using command line
+    Returns disk configuration.
+    Warning: this operation may take some time.
     '''
-    os.system('echo "{1}\n{1}" | /usr/bin/passwd {0} 2> /dev/null'.format(user, newPassword))
+    try:
+        _exec_ogcommand('/opt/opengnsys/interfaceAdm/getConfiguration')
+        # Returns content of configuration file.
+        cfgdata = open('/tmp/getconfig', 'r').read() 
+    except IOError:
+        cfgdata = ''
+    return cfgdata
 
-
-class XScreenSaverInfo(ctypes.Structure):
-    _fields_ = [('window', ctypes.c_long),
-                ('state', ctypes.c_int),
-                ('kind', ctypes.c_int),
-                ('til_or_since', ctypes.c_ulong),
-                ('idle', ctypes.c_ulong),
-                ('eventMask', ctypes.c_ulong)]
-
-# Initialize xlib & xss
-try:
-    xlibPath = ctypes.util.find_library('X11')
-    xssPath = ctypes.util.find_library('Xss')
-    xlib = ctypes.cdll.LoadLibrary(xlibPath)
-    xss = ctypes.cdll.LoadLibrary(xssPath)
-
-    # Fix result type to XScreenSaverInfo Structure
-    xss.XScreenSaverQueryExtension.restype = ctypes.c_int
-    xss.XScreenSaverAllocInfo.restype = ctypes.POINTER(XScreenSaverInfo)  # Result in a XScreenSaverInfo structure
-except Exception:  # Libraries not accesible, not found or whatever..
-    xlib = xss = None
-
-
-def initIdleDuration(atLeastSeconds):
-    '''
-    On linux we set the screensaver to at least required seconds, or we never will get "idle"
-    '''
-    # Workaround for dummy thread
-    if six.PY3 is False:
-        import threading
-        threading._DummyThread._Thread__stop = lambda x: 42
-
-    subprocess.call(['/usr/bin/xset', 's', '{}'.format(atLeastSeconds + 30)])
-    # And now reset it
-    subprocess.call(['/usr/bin/xset', 's', 'reset'])
-
-
-def getIdleDuration():
-    '''
-    Returns idle duration, in seconds
-    '''
-    if xlib is None or xss is None:
-        return 0  # Libraries not available
-
-    # production code might want to not hardcode the offset 16...
-    display = xlib.XOpenDisplay(None)
-
-    event_base = ctypes.c_int()
-    error_base = ctypes.c_int()
-
-    available = xss.XScreenSaverQueryExtension(display, ctypes.byref(event_base), ctypes.byref(error_base))
-    if available != 1:
-        return 0  # No screen saver is available, no way of getting idle
-
-    info = xss.XScreenSaverAllocInfo()
-    xss.XScreenSaverQueryInfo(display, xlib.XDefaultRootWindow(display), info)
-
-    if info.contents.state != 0:
-        return 3600 * 100 * 1000  # If screen saver is active, return a high enough value
-
-    return info.contents.idle / 1000.0
-
-
-def getCurrentUser():
-    '''
-    Returns current logged in user
-    '''
-    return os.environ['USER']
-
-
-def getSessionLanguage():
-    '''
-    Returns the user's session language
-    '''
-    return locale.getdefaultlocale()[0]
-
-
-def showPopup(title, message):
-    '''
-    Displays a message box on user's session (during 1 min).
-    '''
-    return subprocess.call('zenity --info --timeout 60 --title "{}" --text "{}"'.format(title, message), shell=True)

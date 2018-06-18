@@ -29,29 +29,4 @@
 '''
 @author: Adolfo Gómez, dkmaster at dkmon dot com
 '''
-# pylint: disable=unused-wildcard-import,wildcard-import
-
 from __future__ import unicode_literals
-
-import sys
-import os
-
-# Importing platform operations and getting operating system data.
-if sys.platform == 'win32':
-    from .windows.operations import *  # @UnusedWildImport
-    osType = 'Windows'
-    osVersion = getWindowsVersion()
-else:
-    if sys.platform == 'darwin':
-        from .macos.operations import *  # @UnusedWildImport
-        osType = 'MacOS'
-        osVersion = getMacosVersion().replace(',','')
-    else:
-        if os.path.exists('/scripts/oginit'):
-            from .oglive.operations import *  # @UnusedWildImport
-            osType = 'ogLive'
-            osVersion = getOgliveVersion().replace(',','')
-        else:
-            from .linux.operations import *  # @UnusedWildImport
-            osType = 'Linux'
-            osVersion = getLinuxVersion().replace(',','')
