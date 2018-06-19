@@ -1,25 +1,24 @@
 //________________________________________________________________________________________________________
 //
-//	Fichero de idiomas javascripts: comunescomandos_eng.js (Común a todos los comandos)
-//	Idioma: Inglés
+//    Javascript language file: comunescomandos_eng.js
+//    Language: English
 //________________________________________________________________________________________________________
 var CTbMsg=new Array;
-CTbMsg[0]="WARNING.- Cancelled operation, you will might come back this screen in another moment to perform this command";
-CTbMsg[1]="WARNING: An error occurs when attempt to register command";
-CTbMsg[2]="The command has been successfully registered";
-CTbMsg[3]="WARNING: An error occurred while trying to register this Command as a Procedure";
-CTbMsg[4]="The command has been successfully registered as a Procedure";
-CTbMsg[5]="WARNING: An error occurred while trying to register this Command as a Task";
-CTbMsg[6]="The command has been successfully registered as a Task";
-CTbMsg[7]="WARNING: An error occurs when attempt to register command";
-
-CTbMsg[8]="WARNING: Choose one mode of execution at least";
-CTbMsg[9]="WARNING: You must choose a way of immediate execution";
-CTbMsg[10]="WARNING: You must choose a way of inclusion this command on procedure";
-CTbMsg[11]="WARNING: You must specify the name of the new procedure where this command will be added";
-CTbMsg[12]="WARNING: You should choose the procedure that will add this command";
-CTbMsg[13]="WARNING: You must choose a way of inclusion this command on task executable";
-CTbMsg[14]="WARNING: You must specify the name of the new task where this command will be added";
-CTbMsg[15]="WARNING: You must choose the task that will add this command";
-CTbMsg[16]="AVISO: si el código incluye reinicio o apagado, puede provocar que el cliente no inicie correctamente";
-CTbMsg[17]="The command has been successfully registered, but there was some problems connecting repository REST API";
+CTbMsg[0]="WARNING: Canceled operation, you can return at any time on this screen to execute this command again";
+CTbMsg[1]="WARNING: Error sending this command";
+CTbMsg[2]="Command has been sent successfully";
+CTbMsg[3]="WARNING: Error registering this Command as a Procedure";
+CTbMsg[4]="The command has been registered successfully as a Procedure";
+CTbMsg[5]="WARNING: Error registering this Command as a Task";
+CTbMsg[6]="Command has been registered successfully as a Task";
+CTbMsg[7]="WARNING: Error trying to register command action";
+CTbMsg[8]="WARNING: You must choose at least one execution mode";
+CTbMsg[9]="WARNING: You must choose one immediate execution mode";
+CTbMsg[10]="WARNING: You must choose a way of including this command into a Procedure";
+CTbMsg[11]="WARNING: You must specify a name for the new procedure where this command will be added.";
+CTbMsg[12]="WARNING: You must choose the procedure where this command will be added";
+CTbMsg[13]="WARNING: You must choose a way of including this command into an executable task";
+CTbMsg[14]="WARNING: You must specify a name for the new task where this command will be added";
+CTbMsg[15]="WARNING: You must choose the task where this command will be added";
+CTbMsg[16]="WARNING: If the code contains reboot or shutdown, the client might not boot successfully";
+CTbMsg[17]="Command has been sent successfully, but there was some problems connecting API REST Repository";

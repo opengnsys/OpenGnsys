@@ -1,10 +1,9 @@
 ﻿//________________________________________________________________________________________________________
 //	
-//	Fichero de idiomas javascript: inclusionacciones_eng.js 
-//	Idioma: Ingles
-//________________________________________________________________________________________________________
+//    Javascript language file: inclusionacciones_eng.js
+//    Language: English
+//____________________________________________________________________________
 TbMsg=new Array;
 TbMsg[0]="";
-TbMsg[1]=" ATENCIÓN: Debe introducir un número de orden correcto";
-TbMsg[2]="El proceso se ha ejecutado correctamente";
-
+TbMsg[1]="WARNING: You must enter a correct sequence number.";
+TbMsg[2]="Process has been executed successfully";

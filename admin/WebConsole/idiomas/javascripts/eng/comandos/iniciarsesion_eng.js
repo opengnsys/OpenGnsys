@@ -1,9 +1,9 @@
 //________________________________________________________________________________________________________
 //
-//	Fichero de idiomas javascripts: iniciarsesion_eng.js 
-//	Idioma: Ingles 
+//    Javascript language file: iniciarsesion_eng.js
+//    Language: English
 //________________________________________________________________________________________________________
 TbMsg=new Array;
 TbMsg[0]="";
 TbMsg[1]="You must choose at least one partition";
-TbMsg["FILTER"]="Debe seleccionar al menos un ordenador que tenga la configuración elegida.";
+TbMsg["FILTER"]="You must select at least one computer with the chosen configuration.";

@@ -1,7 +1,6 @@
 //____________________________________________________________________________
 //	
-//	Fichero de idiomas javascript: imagenes.js 
-//	Idioma: Ingés 
+//    Javascript language file: imagenes.js
+//    Language: English
 //____________________________________________________________________________
 TbMsg=new Array;
-
