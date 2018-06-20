@@ -174,9 +174,9 @@ def poweroff():
     _exec_ogcommand('/opt/opengnsys/scripts/poweroff')
 
 
-def get_disk_config():
+def get_configuration():
     """
-    Returns disk configuration
+    Returns client's configuration
     Warning: this operation may take some time
     """
     try:
@@ -186,3 +186,17 @@ def get_disk_config():
     except IOError:
         cfgdata = ''
     return cfgdata
+
+
+def get_hardware():
+    """
+    Returns client's hardware list
+    """
+    try:
+        filepath = _exec_ogcommand('/opt/opengnsys/scripts/listHardwareInfo').strip()
+        # Returns content of configuration file, skipping the header line and newline characters
+        with open(filepath, 'r') as f:
+            harddata = map(str.strip, f.readlines()[1:])
+    except IOError:
+        harddata = ''
+    return harddata

@@ -296,7 +296,7 @@ class OpenGnSysWorker(ServerWorker):
         logger.debug('Recieved getconfig operation')
         self.checkSecret(server)
         # Processing data
-        for row in operations.get_disk_config().strip().split(';'):
+        for row in operations.get_configuration().split(';'):
             cols = row.split(':')
             if len(cols) == 1:
                 if cols[0] != '':
@@ -325,3 +325,16 @@ class OpenGnSysWorker(ServerWorker):
                 warnings += 1
         # Returning configuration data and count of warnings
         return {'serialno': serialno, 'storage': storage, 'warnings': warnings}
+
+    def process_hardware(self, path, get_params, post_params, server):
+        """
+        Returns client's hardware profile
+        :param path:
+        :param get_params:
+        :param post_params:
+        :param server:
+        """
+        logger.debug('Recieved {} operation'.format(path))
+        self.checkSecret(server)
+        # Returning raw data
+        return operations.get_hardware()
