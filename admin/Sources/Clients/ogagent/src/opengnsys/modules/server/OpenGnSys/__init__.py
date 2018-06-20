@@ -42,6 +42,7 @@ from opengnsys import operations
 from opengnsys.log import logger
 from opengnsys.scriptThread import ScriptExecutorThread
 from opengnsys.workers import ServerWorker
+from six.moves.urllib import parse
 
 
 # Error handler decorator.
@@ -106,7 +107,12 @@ class OpenGnSysWorker(ServerWorker):
         """
         self.cmd = None
         # Ensure cfg has required configuration variables or an exception will be thrown
-        self.REST = REST(self.service.config.get('opengnsys', 'remote'))
+        url = self.service.config.get('opengnsys', 'remote')
+        if operations.os_type == 'ogLive' and 'oglive' in os.environ:
+            # Replacing server IP if its running on ogLive clinet
+            logger.debug('Activating on ogLive client, new server is {}'.format(os.environ['oglive']))
+            url = parse.urlsplit(url)._replace(netloc=os.environ['oglive']).geturl()
+        self.REST = REST(url)
         # Get network interfaces until they are active or timeout (5 minutes)
         for t in range(0, 300):
             try:
@@ -284,7 +290,38 @@ class OpenGnSysWorker(ServerWorker):
         :param server:
         :return: object
         """
+        serialno = ''   # Serial number
+        storage = []    # Storage configuration
+        warnings = 0    # Number of warnings
         logger.debug('Recieved getconfig operation')
         self.checkSecret(server)
-        # Returns raw data
-        return {'config': operations.get_disk_config()}
+        # Processing data
+        for row in operations.get_disk_config().strip().split(';'):
+            cols = row.split(':')
+            if len(cols) == 1:
+                if cols[0] != '':
+                    # Serial number
+                    serialno = cols[0]
+                else:
+                    # Skip blank rows
+                    pass
+            elif len(cols) == 7:
+                disk, npart, tpart, fs, os, size, usage = cols
+                try:
+                    if int(npart) == 0:
+                        # Disk information
+                        storage.append({'disk': int(disk), 'parttable': int(tpart), 'size': int(size)})
+                    else:
+                        # Partition information
+                        storage.append({'disk': int(disk), 'partition': int(npart), 'parttype': tpart,
+                                        'filesystem': fs, 'operatingsystem': os, 'size': int(size),
+                                        'usage': int(usage)})
+                except ValueError:
+                    logger.warn('Configuration parameter error: {}'.format(cols))
+                    warnings += 1
+            else:
+                # Logging warnings
+                logger.warn('Configuration data error: {}'.format(cols))
+                warnings += 1
+        # Returning configuration data and count of warnings
+        return {'serialno': serialno, 'storage': storage, 'warnings': warnings}

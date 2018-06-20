@@ -181,9 +181,8 @@ def get_disk_config():
     """
     try:
         _exec_ogcommand('/opt/opengnsys/interfaceAdm/getConfiguration')
-        # Returns content of configuration file.
-        cfgdata = open('/tmp/getconfig', 'r').read() 
+        # Returns content of configuration file
+        cfgdata = open('/tmp/getconfig', 'r').read().strip()
     except IOError:
         cfgdata = ''
     return cfgdata
-
