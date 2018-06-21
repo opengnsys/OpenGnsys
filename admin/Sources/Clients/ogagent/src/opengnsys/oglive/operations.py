@@ -164,7 +164,7 @@ def reboot():
 
 def poweroff():
     """
-    Simple poweroff using OpenGnsys script
+    Simple power off using OpenGnsys script
     """
     # Workaround for dummy thread
     if six.PY3 is False:
@@ -178,6 +178,7 @@ def get_configuration():
     """
     Returns client's configuration
     Warning: this operation may take some time
+    :return:
     """
     try:
         _exec_ogcommand('/opt/opengnsys/interfaceAdm/getConfiguration')
@@ -191,6 +192,7 @@ def get_configuration():
 def get_hardware():
     """
     Returns client's hardware list
+    :return:
     """
     try:
         filepath = _exec_ogcommand('/opt/opengnsys/scripts/listHardwareInfo').strip()
@@ -200,3 +202,20 @@ def get_hardware():
     except IOError:
         harddata = ''
     return harddata
+
+
+def get_software(disk, part):
+    """
+    Returns software list installed on an operating system
+    :param disk:
+    :param part:
+    :return:
+    """
+    try:
+        filepath = _exec_ogcommand('/opt/opengnsys/scripts/listSoftwareInfo {} {}'.format(disk, part)).strip()
+        # Returns content of configuration file, skipping the header line and newline characters
+        with open(filepath, 'r') as f:
+            softdata = map(str.strip, f.readlines())
+    except IOError:
+        softdata = ''
+    return softdata

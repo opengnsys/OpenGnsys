@@ -281,7 +281,7 @@ class OpenGnSysWorker(ServerWorker):
     def process_client_popup(self, params):
         self.REST.sendMessage('popup_done', params)
 
-    def process_getconfig(self, path, get_params, post_params, server):
+    def process_config(self, path, get_params, post_params, server):
         """
         Returns client configuration
         :param path:
@@ -334,7 +334,26 @@ class OpenGnSysWorker(ServerWorker):
         :param post_params:
         :param server:
         """
-        logger.debug('Recieved {} operation'.format(path))
+        data = []
+        logger.debug('Recieved hardware operation')
         self.checkSecret(server)
-        # Returning raw data
-        return operations.get_hardware()
+        # Processing data
+        try:
+            for comp in operations.get_hardware():
+                data.append({'component': comp.split('=')[0], 'value': comp.split('=')[1]})
+        except:
+            pass
+        # Return list of hardware components
+        return data
+
+    def process_software(self, path, get_params, post_params, server):
+        """
+        Returns software profile installed on an operating system
+        :param path:
+        :param get_params:
+        :param post_params:
+        :param server:
+        :return:
+        """
+        logger.debug('Recieved software operation with params: {}'.format(post_params))
+        return operations.get_software(post_params['disk'], post_params['part'])
