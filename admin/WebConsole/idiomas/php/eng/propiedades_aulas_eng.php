@@ -58,4 +58,4 @@ $TbMsg['PROP_REMOTEACCESS']="Remote access";
 $TbMsg['COMM_REMOTEACCESS']="allow remote access management to computers";
 $TbMsg['COMM_DEFOGLIVE']="Assigned by administrator";
 // Ticket-816 PCprofesor
-$TbMsg['PROP_PROFCOMPUTER']="Professor's computer";
+$TbMsg['PROP_PROFCOMPUTER']="Teacher‘s computer",

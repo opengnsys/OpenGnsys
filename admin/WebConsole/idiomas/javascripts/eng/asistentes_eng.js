@@ -7,4 +7,4 @@ TbMsg=new Array;
 // Asistente de particionado
 TbMsg["NOCACHESIZE"] = "Free disk space is smaller than cache!";
 TbMsg["NODISKSIZE"] = "Free disk space cannot be lower than zero!";
-TbMsg["NOSUPPORT"] = "Este navegador no soporta la operación.";
+TbMsg["NOSUPPORT"] = "This browser does not support this operation.";
