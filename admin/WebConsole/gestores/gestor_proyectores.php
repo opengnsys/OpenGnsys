@@ -15,13 +15,13 @@ include_once("../includes/CreaComando.php");
 include_once("../includes/constantes.php");
 //include_once("./relaciones/proyectores_eliminacion.php");
 include_once("../includes/opciones.php");
-//include_once("../idiomas/php/".$idioma."/gestor_proyectores_".$idioma.".php");
+include_once("../idiomas/php/".$idioma."/gestor_proyectores_".$idioma.".php");
 
 //________________________________________________________________________________________________________
 $opcion=0; // Inicializa parametros
 
-$idaula=0; 
-$idproyector=0; 
+$idaula=0;
+$idproyector=0;
 $nombreproyector="";
 $modelo="";
 $tipo="";
@@ -77,7 +77,7 @@ if ($resul){
 	if ($opcion==$op_alta ) {
 	    if ( $datosduplicados != '') {
 		echo $literal."(0,'".$TbMsg["DUPLICADO"].$datosduplicados." ',".$idproyector.",o.innerHTML);".chr(13);
-	    } else {  
+	    } else {
 		echo $literal."(1,'".$cmd->DescripUltimoError()." ',".$idproyector.",o.innerHTML);".chr(13);
 	    }
 	}
@@ -90,7 +90,7 @@ else
 if($opcion!=$op_movida){
 	echo '	</SCRIPT>';
 	echo '</BODY>	';
-	echo '</HTML>';	
+	echo '</HTML>';
 }
 /*________________________________________________________________________________________________________
 	Inserta, modifica o elimina datos en la tabla proyectores
@@ -128,7 +128,7 @@ function Gestiona(){
                         $cmd->texto=<<<EOD
 SELECT *
   FROM projectors
- WHERE name=@nombreproyector OR ipddr=@ip;
+ WHERE name=@nombreproyector OR ipaddr=@ip;
 EOD;
                         $rs=new Recordset;
                         $rs->Comando=&$cmd;
@@ -144,10 +144,10 @@ EOD;
                         $datosduplicados = trim($datosduplicados, ',');
 
                         // Si no hay datos duplicados insertamos el proyector;
-                        if ( $datosduplicados == "" ) {
+                        if ($datosduplicados == "") {
 			     $cmd->texto = <<<EOD
-INSERT INTO projectors (name, model, type, ipaddr)
-     VALUES (@nombreproyector, @modelo, @tipo, @ip);
+INSERT INTO projectors (name, model, type, ipaddr, lab_id)
+     VALUES (@nombreproyector, @modelo, @tipo, @ip, @idaula);
 EOD;
 			}
 			$resul=$cmd->Ejecutar();
@@ -189,13 +189,13 @@ EOD;
 	Crea un arbol XML para el nuevo nodo insertado 
 ________________________________________________________________________________________________________*/
 function SubarbolXML_proyectores($idproyector,$nombreproyector){
-		global $LITAMBITO_ORDENADORES;
+		global $LITAMBITO_PROYECTORES;
 		$cadenaXML='<PROYECTOR';
-		// Atributos			
+		// Atributos.
 		$cadenaXML.=' clickcontextualnodo="menu_contextual(this,' ."'flo_".$LITAMBITO_PROYECTORES."'" .')"';
 		$cadenaXML.=' imagenodo="../images/iconos/proyector.gif"';
 		$cadenaXML.=' infonodo="'.$nombreproyector.'"';
 		$cadenaXML.=' nodoid='.$LITAMBITO_PROYECTORES.'-'.$idproyector;
 		$cadenaXML.='></PROYECTOR>';
 		return($cadenaXML);
-} 
+}

@@ -130,8 +130,8 @@ function insertar(l,t,w,h,pages,swi,idu){
 	if(identificador==null) identificador=0;
 
 	if(literaltipo==LITAMBITO_AULAS){ // Nuevo grupo de ordenador hijo de un aula
-		if(	pages=="../propiedades/propiedades_ordenadores.php")
-			var whref="../propiedades/propiedades_ordenadores.php?opcion="+op_alta+"&grupoid=0"+"&idaula="+identificador;
+		if(pages=="../propiedades/propiedades_ordenadores.php" || pages=="../propiedades/propiedades_proyectores.php")
+			var whref=pages+"?opcion="+op_alta+"&grupoid=0"+"&idaula="+identificador;
 		else
 			var whref=pages+"&opcion="+op_alta+"&idambito="+identificador;;
 	}
@@ -220,8 +220,8 @@ function eliminar(l,t,w,h,pages){
 //________________________________________________________________________________________________________
 //	
 //	Devuelve el resultado de eliminar un grupo
-//	Par�etros:
-//			- resul: resultado de la operaci� ( true si tuvo �ito)
+//	Parámetros:
+//			- resul: resultado de la operación (true si tuvo éxito)
 //			- descrierror: Descripción del error en su caso
 //			- id: Identificador del registro
 //________________________________________________________________________________________________________

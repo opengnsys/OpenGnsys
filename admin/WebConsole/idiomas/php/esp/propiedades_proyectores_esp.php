@@ -2,7 +2,7 @@
 //______________________________________________________________
 //
 //	Fichero de idiomas php: propiedades_proyectores_esp.php 
-//	Idioma: Español 
+//	Idioma: Español
 //______________________________________________________________
 if (empty ($TbMsg)) $TbMsg=array();
 $TbMsg[0]="Sin Opci&oacute;n";
