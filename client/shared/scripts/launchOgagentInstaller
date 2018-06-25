@@ -13,7 +13,7 @@
 # Global variables.
 PROG="$(basename "$0")"
 if which curl &>/dev/null; then
-    DOWNLOAD="curl -k --timeout 1 -o"
+    DOWNLOAD="curl -k -f --connect-timeout 1 -o"
 else
     DOWNLOAD="wget --no-check-certificate -T 1 -O"
 fi
@@ -41,11 +41,10 @@ case "$(ogGetOsType $1 $2)" in
         # Downloading OGAgent installer for Windows.
         OGAGENTFILE="OGAgentSetup-${OGVERSION/pre/}.exe"
         TMPDIR="$(ogGetPath "$MNTDIR/Windows/Temp")"
-        eval $DOWNLOAD "$TMPDIR/$OGAGENTFILE" "https://$(ogGetServerIp)/opengnsys/descargas/$OGAGENTFILE" 2>/dev/null
         if ogListSoftware $1 $2 | grep -qi "opengnsys agent"; then
             echo "OGAgent for Windows is already installed, you need to uninstall it before re-install."
         else
-            if [ -s "$TMPDIR/$OGAGENTFILE" ]; then
+            if eval $DOWNLOAD "$TMPDIR/$OGAGENTFILE" "https://$(ogGetServerIp)/opengnsys/descargas/$OGAGENTFILE" 2>/dev/null; then
                 # Run once OGAgent Installer.
                 if hivexsh -w << EOT 2>/dev/null; then
 load $HIVE
@@ -68,7 +67,7 @@ EOT
                 exit $OG_ERR_NOTFOUND
             fi
         fi
-	;;
+        ;;
     Linux)    # OGAgent for Linux (only deb and redhat-based backages; TODO suse-based package).
         if ogListSoftware $1 $2 | grep -qi "ogagent"; then
             echo "OGAgent for Linux is already installed, you need to uninstall it before re-install."
@@ -76,20 +75,19 @@ EOT
             SYSTEMDDIR="$MNTDIR/lib/systemd"
             [ -d "$SYSTEMDDIR" -a -d "${SYSTEMDDIR/lib/etc}" ] || ogRaiseError $OG_ERR_NOTFOUND "$1 $2 systemd" || exit $OG_ERR_NOTFOUND
             # Downloading OGAgent installer for Linux.
-	    if [ -e $MNTDIR/etc/debian_version ]; then    # Debian-based
+            if [ -e $MNTDIR/etc/debian_version ]; then    # Debian-based
                 OGAGENTFILE="ogagent_${OGVERSION/pre/}_all.deb"
                 CODE="if ! dpkg -l ogagent &>/dev/null && [ -f /var/tmp/$OGAGENTFILE ]; then apt-get update; apt-get install -y /var/tmp/$OGAGENTFILE; fi"
-	    fi
-	    if [ -e $MNTDIR/etc/redhat-release ]; then    # RedHat-based
-	        OGAGENTFILE="ogagent-${OGVERSION/pre/}-1.noarch.rpm"
+            fi
+            if [ -e $MNTDIR/etc/redhat-release ]; then    # RedHat-based
+                OGAGENTFILE="ogagent-${OGVERSION/pre/}-1.noarch.rpm"
                 CODE="if ! rpm -q ogagent &>/dev/null && [ -f /var/tmp/$OGAGENTFILE ]; then yum install -y /var/tmp/$OGAGENTFILE; fi"
-	    fi
-	    [ -n "$OGAGENTFILE" ] || ogRaiseError $OG_ERR_NOTFOUND "$1 $2 ogagent" || exit $OG_ERR_NOTFOUND
+            fi
+            [ -n "$OGAGENTFILE" ] || ogRaiseError $OG_ERR_NOTFOUND "$1 $2 ogagent" || exit $OG_ERR_NOTFOUND
             TMPDIR="$MNTDIR/var/tmp"
-            eval $DOWNLOAD "$TMPDIR/$OGAGENTFILE" "https://$(ogGetServerIp)/opengnsys/descargas/$OGAGENTFILE" 2>/dev/null
-            if [ -s "$TMPDIR/$OGAGENTFILE" ]; then
-	        # Creating systemd script.
-	        cat << EOT > $SYSTEMDDIR/systemd-launchogagent
+            if eval $DOWNLOAD "$TMPDIR/$OGAGENTFILE" "https://$(ogGetServerIp)/opengnsys/descargas/$OGAGENTFILE" 2>/dev/null; then
+                # Creating systemd script.
+                cat << EOT > $SYSTEMDDIR/systemd-launchogagent
 #!/bin/bash
 [ $EUID = 0 ] || exit 4
 start() {
@@ -108,12 +106,12 @@ restart() {
 }
 
 case "\$1" in
-	start|restart)  "\$1" ;;
+    start|restart)  "\$1" ;;
 esac
 EOT
                 chmod +x $SYSTEMDDIR/systemd-launchogagent
-	        # Creating systemd service.
-	        cat << EOT > $SYSTEMDDIR/system/launchogagent.service
+                # Creating systemd service.
+                cat << EOT > $SYSTEMDDIR/system/launchogagent.service
 [Unit]
 Description=Installing and configuring OGAgent
 
@@ -127,21 +125,21 @@ TimeoutStartSec=5min
 WantedBy=multi-user.target
 EOT
                 ln -fs /lib/systemd/system/launchogagent.service \
-	               ${SYSTEMDDIR/lib/etc}/system/multi-user.target.wants
-	        echo "Scheduled OGAgent installation at next boot"
-		echo "  (process will be executed in the background, do not shutdown until finish)."
+                       ${SYSTEMDDIR/lib/etc}/system/multi-user.target.wants
+                echo "Scheduled OGAgent installation at next boot"
+                echo "  (process will be executed in the background, do not shutdown until finish)."
             else
                 ogRaiseError $OG_ERR_NOTFOUND "$1 $2 /var/tmp/$OGAGENTFILE"
                 exit $OG_ERR_NOTFOUND
             fi
         fi
-	;;
+        ;;
     MacOS)    # OGAgent for macOS (TODO).
-	echo "OGAgent installer for macOS is not implemented yet."
-	;;
+        echo "OGAgent installer for macOS is not implemented yet."
+        ;;
     *)        # OS not detected or OGAgent not implemented.
         ogRaiseError $OG_ERR_NOTOS "$1 $2"
         exit $OG_ERR_NOTOS
-	;;
+        ;;
 esac
 

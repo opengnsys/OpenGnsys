@@ -1,7 +1,6 @@
 //____________________________________________________________________________
 //	
-//	Fichero de idiomas javascript: menus_eng.js 
-//	Idioma: Ingés 
+//    Javascript language file: menus_eng.js
+//    Language: English
 //____________________________________________________________________________
 TbMsg=new Array;
-

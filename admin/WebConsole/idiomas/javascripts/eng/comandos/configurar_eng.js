@@ -1,16 +1,16 @@
 //________________________________________________________________________________________________________
 //
-//	Fichero de idiomas javascripts: configurar_eng.js 
-//	Idioma: Ingés 
+//    Javascript language file: configurar_eng.js
+//    Language: English
 //________________________________________________________________________________________________________
 TbMsg=new Array;
-TbMsg[0]="WARNING.- There are partitions with the same number, you must select another or remove it  clicking in the last column";
-TbMsg[1]="WARNING.- The number of the partition must be greater than zero";
-TbMsg[2]="El tipo de partición no se ha especificado";
-TbMsg[3]="WARNING.- The size of the partition must be greater than zero";
-TbMsg[4]="ATENCION: Se va a eliminar esta partición ¿ Esta seguro ?";
-TbMsg[5]="Debe especificar el tipo de sistema de ficheros si desea formatear la particion";
-TbMsg[6]="La CACHE solo puede definirse en la particion 4";
-TbMsg[7]="El número maximo de particiones es 4";
-TbMsg["EXTSIZE"]="El tamaño de las particiones lógicas es mayor que el de la partición extendida";
-TbMsg["HDSIZE"]="El tamaño de las particiones es mayor el tamaño del disco";
+TbMsg[0]="WARNING: Duplicated partition. There is another partition with the same number. Please, select another one or delete it by clicking in the last column";
+TbMsg[1]="WARNING: Partition number must be greater than zero";
+TbMsg[2]="Partition type not specified";
+TbMsg[3]="WARNING: Partition size must be greater than zero";
+TbMsg[4]="WARNING: This partition will be deleted. Are you sure?";
+TbMsg[5]="If you want to format this partition, you must specify file-system type";
+TbMsg[6]="CACHE can only be at partition 4";
+TbMsg[7]="Maximum number of partitions is 4";
+TbMsg["EXTSIZE"]="Logic partitions size is greater than extended partition size";
+TbMsg["HDSIZE"]="Partitions size is greater than disk size";

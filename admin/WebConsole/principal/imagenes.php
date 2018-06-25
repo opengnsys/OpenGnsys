@@ -237,9 +237,16 @@ function SubarbolXML_Imagenes($grupoid,$amb,$litamb,$tipo)
 	$rs=new Recordset; 
 	#### agp ### Añado la consulta el campo idrepositorio	####
 	$cmd->texto="SELECT DISTINCT imagenes.idimagen,imagenes.descripcion,repositorios.nombrerepositorio,repositorios.ip
-				FROM  imagenes INNER JOIN repositorios USING  (idrepositorio)
-				WHERE imagenes.idrepositorio = repositorios.idrepositorio
-				AND imagenes.idcentro=".$idcentro."
+				FROM  imagenes ";
+	// Para hallar el repositorio de las incrementales hay que buscar los datos de la imagen basica (en la propia tablas imágenes)
+	if ($tipo == 3) {
+	    $cmd->texto.="      INNER JOIN imagenes AS basica INNER JOIN repositorios
+			        WHERE basica.idrepositorio=repositorios.idrepositorio
+			        AND imagenes.imagenid=basica.idimagen AND ";
+	} else {
+	    $cmd->texto.="      INNER JOIN repositorios USING  (idrepositorio) WHERE ";
+	}
+	$cmd->texto.="          imagenes.idcentro=".$idcentro."
 				AND imagenes.grupoid=".$grupoid."  
 				AND imagenes.tipo=".$tipo." 
 				ORDER BY imagenes.descripcion";

@@ -1,10 +1,10 @@
 ﻿//________________________________________________________________________________________________________
 //
-//	Fichero de idiomas javascripts: crearimagenbasica_esp.js 
-//	Idioma: Español 
+//    Javascript language file: crearimagenbasica_eng.js
+//    Language: English
 //________________________________________________________________________________________________________
 TbMsg=new Array;
 TbMsg[0]="";
-TbMsg[1]="Debe elegir una imagen para esta partición";
-TbMsg[2]="No ha seleccionado ninguna partición";
-TbMsg[3]="No ha seleccionado ningún método de sincronización";
+TbMsg[1]="You must choose an image for this partition";
+TbMsg[2]="No partition selected";
+TbMsg[3]="No synchronization method selected";

@@ -1,10 +1,10 @@
 //________________________________________________________________________________________________________
 //      
-//      Fichero de idiomas javascript: asistentes.js 
-//      Idioma: Inglés
-//________________________________________________________________________________________________________
+//    Javascript language file: asistentes.js 
+//    Language: English
+//____________________________________________________________________________
 TbMsg=new Array;
 // Asistente de particionado
-TbMsg["NOCACHESIZE"] = "¡El espacio libre en disco es menor que la cache!";
-TbMsg["NODISKSIZE"] = "¡El espacio libre en disco no puede ser menor que 0!";
-TbMsg["NOSUPPORT"] = "Este navegador no soporta la operación.";
+TbMsg["NOCACHESIZE"] = "Free disk space is smaller than cache!";
+TbMsg["NODISKSIZE"] = "Free disk space cannot be lower than zero!";
+TbMsg["NOSUPPORT"] = "This browser does not support this operation.";
