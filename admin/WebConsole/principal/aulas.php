@@ -584,8 +584,7 @@ function ContextualXMLAulas(){
 	$layerXML.='<ITEM';
 	$layerXML.=' alpulsar="insertar('.$wParam.')"';
 	$layerXML.=' imgitem="../images/iconos/proyector.gif"';
-	//$layerXML.=' textoitem='.$TbMsg[9];
-	$layerXML.=' textoitem="Nuevo Proyector"';
+	$layerXML.=' textoitem='.$TbMsg[51];
 	$layerXML.='></ITEM>';
 
 	$layerXML.='<SEPARADOR>';
@@ -737,13 +736,14 @@ function CreacontextualXMLProyectores(){
 	$layerXML.=' clase="menu_contextual"';
 	$layerXML.='>';
 
-	// Modificar proyector
 	$wLeft=140;
 	$wTop=115;
 	$wWidth=400;
 	$wHeight=320;
-	$wpages="../propiedades/propiedades_proyector.php";
+	$wpages="../propiedades/propiedades_proyectores.php";
 	$wParam=$wLeft .",".$wTop.",".$wWidth.",".$wHeight.",'". $wpages."'";
+
+	// Modificar proyector
 	$layerXML.='<ITEM';
 	$layerXML.=' alpulsar="modificar('.$wParam.')"';	
 	$layerXML.=' textoitem='.$TbMsg[13];
@@ -753,19 +753,21 @@ function CreacontextualXMLProyectores(){
 	$layerXML.='<SEPARADOR>';
 	$layerXML.='</SEPARADOR>';
 
+	// Estado del proyector
 	$layerXML.='<ITEM';
 	$layerXML.=' alpulsar="estatus('.$wParam.')"';
 	$layerXML.=' imgitem="../images/iconos/estatus.gif"';
-	$layerXML.=' textoitem='.$TbMsg['STATUS'];
+	$layerXML.=' textoitem='.$TbMsg[52];
 	$layerXML.='></ITEM>';
 
 	$layerXML.='<SEPARADOR>';
 	$layerXML.='</SEPARADOR>';
 
+	// Eliminar proyector
 	$layerXML.='<ITEM';
 	$layerXML.=' alpulsar="eliminar('.$wParam.')"';	
 	$layerXML.=' imgitem="../images/iconos/eliminar.gif"';
-	$layerXML.=' textoitem='.$TbMsg[36];
+	$layerXML.=' textoitem='.$TbMsg[53];
 	$layerXML.='></ITEM>';
 
 	$layerXML.='</MENUCONTEXTUAL>';
@@ -1209,5 +1211,3 @@ function ContextualXMLNetBoot(){
         $layerXML.='</MENUCONTEXTUAL>';
         return($layerXML);
 }
-
-?>

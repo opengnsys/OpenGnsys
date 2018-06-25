@@ -4,7 +4,7 @@
 //	Fichero de idiomas php: aulas_esp.php 
 //	Idioma: Español 
 //_____________________________________________________________
-	$TbMsg=array();
+	if (empty ($TbMsg)) $TbMsg=array();
 	$TbMsg[0]='"Nuevo grupo de aulas"';
 	$TbMsg[1]='"Estatus ordenadores"';
 	$TbMsg[2]='"Conmutar';
@@ -56,5 +56,6 @@
 	$TbMsg[48]='"Log en tiempo real"';
 	$TbMsg[49]='"Sincronización"';	
 	$TbMsg[50]='"Sincronización 2"';	
-?>
-
+	$TbMsg[51]='"Añadir nuevo proyector"';
+	$TbMsg[52]='"Estado"';
+	$TbMsg[53]='"Eliminar proyector"';
