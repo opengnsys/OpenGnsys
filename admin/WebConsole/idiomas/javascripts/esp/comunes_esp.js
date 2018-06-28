@@ -3,7 +3,7 @@
 //	Fichero de idiomas javascript: comunes_esp.js 
 //	Idioma: Español 
 //________________________________________________________________________________________________________
-CTbMsg=new Array;
+var CTbMsg=new Array;
 CTbMsg[0]="ATENCIÓN.- Este grupo contiene otros grupos o elementos. Si lo elimina, eliminará también éstos. ¿ Está seguro ?";
 CTbMsg[1]="ATENCIÓN.- Este grupo será eliminado. ¿ Está seguro ?";
 CTbMsg[2]="Este grupo ha sido modificado correctamente";

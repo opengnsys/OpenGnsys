@@ -29,8 +29,8 @@ $idaula=0;
 
 if (isset($_GET["opcion"])) $opcion=$_GET["opcion"]; // Recoge parametros.
 if (isset($_GET["idproyector"])) $idordenador=$_GET["idproyector"];
-if (isset($_GET["idaula"])) $idaula=$_GET["idambito"];
-if (isset($_GET["identificador"])) $idordenador=$_GET["identificador"];
+if (isset($_GET["idaula"])) $idaula=$_GET["idaula"];
+if (isset($_GET["identificador"])) $idproyector=$_GET["identificador"];
 //________________________________________________________________________________________________________
 $cmd=CreaComando($cadenaconexion); // Crea objeto comando
 if (!$cmd)
@@ -74,7 +74,7 @@ if  ($opcion!=$op_alta){
 		<tr>
 			<th align="center">&nbsp;<?php echo $TbMsg["PROP_MODEL"]?>&nbsp;</th>
 			<?php	if ($opcion==$op_eliminacion) {
-					echo '<td><input type="hidden" name="modelo" value="'.$mac.'" />'.$mac.'</td>';
+					echo '<td><input type="hidden" name="modelo" value="'.$modelo.'" />'.$modelo.'</td>';
 				} else {
 					echo '<td><input class="formulariodatos" name="modelo" type="text" value="'. $modelo.'"></td>'."\n";
 				}
@@ -84,12 +84,12 @@ if  ($opcion!=$op_alta){
 		<tr>
 			<th align="center">&nbsp;<?php echo $TbMsg["PROP_TYPE"]?>&nbsp;</th>
 			<?php	if ($opcion==$op_eliminacion) {
-					echo '<td><input type="hidden" name="modelo" value="'.$tipo.'" />'.$mac.'</td>'."\n";
+					echo '<td><input type="hidden" name="modelo" value="'.$tipo.'" />'.$tipo.'</td>'."\n";
 				} else {
 					$tiposproy ="standalone=standalone".chr(13);
 					$tiposproy.="pjlink=pjlink".chr(13);
 					$tiposproy.="unknown=unknown";
-					echo '<td>'.HTMLCTESELECT($tiposproy,"tipo","estilodesple","",$tipo,100).'</td>'."\n";
+					echo '<td>'.HTMLCTESELECT($tiposproy,"tipo","estilodesple","",$tipo,100, "activaip").'</td>'."\n";
 				}
 			?>
 		</tr>
@@ -99,7 +99,7 @@ if  ($opcion!=$op_alta){
 			<?php	if ($opcion==$op_eliminacion) {
 					echo '<td>'.$ip.'</td>'."\n";
 				} else {
-					echo '<td><input class="formulariodatos" name=ip  type=text value="'.$ip.'"></td>'."\n";
+					echo '<td><input class="formulariodatos" name="ip" type="text" value="'.$ip.'" readonly></td>'."\n";
 				}
 			?>
 		</tr>
@@ -123,15 +123,15 @@ include_once("../includes/opcionesbotonesop.php");
 //________________________________________________________________________________________________________
 function TomaPropiedades($cmd,$id){
 	global $nombreproyector;
-	global $ip;
 	global $modelo;
 	global $tipo;
+	global $ip;
 
 	$rs=new Recordset;
 	$cmd->texto=<<<EOD
 SELECT projectors.*
   FROM projectors
-  JOIN aulas ON aulas.idaula=projectors.id
+  JOIN aulas ON aulas.idaula=projectors.lab_id
  WHERE id='$id';
 EOD;
 	$rs->Comando=&$cmd;
@@ -139,7 +139,7 @@ EOD;
 	$rs->Primero();
 	if (!$rs->EOF){
 		$nombreproyector=$rs->campos["name"];
-		$modelo=$rs->campos["model"] == 1;
+		$modelo=$rs->campos["model"];
 		$tipo=$rs->campos["type"];
 		$ip=$rs->campos["ipaddr"];
 		$rs->Cerrar();

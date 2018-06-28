@@ -170,7 +170,11 @@ EOD;
 			$resul=$cmd->Ejecutar();
 			break;
 		case $op_eliminacion :
-			$resul=EliminaProyectores($cmd,$idproyector,"idproyector");// Eliminación en cascada
+			$cmd->texto=<<<EOD
+DELETE FROM projectors
+ WHERE id=@idproyector;
+EOD;
+			$resul=$cmd->Ejecutar();
 			break;
 		case $op_movida :
 			$cmd->texto=<<<EOD
