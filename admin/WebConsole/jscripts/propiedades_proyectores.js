@@ -88,3 +88,11 @@ function comprobar_datos(){
 	 	validate(form.nombreproyector, validate_text_notnull, 0) &&
 		validate(form.ip, validate_ipadress_notnull, 1);
 }
+
+//
+//  Habilita campo IP si tipo de proyector es "pjlink".
+//
+function activaip(type) {
+	var ip = document.getElementsByName('ip')[0];
+	ip.readOnly = type.value !== 'pjlink';
+}
