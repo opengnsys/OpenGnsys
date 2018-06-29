@@ -43,11 +43,11 @@ if  ($opcion!=$op_alta){
 //________________________________________________________________________________________________________
 ?>
 <html>
-<title>Administración web de aulas</title>
 <head>
+	<title>Administración web de aulas</title>
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
 	<link rel="stylesheet" type="text/css" href="../estilos.css" />
-	<SCRIPT language="javascript" src="../jscripts/validators.js"></SCRIPT>
+	<script language="javascript" src="../jscripts/validators.js"></script>
 	<script language="javascript" src="../jscripts/propiedades_proyectores.js"></script>
 	<script language="javascript" src="../jscripts/opciones.js"></script>
 	<?php echo '<script language="javascript" src="../idiomas/javascripts/'.$idioma.'/propiedades_proyectores_'.$idioma.'.js"></script>'?>
@@ -86,10 +86,11 @@ if  ($opcion!=$op_alta){
 			<?php	if ($opcion==$op_eliminacion) {
 					echo '<td><input type="hidden" name="modelo" value="'.$tipo.'" />'.$tipo.'</td>'."\n";
 				} else {
-					$tiposproy ="standalone=standalone".chr(13);
-					$tiposproy.="pjlink=pjlink".chr(13);
-					$tiposproy.="unknown=unknown";
-					echo '<td>'.HTMLCTESELECT($tiposproy,"tipo","estilodesple","",$tipo,100, "activaip").'</td>'."\n";
+					$tiposproy ="no-net=".$TbMsg["TYPE_NONET"].chr(13);
+					$tiposproy.="net-pjlink=".$TbMsg["TYPE_NETPJLINK"].chr(13);
+					$tiposproy.="net-other=".$TbMsg["TYPE_NETOTHER"].chr(13);
+					$tiposproy.="unknown=".$TbMsg["TYPE_UNKNOWN"];
+					echo '<td>'.HTMLCTESELECT($tiposproy,"tipo","estilodesple","",$tipo,120, "activaip").'</td>'."\n";
 				}
 			?>
 		</tr>

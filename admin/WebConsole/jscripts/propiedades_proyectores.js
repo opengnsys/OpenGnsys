@@ -83,10 +83,15 @@ function comprobar_datos(){
 	return true;
 	}
 
-        var form = document.fdatos;
-	return 	validate(form.nombreproyector, validate_notspace, 0) &&
-	 	validate(form.nombreproyector, validate_text_notnull, 0) &&
-		validate(form.ip, validate_ipadress_notnull, 1);
+	var form = document.fdatos;
+	if (form.tipo.valuue === 'net-pjlink' || form.tipo.value === 'net-other') {
+		return 	validate(form.nombreproyector, validate_notspace, 0) &&
+			validate(form.nombreproyector, validate_text_notnull, 0) &&
+			validate(form.ip, validate_ipadress_notnull, 1);
+	} else {
+		return 	validate(form.nombreproyector, validate_notspace, 0) &&
+			validate(form.nombreproyector, validate_text_notnull, 0);
+	}
 }
 
 //
@@ -94,5 +99,5 @@ function comprobar_datos(){
 //
 function activaip(type) {
 	var ip = document.getElementsByName('ip')[0];
-	ip.readOnly = type.value !== 'pjlink';
+	ip.readOnly = type.value !== 'net-pjlink' && type.value !== 'net-other';
 }

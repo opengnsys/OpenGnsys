@@ -13,7 +13,6 @@ include_once("../clases/XmlPhp.php");
 include_once("../clases/ArbolVistaXML.php");
 include_once("../includes/CreaComando.php");
 include_once("../includes/constantes.php");
-//include_once("./relaciones/proyectores_eliminacion.php");
 include_once("../includes/opciones.php");
 include_once("../idiomas/php/".$idioma."/gestor_proyectores_".$idioma.".php");
 
@@ -112,6 +111,7 @@ function Gestiona(){
 	global $tablanodo;
 
 	global $datosduplicados;
+    $resul="";
 
 	$cmd->CreaParametro("@idaula",$idaula,1);
 	$cmd->CreaParametro("@idproyector",$idproyector,1);
@@ -126,17 +126,21 @@ function Gestiona(){
                         $ipduplicada='no';
                         $nombreduplicado='no';
                         $cmd->texto=<<<EOD
-SELECT *
+SELECT name AS nombre, ipaddr AS ip
   FROM projectors
- WHERE name=@nombreproyector OR ipaddr=@ip;
+ WHERE name=@nombreproyector OR (ipaddr=@ip AND ipaddr!='')
+ UNION
+SELECT nombreordenador AS nombre, ip
+  FROM ordenadores
+ WHERE nombreordenador=@nombreproyector OR ipaddr=@ip;
 EOD;
                         $rs=new Recordset;
                         $rs->Comando=&$cmd;
                         if (!$rs->Abrir()) return(0); // Error al abrir recordset
                         $rs->Primero();
                         while (!$rs->EOF){
-                           if ( $nombreproyector == $rs->campos["nombreproyector"]) $datosduplicados ="nombre: $nombreproyector,";
-                           if ( $ip == $rs->campos["ip"]) $datosduplicados .=" ip: $ip,";
+                           if ($nombreproyector == $rs->campos["nombre"])  $datosduplicados ="nombre: $nombreproyector,";
+                           if ($ip == $rs->campos["ip"])  $datosduplicados .=" ip: $ip,";
                            $rs->Siguiente();
                         }
                         $rs->Cerrar();

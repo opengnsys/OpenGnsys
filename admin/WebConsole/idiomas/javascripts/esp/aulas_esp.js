@@ -3,7 +3,7 @@
 //	Fichero de idiomas javascript: aulas_esp.js 
 //	Idioma: Español 
 //________________________________________________________________________________________________________
-TbMsg=new Array;
+var TbMsg=new Array;
 TbMsg[0]="La plantilla de ordenador ha sido registrada correctamente y los ordenadores de este aula han sido actualizados con dicha plantilla";
 TbMsg[1]=" ATENCIÓN: Este ámbito será refrescado. ¿ Está seguro ?";
 TbMsg[2]="";
