@@ -14,3 +14,7 @@ $TbMsg["PROP_IPADDR"]="Direcci&oacute;n IP";
 $TbMsg["PROP_MODEL"]="Marca y Modelo";
 $TbMsg["PROP_NAME"]="Nombre";
 $TbMsg["PROP_TYPE"]="Tipo de Proyector";
+$TbMsg["TYPE_NONET"]="No conectado";
+$TbMsg["TYPE_NETPJLINK"]="Conectado PJLink";
+$TbMsg["TYPE_NETOTHER"]="Conectado otro";
+$TbMsg["TYPE_UNKNOWN"]="Desconocido";

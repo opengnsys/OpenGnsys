@@ -791,7 +791,7 @@ CREATE TABLE `projectors` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(50) NOT NULL DEFAULT '',
   `model` varchar(50) NOT NULL DEFAULT '',
-  `type` enum('standalone', 'pjlink', 'unknown') NOT NULL DEFAULT 'standalone',
+  `type` enum('no-net', 'net-pjlink', 'net-other', 'unknown') NOT NULL DEFAULT 'no-net',
   `ipaddr` varchar(16) NOT NULL DEFAULT '',
   `lab_id` int(11) DEFAULT NULL,
   PRIMARY KEY(`id`)
