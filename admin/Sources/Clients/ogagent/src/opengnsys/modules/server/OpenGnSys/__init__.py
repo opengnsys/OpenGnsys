@@ -64,7 +64,7 @@ def check_locked_partition(sync=False):
         def wrapper(*args, **kwargs):
             part_id = 'None'
             try:
-                this, path, get_params, post_params = args  # @UnusedVariable
+                this, path, get_params, post_params, server = args  # @UnusedVariable
                 part_id = post_params['disk'] + post_params['part']
                 if this.locked.get(part_id, False):
                     this.locked[part_id] = True
@@ -201,17 +201,16 @@ class OpenGnSysWorker(ServerWorker):
 
     def process_status(self, path, getParams, postParams, server):
         """
-        Returns client status.
+        Returns client status (OS type and login status).
         """
-        st = {'linux': 'LNX', 'macos': 'OSX', 'oglive': 'OPG', 'windows': 'WIN'}
         res = {'loggedin': self.loggedin}
         try:
-            res['status'] = st[operations.os_type.lower()]
+            res['status'] = operations.os_type.lower()
         except KeyError:
             res['status'] = ''
         # Check if OpenGnsys Client is busy
-        if res['status'] == 'OPG' and self.locked:
-            res['status'] = 'BSY'
+        if res['status'] == 'oglive' and self.locked:
+            res['status'] = 'busy'
         return res
 
     def process_reboot(self, path, getParams, postParams, server):
@@ -306,7 +305,7 @@ class OpenGnSysWorker(ServerWorker):
                     # Skip blank rows
                     pass
             elif len(cols) == 7:
-                disk, npart, tpart, fs, os, size, usage = cols
+                disk, npart, tpart, fs, opsys, size, usage = cols
                 try:
                     if int(npart) == 0:
                         # Disk information
@@ -314,7 +313,7 @@ class OpenGnSysWorker(ServerWorker):
                     else:
                         # Partition information
                         storage.append({'disk': int(disk), 'partition': int(npart), 'parttype': tpart,
-                                        'filesystem': fs, 'operatingsystem': os, 'size': int(size),
+                                        'filesystem': fs, 'operatingsystem': opsys, 'size': int(size),
                                         'usage': int(usage)})
                 except ValueError:
                     logger.warn('Configuration parameter error: {}'.format(cols))
@@ -325,6 +324,38 @@ class OpenGnSysWorker(ServerWorker):
                 warnings += 1
         # Returning configuration data and count of warnings
         return {'serialno': serialno, 'storage': storage, 'warnings': warnings}
+
+    def task_command(self, code, route):
+        """
+        Task to execute a command
+        :param code: Code to execute
+        :param route: server REST route to return results (including its parameters)
+        """
+        (stat, out, err) = operations.exec_command(code)
+        self.REST.sendMessage(route, {'status': stat, 'output': out, 'error': err})
+
+    def process_command(self, path, get_params, post_params, server):
+        """
+        Launches a thread to executing a command
+        :param path: ignored
+        :param get_params: ignored
+        :param post_params: object with format {"id": OperationId, "code": "Code", url: "ReturnURL"}
+        :param server: ignored
+        :rtype: object with launching status
+        """
+        logger.debug('Recieved command operation with params: {}'.format(post_params))
+        self.checkSecret(server)
+        # Processing data
+        try:
+            code = post_params.get('code')
+            cmd_id = post_params.get('id')
+            route = '{}?id={}'.format(post_params.get('route'), cmd_id)
+            # Launching new thread
+            threading.Thread(target=self.task_command, args=(code, route)).start()
+        except Exception as e:
+            logger.error('Got exception {}'.format(e))
+            return {'error': e}
+        return {'op': 'launched'}
 
     def process_hardware(self, path, get_params, post_params, server):
         """
@@ -356,4 +387,4 @@ class OpenGnSysWorker(ServerWorker):
         :return:
         """
         logger.debug('Recieved software operation with params: {}'.format(post_params))
-        return operations.get_software(post_params['disk'], post_params['part'])
+        return operations.get_software(post_params.get('disk'), post_params.get('part'))

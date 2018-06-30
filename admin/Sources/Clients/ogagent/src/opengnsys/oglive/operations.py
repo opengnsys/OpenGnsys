@@ -189,6 +189,21 @@ def get_configuration():
     return cfgdata
 
 
+def exec_command(cmd):
+    """
+    Executing a shell command
+    :param cmd:
+    :return: object with components:
+      output: standard output
+      error: error output
+      exit: exit code
+    """
+    proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    (out, err) = proc.communicate()
+    stat = proc.returncode
+    return stat, out, err
+
+
 def get_hardware():
     """
     Returns client's hardware list
