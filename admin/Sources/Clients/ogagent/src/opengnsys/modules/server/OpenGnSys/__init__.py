@@ -87,6 +87,7 @@ class OpenGnSysWorker(ServerWorker):
     interface = None  # Binded interface for OpenGnsys
     loggedin = False  # User session flag
     locked = {}       # Locked partitions
+    commands = []     # Running commands
     random = None     # Random string for secure connections
     length = 32       # Random string length
 
@@ -292,7 +293,7 @@ class OpenGnSysWorker(ServerWorker):
         serialno = ''   # Serial number
         storage = []    # Storage configuration
         warnings = 0    # Number of warnings
-        logger.debug('Recieved getconfig operation')
+        logger.debug('Received getconfig operation')
         self.checkSecret(server)
         # Processing data
         for row in operations.get_configuration().split(';'):
@@ -325,37 +326,69 @@ class OpenGnSysWorker(ServerWorker):
         # Returning configuration data and count of warnings
         return {'serialno': serialno, 'storage': storage, 'warnings': warnings}
 
-    def task_command(self, code, route):
+    def task_command(self, code, route, op_id):
         """
         Task to execute a command
         :param code: Code to execute
-        :param route: server REST route to return results (including its parameters)
+        :param route: server callback REST route to return results
+        :param op_id: operation id.
         """
+        # Executing command
         (stat, out, err) = operations.exec_command(code)
-        self.REST.sendMessage(route, {'status': stat, 'output': out, 'error': err})
+        # Removing command from the list
+        for c in self.commands:
+            if c.has_key('id') and c['id'] == op_id:
+                self.commands.remove(c)
+        # Sending results
+        self.REST.sendMessage(route, {'id': op_id, 'status': stat, 'output': out, 'error': err})
 
     def process_command(self, path, get_params, post_params, server):
         """
         Launches a thread to executing a command
         :param path: ignored
         :param get_params: ignored
-        :param post_params: object with format {"id": OperationId, "code": "Code", url: "ReturnURL"}
-        :param server: ignored
+        :param post_params: object with format:
+            id: operation id.
+            code: command code
+            route: callback URL
+        :param server: headers data
         :rtype: object with launching status
         """
-        logger.debug('Recieved command operation with params: {}'.format(post_params))
+        logger.debug('Received command operation with params: {}'.format(post_params))
         self.checkSecret(server)
         # Processing data
         try:
             code = post_params.get('code')
-            cmd_id = post_params.get('id')
-            route = '{}?id={}'.format(post_params.get('route'), cmd_id)
-            # Launching new thread
-            threading.Thread(target=self.task_command, args=(code, route)).start()
+            op_id = post_params.get('id')
+            route = post_params.get('route')
+            # Checking if the thread id. exists
+            for c in self.commands:
+                if c.has_key('id') and c['id'] == op_id:
+                    raise Exception('Task id. already exists: {}'.format(op_id))
+            # Launching a new thread
+            thr = threading.Thread(name=op_id, target=self.task_command, args=(code, route, op_id))
+            thr.start()
+            self.commands.append({'id': op_id, 'code': code})
         except Exception as e:
             logger.error('Got exception {}'.format(e))
             return {'error': e}
         return {'op': 'launched'}
+
+    def process_execinfo(self, path, get_params, post_params, server):
+        """
+        Returns running commands information
+        :param path:
+        :param get_params:
+        :param post_params:
+        :param server:
+        :return: object
+        """
+        #data = []
+        #for c in self.commands:
+        #    if c.is_alive():
+        #        data.append({'name': c.getName(), 'code': c.__dict__['_Thread__args']})
+        #return data
+        return self.commands
 
     def process_hardware(self, path, get_params, post_params, server):
         """
