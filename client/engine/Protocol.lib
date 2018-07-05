@@ -781,7 +781,8 @@ fi
 #@author  Irina Gomez, ETSII Universidad de Sevilla 
 #@date    2017/06/23
 #*/ ##
-function ogMcastRequest {
+function ogMcastRequest ()
+{
 # Variables locales
 local FILE PROTOOPT PORT PORTAUX REPOIP REPOPORTAUX REPEAT OGUNIT
 
@@ -828,9 +829,8 @@ done
 #@param (2 parámetros)  $1 path_aboluto_fichero_torrent  $2 Parametros_Session_Torrent  
 #@param (3 parámetros)  $1 Contenedor CACHE $2 path_absoluto_fichero_Torrent $3 Parametros_Session_Torrent
 #@param (4 parámetros)  $1 disk $2 particion $3 path_absoluto_fichero_Torrent 4$ Parametros_Session_Torrent
-
 #@return
-#@note
+#@note    protocoloTORRENT=mode:time   mode=seeder  -> Dejar el equipo seedeando hasta que transcurra el tiempo indicado o un kill desde consola, mode=peer    -> seedear mientras descarga mode=leecher  -> NO seedear mientras descarga time tiempo que una vez descargada la imagen queremos dejar al cliente como seeder.
 #@todo: 
 #@version 0.1 - Integración para OpenGNSys.
 #@author        Antonio J. Doblas Viso. Universidad de Málaga
@@ -845,13 +845,6 @@ done
 #@author        Antonio J. Doblas Viso. Univesidad de Málaga.
 #@date
 #*/ ##
-
-#protocoloTORRENT    mode:time
-#mode=seeder  -> Dejar el equipo seedeando hasta que transcurra el tiempo indicado o un kill desde consola, 
-#mode=peer    -> seedear mientras descarga
-#mode=leecher  -> NO seedear mientras descarga
-#time tiempo que una vez descargada la imagen queremos dejar al cliente como seeder.
-
 function ogTorrentStart ()
 {
 
