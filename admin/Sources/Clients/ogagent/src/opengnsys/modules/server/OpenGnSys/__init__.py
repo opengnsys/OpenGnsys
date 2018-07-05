@@ -364,7 +364,7 @@ class OpenGnSysWorker(ServerWorker):
             route = post_params.get('redirect_url')
             # Checking if the thread id. exists
             for c in self.commands:
-                if c.getName() == op_id:
+                if c.getName() == str(op_id):
                     raise Exception('Task id. already exists: {}'.format(op_id))
             # Launching a new thread
             thr = threading.Thread(name=op_id, target=self.task_command, args=(script, route, op_id))
@@ -392,6 +392,16 @@ class OpenGnSysWorker(ServerWorker):
             if c.is_alive():
                 data.append(c.__dict__['_Thread__args'])
         return data
+
+    def process_stopcmd(self, path, get_params, post_params, server):
+        logger.debug('Received stopcmd operation with params {}:'.format(post_params))
+        self.checkSecret(server)
+        op_id = post_params.get('trace')
+        for c in self.commands:
+            if c.is_alive() and c.getName() == str(op_id):
+                c._Thread__stop()
+                return {"stopped": op_id}
+        return {}
 
     def process_hardware(self, path, get_params, post_params, server):
         """
