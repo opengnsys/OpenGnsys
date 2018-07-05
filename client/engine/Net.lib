@@ -19,7 +19,8 @@
 #@author  Irina Gomez, ETSII Universidad de Sevilla
 #@date    2015-06-16
 #*/
-function ogChangeRepo {
+function ogChangeRepo ()
+{
 local SRCIMG NEWREPO REPO OGUNIT
 
 if [ "$*" == "help" ]; then
