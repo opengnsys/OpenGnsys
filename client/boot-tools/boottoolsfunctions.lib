@@ -142,7 +142,7 @@ case "${1,,}" in
 		;;
 esac
 SVNURL="https://github.com/opengnsys/OpenGnsys/branches/devel/client"
-VERSIONSVN=$(LC_ALL=C svn info $SVNURL | awk '/Date:/ {gsub(/-/,""); print ""$4}'
+VERSIONSVN=$(LC_ALL=C svn info $SVNURL | awk '/Date:/ {gsub(/-/,""); print ""$4}')
 NAMEISOCLIENT="$VERSIONBOOTTOOLS-$OSCODENAME-$OSRELEASE-$OSARCH-$VERSIONSVN"
 NAMEHOSTCLIENT="$VERSIONBOOTTOOLS-$OSCODENAME-$VERSIONSVN"
 export OSDISTRIB OSCODENAME OSRELEASE OSARCH OSHTTP

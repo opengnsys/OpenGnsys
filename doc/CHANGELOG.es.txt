@@ -3,11 +3,15 @@ LISTA DE CAMBIOS	CHANGELOG.es.txt
 
 
 
-Lista de cambios incluidos en OpenGnsys 1.1.1 Espeto
-----------------------------------------------------
+Lista de cambios incluidos en OpenGnsys 1.1.1 (Espeto)
+------------------------------------------------------
+
+Tickets resueltos en módulo OpenGnsys Client
+#852	Apagado del cliente si tiempo de espera cambia de día
 
 Tickets resueltos en módulo OpenGnsys Web Admin Console:
 #772	Módulo de administración web para dispositivos smartphones y tablets (no se resolverá)
+#804	Conversión de todo el código php de la consola web de administración a Php7 y Mysqli (tarea)
 #816	Marcar ordenador de profesor
 #824	Iniciar sistema restaurado (no integrado)
 #835	Problemas al listar plantillas en Nerboot Avanzado
