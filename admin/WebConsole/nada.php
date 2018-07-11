@@ -221,19 +221,46 @@ if (empty($data->project)) {
 </body>
 </html>
 
-<?php } else { ?>
+<?php } 
+else {
+$data = json_decode(@file_get_contents(__DIR__ . '/../doc/VERSION.json'));
+if (empty($data->project)) {
+    $version = "OpenGnsys";
+} else {
+    $version = @$data->project.' ' . @$data->version.' '
+             . (isset($data->codename) ? '('.$data->codename.') ' : '') . @$data->release;
+}
 
+?>
 <html>
 <head>
   <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
   <link rel="stylesheet" type="text/css" href="./estilos.css">
 </head>
 <body>
+&nbsp;
+&nbsp;
+<div class="cabeceras">
+        <div align="center" > Tip of the Day! </div>
+  &nbsp;
+  &nbsp;
 
-"Here we will show our content"
+<div align="center" class="sobrecabeceras"> ¿Sabías que...?</div>
+  &nbsp;
+  &nbsp;
+<div align="center" class="subcabeceras"><?php echo $Tip[array_rand($Tip)];?></div>
 
+  <div>
+  &nbsp;
+  &nbsp;
+    <div class="subcabeceras">Server IP: <?php echo $_SESSION['ipdevice']; ?> </div>
+    <div class="subcabeceras">Sistema  : <?php echo $tipodevice; ?> </div>
+    <div class="subcabeceras">Navegador: <?php echo $nav; ?> v.<?php echo $vernav; ?> </div>
+  </div>
+  &nbsp;
+  &nbsp;
+</div>
 </body>
 </html>
-
 <?php } ?>
 

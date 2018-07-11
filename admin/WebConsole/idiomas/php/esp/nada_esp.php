@@ -13,4 +13,15 @@
 	$TbMsg[5]="Navegador";
 	$TbMsg[6]="Versi&oacute;n Navegador";
 
+//________________________________________________________________________________________________________
+//
+//      Tip of the Day!
+//________________________________________________________________________________________________________
+
+        $Tip=array();
+        $Tip[0]="Las primeras jornadas de OpenGnsys en verano de 2018 en M&aacute;laga dieron nombre a la versi&oacute;n Espeto";
+        $Tip[1]="Tip1";
+        $Tip[2]="Tip2";
+        $Tip[3]="Tip3";
+
 ?>
