@@ -432,3 +432,35 @@ A.tabla_listados_sin:link{
     FONT-WEIGHT: 300;
 }
 
+.outer-container {
+  border: 1px solid black;
+  height: 100%;
+  width: 100%;
+}
+
+.top-section {
+  background: white;
+  height: 90%;
+}
+
+.bottom-section {
+  background: lightgrey;
+  height: 10%;
+}
+
+.bottom-aligner {
+  display: inline-block;
+  height: 100%;
+  vertical-align: bottom;
+  width: 3px;
+  background: darkgrey;
+}
+
+.bottom-content {
+  display: inline-block;
+}
+
+.top-content {
+  padding: 8px;
+}
+

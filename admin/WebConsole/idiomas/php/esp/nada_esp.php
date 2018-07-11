@@ -20,8 +20,8 @@
 
         $Tip=array();
         $Tip[0]="Las primeras jornadas de OpenGnsys en verano de 2018 en M&aacute;laga dieron nombre a la versi&oacute;n Espeto";
-        $Tip[1]="Tip1";
-        $Tip[2]="Tip2";
-        $Tip[3]="Tip3";
+        $Tip[1]="Por cada aula utiliza un puerto y una direcci&oacute;n ip para multicast diferente del tipo 239.194.X.Y donde X.Y son los 2 &uacute;ltimos octetos de la ip del primer PC del aula";
+        $Tip[2]="No olvides instalar el agente antes de crear una nueva imagen de sistema operativo";
+        $Tip[3]="Al particionar equipos clientes deja aproximadamente 1 Gb de m&aacute;s en tus particiones respecto al equipo modelo";
 
 ?>
