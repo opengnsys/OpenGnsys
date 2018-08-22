@@ -306,6 +306,8 @@ case "$OSDISTRIB" in
 		fi
 		# Adaptar dependencias para libmysqlclient.
 		[ -z "$(apt-cache pkgnames libmysqlclient-dev)" ] && [ -n "$(apt-cache pkgnames libmysqlclient15)" ] && DEPENDENCIES=( ${DEPENDENCIES[@]//libmysqlclient-dev/libmysqlclient15} )
+		# Paquete correcto para realpath.
+		[ -z "$(apt-cache pkgnames realpath)" ] && DEPENDENCIES=( ${DEPENDENCIES[@]//realpath/coreutils} )
 		;;
 	centos)	# Postconfiguación personalizada para CentOS.
 		# Configuración para PHP 7.
@@ -876,8 +878,8 @@ function getNetworkSettings()
 		if [ -n "${SERVERIP[i]}" ]; then
 			NETMASK[i]=$( cidr2mask $(ip -o addr show dev "$dev" | awk '$3~/inet$/ {sub (/.*\//, "", $4); print ($4)}') )
 			NETBROAD[i]=$(ip -o addr show dev "$dev" | awk '$3~/inet$/ {print ($6)}')
-			NETIP[i]=$(ip route | awk -v d="$dev" '$3==d && /src/ {sub (/\/.*/,""); print $1}')
-			ROUTERIP[i]=$(ip route | awk -v d="$dev" '$1=="default" && $5==d {print $3}')
+			NETIP[i]=$(ip route list proto kernel | awk -v d="$dev" '$3==d && /src/ {sub (/\/.*/,""); print $1}')
+			ROUTERIP[i]=$(ip route list default | awk -v d="$dev" '$5==d {print $3}')
 			DEFAULTDEV=${DEFAULTDEV:-"$dev"}
 		fi
 		let i++
