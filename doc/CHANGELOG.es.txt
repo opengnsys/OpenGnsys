@@ -6,7 +6,12 @@ LISTA DE CAMBIOS	CHANGELOG.es.txt
 Lista de cambios incluidos en OpenGnsys 1.1.1 (Espeto)
 ------------------------------------------------------
 
-Tickets resueltos en módulo OpenGnsys Client
+Tickets resueltos en módulo OpenGnsys Cloning Engine:
+#866	Si al restaurar usando la cache no hay espacio en la misma se finalizará la acción
+#868	ConfiguraOs: error al desinstalar el agente de sistema operativo antiguo
+
+Tickets resueltos en módulo OpenGnsys Client:
+#847	La ISO del ogLive debe de utilzar la revisión de Git y no de SVN
 #852	Apagado del cliente si tiempo de espera cambia de día
 
 Tickets resueltos en módulo OpenGnsys Web Admin Console:
@@ -15,8 +20,10 @@ Tickets resueltos en módulo OpenGnsys Web Admin Console:
 #816	Marcar ordenador de profesor
 #824	Iniciar sistema restaurado (no integrado)
 #835	Problemas al listar plantillas en Nerboot Avanzado
+#842	Internacionalización de la consola web
 
 Tickets genéricos resueltos:
+#840	Usar Git como repositorio de código
 #843	Incluir nombre de versión
 
 

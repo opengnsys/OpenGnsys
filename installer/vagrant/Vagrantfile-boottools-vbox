@@ -19,7 +19,7 @@ sed -i "s/XKBLAYOUT=.*/XKBLAYOUT=\"${LANG%_*}\"/" /etc/default/keyboard
 dpkg-reconfigure -fnoninteractive console-setup
 # Install dependencies.
 apt-get update -y
-apt-get install -y subversion syslinux syslinux-efi syslinux-utils
+apt-get install -y jq subversion syslinux syslinux-efi syslinux-utils
 # Prepare environment.
 groupadd opengnsys
 mkdir -p /opt/opengnsys/client /tmp/opengnsys_installer/opengnsys

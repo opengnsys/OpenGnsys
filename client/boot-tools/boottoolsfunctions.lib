@@ -4,7 +4,7 @@
 #@brief   Librería o clase Boot-Tools
 #@class   Boot-Tools
 #@brief   Funciones para generar un sistema operativo cliente para opengnsys
-#@version 1.1.0
+#@version 1.1.1
 #@warning License: GNU GPLv3+
 #*/
 
@@ -13,13 +13,7 @@
 # Autor: Antonio J. Doblas Viso. Universidad de Málaga.
 function btogGetVar()
 {
-
-export BTSVNBOOTTOOLS=/tmp/opengnsys_installer/opengnsys/client/boot-tools
-export BTSVNSHARE=/tmp/opengnsys_installer/opengnsys/client/shared
-export BTSVNENGINE=/tmp/opengnsys_installer/opengnsys/client/engine
-
-export BTSVNOG2=/tmp/opengnsys_installer/opengnsys2
-
+export BTDIR=/tmp/opengnsys_installer/opengnsys/client/boot-tools
 export BTTARGETDIR=/var/lib/tftpboot/ogclient/
 export BTROOTFSIMG=${BTTARGETDIR}ogclient.img
 export BTROOTFSMNT=${BTTARGETDIR}ogclientmount
@@ -125,7 +119,7 @@ case "${1,,}" in
 	bionic) 	# ogLive 1.1.1-rc1 basado en Ubuntu 18.04 y Kernel 4.15.
 		OSDISTRIB="ubuntu"
 		OSCODENAME="bionic"
-		OSRELEASE="4.15.0-13-generic"
+		OSRELEASE="4.15.0-32-generic"
 		OSARCH="amd64"
 		OSHTTP="http://es.archive.ubuntu.com/ubuntu/"
 		;;
@@ -141,12 +135,13 @@ case "${1,,}" in
 		exit 1
 		;;
 esac
-SVNURL="https://github.com/opengnsys/OpenGnsys/branches/devel/client"
-VERSIONSVN=$(LC_ALL=C svn info $SVNURL | awk '/Date:/ {gsub(/-/,""); print ""$4}')
-NAMEISOCLIENT="$VERSIONBOOTTOOLS-$OSCODENAME-$OSRELEASE-$OSARCH-$VERSIONSVN"
-NAMEHOSTCLIENT="$VERSIONBOOTTOOLS-$OSCODENAME-$VERSIONSVN"
+BRANCH="devel"
+GITURL="https://api.github.com/repos/opengnsys/OpenGnsys/commits?sha=$BRANCH&path=/client"
+GITRELEASE=$(curl -s "$GITURL" | jq -r '"r" + (.[0].commit.committer.date | gsub("-"; "")[:8]) + "." + (.[0].sha[:7])')
+NAMEISOCLIENT="$VERSIONBOOTTOOLS-$OSCODENAME-$OSRELEASE-$OSARCH-$GITRELEASE"
+NAMEHOSTCLIENT="$VERSIONBOOTTOOLS-$OSCODENAME-$GITRELEASE"
 export OSDISTRIB OSCODENAME OSRELEASE OSARCH OSHTTP
-export TYPECLIENT VERSIONSVN NAMEISOCLIENT NAMEHOSTCLIENT
+export TYPECLIENT GITRELEASE NAMEISOCLIENT NAMEHOSTCLIENT
 ### El fichero de configuración debe sustituir a estos 3 ficheros (borrar las 3 líneas siguientes).
 echo "$NAMEISOCLIENT" > /tmp/opengnsys_info_rootfs
 echo "$NAMEHOSTCLIENT" > /tmp/opengnsys_chroot
@@ -158,7 +153,7 @@ OSCODENAME="$OSCODENAME"
 OSRELEASE="$OSRELEASE"
 OSARCH="$OSARCH"
 OSHTTP="$OSHTTP"
-VERSIONSVN="$VERSIONSVN"
+GITRELEASE="$GITRELEASE"
 NAMEISOCLIENT="$NAMEISOCLIENT"
 NAMEHOSTCLIENT="$NAMEHOSTCLIENT"
 EOT
@@ -364,7 +359,7 @@ TIMEMOD=`date +%Y%m%d-%H%M%S`
 
 #copiando
 cp /tmp/initrd.img-${OSRELEASE} ${BTTARGETDIR}/oginitrd.img
-cp /tmp/vmlinuz-${OSRELEASE}.efi.signed ${BTTARGETDIR}/ogvmlinuz
+cp /tmp/vmlinuz-${OSRELEASE} ${BTTARGETDIR}/ogvmlinuz
 #generamos md5 del kernel y del initrd.
 DATASUM=`md5sum "${BTTARGETDIR}/oginitrd.img" | cut -f1 -d" "`
 echo $DATASUM > ${BTTARGETDIR}/oginitrd.img.sum
