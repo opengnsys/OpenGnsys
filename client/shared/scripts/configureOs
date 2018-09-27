@@ -73,13 +73,13 @@ case "$OSTYPE" in
         ogWindowsBootParameters $1 $2
         # Registrar en Windows que la partición indicada es su nueva unidad C:\
         ogWindowsRegisterPartition $1 $2 C $1 $2
+        # Configurar nuevo agente OGAgent.
+        ogConfigureOgagent $1 $2
         # Eliminar el antiguo cliente de Windows.
         if [ -n "$(ogGetPath $MNTDIR/windows/ogAdmWinClient.exe)$(ogGetPath $MNTDIR/winnt/ogAdmWinClient.exe)" ]; then
             ogInstallMiniSetup $1 $2 postconf.cmd
             ogUninstallWindowsClient $1 $2 postconf.cmd
         fi
-        # Configurar nuevo agente OGAgent.
-        ogConfigureOgagent $1 $2
         ;;
     Linux)      # Postconfiguración de GNU/Linux.
         ## Instala (no configura) el codigo de arranque del Grub en la partición (no lo configura, se mantiene el original de la imagen)

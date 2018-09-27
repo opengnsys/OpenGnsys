@@ -2,6 +2,7 @@
 #/**
 #@file     poweroffconf
 #@brief    Control de parada tras tiempo de inactividad para ahorro de energía.
+#@license  GNU GPLv3+
 #@param    int_minutos    Minutos de inactividad (opcional); "no" para deshabilitar..
 #@note     La comprobación periódica debe ejecutarse en el "cron" del sistema.
 #@note     Fichero de configuración: /etc/poweroff.conf
@@ -10,7 +11,9 @@
 #@version  1.0.5: incluir opción para deshabilitar ahorro de energía.
 #@author   Ramón Gómez - Univ. Sevilla
 #@date     2014-02-07
-#@warning  License: GNU GPLv3+
+#@version  1.1.1: Corregir problema al cambiar de día
+#@author   Ramón Gómez - Univ. Sevilla
+#@date     2018-07-04
 #*/
 
 
@@ -49,7 +52,7 @@ case $# in
         # Si se necesita, recalcular tiempo de parada.
         if [ -n "POWEROFFTIME" ]; then
             # Asignar tiempo de apagado si no está deshabilitado y actualizar fichero.
-            POWEROFFTIME=${POWEROFFSLEEP:+$(date --date="$POWEROFFSLEEP min" +"%H%M")}
+            POWEROFFTIME=${POWEROFFSLEEP:+$(date --date="$POWEROFFSLEEP min" +"%s")}
             perl -pi -e "s/POWEROFFTIME=.*/POWEROFFTIME=$POWEROFFTIME/" $POWEROFFCONF
         fi
         exit 0 ;;
@@ -64,10 +67,10 @@ if [ -n "$($PGREP $OPENGNSYS | egrep -v "$OGETC|$0")" ]; then
     perl -pi -e 's/POWEROFFTIME=.*$/POWEROFFTIME=/' $POWEROFFCONF
 else
     # Si el sistema está en estado de espera, ...
-    NOW=$(date +"%H%M")
+    NOW=$(date +"%s")
     if [ -z "$POWEROFFTIME" ]; then
         # Asignar tiempo de inicio, si no estaba definido.
-        POWEROFFTIME=$(date --date="$POWEROFFSLEEP min" +"%H%M")
+        POWEROFFTIME=$(date --date="$POWEROFFSLEEP min" +"%s")
         perl -pi -e "s/POWEROFFTIME=.*$/POWEROFFTIME=$POWEROFFTIME/" $POWEROFFCONF
     else
         # Apagar el equipo si se sobrepasa el periodo de espera.

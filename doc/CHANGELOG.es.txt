@@ -3,6 +3,24 @@ LISTA DE CAMBIOS	CHANGELOG.es.txt
 
 
 
+Lista de cambios incluidos en OpenGnsys 1.1.0a (versión de mantenimiento)
+----------------------------------------------
+
+Tickets resueltos en módulo OpenGnsys Cloning Engine:
+#868	ConfiguraOs: error al desinstalar el agente de sistema operativo antiguo
+
+Tickets resueltos en módulo OpenGnsys Client:
+#852	Apagado del cliente si tiempo de espera cambia de día
+
+Tickets resueltos en módulo OpenGnsys Web Admin Console:
+#835	Problemas al listar plantillas en Nerboot Avanzado
+
+Tickets genéricos resueltos:
+#839	Errores detectado en API REST para Remote PC
+#840	Usar Git como repositorio de código
+#872	Liberar versión de mantenimiento OpenGnsys 1.1.0a
+
+
 Lista de cambios incluidos en OpenGnsys 1.1.0
 ---------------------------------------------
 
