@@ -33,7 +33,8 @@ MYSQLFILE="$TMPDIR/$CATALOG.sql"
 MYSQLBCK="$OPENGNSYS/doc/$CATALOG.sql-$DATE"
 
 LOG_FILE=$OPENGNSYS/log/${PROG%.sh}.log
-OPENGNSYS_SERVER="opengnsys.es"
+BRANCH="branches/master"
+SVN_URL="https://github.com/opengnsys/OpenGnsys/$BRANCH/admin/Database"
 DEFAULT_MYSQL_ROOT_PASSWORD="passwordroot"      # Clave por defecto root de MySQL
 
 # Si se solicita, mostrar ayuda.
@@ -231,7 +232,6 @@ if [ $OLDVERSION != $NEWVERSION ] ; then
         exit 0
     fi
     # Nos bajamos los archivos de actualización de la base de datos
-    SVN_URL="https://$OPENGNSYS_SERVER/svn/tags/opengnsys-$NEWVERSION/admin/Database"
     [[ "$NEWVERSION" =~ pre ]] && SVN_URL="https://$OPENGNSYS_SERVER/svn/branches/version${NEWVERSION%.*}/admin/Database"
     svn checkout "$SVN_URL" $TMPDIR/Database
     [ $? -ne 0 ] && errorAndLog "$PROG: Error getting code from $SVN_URL" && exit 6

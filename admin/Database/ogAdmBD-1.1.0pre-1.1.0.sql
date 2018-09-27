@@ -148,7 +148,7 @@ CREATE PROCEDURE addcols() BEGIN
 		INSERT INTO usuarios (idusuario, pasguor)
 			SELECT idusuario, pasguor FROM usuarios
 			ON DUPLICATE KEY UPDATE
-				pasguor=SHA2(VALUES(pasguor),224);
+				pasguor=SHA2(VALUES(pasguor), 224);
 	END IF;
 	# Crear tabla de log para la cola de acciones (ticket #782)
 	IF NOT EXISTS (SELECT * FROM information_schema.COLUMNS

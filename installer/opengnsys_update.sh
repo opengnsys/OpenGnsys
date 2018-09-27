@@ -173,6 +173,7 @@ function checkAutoUpdate()
 	# Actaulizar el script si ha cambiado o no existe el original.
 	if [ $REMOTE -eq 1 ]; then
 		curl -s $RAW_URL/installer/$PROGRAMNAME -o $PROGRAMNAME
+		chmod +x $PROGRAMNAME
 		if ! diff -q $PROGRAMNAME $INSTALL_TARGET/lib/$PROGRAMNAME 2>/dev/null || ! test -f $INSTALL_TARGET/lib/$PROGRAMNAME; then
 			mv $PROGRAMNAME $INSTALL_TARGET/lib
 			update=1
@@ -198,7 +199,7 @@ function getDateTime()
 # Escribe a fichero y muestra por pantalla
 function echoAndLog()
 {
-	echo $1
+	echo "$1"
 	DATETIME=`getDateTime`
 	echo "$DATETIME;$SSH_CLIENT;$1" >> $LOG_FILE
 }
@@ -1011,11 +1012,12 @@ function updateSummary()
 {
 	# Actualizar fichero de versión y revisión.
 	local VERSIONFILE REVISION
-
 	VERSIONFILE="$INSTALL_TARGET/doc/VERSION.txt"
-	REVISION=$(curl -s "$API_URL" | jq -r ".commit.commit.committer.date" | awk '{gsub(/[^0-9]/,""); print}')
+	# Revisión: rAñoMesDía.Gitcommit (8 caracteres de fecha y 7 primeros de commit).
+ 	REVISION=$(curl -s "$API_URL" | jq -r '"r" + (.commit.commit.committer.date | gsub("-"; "")[:8]) + "." + (.commit.sha[:7])')
+
 	[ -f $VERSIONFILE ] || echo "OpenGnsys" >$VERSIONFILE
-	perl -pi -e "s/($| r[0-9]*)/ $REVISION/" $VERSIONFILE
+	sed -ri "s/($| r[.0-9a-f]+)/ $REVISION/" $VERSIONFILE
 
 	echo
 	echoAndLog "OpenGnsys Update Summary"

@@ -14,12 +14,7 @@
 function btogGetVar()
 {
 
-export BTSVNBOOTTOOLS=/tmp/opengnsys_installer/opengnsys/client/boot-tools
-export BTSVNSHARE=/tmp/opengnsys_installer/opengnsys/client/shared
-export BTSVNENGINE=/tmp/opengnsys_installer/opengnsys/client/engine
-
-export BTSVNOG2=/tmp/opengnsys_installer/opengnsys2
-
+export BTDIR=/tmp/opengnsys_installer/opengnsys/client/boot-tools
 export BTTARGETDIR=/var/lib/tftpboot/ogclient/
 export BTROOTFSIMG=${BTTARGETDIR}ogclient.img
 export BTROOTFSMNT=${BTTARGETDIR}ogclientmount
@@ -127,12 +122,13 @@ case "${1,,}" in
 		exit 1
 		;;
 esac
-SVNURL="https://opengnsys.es/svn/trunk/client"
-VERSIONSVN=$(LANG=C svn info $SVNURL | awk '/Rev:/ {print "r"$4}')
-NAMEISOCLIENT="$VERSIONBOOTTOOLS-$OSCODENAME-$OSRELEASE-$OSARCH-$VERSIONSVN"
-NAMEHOSTCLIENT="$VERSIONBOOTTOOLS-$OSCODENAME-$VERSIONSVN"
+BRANCH="master"
+GITURL="https://api.github.com/repos/opengnsys/OpenGnsys/commits?sha=$BRANCH&path=/client"
+GITRELEASE=$(curl -s "$GITURL" | jq -r '"r" + (.[0].commit.committer.date | gsub("-"; "")[:8]) + "." + (.[0].sha[:7])')
+NAMEISOCLIENT="$VERSIONBOOTTOOLS-$OSCODENAME-$OSRELEASE-$OSARCH-$GITRELEASE"
+NAMEHOSTCLIENT="$VERSIONBOOTTOOLS-$OSCODENAME-$GITRELEASE"
 export OSDISTRIB OSCODENAME OSRELEASE OSARCH OSHTTP
-export TYPECLIENT VERSIONSVN NAMEISOCLIENT NAMEHOSTCLIENT
+export TYPECLIENT GITRELEASE NAMEISOCLIENT NAMEHOSTCLIENT
 ### El fichero de configuración debe sustituir a estos 3 ficheros (borrar las 3 líneas siguientes).
 echo "$NAMEISOCLIENT" > /tmp/opengnsys_info_rootfs
 echo "$NAMEHOSTCLIENT" > /tmp/opengnsys_chroot
@@ -144,7 +140,7 @@ OSCODENAME="$OSCODENAME"
 OSRELEASE="$OSRELEASE"
 OSARCH="$OSARCH"
 OSHTTP="$OSHTTP"
-VERSIONSVN="$VERSIONSVN"
+GITRELEASE="$GITRELEASE"
 NAMEISOCLIENT="$NAMEISOCLIENT"
 NAMEHOSTCLIENT="$NAMEHOSTCLIENT"
 EOT

@@ -19,12 +19,12 @@ sed -i "s/XKBLAYOUT=.*/XKBLAYOUT=\"${LANG%_*}\"/" /etc/default/keyboard
 dpkg-reconfigure -fnoninteractive console-setup
 # Install dependencies.
 apt-get update -y
-apt-get install -y subversion
+apt-get install -y jq subversion syslinux syslinux-efi syslinux-utils
 # Prepare environment.
 groupadd opengnsys
 mkdir -p /opt/opengnsys/client /tmp/opengnsys_installer/opengnsys
 ln -fs /var/lib/tftpboot /opt/opengnsys
-svn export https://opengnsys.es/svn/trunk/client /tmp/opengnsys_installer/opengnsys/client
+svn export https://github.com/opengnsys/OpenGnsys/branches/master/client /tmp/opengnsys_installer/opengnsys/client
 echo "Connect to this VM, launch boot-tools generation script and follow instructions:"
 echo "    sudo /tmp/opengnsys_installer/opengnsys/client/boot-tools/boottoolsgenerator.sh"
 echo "Warning: this process may take a long time."

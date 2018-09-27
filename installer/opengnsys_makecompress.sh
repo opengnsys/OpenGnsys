@@ -7,28 +7,40 @@
 # Versión:	1.0 - Incluido en OpenGnSys 1.0.1
 # Autor:	Ramón Gómez, Universidad de Sevilla
 # Fecha:	10/05/2011
+# Versión:	1.1.1 - Descarga desde repositorio de GitHub
+# Autor:	Ramón Gómez, Universidad de Sevilla
+# Fecha:	27/05/2018
 
+# Comprobaciones.
+for PROG in jq unzip; do
+    if ! which $PROG &>/dev/null; then
+        echo "Please, install \"$PROG\" package."
+        exit 1
+    fi
+done
 
 # Variables
-SVNURL="https://opengnsys.es/svn/trunk/"
-SVNREV=$(LANG=C svn info $SVNURL | awk '/Last Changed Rev:/ {print "r"$4}')
+BRANCH="master"
+CODE_URL="https://codeload.github.com/opengnsys/OpenGnsys/zip/$BRANCH"
+API_URL="https://api.github.com/repos/opengnsys/OpenGnsys/branches/$BRANCH"
+REVISION=$(curl -s "$API_URL" | jq -r '"r" + (.commit.commit.committer.date | gsub("-"; "")[:8]) + "." + (.commit.sha[:7])')
 
 # Descargar repositorio SVN
 cd /tmp
 rm -fr opengnsys
-svn export $SVNURL opengnsys || exit 1
+curl "$CODE_URL" -o opengnsys.zip && unzip opengnsys.zip && mv "OpenGnsys-$BRANCH" opengnsys
 
 # Asisgnar propietario de los ficheros descargados.
 chown -R root.root opengnsys
 WARNING=$?
 
 # Parchear datos de revisión del código.
-perl -pi -e "s/$/ $SVNREV/" opengnsys/doc/VERSION.txt
+sed -ri "s/$/ $REVISION/" opengnsys/doc/VERSION.txt
 
 # Generar fichero comprimido.
 VERSION=$(awk '{print $2"-"$3}' opengnsys/doc/VERSION.txt)
 tar cvzf opengnsys-$VERSION.tar.gz opengnsys
-rm -fr opengnsys
+rm -fr opengnsys opengnsys.zip
 
 # Revisar salida.
 [ $WARNING != 0 ] && echo "*** WARNING: cannot change owner of files to \"root\" user before compressing."

@@ -24,7 +24,7 @@ echo "$OSDISTRIB:$OSCODENAME:$OSRELEASE:$OSARCH:$OSHTTP"
 
 LERROR=TRUE
 
-echo "$FUNCNAME: Iniciando la personalización con datos del SVN "
+echo "$FUNCNAME: Iniciando la personalización con datos del repositorio"
 
 # parseamos el apt.source de la distribución (en minúsculas)
 sed -e "s/OSCODENAME/$OSCODENAME/g" ${SVNCLIENTDIR}/includes/etc/apt/sources.list.${OSDISTRIB,,} > ${SVNCLIENTDIR}/includes/etc/apt/sources.list
@@ -77,8 +77,8 @@ if [ $? -ne 0 ]; then
 fi
 
 # El fichero de configuración debe sustituir a los 2 ficheros (borrar las 2 líneas).
-echo "${VERSIONBOOTTOOLS}-${OSCODENAME}-${OSRELEASE}-${VERSIONSVN}" > /$NAMEISOCLIENTFILE
-echo "${VERSIONBOOTTOOLS}-${OSCODENAME}-${VERSIONSVN}" > $NAMEHOSTCLIENTFILE
+echo "${VERSIONBOOTTOOLS}-${OSCODENAME}-${OSRELEASE}-${GITRELEASE}" > /$NAMEISOCLIENTFILE
+echo "${VERSIONBOOTTOOLS}-${OSCODENAME}-${GITRELEASE}" > $NAMEHOSTCLIENTFILE
 
 
 history -c

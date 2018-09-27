@@ -11,8 +11,9 @@
 
 
 # Variables.
-PROGDIR=$PWD/ogagent
-SVNURL=https://opengnsys.es/svn/trunk/admin/Sources/Clients/ogagent
+PROGDIR="$PWD/ogagent"
+BRANCH="branches/master"
+SVNURL="https://github.com/opengnsys/OpenGnsys/$BRANCH/admin/Sources/Clients/ogagent"
 
 # Show prerequisites needed to build the environment.
 mkdir -p $PROGDIR || exit 1
@@ -22,20 +23,21 @@ OGAgent devoloping environment installation
 
 Prerequisites:
 - Install packages, if needed:
+  - Subversion
   - Wine for 32-bit (Winetricks may be required)
   - Python 2.7 with pyqt4-dev-tools
   - realpath
   - dpkg-dev
   - rpmbuild
   - xar
-- Open a web browser and download Microsoft Visual C++ 2010 Redistributable Package (x86) from: http://www.microsoft.com/en-us/download/details.aspx?id=5555
-- Copy or move "vcredist_x86.exe" file to $PROGDIR directory.
 Press [Enter] key when ready to continue.
 EOT
 read
 
 # Importing OGAgent source code.
 svn export --force $SVNURL $PROGDIR || exit 1
+# Downloading Visual C++ Redistributable.
+wget --unlink https://download.microsoft.com/download/5/B/C/5BC5DBB3-652D-4DCE-B14A-475AB85EEF6E/vcredist_x86.exe
 
 # Update PyQt components.
 pushd ogagent/src >/dev/null

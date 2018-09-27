@@ -1,5 +1,5 @@
-Instalación y Actualización de OpenGnsys 1.1.0
-==============================================
+Instalación y Actualización de OpenGnsys 1.1.0a
+===============================================
 
 
 Instalación inicial
@@ -8,17 +8,17 @@ Instalación inicial
 1. Obtener el instalador.
 
 Descargar una versión completa y desccomprimir el fichero "opengnsys-version.tar.gz":
-        tar xvzf opengnsys-version.tar.gz
-        cd opengnsys/installer
+	tar xvzf opengnsys-version.tar.gz
+	cd opengnsys/installer
 
 O bien, descargar el instalador desde la última reversión del repositorio:
-        svn export https://opengnsys.es/svn/trunk/installer/opengnsys_installer.sh
+	wget https://raw.githubusercontent.com/opengnsys/OpenGnsys/devel/installer/opengnsys_installer.sh
 
 Opcionalmente, puede descargarse la imagen del cliente; si no se realiza este paso, el instalador la descargará automáticamente.
 	wget https://opengnsys.es/downloads/ogLive-versioncliente.iso
 
 2. Ejecutar el instalador como root:
-        sudo bash opengnsys_installer.sh 
+	sudo bash opengnsys_installer.sh 
 
 Dicho script solicitará por teclado la siguiente información para configurar el acceso al servicio (si no se indica un parámetro, toma el valor por defecto):
     * Clave del usuario root de MySQL.

@@ -1,35 +1,37 @@
-Installing OpenGnsys Server v 1.0.5
-=======================================
+Installing OpenGnsys Server v 1.1.0a
+====================================
 
 Before installation
 -------------------
 
-OpenGnsys Server 1.0.5 is meant to be installed under Ubuntu Server 12.04 LTS or newer, though it has also been tested under operating systems based on Fedora 20
+OpenGnsys Server 1.1.0 is mean to be installed under Ubuntu Server 16.04 LTS or newer, though it has also been tested under operating systems based on CentOS 7.
 
 Network connection is needed in order to download the required packages, the source code and the preconfigured client.
 
 Minimum storage requirements:
 - 100 MB in /tmp (for the installation process)
-- 450 MB in /var/lib/tftpboot (or /srv in Debian systems)
-- 500 MB in the installation folder (/opt/opengnsys) in addition to the space required for logging (100 MB if ogLive client is already downloaded).
+- 600 MB in /var/lib/tftpboot (or /srv in Debian systems) for every installed ogLive client.
+- 250 MB in the installation folder (/opt/opengnsys) plus 600 MB for every downloaded ISO image.
 - Enough disk space for the image repository in /opt/opengnsys/images (it is recommended to mount it on an independent file system)
 
-Installation
-------------
 
-To install OpenGnsys, run opengnsys_installer.sh after unpacking the release file (opengnsys-release.tar.gz) o downloading it directly from https://opengnsys.es/svn/trunk/installer/opengnsys_installer.sh.
+
+Installing
+----------
+
+To install OpenGnsys, run opengnsys_installer.sh script after unpacking the release file (opengnsys-release.tar.gz) o downloading it directly from https://raw.githubusercontent.com/opengnsys/OpenGnsys/master/installer/opengnsys_installer.sh
 
 Unpacking example:
-	tar xvzf opengnsys-1.0.5.tar.gz
+	tar xvzf opengnsys-1.1.0a.tar.gz
 	cd opengnsys/installer
 
 Download examples:
 
     * Download with wget.
-	wget https://opengnsys.es/svn/trunk/installer/opengnsys_installer.sh -O opengnsys_installer.sh
+	wget https://raw.githubusercontent.com/opengnsys/OpenGnsys/master/installer/opengnsys_installer.sh
 
     * Download with curl.
-	curl https://opengnsys.es/svn/trunk/installer/opengnsys_installer.sh > opengnsys_installer.sh
+	curl https://raw.githubusercontent.com/opengnsys/OpenGnsys/master/installer/opengnsys_installer.sh -o opengnsys_installer.sh
 
 
 You must be root to run the installation script:
@@ -41,23 +43,24 @@ The following information will be requested in order to configure the access to 
     * Web console user and OpenGnsys Super Administrator
     * Web console user's password
     * Client's password for accessing remote services
+    * Choose which ogLive clients to install.
 
 The following processes will be carried out:
     * Gathering of the basic network parameters.
-    * Checking the installed packages.
+    * Checking installed packages.
     * Downloading and installing dependencies.
     * Creating OpenGnsys basic folder sctructure.
-    * Download the code repository to a temporal folder (/tmp/opengnsys_installer). In upcoming releases this process will not be necessary.
+    * Downloading code from the repository to a temporal folder (/tmp/opengnsys_installer). In upcoming releases this process will not be necessary.
     * Compiling and installing OpenGnsys services.
     * Basic configuration of OpenGnsys network services (DHCP, PXE and Samba) using the existing configuration templates.
     * Copying additional server management files.
-    * Creating the database and configuring OpenGnsys administration console web server.
-    * Copying web administration console pages.
-    * Copying the OpenGnsys client folder structure.
+    * Creating database and configuring OpenGnsys administration console web server.
+    * Copying administration console pages.
+    * Copying OpenGnsys client folder structure.
     * Downloading OpenGnsys client initial image.
     * Basic configuration of OpenGnsys services using network parameters.
 
-Once the installation is finished you can start working with the system:
+Once the installation process is finished, you can start working with the system:
     * Configuring DHCP.
     * Adding information in the administration console.
     * Customizing administration scripts.
@@ -79,12 +82,12 @@ You must be root to run this script:
  
 
 
-Uninstall
----------
+Uninstalling
+------------
 
-There is also an uninstall script for the OpenGnsys components:
-    * OpenGnsys files and data base will be deleted. 
-    * Packages belonging to the operating system and their configuration files will be preserved.
+There is also an uninstallation script to remove the OpenGnsys components:
+    * OpenGnsys files and database will be deleted.
+    * Operating system packages and their configuration files will be preserved.
     * The image folder and its content will not be deleted.
 
 You must be root to run this script:
