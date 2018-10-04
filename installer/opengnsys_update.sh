@@ -117,7 +117,7 @@ function autoConfigure()
 	# Configuración según la distribución de Linux.
 	if [ -f /etc/debian_version ]; then
 		# Distribución basada en paquetes Deb.
-		DEPENDENCIES=( curl rsync btrfs-tools procps arp-scan realpath php-curl gettext moreutils jq wakeonlan udpcast )
+		DEPENDENCIES=( curl rsync btrfs-tools procps arp-scan realpath php-curl gettext moreutils jq wakeonlan udpcast php-fpm libapache2-mod-fastcgi )
 		UPDATEPKGLIST="add-apt-repository -y ppa:ondrej/php; apt-get update"
 		INSTALLPKGS="apt-get -y install"
 		DELETEPKGS="apt-get -y purge"
@@ -132,6 +132,8 @@ function autoConfigure()
 			SERVICESTATUS="eval /etc/init.d/\$service status"
 		fi
 		ENABLESERVICE="eval update-rc.d \$service defaults"
+		APACHEENABLEMODS="ssl rewrite proxy_fcgi fastcgi actions alias"
+		APACHEDISABLEMODS="php"
 		APACHEUSER="www-data"
 		APACHEGROUP="www-data"
 		INETDCFGDIR=/etc/xinetd.d
@@ -529,15 +531,14 @@ EOT
 # Configurar HTTPS y exportar usuario y grupo del servicio Apache.
 function apacheConfiguration ()
 {
-	local config template
+	local config template module socketfile
 
-	# Activar HTTPS (solo actualizando desde versiones anteriores a 1.0.2) y
-	#    activar módulo Rewrite (solo actualizaciones desde 1.0.x a 1.1.x).
+	# Activar módulos de Apache.
 	if [ -e $APACHECFGDIR/sites-available/opengnsys.conf ]; then
 		echoAndLog "${FUNCNAME}(): Configuring Apache modules"
 		a2ensite default-ssl
-		a2enmod ssl
-		a2enmod rewrite
+		for module in $APACHEENABLEMODS; do a2enmod -q "$module"; done
+		for module in $APACHEDISABLEMODS; do a2dismod -q "${module//PHP7VERSION}"; done
 		a2ensite opengnsys
 	elif [ -e $APACHECFGDIR/conf.modules.d ]; then
 		echoAndLog "${FUNCNAME}(): Configuring Apache modules"
@@ -551,7 +552,8 @@ function apacheConfiguration ()
 		else
 		       template=$WORKDIR/opengnsys/server/etc/apache.conf.tmpl
 		fi
-		sed -e "s,CONSOLEDIR,$INSTALL_TARGET/www,g" $template > $config
+		sockfile=$(find /run/php -name "php*.sock" -type s -print 2>/dev/null)
+		sed -e "s,CONSOLEDIR,$INSTALL_TARGET/www,g; s/SOCKETFILE/$socketfile/g" $template > $config
 	done
 
 	# Reiniciar Apache.

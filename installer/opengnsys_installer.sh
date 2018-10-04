@@ -141,8 +141,9 @@ OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/${OPENGNSYS_DATABASE}.sql
 # - STARTSERVICE, ENABLESERVICE - iniciar y habilitar un servicio
 # - STOPSERVICE, DISABLESERVICE - parar y deshabilitar un servicio
 # - APACHESERV, APACHECFGDIR, APACHESITESDIR, APACHEUSER, APACHEGROUP - servicio y configuración de Apache
-# - APACHESSLMOD, APACHEENABLESSL, APACHEMAKECERT - habilitar módulo Apache y certificado SSL
+# - APACHEENABLEMODS, APACHEENABLESSL, APACHEMAKECERT - habilitar módulos y certificado SSL
 # - APACHEENABLEOG, APACHEOGSITE, - habilitar sitio web de OpenGnsys
+# - PHPFPMSERV - servicio PHP FastCGI Process Manager para Apache
 # - INETDSERV - servicio Inetd
 # - FIREWALLSERV - servicio de cortabuegos IPTables/FirewallD
 # - DHCPSERV, DHCPCFGDIR - servicio y configuración de DHCP
@@ -169,7 +170,7 @@ OSVERSION="${OSVERSION%%.*}"
 # Configuración según la distribución GNU/Linux (usar minúsculas).
 case "$OSDISTRIB" in
 	ubuntu|debian|linuxmint)
-		DEPENDENCIES=( subversion apache2 php php-ldap libapache2-mod-php mysql-server php-mysql isc-dhcp-server bittorrent tftp-hpa tftpd-hpa xinetd build-essential g++-multilib libmysqlclient-dev wget curl doxygen graphviz bittornado ctorrent samba rsync unzip netpipes debootstrap schroot squashfs-tools btrfs-tools procps arp-scan realpath php-curl gettext moreutils jq wakeonlan udpcast shim-signed grub-efi-amd64-signed )
+		DEPENDENCIES=( subversion apache2 php php-ldap php-fpm libapache2-mod-fastcgi mysql-server php-mysql isc-dhcp-server bittorrent tftp-hpa tftpd-hpa xinetd build-essential g++-multilib libmysqlclient-dev wget curl doxygen graphviz bittornado ctorrent samba rsync unzip netpipes debootstrap schroot squashfs-tools btrfs-tools procps arp-scan realpath php-curl gettext moreutils jq wakeonlan udpcast shim-signed grub-efi-amd64-signed )
 		UPDATEPKGLIST="apt-get update"
 		INSTALLPKG="apt-get -y install --force-yes"
 		CHECKPKG="dpkg -s \$package 2>/dev/null | grep Status | grep -qw install"
@@ -188,8 +189,7 @@ case "$OSDISTRIB" in
 		APACHEOGSITE=opengnsys
 		APACHEUSER="www-data"
 		APACHEGROUP="www-data"
-		APACHESSLMOD="a2enmod ssl"
-		APACHEREWRITEMOD="a2enmod rewrite"
+		APACHEENABLEMODS="a2enmod ssl rewrite proxy_fcgi fastcgi actions alias"
 		APACHEENABLESSL="a2ensite default-ssl"
 		APACHEENABLEOG="a2ensite $APACHEOGSITE"
 		APACHEMAKECERT="make-ssl-cert generate-default-snakeoil --force-overwrite"
@@ -199,6 +199,7 @@ case "$OSDISTRIB" in
 		INETDCFGDIR=/etc/xinetd.d
 		MYSQLSERV=mysql
 		MARIADBSERV=mariadb
+		PHPFPMSERV=php-fpm
 		RSYNCSERV=rsync
 		RSYNCCFGDIR=/etc
 		SAMBASERV=smbd
@@ -302,6 +303,7 @@ case "$OSDISTRIB" in
 			add-apt-repository -y ppa:ondrej/php
 			eval $UPDATEPKGLIST
 			PHP7VERSION=$(apt-cache pkgnames php7 | sort | head -1)
+			PHPFPM="${PHP7VERSION}-fpm"
 			DEPENDENCIES=( ${DEPENDENCIES[@]//php/$PHP7VERSION} )
 		fi
 		# Adaptar dependencias para libmysqlclient.
@@ -1138,6 +1140,7 @@ function installWebConsoleApacheConf()
 	local path_opengnsys_base="$1"
 	local path_apache2_confd="$2"
 	local CONSOLEDIR=${path_opengnsys_base}/www
+	local sockfile
 
 	if [ ! -d $path_apache2_confd ]; then
 		errorAndLog "${FUNCNAME}(): path to apache2 conf.d can not found, verify your server installation"
@@ -1148,12 +1151,17 @@ function installWebConsoleApacheConf()
 
 	echoAndLog "${FUNCNAME}(): creating apache2 config file.."
 
+	# Avtivar PHP-FPM.
+	echoAndLog "${FUNCNAME}(): configuring PHP-FPM"
+	service=$PHPFPMSERV
+	$ENABLESERVICE; $STARTSERVICE
+	sockfile=$(find /run/php -name "php*.sock" -type s -print 2>/dev/null)
+
+	# Activar módulos de Apache.
+	$APACHEENABLEMODS
 	# Activar HTTPS.
-	$APACHESSLMOD
 	$APACHEENABLESSL
 	$APACHEMAKECERT
-	# Activar módulo Rewrite.
-	$APACHEREWRITEMOD
 	# Genera configuración de consola web a partir del fichero plantilla.
 	if [ -n "$(apachectl -v | grep "2\.[0-2]")" ]; then
 		# Configuración para versiones anteriores de Apache.
@@ -1161,7 +1169,7 @@ function installWebConsoleApacheConf()
 			$WORKDIR/opengnsys/server/etc/apache-prev2.4.conf.tmpl > $path_apache2_confd/$APACHESITESDIR/${APACHEOGSITE}
 	else
 		# Configuración específica a partir de Apache 2.4
-		sed -e "s,CONSOLEDIR,$CONSOLEDIR,g" \
+		sed -e "s,CONSOLEDIR,$CONSOLEDIR,g; s,SOCKFILE,$sockfile,g" \
 			$WORKDIR/opengnsys/server/etc/apache.conf.tmpl > $path_apache2_confd/$APACHESITESDIR/${APACHEOGSITE}.conf
 	fi
 	$APACHEENABLEOG

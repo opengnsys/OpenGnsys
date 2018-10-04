@@ -7,6 +7,10 @@ Lista de cambios incluidos en OpenGnsys 1.1.1 (Espeto)
 ------------------------------------------------------
 
 Tickets resueltos en módulo OpenGnsys Cloning Engine:
+#863	smartPartition: incluir scritps de ejemplo de particionado personalizado para múltiples d
+iscos duros
+#864	FirstRunOnceWindows: scripts de ejemplo para installMiniSetup con ratón y teclado desacti
+vado
 #866	Si al restaurar usando la cache no hay espacio en la misma se finalizará la acción
 #868	ConfiguraOs: error al desinstalar el agente de sistema operativo antiguo
 
