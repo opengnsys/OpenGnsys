@@ -98,7 +98,7 @@ EOT
         # Create new JSON file.
         if [ -z "$OUNAME" ]; then
             cat << EOT | jq . > $INFOFILE
-{"directory":"$IMAGESDIR","images":[${IMAGENAME+$JSON}],"ous":[]}
+{"directory":"$IMAGESDIR","images":[${IMAGENAME:+$JSON}],"ous":[]}
 EOT
         else
             cat << EOT | jq . > $INFOFILE
