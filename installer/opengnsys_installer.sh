@@ -1485,9 +1485,12 @@ function openGnsysConfigure()
 	echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/deletepreimage ] && $INSTALL_TARGET/bin/deletepreimage" > /etc/cron.d/imagedelete
 	echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/ogagentqueue.cron ] && $INSTALL_TARGET/bin/ogagentqueue.cron" > /etc/cron.d/ogagentqueue
 
-	echoAndLog "${FUNCNAME}(): Creating logrotate configuration file."
+	echoAndLog "${FUNCNAME}(): Creating logrotate configuration files."
 	sed -e "s/OPENGNSYSDIR/${INSTALL_TARGET//\//\\/}/g" \
-		$WORKDIR/opengnsys/server/etc/logrotate.tmpl > /etc/logrotate.d/opengnsys
+		$WORKDIR/opengnsys/server/etc/logrotate.tmpl > /etc/logrotate.d/opengnsysServer
+
+	sed -e "s/OPENGNSYSDIR/${INSTALL_TARGET//\//\\/}/g" \
+		$WORKDIR/opengnsys/repoman/etc/logrotate.tmpl > /etc/logrotate.d/opengnsysRepo
 
 	echoAndLog "${FUNCNAME}(): Creating OpenGnsys config files."
 	for dev in ${DEVICE[*]}; do
