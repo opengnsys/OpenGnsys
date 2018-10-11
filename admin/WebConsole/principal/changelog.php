@@ -6,8 +6,8 @@ include_once("../includes/ctrlacc.php");
 include_once("../idiomas/php/".$idioma."/changelog_".$idioma.".php");
 
 // Añadir versión.
-$versionfile="../../doc/VERSION.txt";
-$version=(file_exists ($versionfile)) ? file_get_contents($versionfile, TRUE) : "";
+$data = json_decode(@file_get_contents('../../doc/VERSION.json'));
+$version=(empty($data->project)) ? "OpenGnsys" : @$data->project.' '.@$data->version.' '.(isset($data->codename) ? '('.$data->codename.') ' : '').@$data->release;;
 
 $changelogfile="../../doc/CHANGELOG.es.txt";
 $changelog=(file_exists ($changelogfile)) ? file_get_contents($changelogfile, TRUE) : "";

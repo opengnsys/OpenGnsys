@@ -7,9 +7,10 @@ include_once("../includes/ctrlacc.php");
 include_once("../idiomas/php/".$idioma."/ayuda_".$idioma.".php");
 
 // Añadir versión.
-$versionfile="../../doc/VERSION.txt";
-$version=(file_exists ($versionfile)) ? file_get_contents($versionfile, TRUE) : "";
+$data = json_decode(@file_get_contents('../../doc/VERSION.json'));
+$version=(empty($data->project)) ? "OpenGnsys" : @$data->project.' '.@$data->version.' '.(isset($data->codename) ? '('.$data->codename.') ' : '').@$data->release;;
 ?>
+
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
@@ -24,7 +25,7 @@ $version=(file_exists ($versionfile)) ? file_get_contents($versionfile, TRUE) : 
 </div>
 
 <div style="margin-left: 20%">
-    <p><a class="nounderline" href="../api/userManual/Inicio.php"> <span class=subcabeceras> <?php echo $TbMsg["MANUAL"] ?> </span></a> </p>
+    <p><a class="nounderline" href="manual.php"> <span class=subcabeceras> <?php echo $TbMsg["MANUAL"] ?> </span></a> </p>
     <p><a class="nounderline" href="../api/index.html"><span class=subcabeceras>  <?php echo $TbMsg["API"] ?> </span></a></p>
     <p><a class="nounderline" href="engine.php"><span class=subcabeceras> <?php echo $TbMsg["CFG"] ?></span></a> </p>
     <p>&nbsp;</p>
