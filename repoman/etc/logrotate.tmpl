@@ -1,4 +1,4 @@
-# Configuración de logrotate para el servidor de administración de OpenGnsys
+# Configuración de logrotate para el servidor de repositorio de OpenGnsys
 # Los archivos se copian y luego se corta el original, para que los equipos puedan seguir escribiendo sobre ellos
 # Las copias se comprimen
 # Los registros de las transferencias multicast se guardan una semana (repo).
@@ -8,12 +8,14 @@
 copytruncate
 compress
 
-/opt/opengnsys/log/clients/*.log
-/opt/opengnsys/log/ogAdmServer.log
-/opt/opengnsys/log/ogagent.log
+prerotate
+    find /opt/opengnsys/log/mcastlog -type f -mtime +7  -exec rm -f {} \;
+endscript
+
+/opt/opengnsys/log/bttrack.log
+/opt/opengnsys/log/torrent-creator.log
+/opt/opengnsys/log/ogAdmRepo.log 
 /opt/opengnsys/log/opengnsys.log
-/opt/opengnsys/log/remotepc.log
-/opt/opengnsys/log/rest.log
 {
 	rotate 5
 	size 100k
