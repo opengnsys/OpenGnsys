@@ -3,7 +3,7 @@
 #/**
 #         checkrepo
 #@file    checkrepo
-#@brief   Generate repository information in a JSON file.
+#@brief   Maintain repository information in a JSON file.
 #@warning This script uses "jq" command.
 #@version 1.1.0 - Initial version.
 #@author  Ramón M. Gómez - ETSII Univ. Sevilla
@@ -105,7 +105,7 @@ EOT
         # Create new JSON file.
         if [ -z "$OUNAME" ]; then
             cat << EOT | jq . > $INFOFILE
-{"directory":"$IMAGESDIR","images":[$JSON],"ous":[]}
+{"directory":"$IMAGESDIR","images":[${IMAGENAME:+$JSON}],"ous":[]}
 EOT
         else
             cat << EOT | jq . > $INFOFILE
@@ -221,6 +221,7 @@ function checkremoved() {
 
 # Check dependencies.
 [ ! -w "$(dirname "$INFOFILE")" ] && raiseError access "$INFOFILE"
+[ -e "$INFOFILE" ] || addToJson
 JQ=$(which jq 2>/dev/null) || raiseError notfound "Need to install \"jq\"."
 which sponge &>/dev/null || raiseError notfound "Need to install \"moreutils\"."
 
