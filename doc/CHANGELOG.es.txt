@@ -12,6 +12,9 @@ Tickets resueltos en módulo OpenGnsys Cloning Engine:
 Tickets resueltos en módulo OpenGnsys Client:
 #852	Apagado del cliente si tiempo de espera cambia de día
 
+Tickets resueltos en módulo OpenGnsys Server:
+#846	Configuración de logrotate para que incluya todos los servicios de OpenGnsys
+
 Tickets resueltos en módulo OpenGnsys Web Admin Console:
 #835	Problemas al listar plantillas en Nerboot Avanzado
 
