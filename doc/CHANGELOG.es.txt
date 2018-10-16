@@ -37,7 +37,10 @@ Tickets resueltos en módulo OpenGnsys Client:
 #852	Apagado del cliente si tiempo de espera cambia de día
 
 Tickets resueltos en módulo OpenGnsys Server:
-#846	Configuración de logrotate para que incluya todos los servicios de OpenGnsys 
+#846	Configuración de logrotate para que incluya todos los servicios de OpenGnsys
+
+Tickets resueltos en módulo OpenGnsys Repository Server:
+#850	Problema con repositorio recién instalado
 
 Tickets resueltos en módulo OpenGnsys Web Admin Console:
 #835	Problemas al listar plantillas en Nerboot Avanzado
@@ -45,6 +48,7 @@ Tickets resueltos en módulo OpenGnsys Web Admin Console:
 Tickets genéricos resueltos:
 #839	Errores detectado en API REST para Remote PC
 #840	Usar Git como repositorio de código
+#865	Problemas con Trac
 #872	Liberar versión de mantenimiento OpenGnsys 1.1.0a
 
 
@@ -59,7 +63,7 @@ Tickets resueltos en módulo OpenGnsys Cloning Engine:
 #678	Unidades organizativas con directorio de imágenes separado (mejora)
 #716	Revisión ogCleanLinuxDevices
 #722	Multicast entre subredes (mejora)
-#726	Reducir el registro de errores y avisos en algunas operaciones 
+#726	Reducir el registro de errores y avisos en algunas operaciones
 #727	ogGrubHidePartitions comprueba tipo de partición con blkid en vez revisar las entradas del Grub
 #731	Soporte para cualquier versión de Windows
 #740	Clonar disco completo en modo "raw"
@@ -106,8 +110,8 @@ Tickets resueltos en módulo OpenGnsys Repository Server:
 #379	Usar identificador de operación para el ogAdmRepoAux (no se resolverá)
 #701	torrent-creator falla si el fichero de imagen a procesar no es válido
 #743	Funcion en el webservice API REST para wakeonlan (mejora)
-#810	API REST de respositorio para listado de imágenes 
-#820	checkperms da error al cambiar permisos sobre el directorio de agrupamiento de imágenes en el repo 
+#810	API REST de respositorio para listado de imágenes
+#820	checkperms da error al cambiar permisos sobre el directorio de agrupamiento de imágenes en el repo
 
 Tickets resueltos en módulo OpenGnsys Web Admin Console:
 #372	Comandos y asistentes deberían limitar equipos de operación dentro de ámbito
@@ -127,18 +131,18 @@ Tickets resueltos en módulo OpenGnsys Web Admin Console:
 #778	Codificar claves de usuarios (mejora)
 #779	Crear comando "Enviar mensaje"
 #782	Crear registro de acciones para realizar informes
-#789	Actualizar plantilla PXE al mover ordenador 
+#789	Actualizar plantilla PXE al mover ordenador
 #792	Incluir en los html personalizados de ejemplo los enlaces al acceso privado
 #797	Revisar log en los procesos de restauración
 #798	Mostrar imágenes en orden alfabético
-#799	Consola web: estado de los equipos tarda en mostar 
+#799	Consola web: estado de los equipos tarda en mostar
 #806	Comando Particionar y Formatear: controlar que no se exceda el tamaño del disco
 #807	Consola Web: Incorporar ordenadores da error de time-out
 #814	Sustituir las etiquetas cortas de php por el formato largo
 #817	Correcciones al formulario propiedades del aula
-#818	Actualización ficheros PXE tras modificar propiedad de IP del repositorio 
-#819	Eliminar un objeto ordenador no elimina fichero PXE 
-#821	Comando Particionar sólo funciona correctamente en al ámbito de tipo ordenador 
+#818	Actualización ficheros PXE tras modificar propiedad de IP del repositorio
+#819	Eliminar un objeto ordenador no elimina fichero PXE
+#821	Comando Particionar sólo funciona correctamente en al ámbito de tipo ordenador
 #822	Llamar al updateBootCache desde el particionado de la cache
 #828	Identificador de perfil hardware disponible desde el ogLive y eliminación de winboot
 
@@ -896,7 +900,7 @@ Tickets resueltos en módulo OpenGnSys Cloning Engine:
 #61	ogListPartitions muestra el tipo de sistemas de archivos de la particion y no el tipo de partición en cuestión
 #71	ogListPartitions falla con partición extendida
 #73	Mensajes de error en particiones vacías
-#75	Arrancar sistemas Linux en partición distinta a la original 
+#75	Arrancar sistemas Linux en partición distinta a la original
 #85	ogCreateImage no crea los subdirectorios del path indicado
 #86	ogRestoreImage siempre añade a la imagen pasada como parámetro la subcadena ".img"
 #87	Engine no se adapta a la sintaxis Doxygen
