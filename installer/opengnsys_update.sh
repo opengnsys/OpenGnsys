@@ -994,16 +994,30 @@ function updateClient()
 # Comprobar permisos y ficheros.
 function checkFiles()
 {
+	local LOGROTATEDIR=/etc/logrotate.d
+
 	# Comprobar permisos adecuados.
 	if [ -x	$INSTALL_TARGET/bin/checkperms ]; then
 		echoAndLog "${FUNCNAME}(): Checking permissions"
 		OPENGNSYS_DIR="$INSTALL_TARGET" OPENGNSYS_USER="$OPENGNSYS_CLIENTUSER" APACHE_USER="$APACHE_RUN_USER" APACHE_GROUP="$APACHE_RUN_GROUP" $INSTALL_TARGET/bin/checkperms
 	fi
-
 	# Eliminamos el fichero de estado del tracker porque es incompatible entre los distintos paquetes
 	if [ -f /tmp/dstate ]; then
 		echoAndLog "${FUNCNAME}(): Deleting unused files"
 		rm -f /tmp/dstate
+	fi
+	# Crear ficheros de logrotate.
+	if [ -d $LOGROTATEDIR ]; then
+		if [ ! -f $LOGROTATEDIR/opengnsysServer ]; then
+			echoAndLog "${FUNCNAME}(): Creating logrotate configuration file for server"
+			sed -e "s/OPENGNSYSDIR/${INSTALL_TARGET//\//\\/}/g" \
+				$WORKDIR/opengnsys/server/etc/logrotate.tmpl > $LOGROTATEDIR/opengnsysServer
+		fi
+		if [ ! -f $LOGROTATEDIR/opengnsysRepo ]; then
+			echoAndLog "${FUNCNAME}(): Creating logrotate configuration file for repository"
+			sed -e "s/OPENGNSYSDIR/${INSTALL_TARGET//\//\\/}/g" \
+				$WORKDIR/opengnsys/server/etc/logrotate.tmpl > $LOGROTATEDIR/opengnsysRepo
+		fi
 	fi
 }
 
