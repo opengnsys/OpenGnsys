@@ -623,7 +623,8 @@ function updateWebFiles()
 		sed 's/clickcontextualnodo/clicksupnodo/g' $COMPATDIR/$f.php > $COMPATDIR/$f.device.php
 	done
 	cp -a $COMPATDIR/imagenes.device.php $COMPATDIR/imagenes.device4.php
-
+	# Acceso al manual de usuario
+ 	ln -fs ../doc/userManual $INSTALL_TARGET/www/userManual
 	# Fichero de log de la API REST.
 	touch $INSTALL_TARGET/log/{ogagent,rest,remotepc}.log
 	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/log/{ogagent,rest,remotepc}.log
