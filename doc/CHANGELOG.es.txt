@@ -12,6 +12,7 @@ iscos duros
 #864	FirstRunOnceWindows: scripts de ejemplo para installMiniSetup con ratón y teclado desacti
 vado
 #866	Si al restaurar usando la cache no hay espacio en la misma se finalizará la acción
+#871	Error al crear particiones lógicas en discos con sectores de 4 KB 
 
 Tickets resueltos en módulo OpenGnsys Client:
 #847	La ISO del ogLive debe de utilzar la revisión de Git y no de SVN

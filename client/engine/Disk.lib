@@ -128,10 +128,10 @@ while [ $# -gt 0 ]; do
     echo "$DISK$PART : start=$START, size=$SIZE, Id=$ID" >>$tmpsfdisk
     # Error si se supera el nº total de sectores.
     START=$[START+SIZE]
-    [ $START -le $SECTORS ] || ogRaiseError $OG_ERR_FORMAT "$[START/2] > $[SECTORS/2]" || return $?
     if [ "$IOSIZE" == "4096" -a $PART -gt 4 ]; then
         START=$[START+2048]
     fi
+    [ $START -le $SECTORS ] || ogRaiseError $OG_ERR_FORMAT "$[START/2] > $[SECTORS/2]" || return $?
     PART=$[PART+1]
     shift
 done
