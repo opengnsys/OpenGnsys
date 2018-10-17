@@ -220,10 +220,10 @@ function checkremoved() {
 # Main progrram.
 
 # Check dependencies.
-[ ! -w "$(dirname "$INFOFILE")" ] && raiseError access "$INFOFILE"
-[ -e "$INFOFILE" ] || addToJson
 JQ=$(which jq 2>/dev/null) || raiseError notfound "Need to install \"jq\"."
 which sponge &>/dev/null || raiseError notfound "Need to install \"moreutils\"."
+[ ! -w "$(dirname "$INFOFILE")" ] && raiseError access "$INFOFILE"
+[ -e "$INFOFILE" ] || addToJson
 
 checkfiles
 checkdirs
