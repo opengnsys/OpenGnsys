@@ -45,6 +45,7 @@ Tickets resueltos en módulo OpenGnsys Repository Server:
 
 Tickets resueltos en módulo OpenGnsys Web Admin Console:
 #835	Problemas al listar plantillas en Nerboot Avanzado
+#867	La ayuda en la consola incluirá más información
 
 Tickets genéricos resueltos:
 #839	Errores detectado en API REST para Remote PC

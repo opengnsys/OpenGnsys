@@ -3,7 +3,7 @@
 // Descripción : Muestra la configuración de los clientes en engine.cfg
 //**********************************************************************
 include_once("../includes/ctrlacc.php");
-include_once("../idiomas/php/".$idioma."/changelog_".$idioma.".php");
+include_once("../idiomas/php/".$idioma."/ayuda_".$idioma.".php");
 
 // Añadir versión.
 $data = json_decode(@file_get_contents('../../doc/VERSION.json'));

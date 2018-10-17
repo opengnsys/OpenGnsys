@@ -3,7 +3,7 @@
 // Descripción : Muestra la configuración de los clientes en engine.cfg
 //**********************************************************************
 include_once("../includes/ctrlacc.php");
-include_once("../idiomas/php/".$idioma."/engine_".$idioma.".php");
+include_once("../idiomas/php/".$idioma."/ayuda_".$idioma.".php");
 
 $cfgfile="../../client/etc/engine.cfg";
 $config=(file_exists ($cfgfile)) ? file_get_contents($cfgfile, TRUE) : "No hay acceso al fichero de configuración";
