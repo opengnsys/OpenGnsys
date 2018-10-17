@@ -8,6 +8,7 @@ Lista de cambios incluidos en OpenGnsys 1.1.0a (versión de mantenimiento)
 
 Tickets resueltos en módulo OpenGnsys Cloning Engine:
 #868	ConfiguraOs: error al desinstalar el agente de sistema operativo antiguo
+#871	Error al crear particiones lógicas en discos con sectores de 4 KB
 
 Tickets resueltos en módulo OpenGnsys Client:
 #852	Apagado del cliente si tiempo de espera cambia de día
