@@ -21,18 +21,18 @@ $version=(empty($data->project)) ? "OpenGnsys" : @$data->project.' '.@$data->ver
 
 <body>
 
-<div><p align=center class=cabeceras><img  border=0 nod="aulas-1" value="Sala Virtual" style="cursor:pointer" src="../images/iconos/logocirculos.png" >&nbsp;&nbsp;<?php echo $TbMsg["AYUDA_TITULO"]; ?></p>
+<div><p align=center class=cabeceras><img  border=0 nod="aulas-1" value="Sala Virtual" style="cursor:pointer" src="../images/iconos/logocirculos.png" >&nbsp;&nbsp;<?php echo $TbMsg["HELP_TITLE"]; ?></p>
 </div>
 
 <div style="margin-left: 20%">
-    <p><a class="nounderline" href="manual.php"> <span class=subcabeceras> <?php echo $TbMsg["MANUAL"] ?> </span></a> </p>
-    <p><a class="nounderline" href="../api/index.html"><span class=subcabeceras>  <?php echo $TbMsg["API"] ?> </span></a></p>
-    <p><a class="nounderline" href="engine.php"><span class=subcabeceras> <?php echo $TbMsg["CFG"] ?></span></a> </p>
+    <p class=subcabeceras><a class="help_menu" href="manual.php"> <?php echo $TbMsg["MANUAL"] ?> </a> </p>
+    <p class=subcabeceras><a class="help_menu" href="../api/index.html"> <?php echo $TbMsg["API"] ?> </a></p>
+    <p class=subcabeceras><a class="help_menu" href="engine.php"> <?php echo $TbMsg["CFG"] ?> </a> </p>
     <p>&nbsp;</p>
-    <p><a class="nounderline" href="changelog.php"><span class=subcabeceras> <?php echo $TbMsg["CHANGELOG"]." ".$version ?>  </span></a> </p>
-    <p><a class="nounderline" href="https://listas.unizar.es/cgi-bin/mailman/listinfo/opengnsys-users" target="_blank"><span class=subcabeceras> <?php echo $TbMsg["USERMAIL"] ?>  </span></a> </p>
-    <p><a class="nounderline" href="https://opengnsys.es/" target="_blank"><span class=subcabeceras> <?php echo $TbMsg["WEB"] ?> </span></a> </p>
-    <p><a class="nounderline" href="acercade.php"><span class=subcabeceras> <?php echo  $TbMsg["ABOUT"] ?> </span></a> </p>
+    <p class=subcabeceras><a class="help_menu" href="changelog.php"> <?php echo $TbMsg["CHANGELOG"]." ".$version ?>  </a> </p>
+    <p class=subcabeceras><a class="help_menu" href="https://listas.unizar.es/cgi-bin/mailman/listinfo/opengnsys-users" target="_blank"> <?php echo $TbMsg["USERMAIL"] ?> </a> </p>
+    <p class=subcabeceras><a class="help_menu" href="https://opengnsys.es/" target="_blank"> <?php echo $TbMsg["WEB"] ?> </a> </p>
+    <p class=subcabeceras><a class="help_menu" href="acercade.php"> <?php echo  $TbMsg["ABOUT"] ?> </a> </p>
 </div>
 </body>
 </html>
