@@ -5,6 +5,8 @@
 // Fecha: 2018-10-11
 // Descripción : Página de indice del manual de usuario
 // ****************************************************************************************
+include_once("../includes/ctrlacc.php");
+include_once("../idiomas/php/".$idioma."/ayuda_".$idioma.".php");
 
 // Obtenemos nombres de los temas del manual
 //ruta manual usuario
@@ -35,6 +37,8 @@ foreach ($fichero as $ficheros) {
 </head>
 
 <body class='acercade'>
+<div><p align=center class=cabeceras><img  border=0 nod="aulas-1" value="Sala Virtual" style="cursor:pointer" src="../images/iconos/aula.gif" >&nbsp;&nbsp;<?php echo $TbMsg["MANUAL"] ?><br>
+
 <table width='100%' border='0'>
   <tr>
     <td width='30%'><p><img src='../images/acercade.png' alt='*' hspace='10em' vspace='10em' align='left' /></p>

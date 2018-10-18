@@ -457,7 +457,9 @@ A.tabla_listados_sin:link{
     FONT-WEIGHT: 300;
 }
 /* Ayuda enlaces sin subrayado */
-a.nounderline:link
+.help_menu
 {
-text-decoration:none;
+    text-decoration: none;
+    color: #6b6363;
+    font-weight: bold;
 }
