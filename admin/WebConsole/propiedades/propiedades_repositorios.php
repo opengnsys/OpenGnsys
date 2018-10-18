@@ -5,7 +5,7 @@
 // Fecha Creaciónn: Año 2009-2010
 // Fecha Última modificación: Agosto-2010
 // Nombre del fichero: propiedades_repositorios.php
-// Descripción : 
+// Descripción :
 //		 Presenta el formulario de captura de datos de un repositorio para insertar,modificar y eliminar
 // **********************************************************************************************************
 include_once("../includes/ctrlacc.php");
@@ -20,7 +20,7 @@ include_once("../includes/restfunctions.php");
 $opcion=0;
 $opciones=array($TbMsg[0],$TbMsg[1],$TbMsg[2],$TbMsg[3]);
 //________________________________________________________________________________________________________
-$idrepositorio=0; 
+$idrepositorio=0;
 $nombrerepositorio="";
 $ip="";
 $puertorepo="2002";
@@ -31,8 +31,8 @@ $ordenadores=0; // Número de ordenador a los que da servicio
 $numordenadores=0; // Número de ordenador a los que da servicio
 
 if (isset($_GET["opcion"])) $opcion=$_GET["opcion"]; // Recoge parametros
-if (isset($_GET["idrepositorio"])) $idrepositorio=$_GET["idrepositorio"]; 
-if (isset($_GET["grupoid"])) $grupoid=$_GET["grupoid"]; 
+if (isset($_GET["idrepositorio"])) $idrepositorio=$_GET["idrepositorio"];
+if (isset($_GET["grupoid"])) $grupoid=$_GET["grupoid"];
 if (isset($_GET["identificador"])) $idrepositorio=$_GET["identificador"];
 //________________________________________________________________________________________________________
 $cmd=CreaComando($cadenaconexion); // Crea objeto comando
@@ -86,7 +86,7 @@ if($apiKeyRepo != ""){
 </HEAD>
 <BODY>
 <DIV  align=center>
-<FORM  name="fdatos" action="../gestores/gestor_repositorios.php" method="post"> 
+<FORM  name="fdatos" action="../gestores/gestor_repositorios.php" method="post">
 	<INPUT type=hidden name=opcion value="<?php echo $opcion?>">
 	<INPUT type=hidden name=idrepositorio value="<?php echo $idrepositorio?>">
 	<INPUT type=hidden name=grupoid value="<?php echo $grupoid?>">
@@ -101,7 +101,7 @@ if($apiKeyRepo != ""){
 			<?php
 				if ($opcion==$op_eliminacion)
 					echo '<TD>'.$nombrerepositorio.'</TD>';
-				else	
+				else
 					echo '<TD><INPUT  class="formulariodatos" name="nombrerepositorio" style="width:200" type="text" value="'.$nombrerepositorio.'"></TD>';
 			?>
 			<TD valign="top" align="left" rowspan="4"	><CENTER>
@@ -114,7 +114,7 @@ if($apiKeyRepo != ""){
 			<?php
 			if ($opcion==$op_eliminacion)
 					echo '<TD>'.$ip.'</TD>';
-			else	
+			else
 				echo'<TD><INPUT  class="formulariodatos" name="ip" type="text" style="width:200" value="'.$ip.'"></TD>';
 			?>
 		</TR>
@@ -124,7 +124,7 @@ if($apiKeyRepo != ""){
 			<?php
 				if ($opcion==$op_eliminacion)
 					echo '<TD>'.$puertorepo.'</TD>';
-				else	
+				else
 					echo'<TD><INPUT  class="formulariodatos" name=puertorepo type="text" style="width:200" value="'.$puertorepo.'"></TD>';
 			?>
 		</TR>
@@ -134,7 +134,7 @@ if($apiKeyRepo != ""){
 			<?php
 				if ($opcion==$op_eliminacion)
 					echo '<TD>'.$apiKeyRepo.'</TD>';
-				else	
+				else
 					echo'<TD><INPUT  class="formulariodatos" name="apiKeyRepo" type="text" style="width:200" value="'.$apiKeyRepo.'"></TD>';
 			?>
 		</TR>
@@ -144,13 +144,13 @@ if($apiKeyRepo != ""){
 			<?php
 				if ($opcion==$op_eliminacion)
 					echo '<TD colspan="2">'.$comentarios.'</TD>';
-				else	
+				else
 					echo '<TD colspan="2"><TEXTAREA   class="formulariodatos" name="comentarios" rows=2 cols=50>'.$comentarios.'</TEXTAREA></TD>';
 			?>
-		</TR>	
+		</TR>
 
 <!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
-	
+
 	</TABLE>
 		<?php	if ( $opcion == 1 ){} else { ?>
 
@@ -170,7 +170,7 @@ if($apiKeyRepo != ""){
            		<TD align=center width=120>&nbsp;<?php echo $librerepo?>&nbsp;</TD>
            		<TD align=center width=101>&nbsp;<?php echo "$porcentajerepo %" ?>&nbsp;</TD>
                 </TR>
-                <?php 
+                <?php
 				// Si tenemos informacion del repositorio remoto, mostramos las imagenes
 				if($repoWithApi == true && is_array($repoImages)){
 					echo "<tr class='tabla_listados_sin'><th colspan='4'>".$TbMsg['MSG_CONTENT']." $repodir</th></tr>\n";
@@ -203,10 +203,8 @@ echo "<tr><td>".$TbMsg['MSG_IMAGE']." (".$TbMsg['MSG_TYPE'].")</td><td>".$TbMsg[
         		<?php } ?>
 		<?php } ?>
 <!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
-    
+
    	</TABLE>
-   
-	
 </FORM>
 </DIV>
 <?php
@@ -219,8 +217,8 @@ include_once("../includes/opcionesbotonesop.php");
 <?php
 //________________________________________________________________________________________________________
 //	Recupera los datos de un repositorio
-//		Parametros: 
-//		- cmd: Una comando ya operativo (con conexión abierta)  
+//		Parametros:
+//		- cmd: Una comando ya operativo (con conexión abierta)
 //		- id: El identificador del repositorio
 //________________________________________________________________________________________________________
 function TomaPropiedades($cmd,$id){
@@ -231,28 +229,24 @@ function TomaPropiedades($cmd,$id){
 	global $apiKeyRepo;
 	global $ordenadores;
 
-
-	// NOTA: el parámetro "numordenadores" no se está utilizando, por lo que se
-	//	 simplifica la consulta, ignorando dicho valor.
-/*
-	$cmd->texto="SELECT repositorios.*, count(*) as numordenadores FROM repositorios 
-	 						INNER JOIN ordenadores ON ordenadores.idrepositorio=repositorios.idrepositorio
-							WHERE repositorios.idrepositorio=".$id;
-*/
-	$cmd->texto="SELECT * FROM repositorios WHERE idrepositorio=$id";
+	$cmd->texto=<<<EOT
+SELECT repositorios.*, COUNT(*) AS numordenadores
+  FROM repositorios
+ INNER JOIN ordenadores USING(idrepositorio)
+ WHERE repositorios.idrepositorio='$id';
+EOT;
 	$rs=new Recordset;
-	$rs->Comando=&$cmd; 
+	$rs->Comando=&$cmd;
 	if (!$rs->Abrir()) return(true); // Error al abrir recordset
-	$rs->Primero(); 
+	$rs->Primero();
 	if (!$rs->EOF){
 		$nombrerepositorio=$rs->campos["nombrerepositorio"];
 		$ip=$rs->campos["ip"];
 		$comentarios=$rs->campos["comentarios"];
 		$puertorepo=$rs->campos["puertorepo"];
 		$apiKeyRepo=$rs->campos["apikey"];
-//		$ordenadores=$rs->campos["numordenadores"];
+		$ordenadores=$rs->campos["numordenadores"];
 	}
 	$rs->Cerrar();
 	return(true);
 }
-?>
