@@ -38,7 +38,12 @@ if [ -z "$(blkid /dev/mapper/og-images | grep ext4)" ]; then
     mount -a
 fi
 # Install OpenGnsys and change server address.
-curl -s https://raw.githubusercontent.com/opengnsys/OpenGnsys/devel/installer/opengnsys_installer.sh | bash || exit $?
+if which curl &>/dev/null; then
+    DOWNLOAD="curl -s"
+elif which wget &>/dev/null; then
+    DOWNLOAD="wget -q -O -"
+fi
+$DOWNLOAD -s https://raw.githubusercontent.com/opengnsys/OpenGnsys/devel/installer/opengnsys_installer.sh | bash || exit $?
 mv /opt/opengnsys/log/bash.log /opt/opengnsys/log/opengnsys_installer.log
 echo y | /opt/opengnsys/bin/setserveraddr enp0s8
 # Insert DHCP data.
@@ -94,12 +99,12 @@ OGAGENTPKG = "ogagent_1.1.0_all.deb"
 MODELSCRIPT = <<EOT
 # Comment out next lines to install and configure OGAgent for Ubuntu.
 #apt-get update -y
-#curl -ks https://#{SERVERIP}/opengnsys/descargas/#{OGAGENTPKG} -o #{OGAGENTPKG}
-#if [ -f #{OGAGENTPKG} ]; then
-#    dpkg -i #{OGAGENTPKG}
-#    apt-get install -fy || exit $?
+#apt-get install -y curl
+#curl -ks https://#{SERVERIP}/opengnsys/descargas/#{OGAGENTPKG} -o /tmp/#{OGAGENTPKG}
+#if [ -f /tmp/#{OGAGENTPKG} ]; then
+#    apt-get install -y /tmp/#{OGAGENTPKG} || exit $?
 #    sed -i "0,/remote=/ s,remote=.*,remote=https://#{SERVERIP}/opengnsys/rest/," /usr/share/OGAgent/cfg/ogagent.cfg
-#    rm -f #{OGAGENTPKG}
+#    rm -f /tmp/#{OGAGENTPKG}
 #else
 #    echo "Warning: cannot install OGAgent package #{OGAGENTPKG}"
 #fi
