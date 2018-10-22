@@ -232,7 +232,7 @@ function TomaPropiedades($cmd,$id){
 	$cmd->texto=<<<EOT
 SELECT repositorios.*, COUNT(*) AS numordenadores
   FROM repositorios
- INNER JOIN ordenadores USING(idrepositorio)
+  LEFT JOIN ordenadores USING(idrepositorio)
  WHERE repositorios.idrepositorio='$id';
 EOT;
 	$rs=new Recordset;

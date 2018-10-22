@@ -100,7 +100,7 @@ for MAC in $ETHERNET; do
 				(SELECT (@serverip:=ipserveradm) FROM entornos LIMIT 1), aulas.router, aulas.netmask,
 				ordenadores.nombreordenador, ordenadores.netiface, 'none'),
 				' group=', REPLACE(TRIM(aulas.nombreaula), ' ', '_'),
-				' ogrepo=', (@repoip:=repositorios.ip),
+				' ogrepo=', (@repoip:=IFNULL(repositorios.ip, '')),
 				' oglive=', @serverip,
 				' oglog=', @serverip,
 				' ogshare=', @serverip,
@@ -120,7 +120,7 @@ for MAC in $ETHERNET; do
 				JOIN aulas USING(idaula)
 				JOIN centros USING(idcentro)
 				JOIN entidades USING(identidad)
-				JOIN repositorios USING(idrepositorio)
+				LEFT JOIN repositorios USING(idrepositorio)
 				LEFT JOIN perfileshard USING(idperfilhard)
 				LEFT JOIN menus USING(idmenu)
 				WHERE ordenadores.mac='$MAC';")

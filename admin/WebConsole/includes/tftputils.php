@@ -84,7 +84,7 @@ function createBootMode ($cmd, $bootopt, $hostid, $lang) {
 			    ordenadores.oglivedir AS oglivedir,
 			    aulas.netmask AS netmask, aulas.router AS router,
 			    aulas.ntp AS ntp, aulas.dns AS dns, aulas.proxy AS proxy,
-			    aulas.nombreaula AS grupo, repositorios.ip AS iprepo,
+			    aulas.nombreaula AS grupo, IFNULL(repositorios.ip, '') AS iprepo,
 			    (SELECT ipserveradm FROM entornos LIMIT 1) AS ipserveradm,
 			    menus.resolucion AS vga, perfileshard.descripcion AS hardprofile,
 			    centros.directorio, entidades.ogunit
@@ -92,7 +92,7 @@ function createBootMode ($cmd, $bootopt, $hostid, $lang) {
 			JOIN aulas USING (idaula)
 			JOIN centros USING (idcentro)
 			JOIN entidades USING (identidad)
-			JOIN repositorios USING (idrepositorio)
+			LEFT JOIN repositorios USING (idrepositorio)
 			LEFT JOIN menus USING (idmenu)
 			LEFT JOIN perfileshard USING (idperfilhard)
 			WHERE ordenadores.idordenador='$hostid'";
