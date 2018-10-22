@@ -148,8 +148,6 @@ function abrir_ventana(URL){
 				else	{
 					if ($fotoordenador=="")
 					$fotoordenador="../images/fotos/fotoordenador.gif";
-					$fotoordenador;
-					
 					?>
 					<TD colspan=3><SELECT class="formulariodatos" name="fotoordenador" >
 						<?php if($fotomenu==""){
@@ -158,12 +156,11 @@ function abrir_ventana(URL){
 						if ($handle = opendir("../images/fotos")) {
 						while (false !== ($entry = readdir($handle))) {
 						if ($entry != "." && $entry != "..") {?>
-						
 						<option value="<?php echo $entry ?>"><?php echo $entry ?></option>
 						<?php }
 						}
 						closedir($handle);
-						} 
+						}
 						?>
 					 </SELECT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <a href="javascript:abrir_ventana('../images/ver.php')" onClick="MM_openBrWindow('../images/ver.php','Imagenes','scrollbars=yes,resizable=yes,width=950,height=640')"><?php echo $TbMsg[5092] ?></a>
@@ -171,7 +168,6 @@ function abrir_ventana(URL){
 					<?php
 					}
 					?>
-			
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
@@ -184,15 +180,17 @@ function abrir_ventana(URL){
 			?>
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
-		<TR>
-			<th align=center>&nbsp;<?php echo $TbMsg[10]?>&nbsp;</th>
+		<tr>
+			<th align="center">&nbsp;<?php echo $TbMsg[10]?>&nbsp;</th>
 			<?php
-				if ($opcion==$op_eliminacion)
-					echo '<TD colspan=3>'.TomaDato($cmd,$idcentro,'repositorios',$idrepositorio,'idrepositorio','nombrerepositorio').'</TD>';
-				else
-					echo '<TD colspan=3>'.HTMLSELECT($cmd,$idcentro,'repositorios',$idrepositorio,'idrepositorio','nombrerepositorio',250).'</TD>';
+				if ($opcion==$op_eliminacion) {
+					echo '<td colspan="3">'.TomaDato($cmd,$idcentro,'repositorios',$idrepositorio,'idrepositorio','nombrerepositorio').'</td>';
+				} else {
+					echo '<td colspan="3">'.HTMLSELECT($cmd,$idcentro,'repositorios',$idrepositorio,'idrepositorio','nombrerepositorio',250);
+					echo ($idrepositorio==0?$TbMsg["WARN_NOREPO"]:'').'</td>';
+				}
 			?>
-		</TR>
+		</tr>
 <!----	AGP	--------------------------------------------------------------------	OGLIVE	--------------------------------------------------------------------------------------------------------->
 		<TR>
 			<th align=center>&nbsp;<?php echo $TbMsg[18]?>&nbsp;</th>
@@ -352,7 +350,7 @@ if ($opcion!=$op_alta) {
 //		- id: El identificador del ordenador
 //________________________________________________________________________________________________________
 function TomaPropiedades($cmd,$id){
-	global $idordenador; 
+	global $idordenador;
 	global $nombreordenador;
 	global $numserie;
 	global $ip;
@@ -365,14 +363,14 @@ function TomaPropiedades($cmd,$id){
 	global $netiface;
 	global $netdriver;
 ########################### UHU
-        global $validacion;
-        global $paginalogin;
-        global $paginavalidacion;
+	global $validacion;
+	global $paginalogin;
+	global $paginavalidacion;
 ########################### Ramón
-        global $arranque;
+	global $arranque;
 
 	$rs=new Recordset; 
-	$cmd->texto="SELECT * FROM ordenadores WHERE idordenador=".$id;
+	$cmd->texto="SELECT * FROM ordenadores WHERE idordenador='$id';";
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) return(false); // Error al abrir recordset
 	$rs->Primero(); 
@@ -401,5 +399,3 @@ function TomaPropiedades($cmd,$id){
 	else
 		return(false);
 }
-?>
-

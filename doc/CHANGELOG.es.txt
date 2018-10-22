@@ -7,26 +7,26 @@ Lista de cambios incluidos en OpenGnsys 1.1.0a (versión de mantenimiento)
 ----------------------------------------------
 
 Tickets resueltos en módulo OpenGnsys Cloning Engine:
-#868	ConfiguraOs: error al desinstalar el agente de sistema operativo antiguo
-#871	Error al crear particiones lógicas en discos con sectores de 4 KB
+#868	ConfiguraOs: error al desinstalar el agente de sistema operativo antiguo (corrección)
+#871	Error al crear particiones lógicas en discos con sectores de 4 KB (corrección)
 
 Tickets resueltos en módulo OpenGnsys Client:
-#852	Apagado del cliente si tiempo de espera cambia de día
+#852	Apagado del cliente si tiempo de espera cambia de día (corrección)
 
 Tickets resueltos en módulo OpenGnsys Server:
-#846	Configuración de logrotate para que incluya todos los servicios de OpenGnsys
+#846	Configuración de logrotate para que incluya todos los servicios de OpenGnsys (corrección)
 
 Tickets resueltos en módulo OpenGnsys Repository Server:
-#850	Problema con repositorio recién instalado
+#850	Problema con repositorio recién instalado (corrección)
 
 Tickets resueltos en módulo OpenGnsys Web Admin Console:
-#835	Problemas al listar plantillas en Nerboot Avanzado
+#835	Problemas al listar plantillas en Nerboot Avanzado (corrección)
 #867	La ayuda en la consola incluirá más información
 
 Tickets genéricos resueltos:
-#839	Errores detectado en API REST para Remote PC
+#839	Errores detectado en API REST para Remote PC (corrección)
 #840	Usar Git como repositorio de código
-#865	Problemas con Trac
+#865	Problemas con Trac (corrección)
 #872	Liberar versión de mantenimiento OpenGnsys 1.1.0a
 
 

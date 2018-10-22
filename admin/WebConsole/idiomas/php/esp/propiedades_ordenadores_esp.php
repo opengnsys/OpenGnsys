@@ -1,8 +1,8 @@
 <?php
 //______________________________________________________________
 //
-//	Fichero de idiomas php: propiedades_ordenadores_esp.php 
-//	Idioma: Español 
+//	Fichero de idiomas php: propiedades_ordenadores_esp.php
+//	Idioma: Español
 //______________________________________________________________
 if (empty ($TbMsg)) $TbMsg=array();
 $TbMsg[0]="Sin Opci&oacute;n";
@@ -33,8 +33,7 @@ $TbMsg[5092]="Ver fotos";
 $TbMsg[495]="Fecha/Cach&eacute;";
 $TbMsg[4951]="Cach&eacute; libre";
 //AGP
-$TbMsg["PROP_SERIALNO"]="N&ordm; de serie";
-$TbMsg["WARN_NOTDETECTED"]="<em>(no detectado)</em>";
 $TbMsg['COMM_DEFOGLIVE']="Asignado por el administrador";
-?>
-
+$TbMsg["PROP_SERIALNO"]="N&ordm; de serie";
+$TbMsg["WARN_NOREPO"]="<em>AVISO: sin repositorio asignado.</em>";
+$TbMsg["WARN_NOTDETECTED"]="<em>(no detectado)</em>";
