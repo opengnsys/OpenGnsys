@@ -277,6 +277,3 @@ function updateBootRepo ($cmd, $repoid) {
 	}
 	return($errors);
 }
-
-?>
-

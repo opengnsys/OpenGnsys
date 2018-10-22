@@ -156,7 +156,7 @@ function abrir_ventana(URL){
 						echo '<option value="'.$fotomenu.'">'.$fotomenu.'</option>';}
 						if ($handle = opendir("../images/fotos")) {
 						while (false !== ($entry = readdir($handle))) {
-			    			if ($entry != "." && $entry != "..") {?>
+						if ($entry != "." && $entry != "..") {?>
 						<option value="<?php echo $entry ?>"><?php echo $entry ?></option>
 						<?php }
 						}
@@ -165,7 +165,7 @@ function abrir_ventana(URL){
 						?>
 					</SELECT>
 <a href="javascript:abrir_ventana('../images/ver.php')" onclick="MM_openBrWindow('../images/ver.php','Imagenes','scrollbars=yes,resizable=yes,width=950,height=640')"><?php echo $TbMsg[5092] ?></a>
-            				</TD>
+					</TD>
 					<?php
 					}
 					?>

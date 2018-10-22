@@ -19,7 +19,7 @@
 #@version 1.1.0 - Se incluye la unidad organizativa como parametro del kernel: ogunit=directorio_unidad (ticket #678).
 #@author  Irina Gomez, ETSII Universidad de Sevilla
 #@date    2015-12-16
-#@version 1.1.1 - El server siempre es el servidor PXE. El segundo parámetro de la IP es el SERVER. La asignación del ogLive siempre es el server. (ticket #859).
+#@version 1.1.0a - El server siempre es el servidor PXE. El segundo parámetro de la IP es el SERVER. La asignación del ogLive siempre es el server. (ticket #859).
 #@author  Antonio J. Doblas Viso, Universidad de Malaga
 #@date    2018-07-11
 #*/ ##
@@ -97,7 +97,8 @@ for MAC in $ETHERNET; do
 		DATOS=$(mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -s -N -e \
 			"SELECT ' LANG=$LANG',
 				' ip=', CONCAT_WS(':', ordenadores.ip,
-				(SELECT (@serverip:=ipserveradm) FROM entornos LIMIT 1), aulas.router, aulas.netmask,
+				(SELECT (@serverip:=ipserveradm) FROM entornos LIMIT 1),
+				aulas.router, aulas.netmask,
 				ordenadores.nombreordenador, ordenadores.netiface, 'none'),
 				' group=', REPLACE(TRIM(aulas.nombreaula), ' ', '_'),
 				' ogrepo=', (@repoip:=IFNULL(repositorios.ip, '')),
