@@ -7,6 +7,8 @@
 // Nombre del fichero: incorporaordenadores.php
 // Descripción : 
 //		Da de alta en la base de datos nuevos ordenadores desde un fichero de configuración dhcp
+// Version 1.1.0: Se obtiene id del repositorio de la OU. Si no existe se muestra alerta para que confirme el alta.
+// Fecha: 2018-10-24
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
 include_once("../clases/AdoPhp.php");
@@ -34,6 +36,7 @@ if (isset($_POST["nombreaula"])) $nombreaula=$_POST["nombreaula"];
 
 $resul=0;
 $ordDup="";
+$idrepositorio = idrepoOU($cmd,$idaula);
 
 if(!empty($contenido)){ // Se ha introducido contenido en lugar de fichero
 	$resul=procesaLineas($cmd,$idaula,$contenido);
@@ -41,16 +44,27 @@ if(!empty($contenido)){ // Se ha introducido contenido en lugar de fichero
 //___________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE>Administración web de aulas</TITLE>
 <HEAD>
-	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
-<LINK rel="stylesheet" type="text/css" href="../estilos.css">
+    <TITLE>Administración web de aulas</TITLE>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <LINK rel="stylesheet" type="text/css" href="../estilos.css">
+    <SCRIPT language="javascript" src="../idiomas/javascripts/<?php echo $idioma ?>/avisos_<?php echo $idioma ?>.js"></SCRIPT>
+    <SCRIPT>
+	function confirmar(){
+	    if (document.fdatos.idrepositorio.value == '' ){
+		if(confirm(TbMsg["WARN_NOREPO"]) != true)
+		    return(false);
+	    }
+	    document.fdatos.submit();
+	}
+    </SCRIPT>
 </HEAD>
 <BODY>
 <FORM action="incorporaordenadores.php" method="post" name="fdatos">
-	<INPUT type=hidden name=swf value=1>
-	<INPUT type=hidden name=idaula value=<?php echo $idaula?>>
-	<INPUT type=hidden name=nombreaula value=<?php echo $nombreaula?>>
+	<INPUT type="hidden" name="swf" value="1">
+	<INPUT type="hidden" name="idaula" value="<?php echo $idaula?>">
+	<INPUT type="hidden" name="nombreaula" value="<?php echo $nombreaula?>">
+	<INPUT type="hidden" name="idrepositorio" value="<?php echo idrepoOU($cmd,$idaula);?>">
 	<BR>
 	<P align=center class=cabeceras><?php echo $TbMsg[0]?><BR>
 	<SPAN align=center class=subcabeceras><IMG src="../images/iconos/aula.gif">&nbsp;<?php echo $TbMsg[1].":".$nombreaula ?></SPAN></P>
@@ -70,7 +84,7 @@ if(!empty($contenido)){ // Se ha introducido contenido en lugar de fichero
 	<TR>
 		<TD><IMG src="../images/boton_cancelar.gif" style="cursor:hand"  onclick=""></TD>
 		<TD width=20></TD>
-		<TD><IMG src="../images/boton_confirmar.gif" style="cursor:hand"  onclick="document.fdatos.submit();"></TD>
+		<TD><IMG src="../images/boton_confirmar.gif" style="cursor:hand"  onclick="confirmar();"></TD>
 	</TR>
 </TABLE>
 <?php
@@ -155,7 +169,7 @@ function Inserta($cmd,$idaula,$nombre,$lamac,$laip)
 
 	$idperfilhard=0;
 ## ADV: modificacion para asignar a los ordenadores, cuando se crean desde "incorpoar ordenadores" el repositorio "default"
-	$idrepositorio=1;
+	$idrepositorio=idrepoOU($cmd,$idaula);
 	$idconfiguracion=0;
 	$cmd->CreaParametro("@grupoid",$grupoid,1);
 	$cmd->CreaParametro("@idaula",$idaula,1);
@@ -172,6 +186,7 @@ function Inserta($cmd,$idaula,$nombre,$lamac,$laip)
 				 @idrepositorio, router, netmask, @idaula, @grupoid
 			    FROM aulas
 			   WHERE idaula=".$idaula;
+
 	$resul=$cmd->Ejecutar();
 	
 	// Crear fichero de arranque PXE con plantilla por defecto.
@@ -184,7 +199,7 @@ function Inserta($cmd,$idaula,$nombre,$lamac,$laip)
 //________________________________________________________________________________________________________
 //	Recupera los datos de un ordenador
 //		Parametros: 
-//		- cmd: Una comando ya operativo (con conexión abierta)  
+//		- cmd: Un comando ya operativo (con conexión abierta)  
 //		- ip: Dirección IP
 //________________________________________________________________________________________________________
 function existeOrdenador($cmd,$nombre,$MAC,$IP){
@@ -199,5 +214,27 @@ function existeOrdenador($cmd,$nombre,$MAC,$IP){
 	}
 	else
 		return(false);
+}
+//________________________________________________________________________________
+//	Primer repositorio asignado a la unidad organizativa
+//		Parametros:
+//		- cmd: Un comando ya operativo (con conexión abierta)
+//		- idaula: identificador del aula
+//		Salida: idrepositorio del primer repositorio de la OU o ''
+//________________________________________________________________________________
+function idrepoOU($cmd,$idaula) {
+	$idrepositorio = '';
+	$rs=new Recordset; 
+	$cmd->texto="SELECT idrepositorio FROM repositorios ".
+		    " INNER JOIN centros USING (idcentro) ".
+		    " INNER JOIN aulas USING (idcentro) ".
+                    " WHERE idaula=$idaula ORDER BY idrepositorio LIMIT 1;";
+	$rs->Comando=&$cmd; 
+	if ($rs->Abrir()) {
+		$rs->Primero(); 
+		$idrepositorio = $rs->campos["idrepositorio"];
+	}
+	$rs->Cerrar();
+	return $idrepositorio;
 }
 ?>
