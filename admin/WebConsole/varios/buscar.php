@@ -117,7 +117,7 @@ if (!empty ($valor) or $criterio == "duplic" or $criterio == "profe" or $criteri
 					FROM ordenadores
 					JOIN aulas ON aulas.idaula=ordenadores.idaula
 				   LEFT JOIN grupos ON grupos.idgrupo=aulas.grupoid
-					  AND aulas.idcentro='$idcentro'
+				       WHERE aulas.idcentro='$idcentro'
 					  AND idrepositorio=0
 					ORDER BY aulas.nombreaula;";
 			break;
