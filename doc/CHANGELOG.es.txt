@@ -23,6 +23,9 @@ Tickets resueltos en módulo OpenGnsys Web Admin Console:
 #824	Iniciar sistema restaurado (no integrado)
 #842	Internacionalización de la consola web
 
+Tickets resueltos en módulo OpenGnsys Installer:
+#784	Mejorar rendimiento de PHP sobre Apache 
+
 Tickets genéricos resueltos:
 #843	Incluir nombre de versión
 
@@ -38,6 +41,7 @@ Tickets resueltos en módulo OpenGnsys Client:
 #852	Apagado del cliente si tiempo de espera cambia de día (corrección)
 
 Tickets resueltos en módulo OpenGnsys Server:
+#580	Caídas de ogAdmServer y ogAdmClient por desbordamiento de cadenas (no se resolverá)
 #846	Configuración de logrotate para que incluya todos los servicios de OpenGnsys (corrección)
 
 Tickets resueltos en módulo OpenGnsys Repository Server:

@@ -12,10 +12,10 @@ VMMEM = 1024
 SCRIPT = <<EOT
 # Set language.
 export LANG="#{LANGUAGE}.UTF-8"
-echo "LANG=\"$LANG\"" > /etc/default/locale
-echo "LANG=\"$LANG\"" >> /etc/environment
+echo "LANG=\\\"$LANG\\\"" > /etc/default/locale
+echo "LANG=\\\"$LANG\\\"" >> /etc/environment
 locale-gen --lang #{LANGUAGE}
-sed -i "s/XKBLAYOUT=.*/XKBLAYOUT=\"${LANG%_*}\"/" /etc/default/keyboard
+sed -i "s/XKBLAYOUT=.*/XKBLAYOUT=\\\"${LANG%_*}\\\"/" /etc/default/keyboard
 dpkg-reconfigure -fnoninteractive console-setup
 # Install dependencies.
 apt-get update -y
