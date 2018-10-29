@@ -96,7 +96,8 @@ LOG_FILE=/tmp/$(basename $OGLOGFILE)
 # - OSDISTRIB - distribución Linux
 # - DEPENDENCIES - array de dependencias que deben estar instaladas
 # - UPDATEPKGLIST, INSTALLPKGS, CHECKPKG - comandos para gestión de paquetes
-# - APACHECFGDIR, APACHESERV, DHCPSERV, INETDCFGDIR - configuración y servicios
+# - APACHECFGDIR, APACHESERV, PHPFPMSERV, DHCPSERV, INETDCFGDIR - configuración y servicios
+
 function autoConfigure()
 {
 	local service
@@ -117,7 +118,7 @@ function autoConfigure()
 	# Configuración según la distribución de Linux.
 	if [ -f /etc/debian_version ]; then
 		# Distribución basada en paquetes Deb.
-		DEPENDENCIES=( curl rsync btrfs-tools procps arp-scan realpath php-curl gettext moreutils jq wakeonlan udpcast php-fpm libapache2-mod-fastcgi )
+		DEPENDENCIES=( curl rsync btrfs-tools procps arp-scan realpath php-curl gettext moreutils jq wakeonlan udpcast shim-signed grub-efi-amd64-signed php-fpm )
 		UPDATEPKGLIST="add-apt-repository -y ppa:ondrej/php; apt-get update"
 		INSTALLPKGS="apt-get -y install"
 		DELETEPKGS="apt-get -y purge"
@@ -136,12 +137,13 @@ function autoConfigure()
 		APACHEDISABLEMODS="php"
 		APACHEUSER="www-data"
 		APACHEGROUP="www-data"
+		PHPFPMSERV="php-fpm"
 		INETDCFGDIR=/etc/xinetd.d
 	elif [ -f /etc/redhat-release ]; then
 		# Distribución basada en paquetes rpm.
-		DEPENDENCIES=( curl rsync btrfs-progs procps-ng arp-scan gettext moreutils jq net-tools )
-		# En CentOS 7 instalar arp-scan de CentOS 6.
-		[ "$OSDISTRIB$OSVERSION" == "centos7" ] && DEPENDENCIES=( ${DEPENDENCIES[*]/arp-scan/http://dag.wieers.com/redhat/el6/en/$(arch)/dag/RPMS/arp-scan-1.9-1.el6.rf.$(arch).rpm} )
+		DEPENDENCIES=( curl rsync btrfs-progs procps-ng arp-scan gettext moreutils jq net-tools udpcast shim-x64 grub2-efi-x64 grub2-efi-x64-modules )
+		# Repositorios para PHP 7 en CentOS.
+		[ "$OSDISTRIB" == "centos" ] && UPDATEPKGLIST="yum update -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-$OSVERSION.noarch.rpm http://rpms.remirepo.net/enterprise/remi-release-$OSVERSION.rpm"
 		INSTALLPKGS="yum install -y"
 		DELETEPKGS="yum remove -y"
 		CHECKPKG="rpm -q --quiet \$package"
@@ -158,6 +160,7 @@ function autoConfigure()
 		fi
 		APACHEUSER="apache"
 		APACHEGROUP="apache"
+		PHPFPMSERV="php-fpm"
 		INETDCFGDIR=/etc/xinetd.d
 	else
 		# Otras distribuciones.
@@ -372,11 +375,22 @@ function installDependencies()
 	if [ -f /etc/debian_version ]; then
 		# Basado en paquetes Deb.
 		PHP7VERSION=$(apt-cache pkgnames php7 2>/dev/null | sort | head -1)
-		PHP5PKGS=( $(dpkg -l |awk '$2~/^php5/ {print $2}') )
+		PHPFPMSERV="${PHP7VERSION}-fpm"
+		PHP5PKGS=( $(dpkg -l | awk '$2~/^php5/ {print $2}') )
 		if [ -n "$PHP5PKGS" ]; then
 			$DELETEPKGS ${PHP5PKGS[@]}
-			PHP5PKGS[0]=$PHP7VERSION
+			PHP5PKGS[0]="$PHP7VERSION"
 			INSTALLDEPS=${PHP5PKGS[@]//php5*-/${PHP7VERSION}-}
+		fi
+	fi
+	if [ "$OSDISTRIB" == "centos" ]; then
+		PHP7VERSION=$(yum list -q php7\* 2>/dev/null | awk -F. '/^php/ {print $1; exit;}')
+		PHPFPMSERV="${PHP7VERSION}-fpm"
+		PHP5PKGS=( $(yum list installed | awk '$1~/^php/ && $2~/^5\./ {sub(/\..*$/, "", $1); print $1}') )
+		if [ -n "$PHP5PKGS" ]; then
+			$DELETEPKGS ${PHP5PKGS[@]}
+			PHP5PKGS[0]="$PHP7VERSION-php"
+			INSTALLDEPS=${PHP5PKGS[@]//php-/${PHP7VERSION}-php}
 		fi
 	fi
 
@@ -533,6 +547,11 @@ function apacheConfiguration ()
 {
 	local config template module socketfile
 
+	# Avtivar PHP-FPM.
+	echoAndLog "${FUNCNAME}(): configuring PHP-FPM"
+	service=$PHPFPMSERV
+	$ENABLESERVICE; $STARTSERVICE
+
 	# Activar módulos de Apache.
 	if [ -e $APACHECFGDIR/sites-available/opengnsys.conf ]; then
 		echoAndLog "${FUNCNAME}(): Configuring Apache modules"
@@ -544,20 +563,20 @@ function apacheConfiguration ()
 		echoAndLog "${FUNCNAME}(): Configuring Apache modules"
 		sed -i '/rewrite/s/^#//' $APACHECFGDIR/*.conf
 	fi
+	# Elegir plantilla según versión de Apache.
+	if [ -n "$(apachectl -v | grep "2\.[0-2]")" ]; then
+	       template=$WORKDIR/opengnsys/server/etc/apache-prev2.4.conf.tmpl > $config
+	else
+	       template=$WORKDIR/opengnsys/server/etc/apache.conf.tmpl
+	fi
+	sockfile=$(find /run/php -name "php*.sock" -type s -print 2>/dev/null)
 	# Actualizar configuración de Apache a partir de fichero de plantilla.
 	for config in $APACHECFGDIR/{,sites-available/}opengnsys.conf; do
-		# Elegir plantilla según versión de Apache.
-		if [ -n "$(apachectl -v | grep "2\.[0-2]")" ]; then
-		       template=$WORKDIR/opengnsys/server/etc/apache-prev2.4.conf.tmpl > $config
-		else
-		       template=$WORKDIR/opengnsys/server/etc/apache.conf.tmpl
-		fi
-		sockfile=$(find /run/php -name "php*.sock" -type s -print 2>/dev/null)
-		sed -e "s,CONSOLEDIR,$INSTALL_TARGET/www,g; s/SOCKETFILE/$socketfile/g" $template > $config
+		[ -e $config ] && sed -e "s,CONSOLEDIR,$INSTALL_TARGET/www,g; s/SOCKETFILE/$socketfile/g" $template > $config
 	done
 
 	# Reiniciar Apache.
-	service=$APACHESERV; $STARTSERCICE
+	service=$APACHESERV; $STARTSERVICE
 
 	# Variables de ejecución de Apache.
 	# - APACHE_RUN_USER

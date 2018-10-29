@@ -170,7 +170,7 @@ OSVERSION="${OSVERSION%%.*}"
 # Configuración según la distribución GNU/Linux (usar minúsculas).
 case "$OSDISTRIB" in
 	ubuntu|debian|linuxmint)
-		DEPENDENCIES=( subversion apache2 php php-ldap php-fpm libapache2-mod-fastcgi mysql-server php-mysql isc-dhcp-server bittorrent tftp-hpa tftpd-hpa xinetd build-essential g++-multilib libmysqlclient-dev wget curl doxygen graphviz bittornado ctorrent samba rsync unzip netpipes debootstrap schroot squashfs-tools btrfs-tools procps arp-scan realpath php-curl gettext moreutils jq wakeonlan udpcast shim-signed grub-efi-amd64-signed )
+		DEPENDENCIES=( subversion apache2 php php-ldap php-fpm mysql-server php-mysql isc-dhcp-server bittorrent tftp-hpa tftpd-hpa xinetd build-essential g++-multilib libmysqlclient-dev wget curl doxygen graphviz bittornado ctorrent samba rsync unzip netpipes debootstrap schroot squashfs-tools btrfs-tools procps arp-scan realpath php-curl gettext moreutils jq wakeonlan udpcast shim-signed grub-efi-amd64-signed )
 		UPDATEPKGLIST="apt-get update"
 		INSTALLPKG="apt-get -y install --force-yes"
 		CHECKPKG="dpkg -s \$package 2>/dev/null | grep Status | grep -qw install"
@@ -207,9 +207,10 @@ case "$OSDISTRIB" in
 		TFTPCFGDIR=/var/lib/tftpboot
 		;;
 	fedora|centos)
-		DEPENDENCIES=( subversion httpd mod_ssl php php-ldap mysql-server mysql-devel mysql-devel.i686 php-mysql dhcp tftp-server tftp xinetd binutils gcc gcc-c++ glibc-devel glibc-devel.i686 glibc-static glibc-static.i686 libstdc++-devel.i686 make wget curl doxygen graphviz ctorrent samba samba-client rsync unzip debootstrap schroot squashfs-tools python-crypto arp-scan procps-ng gettext moreutils jq net-tools http://ftp.altlinux.org/pub/distributions/ALTLinux/5.1/branch/$(arch)/RPMS.classic/netpipes-4.2-alt1.$(arch).rpm )
+		DEPENDENCIES=( subversion httpd mod_ssl php php-ldap php-fpm mysql-server mysql-devel mysql-devel.i686 php-mysql dhcp tftp-server tftp xinetd binutils gcc gcc-c++ glibc-devel glibc-devel.i686 glibc-static glibc-static.i686 libstdc++-devel.i686 make wget curl doxygen graphviz ctorrent samba samba-client rsync unzip debootstrap schroot squashfs-tools python-crypto arp-scan procps-ng gettext moreutils jq net-tools udpcast shim-x64 grub2-efi-x64 grub2-efi-x64-modules http://ftp.altlinux.org/pub/distributions/ALTLinux/5.1/branch/$(arch)/RPMS.classic/netpipes-4.2-alt1.$(arch).rpm )
+		[ "$OSDISTRIB" == "centos" ] && UPDATEPKGLIST="yum update -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-$OSVERSION.noarch.rpm http://rpms.remirepo.net/enterprise/remi-release-$OSVERSION.rpm"
 		INSTALLEXTRADEPS=( 'pushd /tmp; wget -t3 http://download.bittornado.com/download/BitTornado-0.3.18.tar.gz && tar xvzf BitTornado-0.3.18.tar.gz && cd BitTornado-CVS && python setup.py install && ln -fs btlaunchmany.py /usr/bin/btlaunchmany && ln -fs bttrack.py /usr/bin/bttrack; popd' )
-		INSTALLPKG="yum install -y libstdc++ libstdc++.i686"
+		INSTALLPKG="yum update -y libstdc++ libstdc++.i686"
 		CHECKPKG="rpm -q --quiet \$package"
 		SYSTEMD=$(which systemctl 2>/dev/null)
 		if [ -n "$SYSTEMD" ]; then
@@ -240,6 +241,7 @@ case "$OSDISTRIB" in
 		INETDCFGDIR=/etc/xinetd.d
 		MYSQLSERV=mysqld
 		MARIADBSERV=mariadb
+		PHPFPMSERV=php-fpm
 		RSYNCSERV=rsync
 		RSYNCCFGDIR=/etc
 		SAMBASERV=smb
@@ -303,7 +305,7 @@ case "$OSDISTRIB" in
 			add-apt-repository -y ppa:ondrej/php
 			eval $UPDATEPKGLIST
 			PHP7VERSION=$(apt-cache pkgnames php7 | sort | head -1)
-			PHPFPM="${PHP7VERSION}-fpm"
+			PHPFPMSERV="${PHP7VERSION}-fpm"
 			DEPENDENCIES=( ${DEPENDENCIES[@]//php/$PHP7VERSION} )
 		fi
 		# Adaptar dependencias para libmysqlclient.
@@ -313,13 +315,9 @@ case "$OSDISTRIB" in
 		;;
 	centos)	# Postconfiguación personalizada para CentOS.
 		# Configuración para PHP 7.
-		if ! yum list php7 &>/dev/null; then
-			if [ $OSVERSION -lt 7 ]; then
-				yum install -y https://mirror.webtatic.com/yum/el$OSVERSION/latest.rpm
-				PHP7VERSION=$(yum list -q php7\*w | awk -F. '/^php/ {p=$1} END {print p}')
-				DEPENDENCIES=( ${DEPENDENCIES[@]//php/$PHP5VERSION} )
-			fi
-		fi
+		PHP7VERSION=$(yum list -q php7\* 2>/dev/null | awk -F. '/^php/ {print $1; exit;}')
+		DEPENDENCIES=( ${DEPENDENCIES[@]//php/$PHP7VERSION} )
+		PHPFPMSERV="${PHP7VERSION}-fpm"
 		# Cambios a aplicar a partir de CentOS 7.
 		if [ $OSVERSION -ge 7 ]; then
 			# Sustituir MySQL por MariaDB.
