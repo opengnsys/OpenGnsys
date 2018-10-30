@@ -3524,7 +3524,7 @@ BOOLEAN envioProgramacion(SOCKET *socket_c, TRAMA *ptrTrama)
 static struct {
 	const char *nf; // Nombre de la función
 	BOOLEAN (*fptr)(SOCKET*,TRAMA*); // Puntero a la función que procesa la trama
-} tbfuncionesServer[MAXIMAS_FUNCIONES] = {
+} tbfuncionesServer[] = {
 	{ "Sondeo",				Sondeo,			},
 	{ "respuestaSondeo",			respuestaSondeo,	},
 	{ "ConsolaRemota",			ConsolaRemota,		},
@@ -3567,6 +3567,7 @@ static struct {
 	{ "enviaArchivo",			enviaArchivo,		},
 	{ "recibeArchivo",			recibeArchivo, 		},
 	{ "envioProgramacion",			envioProgramacion,	},
+	{ NULL,					NULL,			},
 };
 
 // ________________________________________________________________________________________________________
@@ -3593,7 +3594,7 @@ BOOLEAN gestionaTrama(SOCKET *socket_c)
 		INTROaFINCAD(ptrTrama);
 		nfn = copiaParametro("nfn",ptrTrama); // Toma nombre de la función
 
-		for (i = 0; i < MAXIMAS_FUNCIONES; i++) { // Recorre funciones que procesan las tramas
+		for (i = 0; tbfuncionesServer[i].fptr; i++) {
 			res = strcmp(tbfuncionesServer[i].nf, nfn);
 			if (res == 0) { // Encontrada la función que procesa el mensaje
 				liberaMemoria(nfn);
