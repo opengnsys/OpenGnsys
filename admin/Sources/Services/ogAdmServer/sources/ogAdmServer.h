@@ -40,11 +40,6 @@ SOCKETCL tbsockets[MAXIMOS_CLIENTES];
 
 BOOLEAN swcSocket; // Switch para indicar si se debe cerrar el socket del cliente
 
-typedef struct{  // Estructura usada para referenciar las funciones que procesan las tramas
-	char nf[LONFUN]; // Nombre de la función
-	BOOLEAN (*fptr)(SOCKET*,TRAMA*); // Puntero a la función que procesa la trama
-}MSGFUN;
-MSGFUN tbfuncionesServer[MAXIMAS_FUNCIONES];
 // ________________________________________________________________________________________________________
 // Prototipo de funciones
 // ________________________________________________________________________________________________________

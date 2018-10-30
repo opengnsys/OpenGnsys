@@ -118,59 +118,7 @@ BOOLEAN tomaConfiguracion(char* filecfg) {
 	liberaMemoria(buffer);
 	return (TRUE);
 }
-// ________________________________________________________________________________________________________
-// Función: gestionaTrama
-//
-//		Descripción:
-//			Procesa las tramas recibidas .
-//		Parametros:
-//			- s : Socket usado para comunicaciones
-//	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
-// ________________________________________________________________________________________________________
-BOOLEAN gestionaTrama(SOCKET *socket_c)
-{
-	TRAMA* ptrTrama;
-	int i, res;
-	char *nfn;
-	char modulo[] = "gestionaTrama()";
 
-	ptrTrama=recibeTrama(socket_c);
-	
-	if (ptrTrama){
-		INTROaFINCAD(ptrTrama);
-		nfn = copiaParametro("nfn",ptrTrama); // Toma nombre de la función
-
-		for (i = 0; i < MAXIMAS_FUNCIONES; i++) { // Recorre funciones que procesan las tramas
-			res = strcmp(tbfuncionesServer[i].nf, nfn);
-			if (res == 0) { // Encontrada la función que procesa el mensaje
-				liberaMemoria(nfn);
-				res=tbfuncionesServer[i].fptr(socket_c, ptrTrama); // Invoca la función
-				liberaMemoria(ptrTrama->parametros);
-				liberaMemoria(ptrTrama);
-				return(res);
-			}
-		}
-		liberaMemoria(nfn);
-		liberaMemoria(ptrTrama->parametros);
-		liberaMemoria(ptrTrama);
-		/*
-		 Sólo puede ser un comando personalizado o su notificación
-		if (ptrTrama->tipo == MSG_COMANDO)
-			return (Comando(socket_c, ptrTrama));
-		else {
-			if (ptrTrama->tipo == MSG_NOTIFICACION)
-				return (RESPUESTA_Comando(socket_c, ptrTrama));
-			else
-				errorLog(modulo, 18, FALSE); // No se reconoce el mensaje
-		}
-		*/
-	}
-	else
-		errorLog(modulo, 17, FALSE); // Error en la recepción
-	return (TRUE);
-}
 // ________________________________________________________________________________________________________
 // Función: Sondeo
 //
@@ -3571,6 +3519,110 @@ BOOLEAN envioProgramacion(SOCKET *socket_c, TRAMA *ptrTrama)
 	}
 	return (TRUE); // No existen registros
 }
+
+// This object stores function handler for messages
+static struct {
+	const char *nf; // Nombre de la función
+	BOOLEAN (*fptr)(SOCKET*,TRAMA*); // Puntero a la función que procesa la trama
+} tbfuncionesServer[MAXIMAS_FUNCIONES] = {
+	{ "Sondeo",				Sondeo,			},
+	{ "respuestaSondeo",			respuestaSondeo,	},
+	{ "ConsolaRemota",			ConsolaRemota,		},
+	{ "EcoConsola",				EcoConsola,		},
+	{ "Actualizar",				Actualizar,		},
+	{ "Purgar",				Purgar,			},
+	{ "InclusionCliente",			InclusionCliente,	},
+	{ "InclusionClienteWinLnx",		InclusionClienteWinLnx, },
+	{ "AutoexecCliente",			AutoexecCliente,	},
+	{ "ComandosPendientes",			ComandosPendientes,	},
+	{ "DisponibilidadComandos",		DisponibilidadComandos, },
+	{ "Arrancar",				Arrancar, 		},
+	{ "RESPUESTA_Arrancar",			RESPUESTA_Arrancar,	},
+	{ "Apagar",				Apagar,			},
+	{ "RESPUESTA_Apagar",			RESPUESTA_Apagar,	},
+	{ "Reiniciar",				Reiniciar,		},
+	{ "RESPUESTA_Reiniciar",		RESPUESTA_Reiniciar,	},
+	{ "IniciarSesion",			IniciarSesion,		},
+	{ "RESPUESTA_IniciarSesion",		RESPUESTA_IniciarSesion, },
+	{ "CrearImagen",			CrearImagen,		},
+	{ "RESPUESTA_CrearImagen",		RESPUESTA_CrearImagen,	},
+	{ "CrearImagenBasica",			CrearImagenBasica,	},
+	{ "RESPUESTA_CrearImagenBasica",	RESPUESTA_CrearImagenBasica, },
+	{ "CrearSoftIncremental",		CrearSoftIncremental,	},
+	{ "RESPUESTA_CrearSoftIncremental",	RESPUESTA_CrearSoftIncremental, },
+	{ "RestaurarImagen",			RestaurarImagen,	},
+	{ "RESPUESTA_RestaurarImagen",		RESPUESTA_RestaurarImagen },
+	{ "RestaurarImagenBasica",		RestaurarImagenBasica, },
+	{ "RESPUESTA_RestaurarImagenBasica",	RESPUESTA_RestaurarImagenBasica, },
+	{ "RestaurarSoftIncremental",		RestaurarSoftIncremental, },
+	{ "RESPUESTA_RestaurarSoftIncremental",	RESPUESTA_RestaurarSoftIncremental, },
+	{ "Configurar",				Configurar,		},
+	{ "RESPUESTA_Configurar",		RESPUESTA_Configurar,	},
+	{ "EjecutarScript",			EjecutarScript,		},
+	{ "RESPUESTA_EjecutarScript",		RESPUESTA_EjecutarScript, },
+	{ "InventarioHardware",			InventarioHardware, 	},
+	{ "RESPUESTA_InventarioHardware",	RESPUESTA_InventarioHardware, },
+	{ "InventarioSoftware",			InventarioSoftware	},
+	{ "RESPUESTA_InventarioSoftware",	RESPUESTA_InventarioSoftware, },
+	{ "enviaArchivo",			enviaArchivo,		},
+	{ "recibeArchivo",			recibeArchivo, 		},
+	{ "envioProgramacion",			envioProgramacion,	},
+};
+
+// ________________________________________________________________________________________________________
+// Función: gestionaTrama
+//
+//		Descripción:
+//			Procesa las tramas recibidas .
+//		Parametros:
+//			- s : Socket usado para comunicaciones
+//	Devuelve:
+//		TRUE: Si el proceso es correcto
+//		FALSE: En caso de ocurrir algún error
+// ________________________________________________________________________________________________________
+BOOLEAN gestionaTrama(SOCKET *socket_c)
+{
+	TRAMA* ptrTrama;
+	int i, res;
+	char *nfn;
+	char modulo[] = "gestionaTrama()";
+
+	ptrTrama=recibeTrama(socket_c);
+
+	if (ptrTrama){
+		INTROaFINCAD(ptrTrama);
+		nfn = copiaParametro("nfn",ptrTrama); // Toma nombre de la función
+
+		for (i = 0; i < MAXIMAS_FUNCIONES; i++) { // Recorre funciones que procesan las tramas
+			res = strcmp(tbfuncionesServer[i].nf, nfn);
+			if (res == 0) { // Encontrada la función que procesa el mensaje
+				liberaMemoria(nfn);
+				res=tbfuncionesServer[i].fptr(socket_c, ptrTrama); // Invoca la función
+				liberaMemoria(ptrTrama->parametros);
+				liberaMemoria(ptrTrama);
+				return(res);
+			}
+		}
+		liberaMemoria(nfn);
+		liberaMemoria(ptrTrama->parametros);
+		liberaMemoria(ptrTrama);
+		/*
+		 Sólo puede ser un comando personalizado o su notificación
+		if (ptrTrama->tipo == MSG_COMANDO)
+			return (Comando(socket_c, ptrTrama));
+		else {
+			if (ptrTrama->tipo == MSG_NOTIFICACION)
+				return (RESPUESTA_Comando(socket_c, ptrTrama));
+			else
+				errorLog(modulo, 18, FALSE); // No se reconoce el mensaje
+		}
+		*/
+	}
+	else
+		errorLog(modulo, 17, FALSE); // Error en la recepción
+	return (TRUE);
+}
+
 // ********************************************************************************************************
 // PROGRAMA PRINCIPAL (SERVICIO)
 // ********************************************************************************************************
@@ -3592,121 +3644,6 @@ int main(int argc, char *argv[]) {
 	if (!tomaConfiguracion(szPathFileCfg)) { // Toma parametros de configuracion
 		exit(EXIT_FAILURE);
 	}
-	/*--------------------------------------------------------------------------------------------------------
-	 Carga del catálogo de funciones que procesan las tramas (referencia directa por puntero a función)
-	 ---------------------------------------------------------------------------------------------------------*/
-	int cf = 0;
-
-	strcpy(tbfuncionesServer[cf].nf, "Sondeo");
-	tbfuncionesServer[cf++].fptr = &Sondeo;
-	strcpy(tbfuncionesServer[cf].nf, "respuestaSondeo");
-	tbfuncionesServer[cf++].fptr = &respuestaSondeo;
-
-	strcpy(tbfuncionesServer[cf].nf, "ConsolaRemota");
-	tbfuncionesServer[cf++].fptr = &ConsolaRemota;
-
-	strcpy(tbfuncionesServer[cf].nf, "EcoConsola");
-	tbfuncionesServer[cf++].fptr = &EcoConsola;
-
-	strcpy(tbfuncionesServer[cf].nf, "Actualizar");
-	tbfuncionesServer[cf++].fptr = &Actualizar;
-
-	strcpy(tbfuncionesServer[cf].nf, "Purgar");
-	tbfuncionesServer[cf++].fptr = &Purgar;
-
-	strcpy(tbfuncionesServer[cf].nf, "InclusionCliente");
-	tbfuncionesServer[cf++].fptr = &InclusionCliente;
-
-	strcpy(tbfuncionesServer[cf].nf, "InclusionClienteWinLnx");
-	tbfuncionesServer[cf++].fptr = &InclusionClienteWinLnx;
-
-	strcpy(tbfuncionesServer[cf].nf, "AutoexecCliente");
-	tbfuncionesServer[cf++].fptr = &AutoexecCliente;
-
-	strcpy(tbfuncionesServer[cf].nf, "ComandosPendientes");
-	tbfuncionesServer[cf++].fptr = &ComandosPendientes;
-
-	strcpy(tbfuncionesServer[cf].nf, "DisponibilidadComandos");
-	tbfuncionesServer[cf++].fptr = &DisponibilidadComandos;
-
-	strcpy(tbfuncionesServer[cf].nf, "Arrancar");
-	tbfuncionesServer[cf++].fptr = &Arrancar;
-	strcpy(tbfuncionesServer[cf].nf, "RESPUESTA_Arrancar");
-	tbfuncionesServer[cf++].fptr = &RESPUESTA_Arrancar;
-
-	strcpy(tbfuncionesServer[cf].nf, "Apagar");
-	tbfuncionesServer[cf++].fptr = &Apagar;
-	strcpy(tbfuncionesServer[cf].nf, "RESPUESTA_Apagar");
-	tbfuncionesServer[cf++].fptr = &RESPUESTA_Apagar;
-
-	strcpy(tbfuncionesServer[cf].nf, "Reiniciar");
-	tbfuncionesServer[cf++].fptr = &Reiniciar;
-	strcpy(tbfuncionesServer[cf].nf, "RESPUESTA_Reiniciar");
-	tbfuncionesServer[cf++].fptr = &RESPUESTA_Reiniciar;
-
-	strcpy(tbfuncionesServer[cf].nf, "IniciarSesion");
-	tbfuncionesServer[cf++].fptr = &IniciarSesion;
-	strcpy(tbfuncionesServer[cf].nf, "RESPUESTA_IniciarSesion");
-	tbfuncionesServer[cf++].fptr = &RESPUESTA_IniciarSesion;
-
-	strcpy(tbfuncionesServer[cf].nf, "CrearImagen");
-	tbfuncionesServer[cf++].fptr = &CrearImagen;
-	strcpy(tbfuncionesServer[cf].nf, "RESPUESTA_CrearImagen");
-	tbfuncionesServer[cf++].fptr = &RESPUESTA_CrearImagen;
-
-	strcpy(tbfuncionesServer[cf].nf, "CrearImagenBasica");
-	tbfuncionesServer[cf++].fptr = &CrearImagenBasica;
-	strcpy(tbfuncionesServer[cf].nf, "RESPUESTA_CrearImagenBasica");
-	tbfuncionesServer[cf++].fptr = &RESPUESTA_CrearImagenBasica;
-
-	strcpy(tbfuncionesServer[cf].nf, "CrearSoftIncremental");
-	tbfuncionesServer[cf++].fptr = &CrearSoftIncremental;
-	strcpy(tbfuncionesServer[cf].nf, "RESPUESTA_CrearSoftIncremental");
-	tbfuncionesServer[cf++].fptr = &RESPUESTA_CrearSoftIncremental;
-
-	strcpy(tbfuncionesServer[cf].nf, "RestaurarImagen");
-	tbfuncionesServer[cf++].fptr = &RestaurarImagen;
-	strcpy(tbfuncionesServer[cf].nf, "RESPUESTA_RestaurarImagen");
-	tbfuncionesServer[cf++].fptr = &RESPUESTA_RestaurarImagen;
-
-	strcpy(tbfuncionesServer[cf].nf, "RestaurarImagenBasica");
-	tbfuncionesServer[cf++].fptr = &RestaurarImagenBasica;
-	strcpy(tbfuncionesServer[cf].nf, "RESPUESTA_RestaurarImagenBasica");
-	tbfuncionesServer[cf++].fptr = &RESPUESTA_RestaurarImagenBasica;
-
-	strcpy(tbfuncionesServer[cf].nf, "RestaurarSoftIncremental");
-	tbfuncionesServer[cf++].fptr = &RestaurarSoftIncremental;
-	strcpy(tbfuncionesServer[cf].nf, "RESPUESTA_RestaurarSoftIncremental");
-	tbfuncionesServer[cf++].fptr = &RESPUESTA_RestaurarSoftIncremental;
-
-	strcpy(tbfuncionesServer[cf].nf, "Configurar");
-	tbfuncionesServer[cf++].fptr = &Configurar;
-	strcpy(tbfuncionesServer[cf].nf, "RESPUESTA_Configurar");
-	tbfuncionesServer[cf++].fptr = &RESPUESTA_Configurar;
-
-	strcpy(tbfuncionesServer[cf].nf, "EjecutarScript");
-	tbfuncionesServer[cf++].fptr = &EjecutarScript;
-	strcpy(tbfuncionesServer[cf].nf, "RESPUESTA_EjecutarScript");
-	tbfuncionesServer[cf++].fptr = &RESPUESTA_EjecutarScript;
-
-	strcpy(tbfuncionesServer[cf].nf, "InventarioHardware");
-	tbfuncionesServer[cf++].fptr = &InventarioHardware;
-	strcpy(tbfuncionesServer[cf].nf, "RESPUESTA_InventarioHardware");
-	tbfuncionesServer[cf++].fptr = &RESPUESTA_InventarioHardware;
-
-	strcpy(tbfuncionesServer[cf].nf, "InventarioSoftware");
-	tbfuncionesServer[cf++].fptr = &InventarioSoftware;
-	strcpy(tbfuncionesServer[cf].nf, "RESPUESTA_InventarioSoftware");
-	tbfuncionesServer[cf++].fptr = &RESPUESTA_InventarioSoftware;
-
-	strcpy(tbfuncionesServer[cf].nf, "enviaArchivo");
-	tbfuncionesServer[cf++].fptr = &enviaArchivo;
-
-	strcpy(tbfuncionesServer[cf].nf, "recibeArchivo");
-	tbfuncionesServer[cf++].fptr = &recibeArchivo;
-
-	strcpy(tbfuncionesServer[cf].nf, "envioProgramacion");
-	tbfuncionesServer[cf++].fptr = &envioProgramacion;
 
 	/*--------------------------------------------------------------------------------------------------------
 	 // Inicializa array de información de los clientes
