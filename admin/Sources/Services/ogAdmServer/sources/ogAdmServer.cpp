@@ -21,33 +21,20 @@
 //________________________________________________________________________________________________________
 BOOLEAN tomaConfiguracion(char* filecfg) {
 	char modulo[] = "tomaConfiguracion()";
+	char buf[1024], *line;
+	char *key, *value;
+	FILE *fcfg;
 
 	if (filecfg == NULL || strlen(filecfg) == 0) {
 		errorLog(modulo, 1, FALSE); // Fichero de configuración del servicio vacío
 		return (FALSE);
 	}
-	FILE *fcfg;
-	long lSize;
-	char * buffer, *lineas[MAXPRM], *dualparametro[2];
-	int i, numlin, resul;
 
 	fcfg = fopen(filecfg, "rt");
 	if (fcfg == NULL) {
 		errorLog(modulo, 2, FALSE); // No existe fichero de configuración del servicio
 		return (FALSE);
 	}
-
-	fseek(fcfg, 0, SEEK_END);
-	lSize = ftell(fcfg); // Obtiene tamaño del fichero.
-	rewind(fcfg);
-	buffer = (char*) reservaMemoria(lSize + 1); // Toma memoria para el buffer de lectura.
-	if (buffer == NULL) { // No hay memoria suficiente para el buffer
-		errorLog(modulo, 3, FALSE);
-		return (FALSE);
-	}
-	fread(buffer, 1, lSize, fcfg); // Lee contenido del fichero
-	buffer[lSize] = (char) NULL;
-	fclose(fcfg);
 
 	servidoradm[0] = (char) NULL; //inicializar variables globales
 	usuario[0] = (char) NULL;
@@ -56,66 +43,60 @@ BOOLEAN tomaConfiguracion(char* filecfg) {
 	catalog[0] = (char) NULL;
 	aulaup[0] = (char) NULL;
 
-	numlin = splitCadena(lineas, buffer, '\n');
-	for (i = 0; i < numlin; i++) {
-		splitCadena(dualparametro, lineas[i], '=');
-		resul = strcmp(StrToUpper(dualparametro[0]), "SERVIDORADM");
-		if (resul == 0)
-			strcpy(servidoradm, dualparametro[1]);
-		resul = strcmp(StrToUpper(dualparametro[0]), "PUERTO");
-		if (resul == 0)
-			strcpy(puerto, dualparametro[1]);
-		resul = strcmp(StrToUpper(dualparametro[0]), "USUARIO");
-		if (resul == 0)
-			strcpy(usuario, dualparametro[1]);
-		resul = strcmp(StrToUpper(dualparametro[0]), "PASSWORD");
-		if (resul == 0)
-			strcpy(pasguor, dualparametro[1]);
-		resul = strcmp(StrToUpper(dualparametro[0]), "DATASOURCE");
-		if (resul == 0)
-			strcpy(datasource, dualparametro[1]);
-		resul = strcmp(StrToUpper(dualparametro[0]), "CATALOG");
-		if (resul == 0)
-			strcpy(catalog, dualparametro[1]);
-		resul = strcmp(StrToUpper(dualparametro[0]), "AULAUP");
-		if (resul == 0)
-			strcpy(catalog, dualparametro[1]);
+	line = fgets(buf, sizeof(buf), fcfg);
+	while (line != NULL) {
+		const char *delim = "=";
+
+		line[strlen(line) - 1] = '\0';
+
+		key = strtok(line, delim);
+		value = strtok(NULL, delim);
+
+		if (!strcmp(StrToUpper(key), "SERVIDORADM"))
+			snprintf(servidoradm, sizeof(servidoradm), "%s", value);
+		else if (!strcmp(StrToUpper(key), "PUERTO"))
+			snprintf(puerto, sizeof(puerto), "%s", value);
+		else if (!strcmp(StrToUpper(key), "USUARIO"))
+			snprintf(usuario, sizeof(usuario), "%s", value);
+		else if (!strcmp(StrToUpper(key), "PASSWORD"))
+			snprintf(pasguor, sizeof(pasguor), "%s", value);
+		else if (!strcmp(StrToUpper(key), "DATASOURCE"))
+			snprintf(datasource, sizeof(datasource), "%s", value);
+		else if (!strcmp(StrToUpper(key), "CATALOG"))
+			snprintf(catalog, sizeof(catalog), "%s", value);
+		else if (!strcmp(StrToUpper(key), "AULAUP"))
+			snprintf(catalog, sizeof(catalog), "%s", value);
+
+		line = fgets(buf, sizeof(buf), fcfg);
 	}
+
 	if (servidoradm[0] == (char) NULL) {
-		liberaMemoria(buffer);
 		errorLog(modulo, 4, FALSE); // Falta parámetro SERVIDORADM
 		return (FALSE);
 	}
 	if (puerto[0] == (char) NULL) {
-		liberaMemoria(buffer);
 		errorLog(modulo, 5, FALSE); // Falta parámetro PUERTO
 		return (FALSE);
 	}
 	if (usuario[0] == (char) NULL) {
-		liberaMemoria(buffer);
 		errorLog(modulo, 6, FALSE); // Falta parámetro USUARIO
 		return (FALSE);
 	}
 	if (pasguor[0] == (char) NULL) {
-		liberaMemoria(buffer);
 		errorLog(modulo, 7, FALSE); // Falta parámetro PASSWORD
 		return (FALSE);
 	}
 	if (datasource[0] == (char) NULL) {
-		liberaMemoria(buffer);
 		errorLog(modulo, 8, FALSE); // Falta parámetro DATASOURCE
 		return (FALSE);
 	}
 	if (catalog[0] == (char) NULL) {
-		liberaMemoria(buffer);
 		errorLog(modulo, 9, FALSE); // Falta parámetro CATALOG
 		return (FALSE);
 	}
-	if (aulaup[0] == (char) NULL) {
+	if (aulaup[0] == (char) NULL)
 		strcpy(aulaup, "0"); // Por defecto el conmutador de registro automático esta en off
 
-	}
-	liberaMemoria(buffer);
 	return (TRUE);
 }
 
