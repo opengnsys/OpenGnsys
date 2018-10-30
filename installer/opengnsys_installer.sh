@@ -208,7 +208,7 @@ case "$OSDISTRIB" in
 	fedora|centos)
 		DEPENDENCIES=( subversion httpd mod_ssl php php-ldap mysql-server mysql-devel mysql-devel.i686 php-mysql dhcp tftp-server tftp xinetd binutils gcc gcc-c++ glibc-devel glibc-devel.i686 glibc-static glibc-static.i686 libstdc++-devel.i686 make wget curl doxygen graphviz ctorrent samba samba-client rsync unzip debootstrap schroot squashfs-tools python-crypto arp-scan procps-ng gettext moreutils jq net-tools http://ftp.altlinux.org/pub/distributions/ALTLinux/5.1/branch/$(arch)/RPMS.classic/netpipes-4.2-alt1.$(arch).rpm )
 		INSTALLEXTRADEPS=( 'pushd /tmp; wget -t3 http://download.bittornado.com/download/BitTornado-0.3.18.tar.gz && tar xvzf BitTornado-0.3.18.tar.gz && cd BitTornado-CVS && python setup.py install && ln -fs btlaunchmany.py /usr/bin/btlaunchmany && ln -fs bttrack.py /usr/bin/bttrack; popd' )
-		INSTALLPKG="yum install -y libstdc++ libstdc++.i686"
+		INSTALLPKG="yum update -y libstdc++ libstdc++.i686"
 		CHECKPKG="rpm -q --quiet \$package"
 		SYSTEMD=$(which systemctl 2>/dev/null)
 		if [ -n "$SYSTEMD" ]; then
@@ -878,8 +878,8 @@ function getNetworkSettings()
 		if [ -n "${SERVERIP[i]}" ]; then
 			NETMASK[i]=$( cidr2mask $(ip -o addr show dev "$dev" | awk '$3~/inet$/ {sub (/.*\//, "", $4); print ($4)}') )
 			NETBROAD[i]=$(ip -o addr show dev "$dev" | awk '$3~/inet$/ {print ($6)}')
-			NETIP[i]=$(ip route | awk -v d="$dev" '$3==d && /src/ {sub (/\/.*/,""); print $1}')
-			ROUTERIP[i]=$(ip route | awk -v d="$dev" '$1=="default" && $5==d {print $3}')
+			NETIP[i]=$(ip route list proto kernel | awk -v d="$dev" '$3==d && /src/ {sub (/\/.*/,""); print $1}')
+			ROUTERIP[i]=$(ip route list default | awk -v d="$dev" '$5==d {print $3}')
 			DEFAULTDEV=${DEFAULTDEV:-"$dev"}
 		fi
 		let i++
@@ -1092,7 +1092,7 @@ function installWebFiles()
 	done
 	cp -a $COMPATDIR/imagenes.device.php $COMPATDIR/imagenes.device4.php
 	# Acceso al manual de usuario
- 	ln -fs ../doc/userManual $INSTALL_TARGET/www/userManual
+	ln -fs ../doc/userManual $INSTALL_TARGET/www/userManual
 	# Cambiar permisos para ficheros especiales.
 	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/images/{fotos,iconos}
 	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/tmp/
@@ -1106,7 +1106,7 @@ function installWebFiles()
 # Copiar ficheros en la zona de descargas de OpenGnsys Web Console.
 function installDownloadableFiles()
 {
-	INSTVERSION=1.1.0       ###  Temporal.
+	INSTVERSION=1.1.0	###  Temporal.
 	local FILENAME=ogagentpkgs-$INSTVERSION.tar.gz
 	local TARGETFILE=$WORKDIR/$FILENAME
  
@@ -1566,8 +1566,8 @@ function installationSummary()
 	# de código o si no está incluida en el fichero de versión.
 	if [ $REMOTE -eq 1 ] || [ -z "$(awk '$3~/r[0-9]*/ {print}' $VERSIONFILE)" ]; then
 		# Revisión: rAñoMesDía.Gitcommit (8 caracteres de fecha y 7 primeros de commit).
- 		REVISION=$(curl -s "$API_URL" | jq -r '"r" + (.commit.commit.committer.date | gsub("-"; "")[:8]) + "." + (.commit.sha[:7])')
- 		sed -ri "s/($| r[.0-9a-f]+)/ $REVISION/" $VERSIONFILE
+		REVISION=$(curl -s "$API_URL" | jq -r '"r" + (.commit.commit.committer.date | gsub("-"; "")[:8]) + "." + (.commit.sha[:7])')
+		sed -ri "s/($| r[.0-9a-f]+)/ $REVISION/" $VERSIONFILE
 	fi
 
 	# Mostrar información.

@@ -15,5 +15,6 @@ $TbMsg["SEARCH_MAC"]="Adreça MAC";
 $TbMsg["SEARCH_DUPLICATES"]="Duplicats";
 $TbMsg["SEARCH_NOMATCHES"]="No es troben resultats";
 $TbMsg["SEARCH_NOVALUE"]="Ha d\'introduir un valor pel criteri de cerca";
+$TbMsg["SEARCH_NOREPO"]="Ordenadores sin repositorio";
 ?>
 

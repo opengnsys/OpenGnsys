@@ -1,11 +1,11 @@
 ﻿//____________________________________________________________________________
 //	
-//	Fichero de idiomas javascript: propiedades_repositorios_eng.js
-//	Idioma: Ingles
+//    Javascript language file: propiedades_repositorios_eng.js
+//    Language: English
 //____________________________________________________________________________
 TbMsg=new Array;
-TbMsg[0]="El nombre del repositorio sólo puede contener caracteres alfanuméricos";
-TbMsg[1]="Debe introducir una dirección IP";
-TbMsg[2]="ATENCIÓN: Hay imágenes alojadas por este repositorio. ¿Está seguro de querer eliminarlo ?";
-TbMsg[3]="Debe introducir un puerto de comunicaciones para los clientes";
-TbMsg[4]="Los comentarios sólo pueden contener caracteres alfanuméricos";
+TbMsg[0]="Repository name can only contain alphanumeric characters";
+TbMsg[1]="You must enter IP address";
+TbMsg[2]="WARNING: There are computers assigned to this repository. Do you really want to delete it?";
+TbMsg[3]="You must enter Comm port for clients";
+TbMsg[4]="Comments can only contain alphanumeric characters.";

@@ -133,7 +133,7 @@ if($apiKeyRepo != ""){
 			<TH align=center>&nbsp;<?php echo $TbMsg[17]?>&nbsp;</TD>
 			<?php
 				if ($opcion==$op_eliminacion)
-					echo '<TD>'.$apiKeyRepo.'</TD>';
+					echo '<TD>********</TD>';
 				else
 					echo'<TD><INPUT  class="formulariodatos" name="apiKeyRepo" type="text" style="width:200" value="'.$apiKeyRepo.'"></TD>';
 			?>

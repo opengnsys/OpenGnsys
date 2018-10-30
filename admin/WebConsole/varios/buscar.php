@@ -23,12 +23,12 @@ $valor="";
 # Tomar varlores de sesión.
 if (isset($_POST["criterio"])) $criterio=htmlspecialchars($_POST["criterio"]);
 if (isset($_POST["valor"])) $valor=htmlspecialchars($_POST["valor"]); 
-if (!empty ($valor) || $criterio == "duplic") {
+if (!empty ($valor) or $criterio == "duplic" or $criterio == "norepo") {
     $cmd=CreaComando($cadenaconexion);
     if ($cmd) {
 	$rs=new Recordset; 
 	switch ($criterio) {
-		case "nombre":
+		case "nombre":	// Buscar por nombre de equipo.
 			$cmd->texto="SELECT grupos.nombregrupo AS grupo,
 					    aulas.nombreaula AS aula,
 					    ordenadores.idordenador AS id,
@@ -42,7 +42,7 @@ if (!empty ($valor) || $criterio == "duplic") {
 					  AND aulas.idcentro='$idcentro'
 					ORDER BY ordenadores.nombreordenador";
 			break;
-		case "ip":
+		case "ip":	// Buscar por IP.
 			$cmd->texto="SELECT grupos.nombregrupo AS grupo,
 					    aulas.nombreaula AS aula,
 					    ordenadores.idordenador AS id,
@@ -56,7 +56,7 @@ if (!empty ($valor) || $criterio == "duplic") {
 					  AND aulas.idcentro='$idcentro'
 					ORDER BY ordenadores.nombreordenador";
 			break;
-		case "mac":
+		case "mac":	// Buscar por dirección MAC (Ethernet).
 			$cmd->texto="SELECT grupos.nombregrupo AS grupo,
 					    aulas.nombreaula AS aula,
 					    ordenadores.idordenador AS id,
@@ -70,7 +70,7 @@ if (!empty ($valor) || $criterio == "duplic") {
 					  AND aulas.idcentro='$idcentro'
 					ORDER BY ordenadores.nombreordenador";
 			break;
-		case "duplic":
+		case "duplic":	// Mostrar duplicados.
 			$cmd->texto="SELECT grupos.nombregrupo AS grupo,
 					    aulas.nombreaula AS aula,
 					    ordenadores.idordenador AS id,
@@ -92,6 +92,20 @@ if (!empty ($valor) || $criterio == "duplic") {
 						(SELECT mac FROM ordenadores
 						  GROUP BY mac HAVING count(*) > 1)
 					  AND aulas.idcentro='$idcentro'";
+			break;
+		case "norepo":   // Mostrar ordenadores sin repositorio
+			$cmd->texto="SELECT grupos.nombregrupo AS grupo,
+					    aulas.nombreaula AS aula,
+					    ordenadores.idordenador AS id,
+					    ordenadores.nombreordenador AS nombre,
+					    ordenadores.ip AS ip,
+					    ordenadores.mac AS mac
+					FROM ordenadores
+					JOIN aulas ON aulas.idaula=ordenadores.idaula
+				   LEFT JOIN grupos ON grupos.idgrupo=aulas.grupoid
+				       WHERE aulas.idcentro='$idcentro'
+					  AND idrepositorio=0
+					ORDER BY aulas.nombreaula;";
 			break;
 	}
 	$rs->Comando=&$cmd; 
@@ -126,9 +140,9 @@ function confirmar(){
 }
 //_________________________________
 function comprobar_datos(){
-	if (document.fdatos.valor.value=="" && document.fdatos.criterio.value!="duplic") {
-		alert("<?php echo $TbMsg["SEARCH_NOVALUE"] ?>")
-		document.fdatos.valor.focus()
+	if (document.fdatos.valor.value=="" && document.fdatos.criterio.value!="duplic" && document.fdatos.criterio.value!="norepo") {
+		alert("<?php echo $TbMsg["SEARCH_NOVALUE"] ?>");
+		document.fdatos.valor.focus();
 		return(false)
 	}
 	return(true)
@@ -147,14 +161,13 @@ function PulsaEnter(oEvento){
     if (iAscii == 13)  confirmar();
 	return true; 
 } 
-//_________________________________
 	</script>
 </head>
 <body>
 <p align="center"><u><span class="cabeceras"><?php echo $TbMsg["SEARCH_TITLE"] ?></span></u></p>
 
 <?php
-if (!empty ($valor) || $criterio == "duplic") {
+if (!empty ($valor) or $criterio == "duplic" or $criterio == "norepo") {
 	if (empty ($aula)) {
 		echo '<p class="subcabeceras" align="center">'.$TbMsg["SEARCH_NOMATCHES"].'</p>';
 	} else {
@@ -186,11 +199,12 @@ if (!empty ($valor) || $criterio == "duplic") {
 <div align="center" style="margin:20;">
 	<form action="#" class="formulariodatos" name="fdatos" method="post">
 		<?php echo $TbMsg["SEARCH_CRITERIA"] ?>:
-		<select name="criterio" id="criterio" onchange="if (document.fdatos.criterio.value=='duplic') document.fdatos.valor.disabled=true; else document.fdatos.valor.disabled=false">
+		<select name="criterio" id="criterio" onchange="if (document.fdatos.criterio.value=='duplic' || document.fdatos.criterio.value=='norepo') document.fdatos.valor.disabled=true; else document.fdatos.valor.disabled=false">
 			<option value="nombre"> <?php echo $TbMsg["SEARCH_NAME"] ?> </option>
 			<option value="ip"> <?php echo $TbMsg["SEARCH_IP"] ?> </option>
 			<option value="mac"> <?php echo $TbMsg["SEARCH_MAC"] ?> </option>
 			<option value="duplic"> <?php echo $TbMsg["SEARCH_DUPLICATES"] ?> </option>
+			<option value="norepo"> <?php echo $TbMsg["SEARCH_NOREPO"] ?> </option>
 		</select>
 		<input type="text" name="valor" id="valor" size="20" />
 		<div align="center">

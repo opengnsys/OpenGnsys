@@ -17,6 +17,7 @@ Tickets resueltos en módulo OpenGnsys Server:
 #846	Configuración de logrotate para que incluya todos los servicios de OpenGnsys (corrección)
 
 Tickets resueltos en módulo OpenGnsys Repository Server:
+#580	Caídas de ogAdmServer y ogAdmClient por desbordamiento de cadenas (no se resolverá)
 #850	Problema con repositorio recién instalado (corrección)
 
 Tickets resueltos en módulo OpenGnsys Web Admin Console:
