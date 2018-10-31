@@ -22,8 +22,8 @@ static char catalog[LONPRM]; // Nombre de la base de datos
 //	Parámetros:
 //		filecfg : Ruta completa al fichero de configuración
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error 
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error 
 //________________________________________________________________________________________________________
 static bool tomaConfiguracion(const char *filecfg)
 {
@@ -32,14 +32,14 @@ static bool tomaConfiguracion(const char *filecfg)
 	FILE *fcfg;
 
 	if (filecfg == NULL || strlen(filecfg) == 0) {
-		og_log(1, FALSE); // Fichero de configuración del servicio vacío
-		return (FALSE);
+		og_log(1, false); // Fichero de configuración del servicio vacío
+		return false;
 	}
 
 	fcfg = fopen(filecfg, "rt");
 	if (fcfg == NULL) {
-		og_log(2, FALSE); // No existe fichero de configuración del servicio
-		return (FALSE);
+		og_log(2, false); // No existe fichero de configuración del servicio
+		return false;
 	}
 
 	servidoradm[0] = (char) NULL; //inicializar variables globales
@@ -70,31 +70,31 @@ static bool tomaConfiguracion(const char *filecfg)
 	}
 
 	if (!servidoradm[0]) {
-		og_log(4, FALSE); // Falta parámetro SERVIDORADM
-		return (FALSE);
+		og_log(4, false); // Falta parámetro SERVIDORADM
+		return false;
 	}
 	if (!puerto[0]) {
-		og_log(5, FALSE); // Falta parámetro PUERTO
-		return (FALSE);
+		og_log(5, false); // Falta parámetro PUERTO
+		return false;
 	}
 	if (!usuario[0]) {
-		og_log(6, FALSE); // Falta parámetro USUARIO
-		return (FALSE);
+		og_log(6, false); // Falta parámetro USUARIO
+		return false;
 	}
 	if (!pasguor[0]) {
-		og_log(7, FALSE); // Falta parámetro PASSWORD
-		return (FALSE);
+		og_log(7, false); // Falta parámetro PASSWORD
+		return false;
 	}
 	if (!datasource[0]) {
-		og_log(8, FALSE); // Falta parámetro DATASOURCE
-		return (FALSE);
+		og_log(8, false); // Falta parámetro DATASOURCE
+		return false;
 	}
 	if (!catalog[0]) {
-		og_log(9, FALSE); // Falta parámetro CATALOG
-		return (FALSE);
+		og_log(9, false); // Falta parámetro CATALOG
+		return false;
 	}
 
-	return (TRUE);
+	return true;
 }
 
 // ________________________________________________________________________________________________________
@@ -106,8 +106,8 @@ static bool tomaConfiguracion(const char *filecfg)
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros del mensaje
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 static bool Sondeo(int socket_c, TRAMA* ptrTrama)
 {
@@ -117,11 +117,11 @@ static bool Sondeo(int socket_c, TRAMA* ptrTrama)
 	if (!enviaComando(ptrTrama, CLIENTE_APAGADO)) {
 		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
 		errorInfo(modulo, msglog);
-		respuestaConsola(socket_c, ptrTrama, FALSE);
-		return (FALSE);
+		respuestaConsola(socket_c, ptrTrama, false);
+		return false;
 	}
-	respuestaConsola(socket_c, ptrTrama, TRUE);
-	return (TRUE);
+	respuestaConsola(socket_c, ptrTrama, true);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: respuestaSondeo
@@ -132,8 +132,8 @@ static bool Sondeo(int socket_c, TRAMA* ptrTrama)
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros del mensaje
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 static bool respuestaSondeo(int socket_c, TRAMA* ptrTrama)
 {
@@ -146,8 +146,8 @@ static bool respuestaSondeo(int socket_c, TRAMA* ptrTrama)
 	Ipes = (char*) reservaMemoria(lSize + 1);
 	if (Ipes == NULL) {
 		liberaMemoria(iph);
-		og_log(3, FALSE);
-		return (FALSE);
+		og_log(3, false);
+		return false;
 	}
 	strcpy(Ipes, iph); // Copia cadena de IPES
 	liberaMemoria(iph);
@@ -166,10 +166,10 @@ static bool respuestaSondeo(int socket_c, TRAMA* ptrTrama)
 	strcat(ptrTrama->parametros, "\r");
 	liberaMemoria(Ipes);
 	if (!mandaTrama(&socket_c, ptrTrama)) {
-		og_log(26, FALSE);
-		return (FALSE);
+		og_log(26, false);
+		return false;
 	}
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: Actualizar
@@ -180,8 +180,8 @@ static bool respuestaSondeo(int socket_c, TRAMA* ptrTrama)
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros del mensaje
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 static bool Actualizar(int socket_c, TRAMA* ptrTrama)
 {
@@ -191,10 +191,10 @@ static bool Actualizar(int socket_c, TRAMA* ptrTrama)
 	if (!enviaComando(ptrTrama, CLIENTE_APAGADO)) {
 		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
 		errorInfo(modulo, msglog);
-		return (FALSE);
+		return false;
 	}
-	respuestaConsola(socket_c, ptrTrama, TRUE);
-	return (TRUE);
+	respuestaConsola(socket_c, ptrTrama, true);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: Purgar
@@ -205,8 +205,8 @@ static bool Actualizar(int socket_c, TRAMA* ptrTrama)
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros del mensaje
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 static bool Purgar(int socket_c, TRAMA* ptrTrama)
 {
@@ -216,10 +216,10 @@ static bool Purgar(int socket_c, TRAMA* ptrTrama)
 	if (!enviaComando(ptrTrama, CLIENTE_APAGADO)) {
 		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
 		errorInfo(modulo, msglog);
-		return (FALSE);
+		return false;
 	}
-	respuestaConsola(socket_c, ptrTrama, TRUE);
-	return (TRUE);
+	respuestaConsola(socket_c, ptrTrama, true);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: ConsolaRemota
@@ -230,8 +230,8 @@ static bool Purgar(int socket_c, TRAMA* ptrTrama)
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros del mensaje
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 static bool ConsolaRemota(int socket_c, TRAMA* ptrTrama)
 {
@@ -243,8 +243,8 @@ static bool ConsolaRemota(int socket_c, TRAMA* ptrTrama)
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
 		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
 		errorInfo(modulo, msglog);
-		respuestaConsola(socket_c, ptrTrama, FALSE);
-		return (FALSE);
+		respuestaConsola(socket_c, ptrTrama, false);
+		return false;
 	}
 	INTROaFINCAD(ptrTrama);
 	/* Destruye contenido del fichero de eco anterior */
@@ -256,8 +256,8 @@ static bool ConsolaRemota(int socket_c, TRAMA* ptrTrama)
 		fclose(f);
 	}
 	liberaMemoria(iph);
-	respuestaConsola(socket_c, ptrTrama, TRUE);
-	return (TRUE);
+	respuestaConsola(socket_c, ptrTrama, true);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: EcoConsola
@@ -268,8 +268,8 @@ static bool ConsolaRemota(int socket_c, TRAMA* ptrTrama)
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros del mensaje
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 static bool EcoConsola(int socket_c, TRAMA* ptrTrama)
 {
@@ -294,10 +294,10 @@ static bool EcoConsola(int socket_c, TRAMA* ptrTrama)
 	}
 	ptrTrama->tipo=MSG_RESPUESTA; // Tipo de mensaje
 	if (!mandaTrama(&socket_c, ptrTrama)) {
-		og_log(26, FALSE);
-		return (FALSE);
+		og_log(26, false);
+		return false;
 	}
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: clienteDisponible
@@ -308,8 +308,8 @@ static bool EcoConsola(int socket_c, TRAMA* ptrTrama)
 //		- ip : La ip del cliente a buscar
 //		- idx: (Salida)  Indice que ocupa el cliente, de estar ya registrado
 //	Devuelve:
-//		TRUE: Si el cliente está disponible
-//		FALSE: En caso contrario
+//		true: Si el cliente está disponible
+//		false: En caso contrario
 // ________________________________________________________________________________________________________
 bool clienteDisponible(char *ip, int* idx)
 {
@@ -318,19 +318,19 @@ bool clienteDisponible(char *ip, int* idx)
 	if (clienteExistente(ip, idx)) {
 		estado = strcmp(tbsockets[*idx].estado, CLIENTE_OCUPADO); // Cliente ocupado
 		if (estado == 0)
-			return (FALSE);
+			return false;
 
 		estado = strcmp(tbsockets[*idx].estado, CLIENTE_APAGADO); // Cliente apagado
 		if (estado == 0)
-			return (FALSE);
+			return false;
 
 		estado = strcmp(tbsockets[*idx].estado, CLIENTE_INICIANDO); // Cliente en proceso de inclusión
 		if (estado == 0)
-			return (FALSE);
+			return false;
 
-		return (TRUE); // En caso contrario el cliente está disponible
+		return true; // En caso contrario el cliente está disponible
 	}
-	return (FALSE); // Cliente no está registrado en el sistema
+	return false; // Cliente no está registrado en el sistema
 }
 // ________________________________________________________________________________________________________
 // Función: clienteExistente
@@ -341,8 +341,8 @@ bool clienteDisponible(char *ip, int* idx)
 //		- ip : La ip del cliente a buscar
 //		- idx:(Salida)  Indice que ocupa el cliente, de estar ya registrado
 //	Devuelve:
-//		TRUE: Si el cliente está registrado
-//		FALSE: En caso contrario
+//		true: Si el cliente está registrado
+//		false: En caso contrario
 // ________________________________________________________________________________________________________
 bool clienteExistente(char *ip, int* idx)
 {
@@ -350,21 +350,21 @@ bool clienteExistente(char *ip, int* idx)
 	for (i = 0; i < MAXIMOS_CLIENTES; i++) {
 		if (contieneIP(ip, tbsockets[i].ip)) { // Si existe la IP en la cadena
 			*idx = i;
-			return (TRUE);
+			return true;
 		}
 	}
-	return (FALSE);
+	return false;
 }
 // ________________________________________________________________________________________________________
 // Función: hayHueco
 // 
 // 	Descripción:
-// 		Esta función devuelve TRUE o FALSE dependiendo de que haya hueco en la tabla de sockets para un nuevo cliente.
+// 		Esta función devuelve true o false dependiendo de que haya hueco en la tabla de sockets para un nuevo cliente.
 // 	Parametros:
 // 		- idx:   Primer indice libre que se podrn utilizar
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 static bool hayHueco(int *idx)
 {
@@ -373,10 +373,10 @@ static bool hayHueco(int *idx)
 	for (i = 0; i < MAXIMOS_CLIENTES; i++) {
 		if (strncmp(tbsockets[i].ip, "\0", 1) == 0) { // Hay un hueco
 			*idx = i;
-			return (TRUE);
+			return true;
 		}
 	}
-	return (FALSE);
+	return false;
 }
 // ________________________________________________________________________________________________________
 // Función: InclusionClienteWin
@@ -387,8 +387,8 @@ static bool hayHueco(int *idx)
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 static bool InclusionClienteWinLnx(int socket_c, TRAMA *ptrTrama)
 {
@@ -407,10 +407,10 @@ static bool InclusionClienteWinLnx(int socket_c, TRAMA *ptrTrama)
 	lon += sprintf(ptrTrama->parametros + lon, "res=%d\r", res);	
 	
 	if (!mandaTrama(&socket_c, ptrTrama)) {
-		og_log(26, FALSE);
-		return (FALSE);
+		og_log(26, false);
+		return false;
 	}
-	return (TRUE);	
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: procesoInclusionClienteWinLnx
@@ -440,7 +440,7 @@ bool procesoInclusionClienteWinLnx(int socket_c, TRAMA *ptrTrama, int *idordenad
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexión con la BD
 		liberaMemoria(iph);
-		og_log(20, FALSE);
+		og_log(20, false);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
 		return (20);
@@ -453,7 +453,7 @@ bool procesoInclusionClienteWinLnx(int socket_c, TRAMA *ptrTrama, int *idordenad
 
 	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
 		liberaMemoria(iph);
-		og_log(21, FALSE);
+		og_log(21, false);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
 		db.Close();
@@ -462,7 +462,7 @@ bool procesoInclusionClienteWinLnx(int socket_c, TRAMA *ptrTrama, int *idordenad
 
 	if (tbl.ISEOF()) { // Si no existe el cliente
 		liberaMemoria(iph);
-		og_log(22, FALSE);
+		og_log(22, false);
 		db.liberaResult(tbl);
 		db.Close();
 		return (22);
@@ -478,7 +478,7 @@ bool procesoInclusionClienteWinLnx(int socket_c, TRAMA *ptrTrama, int *idordenad
 		tbl.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
 		db.Close();
-		return (FALSE);
+		return false;
 	}
 	if (!tbl.Get("nombreordenador", nombreordenador)) {
 		liberaMemoria(iph);
@@ -486,14 +486,14 @@ bool procesoInclusionClienteWinLnx(int socket_c, TRAMA *ptrTrama, int *idordenad
 		tbl.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
 		db.Close();
-		return (FALSE);
+		return false;
 	}
 	db.liberaResult(tbl);
 	db.Close();
 	
 	if (!registraCliente(iph)) { // Incluyendo al cliente en la tabla de sokets
 		liberaMemoria(iph);
-		og_log(25, FALSE);
+		og_log(25, false);
 		return (25);
 	}
 	liberaMemoria(iph);
@@ -509,8 +509,8 @@ bool procesoInclusionClienteWinLnx(int socket_c, TRAMA *ptrTrama, int *idordenad
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 static bool InclusionCliente(int socket_c, TRAMA *ptrTrama)
 {
@@ -518,11 +518,11 @@ static bool InclusionCliente(int socket_c, TRAMA *ptrTrama)
 		initParametros(ptrTrama,0);
 		strcpy(ptrTrama->parametros, "nfn=RESPUESTA_InclusionCliente\rres=0\r");
 		if (!mandaTrama(&socket_c, ptrTrama)) {
-			og_log(26, FALSE);
-			return (FALSE);
+			og_log(26, false);
+			return false;
 		}
 	}
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: procesoInclusionCliente
@@ -533,8 +533,8 @@ static bool InclusionCliente(int socket_c, TRAMA *ptrTrama)
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 bool procesoInclusionCliente(int socket_c, TRAMA *ptrTrama)
 {
@@ -554,10 +554,10 @@ bool procesoInclusionCliente(int socket_c, TRAMA *ptrTrama)
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexión con la BD
 		liberaMemoria(iph);
 		liberaMemoria(cfg);
-		og_log(20, FALSE);
+		og_log(20, false);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
-		return (FALSE);
+		return false;
 	}
 
 	// Recupera los datos del cliente
@@ -568,15 +568,15 @@ bool procesoInclusionCliente(int socket_c, TRAMA *ptrTrama)
 				" WHERE ordenadores.ip = '%s'", iph);
 
 	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
-		og_log(21, FALSE);
+		og_log(21, false);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
-		return (FALSE);
+		return false;
 	}
 
 	if (tbl.ISEOF()) { // Si no existe el cliente
-		og_log(22, FALSE);
-		return (FALSE);
+		og_log(22, false);
+		return false;
 	}
 
 	if (ndebug == DEBUG_ALTO) {
@@ -586,37 +586,37 @@ bool procesoInclusionCliente(int socket_c, TRAMA *ptrTrama)
 	if (!tbl.Get("idordenador", idordenador)) {
 		tbl.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
-		return (FALSE);
+		return false;
 	}
 	if (!tbl.Get("nombreordenador", nombreordenador)) {
 		tbl.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
-		return (FALSE);
+		return false;
 	}
 	if (!tbl.Get("idmenu", idmenu)) {
 		tbl.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
-		return (FALSE);
+		return false;
 	}
 	if (!tbl.Get("cache", cache)) {
 		tbl.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
-		return (FALSE);
+		return false;
 	}
 	if (!tbl.Get("idproautoexec", idproautoexec)) {
 		tbl.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
-		return (FALSE);
+		return false;
 	}
 	if (!tbl.Get("idaula", idaula)) {
 		tbl.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
-		return (FALSE);
+		return false;
 	}
 	if (!tbl.Get("idcentro", idcentro)) {
 		tbl.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
-		return (FALSE);
+		return false;
 	}
 
 	resul = actualizaConfiguracion(db, tbl, cfg, idordenador); // Actualiza la configuración del ordenador
@@ -625,14 +625,14 @@ bool procesoInclusionCliente(int socket_c, TRAMA *ptrTrama)
 
 	if (!resul) {
 		liberaMemoria(iph);
-		og_log(29, FALSE);
-		return (FALSE);
+		og_log(29, false);
+		return false;
 	}
 
 	if (!registraCliente(iph)) { // Incluyendo al cliente en la tabla de sokets
 		liberaMemoria(iph);
-		og_log(25, FALSE);
-		return (FALSE);
+		og_log(25, false);
+		return false;
 	}
 
 	/*------------------------------------------------------------------------------------------------------------------------------
@@ -650,11 +650,11 @@ bool procesoInclusionCliente(int socket_c, TRAMA *ptrTrama)
 	lon += sprintf(ptrTrama->parametros + lon, "res=%d\r", 1); // Confirmación proceso correcto
 
 	if (!mandaTrama(&socket_c, ptrTrama)) {
-		og_log(26, FALSE);
-		return (FALSE);
+		og_log(26, false);
+		return false;
 	}
 	liberaMemoria(iph);
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: actualizaConfiguracion
@@ -667,8 +667,8 @@ bool procesoInclusionCliente(int socket_c, TRAMA *ptrTrama)
 //		- cfg: cadena con una Configuración
 //		- ido: Identificador del ordenador cliente
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 //	Especificaciones:
 //		Los parametros de la configuración son:
 //			par= Número de partición
@@ -702,7 +702,7 @@ bool actualizaConfiguracion(Database db, Table tbl, char *cfg, int ido)
 				if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 					db.GetErrorErrStr(msglog);
 					errorInfo(modulo, msglog);
-					return (FALSE);
+					return false;
 				}
 			}
 			continue;
@@ -757,10 +757,10 @@ bool actualizaConfiguracion(Database db, Table tbl, char *cfg, int ido)
 
 
 		if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
-			og_log(21, FALSE);
+			og_log(21, false);
 			db.GetErrorErrStr(msglog);
 			errorInfo(modulo, msglog);
-			return (FALSE);
+			return false;
 		}
 		if (tbl.ISEOF()) { // Si no existe el registro
 			sprintf(sqlstr, "INSERT INTO ordenadores_particiones(idordenador,numdisk,numpar,codpar,tamano,uso,idsistemafichero,idnombreso,idimagen)"
@@ -771,35 +771,35 @@ bool actualizaConfiguracion(Database db, Table tbl, char *cfg, int ido)
 			if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 				db.GetErrorErrStr(msglog);
 				errorInfo(modulo, msglog);
-				return (FALSE);
+				return false;
 			}
 		} else { // Existe el registro
-			swu = TRUE; // Se supone que algún dato ha cambiado
+			swu = true; // Se supone que algún dato ha cambiado
 			if (!tbl.Get("codpar", dato)) { // Toma dato
 				tbl.GetErrorErrStr(msglog); // Error al acceder al registro
 				errorInfo(modulo, msglog);
-				return (FALSE);
+				return false;
 			}
 			if (strtol(cpt, NULL, 16) == dato) {// Parámetro tipo de partición (hexadecimal) igual al almacenado (decimal)
 				if (!tbl.Get("tamano", dato)) { // Toma dato
 					tbl.GetErrorErrStr(msglog); // Error al acceder al registro
 					errorInfo(modulo, msglog);
-					return (FALSE);
+					return false;
 				}
 				if (atoi(tam) == dato) {// Parámetro tamaño igual al almacenado
 					if (!tbl.Get("idsistemafichero", dato)) { // Toma dato
 						tbl.GetErrorErrStr(msglog); // Error al acceder al registro
 						errorInfo(modulo, msglog);
-						return (FALSE);
+						return false;
 					}
 					if (idsfi == dato) {// Parámetro sistema de fichero igual al almacenado
 						if (!tbl.Get("idnombreso", dato)) { // Toma dato
 							tbl.GetErrorErrStr(msglog); // Error al acceder al registro
 							errorInfo(modulo, msglog);
-							return (FALSE);
+							return false;
 						}
 						if (idsoi == dato) {// Parámetro sistema de fichero distinto al almacenado
-							swu = FALSE; // Todos los parámetros de la partición son iguales, no se actualiza
+							swu = false; // Todos los parámetros de la partición son iguales, no se actualiza
 						}
 					}
 				}
@@ -823,10 +823,10 @@ bool actualizaConfiguracion(Database db, Table tbl, char *cfg, int ido)
 					uso, ido, disk, par);
 			}
 			if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
-				og_log(21, FALSE);
+				og_log(21, false);
 				db.GetErrorErrStr(msglog);
 				errorInfo(modulo, msglog);
-				return (FALSE);
+				return false;
 			}
 		}
 	}
@@ -835,12 +835,12 @@ bool actualizaConfiguracion(Database db, Table tbl, char *cfg, int ido)
 	sprintf(sqlstr, "DELETE FROM ordenadores_particiones WHERE idordenador=%d AND (numdisk, numpar) NOT IN (%s)",
 			ido, tbPar);
 	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
-		og_log(21, FALSE);
+		og_log(21, false);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
-		return (FALSE);
+		return false;
 	}
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: checkDato
@@ -876,7 +876,7 @@ int checkDato(Database db, Table tbl, char *dato, const char *tabla,
 
 	// Ejecuta consulta
 	if (!db.Execute(sqlstr, tbl)) { // Error al leer
-		og_log(21, FALSE);
+		og_log(21, false);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
 		return (0);
@@ -919,8 +919,8 @@ int checkDato(Database db, Table tbl, char *dato, const char *tabla,
 //	Parámetros:
 //		- iph: Dirección ip del cliente
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 bool registraCliente(char *iph)
 {
@@ -928,12 +928,12 @@ bool registraCliente(char *iph)
 
 	if (!clienteExistente(iph, &idx)) { // Si no existe la IP ...
 		if (!hayHueco(&idx)) { // Busca hueco para el nuevo cliente
-			return (FALSE); // No hay huecos
+			return false; // No hay huecos
 		}
 	}
 	strcpy(tbsockets[idx].ip, iph); // Copia IP
 	strcpy(tbsockets[idx].estado, CLIENTE_INICIANDO); // Actualiza el estado del cliente
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: AutoexecCliente
@@ -944,8 +944,8 @@ bool registraCliente(char *iph)
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 static bool AutoexecCliente(int socket_c, TRAMA *ptrTrama)
 {
@@ -964,15 +964,15 @@ static bool AutoexecCliente(int socket_c, TRAMA *ptrTrama)
 	liberaMemoria(iph);
 	fileexe = fopen(fileautoexec, "wb"); // Abre fichero de script
 	if (fileexe == NULL) {
-		og_log(52, FALSE);
-		return (FALSE);
+		og_log(52, false);
+		return false;
 	}
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexión con la BD
-		og_log(20, FALSE);
+		og_log(20, false);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
-		return (FALSE);
+		return false;
 	}
 	initParametros(ptrTrama,0);
 	if (recorreProcedimientos(db, parametros, fileexe, exe)) {
@@ -989,11 +989,11 @@ static bool AutoexecCliente(int socket_c, TRAMA *ptrTrama)
 
 	if (!mandaTrama(&socket_c, ptrTrama)) {
 		liberaMemoria(exe);
-		og_log(26, FALSE);
-		return (FALSE);
+		og_log(26, false);
+		return false;
 	}
 	liberaMemoria(exe);
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: recorreProcedimientos
@@ -1003,8 +1003,8 @@ static bool AutoexecCliente(int socket_c, TRAMA *ptrTrama)
 //	Parámetros:
 //		Database db,char* parametros,FILE* fileexe,char* idp
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 bool recorreProcedimientos(Database db, char *parametros, FILE *fileexe, char *idp)
 {
@@ -1019,27 +1019,27 @@ bool recorreProcedimientos(Database db, char *parametros, FILE *fileexe, char *i
 				" WHERE idprocedimiento=%s ORDER BY orden", idp);
 	// Ejecuta consulta
 	if (!db.Execute(sqlstr, tbl)) { // Error al leer
-		og_log(21, FALSE);
+		og_log(21, false);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
-		return (FALSE);
+		return false;
 	}
 	while (!tbl.ISEOF()) { // Recorre procedimientos
 		if (!tbl.Get("procedimientoid", procedimientoid)) { // Toma dato
 			tbl.GetErrorErrStr(msglog); // Error al acceder al registro
 			errorInfo(modulo, msglog);
-			return (FALSE);
+			return false;
 		}
 		if (procedimientoid > 0) { // Procedimiento recursivo
 			sprintf(idprocedimiento, "%d", procedimientoid);
 			if (!recorreProcedimientos(db, parametros, fileexe, idprocedimiento)) {
-				return (FALSE);
+				return false;
 			}
 		} else {
 			if (!tbl.Get("parametros", parametros)) { // Toma dato
 				tbl.GetErrorErrStr(msglog); // Error al acceder al registro
 				errorInfo(modulo, msglog);
-				return (FALSE);
+				return false;
 			}
 			strcat(parametros, "@");
 			lsize = strlen(parametros);
@@ -1047,7 +1047,7 @@ bool recorreProcedimientos(Database db, char *parametros, FILE *fileexe, char *i
 		}
 		tbl.MoveNext();
 	}
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: ComandosPendientes
@@ -1058,8 +1058,8 @@ bool recorreProcedimientos(Database db, char *parametros, FILE *fileexe, char *i
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 static bool ComandosPendientes(int socket_c, TRAMA *ptrTrama)
 {
@@ -1072,8 +1072,8 @@ static bool ComandosPendientes(int socket_c, TRAMA *ptrTrama)
 	if (!clienteExistente(iph, &idx)) { // Busca índice del cliente
 		liberaMemoria(iph);
 		liberaMemoria(ido);
-		og_log(47, FALSE);
-		return (FALSE);
+		og_log(47, false);
+		return false;
 	}
 	if (buscaComandos(ido, ptrTrama, &ids)) { // Existen comandos pendientes
 		ptrTrama->tipo = MSG_COMANDO;
@@ -1087,12 +1087,12 @@ static bool ComandosPendientes(int socket_c, TRAMA *ptrTrama)
 	if (!mandaTrama(&socket_c, ptrTrama)) {
 		liberaMemoria(iph);
 		liberaMemoria(ido);	
-		og_log(26, FALSE);
-		return (FALSE);
+		og_log(26, false);
+		return false;
 	}
 	liberaMemoria(iph);
 	liberaMemoria(ido);	
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: buscaComandos
@@ -1104,8 +1104,8 @@ static bool ComandosPendientes(int socket_c, TRAMA *ptrTrama)
 //		- cmd: Parámetros del comando (Salida)
 //		- ids: Identificador de la sesion(Salida)
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 bool buscaComandos(char *ido, TRAMA *ptrTrama, int *ids)
 {
@@ -1117,46 +1117,46 @@ bool buscaComandos(char *ido, TRAMA *ptrTrama, int *ids)
 	char modulo[] = "buscaComandos()";
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexión con la BD
-		og_log(20, FALSE);
+		og_log(20, false);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
-		return (FALSE);
+		return false;
 	}
 	sprintf(sqlstr,"SELECT sesion,parametros,length( parametros) as lonprm"\
 			" FROM acciones WHERE idordenador=%s AND estado='%d' ORDER BY idaccion", ido, ACCION_INICIADA);
 	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
-		og_log(21, FALSE);
+		og_log(21, false);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
-		return (FALSE);
+		return false;
 	}
 	if (tbl.ISEOF()) {
 		db.Close();
-		return (FALSE); // No hay comandos pendientes
+		return false; // No hay comandos pendientes
 	} else { // Busca entre todas las acciones de diversos ambitos
 		if (!tbl.Get("sesion", *ids)) { // Toma identificador de la sesion
 			tbl.GetErrorErrStr(msglog); // Error al acceder al registro
 			errorInfo(modulo, msglog);
-			return (FALSE);
+			return false;
 		}
 		if (!tbl.Get("lonprm", lonprm)) { // Toma parámetros del comando
 			tbl.GetErrorErrStr(msglog); // Error al acceder al registro
 			errorInfo(modulo, msglog);
-			return (FALSE);
+			return false;
 		}
 		if(!initParametros(ptrTrama,lonprm+LONGITUD_PARAMETROS)){
 			db.Close();
-			og_log(3, FALSE);
-			return (FALSE);
+			og_log(3, false);
+			return false;
 		}
 		if (!tbl.Get("parametros", ptrTrama->parametros)) { // Toma parámetros del comando
 			tbl.GetErrorErrStr(msglog); // Error al acceder al registro
 			errorInfo(modulo, msglog);
-			return (FALSE);
+			return false;
 		}
 	}
 	db.Close();
-	return (TRUE); // Hay comandos pendientes, se toma el primero de la cola
+	return true; // Hay comandos pendientes, se toma el primero de la cola
 }
 // ________________________________________________________________________________________________________
 // Función: DisponibilidadComandos
@@ -1167,8 +1167,8 @@ bool buscaComandos(char *ido, TRAMA *ptrTrama, int *ids)
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 //
 static bool DisponibilidadComandos(int socket_c, TRAMA *ptrTrama)
@@ -1179,8 +1179,8 @@ static bool DisponibilidadComandos(int socket_c, TRAMA *ptrTrama)
 	iph = copiaParametro("iph",ptrTrama); // Toma ip
 	if (!clienteExistente(iph, &idx)) { // Busca índice del cliente
 		liberaMemoria(iph);
-		og_log(47, FALSE);
-		return (FALSE);
+		og_log(47, false);
+		return false;
 	}
 	tpc = copiaParametro("tpc",ptrTrama); // Tipo de cliente (Plataforma y S.O.)
 	strcpy(tbsockets[idx].estado, tpc);
@@ -1195,10 +1195,10 @@ static bool DisponibilidadComandos(int socket_c, TRAMA *ptrTrama)
 	}
 
 	tbsockets[idx].sock = socket_c;
-	swcSocket = TRUE; // El socket permanece abierto para recibir comandos desde el servidor
+	swcSocket = true; // El socket permanece abierto para recibir comandos desde el servidor
 	liberaMemoria(iph);
 	liberaMemoria(tpc);		
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: respuestaEstandar
@@ -1214,8 +1214,8 @@ static bool DisponibilidadComandos(int socket_c, TRAMA *ptrTrama)
 //		- db: Objeto base de datos (operativo)
 //		- tbl: Objeto tabla
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 static bool respuestaEstandar(TRAMA *ptrTrama, char *iph, char *ido, Database db,
 		Table tbl)
@@ -1230,11 +1230,11 @@ static bool respuestaEstandar(TRAMA *ptrTrama, char *iph, char *ido, Database db
 	ids = copiaParametro("ids",ptrTrama); // Toma identificador de la sesión
 
 	if (ids == NULL) // No existe seguimiento de la acción
-		return (TRUE);
-		
+		return true;
+
 	if (atoi(ids) == 0){ // No existe seguimiento de la acción
 		liberaMemoria(ids);
-		return (TRUE);
+		return true;
 	}
 
 	sprintf(sqlstr,
@@ -1244,19 +1244,19 @@ static bool respuestaEstandar(TRAMA *ptrTrama, char *iph, char *ido, Database db
 	liberaMemoria(ids);
 
 	if (!db.Execute(sqlstr, tbl)) { // Error al consultar
-		og_log(21, FALSE);
+		og_log(21, false);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
-		return (FALSE);
+		return false;
 	}
 	if (tbl.ISEOF()) { // No existe registro de acciones
-		og_log(31, FALSE);
-		return (TRUE);
+		og_log(31, false);
+		return true;
 	}
 	if (!tbl.Get("idaccion", idaccion)) { // Toma identificador de la accion
 		tbl.GetErrorErrStr(msglog); // Error al acceder al registro
 		errorInfo(modulo, msglog);
-		return (FALSE);
+		return false;
 	}
 	st = tomaHora();
 	sprintf(fechafin, "%d/%d/%d %d:%d:%d", st->tm_year + 1900, st->tm_mon + 1,
@@ -1276,18 +1276,18 @@ static bool respuestaEstandar(TRAMA *ptrTrama, char *iph, char *ido, Database db
 		liberaMemoria(der);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
-		return (FALSE);
+		return false;
 	}
 	
 	liberaMemoria(der);
 	
 	if (atoi(res) == ACCION_FALLIDA) {
 		liberaMemoria(res);
-		return (FALSE); // Error en la ejecución del comando
+		return false; // Error en la ejecución del comando
 	}
 
 	liberaMemoria(res);
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: enviaComando
@@ -1298,8 +1298,8 @@ static bool respuestaEstandar(TRAMA *ptrTrama, char *iph, char *ido, Database db
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //		- estado: Estado en el se deja al cliente mientras se ejecuta el comando
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 bool enviaComando(TRAMA* ptrTrama, const char *estado)
 {
@@ -1310,8 +1310,8 @@ bool enviaComando(TRAMA* ptrTrama, const char *estado)
 	lon = strlen(iph); // Calcula longitud de la cadena de direccion/es IPE/S
 	Ipes = (char*) reservaMemoria(lon + 1);
 	if (Ipes == NULL) {
-		og_log(3, FALSE);
-		return (FALSE);
+		og_log(3, false);
+		return false;
 	}
 	
 	strcpy(Ipes, iph); // Copia cadena de IPES
@@ -1323,14 +1323,14 @@ bool enviaComando(TRAMA* ptrTrama, const char *estado)
 		if (clienteDisponible(ptrIpes[i], &idx)) { // Si el cliente puede recibir comandos
 			strcpy(tbsockets[idx].estado, estado); // Actualiza el estado del cliente
 			if (!mandaTrama(&tbsockets[idx].sock, ptrTrama)) {
-				og_log(26, FALSE);
-				return (FALSE);
+				og_log(26, false);
+				return false;
 			}
 			//close(tbsockets[idx].sock); // Cierra el socket del cliente hasta nueva disponibilidad
 		}
 	}
 	liberaMemoria(Ipes);
-	return (TRUE);
+	return true;
 }
 //______________________________________________________________________________________________________
 // Función: respuestaConsola
@@ -1341,18 +1341,18 @@ bool enviaComando(TRAMA* ptrTrama, const char *estado)
 //		- socket_c: (Salida) Socket utilizado para el envío
 //		- res: Resultado del envío del comando
 // 	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 bool respuestaConsola(int socket_c, TRAMA *ptrTrama, int res)
 {
 	initParametros(ptrTrama,0);
 	sprintf(ptrTrama->parametros, "res=%d\r", res);
 	if (!mandaTrama(&socket_c, ptrTrama)) {
-		og_log(26, FALSE);
-		return (FALSE);
+		og_log(26, false);
+		return false;
 	}
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: Arrancar
@@ -1363,8 +1363,8 @@ bool respuestaConsola(int socket_c, TRAMA *ptrTrama, int res)
 //		- socket_c: Socket de la consola al envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 static bool Arrancar(int socket_c, TRAMA* ptrTrama)
 {
@@ -1385,18 +1385,18 @@ static bool Arrancar(int socket_c, TRAMA* ptrTrama)
 	if(!res){
 		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
 		errorInfo(modulo, msglog);
-		respuestaConsola(socket_c, ptrTrama, FALSE);
-		return (FALSE);
+		respuestaConsola(socket_c, ptrTrama, false);
+		return false;
 	}
 
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
 		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
 		errorInfo(modulo, msglog);
-		respuestaConsola(socket_c, ptrTrama, FALSE);
-		return (FALSE);
+		respuestaConsola(socket_c, ptrTrama, false);
+		return false;
 	}
-	respuestaConsola(socket_c, ptrTrama, TRUE);
-	return (TRUE);
+	respuestaConsola(socket_c, ptrTrama, true);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: Levanta
@@ -1408,8 +1408,8 @@ static bool Arrancar(int socket_c, TRAMA* ptrTrama)
 //		- mac: Cadena de direcciones mac separadas por ";"
 //		- mar: Método de arranque (1=Broadcast, 2=Unicast)
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 bool Levanta(char *iph, char *mac, char *mar)
 {
@@ -1422,20 +1422,20 @@ bool Levanta(char *iph, char *mac, char *mar)
 	/* Creación de socket para envío de magig packet */
 	s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 	if (s < 0) {
-		og_log(13, TRUE);
-		return (FALSE);
+		og_log(13, true);
+		return false;
 	}
-	bOpt = TRUE; // Pone el socket en modo Broadcast
+	bOpt = true; // Pone el socket en modo Broadcast
 	res = setsockopt(s, SOL_SOCKET, SO_BROADCAST, (char *) &bOpt, sizeof(bOpt));
 	if (res < 0) {
-		og_log(48, TRUE);
-		return (FALSE);
+		og_log(48, true);
+		return false;
 	}
 	local.sin_family = AF_INET;
 	local.sin_port = htons((short) PUERTO_WAKEUP);
 	local.sin_addr.s_addr = htonl(INADDR_ANY); // cualquier interface
 	if (bind(s, (sockaddr *) &local, sizeof(local)) < 0) {
-		og_log(14, TRUE);
+		og_log(14, true);
 		exit(EXIT_FAILURE);
 	}
 	/* fin creación de socket */
@@ -1443,13 +1443,13 @@ bool Levanta(char *iph, char *mac, char *mar)
 	lon = splitCadena(ptrMacs, mac, ';');
 	for (i = 0; i < lon; i++) {
 		if (!WakeUp(&s,ptrIP[i],ptrMacs[i],mar)) {
-			og_log(49, TRUE);
+			og_log(49, true);
 			close(s);
-			return (FALSE);
+			return false;
 		}
 	}
 	close(s);
-	return (TRUE);
+	return true;
 }
 //_____________________________________________________________________________________________________________
 // Función: WakeUp
@@ -1462,8 +1462,8 @@ bool Levanta(char *iph, char *mac, char *mar)
 //		- mac : Cadena con la dirección mac en formato XXXXXXXXXXXX
 //		- mar: Método de arranque (1=Broadcast, 2=Unicast)
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 //_____________________________________________________________________________________________________________
 //
 bool WakeUp(SOCKET *s, char* iph, char *mac, char *mar)
@@ -1495,10 +1495,10 @@ bool WakeUp(SOCKET *s, char* iph, char *mac, char *mar)
 	res = sendto(*s, (char *) &Trama_WakeUp, sizeof(Trama_WakeUp), 0,
 			(sockaddr *) &WakeUpCliente, sizeof(WakeUpCliente));
 	if (res < 0) {
-		og_log(26, FALSE);
-		return (FALSE);
+		og_log(26, false);
+		return false;
 	}
-	return (TRUE);
+	return true;
 }
 //_____________________________________________________________________________________________________________
 // Función: PasaHexBin
@@ -1544,8 +1544,8 @@ void PasaHexBin(char *cadena, char *numero)
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 static bool RESPUESTA_Arrancar(int socket_c, TRAMA* ptrTrama)
 {
@@ -1558,10 +1558,10 @@ static bool RESPUESTA_Arrancar(int socket_c, TRAMA* ptrTrama)
 	char modulo[] = "RESPUESTA_Arrancar()";
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
-		og_log(20, FALSE);
+		og_log(20, false);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
-		return (FALSE);
+		return false;
 	}
 
 	iph = copiaParametro("iph",ptrTrama); // Toma dirección ip
@@ -1570,8 +1570,8 @@ static bool RESPUESTA_Arrancar(int socket_c, TRAMA* ptrTrama)
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
 		liberaMemoria(iph);
 		liberaMemoria(ido);
-		og_log(30, FALSE);
-		return (FALSE); // Error al registrar notificacion
+		og_log(30, false);
+		return false; // Error al registrar notificacion
 	}
 
 	tpc = copiaParametro("tpc",ptrTrama); // Tipo de cliente (Plataforma y S.O.)
@@ -1583,7 +1583,7 @@ static bool RESPUESTA_Arrancar(int socket_c, TRAMA* ptrTrama)
 	liberaMemoria(tpc);
 	
 	db.Close(); // Cierra conexión
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: Apagar
@@ -1594,8 +1594,8 @@ static bool RESPUESTA_Arrancar(int socket_c, TRAMA* ptrTrama)
 //		- socket_c: Socket de la consola al envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 static bool Apagar(int socket_c, TRAMA* ptrTrama)
 {
@@ -1605,11 +1605,11 @@ static bool Apagar(int socket_c, TRAMA* ptrTrama)
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
 		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
 		errorInfo(modulo, msglog);
-		respuestaConsola(socket_c, ptrTrama, FALSE);
-		return (FALSE);
+		respuestaConsola(socket_c, ptrTrama, false);
+		return false;
 	}
-	respuestaConsola(socket_c, ptrTrama, TRUE);
-	return (TRUE);
+	respuestaConsola(socket_c, ptrTrama, true);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: RESPUESTA_Apagar
@@ -1620,8 +1620,8 @@ static bool Apagar(int socket_c, TRAMA* ptrTrama)
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 static bool RESPUESTA_Apagar(int socket_c, TRAMA* ptrTrama)
 {
@@ -1633,10 +1633,10 @@ static bool RESPUESTA_Apagar(int socket_c, TRAMA* ptrTrama)
 	char modulo[] = "RESPUESTA_Apagar()";
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
-		og_log(20, FALSE);
+		og_log(20, false);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
-		return (FALSE);
+		return false;
 	}
 
 	iph = copiaParametro("iph",ptrTrama); // Toma dirección ip
@@ -1645,8 +1645,8 @@ static bool RESPUESTA_Apagar(int socket_c, TRAMA* ptrTrama)
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
 		liberaMemoria(iph);
 		liberaMemoria(ido);
-		og_log(30, FALSE);
-		return (FALSE); // Error al registrar notificacion
+		og_log(30, false);
+		return false; // Error al registrar notificacion
 	}
 
 	if (clienteExistente(iph, &i)) // Actualiza estado
@@ -1656,7 +1656,7 @@ static bool RESPUESTA_Apagar(int socket_c, TRAMA* ptrTrama)
 	liberaMemoria(ido);
 	
 	db.Close(); // Cierra conexión
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: Reiniciar
@@ -1667,8 +1667,8 @@ static bool RESPUESTA_Apagar(int socket_c, TRAMA* ptrTrama)
 //		- socket_c: Socket de la consola al envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 static bool Reiniciar(int socket_c, TRAMA* ptrTrama)
 {
@@ -1678,11 +1678,11 @@ static bool Reiniciar(int socket_c, TRAMA* ptrTrama)
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
 		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
 		errorInfo(modulo, msglog);
-		respuestaConsola(socket_c, ptrTrama, FALSE);
-		return (FALSE);
+		respuestaConsola(socket_c, ptrTrama, false);
+		return false;
 	}
-	respuestaConsola(socket_c, ptrTrama, TRUE);
-	return (TRUE);
+	respuestaConsola(socket_c, ptrTrama, true);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: RESPUESTA_Reiniciar
@@ -1693,8 +1693,8 @@ static bool Reiniciar(int socket_c, TRAMA* ptrTrama)
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 static bool RESPUESTA_Reiniciar(int socket_c, TRAMA* ptrTrama)
 {
@@ -1706,10 +1706,10 @@ static bool RESPUESTA_Reiniciar(int socket_c, TRAMA* ptrTrama)
 	char modulo[] = "RESPUESTA_Reiniciar()";
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
-		og_log(20, FALSE);
+		og_log(20, false);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
-		return (FALSE);
+		return false;
 	}
 
 	iph = copiaParametro("iph",ptrTrama); // Toma dirección ip
@@ -1718,8 +1718,8 @@ static bool RESPUESTA_Reiniciar(int socket_c, TRAMA* ptrTrama)
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
 		liberaMemoria(iph);
 		liberaMemoria(ido);
-		og_log(30, FALSE);
-		return (FALSE); // Error al registrar notificacion
+		og_log(30, false);
+		return false; // Error al registrar notificacion
 	}
 
 	if (clienteExistente(iph, &i)) // Actualiza estado
@@ -1729,7 +1729,7 @@ static bool RESPUESTA_Reiniciar(int socket_c, TRAMA* ptrTrama)
 	liberaMemoria(ido);
 
 	db.Close(); // Cierra conexión
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: IniciarSesion
@@ -1740,8 +1740,8 @@ static bool RESPUESTA_Reiniciar(int socket_c, TRAMA* ptrTrama)
 //		- socket_c: Socket de la consola al envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 static bool IniciarSesion(int socket_c, TRAMA* ptrTrama)
 {
@@ -1751,11 +1751,11 @@ static bool IniciarSesion(int socket_c, TRAMA* ptrTrama)
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
 		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
 		errorInfo(modulo, msglog);
-		respuestaConsola(socket_c, ptrTrama, FALSE);
-		return (FALSE);
+		respuestaConsola(socket_c, ptrTrama, false);
+		return false;
 	}
-	respuestaConsola(socket_c, ptrTrama, TRUE);
-	return (TRUE);
+	respuestaConsola(socket_c, ptrTrama, true);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: RESPUESTA_IniciarSesion
@@ -1766,8 +1766,8 @@ static bool IniciarSesion(int socket_c, TRAMA* ptrTrama)
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 static bool RESPUESTA_IniciarSesion(int socket_c, TRAMA* ptrTrama)
 {
@@ -1779,10 +1779,10 @@ static bool RESPUESTA_IniciarSesion(int socket_c, TRAMA* ptrTrama)
 	char modulo[] = "RESPUESTA_IniciarSesion()";
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
-		og_log(20, FALSE);
+		og_log(20, false);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
-		return (FALSE);
+		return false;
 	}
 
 	iph = copiaParametro("iph",ptrTrama); // Toma dirección ip
@@ -1791,8 +1791,8 @@ static bool RESPUESTA_IniciarSesion(int socket_c, TRAMA* ptrTrama)
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
 		liberaMemoria(iph);
 		liberaMemoria(ido);
-		og_log(30, FALSE);
-		return (FALSE); // Error al registrar notificacion
+		og_log(30, false);
+		return false; // Error al registrar notificacion
 	}
 
 	if (clienteExistente(iph, &i)) // Actualiza estado
@@ -1802,7 +1802,7 @@ static bool RESPUESTA_IniciarSesion(int socket_c, TRAMA* ptrTrama)
 	liberaMemoria(ido);
 		
 	db.Close(); // Cierra conexión
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: CrearImagen
@@ -1813,8 +1813,8 @@ static bool RESPUESTA_IniciarSesion(int socket_c, TRAMA* ptrTrama)
 //		- socket_c: Socket de la consola al envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 static bool CrearImagen(int socket_c, TRAMA* ptrTrama)
 {
@@ -1824,11 +1824,11 @@ static bool CrearImagen(int socket_c, TRAMA* ptrTrama)
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
 		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
 		errorInfo(modulo, msglog);
-		respuestaConsola(socket_c, ptrTrama, FALSE);
-		return (FALSE);
+		respuestaConsola(socket_c, ptrTrama, false);
+		return false;
 	}
-	respuestaConsola(socket_c, ptrTrama, TRUE);
-	return (TRUE);
+	respuestaConsola(socket_c, ptrTrama, true);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: RESPUESTA_CrearImagen
@@ -1839,8 +1839,8 @@ static bool CrearImagen(int socket_c, TRAMA* ptrTrama)
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 static bool RESPUESTA_CrearImagen(int socket_c, TRAMA* ptrTrama)
 {
@@ -1853,10 +1853,10 @@ static bool RESPUESTA_CrearImagen(int socket_c, TRAMA* ptrTrama)
 	char modulo[] = "RESPUESTA_CrearImagen()";
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
-		og_log(20, FALSE);
+		og_log(20, false);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
-		return (FALSE);
+		return false;
 	}
 
 	iph = copiaParametro("iph",ptrTrama); // Toma dirección ip
@@ -1865,8 +1865,8 @@ static bool RESPUESTA_CrearImagen(int socket_c, TRAMA* ptrTrama)
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
 		liberaMemoria(iph);
 		liberaMemoria(ido);
-		og_log(30, FALSE);
-		return (FALSE); // Error al registrar notificacion
+		og_log(30, false);
+		return false; // Error al registrar notificacion
 	}
 
 	// Acciones posteriores
@@ -1884,13 +1884,13 @@ static bool RESPUESTA_CrearImagen(int socket_c, TRAMA* ptrTrama)
 	liberaMemoria(ipr);
 	
 	if(!res){
-		og_log(94, FALSE);
+		og_log(94, false);
 		db.Close(); // Cierra conexión
-		return (FALSE);
+		return false;
 	}
 
 	db.Close(); // Cierra conexión
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: actualizaCreacionImagen
@@ -1907,8 +1907,8 @@ static bool RESPUESTA_CrearImagen(int socket_c, TRAMA* ptrTrama)
 //		- ipr: Ip del repositorio
 //		- ido: Identificador del ordenador modelo
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 bool actualizaCreacionImagen(Database db, Table tbl, char *idi, char *dsk,
 			     char *par, char *cpt, char *ipr, char *ido)
@@ -1925,15 +1925,15 @@ bool actualizaCreacionImagen(Database db, Table tbl, char *idi, char *dsk,
 			" WHERE repositorios.ip='%s' AND ordenadores.idordenador=%s", ipr, ido);
 
 	if (!db.Execute(sqlstr, tbl)) { // Error al leer
-		og_log(21, FALSE);
+		og_log(21, false);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
-		return (FALSE);
+		return false;
 	}
 	if (!tbl.Get("idrepositorio", idr)) { // Toma dato
 		tbl.GetErrorErrStr(msglog); // Error al acceder al registro
 		errorInfo(modulo, msglog);
-		return (FALSE);
+		return false;
 	}
 
 	/* Toma identificador del perfilsoftware */
@@ -1943,15 +1943,15 @@ bool actualizaCreacionImagen(Database db, Table tbl, char *idi, char *dsk,
 			" WHERE idordenador=%s AND numdisk=%s AND numpar=%s", ido, dsk, par);
 
 	if (!db.Execute(sqlstr, tbl)) { // Error al leer
-		og_log(21, FALSE);
+		og_log(21, false);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
-		return (FALSE);
+		return false;
 	}
 	if (!tbl.Get("idperfilsoft", ifs)) { // Toma dato
 		tbl.GetErrorErrStr(msglog); // Error al acceder al registro
 		errorInfo(modulo, msglog);
-		return (FALSE);
+		return false;
 	}
 
 	/* Actualizar los datos de la imagen */
@@ -1963,10 +1963,10 @@ bool actualizaCreacionImagen(Database db, Table tbl, char *idi, char *dsk,
 		" WHERE idimagen=%s", ido, dsk, par, cpt, ifs, idr, idi);
 
 	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
-		og_log(21, FALSE);
+		og_log(21, false);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
-		return (FALSE);
+		return false;
 	}
 	/* Actualizar los datos en el cliente */
 	snprintf(sqlstr, LONSQL,
@@ -1976,12 +1976,12 @@ bool actualizaCreacionImagen(Database db, Table tbl, char *idi, char *dsk,
 		" WHERE idordenador=%s AND numdisk=%s AND numpar=%s",
 		idi, idi, ido, dsk, par);
 	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
-		og_log(21, FALSE);
+		og_log(21, false);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
-		return (FALSE);
+		return false;
 	}
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: CrearImagenBasica
@@ -1992,8 +1992,8 @@ bool actualizaCreacionImagen(Database db, Table tbl, char *idi, char *dsk,
 //		- socket_c: Socket de la consola al envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 static bool CrearImagenBasica(int socket_c, TRAMA* ptrTrama)
 {
@@ -2003,11 +2003,11 @@ static bool CrearImagenBasica(int socket_c, TRAMA* ptrTrama)
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
 		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
 		errorInfo(modulo, msglog);
-		respuestaConsola(socket_c, ptrTrama, FALSE);
-		return (FALSE);
+		respuestaConsola(socket_c, ptrTrama, false);
+		return false;
 	}
-	respuestaConsola(socket_c, ptrTrama, TRUE);
-	return (TRUE);
+	respuestaConsola(socket_c, ptrTrama, true);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: RESPUESTA_CrearImagenBasica
@@ -2018,8 +2018,8 @@ static bool CrearImagenBasica(int socket_c, TRAMA* ptrTrama)
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 static bool RESPUESTA_CrearImagenBasica(int socket_c, TRAMA* ptrTrama)
 {
@@ -2035,8 +2035,8 @@ static bool RESPUESTA_CrearImagenBasica(int socket_c, TRAMA* ptrTrama)
 //		- socket_c: Socket de la consola al envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 static bool CrearSoftIncremental(int socket_c, TRAMA* ptrTrama)
 {
@@ -2046,11 +2046,11 @@ static bool CrearSoftIncremental(int socket_c, TRAMA* ptrTrama)
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
 		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
 		errorInfo(modulo, msglog);
-		respuestaConsola(socket_c, ptrTrama, FALSE);
-		return (FALSE);
+		respuestaConsola(socket_c, ptrTrama, false);
+		return false;
 	}
-	respuestaConsola(socket_c, ptrTrama, TRUE);
-	return (TRUE);
+	respuestaConsola(socket_c, ptrTrama, true);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: RESPUESTA_CrearSoftIncremental
@@ -2061,8 +2061,8 @@ static bool CrearSoftIncremental(int socket_c, TRAMA* ptrTrama)
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 static bool RESPUESTA_CrearSoftIncremental(int socket_c, TRAMA* ptrTrama)
 {
@@ -2074,10 +2074,10 @@ static bool RESPUESTA_CrearSoftIncremental(int socket_c, TRAMA* ptrTrama)
 	char modulo[] = "RESPUESTA_CrearSoftIncremental()";
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
-		og_log(20, FALSE);
+		og_log(20, false);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
-		return (FALSE);
+		return false;
 	}
 
 	iph = copiaParametro("iph",ptrTrama); // Toma dirección ip
@@ -2086,8 +2086,8 @@ static bool RESPUESTA_CrearSoftIncremental(int socket_c, TRAMA* ptrTrama)
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
 		liberaMemoria(iph);
 		liberaMemoria(ido);	
-		og_log(30, FALSE);
-		return (FALSE); // Error al registrar notificacion
+		og_log(30, false);
+		return false; // Error al registrar notificacion
 	}
 
 	par = copiaParametro("par",ptrTrama);
@@ -2100,15 +2100,15 @@ static bool RESPUESTA_CrearSoftIncremental(int socket_c, TRAMA* ptrTrama)
 	liberaMemoria(par);	
 		
 	if (!db.Execute(sqlstr, tbl)) { // Error al leer
-		og_log(21, FALSE);
+		og_log(21, false);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
-		return (FALSE);
+		return false;
 	}
 	if (!tbl.Get("idperfilsoft", ifs)) { // Toma dato
 		tbl.GetErrorErrStr(msglog); // Error al acceder al registro
 		errorInfo(modulo, msglog);
-		return (FALSE);
+		return false;
 	}
 
 	/* Actualizar los datos de la imagen */
@@ -2117,13 +2117,13 @@ static bool RESPUESTA_CrearSoftIncremental(int socket_c, TRAMA* ptrTrama)
 	liberaMemoria(idf);	
 	
 	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
-		og_log(21, FALSE);
+		og_log(21, false);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
-		return (FALSE);
+		return false;
 	}
 	db.Close(); // Cierra conexión
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: RestaurarImagen
@@ -2134,8 +2134,8 @@ static bool RESPUESTA_CrearSoftIncremental(int socket_c, TRAMA* ptrTrama)
 //		- socket_c: Socket de la consola al envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 static bool RestaurarImagen(int socket_c, TRAMA* ptrTrama)
 {
@@ -2145,11 +2145,11 @@ static bool RestaurarImagen(int socket_c, TRAMA* ptrTrama)
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
 		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
 		errorInfo(modulo, msglog);
-		respuestaConsola(socket_c, ptrTrama, FALSE);
-		return (FALSE);
+		respuestaConsola(socket_c, ptrTrama, false);
+		return false;
 	}
-	respuestaConsola(socket_c, ptrTrama, TRUE);
-	return (TRUE);
+	respuestaConsola(socket_c, ptrTrama, true);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: RestaurarImagenBasica
@@ -2160,8 +2160,8 @@ static bool RestaurarImagen(int socket_c, TRAMA* ptrTrama)
 //		- socket_c: Socket de la consola al envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 static bool RestaurarImagenBasica(int socket_c, TRAMA* ptrTrama)
 {
@@ -2171,11 +2171,11 @@ static bool RestaurarImagenBasica(int socket_c, TRAMA* ptrTrama)
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
 		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
 		errorInfo(modulo, msglog);
-		respuestaConsola(socket_c, ptrTrama, FALSE);
-		return (FALSE);
+		respuestaConsola(socket_c, ptrTrama, false);
+		return false;
 	}
-	respuestaConsola(socket_c, ptrTrama, TRUE);
-	return (TRUE);
+	respuestaConsola(socket_c, ptrTrama, true);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: RestaurarSoftIncremental
@@ -2186,8 +2186,8 @@ static bool RestaurarImagenBasica(int socket_c, TRAMA* ptrTrama)
 //		- socket_c: Socket de la consola al envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 static bool RestaurarSoftIncremental(int socket_c, TRAMA* ptrTrama)
 {
@@ -2197,11 +2197,11 @@ static bool RestaurarSoftIncremental(int socket_c, TRAMA* ptrTrama)
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
 		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
 		errorInfo(modulo, msglog);
-		respuestaConsola(socket_c, ptrTrama, FALSE);
-		return (FALSE);
+		respuestaConsola(socket_c, ptrTrama, false);
+		return false;
 	}
-	respuestaConsola(socket_c, ptrTrama, TRUE);
-	return (TRUE);
+	respuestaConsola(socket_c, ptrTrama, true);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: RESPUESTA_RestaurarImagen
@@ -2212,8 +2212,8 @@ static bool RestaurarSoftIncremental(int socket_c, TRAMA* ptrTrama)
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 //
 static bool RESPUESTA_RestaurarImagen(int socket_c, TRAMA* ptrTrama)
@@ -2226,10 +2226,10 @@ static bool RESPUESTA_RestaurarImagen(int socket_c, TRAMA* ptrTrama)
 	char modulo[] = "RESPUESTA_RestaurarImagen()";
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
-		og_log(20, FALSE);
+		og_log(20, false);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
-		return (FALSE);
+		return false;
 	}
 
 	iph = copiaParametro("iph",ptrTrama); // Toma dirección ip
@@ -2238,8 +2238,8 @@ static bool RESPUESTA_RestaurarImagen(int socket_c, TRAMA* ptrTrama)
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
 		liberaMemoria(iph);
 		liberaMemoria(ido);	
-		og_log(30, FALSE);
-		return (FALSE); // Error al registrar notificacion
+		og_log(30, false);
+		return false; // Error al registrar notificacion
 	}
 
 	// Acciones posteriores
@@ -2261,13 +2261,13 @@ static bool RESPUESTA_RestaurarImagen(int socket_c, TRAMA* ptrTrama)
 	liberaMemoria(ifs);
 
 	if(!res){
-		og_log(95, FALSE);
+		og_log(95, false);
 		db.Close(); // Cierra conexión
-		return (FALSE);
+		return false;
 	}
 
 	db.Close(); // Cierra conexión
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 //
@@ -2279,8 +2279,8 @@ static bool RESPUESTA_RestaurarImagen(int socket_c, TRAMA* ptrTrama)
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 //
 static bool RESPUESTA_RestaurarImagenBasica(int socket_c, TRAMA* ptrTrama)
@@ -2296,8 +2296,8 @@ static bool RESPUESTA_RestaurarImagenBasica(int socket_c, TRAMA* ptrTrama)
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 static bool RESPUESTA_RestaurarSoftIncremental(int socket_c, TRAMA* ptrTrama)
 {
@@ -2317,8 +2317,8 @@ static bool RESPUESTA_RestaurarSoftIncremental(int socket_c, TRAMA* ptrTrama)
 //		- ido: Identificador del cliente donde se restauró
 //		- ifs: Identificador del perfil software contenido	en la imagen
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 bool actualizaRestauracionImagen(Database db, Table tbl, char *idi,
 				 char *dsk, char *par, char *ido, char *ifs)
@@ -2335,12 +2335,12 @@ bool actualizaRestauracionImagen(Database db, Table tbl, char *idi,
 			" WHERE idordenador=%s AND numdisk=%s AND numpar=%s", idi, ifs, idi, ifs, ido, dsk, par);
 
 	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
-		og_log(21, FALSE);
+		og_log(21, false);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
-		return (FALSE);
+		return false;
 	}
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: Configurar
@@ -2351,8 +2351,8 @@ bool actualizaRestauracionImagen(Database db, Table tbl, char *idi,
 //		- socket_c: Socket de la consola al envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 static bool Configurar(int socket_c, TRAMA* ptrTrama)
 {
@@ -2362,11 +2362,11 @@ static bool Configurar(int socket_c, TRAMA* ptrTrama)
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
 		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
 		errorInfo(modulo, msglog);
-		respuestaConsola(socket_c, ptrTrama, FALSE);
-		return (FALSE);
+		respuestaConsola(socket_c, ptrTrama, false);
+		return false;
 	}
-	respuestaConsola(socket_c, ptrTrama, TRUE);
-	return (TRUE);
+	respuestaConsola(socket_c, ptrTrama, true);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: RESPUESTA_Configurar
@@ -2377,8 +2377,8 @@ static bool Configurar(int socket_c, TRAMA* ptrTrama)
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 //
 static bool RESPUESTA_Configurar(int socket_c, TRAMA* ptrTrama)
@@ -2391,10 +2391,10 @@ static bool RESPUESTA_Configurar(int socket_c, TRAMA* ptrTrama)
 	char modulo[] = "RESPUESTA_Configurar()";
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
-		og_log(20, FALSE);
+		og_log(20, false);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
-		return (FALSE);
+		return false;
 	}
 
 	iph = copiaParametro("iph",ptrTrama); // Toma dirección ip
@@ -2403,8 +2403,8 @@ static bool RESPUESTA_Configurar(int socket_c, TRAMA* ptrTrama)
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
 		liberaMemoria(iph);
 		liberaMemoria(ido);	
-		og_log(30, FALSE);
-		return (FALSE); // Error al registrar notificacion
+		og_log(30, false);
+		return false; // Error al registrar notificacion
 	}
 
 	cfg = copiaParametro("cfg",ptrTrama); // Toma configuración de particiones
@@ -2415,12 +2415,12 @@ static bool RESPUESTA_Configurar(int socket_c, TRAMA* ptrTrama)
 	liberaMemoria(cfg);	
 		
 	if(!res){	
-		og_log(24, FALSE);
-		return (FALSE); // Error al registrar notificacion
+		og_log(24, false);
+		return false; // Error al registrar notificacion
 	}
 	
 	db.Close(); // Cierra conexión
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: EjecutarScript
@@ -2431,8 +2431,8 @@ static bool RESPUESTA_Configurar(int socket_c, TRAMA* ptrTrama)
 //		- socket_c: Socket de la consola al envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 static bool EjecutarScript(int socket_c, TRAMA* ptrTrama)
 {
@@ -2442,11 +2442,11 @@ static bool EjecutarScript(int socket_c, TRAMA* ptrTrama)
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
 		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
 		errorInfo(modulo, msglog);
-		respuestaConsola(socket_c, ptrTrama, FALSE);
-		return (FALSE);
+		respuestaConsola(socket_c, ptrTrama, false);
+		return false;
 	}
-	respuestaConsola(socket_c, ptrTrama, TRUE);
-	return (TRUE);
+	respuestaConsola(socket_c, ptrTrama, true);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: RESPUESTA_EjecutarScript
@@ -2457,8 +2457,8 @@ static bool EjecutarScript(int socket_c, TRAMA* ptrTrama)
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 static bool RESPUESTA_EjecutarScript(int socket_c, TRAMA* ptrTrama)
 {
@@ -2470,10 +2470,10 @@ static bool RESPUESTA_EjecutarScript(int socket_c, TRAMA* ptrTrama)
 	char modulo[] = "RESPUESTA_EjecutarScript()";
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
-		og_log(20, FALSE);
+		og_log(20, false);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
-		return (FALSE);
+		return false;
 	}
 
 	iph = copiaParametro("iph",ptrTrama); // Toma dirección ip
@@ -2482,8 +2482,8 @@ static bool RESPUESTA_EjecutarScript(int socket_c, TRAMA* ptrTrama)
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
 		liberaMemoria(iph);
 		liberaMemoria(ido);	
-		og_log(30, FALSE);
-		return (FALSE); // Error al registrar notificacion
+		og_log(30, false);
+		return false; // Error al registrar notificacion
 	}
 	
 	cfg = copiaParametro("cfg",ptrTrama); // Toma configuración de particiones
@@ -2497,7 +2497,7 @@ static bool RESPUESTA_EjecutarScript(int socket_c, TRAMA* ptrTrama)
 
 	
 	db.Close(); // Cierra conexión
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: InventarioHardware
@@ -2508,8 +2508,8 @@ static bool RESPUESTA_EjecutarScript(int socket_c, TRAMA* ptrTrama)
 //		- socket_c: Socket de la consola al envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 static bool InventarioHardware(int socket_c, TRAMA* ptrTrama)
 {
@@ -2519,11 +2519,11 @@ static bool InventarioHardware(int socket_c, TRAMA* ptrTrama)
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
 		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
 		errorInfo(modulo, msglog);
-		respuestaConsola(socket_c, ptrTrama, FALSE);
-		return (FALSE);
+		respuestaConsola(socket_c, ptrTrama, false);
+		return false;
 	}
-	respuestaConsola(socket_c, ptrTrama, TRUE);
-	return (TRUE);
+	respuestaConsola(socket_c, ptrTrama, true);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: RESPUESTA_InventarioHardware
@@ -2534,8 +2534,8 @@ static bool InventarioHardware(int socket_c, TRAMA* ptrTrama)
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 static bool RESPUESTA_InventarioHardware(int socket_c, TRAMA* ptrTrama)
 {
@@ -2547,10 +2547,10 @@ static bool RESPUESTA_InventarioHardware(int socket_c, TRAMA* ptrTrama)
 	char modulo[] = "RESPUESTA_InventarioHardware()";
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
-		og_log(20, FALSE);
+		og_log(20, false);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
-		return (FALSE);
+		return false;
 	}
 
 	iph = copiaParametro("iph",ptrTrama); // Toma dirección ip del cliente
@@ -2559,8 +2559,8 @@ static bool RESPUESTA_InventarioHardware(int socket_c, TRAMA* ptrTrama)
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
 		liberaMemoria(iph);
 		liberaMemoria(ido);	
-		og_log(30, FALSE);
-		return (FALSE); // Error al registrar notificacion
+		og_log(30, false);
+		return false; // Error al registrar notificacion
 	}
 	// Lee archivo de inventario enviado anteriormente
 	hrd = copiaParametro("hrd",ptrTrama);
@@ -2579,12 +2579,12 @@ static bool RESPUESTA_InventarioHardware(int socket_c, TRAMA* ptrTrama)
 	liberaMemoria(buffer);		
 	
 	if(!res){
-		og_log(53, FALSE);
-		return (FALSE);
+		og_log(53, false);
+		return false;
 	}
 		
 	db.Close(); // Cierra conexión
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: actualizaHardware
@@ -2616,19 +2616,19 @@ bool actualizaHardware(Database db, Table tbl, char *hrd, char *ido, char *npc,
 	sprintf(sqlstr, "SELECT * FROM ordenadores WHERE idordenador=%s", ido);
 
 	if (!db.Execute(sqlstr, tbl)) { // Error al leer
-		og_log(21, FALSE);
+		og_log(21, false);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
-		return (FALSE);
+		return false;
 	}
 	if (!tbl.Get("idperfilhard", idperfilhard)) { // Toma dato
 		tbl.GetErrorErrStr(msglog); // Error al acceder al registro
 		errorInfo(modulo, msglog);
-		return (FALSE);
+		return false;
 	}
 	whard=escaparCadena(hrd); // Codificar comillas simples
 	if(!whard)
-		return (FALSE);
+		return false;
 	/* Recorre componentes hardware*/
 	lon = splitCadena(tbHardware, whard, '\n');
 	if (lon > MAXHARDWARE)
@@ -2636,37 +2636,37 @@ bool actualizaHardware(Database db, Table tbl, char *hrd, char *ido, char *npc,
 	/*
 	 for (i=0;i<lon;i++){
 	 sprintf(msglog,"Linea de inventario: %s",tbHardware[i]);
-	 RegistraLog(msglog,FALSE);
+	 RegistraLog(msglog,false);
 	 }
 	 */
 	for (i = 0; i < lon; i++) {
 		splitCadena(dualHardware, rTrim(tbHardware[i]), '=');
 		//sprintf(msglog,"nemonico: %s",dualHardware[0]);
-		//RegistraLog(msglog,FALSE);
+		//RegistraLog(msglog,false);
 		//sprintf(msglog,"valor: %s",dualHardware[1]);
-		//RegistraLog(msglog,FALSE);
+		//RegistraLog(msglog,false);
 		sprintf(sqlstr, "SELECT idtipohardware,descripcion FROM tipohardwares "
 			" WHERE nemonico='%s'", dualHardware[0]);
 		if (!db.Execute(sqlstr, tbl)) { // Error al leer
-			og_log(21, FALSE);
+			og_log(21, false);
 			db.GetErrorErrStr(msglog);
 			errorInfo(modulo, msglog);
-			return (FALSE);
+			return false;
 		}
 		if (tbl.ISEOF()) { //  Tipo de Hardware NO existente
 			sprintf(msglog, "%s: %s)", tbErrores[54], dualHardware[0]);
 			errorInfo(modulo, msglog);
-			return (FALSE);
+			return false;
 		} else { //  Tipo de Hardware Existe
 			if (!tbl.Get("idtipohardware", idtipohardware)) { // Toma dato
 				tbl.GetErrorErrStr(msglog); // Error al acceder al registro
 				errorInfo(modulo, msglog);
-				return (FALSE);
+				return false;
 			}
 			if (!tbl.Get("descripcion", descripcion)) { // Toma dato
 				tbl.GetErrorErrStr(msglog); // Error al acceder al registro
 				errorInfo(modulo, msglog);
-				return (FALSE);
+				return false;
 			}
 
 			sprintf(sqlstr, "SELECT idhardware FROM hardwares "
@@ -2675,10 +2675,10 @@ bool actualizaHardware(Database db, Table tbl, char *hrd, char *ido, char *npc,
 
 			// Ejecuta consulta
 			if (!db.Execute(sqlstr, tbl)) { // Error al leer
-				og_log(21, FALSE);
+				og_log(21, false);
 				db.GetErrorErrStr(msglog);
 				errorInfo(modulo, msglog);
-				return (FALSE);
+				return false;
 			}
 
 			if (tbl.ISEOF()) { //  Hardware NO existente
@@ -2688,28 +2688,28 @@ bool actualizaHardware(Database db, Table tbl, char *hrd, char *ido, char *npc,
 				if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 					db.GetErrorErrStr(msglog); // Error al acceder al registro
 					errorInfo(modulo, msglog);
-					return (FALSE);
+					return false;
 				}
 				// Recupera el identificador del hardware
 				sprintf(sqlstr, "SELECT LAST_INSERT_ID() as identificador");
 				if (!db.Execute(sqlstr, tbl)) { // Error al leer
-					og_log(21, FALSE);
+					og_log(21, false);
 					db.GetErrorErrStr(msglog);
 					errorInfo(modulo, msglog);
-					return (FALSE);
+					return false;
 				}
 				if (!tbl.ISEOF()) { // Si existe registro
 					if (!tbl.Get("identificador", tbidhardware[i])) {
 						tbl.GetErrorErrStr(msglog); // Error al acceder al registro
 						errorInfo(modulo, msglog);
-						return (FALSE);
+						return false;
 					}
 				}
 			} else {
 				if (!tbl.Get("idhardware", tbidhardware[i])) { // Toma dato
 					tbl.GetErrorErrStr(msglog); // Error al acceder al registro
 					errorInfo(modulo, msglog);
-					return (FALSE);
+					return false;
 				}
 			}
 		}
@@ -2730,8 +2730,8 @@ bool actualizaHardware(Database db, Table tbl, char *hrd, char *ido, char *npc,
 	aux = strlen(strInt); // Calcula longitud de cadena para reservar espacio a todos los perfiles
 	idhardwares = reservaMemoria(sizeof(aux) * lon + lon);
 	if (idhardwares == NULL) {
-		og_log(3, FALSE);
-		return (FALSE);
+		og_log(3, false);
+		return false;
 	}
 	aux = sprintf(idhardwares, "%d", tbidhardware[0]);
 	for (i = 1; i < lon; i++)
@@ -2739,12 +2739,12 @@ bool actualizaHardware(Database db, Table tbl, char *hrd, char *ido, char *npc,
 
 	if (!cuestionPerfilHardware(db, tbl, idc, ido, idperfilhard, idhardwares,
 			npc, tbidhardware, lon)) {
-		og_log(55, FALSE);
+		og_log(55, false);
 		errorInfo(modulo, msglog);
-		retval=FALSE;
+		retval=false;
 	}
 	else {
-		retval=TRUE;
+		retval=true;
 	}
 	liberaMemoria(whard);
 	liberaMemoria(idhardwares);
@@ -2775,8 +2775,8 @@ bool cuestionPerfilHardware(Database db, Table tbl, char *idc, char *ido,
 
 	sqlstr = reservaMemoria(strlen(idhardwares)+LONSQL); // Reserva para escribir sentencia SQL
 	if (sqlstr == NULL) {
-		og_log(3, FALSE);
-		return (FALSE);
+		og_log(3, false);
+		return false;
 	}
 	// Busca perfil hard del ordenador que contenga todos los componentes hardware encontrados
 	sprintf(sqlstr, "SELECT idperfilhard FROM"
@@ -2788,11 +2788,11 @@ bool cuestionPerfilHardware(Database db, Table tbl, char *idc, char *ido,
 		" WHERE idhardwares LIKE '%s'", idhardwares);
 	// Ejecuta consulta
 	if (!db.Execute(sqlstr, tbl)) { // Error al leer
-		og_log(21, FALSE);
+		og_log(21, false);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
 		liberaMemoria(sqlstr);
-		return (false);
+		return false;
 	}
 	if (tbl.ISEOF()) { // No existe un perfil hardware con esos componentes de componentes hardware, lo crea
 		sprintf(sqlstr, "INSERT perfileshard  (descripcion,idcentro,grupoid)"
@@ -2801,7 +2801,7 @@ bool cuestionPerfilHardware(Database db, Table tbl, char *idc, char *ido,
 			db.GetErrorErrStr(msglog);
 			errorInfo(modulo, msglog);
 			liberaMemoria(sqlstr);
-			return (false);
+			return false;
 		}
 		// Recupera el identificador del nuevo perfil hardware
 		sprintf(sqlstr, "SELECT LAST_INSERT_ID() as identificador");
@@ -2809,14 +2809,14 @@ bool cuestionPerfilHardware(Database db, Table tbl, char *idc, char *ido,
 			db.GetErrorErrStr(msglog);
 			errorInfo(modulo, msglog);
 			liberaMemoria(sqlstr);
-			return (false);
+			return false;
 		}
 		if (!tbl.ISEOF()) { // Si existe registro
 			if (!tbl.Get("identificador", nwidperfilhard)) {
 				tbl.GetErrorErrStr(msglog);
 				errorInfo(modulo, msglog);
 				liberaMemoria(sqlstr);
-				return (false);
+				return false;
 			}
 		}
 		// Crea la relación entre perfiles y componenetes hardware
@@ -2827,7 +2827,7 @@ bool cuestionPerfilHardware(Database db, Table tbl, char *idc, char *ido,
 				db.GetErrorErrStr(msglog);
 				errorInfo(modulo, msglog);
 				liberaMemoria(sqlstr);
-				return (false);
+				return false;
 			}
 		}
 	} else { // Existe un perfil con todos esos componentes
@@ -2835,7 +2835,7 @@ bool cuestionPerfilHardware(Database db, Table tbl, char *idc, char *ido,
 			tbl.GetErrorErrStr(msglog);
 			errorInfo(modulo, msglog);
 			liberaMemoria(sqlstr);
-			return (false);
+			return false;
 		}
 	}
 	if (idperfilhardware != nwidperfilhard) { // No coinciden los perfiles
@@ -2846,7 +2846,7 @@ bool cuestionPerfilHardware(Database db, Table tbl, char *idc, char *ido,
 			db.GetErrorErrStr(msglog);
 			errorInfo(modulo, msglog);
 			liberaMemoria(sqlstr);
-			return (false);
+			return false;
 		}
 	}
 	/* Eliminar Relación de hardwares con Perfiles hardware que quedan húerfanos */
@@ -2857,7 +2857,7 @@ bool cuestionPerfilHardware(Database db, Table tbl, char *idc, char *ido,
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
 		liberaMemoria(sqlstr);
-		return (false);
+		return false;
 	}
 
 	/* Eliminar Perfiles hardware que quedan húerfanos */
@@ -2867,7 +2867,7 @@ bool cuestionPerfilHardware(Database db, Table tbl, char *idc, char *ido,
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
 		liberaMemoria(sqlstr);
-		return (false);
+		return false;
 	}
 	/* Eliminar Relación de hardwares con Perfiles hardware que quedan húerfanos */
 	sprintf(sqlstr, "DELETE FROM perfileshard_hardwares WHERE idperfilhard NOT IN"
@@ -2876,10 +2876,10 @@ bool cuestionPerfilHardware(Database db, Table tbl, char *idc, char *ido,
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
 		liberaMemoria(sqlstr);
-		return (false);
+		return false;
 	}
 	liberaMemoria(sqlstr);
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: InventarioSoftware
@@ -2890,8 +2890,8 @@ bool cuestionPerfilHardware(Database db, Table tbl, char *idc, char *ido,
 //		- socket_c: Socket de la consola al envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 static bool InventarioSoftware(int socket_c, TRAMA* ptrTrama)
 {
@@ -2901,11 +2901,11 @@ static bool InventarioSoftware(int socket_c, TRAMA* ptrTrama)
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
 		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
 		errorInfo(modulo, msglog);
-		respuestaConsola(socket_c, ptrTrama, FALSE);
-		return (FALSE);
+		respuestaConsola(socket_c, ptrTrama, false);
+		return false;
 	}
-	respuestaConsola(socket_c, ptrTrama, TRUE);
-	return (TRUE);
+	respuestaConsola(socket_c, ptrTrama, true);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: RESPUESTA_InventarioSoftware
@@ -2916,8 +2916,8 @@ static bool InventarioSoftware(int socket_c, TRAMA* ptrTrama)
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 static bool RESPUESTA_InventarioSoftware(int socket_c, TRAMA* ptrTrama)
 {
@@ -2929,10 +2929,10 @@ static bool RESPUESTA_InventarioSoftware(int socket_c, TRAMA* ptrTrama)
 	char modulo[] = "RESPUESTA_InventarioSoftware()";
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
-		og_log(20, FALSE);
+		og_log(20, false);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
-		return (FALSE);
+		return false;
 	}
 
 	iph = copiaParametro("iph",ptrTrama); // Toma dirección ip
@@ -2941,8 +2941,8 @@ static bool RESPUESTA_InventarioSoftware(int socket_c, TRAMA* ptrTrama)
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
 		liberaMemoria(iph);
 		liberaMemoria(ido);	
-		og_log(30, FALSE);
-		return (FALSE); // Error al registrar notificacion
+		og_log(30, false);
+		return false; // Error al registrar notificacion
 	}
 	
 	npc = copiaParametro("npc",ptrTrama); 
@@ -2962,12 +2962,12 @@ static bool RESPUESTA_InventarioSoftware(int socket_c, TRAMA* ptrTrama)
 	liberaMemoria(sft);	
 
 	if(!res){
-		og_log(82, FALSE);
-		return (FALSE);
+		og_log(82, false);
+		return false;
 	}	
 	
 	db.Close(); // Cierra conexión
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: actualizaSoftware
@@ -2983,8 +2983,8 @@ static bool RESPUESTA_InventarioSoftware(int socket_c, TRAMA* ptrTrama)
 //		- npc: Nombre del ordenador
 //		- idc: Identificador del centro o Unidad organizativa
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 //
 //	Versión 1.1.0: Se incluye el sistema operativo. Autora: Irina Gómez - ETSII Universidad Sevilla
 // ________________________________________________________________________________________________________
@@ -3004,23 +3004,23 @@ bool actualizaSoftware(Database db, Table tbl, char *sft, char *par,char *ido,
 		" WHERE idordenador=%s", ido);
 
 	if (!db.Execute(sqlstr, tbl)) { // Error al leer
-		og_log(21, FALSE);
+		og_log(21, false);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
-		return (FALSE);
+		return false;
 	}
 	idperfilsoft = 0; // Por defecto se supone que el ordenador no tiene aún detectado el perfil software
 	while (!tbl.ISEOF()) { // Recorre particiones
 		if (!tbl.Get("numpar", aux)) {
 			tbl.GetErrorErrStr(msglog);
 			errorInfo(modulo, msglog);
-			return (FALSE);
+			return false;
 		}
 		if (aux == atoi(par)) { // Se encuentra la partición
 			if (!tbl.Get("idperfilsoft", idperfilsoft)) {
 				tbl.GetErrorErrStr(msglog);
 				errorInfo(modulo, msglog);
-				return (FALSE);
+				return false;
 			}
 			break;
 		}
@@ -3028,13 +3028,13 @@ bool actualizaSoftware(Database db, Table tbl, char *sft, char *par,char *ido,
 	}
 	wsft=escaparCadena(sft); // Codificar comillas simples
 	if(!wsft)
-		return (FALSE);
+		return false;
 
 	/* Recorre componentes software*/
 	lon = splitCadena(tbSoftware, wsft, '\n');
 
 	if (lon == 0)
-		return (true); // No hay lineas que procesar
+		return true; // No hay lineas que procesar
 	if (lon > MAXSOFTWARE)
 		lon = MAXSOFTWARE; // Limita el número de componentes software
 
@@ -3051,10 +3051,10 @@ bool actualizaSoftware(Database db, Table tbl, char *sft, char *par,char *ido,
 
 		// Ejecuta consulta
 		if (!db.Execute(sqlstr, tbl)) { // Error al leer
-			og_log(21, FALSE);
+			og_log(21, false);
 			db.GetErrorErrStr(msglog);
 			errorInfo(modulo, msglog);
-			return (FALSE);
+			return false;
 		}
 
 		if (tbl.ISEOF()) { //  Software NO existente
@@ -3064,27 +3064,27 @@ bool actualizaSoftware(Database db, Table tbl, char *sft, char *par,char *ido,
 			if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 				db.GetErrorErrStr(msglog); // Error al acceder al registro
 				errorInfo(modulo, msglog);
-				return (FALSE);
+				return false;
 			}
 			// Recupera el identificador del software
 			sprintf(sqlstr, "SELECT LAST_INSERT_ID() as identificador");
 			if (!db.Execute(sqlstr, tbl)) { // Error al leer
 				db.GetErrorErrStr(msglog); // Error al acceder al registro
 				errorInfo(modulo, msglog);
-				return (FALSE);
+				return false;
 			}
 			if (!tbl.ISEOF()) { // Si existe registro
 				if (!tbl.Get("identificador", tbidsoftware[i])) {
 					tbl.GetErrorErrStr(msglog); // Error al acceder al registro
 					errorInfo(modulo, msglog);
-					return (FALSE);
+					return false;
 				}
 			}
 		} else {
 			if (!tbl.Get("idsoftware", tbidsoftware[i])) { // Toma dato
 				tbl.GetErrorErrStr(msglog); // Error al acceder al registro
 				errorInfo(modulo, msglog);
-				return (FALSE);
+				return false;
 			}
 		}
 	}
@@ -3105,8 +3105,8 @@ bool actualizaSoftware(Database db, Table tbl, char *sft, char *par,char *ido,
 	aux = strlen(strInt); // Calcula longitud de cadena para reservar espacio a todos los perfiles
 	idsoftwares = reservaMemoria((sizeof(aux)+1) * lon + lon);
 	if (idsoftwares == NULL) {
-		og_log(3, FALSE);
-		return (FALSE);
+		og_log(3, false);
+		return false;
 	}
 	aux = sprintf(idsoftwares, "%d", tbidsoftware[0]);
 	for (i = 1; i < lon; i++)
@@ -3115,12 +3115,12 @@ bool actualizaSoftware(Database db, Table tbl, char *sft, char *par,char *ido,
 	// Comprueba existencia de perfil software y actualización de éste para el ordenador
 	if (!cuestionPerfilSoftware(db, tbl, idc, ido, idperfilsoft, idnombreso, idsoftwares, 
 			npc, par, tbidsoftware, lon)) {
-		og_log(83, FALSE);
+		og_log(83, false);
 		errorInfo(modulo, msglog);
-		retval=FALSE;
+		retval=false;
 	}
 	else {
-		retval=TRUE;
+		retval=true;
 	}
 	liberaMemoria(wsft);
 	liberaMemoria(idsoftwares);
@@ -3141,8 +3141,8 @@ bool actualizaSoftware(Database db, Table tbl, char *sft, char *par,char *ido,
 //		- tbidsoftware: Array con los identificadores de componentes software
 //		- lon: Número de componentes
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 //
 //	Versión 1.1.0: Se incluye el sistema operativo. Autora: Irina Gómez - ETSII Universidad Sevilla
 //_________________________________________________________________________________________________________
@@ -3157,8 +3157,8 @@ bool cuestionPerfilSoftware(Database db, Table tbl, char *idc, char *ido,
 
 	sqlstr = reservaMemoria(strlen(idsoftwares)+LONSQL); // Reserva para escribir sentencia SQL
 	if (sqlstr == NULL) {
-		og_log(3, FALSE);
-		return (FALSE);
+		og_log(3, false);
+		return false;
 	}
 	// Busca perfil soft del ordenador que contenga todos los componentes software encontrados
 	sprintf(sqlstr, "SELECT idperfilsoft FROM"
@@ -3170,11 +3170,11 @@ bool cuestionPerfilSoftware(Database db, Table tbl, char *idc, char *ido,
 		" WHERE idsoftwares LIKE '%s'", idsoftwares);
 	// Ejecuta consulta
 	if (!db.Execute(sqlstr, tbl)) { // Error al leer
-		og_log(21, FALSE);
+		og_log(21, false);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
 		liberaMemoria(sqlstr);
-		return (false);
+		return false;
 	}
 	if (tbl.ISEOF()) { // No existe un perfil software con esos componentes de componentes software, lo crea
 		sprintf(sqlstr, "INSERT perfilessoft  (descripcion, idcentro, grupoid, idnombreso)"
@@ -3182,7 +3182,7 @@ bool cuestionPerfilSoftware(Database db, Table tbl, char *idc, char *ido,
 		if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 			db.GetErrorErrStr(msglog);
 			errorInfo(modulo, msglog);
-			return (false);
+			return false;
 		}
 		// Recupera el identificador del nuevo perfil software
 		sprintf(sqlstr, "SELECT LAST_INSERT_ID() as identificador");
@@ -3190,14 +3190,14 @@ bool cuestionPerfilSoftware(Database db, Table tbl, char *idc, char *ido,
 			tbl.GetErrorErrStr(msglog);
 			errorInfo(modulo, msglog);
 			liberaMemoria(sqlstr);
-			return (false);
+			return false;
 		}
 		if (!tbl.ISEOF()) { // Si existe registro
 			if (!tbl.Get("identificador", nwidperfilsoft)) {
 				tbl.GetErrorErrStr(msglog);
 				errorInfo(modulo, msglog);
 				liberaMemoria(sqlstr);
-				return (false);
+				return false;
 			}
 		}
 		// Crea la relación entre perfiles y componenetes software
@@ -3208,7 +3208,7 @@ bool cuestionPerfilSoftware(Database db, Table tbl, char *idc, char *ido,
 				db.GetErrorErrStr(msglog);
 				errorInfo(modulo, msglog);
 				liberaMemoria(sqlstr);
-				return (false);
+				return false;
 			}
 		}
 	} else { // Existe un perfil con todos esos componentes
@@ -3216,7 +3216,7 @@ bool cuestionPerfilSoftware(Database db, Table tbl, char *idc, char *ido,
 			tbl.GetErrorErrStr(msglog);
 			errorInfo(modulo, msglog);
 			liberaMemoria(sqlstr);
-			return (false);
+			return false;
 		}
 	}
 
@@ -3228,7 +3228,7 @@ bool cuestionPerfilSoftware(Database db, Table tbl, char *idc, char *ido,
 			db.GetErrorErrStr(msglog);
 			errorInfo(modulo, msglog);
 			liberaMemoria(sqlstr);
-			return (false);
+			return false;
 		}
 	}
 
@@ -3243,7 +3243,7 @@ bool cuestionPerfilSoftware(Database db, Table tbl, char *idc, char *ido,
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
 		liberaMemoria(sqlstr);
-		return (false);
+		return false;
 	}
 	/* Eliminar Perfiles software que quedan húerfanos */
 	sprintf(sqlstr, "DELETE FROM perfilessoft WHERE idperfilsoft NOT IN"
@@ -3254,7 +3254,7 @@ bool cuestionPerfilSoftware(Database db, Table tbl, char *idc, char *ido,
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
 		liberaMemoria(sqlstr);
-		return (false);
+		return false;
 	}
 	/* Eliminar Relación de softwares con Perfiles software que quedan húerfanos */
 	sprintf(sqlstr, "DELETE FROM perfilessoft_softwares WHERE idperfilsoft NOT IN"
@@ -3263,10 +3263,10 @@ bool cuestionPerfilSoftware(Database db, Table tbl, char *idc, char *ido,
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
 		liberaMemoria(sqlstr);
-		return (false);
+		return false;
 	}
 	liberaMemoria(sqlstr);
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: enviaArchivo
@@ -3277,8 +3277,8 @@ bool cuestionPerfilSoftware(Database db, Table tbl, char *idc, char *ido,
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 static bool enviaArchivo(int socket_c, TRAMA *ptrTrama)
 {
@@ -3288,11 +3288,11 @@ static bool enviaArchivo(int socket_c, TRAMA *ptrTrama)
 	nfl = copiaParametro("nfl",ptrTrama); // Toma nombre completo del archivo
 	if (!sendArchivo(&socket_c, nfl)) {
 		liberaMemoria(nfl);
-		og_log(57, FALSE);
-		return (FALSE);
+		og_log(57, false);
+		return false;
 	}
 	liberaMemoria(nfl);
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: enviaArchivo
@@ -3303,8 +3303,8 @@ static bool enviaArchivo(int socket_c, TRAMA *ptrTrama)
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 static bool recibeArchivo(int socket_c, TRAMA *ptrTrama)
 {
@@ -3316,11 +3316,11 @@ static bool recibeArchivo(int socket_c, TRAMA *ptrTrama)
 	enviaFlag(&socket_c, ptrTrama);
 	if (!recArchivo(&socket_c, nfl)) {
 		liberaMemoria(nfl);
-		og_log(58, FALSE);
-		return (FALSE);
+		og_log(58, false);
+		return false;
 	}
 	liberaMemoria(nfl);
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: envioProgramacion
@@ -3332,8 +3332,8 @@ static bool recibeArchivo(int socket_c, TRAMA *ptrTrama)
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 static bool envioProgramacion(int socket_c, TRAMA *ptrTrama)
 {
@@ -3345,10 +3345,10 @@ static bool envioProgramacion(int socket_c, TRAMA *ptrTrama)
 	char modulo[] = "envioProgramacion()";
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
-		og_log(20, FALSE);
+		og_log(20, false);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
-		return (FALSE);
+		return false;
 	}
 
 	idp = copiaParametro("idp",ptrTrama); // Toma identificador de la programación de la tabla acciones
@@ -3360,14 +3360,14 @@ static bool envioProgramacion(int socket_c, TRAMA *ptrTrama)
 	liberaMemoria(idp);
 			
 	if (!db.Execute(sqlstr, tbl)) { // Error al leer
-		og_log(21, FALSE);
+		og_log(21, false);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
-		return (FALSE);
+		return false;
 	}
 	db.Close();
 	if(tbl.ISEOF())
-		return (TRUE); // No existen registros
+		return true; // No existen registros
 
 	/* Prepara la trama de actualizacion */
 
@@ -3379,45 +3379,45 @@ static bool envioProgramacion(int socket_c, TRAMA *ptrTrama)
 		if (!tbl.Get("ip", iph)) {
 			tbl.GetErrorErrStr(msglog);
 			errorInfo(modulo, msglog);
-			return (FALSE);
+			return false;
 		}
 		if (!tbl.Get("idcomando", idcomando)) {
 			tbl.GetErrorErrStr(msglog);
 			errorInfo(modulo, msglog);
-			return (FALSE);
+			return false;
 		}
 		if(idcomando==1){ // Arrancar
 			if (!tbl.Get("mac", mac)) {
 				tbl.GetErrorErrStr(msglog);
 				errorInfo(modulo, msglog);
-				return (FALSE);
+				return false;
 			}
 
 			// Se manda por broadcast y por unicast
 			if (!Levanta(iph, mac, (char*)"1")) {
 				sprintf(msglog, "%s:%s", tbErrores[32], modulo);
 				errorInfo(modulo, msglog);
-				return (FALSE);
+				return false;
 			}
 
 			if (!Levanta(iph, mac, (char*)"2")) {
 				sprintf(msglog, "%s:%s", tbErrores[32], modulo);
 				errorInfo(modulo, msglog);
-				return (FALSE);
+				return false;
 			}
 
 		}
 		if (clienteDisponible(iph, &idx)) { // Si el cliente puede recibir comandos
 			strcpy(tbsockets[idx].estado, CLIENTE_OCUPADO); // Actualiza el estado del cliente
 			if (!mandaTrama(&tbsockets[idx].sock, ptrTrama)) {
-				og_log(26, FALSE);
-				return (FALSE);
+				og_log(26, false);
+				return false;
 			}
 			//close(tbsockets[idx].sock); // Cierra el socket del cliente hasta nueva disponibilidad
 		}
 		tbl.MoveNext();
 	}
-	return (TRUE); // No existen registros
+	return true; // No existen registros
 }
 
 // This object stores function handler for messages
@@ -3478,8 +3478,8 @@ static struct {
 //		Parametros:
 //			- s : Socket usado para comunicaciones
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 static bool gestionaTrama(int socket_c)
 {
@@ -3514,13 +3514,13 @@ static bool gestionaTrama(int socket_c)
 			if (ptrTrama->tipo == MSG_NOTIFICACION)
 				return (RESPUESTA_Comando(socket_c, ptrTrama));
 			else
-				og_log(18, FALSE); // No se reconoce el mensaje
+				og_log(18, false); // No se reconoce el mensaje
 		}
 		*/
 	}
 	else
-		og_log(17, FALSE); // Error en la recepción
-	return (TRUE);
+		og_log(17, false); // Error en la recepción
+	return true;
 }
 
 // ********************************************************************************************************
@@ -3557,7 +3557,7 @@ int main(int argc, char *argv[]) {
 	socket_s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP); // Crea socket del servicio
 	setsockopt(socket_s, SOL_SOCKET, SO_REUSEPORT, &activo, sizeof(int));
 	if (socket_s < 0) {
-		og_log(13, TRUE);
+		og_log(13, true);
 		exit(EXIT_FAILURE);
 	}
 
@@ -3566,7 +3566,7 @@ int main(int argc, char *argv[]) {
 	local.sin_port = htons(atoi(puerto));
 
 	if (bind(socket_s, (struct sockaddr *) &local, sizeof(local)) < 0) {
-		og_log(14, TRUE);
+		og_log(14, true);
 		exit(EXIT_FAILURE);
 	}
 
@@ -3576,15 +3576,15 @@ int main(int argc, char *argv[]) {
 	 Bucle para acceptar conexiones
 	 ---------------------------------------------------------------------------------------------------------*/
 	infoLog(1); // Inicio de sesión
-	while (TRUE) {
+	while (true) {
 		socket_c = accept(socket_s, (struct sockaddr *) &cliente, &iAddrSize);
 		if (socket_c < 0) {
-			og_log(15, TRUE);
+			og_log(15, true);
 			exit(EXIT_FAILURE);
 		}
-		swcSocket = FALSE; // Por defecto se cerrara el socket de cliente después del anális de la trama
+		swcSocket = false; // Por defecto se cerrara el socket de cliente después del anális de la trama
 		if (!gestionaTrama(socket_c)) {
-			og_log(39, TRUE);
+			og_log(39, true);
 			//close(socket_c);/tmp/
 			//break;
 		}
