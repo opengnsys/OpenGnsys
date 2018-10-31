@@ -71,31 +71,31 @@ bool tomaConfiguracion(char* filecfg) {
 		line = fgets(buf, sizeof(buf), fcfg);
 	}
 
-	if (servidoradm[0] == (char) NULL) {
+	if (!servidoradm[0]) {
 		og_log(4, FALSE); // Falta parámetro SERVIDORADM
 		return (FALSE);
 	}
-	if (puerto[0] == (char) NULL) {
+	if (!puerto[0]) {
 		og_log(5, FALSE); // Falta parámetro PUERTO
 		return (FALSE);
 	}
-	if (usuario[0] == (char) NULL) {
+	if (!usuario[0]) {
 		og_log(6, FALSE); // Falta parámetro USUARIO
 		return (FALSE);
 	}
-	if (pasguor[0] == (char) NULL) {
+	if (!pasguor[0]) {
 		og_log(7, FALSE); // Falta parámetro PASSWORD
 		return (FALSE);
 	}
-	if (datasource[0] == (char) NULL) {
+	if (!datasource[0]) {
 		og_log(8, FALSE); // Falta parámetro DATASOURCE
 		return (FALSE);
 	}
-	if (catalog[0] == (char) NULL) {
+	if (!catalog[0]) {
 		og_log(9, FALSE); // Falta parámetro CATALOG
 		return (FALSE);
 	}
-	if (aulaup[0] == (char) NULL)
+	if (!aulaup[0])
 		strcpy(aulaup, "0"); // Por defecto el conmutador de registro automático esta en off
 
 	return (TRUE);
