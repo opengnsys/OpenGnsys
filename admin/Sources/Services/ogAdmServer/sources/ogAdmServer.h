@@ -52,8 +52,8 @@ BOOLEAN InclusionClienteWinLnx(SOCKET*,TRAMA*);
 BOOLEAN InclusionCliente(SOCKET*,TRAMA*);
 BOOLEAN registraCliente(char *);
 
-BOOLEAN procesoInclusionClienteWinLnx(SOCKET*,TRAMA*,int*,char*);
-BOOLEAN procesoInclusionCliente(SOCKET*,TRAMA*);
+BOOLEAN procesoInclusionClienteWinLnx(int socket, TRAMA*,int*,char*);
+BOOLEAN procesoInclusionCliente(int socket, TRAMA*);
 BOOLEAN clienteExistente(char *,int *);
 BOOLEAN clienteDisponible(char *,int *);
 BOOLEAN hayHueco(int *);
@@ -65,7 +65,7 @@ BOOLEAN tomaRepositorio(Database ,Table ,char*,int*);
 BOOLEAN buscaComandos(char *,TRAMA *,int *);
 BOOLEAN DisponibilidadComandos(SOCKET*,TRAMA*);
 BOOLEAN respuestaEstandar(TRAMA *,char **,char **,char ** ,Database *,Table *);
-BOOLEAN respuestaConsola(SOCKET *,TRAMA *,int);
+BOOLEAN respuestaConsola(int socket, TRAMA *,int);
 BOOLEAN enviaComando(TRAMA *ptrTrama,const char*);
 
 BOOLEAN Actualizar(SOCKET *, TRAMA* );
