@@ -1421,20 +1421,20 @@ bool Levanta(char *iph, char *mac, char *mar)
 
 	/* Creación de socket para envío de magig packet */
 	s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-	if (s == SOCKET_ERROR) { // Error al crear el socket del servicio
+	if (s < 0) {
 		og_log(13, TRUE);
 		return (FALSE);
 	}
 	bOpt = TRUE; // Pone el socket en modo Broadcast
 	res = setsockopt(s, SOL_SOCKET, SO_BROADCAST, (char *) &bOpt, sizeof(bOpt));
-	if (res == SOCKET_ERROR) {
+	if (res < 0) {
 		og_log(48, TRUE);
 		return (FALSE);
 	}
 	local.sin_family = AF_INET;
 	local.sin_port = htons((short) PUERTO_WAKEUP);
 	local.sin_addr.s_addr = htonl(INADDR_ANY); // cualquier interface
-	if (bind(s, (sockaddr *) &local, sizeof(local)) == SOCKET_ERROR) {
+	if (bind(s, (sockaddr *) &local, sizeof(local)) < 0) {
 		og_log(14, TRUE);
 		exit(EXIT_FAILURE);
 	}
@@ -1494,7 +1494,7 @@ bool WakeUp(SOCKET *s, char* iph, char *mac, char *mar)
 
 	res = sendto(*s, (char *) &Trama_WakeUp, sizeof(Trama_WakeUp), 0,
 			(sockaddr *) &WakeUpCliente, sizeof(WakeUpCliente));
-	if (res == SOCKET_ERROR) {
+	if (res < 0) {
 		og_log(26, FALSE);
 		return (FALSE);
 	}
@@ -3556,7 +3556,7 @@ int main(int argc, char *argv[]) {
 	 ---------------------------------------------------------------------------------------------------------*/
 	socket_s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP); // Crea socket del servicio
 	setsockopt(socket_s, SOL_SOCKET, SO_REUSEPORT, &activo, sizeof(int));
-	if (socket_s == SOCKET_ERROR) { // Error al crear el socket del servicio
+	if (socket_s < 0) {
 		og_log(13, TRUE);
 		exit(EXIT_FAILURE);
 	}
@@ -3565,8 +3565,7 @@ int main(int argc, char *argv[]) {
 	local.sin_family = AF_INET;
 	local.sin_port = htons(atoi(puerto));
 
-	if (bind(socket_s, (struct sockaddr *) &local, sizeof(local))
-			== SOCKET_ERROR) { // Enlaza socket
+	if (bind(socket_s, (struct sockaddr *) &local, sizeof(local)) < 0) {
 		og_log(14, TRUE);
 		exit(EXIT_FAILURE);
 	}
