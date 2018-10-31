@@ -272,6 +272,7 @@ char *encriptar(char *,int*);
 struct tm * tomaHora();
 void registraLog(const char *,const char *,int );
 void errorLog(const char *,int ,int);
+#define og_log(err, swe)   errorLog(__FUNCTION__, err, swe)
 void errorInfo(const char *,char *);
 void infoLog(int);
 void infoDebug(char*);

@@ -20,19 +20,18 @@
 //		FALSE: En caso de ocurrir algún error 
 //________________________________________________________________________________________________________
 bool tomaConfiguracion(char* filecfg) {
-	char modulo[] = "tomaConfiguracion()";
 	char buf[1024], *line;
 	char *key, *value;
 	FILE *fcfg;
 
 	if (filecfg == NULL || strlen(filecfg) == 0) {
-		errorLog(modulo, 1, FALSE); // Fichero de configuración del servicio vacío
+		og_log(1, FALSE); // Fichero de configuración del servicio vacío
 		return (FALSE);
 	}
 
 	fcfg = fopen(filecfg, "rt");
 	if (fcfg == NULL) {
-		errorLog(modulo, 2, FALSE); // No existe fichero de configuración del servicio
+		og_log(2, FALSE); // No existe fichero de configuración del servicio
 		return (FALSE);
 	}
 
@@ -71,27 +70,27 @@ bool tomaConfiguracion(char* filecfg) {
 	}
 
 	if (servidoradm[0] == (char) NULL) {
-		errorLog(modulo, 4, FALSE); // Falta parámetro SERVIDORADM
+		og_log(4, FALSE); // Falta parámetro SERVIDORADM
 		return (FALSE);
 	}
 	if (puerto[0] == (char) NULL) {
-		errorLog(modulo, 5, FALSE); // Falta parámetro PUERTO
+		og_log(5, FALSE); // Falta parámetro PUERTO
 		return (FALSE);
 	}
 	if (usuario[0] == (char) NULL) {
-		errorLog(modulo, 6, FALSE); // Falta parámetro USUARIO
+		og_log(6, FALSE); // Falta parámetro USUARIO
 		return (FALSE);
 	}
 	if (pasguor[0] == (char) NULL) {
-		errorLog(modulo, 7, FALSE); // Falta parámetro PASSWORD
+		og_log(7, FALSE); // Falta parámetro PASSWORD
 		return (FALSE);
 	}
 	if (datasource[0] == (char) NULL) {
-		errorLog(modulo, 8, FALSE); // Falta parámetro DATASOURCE
+		og_log(8, FALSE); // Falta parámetro DATASOURCE
 		return (FALSE);
 	}
 	if (catalog[0] == (char) NULL) {
-		errorLog(modulo, 9, FALSE); // Falta parámetro CATALOG
+		og_log(9, FALSE); // Falta parámetro CATALOG
 		return (FALSE);
 	}
 	if (aulaup[0] == (char) NULL)
@@ -141,14 +140,13 @@ bool respuestaSondeo(int socket_c, TRAMA* ptrTrama) {
 	int i;
 	long lSize;
 	char *iph, *Ipes;
-	char modulo[] = "respuestaSondeo()";
 
 	iph = copiaParametro("iph",ptrTrama); // Toma dirección/es IP
 	lSize = strlen(iph); // Calcula longitud de la cadena de direccion/es IPE/S
 	Ipes = (char*) reservaMemoria(lSize + 1);
 	if (Ipes == NULL) {
 		liberaMemoria(iph);
-		errorLog(modulo, 3, FALSE);
+		og_log(3, FALSE);
 		return (FALSE);
 	}
 	strcpy(Ipes, iph); // Copia cadena de IPES
@@ -168,7 +166,7 @@ bool respuestaSondeo(int socket_c, TRAMA* ptrTrama) {
 	strcat(ptrTrama->parametros, "\r");
 	liberaMemoria(Ipes);
 	if (!mandaTrama(&socket_c, ptrTrama)) {
-		errorLog(modulo, 26, FALSE);
+		og_log(26, FALSE);
 		return (FALSE);
 	}
 	return (TRUE);
@@ -275,7 +273,6 @@ bool EcoConsola(int socket_c, TRAMA* ptrTrama)
 {
 	char *iph,fileco[LONPRM],*buffer;
 	int lSize;
-	char modulo[] = "EcoConsola()";
 
 	INTROaFINCAD(ptrTrama);
 	// Lee archivo de eco de consola
@@ -295,7 +292,7 @@ bool EcoConsola(int socket_c, TRAMA* ptrTrama)
 	}
 	ptrTrama->tipo=MSG_RESPUESTA; // Tipo de mensaje
 	if (!mandaTrama(&socket_c, ptrTrama)) {
-		errorLog(modulo, 26, FALSE);
+		og_log(26, FALSE);
 		return (FALSE);
 	}
 	return (TRUE);
@@ -390,7 +387,6 @@ bool hayHueco(int *idx) {
 // ________________________________________________________________________________________________________
 bool InclusionClienteWinLnx(int socket_c, TRAMA *ptrTrama)
  {
-	char modulo[] = "InclusionClienteWinLnx()";
 	int res,idordenador,lon;
 	char nombreordenador[LONFIL];
 		
@@ -406,7 +402,7 @@ bool InclusionClienteWinLnx(int socket_c, TRAMA *ptrTrama)
 	lon += sprintf(ptrTrama->parametros + lon, "res=%d\r", res);	
 	
 	if (!mandaTrama(&socket_c, ptrTrama)) {
-		errorLog(modulo, 26, FALSE);
+		og_log(26, FALSE);
 		return (FALSE);
 	}
 	return (TRUE);	
@@ -439,7 +435,7 @@ bool procesoInclusionClienteWinLnx(int socket_c, TRAMA *ptrTrama,int *idordenado
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexión con la BD
 		liberaMemoria(iph);
-		errorLog(modulo, 20, FALSE);
+		og_log(20, FALSE);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
 		return (20);
@@ -452,7 +448,7 @@ bool procesoInclusionClienteWinLnx(int socket_c, TRAMA *ptrTrama,int *idordenado
 
 	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
 		liberaMemoria(iph);
-		errorLog(modulo, 21, FALSE);
+		og_log(21, FALSE);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
 		db.Close();
@@ -461,7 +457,7 @@ bool procesoInclusionClienteWinLnx(int socket_c, TRAMA *ptrTrama,int *idordenado
 
 	if (tbl.ISEOF()) { // Si no existe el cliente
 		liberaMemoria(iph);
-		errorLog(modulo, 22, FALSE);
+		og_log(22, FALSE);
 		db.liberaResult(tbl);
 		db.Close();
 		return (22);
@@ -492,7 +488,7 @@ bool procesoInclusionClienteWinLnx(int socket_c, TRAMA *ptrTrama,int *idordenado
 	
 	if (!registraCliente(iph)) { // Incluyendo al cliente en la tabla de sokets
 		liberaMemoria(iph);
-		errorLog(modulo, 25, FALSE);
+		og_log(25, FALSE);
 		return (25);
 	}
 	liberaMemoria(iph);
@@ -512,13 +508,12 @@ bool procesoInclusionClienteWinLnx(int socket_c, TRAMA *ptrTrama,int *idordenado
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 bool InclusionCliente(int socket_c, TRAMA *ptrTrama) {
-	char modulo[] = "InclusionCliente()";
 
 	if (!procesoInclusionCliente(socket_c, ptrTrama)) { // Ha habido algún error...
 		initParametros(ptrTrama,0);
 		strcpy(ptrTrama->parametros, "nfn=RESPUESTA_InclusionCliente\rres=0\r");
 		if (!mandaTrama(&socket_c, ptrTrama)) {
-			errorLog(modulo, 26, FALSE);
+			og_log(26, FALSE);
 			return (FALSE);
 		}
 	}
@@ -553,7 +548,7 @@ bool procesoInclusionCliente(int socket_c, TRAMA *ptrTrama) {
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexión con la BD
 		liberaMemoria(iph);
 		liberaMemoria(cfg);
-		errorLog(modulo, 20, FALSE);
+		og_log(20, FALSE);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
 		return (FALSE);
@@ -567,14 +562,14 @@ bool procesoInclusionCliente(int socket_c, TRAMA *ptrTrama) {
 				" WHERE ordenadores.ip = '%s'", iph);
 
 	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
-		errorLog(modulo, 21, FALSE);
+		og_log(21, FALSE);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
 		return (FALSE);
 	}
 
 	if (tbl.ISEOF()) { // Si no existe el cliente
-		errorLog(modulo, 22, FALSE);
+		og_log(22, FALSE);
 		return (FALSE);
 	}
 
@@ -624,13 +619,13 @@ bool procesoInclusionCliente(int socket_c, TRAMA *ptrTrama) {
 
 	if (!resul) {
 		liberaMemoria(iph);
-		errorLog(modulo, 29, FALSE);
+		og_log(29, FALSE);
 		return (FALSE);
 	}
 
 	if (!registraCliente(iph)) { // Incluyendo al cliente en la tabla de sokets
 		liberaMemoria(iph);
-		errorLog(modulo, 25, FALSE);
+		og_log(25, FALSE);
 		return (FALSE);
 	}
 
@@ -649,7 +644,7 @@ bool procesoInclusionCliente(int socket_c, TRAMA *ptrTrama) {
 	lon += sprintf(ptrTrama->parametros + lon, "res=%d\r", 1); // Confirmación proceso correcto
 
 	if (!mandaTrama(&socket_c, ptrTrama)) {
-		errorLog(modulo, 26, FALSE);
+		og_log(26, FALSE);
 		return (FALSE);
 	}
 	liberaMemoria(iph);
@@ -756,7 +751,7 @@ bool actualizaConfiguracion(Database db, Table tbl, char* cfg, int ido)
 
 
 		if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
-			errorLog(modulo, 21, FALSE);
+			og_log(21, FALSE);
 			db.GetErrorErrStr(msglog);
 			errorInfo(modulo, msglog);
 			return (FALSE);
@@ -822,7 +817,7 @@ bool actualizaConfiguracion(Database db, Table tbl, char* cfg, int ido)
 					uso, ido, disk, par);
 			}
 			if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
-				errorLog(modulo, 21, FALSE);
+				og_log(21, FALSE);
 				db.GetErrorErrStr(msglog);
 				errorInfo(modulo, msglog);
 				return (FALSE);
@@ -834,7 +829,7 @@ bool actualizaConfiguracion(Database db, Table tbl, char* cfg, int ido)
 	sprintf(sqlstr, "DELETE FROM ordenadores_particiones WHERE idordenador=%d AND (numdisk, numpar) NOT IN (%s)",
 			ido, tbPar);
 	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
-		errorLog(modulo, 21, FALSE);
+		og_log(21, FALSE);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
 		return (FALSE);
@@ -874,7 +869,7 @@ int checkDato(Database db, Table tbl, char *dato, const char*tabla,
 
 	// Ejecuta consulta
 	if (!db.Execute(sqlstr, tbl)) { // Error al leer
-		errorLog(modulo, 21, FALSE);
+		og_log(21, FALSE);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
 		return (0);
@@ -960,12 +955,12 @@ bool AutoexecCliente(int socket_c, TRAMA *ptrTrama) {
 	liberaMemoria(iph);
 	fileexe = fopen(fileautoexec, "wb"); // Abre fichero de script
 	if (fileexe == NULL) {
-		errorLog(modulo, 52, FALSE);
+		og_log(52, FALSE);
 		return (FALSE);
 	}
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexión con la BD
-		errorLog(modulo, 20, FALSE);
+		og_log(20, FALSE);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
 		return (FALSE);
@@ -985,7 +980,7 @@ bool AutoexecCliente(int socket_c, TRAMA *ptrTrama) {
 
 	if (!mandaTrama(&socket_c, ptrTrama)) {
 		liberaMemoria(exe);
-		errorLog(modulo, 26, FALSE);
+		og_log(26, FALSE);
 		return (FALSE);
 	}
 	liberaMemoria(exe);
@@ -1015,7 +1010,7 @@ bool recorreProcedimientos(Database db, char* parametros, FILE* fileexe,
 				" WHERE idprocedimiento=%s ORDER BY orden", idp);
 	// Ejecuta consulta
 	if (!db.Execute(sqlstr, tbl)) { // Error al leer
-		errorLog(modulo, 21, FALSE);
+		og_log(21, FALSE);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
 		return (FALSE);
@@ -1061,7 +1056,6 @@ bool ComandosPendientes(int socket_c, TRAMA *ptrTrama)
 {
 	char *ido,*iph,pids[LONPRM];
 	int ids, idx;
-	char modulo[] = "ComandosPendientes()";
 
 	iph = copiaParametro("iph",ptrTrama); // Toma dirección IP
 	ido = copiaParametro("ido",ptrTrama); // Toma identificador del ordenador
@@ -1069,7 +1063,7 @@ bool ComandosPendientes(int socket_c, TRAMA *ptrTrama)
 	if (!clienteExistente(iph, &idx)) { // Busca índice del cliente
 		liberaMemoria(iph);
 		liberaMemoria(ido);
-		errorLog(modulo, 47, FALSE);
+		og_log(47, FALSE);
 		return (FALSE);
 	}
 	if (buscaComandos(ido, ptrTrama, &ids)) { // Existen comandos pendientes
@@ -1084,7 +1078,7 @@ bool ComandosPendientes(int socket_c, TRAMA *ptrTrama)
 	if (!mandaTrama(&socket_c, ptrTrama)) {
 		liberaMemoria(iph);
 		liberaMemoria(ido);	
-		errorLog(modulo, 26, FALSE);
+		og_log(26, FALSE);
 		return (FALSE);
 	}
 	liberaMemoria(iph);
@@ -1114,7 +1108,7 @@ bool buscaComandos(char *ido, TRAMA *ptrTrama, int *ids)
 	char modulo[] = "buscaComandos()";
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexión con la BD
-		errorLog(modulo, 20, FALSE);
+		og_log(20, FALSE);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
 		return (FALSE);
@@ -1122,7 +1116,7 @@ bool buscaComandos(char *ido, TRAMA *ptrTrama, int *ids)
 	sprintf(sqlstr,"SELECT sesion,parametros,length( parametros) as lonprm"\
 			" FROM acciones WHERE idordenador=%s AND estado='%d' ORDER BY idaccion", ido, ACCION_INICIADA);
 	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
-		errorLog(modulo, 21, FALSE);
+		og_log(21, FALSE);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
 		return (FALSE);
@@ -1143,7 +1137,7 @@ bool buscaComandos(char *ido, TRAMA *ptrTrama, int *ids)
 		}
 		if(!initParametros(ptrTrama,lonprm+LONGITUD_PARAMETROS)){
 			db.Close();
-			errorLog(modulo, 3, FALSE);
+			og_log(3, FALSE);
 			return (FALSE);
 		}
 		if (!tbl.Get("parametros", ptrTrama->parametros)) { // Toma parámetros del comando
@@ -1172,14 +1166,11 @@ bool DisponibilidadComandos(int socket_c, TRAMA *ptrTrama)
 {
 	char *iph, *tpc;
 	int idx,port_old=0,port_new;
-	char modulo[] = "DisponibilidadComandos()";
-	
-
 
 	iph = copiaParametro("iph",ptrTrama); // Toma ip
 	if (!clienteExistente(iph, &idx)) { // Busca índice del cliente
 		liberaMemoria(iph);
-		errorLog(modulo, 47, FALSE);
+		og_log(47, FALSE);
 		return (FALSE);
 	}
 	tpc = copiaParametro("tpc",ptrTrama); // Tipo de cliente (Plataforma y S.O.)
@@ -1243,13 +1234,13 @@ bool respuestaEstandar(TRAMA *ptrTrama, char *iph, char *ido, Database db,
 	liberaMemoria(ids);
 
 	if (!db.Execute(sqlstr, tbl)) { // Error al consultar
-		errorLog(modulo, 21, FALSE);
+		og_log(21, FALSE);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
 		return (FALSE);
 	}
 	if (tbl.ISEOF()) { // No existe registro de acciones
-		errorLog(modulo, 31, FALSE);
+		og_log(31, FALSE);
 		return (TRUE);
 	}
 	if (!tbl.Get("idaccion", idaccion)) { // Toma identificador de la accion
@@ -1304,13 +1295,12 @@ bool enviaComando(TRAMA* ptrTrama, const char *estado)
  {
 	char *iph, *Ipes, *ptrIpes[MAXIMOS_CLIENTES];
 	int i, idx, lon;
-	char modulo[] = "enviaComando()";
 
 	iph = copiaParametro("iph",ptrTrama); // Toma dirección/es IP
 	lon = strlen(iph); // Calcula longitud de la cadena de direccion/es IPE/S
 	Ipes = (char*) reservaMemoria(lon + 1);
 	if (Ipes == NULL) {
-		errorLog(modulo, 3, FALSE);
+		og_log(3, FALSE);
 		return (FALSE);
 	}
 	
@@ -1323,7 +1313,7 @@ bool enviaComando(TRAMA* ptrTrama, const char *estado)
 		if (clienteDisponible(ptrIpes[i], &idx)) { // Si el cliente puede recibir comandos
 			strcpy(tbsockets[idx].estado, estado); // Actualiza el estado del cliente
 			if (!mandaTrama(&tbsockets[idx].sock, ptrTrama)) {
-				errorLog(modulo, 26, FALSE);
+				og_log(26, FALSE);
 				return (FALSE);
 			}
 			//close(tbsockets[idx].sock); // Cierra el socket del cliente hasta nueva disponibilidad
@@ -1345,11 +1335,10 @@ bool enviaComando(TRAMA* ptrTrama, const char *estado)
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 bool respuestaConsola(int socket_c, TRAMA *ptrTrama, int res) {
-	char modulo[] = "respuestaConsola()";
 	initParametros(ptrTrama,0);
 	sprintf(ptrTrama->parametros, "res=%d\r", res);
 	if (!mandaTrama(&socket_c, ptrTrama)) {
-		errorLog(modulo, 26, FALSE);
+		og_log(26, FALSE);
 		return (FALSE);
 	}
 	return (TRUE);
@@ -1417,25 +1406,24 @@ bool Levanta(char* iph,char *mac, char* mar)
 	SOCKET s;
 	bool bOpt;
 	sockaddr_in local;
-	char modulo[] = "Levanta()";
 
 	/* Creación de socket para envío de magig packet */
 	s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 	if (s == SOCKET_ERROR) { // Error al crear el socket del servicio
-		errorLog(modulo, 13, TRUE);
+		og_log(13, TRUE);
 		return (FALSE);
 	}
 	bOpt = TRUE; // Pone el socket en modo Broadcast
 	res = setsockopt(s, SOL_SOCKET, SO_BROADCAST, (char *) &bOpt, sizeof(bOpt));
 	if (res == SOCKET_ERROR) {
-		errorLog(modulo, 48, TRUE);
+		og_log(48, TRUE);
 		return (FALSE);
 	}
 	local.sin_family = AF_INET;
 	local.sin_port = htons((short) PUERTO_WAKEUP);
 	local.sin_addr.s_addr = htonl(INADDR_ANY); // cualquier interface
 	if (bind(s, (sockaddr *) &local, sizeof(local)) == SOCKET_ERROR) {
-		errorLog(modulo, 14, TRUE);
+		og_log(14, TRUE);
 		exit(EXIT_FAILURE);
 	}
 	/* fin creación de socket */
@@ -1443,7 +1431,7 @@ bool Levanta(char* iph,char *mac, char* mar)
 	lon = splitCadena(ptrMacs, mac, ';');
 	for (i = 0; i < lon; i++) {
 		if (!WakeUp(&s,ptrIP[i],ptrMacs[i],mar)) {
-			errorLog(modulo, 49, TRUE);
+			og_log(49, TRUE);
 			close(s);
 			return (FALSE);
 		}
@@ -1475,7 +1463,6 @@ bool WakeUp(SOCKET *s, char* iph,char *mac,char* mar)
 		char macbin[16][6];
 	} Trama_WakeUp;
 	sockaddr_in WakeUpCliente;
-	char modulo[] = "WakeUp()";
 
 	for (i = 0; i < 6; i++) // Primera secuencia de la trama Wake Up (0xFFFFFFFFFFFF)
 		Trama_WakeUp.secuencia_FF[i] = 0xFF;
@@ -1496,7 +1483,7 @@ bool WakeUp(SOCKET *s, char* iph,char *mac,char* mar)
 	res = sendto(*s, (char *) &Trama_WakeUp, sizeof(Trama_WakeUp), 0,
 			(sockaddr *) &WakeUpCliente, sizeof(WakeUpCliente));
 	if (res == SOCKET_ERROR) {
-		errorLog(modulo, 26, FALSE);
+		og_log(26, FALSE);
 		return (FALSE);
 	}
 	return (TRUE);
@@ -1557,7 +1544,7 @@ bool RESPUESTA_Arrancar(int socket_c, TRAMA* ptrTrama) {
 	char modulo[] = "RESPUESTA_Arrancar()";
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
-		errorLog(modulo, 20, FALSE);
+		og_log(20, FALSE);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
 		return (FALSE);
@@ -1569,7 +1556,7 @@ bool RESPUESTA_Arrancar(int socket_c, TRAMA* ptrTrama) {
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
 		liberaMemoria(iph);
 		liberaMemoria(ido);
-		errorLog(modulo, 30, FALSE);
+		og_log(30, FALSE);
 		return (FALSE); // Error al registrar notificacion
 	}
 
@@ -1630,7 +1617,7 @@ bool RESPUESTA_Comando(int socket_c, TRAMA* ptrTrama)
 	char modulo[] = "RESPUESTA_Comando()";
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
-		errorLog(modulo, 20, FALSE);
+		og_log(20, FALSE);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
 		return (FALSE);
@@ -1642,7 +1629,7 @@ bool RESPUESTA_Comando(int socket_c, TRAMA* ptrTrama)
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
 		liberaMemoria(iph);
 		liberaMemoria(ido);
-		errorLog(modulo, 30, FALSE);
+		og_log(30, FALSE);
 		return (FALSE); // Error al registrar notificacion
 	}
 	liberaMemoria(iph);
@@ -1696,7 +1683,7 @@ bool RESPUESTA_Apagar(int socket_c, TRAMA* ptrTrama) {
 	char modulo[] = "RESPUESTA_Apagar()";
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
-		errorLog(modulo, 20, FALSE);
+		og_log(20, FALSE);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
 		return (FALSE);
@@ -1708,7 +1695,7 @@ bool RESPUESTA_Apagar(int socket_c, TRAMA* ptrTrama) {
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
 		liberaMemoria(iph);
 		liberaMemoria(ido);
-		errorLog(modulo, 30, FALSE);
+		og_log(30, FALSE);
 		return (FALSE); // Error al registrar notificacion
 	}
 
@@ -1767,7 +1754,7 @@ bool RESPUESTA_Reiniciar(int socket_c, TRAMA* ptrTrama) {
 	char modulo[] = "RESPUESTA_Reiniciar()";
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
-		errorLog(modulo, 20, FALSE);
+		og_log(20, FALSE);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
 		return (FALSE);
@@ -1779,7 +1766,7 @@ bool RESPUESTA_Reiniciar(int socket_c, TRAMA* ptrTrama) {
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
 		liberaMemoria(iph);
 		liberaMemoria(ido);
-		errorLog(modulo, 30, FALSE);
+		og_log(30, FALSE);
 		return (FALSE); // Error al registrar notificacion
 	}
 
@@ -1838,7 +1825,7 @@ bool RESPUESTA_IniciarSesion(int socket_c, TRAMA* ptrTrama) {
 	char modulo[] = "RESPUESTA_IniciarSesion()";
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
-		errorLog(modulo, 20, FALSE);
+		og_log(20, FALSE);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
 		return (FALSE);
@@ -1850,7 +1837,7 @@ bool RESPUESTA_IniciarSesion(int socket_c, TRAMA* ptrTrama) {
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
 		liberaMemoria(iph);
 		liberaMemoria(ido);
-		errorLog(modulo, 30, FALSE);
+		og_log(30, FALSE);
 		return (FALSE); // Error al registrar notificacion
 	}
 
@@ -1911,7 +1898,7 @@ bool RESPUESTA_CrearImagen(int socket_c, TRAMA* ptrTrama)
 	char modulo[] = "RESPUESTA_CrearImagen()";
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
-		errorLog(modulo, 20, FALSE);
+		og_log(20, FALSE);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
 		return (FALSE);
@@ -1923,7 +1910,7 @@ bool RESPUESTA_CrearImagen(int socket_c, TRAMA* ptrTrama)
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
 		liberaMemoria(iph);
 		liberaMemoria(ido);
-		errorLog(modulo, 30, FALSE);
+		og_log(30, FALSE);
 		return (FALSE); // Error al registrar notificacion
 	}
 
@@ -1942,7 +1929,7 @@ bool RESPUESTA_CrearImagen(int socket_c, TRAMA* ptrTrama)
 	liberaMemoria(ipr);
 	
 	if(!res){
-		errorLog(modulo, 94, FALSE);
+		og_log(94, FALSE);
 		db.Close(); // Cierra conexión
 		return (FALSE);
 	}
@@ -1982,7 +1969,7 @@ bool actualizaCreacionImagen(Database db, Table tbl, char* idi, char* dsk,
 			" WHERE repositorios.ip='%s' AND ordenadores.idordenador=%s", ipr, ido);
 
 	if (!db.Execute(sqlstr, tbl)) { // Error al leer
-		errorLog(modulo, 21, FALSE);
+		og_log(21, FALSE);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
 		return (FALSE);
@@ -2000,7 +1987,7 @@ bool actualizaCreacionImagen(Database db, Table tbl, char* idi, char* dsk,
 			" WHERE idordenador=%s AND numdisk=%s AND numpar=%s", ido, dsk, par);
 
 	if (!db.Execute(sqlstr, tbl)) { // Error al leer
-		errorLog(modulo, 21, FALSE);
+		og_log(21, FALSE);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
 		return (FALSE);
@@ -2020,7 +2007,7 @@ bool actualizaCreacionImagen(Database db, Table tbl, char* idi, char* dsk,
 		" WHERE idimagen=%s", ido, dsk, par, cpt, ifs, idr, idi);
 
 	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
-		errorLog(modulo, 21, FALSE);
+		og_log(21, FALSE);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
 		return (FALSE);
@@ -2033,7 +2020,7 @@ bool actualizaCreacionImagen(Database db, Table tbl, char* idi, char* dsk,
 		" WHERE idordenador=%s AND numdisk=%s AND numpar=%s",
 		idi, idi, ido, dsk, par);
 	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
-		errorLog(modulo, 21, FALSE);
+		og_log(21, FALSE);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
 		return (FALSE);
@@ -2128,7 +2115,7 @@ bool RESPUESTA_CrearSoftIncremental(int socket_c, TRAMA* ptrTrama)
 	char modulo[] = "RESPUESTA_CrearSoftIncremental()";
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
-		errorLog(modulo, 20, FALSE);
+		og_log(20, FALSE);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
 		return (FALSE);
@@ -2140,7 +2127,7 @@ bool RESPUESTA_CrearSoftIncremental(int socket_c, TRAMA* ptrTrama)
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
 		liberaMemoria(iph);
 		liberaMemoria(ido);	
-		errorLog(modulo, 30, FALSE);
+		og_log(30, FALSE);
 		return (FALSE); // Error al registrar notificacion
 	}
 
@@ -2154,7 +2141,7 @@ bool RESPUESTA_CrearSoftIncremental(int socket_c, TRAMA* ptrTrama)
 	liberaMemoria(par);	
 		
 	if (!db.Execute(sqlstr, tbl)) { // Error al leer
-		errorLog(modulo, 21, FALSE);
+		og_log(21, FALSE);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
 		return (FALSE);
@@ -2171,7 +2158,7 @@ bool RESPUESTA_CrearSoftIncremental(int socket_c, TRAMA* ptrTrama)
 	liberaMemoria(idf);	
 	
 	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
-		errorLog(modulo, 21, FALSE);
+		og_log(21, FALSE);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
 		return (FALSE);
@@ -2204,7 +2191,7 @@ bool actualizaCreacionSoftIncremental(Database db, Table tbl, char* idi,char* id
 					" WHERE idimagen=%s AND idsoftincremental=%s", idi,idf);
 
 	if (!db.Execute(sqlstr, tbl)) { // Error al leer
-		errorLog(modulo, 21, FALSE);
+		og_log(21, FALSE);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
 		return (FALSE);
@@ -2215,7 +2202,7 @@ bool actualizaCreacionSoftIncremental(Database db, Table tbl, char* idi,char* id
 	// Crea relación entre la imagen y el software incremental
 	sprintf(sqlstr,"INSERT INTO imagenes_softincremental (idimagen,idsoftincremental) VALUES (%s,%s)",idi,idf);
 	if (!db.Execute(sqlstr, tbl)) { // Error al ejecutar la sentencia
-		errorLog(modulo, 21, FALSE);
+		og_log(21, FALSE);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
 		return (FALSE);
@@ -2320,7 +2307,7 @@ bool RESPUESTA_RestaurarImagen(int socket_c, TRAMA* ptrTrama)
 	char modulo[] = "RESPUESTA_RestaurarImagen()";
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
-		errorLog(modulo, 20, FALSE);
+		og_log(20, FALSE);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
 		return (FALSE);
@@ -2332,7 +2319,7 @@ bool RESPUESTA_RestaurarImagen(int socket_c, TRAMA* ptrTrama)
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
 		liberaMemoria(iph);
 		liberaMemoria(ido);	
-		errorLog(modulo, 30, FALSE);
+		og_log(30, FALSE);
 		return (FALSE); // Error al registrar notificacion
 	}
 
@@ -2355,7 +2342,7 @@ bool RESPUESTA_RestaurarImagen(int socket_c, TRAMA* ptrTrama)
 	liberaMemoria(ifs);
 
 	if(!res){
-		errorLog(modulo, 95, FALSE);
+		og_log(95, FALSE);
 		db.Close(); // Cierra conexión
 		return (FALSE);
 	}
@@ -2426,7 +2413,7 @@ bool actualizaRestauracionImagen(Database db, Table tbl, char* idi,
 			" WHERE idordenador=%s AND numdisk=%s AND numpar=%s", idi, ifs, idi, ifs, ido, dsk, par);
 
 	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
-		errorLog(modulo, 21, FALSE);
+		og_log(21, FALSE);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
 		return (FALSE);
@@ -2481,7 +2468,7 @@ bool RESPUESTA_Configurar(int socket_c, TRAMA* ptrTrama)
 	char modulo[] = "RESPUESTA_Configurar()";
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
-		errorLog(modulo, 20, FALSE);
+		og_log(20, FALSE);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
 		return (FALSE);
@@ -2493,7 +2480,7 @@ bool RESPUESTA_Configurar(int socket_c, TRAMA* ptrTrama)
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
 		liberaMemoria(iph);
 		liberaMemoria(ido);	
-		errorLog(modulo, 30, FALSE);
+		og_log(30, FALSE);
 		return (FALSE); // Error al registrar notificacion
 	}
 
@@ -2505,7 +2492,7 @@ bool RESPUESTA_Configurar(int socket_c, TRAMA* ptrTrama)
 	liberaMemoria(cfg);	
 		
 	if(!res){	
-		errorLog(modulo, 24, FALSE);
+		og_log(24, FALSE);
 		return (FALSE); // Error al registrar notificacion
 	}
 	
@@ -2559,7 +2546,7 @@ bool RESPUESTA_EjecutarScript(int socket_c, TRAMA* ptrTrama)
 	char modulo[] = "RESPUESTA_EjecutarScript()";
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
-		errorLog(modulo, 20, FALSE);
+		og_log(20, FALSE);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
 		return (FALSE);
@@ -2571,7 +2558,7 @@ bool RESPUESTA_EjecutarScript(int socket_c, TRAMA* ptrTrama)
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
 		liberaMemoria(iph);
 		liberaMemoria(ido);	
-		errorLog(modulo, 30, FALSE);
+		og_log(30, FALSE);
 		return (FALSE); // Error al registrar notificacion
 	}
 	
@@ -2634,7 +2621,7 @@ bool RESPUESTA_InventarioHardware(int socket_c, TRAMA* ptrTrama) {
 	char modulo[] = "RESPUESTA_InventarioHardware()";
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
-		errorLog(modulo, 20, FALSE);
+		og_log(20, FALSE);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
 		return (FALSE);
@@ -2646,7 +2633,7 @@ bool RESPUESTA_InventarioHardware(int socket_c, TRAMA* ptrTrama) {
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
 		liberaMemoria(iph);
 		liberaMemoria(ido);	
-		errorLog(modulo, 30, FALSE);
+		og_log(30, FALSE);
 		return (FALSE); // Error al registrar notificacion
 	}
 	// Lee archivo de inventario enviado anteriormente
@@ -2666,7 +2653,7 @@ bool RESPUESTA_InventarioHardware(int socket_c, TRAMA* ptrTrama) {
 	liberaMemoria(buffer);		
 	
 	if(!res){
-		errorLog(modulo, 53, FALSE);
+		og_log(53, FALSE);
 		return (FALSE);
 	}
 		
@@ -2702,7 +2689,7 @@ bool actualizaHardware(Database db, Table tbl, char* hrd, char*ido,char* npc, ch
 	sprintf(sqlstr, "SELECT * FROM ordenadores WHERE idordenador=%s", ido);
 
 	if (!db.Execute(sqlstr, tbl)) { // Error al leer
-		errorLog(modulo, 21, FALSE);
+		og_log(21, FALSE);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
 		return (FALSE);
@@ -2734,7 +2721,7 @@ bool actualizaHardware(Database db, Table tbl, char* hrd, char*ido,char* npc, ch
 		sprintf(sqlstr, "SELECT idtipohardware,descripcion FROM tipohardwares "
 			" WHERE nemonico='%s'", dualHardware[0]);
 		if (!db.Execute(sqlstr, tbl)) { // Error al leer
-			errorLog(modulo, 21, FALSE);
+			og_log(21, FALSE);
 			db.GetErrorErrStr(msglog);
 			errorInfo(modulo, msglog);
 			return (FALSE);
@@ -2761,7 +2748,7 @@ bool actualizaHardware(Database db, Table tbl, char* hrd, char*ido,char* npc, ch
 
 			// Ejecuta consulta
 			if (!db.Execute(sqlstr, tbl)) { // Error al leer
-				errorLog(modulo, 21, FALSE);
+				og_log(21, FALSE);
 				db.GetErrorErrStr(msglog);
 				errorInfo(modulo, msglog);
 				return (FALSE);
@@ -2779,7 +2766,7 @@ bool actualizaHardware(Database db, Table tbl, char* hrd, char*ido,char* npc, ch
 				// Recupera el identificador del hardware
 				sprintf(sqlstr, "SELECT LAST_INSERT_ID() as identificador");
 				if (!db.Execute(sqlstr, tbl)) { // Error al leer
-					errorLog(modulo, 21, FALSE);
+					og_log(21, FALSE);
 					db.GetErrorErrStr(msglog);
 					errorInfo(modulo, msglog);
 					return (FALSE);
@@ -2816,7 +2803,7 @@ bool actualizaHardware(Database db, Table tbl, char* hrd, char*ido,char* npc, ch
 	aux = strlen(strInt); // Calcula longitud de cadena para reservar espacio a todos los perfiles
 	idhardwares = reservaMemoria(sizeof(aux) * lon + lon);
 	if (idhardwares == NULL) {
-		errorLog(modulo, 3, FALSE);
+		og_log(3, FALSE);
 		return (FALSE);
 	}
 	aux = sprintf(idhardwares, "%d", tbidhardware[0]);
@@ -2825,7 +2812,7 @@ bool actualizaHardware(Database db, Table tbl, char* hrd, char*ido,char* npc, ch
 
 	if (!cuestionPerfilHardware(db, tbl, idc, ido, idperfilhard, idhardwares,
 			npc, tbidhardware, lon)) {
-		errorLog(modulo, 55, FALSE);
+		og_log(55, FALSE);
 		errorInfo(modulo, msglog);
 		retval=FALSE;
 	}
@@ -2861,7 +2848,7 @@ bool cuestionPerfilHardware(Database db, Table tbl, char* idc, char* ido,
 
 	sqlstr = reservaMemoria(strlen(idhardwares)+LONSQL); // Reserva para escribir sentencia SQL
 	if (sqlstr == NULL) {
-		errorLog(modulo, 3, FALSE);
+		og_log(3, FALSE);
 		return (FALSE);
 	}
 	// Busca perfil hard del ordenador que contenga todos los componentes hardware encontrados
@@ -2874,7 +2861,7 @@ bool cuestionPerfilHardware(Database db, Table tbl, char* idc, char* ido,
 		" WHERE idhardwares LIKE '%s'", idhardwares);
 	// Ejecuta consulta
 	if (!db.Execute(sqlstr, tbl)) { // Error al leer
-		errorLog(modulo, 21, FALSE);
+		og_log(21, FALSE);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
 		liberaMemoria(sqlstr);
@@ -3013,7 +3000,7 @@ bool RESPUESTA_InventarioSoftware(int socket_c, TRAMA* ptrTrama) {
 	char modulo[] = "RESPUESTA_InventarioSoftware()";
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
-		errorLog(modulo, 20, FALSE);
+		og_log(20, FALSE);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
 		return (FALSE);
@@ -3025,7 +3012,7 @@ bool RESPUESTA_InventarioSoftware(int socket_c, TRAMA* ptrTrama) {
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
 		liberaMemoria(iph);
 		liberaMemoria(ido);	
-		errorLog(modulo, 30, FALSE);
+		og_log(30, FALSE);
 		return (FALSE); // Error al registrar notificacion
 	}
 	
@@ -3046,7 +3033,7 @@ bool RESPUESTA_InventarioSoftware(int socket_c, TRAMA* ptrTrama) {
 	liberaMemoria(sft);	
 
 	if(!res){
-		errorLog(modulo, 82, FALSE);
+		og_log(82, FALSE);
 		return (FALSE);
 	}	
 	
@@ -3087,7 +3074,7 @@ bool actualizaSoftware(Database db, Table tbl, char* sft, char* par,char* ido, c
 		" WHERE idordenador=%s", ido);
 
 	if (!db.Execute(sqlstr, tbl)) { // Error al leer
-		errorLog(modulo, 21, FALSE);
+		og_log(21, FALSE);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
 		return (FALSE);
@@ -3134,7 +3121,7 @@ bool actualizaSoftware(Database db, Table tbl, char* sft, char* par,char* ido, c
 
 		// Ejecuta consulta
 		if (!db.Execute(sqlstr, tbl)) { // Error al leer
-			errorLog(modulo, 21, FALSE);
+			og_log(21, FALSE);
 			db.GetErrorErrStr(msglog);
 			errorInfo(modulo, msglog);
 			return (FALSE);
@@ -3188,7 +3175,7 @@ bool actualizaSoftware(Database db, Table tbl, char* sft, char* par,char* ido, c
 	aux = strlen(strInt); // Calcula longitud de cadena para reservar espacio a todos los perfiles
 	idsoftwares = reservaMemoria((sizeof(aux)+1) * lon + lon);
 	if (idsoftwares == NULL) {
-		errorLog(modulo, 3, FALSE);
+		og_log(3, FALSE);
 		return (FALSE);
 	}
 	aux = sprintf(idsoftwares, "%d", tbidsoftware[0]);
@@ -3198,7 +3185,7 @@ bool actualizaSoftware(Database db, Table tbl, char* sft, char* par,char* ido, c
 	// Comprueba existencia de perfil software y actualización de éste para el ordenador
 	if (!cuestionPerfilSoftware(db, tbl, idc, ido, idperfilsoft, idnombreso, idsoftwares, 
 			npc, par, tbidsoftware, lon)) {
-		errorLog(modulo, 83, FALSE);
+		og_log(83, FALSE);
 		errorInfo(modulo, msglog);
 		retval=FALSE;
 	}
@@ -3238,7 +3225,7 @@ bool cuestionPerfilSoftware(Database db, Table tbl, char* idc, char* ido,
 
 	sqlstr = reservaMemoria(strlen(idsoftwares)+LONSQL); // Reserva para escribir sentencia SQL
 	if (sqlstr == NULL) {
-		errorLog(modulo, 3, FALSE);
+		og_log(3, FALSE);
 		return (FALSE);
 	}
 	// Busca perfil soft del ordenador que contenga todos los componentes software encontrados
@@ -3251,7 +3238,7 @@ bool cuestionPerfilSoftware(Database db, Table tbl, char* idc, char* ido,
 		" WHERE idsoftwares LIKE '%s'", idsoftwares);
 	// Ejecuta consulta
 	if (!db.Execute(sqlstr, tbl)) { // Error al leer
-		errorLog(modulo, 21, FALSE);
+		og_log(21, FALSE);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
 		liberaMemoria(sqlstr);
@@ -3363,13 +3350,12 @@ bool cuestionPerfilSoftware(Database db, Table tbl, char* idc, char* ido,
 // ________________________________________________________________________________________________________
 bool enviaArchivo(int socket_c, TRAMA *ptrTrama) {
 	char *nfl;
-	char modulo[] = "enviaArchivo()";
 
 	// Toma parámetros
 	nfl = copiaParametro("nfl",ptrTrama); // Toma nombre completo del archivo
 	if (!sendArchivo(&socket_c, nfl)) {
 		liberaMemoria(nfl);
-		errorLog(modulo, 57, FALSE);
+		og_log(57, FALSE);
 		return (FALSE);
 	}
 	liberaMemoria(nfl);
@@ -3389,7 +3375,6 @@ bool enviaArchivo(int socket_c, TRAMA *ptrTrama) {
 // ________________________________________________________________________________________________________
 bool recibeArchivo(int socket_c, TRAMA *ptrTrama) {
 	char *nfl;
-	char modulo[] = "recibeArchivo()";
 
 	// Toma parámetros
 	nfl = copiaParametro("nfl",ptrTrama); // Toma nombre completo del archivo
@@ -3397,7 +3382,7 @@ bool recibeArchivo(int socket_c, TRAMA *ptrTrama) {
 	enviaFlag(&socket_c, ptrTrama);
 	if (!recArchivo(&socket_c, nfl)) {
 		liberaMemoria(nfl);
-		errorLog(modulo, 58, FALSE);
+		og_log(58, FALSE);
 		return (FALSE);
 	}
 	liberaMemoria(nfl);
@@ -3426,7 +3411,7 @@ bool envioProgramacion(int socket_c, TRAMA *ptrTrama)
 	char modulo[] = "envioProgramacion()";
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
-		errorLog(modulo, 20, FALSE);
+		og_log(20, FALSE);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
 		return (FALSE);
@@ -3441,7 +3426,7 @@ bool envioProgramacion(int socket_c, TRAMA *ptrTrama)
 	liberaMemoria(idp);
 			
 	if (!db.Execute(sqlstr, tbl)) { // Error al leer
-		errorLog(modulo, 21, FALSE);
+		og_log(21, FALSE);
 		db.GetErrorErrStr(msglog);
 		errorInfo(modulo, msglog);
 		return (FALSE);
@@ -3491,7 +3476,7 @@ bool envioProgramacion(int socket_c, TRAMA *ptrTrama)
 		if (clienteDisponible(iph, &idx)) { // Si el cliente puede recibir comandos
 			strcpy(tbsockets[idx].estado, CLIENTE_OCUPADO); // Actualiza el estado del cliente
 			if (!mandaTrama(&tbsockets[idx].sock, ptrTrama)) {
-				errorLog(modulo, 26, FALSE);
+				og_log(26, FALSE);
 				return (FALSE);
 			}
 			//close(tbsockets[idx].sock); // Cierra el socket del cliente hasta nueva disponibilidad
@@ -3567,7 +3552,6 @@ bool gestionaTrama(int socket_c)
 	TRAMA* ptrTrama;
 	int i, res;
 	char *nfn;
-	char modulo[] = "gestionaTrama()";
 
 	ptrTrama=recibeTrama(&socket_c);
 
@@ -3596,12 +3580,12 @@ bool gestionaTrama(int socket_c)
 			if (ptrTrama->tipo == MSG_NOTIFICACION)
 				return (RESPUESTA_Comando(socket_c, ptrTrama));
 			else
-				errorLog(modulo, 18, FALSE); // No se reconoce el mensaje
+				og_log(18, FALSE); // No se reconoce el mensaje
 		}
 		*/
 	}
 	else
-		errorLog(modulo, 17, FALSE); // Error en la recepción
+		og_log(17, FALSE); // Error en la recepción
 	return (TRUE);
 }
 
@@ -3614,7 +3598,6 @@ int main(int argc, char *argv[]) {
 	int socket_c; // Client socket
 	socklen_t iAddrSize;
 	struct sockaddr_in local, cliente;
-	char modulo[] = "main()";
 	int activo=1;
 
 	/*--------------------------------------------------------------------------------------------------------
@@ -3640,7 +3623,7 @@ int main(int argc, char *argv[]) {
 	socket_s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP); // Crea socket del servicio
 	setsockopt(socket_s, SOL_SOCKET, SO_REUSEPORT, &activo, sizeof(int));
 	if (socket_s == SOCKET_ERROR) { // Error al crear el socket del servicio
-		errorLog(modulo, 13, TRUE);
+		og_log(13, TRUE);
 		exit(EXIT_FAILURE);
 	}
 
@@ -3650,7 +3633,7 @@ int main(int argc, char *argv[]) {
 
 	if (bind(socket_s, (struct sockaddr *) &local, sizeof(local))
 			== SOCKET_ERROR) { // Enlaza socket
-		errorLog(modulo, 14, TRUE);
+		og_log(14, TRUE);
 		exit(EXIT_FAILURE);
 	}
 
@@ -3663,12 +3646,12 @@ int main(int argc, char *argv[]) {
 	while (TRUE) {
 		socket_c = accept(socket_s, (struct sockaddr *) &cliente, &iAddrSize);
 		if (socket_c == INVALID_SOCKET) {
-			errorLog(modulo, 15, TRUE);
+			og_log(15, TRUE);
 			exit(EXIT_FAILURE);
 		}
 		swcSocket = FALSE; // Por defecto se cerrara el socket de cliente después del anális de la trama
 		if (!gestionaTrama(socket_c)) {
-			errorLog(modulo, 39, TRUE);
+			og_log(39, TRUE);
 			//close(socket_c);/tmp/
 			//break;
 		}
