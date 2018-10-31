@@ -26,11 +26,6 @@
 // ________________________________________________________________________________________________________
 char servidoradm[LONPRM];	// Dirección IP del servidor de administración
 char puerto[LONPRM];	// Puerto de comunicación
-char usuario[LONPRM];	// Usuario de acceso a la base de datos
-char pasguor[LONPRM];	// Password del usuario
-char datasource[LONPRM];	// Dirección IP del gestor de base de datos
-char catalog[LONPRM];	// Nombre de la base de datos
-char aulaup[LONPRM];	// Conmutador para registro automático de clientes
 
 typedef struct{ // Estructura usada para guardar información de los clientes
 	char ip[LONIP]; // IP del cliente

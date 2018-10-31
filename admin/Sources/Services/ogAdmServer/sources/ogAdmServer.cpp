@@ -8,6 +8,13 @@
 // *******************************************************************************************************
 #include "ogAdmServer.h"
 #include "ogAdmLib.c"
+
+static char usuario[LONPRM]; // Usuario de acceso a la base de datos
+static char pasguor[LONPRM]; // Password del usuario
+static char datasource[LONPRM]; // Dirección IP del gestor de base de datos
+static char catalog[LONPRM]; // Nombre de la base de datos
+static char aulaup[LONPRM]; // Conmutador para registro automático de clientes
+
 //________________________________________________________________________________________________________
 //	Función: tomaConfiguracion
 //
@@ -36,11 +43,6 @@ bool tomaConfiguracion(char* filecfg) {
 	}
 
 	servidoradm[0] = (char) NULL; //inicializar variables globales
-	usuario[0] = (char) NULL;
-	pasguor[0] = (char) NULL;
-	datasource[0] = (char) NULL;
-	catalog[0] = (char) NULL;
-	aulaup[0] = (char) NULL;
 
 	line = fgets(buf, sizeof(buf), fcfg);
 	while (line != NULL) {
