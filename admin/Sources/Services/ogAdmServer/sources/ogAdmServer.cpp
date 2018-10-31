@@ -13,7 +13,6 @@ static char usuario[LONPRM]; // Usuario de acceso a la base de datos
 static char pasguor[LONPRM]; // Password del usuario
 static char datasource[LONPRM]; // Dirección IP del gestor de base de datos
 static char catalog[LONPRM]; // Nombre de la base de datos
-static char aulaup[LONPRM]; // Conmutador para registro automático de clientes
 
 //________________________________________________________________________________________________________
 //	Función: tomaConfiguracion
@@ -65,8 +64,6 @@ bool tomaConfiguracion(char* filecfg) {
 			snprintf(datasource, sizeof(datasource), "%s", value);
 		else if (!strcmp(StrToUpper(key), "CATALOG"))
 			snprintf(catalog, sizeof(catalog), "%s", value);
-		else if (!strcmp(StrToUpper(key), "AULAUP"))
-			snprintf(catalog, sizeof(catalog), "%s", value);
 
 		line = fgets(buf, sizeof(buf), fcfg);
 	}
@@ -95,8 +92,6 @@ bool tomaConfiguracion(char* filecfg) {
 		og_log(9, FALSE); // Falta parámetro CATALOG
 		return (FALSE);
 	}
-	if (!aulaup[0])
-		strcpy(aulaup, "0"); // Por defecto el conmutador de registro automático esta en off
 
 	return (TRUE);
 }
