@@ -1187,7 +1187,7 @@ static bool DisponibilidadComandos(int socket_c, TRAMA *ptrTrama)
 
 	port_new=tomaPuerto(socket_c);
 
-	if(tbsockets[idx].sock!=INVALID_SOCKET){
+	if (tbsockets[idx].sock != -1) {
 		port_old=tomaPuerto(tbsockets[idx].sock);
 		if(port_old!=port_new){
 			close(tbsockets[idx].sock); // Cierra el socket si ya existia uno
@@ -3549,7 +3549,7 @@ int main(int argc, char *argv[]) {
 	 ---------------------------------------------------------------------------------------------------------*/
 	for (i = 0; i < MAXIMOS_CLIENTES; i++) {
 		tbsockets[i].ip[0] = '\0';
-		tbsockets[i].sock = INVALID_SOCKET;
+		tbsockets[i].sock = -1;
 	}
 	/*--------------------------------------------------------------------------------------------------------
 	 Creación y configuración del socket del servicio
@@ -3578,7 +3578,7 @@ int main(int argc, char *argv[]) {
 	infoLog(1); // Inicio de sesión
 	while (TRUE) {
 		socket_c = accept(socket_s, (struct sockaddr *) &cliente, &iAddrSize);
-		if (socket_c == INVALID_SOCKET) {
+		if (socket_c < 0) {
 			og_log(15, TRUE);
 			exit(EXIT_FAILURE);
 		}
