@@ -215,7 +215,7 @@ static bool Purgar(int socket_c, TRAMA* ptrTrama)
 
 	if (!enviaComando(ptrTrama, CLIENTE_APAGADO)) {
 		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		return false;
 	}
 	respuestaConsola(socket_c, ptrTrama, true);
@@ -431,10 +431,8 @@ bool procesoInclusionClienteWinLnx(int socket_c, TRAMA *ptrTrama, int *idordenad
 	char msglog[LONSTD], sqlstr[LONSQL];
 	Database db;
 	Table tbl;
-
 	char *iph;
-	char modulo[] = "procesoInclusionClienteWinLnx()";
-	
+
 	// Toma parámetros
 	iph = copiaParametro("iph",ptrTrama); // Toma ip
 
@@ -442,7 +440,7 @@ bool procesoInclusionClienteWinLnx(int socket_c, TRAMA *ptrTrama, int *idordenad
 		liberaMemoria(iph);
 		og_log(20, false);
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		return (20);
 	}
 
@@ -455,7 +453,7 @@ bool procesoInclusionClienteWinLnx(int socket_c, TRAMA *ptrTrama, int *idordenad
 		liberaMemoria(iph);
 		og_log(21, false);
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		db.Close();
 		return (21);
 	}
@@ -476,7 +474,7 @@ bool procesoInclusionClienteWinLnx(int socket_c, TRAMA *ptrTrama, int *idordenad
 		liberaMemoria(iph);
 		db.liberaResult(tbl);
 		tbl.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		db.Close();
 		return false;
 	}
@@ -484,7 +482,7 @@ bool procesoInclusionClienteWinLnx(int socket_c, TRAMA *ptrTrama, int *idordenad
 		liberaMemoria(iph);
 		db.liberaResult(tbl);
 		tbl.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		db.Close();
 		return false;
 	}
@@ -545,7 +543,6 @@ bool procesoInclusionCliente(int socket_c, TRAMA *ptrTrama)
 	char *iph, *cfg;
 	char nombreordenador[LONFIL];
 	int lon, resul, idordenador, idmenu, cache, idproautoexec, idaula, idcentro;
-	char modulo[] = "procesoInclusionCliente()";
 
 	// Toma parámetros
 	iph = copiaParametro("iph",ptrTrama); // Toma ip
@@ -556,7 +553,7 @@ bool procesoInclusionCliente(int socket_c, TRAMA *ptrTrama)
 		liberaMemoria(cfg);
 		og_log(20, false);
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		return false;
 	}
 
@@ -570,7 +567,7 @@ bool procesoInclusionCliente(int socket_c, TRAMA *ptrTrama)
 	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
 		og_log(21, false);
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		return false;
 	}
 
@@ -585,37 +582,37 @@ bool procesoInclusionCliente(int socket_c, TRAMA *ptrTrama)
 	}
 	if (!tbl.Get("idordenador", idordenador)) {
 		tbl.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		return false;
 	}
 	if (!tbl.Get("nombreordenador", nombreordenador)) {
 		tbl.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		return false;
 	}
 	if (!tbl.Get("idmenu", idmenu)) {
 		tbl.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		return false;
 	}
 	if (!tbl.Get("cache", cache)) {
 		tbl.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		return false;
 	}
 	if (!tbl.Get("idproautoexec", idproautoexec)) {
 		tbl.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		return false;
 	}
 	if (!tbl.Get("idaula", idaula)) {
 		tbl.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		return false;
 	}
 	if (!tbl.Get("idcentro", idcentro)) {
 		tbl.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		return false;
 	}
 
@@ -683,7 +680,6 @@ bool actualizaConfiguracion(Database db, Table tbl, char *cfg, int ido)
 	int lon, p, c,i, dato, swu, idsoi, idsfi,k;
 	char *ptrPar[MAXPAR], *ptrCfg[6], *ptrDual[2], tbPar[LONSTD];
 	char *ser, *disk, *par, *cpt, *sfi, *soi, *tam, *uso; // Parametros de configuración.
-	char modulo[] = "actualizaConfiguracion()";
 
 	lon = 0;
 	p = splitCadena(ptrPar, cfg, '\n');
@@ -701,7 +697,7 @@ bool actualizaConfiguracion(Database db, Table tbl, char *cfg, int ido)
 						ser, ido);
 				if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 					db.GetErrorErrStr(msglog);
-					errorInfo(modulo, msglog);
+					og_info(msglog);
 					return false;
 				}
 			}
@@ -759,7 +755,7 @@ bool actualizaConfiguracion(Database db, Table tbl, char *cfg, int ido)
 		if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
 			og_log(21, false);
 			db.GetErrorErrStr(msglog);
-			errorInfo(modulo, msglog);
+			og_info(msglog);
 			return false;
 		}
 		if (tbl.ISEOF()) { // Si no existe el registro
@@ -770,32 +766,32 @@ bool actualizaConfiguracion(Database db, Table tbl, char *cfg, int ido)
 
 			if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 				db.GetErrorErrStr(msglog);
-				errorInfo(modulo, msglog);
+				og_info(msglog);
 				return false;
 			}
 		} else { // Existe el registro
 			swu = true; // Se supone que algún dato ha cambiado
 			if (!tbl.Get("codpar", dato)) { // Toma dato
 				tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-				errorInfo(modulo, msglog);
+				og_info(msglog);
 				return false;
 			}
 			if (strtol(cpt, NULL, 16) == dato) {// Parámetro tipo de partición (hexadecimal) igual al almacenado (decimal)
 				if (!tbl.Get("tamano", dato)) { // Toma dato
 					tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-					errorInfo(modulo, msglog);
+					og_info(msglog);
 					return false;
 				}
 				if (atoi(tam) == dato) {// Parámetro tamaño igual al almacenado
 					if (!tbl.Get("idsistemafichero", dato)) { // Toma dato
 						tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-						errorInfo(modulo, msglog);
+						og_info(msglog);
 						return false;
 					}
 					if (idsfi == dato) {// Parámetro sistema de fichero igual al almacenado
 						if (!tbl.Get("idnombreso", dato)) { // Toma dato
 							tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-							errorInfo(modulo, msglog);
+							og_info(msglog);
 							return false;
 						}
 						if (idsoi == dato) {// Parámetro sistema de fichero distinto al almacenado
@@ -825,7 +821,7 @@ bool actualizaConfiguracion(Database db, Table tbl, char *cfg, int ido)
 			if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
 				og_log(21, false);
 				db.GetErrorErrStr(msglog);
-				errorInfo(modulo, msglog);
+				og_info(msglog);
 				return false;
 			}
 		}
@@ -837,7 +833,7 @@ bool actualizaConfiguracion(Database db, Table tbl, char *cfg, int ido)
 	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
 		og_log(21, false);
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		return false;
 	}
 	return true;
@@ -866,7 +862,6 @@ int checkDato(Database db, Table tbl, char *dato, const char *tabla,
 		     const char *nomdato, const char *nomidentificador)
 {
 	char msglog[LONSTD], sqlstr[LONSQL];
-	char modulo[] = "checkDato()";
 	int identificador;
 
 	if (strlen(dato) == 0)
@@ -878,34 +873,34 @@ int checkDato(Database db, Table tbl, char *dato, const char *tabla,
 	if (!db.Execute(sqlstr, tbl)) { // Error al leer
 		og_log(21, false);
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		return (0);
 	}
 	if (tbl.ISEOF()) { //  Software NO existente
 		sprintf(sqlstr, "INSERT INTO %s (%s) VALUES('%s')", tabla, nomdato, dato);
 		if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 			db.GetErrorErrStr(msglog); // Error al acceder al registro
-			errorInfo(modulo, msglog);
+			og_info(msglog);
 			return (0);
 		}
 		// Recupera el identificador del software
 		sprintf(sqlstr, "SELECT LAST_INSERT_ID() as identificador");
 		if (!db.Execute(sqlstr, tbl)) { // Error al leer
 			db.GetErrorErrStr(msglog); // Error al acceder al registro
-			errorInfo(modulo, msglog);
+			og_info(msglog);
 			return (0);
 		}
 		if (!tbl.ISEOF()) { // Si existe registro
 			if (!tbl.Get("identificador", identificador)) {
 				tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-				errorInfo(modulo, msglog);
+				og_info(msglog);
 				return (0);
 			}
 		}
 	} else {
 		if (!tbl.Get(nomidentificador, identificador)) { // Toma dato
 			tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-			errorInfo(modulo, msglog);
+			og_info(msglog);
 			return (0);
 		}
 	}
@@ -955,7 +950,6 @@ static bool AutoexecCliente(int socket_c, TRAMA *ptrTrama)
 	FILE *fileexe;
 	char fileautoexec[LONPRM];
 	char parametros[LONGITUD_PARAMETROS];
-	char modulo[] = "AutoexecCliente()";
 
 	iph = copiaParametro("iph",ptrTrama); // Toma dirección IP del cliente
 	exe = copiaParametro("exe",ptrTrama); // Toma identificador del procedimiento inicial
@@ -971,7 +965,7 @@ static bool AutoexecCliente(int socket_c, TRAMA *ptrTrama)
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexión con la BD
 		og_log(20, false);
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		return false;
 	}
 	initParametros(ptrTrama,0);
@@ -1011,7 +1005,6 @@ bool recorreProcedimientos(Database db, char *parametros, FILE *fileexe, char *i
 	int procedimientoid, lsize;
 	char idprocedimiento[LONPRM], msglog[LONSTD], sqlstr[LONSQL];
 	Table tbl;
-	char modulo[] = "recorreProcedimientos()";
 
 	/* Busca procedimiento */
 	sprintf(sqlstr,
@@ -1021,13 +1014,13 @@ bool recorreProcedimientos(Database db, char *parametros, FILE *fileexe, char *i
 	if (!db.Execute(sqlstr, tbl)) { // Error al leer
 		og_log(21, false);
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		return false;
 	}
 	while (!tbl.ISEOF()) { // Recorre procedimientos
 		if (!tbl.Get("procedimientoid", procedimientoid)) { // Toma dato
 			tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-			errorInfo(modulo, msglog);
+			og_info(msglog);
 			return false;
 		}
 		if (procedimientoid > 0) { // Procedimiento recursivo
@@ -1038,7 +1031,7 @@ bool recorreProcedimientos(Database db, char *parametros, FILE *fileexe, char *i
 		} else {
 			if (!tbl.Get("parametros", parametros)) { // Toma dato
 				tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-				errorInfo(modulo, msglog);
+				og_info(msglog);
 				return false;
 			}
 			strcat(parametros, "@");
@@ -1114,12 +1107,10 @@ bool buscaComandos(char *ido, TRAMA *ptrTrama, int *ids)
 	Table tbl;
 	int lonprm;
 
-	char modulo[] = "buscaComandos()";
-
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexión con la BD
 		og_log(20, false);
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		return false;
 	}
 	sprintf(sqlstr,"SELECT sesion,parametros,length( parametros) as lonprm"\
@@ -1127,7 +1118,7 @@ bool buscaComandos(char *ido, TRAMA *ptrTrama, int *ids)
 	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
 		og_log(21, false);
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		return false;
 	}
 	if (tbl.ISEOF()) {
@@ -1136,12 +1127,12 @@ bool buscaComandos(char *ido, TRAMA *ptrTrama, int *ids)
 	} else { // Busca entre todas las acciones de diversos ambitos
 		if (!tbl.Get("sesion", *ids)) { // Toma identificador de la sesion
 			tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-			errorInfo(modulo, msglog);
+			og_info(msglog);
 			return false;
 		}
 		if (!tbl.Get("lonprm", lonprm)) { // Toma parámetros del comando
 			tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-			errorInfo(modulo, msglog);
+			og_info(msglog);
 			return false;
 		}
 		if(!initParametros(ptrTrama,lonprm+LONGITUD_PARAMETROS)){
@@ -1151,7 +1142,7 @@ bool buscaComandos(char *ido, TRAMA *ptrTrama, int *ids)
 		}
 		if (!tbl.Get("parametros", ptrTrama->parametros)) { // Toma parámetros del comando
 			tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-			errorInfo(modulo, msglog);
+			og_info(msglog);
 			return false;
 		}
 	}
@@ -1225,7 +1216,6 @@ static bool respuestaEstandar(TRAMA *ptrTrama, char *iph, char *ido, Database db
 	char fechafin[LONPRM];
 	struct tm* st;
 	int idaccion;
-	char modulo[] = "respuestaEstandar()";
 
 	ids = copiaParametro("ids",ptrTrama); // Toma identificador de la sesión
 
@@ -1246,7 +1236,7 @@ static bool respuestaEstandar(TRAMA *ptrTrama, char *iph, char *ido, Database db
 	if (!db.Execute(sqlstr, tbl)) { // Error al consultar
 		og_log(21, false);
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		return false;
 	}
 	if (tbl.ISEOF()) { // No existe registro de acciones
@@ -1255,7 +1245,7 @@ static bool respuestaEstandar(TRAMA *ptrTrama, char *iph, char *ido, Database db
 	}
 	if (!tbl.Get("idaccion", idaccion)) { // Toma identificador de la accion
 		tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		return false;
 	}
 	st = tomaHora();
@@ -1275,7 +1265,7 @@ static bool respuestaEstandar(TRAMA *ptrTrama, char *iph, char *ido, Database db
 		liberaMemoria(res);
 		liberaMemoria(der);
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		return false;
 	}
 	
@@ -1555,12 +1545,11 @@ static bool RESPUESTA_Arrancar(int socket_c, TRAMA* ptrTrama)
 	int i;
 	char *iph, *ido;
 	char *tpc;
-	char modulo[] = "RESPUESTA_Arrancar()";
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
 		og_log(20, false);
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		return false;
 	}
 
@@ -1630,12 +1619,11 @@ static bool RESPUESTA_Apagar(int socket_c, TRAMA* ptrTrama)
 	Table tbl;
 	int i;
 	char *iph, *ido;
-	char modulo[] = "RESPUESTA_Apagar()";
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
 		og_log(20, false);
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		return false;
 	}
 
@@ -1703,12 +1691,11 @@ static bool RESPUESTA_Reiniciar(int socket_c, TRAMA* ptrTrama)
 	Table tbl;
 	int i;
 	char *iph, *ido;
-	char modulo[] = "RESPUESTA_Reiniciar()";
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
 		og_log(20, false);
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		return false;
 	}
 
@@ -1776,12 +1763,11 @@ static bool RESPUESTA_IniciarSesion(int socket_c, TRAMA* ptrTrama)
 	Table tbl;
 	int i;
 	char *iph, *ido;
-	char modulo[] = "RESPUESTA_IniciarSesion()";
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
 		og_log(20, false);
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		return false;
 	}
 
@@ -1850,12 +1836,11 @@ static bool RESPUESTA_CrearImagen(int socket_c, TRAMA* ptrTrama)
 	char *iph, *dsk, *par, *cpt, *ipr, *ido;
 	char *idi;
 	bool res;
-	char modulo[] = "RESPUESTA_CrearImagen()";
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
 		og_log(20, false);
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		return false;
 	}
 
@@ -1914,7 +1899,6 @@ bool actualizaCreacionImagen(Database db, Table tbl, char *idi, char *dsk,
 			     char *par, char *cpt, char *ipr, char *ido)
 {
 	char msglog[LONSTD], sqlstr[LONSQL];
-	char modulo[] = "actualizaCreacionImagen()";
 	int idr,ifs;
 
 	/* Toma identificador del repositorio correspondiente al ordenador modelo */
@@ -1927,12 +1911,12 @@ bool actualizaCreacionImagen(Database db, Table tbl, char *idi, char *dsk,
 	if (!db.Execute(sqlstr, tbl)) { // Error al leer
 		og_log(21, false);
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		return false;
 	}
 	if (!tbl.Get("idrepositorio", idr)) { // Toma dato
 		tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		return false;
 	}
 
@@ -1945,12 +1929,12 @@ bool actualizaCreacionImagen(Database db, Table tbl, char *idi, char *dsk,
 	if (!db.Execute(sqlstr, tbl)) { // Error al leer
 		og_log(21, false);
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		return false;
 	}
 	if (!tbl.Get("idperfilsoft", ifs)) { // Toma dato
 		tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		return false;
 	}
 
@@ -1965,7 +1949,7 @@ bool actualizaCreacionImagen(Database db, Table tbl, char *idi, char *dsk,
 	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
 		og_log(21, false);
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		return false;
 	}
 	/* Actualizar los datos en el cliente */
@@ -1978,7 +1962,7 @@ bool actualizaCreacionImagen(Database db, Table tbl, char *idi, char *dsk,
 	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
 		og_log(21, false);
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		return false;
 	}
 	return true;
@@ -2071,12 +2055,11 @@ static bool RESPUESTA_CrearSoftIncremental(int socket_c, TRAMA* ptrTrama)
 	char *iph,*par,*ido,*idf;
 	int ifs;
 	char msglog[LONSTD],sqlstr[LONSQL];
-	char modulo[] = "RESPUESTA_CrearSoftIncremental()";
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
 		og_log(20, false);
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		return false;
 	}
 
@@ -2102,12 +2085,12 @@ static bool RESPUESTA_CrearSoftIncremental(int socket_c, TRAMA* ptrTrama)
 	if (!db.Execute(sqlstr, tbl)) { // Error al leer
 		og_log(21, false);
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		return false;
 	}
 	if (!tbl.Get("idperfilsoft", ifs)) { // Toma dato
 		tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		return false;
 	}
 
@@ -2119,7 +2102,7 @@ static bool RESPUESTA_CrearSoftIncremental(int socket_c, TRAMA* ptrTrama)
 	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
 		og_log(21, false);
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		return false;
 	}
 	db.Close(); // Cierra conexión
@@ -2223,12 +2206,11 @@ static bool RESPUESTA_RestaurarImagen(int socket_c, TRAMA* ptrTrama)
 	Table tbl;
 	bool res;
 	char *iph, *ido, *idi, *dsk, *par, *ifs, *cfg;
-	char modulo[] = "RESPUESTA_RestaurarImagen()";
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
 		og_log(20, false);
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		return false;
 	}
 
@@ -2324,7 +2306,6 @@ bool actualizaRestauracionImagen(Database db, Table tbl, char *idi,
 				 char *dsk, char *par, char *ido, char *ifs)
 {
 	char msglog[LONSTD], sqlstr[LONSQL];
-	char modulo[] = "actualizaRestauracionImagen()";
 
 	/* Actualizar los datos de la imagen */
 	snprintf(sqlstr, LONSQL,
@@ -2337,7 +2318,7 @@ bool actualizaRestauracionImagen(Database db, Table tbl, char *idi,
 	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
 		og_log(21, false);
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		return false;
 	}
 	return true;
@@ -2388,12 +2369,11 @@ static bool RESPUESTA_Configurar(int socket_c, TRAMA* ptrTrama)
 	Table tbl;
 	bool res;
 	char *iph, *ido,*cfg;
-	char modulo[] = "RESPUESTA_Configurar()";
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
 		og_log(20, false);
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		return false;
 	}
 
@@ -2467,12 +2447,10 @@ static bool RESPUESTA_EjecutarScript(int socket_c, TRAMA* ptrTrama)
 	Table tbl;
 	char *iph, *ido,*cfg;
 
-	char modulo[] = "RESPUESTA_EjecutarScript()";
-
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
 		og_log(20, false);
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		return false;
 	}
 
@@ -2544,12 +2522,11 @@ static bool RESPUESTA_InventarioHardware(int socket_c, TRAMA* ptrTrama)
 	Table tbl;
 	bool res;
 	char *iph, *ido, *idc, *npc, *hrd, *buffer;
-	char modulo[] = "RESPUESTA_InventarioHardware()";
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
 		og_log(20, false);
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		return false;
 	}
 
@@ -2610,7 +2587,6 @@ bool actualizaHardware(Database db, Table tbl, char *hrd, char *ido, char *npc,
 	char *whard;
 	int tbidhardware[MAXHARDWARE];
 	char *tbHardware[MAXHARDWARE],*dualHardware[2], descripcion[250], strInt[LONINT], *idhardwares;
-	char modulo[] = "actualizaHardware()";
 
 	/* Toma Centro (Unidad Organizativa) */
 	sprintf(sqlstr, "SELECT * FROM ordenadores WHERE idordenador=%s", ido);
@@ -2618,12 +2594,12 @@ bool actualizaHardware(Database db, Table tbl, char *hrd, char *ido, char *npc,
 	if (!db.Execute(sqlstr, tbl)) { // Error al leer
 		og_log(21, false);
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		return false;
 	}
 	if (!tbl.Get("idperfilhard", idperfilhard)) { // Toma dato
 		tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		return false;
 	}
 	whard=escaparCadena(hrd); // Codificar comillas simples
@@ -2650,22 +2626,22 @@ bool actualizaHardware(Database db, Table tbl, char *hrd, char *ido, char *npc,
 		if (!db.Execute(sqlstr, tbl)) { // Error al leer
 			og_log(21, false);
 			db.GetErrorErrStr(msglog);
-			errorInfo(modulo, msglog);
+			og_info(msglog);
 			return false;
 		}
 		if (tbl.ISEOF()) { //  Tipo de Hardware NO existente
 			sprintf(msglog, "%s: %s)", tbErrores[54], dualHardware[0]);
-			errorInfo(modulo, msglog);
+			og_info(msglog);
 			return false;
 		} else { //  Tipo de Hardware Existe
 			if (!tbl.Get("idtipohardware", idtipohardware)) { // Toma dato
 				tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-				errorInfo(modulo, msglog);
+				og_info(msglog);
 				return false;
 			}
 			if (!tbl.Get("descripcion", descripcion)) { // Toma dato
 				tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-				errorInfo(modulo, msglog);
+				og_info(msglog);
 				return false;
 			}
 
@@ -2677,7 +2653,7 @@ bool actualizaHardware(Database db, Table tbl, char *hrd, char *ido, char *npc,
 			if (!db.Execute(sqlstr, tbl)) { // Error al leer
 				og_log(21, false);
 				db.GetErrorErrStr(msglog);
-				errorInfo(modulo, msglog);
+				og_info(msglog);
 				return false;
 			}
 
@@ -2687,7 +2663,7 @@ bool actualizaHardware(Database db, Table tbl, char *hrd, char *ido, char *npc,
 						dualHardware[1], idc);
 				if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 					db.GetErrorErrStr(msglog); // Error al acceder al registro
-					errorInfo(modulo, msglog);
+					og_info(msglog);
 					return false;
 				}
 				// Recupera el identificador del hardware
@@ -2695,20 +2671,20 @@ bool actualizaHardware(Database db, Table tbl, char *hrd, char *ido, char *npc,
 				if (!db.Execute(sqlstr, tbl)) { // Error al leer
 					og_log(21, false);
 					db.GetErrorErrStr(msglog);
-					errorInfo(modulo, msglog);
+					og_info(msglog);
 					return false;
 				}
 				if (!tbl.ISEOF()) { // Si existe registro
 					if (!tbl.Get("identificador", tbidhardware[i])) {
 						tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-						errorInfo(modulo, msglog);
+						og_info(msglog);
 						return false;
 					}
 				}
 			} else {
 				if (!tbl.Get("idhardware", tbidhardware[i])) { // Toma dato
 					tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-					errorInfo(modulo, msglog);
+					og_info(msglog);
 					return false;
 				}
 			}
@@ -2740,7 +2716,7 @@ bool actualizaHardware(Database db, Table tbl, char *hrd, char *ido, char *npc,
 	if (!cuestionPerfilHardware(db, tbl, idc, ido, idperfilhard, idhardwares,
 			npc, tbidhardware, lon)) {
 		og_log(55, false);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		retval=false;
 	}
 	else {
@@ -2771,7 +2747,6 @@ bool cuestionPerfilHardware(Database db, Table tbl, char *idc, char *ido,
 	char msglog[LONSTD], *sqlstr;
 	int i;
 	int nwidperfilhard;
-	char modulo[] = "cuestionPerfilHardware()";
 
 	sqlstr = reservaMemoria(strlen(idhardwares)+LONSQL); // Reserva para escribir sentencia SQL
 	if (sqlstr == NULL) {
@@ -2790,7 +2765,7 @@ bool cuestionPerfilHardware(Database db, Table tbl, char *idc, char *ido,
 	if (!db.Execute(sqlstr, tbl)) { // Error al leer
 		og_log(21, false);
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		liberaMemoria(sqlstr);
 		return false;
 	}
@@ -2799,7 +2774,7 @@ bool cuestionPerfilHardware(Database db, Table tbl, char *idc, char *ido,
 				" VALUES('Perfil hardware (%s) ',%s,0)", npc, idc);
 		if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 			db.GetErrorErrStr(msglog);
-			errorInfo(modulo, msglog);
+			og_info(msglog);
 			liberaMemoria(sqlstr);
 			return false;
 		}
@@ -2807,14 +2782,14 @@ bool cuestionPerfilHardware(Database db, Table tbl, char *idc, char *ido,
 		sprintf(sqlstr, "SELECT LAST_INSERT_ID() as identificador");
 		if (!db.Execute(sqlstr, tbl)) { // Error al leer
 			db.GetErrorErrStr(msglog);
-			errorInfo(modulo, msglog);
+			og_info(msglog);
 			liberaMemoria(sqlstr);
 			return false;
 		}
 		if (!tbl.ISEOF()) { // Si existe registro
 			if (!tbl.Get("identificador", nwidperfilhard)) {
 				tbl.GetErrorErrStr(msglog);
-				errorInfo(modulo, msglog);
+				og_info(msglog);
 				liberaMemoria(sqlstr);
 				return false;
 			}
@@ -2825,7 +2800,7 @@ bool cuestionPerfilHardware(Database db, Table tbl, char *idc, char *ido,
 						" VALUES(%d,%d)", nwidperfilhard, tbidhardware[i]);
 			if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 				db.GetErrorErrStr(msglog);
-				errorInfo(modulo, msglog);
+				og_info(msglog);
 				liberaMemoria(sqlstr);
 				return false;
 			}
@@ -2833,7 +2808,7 @@ bool cuestionPerfilHardware(Database db, Table tbl, char *idc, char *ido,
 	} else { // Existe un perfil con todos esos componentes
 		if (!tbl.Get("idperfilhard", nwidperfilhard)) {
 			tbl.GetErrorErrStr(msglog);
-			errorInfo(modulo, msglog);
+			og_info(msglog);
 			liberaMemoria(sqlstr);
 			return false;
 		}
@@ -2844,7 +2819,7 @@ bool cuestionPerfilHardware(Database db, Table tbl, char *idc, char *ido,
 			" WHERE idordenador=%s", nwidperfilhard, ido);
 		if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 			db.GetErrorErrStr(msglog);
-			errorInfo(modulo, msglog);
+			og_info(msglog);
 			liberaMemoria(sqlstr);
 			return false;
 		}
@@ -2855,7 +2830,7 @@ bool cuestionPerfilHardware(Database db, Table tbl, char *idc, char *ido,
 		" (SELECT DISTINCT idperfilhard from ordenadores))");
 	if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		liberaMemoria(sqlstr);
 		return false;
 	}
@@ -2865,7 +2840,7 @@ bool cuestionPerfilHardware(Database db, Table tbl, char *idc, char *ido,
 			" (SELECT DISTINCT idperfilhard FROM ordenadores)");
 	if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		liberaMemoria(sqlstr);
 		return false;
 	}
@@ -2874,7 +2849,7 @@ bool cuestionPerfilHardware(Database db, Table tbl, char *idc, char *ido,
 			" (SELECT idperfilhard FROM perfileshard)");
 	if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		liberaMemoria(sqlstr);
 		return false;
 	}
@@ -2926,12 +2901,11 @@ static bool RESPUESTA_InventarioSoftware(int socket_c, TRAMA* ptrTrama)
 	Table tbl;
 	bool res;
 	char *iph, *ido, *npc, *idc, *par, *sft, *buffer;
-	char modulo[] = "RESPUESTA_InventarioSoftware()";
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
 		og_log(20, false);
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		return false;
 	}
 
@@ -2996,7 +2970,6 @@ bool actualizaSoftware(Database db, Table tbl, char *sft, char *par,char *ido,
 	char *wsft;
 	int tbidsoftware[MAXSOFTWARE];
 	char *tbSoftware[MAXSOFTWARE],msglog[LONSTD], sqlstr[LONSQL], strInt[LONINT], *idsoftwares;
-	char modulo[] = "actualizaSoftware()";
 
 	/* Toma Centro (Unidad Organizativa) y perfil software */
 	sprintf(sqlstr, "SELECT idperfilsoft,numpar"
@@ -3006,20 +2979,20 @@ bool actualizaSoftware(Database db, Table tbl, char *sft, char *par,char *ido,
 	if (!db.Execute(sqlstr, tbl)) { // Error al leer
 		og_log(21, false);
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		return false;
 	}
 	idperfilsoft = 0; // Por defecto se supone que el ordenador no tiene aún detectado el perfil software
 	while (!tbl.ISEOF()) { // Recorre particiones
 		if (!tbl.Get("numpar", aux)) {
 			tbl.GetErrorErrStr(msglog);
-			errorInfo(modulo, msglog);
+			og_info(msglog);
 			return false;
 		}
 		if (aux == atoi(par)) { // Se encuentra la partición
 			if (!tbl.Get("idperfilsoft", idperfilsoft)) {
 				tbl.GetErrorErrStr(msglog);
-				errorInfo(modulo, msglog);
+				og_info(msglog);
 				return false;
 			}
 			break;
@@ -3053,7 +3026,7 @@ bool actualizaSoftware(Database db, Table tbl, char *sft, char *par,char *ido,
 		if (!db.Execute(sqlstr, tbl)) { // Error al leer
 			og_log(21, false);
 			db.GetErrorErrStr(msglog);
-			errorInfo(modulo, msglog);
+			og_info(msglog);
 			return false;
 		}
 
@@ -3063,27 +3036,27 @@ bool actualizaSoftware(Database db, Table tbl, char *sft, char *par,char *ido,
 
 			if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 				db.GetErrorErrStr(msglog); // Error al acceder al registro
-				errorInfo(modulo, msglog);
+				og_info(msglog);
 				return false;
 			}
 			// Recupera el identificador del software
 			sprintf(sqlstr, "SELECT LAST_INSERT_ID() as identificador");
 			if (!db.Execute(sqlstr, tbl)) { // Error al leer
 				db.GetErrorErrStr(msglog); // Error al acceder al registro
-				errorInfo(modulo, msglog);
+				og_info(msglog);
 				return false;
 			}
 			if (!tbl.ISEOF()) { // Si existe registro
 				if (!tbl.Get("identificador", tbidsoftware[i])) {
 					tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-					errorInfo(modulo, msglog);
+					og_info(msglog);
 					return false;
 				}
 			}
 		} else {
 			if (!tbl.Get("idsoftware", tbidsoftware[i])) { // Toma dato
 				tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-				errorInfo(modulo, msglog);
+				og_info(msglog);
 				return false;
 			}
 		}
@@ -3116,7 +3089,7 @@ bool actualizaSoftware(Database db, Table tbl, char *sft, char *par,char *ido,
 	if (!cuestionPerfilSoftware(db, tbl, idc, ido, idperfilsoft, idnombreso, idsoftwares, 
 			npc, par, tbidsoftware, lon)) {
 		og_log(83, false);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		retval=false;
 	}
 	else {
@@ -3153,7 +3126,6 @@ bool cuestionPerfilSoftware(Database db, Table tbl, char *idc, char *ido,
 {
 	char *sqlstr, msglog[LONSTD];
 	int i, nwidperfilsoft;
-	char modulo[] = "cuestionPerfilSoftware()";
 
 	sqlstr = reservaMemoria(strlen(idsoftwares)+LONSQL); // Reserva para escribir sentencia SQL
 	if (sqlstr == NULL) {
@@ -3172,7 +3144,7 @@ bool cuestionPerfilSoftware(Database db, Table tbl, char *idc, char *ido,
 	if (!db.Execute(sqlstr, tbl)) { // Error al leer
 		og_log(21, false);
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		liberaMemoria(sqlstr);
 		return false;
 	}
@@ -3181,21 +3153,21 @@ bool cuestionPerfilSoftware(Database db, Table tbl, char *idc, char *ido,
 				" VALUES('Perfil Software (%s, Part:%s) ',%s,0,%i)", npc, par, idc,idnombreso);
 		if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 			db.GetErrorErrStr(msglog);
-			errorInfo(modulo, msglog);
+			og_info(msglog);
 			return false;
 		}
 		// Recupera el identificador del nuevo perfil software
 		sprintf(sqlstr, "SELECT LAST_INSERT_ID() as identificador");
 		if (!db.Execute(sqlstr, tbl)) { // Error al leer
 			tbl.GetErrorErrStr(msglog);
-			errorInfo(modulo, msglog);
+			og_info(msglog);
 			liberaMemoria(sqlstr);
 			return false;
 		}
 		if (!tbl.ISEOF()) { // Si existe registro
 			if (!tbl.Get("identificador", nwidperfilsoft)) {
 				tbl.GetErrorErrStr(msglog);
-				errorInfo(modulo, msglog);
+				og_info(msglog);
 				liberaMemoria(sqlstr);
 				return false;
 			}
@@ -3206,7 +3178,7 @@ bool cuestionPerfilSoftware(Database db, Table tbl, char *idc, char *ido,
 						" VALUES(%d,%d)", nwidperfilsoft, tbidsoftware[i]);
 			if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 				db.GetErrorErrStr(msglog);
-				errorInfo(modulo, msglog);
+				og_info(msglog);
 				liberaMemoria(sqlstr);
 				return false;
 			}
@@ -3214,7 +3186,7 @@ bool cuestionPerfilSoftware(Database db, Table tbl, char *idc, char *ido,
 	} else { // Existe un perfil con todos esos componentes
 		if (!tbl.Get("idperfilsoft", nwidperfilsoft)) {
 			tbl.GetErrorErrStr(msglog);
-			errorInfo(modulo, msglog);
+			og_info(msglog);
 			liberaMemoria(sqlstr);
 			return false;
 		}
@@ -3226,7 +3198,7 @@ bool cuestionPerfilSoftware(Database db, Table tbl, char *idc, char *ido,
 				" WHERE idordenador=%s AND numpar=%s", nwidperfilsoft, ido, par);
 		if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 			db.GetErrorErrStr(msglog);
-			errorInfo(modulo, msglog);
+			og_info(msglog);
 			liberaMemoria(sqlstr);
 			return false;
 		}
@@ -3241,7 +3213,7 @@ bool cuestionPerfilSoftware(Database db, Table tbl, char *idc, char *ido,
 		" (SELECT DISTINCT idperfilsoft from imagenes))");
 	if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		liberaMemoria(sqlstr);
 		return false;
 	}
@@ -3252,7 +3224,7 @@ bool cuestionPerfilSoftware(Database db, Table tbl, char *idc, char *ido,
 		" (SELECT DISTINCT idperfilsoft from imagenes)");
 	if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		liberaMemoria(sqlstr);
 		return false;
 	}
@@ -3261,7 +3233,7 @@ bool cuestionPerfilSoftware(Database db, Table tbl, char *idc, char *ido,
 			" (SELECT idperfilsoft from perfilessoft)");
 	if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		liberaMemoria(sqlstr);
 		return false;
 	}

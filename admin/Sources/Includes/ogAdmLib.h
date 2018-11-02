@@ -274,6 +274,7 @@ void registraLog(const char *,const char *,int );
 void errorLog(const char *,int ,int);
 #define og_log(err, swe)   errorLog(__FUNCTION__, err, swe)
 void errorInfo(const char *,char *);
+#define og_info(err)  errorInfo(__FUNCTION__, err)
 void infoLog(int);
 void infoDebug(char*);
 BOOLEAN validacionParametros(int,char**,int);
