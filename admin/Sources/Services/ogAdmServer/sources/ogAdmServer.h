@@ -34,8 +34,6 @@ typedef struct{ // Estructura usada para guardar información de los clientes
 }SOCKETCL;
 SOCKETCL tbsockets[MAXIMOS_CLIENTES];
 
-bool swcSocket; // Switch para indicar si se debe cerrar el socket del cliente
-
 bool registraCliente(char *);
 bool procesoInclusionClienteWinLnx(int socket, TRAMA*,int*,char*);
 bool procesoInclusionCliente(int socket, TRAMA*);

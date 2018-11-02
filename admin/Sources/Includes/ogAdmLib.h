@@ -314,3 +314,9 @@ BOOLEAN recArchivo(SOCKET *,char *);
 SOCKET TCPConnect(char *,char*);
 int tomaPuerto(SOCKET);
 
+#include <stddef.h> /* for offsetof. */
+
+#define container_of(ptr, type, member) ({			\
+	typeof( ((type *)0)->member ) *__mptr = (ptr);		\
+	(type *)( (char *)__mptr - offsetof(type,member) );})
+

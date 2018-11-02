@@ -8,6 +8,7 @@
 // *******************************************************************************************************
 #include "ogAdmServer.h"
 #include "ogAdmLib.c"
+#include <ev.h>
 
 static char usuario[LONPRM]; // Usuario de acceso a la base de datos
 static char pasguor[LONPRM]; // Password del usuario
@@ -97,6 +98,30 @@ static bool tomaConfiguracion(const char *filecfg)
 	return true;
 }
 
+enum og_client_state {
+	OG_CLIENT_RECEIVING_HEADER	= 0,
+	OG_CLIENT_RECEIVING_PAYLOAD,
+	OG_CLIENT_PROCESSING_REQUEST,
+};
+
+/* Shut down connection if there is no complete message after 10 seconds. */
+#define OG_CLIENT_TIMEOUT	10
+
+struct og_client {
+	struct ev_io		io;
+	struct ev_timer		timer;
+	enum og_client_state	state;
+	char			buf[4096];
+	unsigned int		buf_len;
+	unsigned int		msg_len;
+	bool			keepalive;
+};
+
+static inline int og_client_socket(const struct og_client *cli)
+{
+	return cli->io.fd;
+}
+
 // ________________________________________________________________________________________________________
 // Función: Sondeo
 //
@@ -109,7 +134,7 @@ static bool tomaConfiguracion(const char *filecfg)
 //		true: Si el proceso es correcto
 //		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-static bool Sondeo(int socket_c, TRAMA* ptrTrama)
+static bool Sondeo(TRAMA* ptrTrama, struct og_client *cli)
 {
 	char msglog[LONSTD];
 	char modulo[] = "Sondeo()";
@@ -117,10 +142,10 @@ static bool Sondeo(int socket_c, TRAMA* ptrTrama)
 	if (!enviaComando(ptrTrama, CLIENTE_APAGADO)) {
 		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
 		errorInfo(modulo, msglog);
-		respuestaConsola(socket_c, ptrTrama, false);
+		respuestaConsola(og_client_socket(cli), ptrTrama, false);
 		return false;
 	}
-	respuestaConsola(socket_c, ptrTrama, true);
+	respuestaConsola(og_client_socket(cli), ptrTrama, true);
 	return true;
 }
 // ________________________________________________________________________________________________________
@@ -135,8 +160,9 @@ static bool Sondeo(int socket_c, TRAMA* ptrTrama)
 //		true: Si el proceso es correcto
 //		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-static bool respuestaSondeo(int socket_c, TRAMA* ptrTrama)
+static bool respuestaSondeo(TRAMA* ptrTrama, struct og_client *cli)
 {
+	int socket_c = og_client_socket(cli);
 	int i;
 	long lSize;
 	char *iph, *Ipes;
@@ -183,7 +209,7 @@ static bool respuestaSondeo(int socket_c, TRAMA* ptrTrama)
 //		true: Si el proceso es correcto
 //		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-static bool Actualizar(int socket_c, TRAMA* ptrTrama)
+static bool Actualizar(TRAMA* ptrTrama, struct og_client *cli)
 {
 	char msglog[LONSTD];
 	char modulo[] = "Actualizar()";
@@ -193,7 +219,7 @@ static bool Actualizar(int socket_c, TRAMA* ptrTrama)
 		errorInfo(modulo, msglog);
 		return false;
 	}
-	respuestaConsola(socket_c, ptrTrama, true);
+	respuestaConsola(og_client_socket(cli), ptrTrama, true);
 	return true;
 }
 // ________________________________________________________________________________________________________
@@ -208,7 +234,7 @@ static bool Actualizar(int socket_c, TRAMA* ptrTrama)
 //		true: Si el proceso es correcto
 //		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-static bool Purgar(int socket_c, TRAMA* ptrTrama)
+static bool Purgar(TRAMA* ptrTrama, struct og_client *cli)
 {
 	char msglog[LONSTD];
 	char modulo[] = "Purgar()";
@@ -218,7 +244,7 @@ static bool Purgar(int socket_c, TRAMA* ptrTrama)
 		og_info(msglog);
 		return false;
 	}
-	respuestaConsola(socket_c, ptrTrama, true);
+	respuestaConsola(og_client_socket(cli), ptrTrama, true);
 	return true;
 }
 // ________________________________________________________________________________________________________
@@ -233,7 +259,7 @@ static bool Purgar(int socket_c, TRAMA* ptrTrama)
 //		true: Si el proceso es correcto
 //		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-static bool ConsolaRemota(int socket_c, TRAMA* ptrTrama)
+static bool ConsolaRemota(TRAMA* ptrTrama, struct og_client *cli)
 {
 	char *iph,fileco[LONPRM],msglog[LONSTD],*ptrIpes[MAXIMOS_CLIENTES];;
 	FILE* f;
@@ -243,7 +269,7 @@ static bool ConsolaRemota(int socket_c, TRAMA* ptrTrama)
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
 		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
 		errorInfo(modulo, msglog);
-		respuestaConsola(socket_c, ptrTrama, false);
+		respuestaConsola(og_client_socket(cli), ptrTrama, false);
 		return false;
 	}
 	INTROaFINCAD(ptrTrama);
@@ -256,7 +282,7 @@ static bool ConsolaRemota(int socket_c, TRAMA* ptrTrama)
 		fclose(f);
 	}
 	liberaMemoria(iph);
-	respuestaConsola(socket_c, ptrTrama, true);
+	respuestaConsola(og_client_socket(cli), ptrTrama, true);
 	return true;
 }
 // ________________________________________________________________________________________________________
@@ -271,8 +297,9 @@ static bool ConsolaRemota(int socket_c, TRAMA* ptrTrama)
 //		true: Si el proceso es correcto
 //		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-static bool EcoConsola(int socket_c, TRAMA* ptrTrama)
+static bool EcoConsola(TRAMA* ptrTrama, struct og_client *cli)
 {
+	int socket_c = og_client_socket(cli);
 	char *iph,fileco[LONPRM],*buffer;
 	int lSize;
 
@@ -390,13 +417,15 @@ static bool hayHueco(int *idx)
 //		true: Si el proceso es correcto
 //		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-static bool InclusionClienteWinLnx(int socket_c, TRAMA *ptrTrama)
+static bool InclusionClienteWinLnx(TRAMA *ptrTrama, struct og_client *cli)
 {
+	int socket_c = og_client_socket(cli);
 	int res,idordenador,lon;
 	char nombreordenador[LONFIL];
-		
-	res=procesoInclusionClienteWinLnx(socket_c, ptrTrama,&idordenador,nombreordenador);
-	
+
+	res = procesoInclusionClienteWinLnx(socket_c, ptrTrama, &idordenador,
+					    nombreordenador);
+
 	// Prepara la trama de respuesta
 
 	initParametros(ptrTrama,0);
@@ -510,8 +539,10 @@ bool procesoInclusionClienteWinLnx(int socket_c, TRAMA *ptrTrama, int *idordenad
 //		true: Si el proceso es correcto
 //		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-static bool InclusionCliente(int socket_c, TRAMA *ptrTrama)
+static bool InclusionCliente(TRAMA *ptrTrama, struct og_client *cli)
 {
+	int socket_c = og_client_socket(cli);
+
 	if (!procesoInclusionCliente(socket_c, ptrTrama)) { // Ha habido algún error...
 		initParametros(ptrTrama,0);
 		strcpy(ptrTrama->parametros, "nfn=RESPUESTA_InclusionCliente\rres=0\r");
@@ -942,8 +973,9 @@ bool registraCliente(char *iph)
 //		true: Si el proceso es correcto
 //		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-static bool AutoexecCliente(int socket_c, TRAMA *ptrTrama)
+static bool AutoexecCliente(TRAMA *ptrTrama, struct og_client *cli)
 {
+	int socket_c = og_client_socket(cli);
 	int lon;
 	char *iph, *exe, msglog[LONSTD];
 	Database db;
@@ -1054,8 +1086,9 @@ bool recorreProcedimientos(Database db, char *parametros, FILE *fileexe, char *i
 //		true: Si el proceso es correcto
 //		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-static bool ComandosPendientes(int socket_c, TRAMA *ptrTrama)
+static bool ComandosPendientes(TRAMA *ptrTrama, struct og_client *cli)
 {
+	int socket_c = og_client_socket(cli);
 	char *ido,*iph,pids[LONPRM];
 	int ids, idx;
 
@@ -1162,7 +1195,7 @@ bool buscaComandos(char *ido, TRAMA *ptrTrama, int *ids)
 //		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 //
-static bool DisponibilidadComandos(int socket_c, TRAMA *ptrTrama)
+static bool DisponibilidadComandos(TRAMA *ptrTrama, struct og_client *cli)
 {
 	char *iph, *tpc;
 	int idx,port_old=0,port_new;
@@ -1176,7 +1209,7 @@ static bool DisponibilidadComandos(int socket_c, TRAMA *ptrTrama)
 	tpc = copiaParametro("tpc",ptrTrama); // Tipo de cliente (Plataforma y S.O.)
 	strcpy(tbsockets[idx].estado, tpc);
 
-	port_new=tomaPuerto(socket_c);
+	port_new = tomaPuerto(og_client_socket(cli));
 
 	if (tbsockets[idx].sock != -1) {
 		port_old=tomaPuerto(tbsockets[idx].sock);
@@ -1185,8 +1218,8 @@ static bool DisponibilidadComandos(int socket_c, TRAMA *ptrTrama)
 		}
 	}
 
-	tbsockets[idx].sock = socket_c;
-	swcSocket = true; // El socket permanece abierto para recibir comandos desde el servidor
+	tbsockets[idx].sock = og_client_socket(cli);
+	cli->keepalive = true;
 	liberaMemoria(iph);
 	liberaMemoria(tpc);		
 	return true;
@@ -1356,7 +1389,7 @@ bool respuestaConsola(int socket_c, TRAMA *ptrTrama, int res)
 //		true: Si el proceso es correcto
 //		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-static bool Arrancar(int socket_c, TRAMA* ptrTrama)
+static bool Arrancar(TRAMA* ptrTrama, struct og_client *cli)
 {
 	char *iph,*mac,*mar, msglog[LONSTD];
 	bool res;
@@ -1375,17 +1408,17 @@ static bool Arrancar(int socket_c, TRAMA* ptrTrama)
 	if(!res){
 		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
 		errorInfo(modulo, msglog);
-		respuestaConsola(socket_c, ptrTrama, false);
+		respuestaConsola(og_client_socket(cli), ptrTrama, false);
 		return false;
 	}
 
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
 		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
 		errorInfo(modulo, msglog);
-		respuestaConsola(socket_c, ptrTrama, false);
+		respuestaConsola(og_client_socket(cli), ptrTrama, false);
 		return false;
 	}
-	respuestaConsola(socket_c, ptrTrama, true);
+	respuestaConsola(og_client_socket(cli), ptrTrama, true);
 	return true;
 }
 // ________________________________________________________________________________________________________
@@ -1537,7 +1570,7 @@ void PasaHexBin(char *cadena, char *numero)
 //		true: Si el proceso es correcto
 //		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-static bool RESPUESTA_Arrancar(int socket_c, TRAMA* ptrTrama)
+static bool RESPUESTA_Arrancar(TRAMA* ptrTrama, struct og_client *cli)
 {
 	char msglog[LONSTD];
 	Database db;
@@ -1586,7 +1619,7 @@ static bool RESPUESTA_Arrancar(int socket_c, TRAMA* ptrTrama)
 //		true: Si el proceso es correcto
 //		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-static bool Apagar(int socket_c, TRAMA* ptrTrama)
+static bool Apagar(TRAMA* ptrTrama, struct og_client *cli)
 {
 	char msglog[LONSTD];
 	char modulo[] = "Apagar()";
@@ -1594,10 +1627,10 @@ static bool Apagar(int socket_c, TRAMA* ptrTrama)
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
 		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
 		errorInfo(modulo, msglog);
-		respuestaConsola(socket_c, ptrTrama, false);
+		respuestaConsola(og_client_socket(cli), ptrTrama, false);
 		return false;
 	}
-	respuestaConsola(socket_c, ptrTrama, true);
+	respuestaConsola(og_client_socket(cli), ptrTrama, true);
 	return true;
 }
 // ________________________________________________________________________________________________________
@@ -1612,7 +1645,7 @@ static bool Apagar(int socket_c, TRAMA* ptrTrama)
 //		true: Si el proceso es correcto
 //		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-static bool RESPUESTA_Apagar(int socket_c, TRAMA* ptrTrama)
+static bool RESPUESTA_Apagar(TRAMA* ptrTrama, struct og_client *cli)
 {
 	char msglog[LONSTD];
 	Database db;
@@ -1658,7 +1691,7 @@ static bool RESPUESTA_Apagar(int socket_c, TRAMA* ptrTrama)
 //		true: Si el proceso es correcto
 //		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-static bool Reiniciar(int socket_c, TRAMA* ptrTrama)
+static bool Reiniciar(TRAMA* ptrTrama, struct og_client *cli)
 {
 	char msglog[LONSTD];
 	char modulo[] = "Reiniciar()";
@@ -1666,10 +1699,10 @@ static bool Reiniciar(int socket_c, TRAMA* ptrTrama)
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
 		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
 		errorInfo(modulo, msglog);
-		respuestaConsola(socket_c, ptrTrama, false);
+		respuestaConsola(og_client_socket(cli), ptrTrama, false);
 		return false;
 	}
-	respuestaConsola(socket_c, ptrTrama, true);
+	respuestaConsola(og_client_socket(cli), ptrTrama, true);
 	return true;
 }
 // ________________________________________________________________________________________________________
@@ -1684,7 +1717,7 @@ static bool Reiniciar(int socket_c, TRAMA* ptrTrama)
 //		true: Si el proceso es correcto
 //		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-static bool RESPUESTA_Reiniciar(int socket_c, TRAMA* ptrTrama)
+static bool RESPUESTA_Reiniciar(TRAMA* ptrTrama, struct og_client *cli)
 {
 	char msglog[LONSTD];
 	Database db;
@@ -1730,7 +1763,7 @@ static bool RESPUESTA_Reiniciar(int socket_c, TRAMA* ptrTrama)
 //		true: Si el proceso es correcto
 //		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-static bool IniciarSesion(int socket_c, TRAMA* ptrTrama)
+static bool IniciarSesion(TRAMA* ptrTrama, struct og_client *cli)
 {
 	char msglog[LONSTD];
 	char modulo[] = "IniciarSesion()";
@@ -1738,10 +1771,10 @@ static bool IniciarSesion(int socket_c, TRAMA* ptrTrama)
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
 		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
 		errorInfo(modulo, msglog);
-		respuestaConsola(socket_c, ptrTrama, false);
+		respuestaConsola(og_client_socket(cli), ptrTrama, false);
 		return false;
 	}
-	respuestaConsola(socket_c, ptrTrama, true);
+	respuestaConsola(og_client_socket(cli), ptrTrama, true);
 	return true;
 }
 // ________________________________________________________________________________________________________
@@ -1756,7 +1789,7 @@ static bool IniciarSesion(int socket_c, TRAMA* ptrTrama)
 //		true: Si el proceso es correcto
 //		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-static bool RESPUESTA_IniciarSesion(int socket_c, TRAMA* ptrTrama)
+static bool RESPUESTA_IniciarSesion(TRAMA* ptrTrama, struct og_client *cli)
 {
 	char msglog[LONSTD];
 	Database db;
@@ -1802,7 +1835,7 @@ static bool RESPUESTA_IniciarSesion(int socket_c, TRAMA* ptrTrama)
 //		true: Si el proceso es correcto
 //		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-static bool CrearImagen(int socket_c, TRAMA* ptrTrama)
+static bool CrearImagen(TRAMA* ptrTrama, struct og_client *cli)
 {
 	char msglog[LONSTD];
 	char modulo[] = "CrearImagen()";
@@ -1810,10 +1843,10 @@ static bool CrearImagen(int socket_c, TRAMA* ptrTrama)
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
 		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
 		errorInfo(modulo, msglog);
-		respuestaConsola(socket_c, ptrTrama, false);
+		respuestaConsola(og_client_socket(cli), ptrTrama, false);
 		return false;
 	}
-	respuestaConsola(socket_c, ptrTrama, true);
+	respuestaConsola(og_client_socket(cli), ptrTrama, true);
 	return true;
 }
 // ________________________________________________________________________________________________________
@@ -1828,7 +1861,7 @@ static bool CrearImagen(int socket_c, TRAMA* ptrTrama)
 //		true: Si el proceso es correcto
 //		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-static bool RESPUESTA_CrearImagen(int socket_c, TRAMA* ptrTrama)
+static bool RESPUESTA_CrearImagen(TRAMA* ptrTrama, struct og_client *cli)
 {
 	char msglog[LONSTD];
 	Database db;
@@ -1979,7 +2012,7 @@ bool actualizaCreacionImagen(Database db, Table tbl, char *idi, char *dsk,
 //		true: Si el proceso es correcto
 //		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-static bool CrearImagenBasica(int socket_c, TRAMA* ptrTrama)
+static bool CrearImagenBasica(TRAMA* ptrTrama, struct og_client *cli)
 {
 	char msglog[LONSTD];
 	char modulo[] = "CrearImagenBasica()";
@@ -1987,10 +2020,10 @@ static bool CrearImagenBasica(int socket_c, TRAMA* ptrTrama)
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
 		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
 		errorInfo(modulo, msglog);
-		respuestaConsola(socket_c, ptrTrama, false);
+		respuestaConsola(og_client_socket(cli), ptrTrama, false);
 		return false;
 	}
-	respuestaConsola(socket_c, ptrTrama, true);
+	respuestaConsola(og_client_socket(cli), ptrTrama, true);
 	return true;
 }
 // ________________________________________________________________________________________________________
@@ -2005,9 +2038,10 @@ static bool CrearImagenBasica(int socket_c, TRAMA* ptrTrama)
 //		true: Si el proceso es correcto
 //		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-static bool RESPUESTA_CrearImagenBasica(int socket_c, TRAMA* ptrTrama)
+static bool RESPUESTA_CrearImagenBasica(TRAMA* ptrTrama, struct og_client *cli)
 {
-	return(RESPUESTA_CrearImagen(socket_c,ptrTrama)); // La misma respuesta que la creación de imagen monolítica
+	// La misma respuesta que la creación de imagen monolítica
+	return RESPUESTA_CrearImagen(ptrTrama, cli);
 }
 // ________________________________________________________________________________________________________
 // Función: CrearSoftIncremental
@@ -2022,7 +2056,7 @@ static bool RESPUESTA_CrearImagenBasica(int socket_c, TRAMA* ptrTrama)
 //		true: Si el proceso es correcto
 //		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-static bool CrearSoftIncremental(int socket_c, TRAMA* ptrTrama)
+static bool CrearSoftIncremental(TRAMA* ptrTrama, struct og_client *cli)
 {
 	char msglog[LONSTD];
 	char modulo[] = "CrearSoftIncremental()";
@@ -2030,10 +2064,10 @@ static bool CrearSoftIncremental(int socket_c, TRAMA* ptrTrama)
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
 		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
 		errorInfo(modulo, msglog);
-		respuestaConsola(socket_c, ptrTrama, false);
+		respuestaConsola(og_client_socket(cli), ptrTrama, false);
 		return false;
 	}
-	respuestaConsola(socket_c, ptrTrama, true);
+	respuestaConsola(og_client_socket(cli), ptrTrama, true);
 	return true;
 }
 // ________________________________________________________________________________________________________
@@ -2048,7 +2082,7 @@ static bool CrearSoftIncremental(int socket_c, TRAMA* ptrTrama)
 //		true: Si el proceso es correcto
 //		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-static bool RESPUESTA_CrearSoftIncremental(int socket_c, TRAMA* ptrTrama)
+static bool RESPUESTA_CrearSoftIncremental(TRAMA* ptrTrama, struct og_client *cli)
 {
 	Database db;
 	Table tbl;
@@ -2120,7 +2154,7 @@ static bool RESPUESTA_CrearSoftIncremental(int socket_c, TRAMA* ptrTrama)
 //		true: Si el proceso es correcto
 //		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-static bool RestaurarImagen(int socket_c, TRAMA* ptrTrama)
+static bool RestaurarImagen(TRAMA* ptrTrama, struct og_client *cli)
 {
 	char msglog[LONSTD];
 	char modulo[] = "RestaurarImagen()";
@@ -2128,10 +2162,10 @@ static bool RestaurarImagen(int socket_c, TRAMA* ptrTrama)
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
 		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
 		errorInfo(modulo, msglog);
-		respuestaConsola(socket_c, ptrTrama, false);
+		respuestaConsola(og_client_socket(cli), ptrTrama, false);
 		return false;
 	}
-	respuestaConsola(socket_c, ptrTrama, true);
+	respuestaConsola(og_client_socket(cli), ptrTrama, true);
 	return true;
 }
 // ________________________________________________________________________________________________________
@@ -2146,7 +2180,7 @@ static bool RestaurarImagen(int socket_c, TRAMA* ptrTrama)
 //		true: Si el proceso es correcto
 //		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-static bool RestaurarImagenBasica(int socket_c, TRAMA* ptrTrama)
+static bool RestaurarImagenBasica(TRAMA* ptrTrama, struct og_client *cli)
 {
 	char msglog[LONSTD];
 	char modulo[] = "RestaurarImagenBasica()";
@@ -2154,10 +2188,10 @@ static bool RestaurarImagenBasica(int socket_c, TRAMA* ptrTrama)
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
 		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
 		errorInfo(modulo, msglog);
-		respuestaConsola(socket_c, ptrTrama, false);
+		respuestaConsola(og_client_socket(cli), ptrTrama, false);
 		return false;
 	}
-	respuestaConsola(socket_c, ptrTrama, true);
+	respuestaConsola(og_client_socket(cli), ptrTrama, true);
 	return true;
 }
 // ________________________________________________________________________________________________________
@@ -2172,7 +2206,7 @@ static bool RestaurarImagenBasica(int socket_c, TRAMA* ptrTrama)
 //		true: Si el proceso es correcto
 //		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-static bool RestaurarSoftIncremental(int socket_c, TRAMA* ptrTrama)
+static bool RestaurarSoftIncremental(TRAMA* ptrTrama, struct og_client *cli)
 {
 	char msglog[LONSTD];
 	char modulo[] = "RestaurarSoftIncremental()";
@@ -2180,10 +2214,10 @@ static bool RestaurarSoftIncremental(int socket_c, TRAMA* ptrTrama)
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
 		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
 		errorInfo(modulo, msglog);
-		respuestaConsola(socket_c, ptrTrama, false);
+		respuestaConsola(og_client_socket(cli), ptrTrama, false);
 		return false;
 	}
-	respuestaConsola(socket_c, ptrTrama, true);
+	respuestaConsola(og_client_socket(cli), ptrTrama, true);
 	return true;
 }
 // ________________________________________________________________________________________________________
@@ -2199,7 +2233,7 @@ static bool RestaurarSoftIncremental(int socket_c, TRAMA* ptrTrama)
 //		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 //
-static bool RESPUESTA_RestaurarImagen(int socket_c, TRAMA* ptrTrama)
+static bool RESPUESTA_RestaurarImagen(TRAMA* ptrTrama, struct og_client *cli)
 {
 	char msglog[LONSTD];
 	Database db;
@@ -2265,9 +2299,9 @@ static bool RESPUESTA_RestaurarImagen(int socket_c, TRAMA* ptrTrama)
 //		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 //
-static bool RESPUESTA_RestaurarImagenBasica(int socket_c, TRAMA* ptrTrama)
+static bool RESPUESTA_RestaurarImagenBasica(TRAMA* ptrTrama, struct og_client *cli)
 {
-	return(RESPUESTA_RestaurarImagen(socket_c,ptrTrama));
+	return RESPUESTA_RestaurarImagen(ptrTrama, cli);
 }
 // ________________________________________________________________________________________________________
 // Función: RESPUESTA_RestaurarSoftIncremental
@@ -2281,9 +2315,9 @@ static bool RESPUESTA_RestaurarImagenBasica(int socket_c, TRAMA* ptrTrama)
 //		true: Si el proceso es correcto
 //		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-static bool RESPUESTA_RestaurarSoftIncremental(int socket_c, TRAMA* ptrTrama)
+static bool RESPUESTA_RestaurarSoftIncremental(TRAMA* ptrTrama, struct og_client *cli)
 {
-	return(RESPUESTA_RestaurarImagen(socket_c,ptrTrama));
+	return RESPUESTA_RestaurarImagen(ptrTrama, cli);
 }
 // ________________________________________________________________________________________________________
 // Función: actualizaRestauracionImagen
@@ -2335,7 +2369,7 @@ bool actualizaRestauracionImagen(Database db, Table tbl, char *idi,
 //		true: Si el proceso es correcto
 //		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-static bool Configurar(int socket_c, TRAMA* ptrTrama)
+static bool Configurar(TRAMA* ptrTrama, struct og_client *cli)
 {
 	char msglog[LONSTD];
 	char modulo[] = "Configurar()";
@@ -2343,10 +2377,10 @@ static bool Configurar(int socket_c, TRAMA* ptrTrama)
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
 		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
 		errorInfo(modulo, msglog);
-		respuestaConsola(socket_c, ptrTrama, false);
+		respuestaConsola(og_client_socket(cli), ptrTrama, false);
 		return false;
 	}
-	respuestaConsola(socket_c, ptrTrama, true);
+	respuestaConsola(og_client_socket(cli), ptrTrama, true);
 	return true;
 }
 // ________________________________________________________________________________________________________
@@ -2362,7 +2396,7 @@ static bool Configurar(int socket_c, TRAMA* ptrTrama)
 //		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 //
-static bool RESPUESTA_Configurar(int socket_c, TRAMA* ptrTrama)
+static bool RESPUESTA_Configurar(TRAMA* ptrTrama, struct og_client *ci)
 {
 	char msglog[LONSTD];
 	Database db;
@@ -2414,7 +2448,7 @@ static bool RESPUESTA_Configurar(int socket_c, TRAMA* ptrTrama)
 //		true: Si el proceso es correcto
 //		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-static bool EjecutarScript(int socket_c, TRAMA* ptrTrama)
+static bool EjecutarScript(TRAMA* ptrTrama, struct og_client *cli)
 {
 	char msglog[LONSTD];
 	char modulo[] = "EjecutarScript()";
@@ -2422,10 +2456,10 @@ static bool EjecutarScript(int socket_c, TRAMA* ptrTrama)
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
 		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
 		errorInfo(modulo, msglog);
-		respuestaConsola(socket_c, ptrTrama, false);
+		respuestaConsola(og_client_socket(cli), ptrTrama, false);
 		return false;
 	}
-	respuestaConsola(socket_c, ptrTrama, true);
+	respuestaConsola(og_client_socket(cli), ptrTrama, true);
 	return true;
 }
 // ________________________________________________________________________________________________________
@@ -2440,7 +2474,7 @@ static bool EjecutarScript(int socket_c, TRAMA* ptrTrama)
 //		true: Si el proceso es correcto
 //		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-static bool RESPUESTA_EjecutarScript(int socket_c, TRAMA* ptrTrama)
+static bool RESPUESTA_EjecutarScript(TRAMA* ptrTrama, struct og_client *cli)
 {
 	char msglog[LONSTD];
 	Database db;
@@ -2489,7 +2523,7 @@ static bool RESPUESTA_EjecutarScript(int socket_c, TRAMA* ptrTrama)
 //		true: Si el proceso es correcto
 //		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-static bool InventarioHardware(int socket_c, TRAMA* ptrTrama)
+static bool InventarioHardware(TRAMA* ptrTrama, struct og_client *cli)
 {
 	char msglog[LONSTD];
 	char modulo[] = "InventarioHardware()";
@@ -2497,10 +2531,10 @@ static bool InventarioHardware(int socket_c, TRAMA* ptrTrama)
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
 		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
 		errorInfo(modulo, msglog);
-		respuestaConsola(socket_c, ptrTrama, false);
+		respuestaConsola(og_client_socket(cli), ptrTrama, false);
 		return false;
 	}
-	respuestaConsola(socket_c, ptrTrama, true);
+	respuestaConsola(og_client_socket(cli), ptrTrama, true);
 	return true;
 }
 // ________________________________________________________________________________________________________
@@ -2515,7 +2549,7 @@ static bool InventarioHardware(int socket_c, TRAMA* ptrTrama)
 //		true: Si el proceso es correcto
 //		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-static bool RESPUESTA_InventarioHardware(int socket_c, TRAMA* ptrTrama)
+static bool RESPUESTA_InventarioHardware(TRAMA* ptrTrama, struct og_client *cli)
 {
 	char msglog[LONSTD];
 	Database db;
@@ -2868,7 +2902,7 @@ bool cuestionPerfilHardware(Database db, Table tbl, char *idc, char *ido,
 //		true: Si el proceso es correcto
 //		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-static bool InventarioSoftware(int socket_c, TRAMA* ptrTrama)
+static bool InventarioSoftware(TRAMA* ptrTrama, struct og_client *cli)
 {
 	char msglog[LONSTD];
 	char modulo[] = "InventarioSoftware()";
@@ -2876,10 +2910,10 @@ static bool InventarioSoftware(int socket_c, TRAMA* ptrTrama)
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
 		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
 		errorInfo(modulo, msglog);
-		respuestaConsola(socket_c, ptrTrama, false);
+		respuestaConsola(og_client_socket(cli), ptrTrama, false);
 		return false;
 	}
-	respuestaConsola(socket_c, ptrTrama, true);
+	respuestaConsola(og_client_socket(cli), ptrTrama, true);
 	return true;
 }
 // ________________________________________________________________________________________________________
@@ -2894,7 +2928,7 @@ static bool InventarioSoftware(int socket_c, TRAMA* ptrTrama)
 //		true: Si el proceso es correcto
 //		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-static bool RESPUESTA_InventarioSoftware(int socket_c, TRAMA* ptrTrama)
+static bool RESPUESTA_InventarioSoftware(TRAMA* ptrTrama, struct og_client *cli)
 {
 	char msglog[LONSTD];
 	Database db;
@@ -3252,8 +3286,9 @@ bool cuestionPerfilSoftware(Database db, Table tbl, char *idc, char *ido,
 //		true: Si el proceso es correcto
 //		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-static bool enviaArchivo(int socket_c, TRAMA *ptrTrama)
+static bool enviaArchivo(TRAMA *ptrTrama, struct og_client *cli)
 {
+	int socket_c = og_client_socket(cli);
 	char *nfl;
 
 	// Toma parámetros
@@ -3278,8 +3313,9 @@ static bool enviaArchivo(int socket_c, TRAMA *ptrTrama)
 //		true: Si el proceso es correcto
 //		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-static bool recibeArchivo(int socket_c, TRAMA *ptrTrama)
+static bool recibeArchivo(TRAMA *ptrTrama, struct og_client *cli)
 {
+	int socket_c = og_client_socket(cli);
 	char *nfl;
 
 	// Toma parámetros
@@ -3307,7 +3343,7 @@ static bool recibeArchivo(int socket_c, TRAMA *ptrTrama)
 //		true: Si el proceso es correcto
 //		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-static bool envioProgramacion(int socket_c, TRAMA *ptrTrama)
+static bool envioProgramacion(TRAMA *ptrTrama, struct og_client *cli)
 {
 	char sqlstr[LONSQL], msglog[LONSTD];
 	char *idp,iph[LONIP],mac[LONMAC];
@@ -3395,7 +3431,7 @@ static bool envioProgramacion(int socket_c, TRAMA *ptrTrama)
 // This object stores function handler for messages
 static struct {
 	const char *nf; // Nombre de la función
-	bool (*fptr)(int socket,TRAMA *); // Puntero a la función que procesa la trama
+	bool (*fcn)(TRAMA *, struct og_client *cli);
 } tbfuncionesServer[] = {
 	{ "Sondeo",				Sondeo,			},
 	{ "respuestaSondeo",			respuestaSondeo,	},
@@ -3453,59 +3489,158 @@ static struct {
 //		true: Si el proceso es correcto
 //		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-static bool gestionaTrama(int socket_c)
+static bool gestionaTrama(TRAMA *ptrTrama, struct og_client *cli)
 {
-	TRAMA* ptrTrama;
 	int i, res;
 	char *nfn;
-
-	ptrTrama=recibeTrama(&socket_c);
 
 	if (ptrTrama){
 		INTROaFINCAD(ptrTrama);
 		nfn = copiaParametro("nfn",ptrTrama); // Toma nombre de la función
 
-		for (i = 0; tbfuncionesServer[i].fptr; i++) {
-			res = strncmp(tbfuncionesServer[i].nf, nfn,
-				      strlen(tbfuncionesServer[i].nf));
-			if (res == 0) { // Encontrada la función que procesa el mensaje
-				liberaMemoria(nfn);
-				res=tbfuncionesServer[i].fptr(socket_c, ptrTrama); // Invoca la función
-				liberaMemoria(ptrTrama->parametros);
-				liberaMemoria(ptrTrama);
-				return(res);
+		for (i = 0; tbfuncionesServer[i].fcn; i++) {
+			if (!strncmp(tbfuncionesServer[i].nf, nfn,
+				     strlen(tbfuncionesServer[i].nf))) {
+				res = tbfuncionesServer[i].fcn(ptrTrama, cli);
+				break;
 			}
 		}
 		liberaMemoria(nfn);
-		liberaMemoria(ptrTrama->parametros);
-		liberaMemoria(ptrTrama);
-		/*
-		 Sólo puede ser un comando personalizado o su notificación
-		if (ptrTrama->tipo == MSG_COMANDO)
-			return (Comando(socket_c, ptrTrama));
-		else {
-			if (ptrTrama->tipo == MSG_NOTIFICACION)
-				return (RESPUESTA_Comando(socket_c, ptrTrama));
-			else
-				og_log(18, false); // No se reconoce el mensaje
-		}
-		*/
 	}
-	else
-		og_log(17, false); // Error en la recepción
-	return true;
+	return res;
 }
 
-// ********************************************************************************************************
-// PROGRAMA PRINCIPAL (SERVICIO)
-// ********************************************************************************************************
-int main(int argc, char *argv[]) {
-	int i;
-	int socket_s; // Server socket
-	int socket_c; // Client socket
-	socklen_t iAddrSize;
-	struct sockaddr_in local, cliente;
+static void og_client_read_cb(struct ev_loop *loop, struct ev_io *io, int events)
+{
+	char hdrlen[LONHEXPRM];
+	struct og_client *cli;
+	TRAMA *ptrTrama;
+	int ret, len;
+	char *data;
+
+	if (events & EV_ERROR)
+		goto close;
+
+	cli = container_of(io, struct og_client, io);
+
+	ret = recv(io->fd, cli->buf + cli->buf_len,
+		   sizeof(cli->buf) - cli->buf_len, 0);
+	if (ret <= 0)
+		goto close;
+
+	ev_timer_again(loop, &cli->timer);
+
+	cli->buf_len += ret;
+
+	switch (cli->state) {
+	case OG_CLIENT_RECEIVING_HEADER:
+		/* Still too short to validate protocol fingerprint and message
+		 * length.
+		 */
+		if (cli->buf_len < 15 + LONHEXPRM)
+			return;
+
+		if (strncmp(cli->buf, "@JMMLCAMDJ_MCDJ", 15))
+			goto close;
+
+		memcpy(hdrlen, &cli->buf[LONGITUD_CABECERATRAMA], LONHEXPRM);
+		cli->msg_len = strtol(hdrlen, NULL, 16);
+
+		/* Header announces more that we can fit into buffer. */
+		if (cli->msg_len >= sizeof(cli->buf))
+			goto close;
+
+		cli->state = OG_CLIENT_RECEIVING_PAYLOAD;
+		/* Fall through. */
+	case OG_CLIENT_RECEIVING_PAYLOAD:
+		/* Still not enough data to process request. */
+		if (cli->buf_len < cli->msg_len)
+			return;
+
+		cli->state = OG_CLIENT_PROCESSING_REQUEST;
+		/* fall through. */
+	case OG_CLIENT_PROCESSING_REQUEST:
+		len = cli->msg_len - (LONGITUD_CABECERATRAMA + LONHEXPRM);
+		data = desencriptar(&cli->buf[LONGITUD_CABECERATRAMA + LONHEXPRM], &len);
+
+		ptrTrama = (TRAMA *)reservaMemoria(sizeof(TRAMA));
+		if (!ptrTrama)
+			goto close;
+
+		initParametros(ptrTrama, len);
+		memcpy(ptrTrama, cli->buf, LONGITUD_CABECERATRAMA);
+		memcpy(ptrTrama->parametros, data, len);
+		ptrTrama->lonprm = len;
+
+		if (!gestionaTrama(ptrTrama, cli))
+			og_log(39, true);
+
+		liberaMemoria(ptrTrama->parametros);
+		liberaMemoria(ptrTrama);
+
+		if (!cli->keepalive)
+			goto close;
+		break;
+	}
+	return;
+close:
+	ev_timer_stop(loop, &cli->timer);
+	ev_io_stop(loop, &cli->io);
+	close(cli->io.fd);
+	free(cli);
+}
+
+static void og_client_timer_cb(struct ev_loop *loop, ev_timer *timer, int events)
+{
+	struct og_client *cli;
+
+	cli = container_of(timer, struct og_client, timer);
+	if (cli->keepalive) {
+		ev_timer_again(loop, &cli->timer);
+		return;
+	}
+	ev_io_stop(loop, &cli->io);
+	close(cli->io.fd);
+	free(cli);
+}
+
+static void og_server_accept_cb(struct ev_loop *loop, struct ev_io *io,
+				int events)
+{
+	struct sockaddr_in client_addr;
+	socklen_t addrlen = sizeof(client_addr);
+	struct og_client *cli;
+	int client_sd;
+
+	if (events & EV_ERROR)
+		return;
+
+	client_sd = accept(io->fd, (struct sockaddr *)&client_addr, &addrlen);
+	if (client_sd < 0) {
+		og_log(15, true);
+		return;
+	}
+
+	cli = (struct og_client *)calloc(1, sizeof(struct og_client));
+	if (!cli) {
+		close(client_sd);
+		return;
+	}
+
+	ev_io_init(&cli->io, og_client_read_cb, client_sd, EV_READ);
+	ev_io_start(loop, &cli->io);
+	ev_timer_init(&cli->timer, og_client_timer_cb, OG_CLIENT_TIMEOUT, 0.);
+	ev_timer_start(loop, &cli->timer);
+}
+
+int main(int argc, char *argv[])
+{
+	struct ev_loop *loop = ev_default_loop(0);
+	struct ev_io ev_io_server;
+	struct sockaddr_in local;
+	int socket_s;
 	int activo=1;
+	int i;
 
 	/*--------------------------------------------------------------------------------------------------------
 	 Validación de parámetros de ejecución y lectura del fichero de configuración del servicio
@@ -3544,29 +3679,14 @@ int main(int argc, char *argv[]) {
 	}
 
 	listen(socket_s, 250); // Pone a escuchar al socket
-	iAddrSize = sizeof(cliente);
-	/*--------------------------------------------------------------------------------------------------------
-	 Bucle para acceptar conexiones
-	 ---------------------------------------------------------------------------------------------------------*/
+
+	ev_io_init(&ev_io_server, og_server_accept_cb, socket_s, EV_READ);
+	ev_io_start(loop, &ev_io_server);
+
 	infoLog(1); // Inicio de sesión
-	while (true) {
-		socket_c = accept(socket_s, (struct sockaddr *) &cliente, &iAddrSize);
-		if (socket_c < 0) {
-			og_log(15, true);
-			exit(EXIT_FAILURE);
-		}
-		swcSocket = false; // Por defecto se cerrara el socket de cliente después del anális de la trama
-		if (!gestionaTrama(socket_c)) {
-			og_log(39, true);
-			//close(socket_c);/tmp/
-			//break;
-		}
-		if (!swcSocket) // Sólo se cierra cuando el cliente NO espera comandos ineractivos
-			close(socket_c);
-	}
-	/*--------------------------------------------------------------------------------------------------------
-	 Fin del servicio
-	 ---------------------------------------------------------------------------------------------------------*/
-	close(socket_s);
+
+	while (1)
+		ev_loop(loop, 0);
+
 	exit(EXIT_SUCCESS);
 }
