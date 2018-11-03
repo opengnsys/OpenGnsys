@@ -3466,7 +3466,8 @@ static bool gestionaTrama(int socket_c)
 		nfn = copiaParametro("nfn",ptrTrama); // Toma nombre de la función
 
 		for (i = 0; tbfuncionesServer[i].fptr; i++) {
-			res = strcmp(tbfuncionesServer[i].nf, nfn);
+			res = strncmp(tbfuncionesServer[i].nf, nfn,
+				      strlen(tbfuncionesServer[i].nf));
 			if (res == 0) { // Encontrada la función que procesa el mensaje
 				liberaMemoria(nfn);
 				res=tbfuncionesServer[i].fptr(socket_c, ptrTrama); // Invoca la función
