@@ -9,6 +9,7 @@
 #include "ogAdmServer.h"
 #include "ogAdmLib.c"
 #include <ev.h>
+#include <syslog.h>
 
 static char usuario[LONPRM]; // Usuario de acceso a la base de datos
 static char pasguor[LONPRM]; // Password del usuario
@@ -110,6 +111,7 @@ enum og_client_state {
 struct og_client {
 	struct ev_io		io;
 	struct ev_timer		timer;
+	struct sockaddr_in	addr;
 	enum og_client_state	state;
 	char			buf[4096];
 	unsigned int		buf_len;
@@ -3502,9 +3504,14 @@ static bool gestionaTrama(TRAMA *ptrTrama, struct og_client *cli)
 			if (!strncmp(tbfuncionesServer[i].nf, nfn,
 				     strlen(tbfuncionesServer[i].nf))) {
 				res = tbfuncionesServer[i].fcn(ptrTrama, cli);
+				syslog(LOG_INFO, "handling request %s (result=%d)\n",
+				       tbfuncionesServer[i].nf, res);
 				break;
 			}
 		}
+		if (!tbfuncionesServer[i].fcn)
+			syslog(LOG_ERR, "unknown request %s\n", nfn);
+
 		liberaMemoria(nfn);
 	}
 	return res;
@@ -3540,15 +3547,21 @@ static void og_client_read_cb(struct ev_loop *loop, struct ev_io *io, int events
 		if (cli->buf_len < 15 + LONHEXPRM)
 			return;
 
-		if (strncmp(cli->buf, "@JMMLCAMDJ_MCDJ", 15))
+		if (strncmp(cli->buf, "@JMMLCAMDJ_MCDJ", 15)) {
+			syslog(LOG_ERR, "bad fingerprint from client %s, closing\n",
+			       inet_ntoa(cli->addr.sin_addr));
 			goto close;
+		}
 
 		memcpy(hdrlen, &cli->buf[LONGITUD_CABECERATRAMA], LONHEXPRM);
 		cli->msg_len = strtol(hdrlen, NULL, 16);
 
 		/* Header announces more that we can fit into buffer. */
-		if (cli->msg_len >= sizeof(cli->buf))
+		if (cli->msg_len >= sizeof(cli->buf)) {
+			syslog(LOG_ERR, "too large message %u bytes from %s\n",
+			       cli->msg_len, inet_ntoa(cli->addr.sin_addr));
 			goto close;
+		}
 
 		cli->state = OG_CLIENT_RECEIVING_PAYLOAD;
 		/* Fall through. */
@@ -3560,6 +3573,9 @@ static void og_client_read_cb(struct ev_loop *loop, struct ev_io *io, int events
 		cli->state = OG_CLIENT_PROCESSING_REQUEST;
 		/* fall through. */
 	case OG_CLIENT_PROCESSING_REQUEST:
+		syslog(LOG_INFO, "processing request from %s\n",
+		       inet_ntoa(cli->addr.sin_addr));
+
 		len = cli->msg_len - (LONGITUD_CABECERATRAMA + LONHEXPRM);
 		data = desencriptar(&cli->buf[LONGITUD_CABECERATRAMA + LONHEXPRM], &len);
 
@@ -3581,9 +3597,14 @@ static void og_client_read_cb(struct ev_loop *loop, struct ev_io *io, int events
 		if (!cli->keepalive)
 			goto close;
 		break;
+	default:
+		syslog(LOG_ERR, "unknown state, critical internal error\n");
+		goto close;
 	}
 	return;
 close:
+	syslog(LOG_ERR, "closed connection by %s\n",
+	       inet_ntoa(cli->addr.sin_addr));
 	ev_timer_stop(loop, &cli->timer);
 	ev_io_stop(loop, &cli->io);
 	close(cli->io.fd);
@@ -3599,6 +3620,9 @@ static void og_client_timer_cb(struct ev_loop *loop, ev_timer *timer, int events
 		ev_timer_again(loop, &cli->timer);
 		return;
 	}
+	syslog(LOG_ERR, "timeout request for client %s\n",
+	       inet_ntoa(cli->addr.sin_addr));
+
 	ev_io_stop(loop, &cli->io);
 	close(cli->io.fd);
 	free(cli);
@@ -3626,6 +3650,10 @@ static void og_server_accept_cb(struct ev_loop *loop, struct ev_io *io,
 		close(client_sd);
 		return;
 	}
+	memcpy(&cli->addr, &client_addr, sizeof(client_addr));
+
+	syslog(LOG_INFO, "connection from client %s\n",
+	       inet_ntoa(cli->addr.sin_addr));
 
 	ev_io_init(&cli->io, og_client_read_cb, client_sd, EV_READ);
 	ev_io_start(loop, &cli->io);
@@ -3641,6 +3669,8 @@ int main(int argc, char *argv[])
 	int socket_s;
 	int activo=1;
 	int i;
+
+	openlog(argv[0], LOG_PID, LOG_DAEMON);
 
 	/*--------------------------------------------------------------------------------------------------------
 	 Validación de parámetros de ejecución y lectura del fichero de configuración del servicio
@@ -3684,6 +3714,8 @@ int main(int argc, char *argv[])
 	ev_io_start(loop, &ev_io_server);
 
 	infoLog(1); // Inicio de sesión
+
+	syslog(LOG_INFO, "Waiting for connections\n");
 
 	while (1)
 		ev_loop(loop, 0);
