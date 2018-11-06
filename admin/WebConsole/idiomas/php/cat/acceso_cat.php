@@ -30,5 +30,4 @@ $TbMsg["ACCESS_ALLOWED"]='Accés permès. Esperi si us plau ...';
 $TbMsg["ACCESS_ERROR"]='Error d\'acces';
 $TbMsg["ACCESS_UNKNOWNERROR"]='Error desconegut';
 $TbMsg["ACCESS_NOFRAMES"]='El navegador necessita suport per a "frames" per a mostrar la pàgina.';
-?>
-
+$TbMsg["WARN_NOREPO"]='No existe repositorio definido en la Unidad Organizativa';

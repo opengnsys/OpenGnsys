@@ -168,6 +168,28 @@ if ($idc != 0)
 	return(true); 
  } 
  //_______________________________________________________________________________________________________ 
+ //    Muestra mensaje de alerta si no existe repositorio en la unidad organizativa
+ //        Parametros:
+ //        - cmd:Una comando ya operativo (con conexión abierta)
+ //        - idcentro: identificador de la unidad organizativa
+ //_______________________________________________________________________________________________________
+ function alert_norepo($cmd, $idcentro,$mensaje){
+	$idrepositorio = '';
+	$rs=new Recordset;
+	$cmd->texto="SELECT idrepositorio FROM repositorios ".
+		    " WHERE idcentro=$idcentro LIMIT 1;";
+	$rs->Comando=&$cmd;
+	if ($rs->Abrir()) {
+		$rs->Primero();
+		$idrepositorio = $rs->campos["idrepositorio"];
+	}
+	$rs->Cerrar();
+	if ($idrepositorio == '') {
+		echo 'alert("'.$mensaje.'");';
+	}
+	return;
+
+ }
 ?> 
 <html> 
 <head> 
@@ -183,6 +205,7 @@ if ($idc != 0)
      <script language="javascript"> 
              var vez=0; 
              setTimeout("acceso();",300); 
+
              function acceso(){ 
                  o=document.getElementById("mensaje"); 
                  var s=o.style.visibility; 
@@ -197,7 +220,7 @@ if ($idc != 0)
                  vez++; 
                  setTimeout("acceso();",300); 
              } 
+             <?php alert_norepo($cmd, $idc,$TbMsg["WARN_NOREPO"]) ?>;
      </script> 
 </body> 
 </html> 
-
