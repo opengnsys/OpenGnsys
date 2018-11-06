@@ -207,10 +207,10 @@ case "$OSDISTRIB" in
 		TFTPCFGDIR=/var/lib/tftpboot
 		;;
 	fedora|centos)
-		DEPENDENCIES=( subversion httpd mod_ssl php php-ldap php-fpm mysql-server mysql-devel mysql-devel.i686 php-mysql dhcp tftp-server tftp xinetd binutils gcc gcc-c++ glibc-devel glibc-devel.i686 glibc-static glibc-static.i686 libstdc++-devel.i686 make wget curl doxygen graphviz ctorrent samba samba-client rsync unzip debootstrap schroot squashfs-tools python-crypto arp-scan procps-ng gettext moreutils jq net-tools udpcast shim-x64 grub2-efi-x64 grub2-efi-x64-modules http://ftp.altlinux.org/pub/distributions/ALTLinux/5.1/branch/$(arch)/RPMS.classic/netpipes-4.2-alt1.$(arch).rpm )
-		[ "$OSDISTRIB" == "centos" ] && UPDATEPKGLIST="yum update -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-$OSVERSION.noarch.rpm http://rpms.remirepo.net/enterprise/remi-release-$OSVERSION.rpm"
-		INSTALLEXTRADEPS=( 'pushd /tmp; wget -t3 http://download.bittornado.com/download/BitTornado-0.3.18.tar.gz && tar xvzf BitTornado-0.3.18.tar.gz && cd BitTornado-CVS && python setup.py install && ln -fs btlaunchmany.py /usr/bin/btlaunchmany && ln -fs bttrack.py /usr/bin/bttrack; popd' )
-		INSTALLPKG="yum update -y libstdc++ libstdc++.i686"
+		DEPENDENCIES=( subversion httpd mod_ssl php-ldap php-fpm mysql-server mysql-devel mysql-devel.i686 php-mysql dhcp tftp-server tftp xinetd binutils gcc gcc-c++ glibc-devel glibc-devel.i686 glibc-static glibc-static.i686 libstdc++-devel.i686 make wget curl doxygen graphviz ctorrent samba samba-client rsync unzip debootstrap schroot squashfs-tools python-crypto arp-scan procps-ng gettext moreutils jq net-tools udpcast shim-x64 grub2-efi-x64 grub2-efi-x64-modules http://ftp.altlinux.org/pub/distributions/ALTLinux/5.1/branch/$(arch)/RPMS.classic/netpipes-4.2-alt1.$(arch).rpm )
+		[ "$OSDISTRIB" == "centos" ] && UPDATEPKGLIST="yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-$OSVERSION.noarch.rpm http://rpms.remirepo.net/enterprise/remi-release-$OSVERSION.rpm"
+		INSTALLEXTRADEPS=( 'pushd /tmp; wget -t3 http://ftp.acc.umu.se/mirror/bittornado/BitTornado-0.3.18.tar.gz && tar xvzf BitTornado-0.3.18.tar.gz && cd BitTornado-CVS && python setup.py install && ln -fs btlaunchmany.py /usr/bin/btlaunchmany && ln -fs bttrack.py /usr/bin/bttrack; popd' )
+		INSTALLPKG="yum install -y libstdc++ libstdc++.i686"
 		CHECKPKG="rpm -q --quiet \$package"
 		SYSTEMD=$(which systemctl 2>/dev/null)
 		if [ -n "$SYSTEMD" ]; then
@@ -316,8 +316,8 @@ case "$OSDISTRIB" in
 	centos)	# Postconfiguación personalizada para CentOS.
 		# Configuración para PHP 7.
 		PHP7VERSION=$(yum list -q php7\* 2>/dev/null | awk -F. '/^php/ {print $1; exit;}')
-		DEPENDENCIES=( ${DEPENDENCIES[@]//php/$PHP7VERSION} )
-		PHPFPMSERV="${PHP7VERSION}-fpm"
+		PHPFPMSERV="${PHP7VERSION}-${PHPFPMSERV}"
+		DEPENDENCIES=( ${PHP7VERSION} ${DEPENDENCIES[@]//php/$PHP7VERSION-php} )
 		# Cambios a aplicar a partir de CentOS 7.
 		if [ $OSVERSION -ge 7 ]; then
 			# Sustituir MySQL por MariaDB.

@@ -385,7 +385,7 @@ function installDependencies()
 	fi
 	if [ "$OSDISTRIB" == "centos" ]; then
 		PHP7VERSION=$(yum list -q php7\* 2>/dev/null | awk -F. '/^php/ {print $1; exit;}')
-		PHPFPMSERV="${PHP7VERSION}-fpm"
+		PHPFPMSERV="${PHP7VERSION}-${PHPFPMSERV}"
 		PHP5PKGS=( $(yum list installed | awk '$1~/^php/ && $2~/^5\./ {sub(/\..*$/, "", $1); print $1}') )
 		if [ -n "$PHP5PKGS" ]; then
 			$DELETEPKGS ${PHP5PKGS[@]}
