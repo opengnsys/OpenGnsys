@@ -15,6 +15,7 @@ Tickets resueltos en módulo OpenGnsys Client:
 
 Tickets resueltos en módulo OpenGnsys Server:
 #846	Configuración de logrotate para que incluya todos los servicios de OpenGnsys (corrección)
+#859	Gestor de los ficheros PXE duplicado
 
 Tickets resueltos en módulo OpenGnsys Repository Server:
 #580	Caídas de ogAdmServer y ogAdmClient por desbordamiento de cadenas (no se resolverá)
@@ -23,6 +24,7 @@ Tickets resueltos en módulo OpenGnsys Repository Server:
 Tickets resueltos en módulo OpenGnsys Web Admin Console:
 #835	Problemas al listar plantillas en Nerboot Avanzado (corrección)
 #867	La ayuda en la consola incluirá más información
+#870	Netboot avanzado no crea la plantilla de arranque si el equipo no tiene asignado un repositorio (corrección)
 
 Tickets genéricos resueltos:
 #839	Errores detectado en API REST para Remote PC (corrección)

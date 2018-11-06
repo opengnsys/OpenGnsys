@@ -208,7 +208,7 @@ case "$OSDISTRIB" in
 	fedora|centos)
 		DEPENDENCIES=( subversion httpd mod_ssl php php-ldap mysql-server mysql-devel mysql-devel.i686 php-mysql dhcp tftp-server tftp xinetd binutils gcc gcc-c++ glibc-devel glibc-devel.i686 glibc-static glibc-static.i686 libstdc++-devel.i686 make wget curl doxygen graphviz ctorrent samba samba-client rsync unzip debootstrap schroot squashfs-tools python-crypto arp-scan procps-ng gettext moreutils jq net-tools http://ftp.altlinux.org/pub/distributions/ALTLinux/5.1/branch/$(arch)/RPMS.classic/netpipes-4.2-alt1.$(arch).rpm )
 		INSTALLEXTRADEPS=( 'pushd /tmp; wget -t3 http://download.bittornado.com/download/BitTornado-0.3.18.tar.gz && tar xvzf BitTornado-0.3.18.tar.gz && cd BitTornado-CVS && python setup.py install && ln -fs btlaunchmany.py /usr/bin/btlaunchmany && ln -fs bttrack.py /usr/bin/bttrack; popd' )
-		INSTALLPKG="yum update -y libstdc++ libstdc++.i686"
+		INSTALLPKG="yum install -y libstdc++ libstdc++.i686"
 		CHECKPKG="rpm -q --quiet \$package"
 		SYSTEMD=$(which systemctl 2>/dev/null)
 		if [ -n "$SYSTEMD" ]; then
