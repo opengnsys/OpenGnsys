@@ -17,6 +17,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <stdbool.h>
 #include </usr/include/mysql/mysql.h>
 #include "Database.h"
 #include "ogAdmLib.h"
@@ -38,85 +39,85 @@ typedef struct{ // Estructura usada para guardar información de los clientes
 }SOCKETCL;
 SOCKETCL tbsockets[MAXIMOS_CLIENTES];
 
-BOOLEAN swcSocket; // Switch para indicar si se debe cerrar el socket del cliente
+bool swcSocket; // Switch para indicar si se debe cerrar el socket del cliente
 
 // ________________________________________________________________________________________________________
 // Prototipo de funciones
 // ________________________________________________________________________________________________________
 
-BOOLEAN tomaConfiguracion(char*);
-BOOLEAN gestionaTrama(SOCKET*);
-BOOLEAN Sondeo(SOCKET*,TRAMA*);
-BOOLEAN respuestaSondeo(SOCKET *,TRAMA*);
-BOOLEAN InclusionClienteWinLnx(SOCKET*,TRAMA*);
-BOOLEAN InclusionCliente(SOCKET*,TRAMA*);
-BOOLEAN registraCliente(char *);
+bool tomaConfiguracion(char*);
+bool gestionaTrama(SOCKET*);
+bool Sondeo(SOCKET*,TRAMA*);
+bool respuestaSondeo(SOCKET *,TRAMA*);
+bool InclusionClienteWinLnx(SOCKET*,TRAMA*);
+bool InclusionCliente(SOCKET*,TRAMA*);
+bool registraCliente(char *);
 
-BOOLEAN procesoInclusionClienteWinLnx(int socket, TRAMA*,int*,char*);
-BOOLEAN procesoInclusionCliente(int socket, TRAMA*);
-BOOLEAN clienteExistente(char *,int *);
-BOOLEAN clienteDisponible(char *,int *);
-BOOLEAN hayHueco(int *);
-BOOLEAN actualizaConfiguracion(Database , Table ,char* ,int);
-BOOLEAN AutoexecCliente(SOCKET *, TRAMA *);
-BOOLEAN recorreProcedimientos(Database ,char* ,FILE*,char*);
+bool procesoInclusionClienteWinLnx(int socket, TRAMA*,int*,char*);
+bool procesoInclusionCliente(int socket, TRAMA*);
+bool clienteExistente(char *,int *);
+bool clienteDisponible(char *,int *);
+bool hayHueco(int *);
+bool actualizaConfiguracion(Database , Table ,char* ,int);
+bool AutoexecCliente(SOCKET *, TRAMA *);
+bool recorreProcedimientos(Database ,char* ,FILE*,char*);
 
-BOOLEAN tomaRepositorio(Database ,Table ,char*,int*);
-BOOLEAN buscaComandos(char *,TRAMA *,int *);
-BOOLEAN DisponibilidadComandos(SOCKET*,TRAMA*);
-BOOLEAN respuestaEstandar(TRAMA *,char **,char **,char ** ,Database *,Table *);
-BOOLEAN respuestaConsola(int socket, TRAMA *,int);
-BOOLEAN enviaComando(TRAMA *ptrTrama,const char*);
+bool tomaRepositorio(Database ,Table ,char*,int*);
+bool buscaComandos(char *,TRAMA *,int *);
+bool DisponibilidadComandos(SOCKET*,TRAMA*);
+bool respuestaEstandar(TRAMA *,char **,char **,char ** ,Database *,Table *);
+bool respuestaConsola(int socket, TRAMA *,int);
+bool enviaComando(TRAMA *ptrTrama,const char*);
 
-BOOLEAN Actualizar(SOCKET *, TRAMA* );
-BOOLEAN Purgar(SOCKET *, TRAMA* );
+bool Actualizar(SOCKET *, TRAMA* );
+bool Purgar(SOCKET *, TRAMA* );
 
-BOOLEAN ConsolaRemota(SOCKET *,TRAMA*);
-BOOLEAN RESPUESTA_ConsolaRemota(SOCKET *,TRAMA*);
-BOOLEAN EcoConsola(SOCKET *,TRAMA*);
+bool ConsolaRemota(SOCKET *,TRAMA*);
+bool RESPUESTA_ConsolaRemota(SOCKET *,TRAMA*);
+bool EcoConsola(SOCKET *,TRAMA*);
 
-BOOLEAN Comando(SOCKET *,TRAMA *);
-BOOLEAN RESPUESTA_Comando(SOCKET *,TRAMA *);
+bool Comando(SOCKET *,TRAMA *);
+bool RESPUESTA_Comando(SOCKET *,TRAMA *);
 
-BOOLEAN Arrancar(SOCKET *,TRAMA *);
-BOOLEAN Levanta(char*,char*,char*);
-BOOLEAN WakeUp(SOCKET *,char*,char*,char*);
+bool Arrancar(SOCKET *,TRAMA *);
+bool Levanta(char*,char*,char*);
+bool WakeUp(SOCKET *,char*,char*,char*);
 void PasaHexBin(char *,char *);
-BOOLEAN RESPUESTA_Arrancar(SOCKET *,TRAMA*);
-BOOLEAN Apagar(SOCKET *,TRAMA *);
-BOOLEAN RESPUESTA_Apagar(SOCKET *,TRAMA *);
-BOOLEAN Reiniciar(SOCKET *,TRAMA *);
-BOOLEAN RESPUESTA_Reiniciar(SOCKET *,TRAMA *);
-BOOLEAN IniciarSesion(SOCKET *,TRAMA *);
-BOOLEAN RESPUESTA_IniciarSesion(SOCKET *,TRAMA *);
-BOOLEAN CrearImagen(SOCKET *,TRAMA *);
-BOOLEAN CrearImagenBasica(SOCKET *,TRAMA *);
-BOOLEAN CrearSoftIncremental(SOCKET *,TRAMA *);
-BOOLEAN RESPUESTA_CrearImagen(SOCKET *,TRAMA *);
-BOOLEAN RESPUESTA_CrearImagenBasica(SOCKET *,TRAMA *);
-BOOLEAN RESPUESTA_CrearSoftIncremental(SOCKET *,TRAMA *);
-BOOLEAN actualizaCreacionImagen(Database,Table,char*,char*,char*,char*,char*,char*);
-BOOLEAN actualizaCreacionSoftIncremental(Database,Table,char*,char*);
-BOOLEAN RestaurarImagen(SOCKET *,TRAMA *);
-BOOLEAN RestaurarImagenBasica(SOCKET *,TRAMA *);
-BOOLEAN RestaurarSoftIncremental(SOCKET *,TRAMA *);
-BOOLEAN RESPUESTA_RestaurarImagen(SOCKET *,TRAMA *);
-BOOLEAN RESPUESTA_RestaurarImagenBasica(SOCKET *,TRAMA *);
-BOOLEAN RESPUESTA_RestaurarSoftIncremental(SOCKET *,TRAMA *);
-BOOLEAN actualizaRestauracionImagen(Database,Table,char*,char*,char*,char*,char*);
-BOOLEAN Configurar(SOCKET *,TRAMA* );
-BOOLEAN RESPUESTA_Configurar(SOCKET *,TRAMA* );
-BOOLEAN actualizaConfigurar(Database , Table , char* );
-BOOLEAN InventarioHardware(SOCKET *,TRAMA *);
-BOOLEAN RESPUESTA_InventarioHardware(SOCKET *,TRAMA *);
-BOOLEAN actualizaHardware(Database, Table,char* ,char*,char*,char*);
-BOOLEAN cuestionPerfilHardware(Database,Table,char*,char*,int,char*,char*,int *,int);
-BOOLEAN actualizaSoftware(Database , Table , char* , char* , char*,char*,char*);
-BOOLEAN cuestionPerfilSoftware(Database, Table, char*, char*,int,int,char*,char*,char*,int *,int);
+bool RESPUESTA_Arrancar(SOCKET *,TRAMA*);
+bool Apagar(SOCKET *,TRAMA *);
+bool RESPUESTA_Apagar(SOCKET *,TRAMA *);
+bool Reiniciar(SOCKET *,TRAMA *);
+bool RESPUESTA_Reiniciar(SOCKET *,TRAMA *);
+bool IniciarSesion(SOCKET *,TRAMA *);
+bool RESPUESTA_IniciarSesion(SOCKET *,TRAMA *);
+bool CrearImagen(SOCKET *,TRAMA *);
+bool CrearImagenBasica(SOCKET *,TRAMA *);
+bool CrearSoftIncremental(SOCKET *,TRAMA *);
+bool RESPUESTA_CrearImagen(SOCKET *,TRAMA *);
+bool RESPUESTA_CrearImagenBasica(SOCKET *,TRAMA *);
+bool RESPUESTA_CrearSoftIncremental(SOCKET *,TRAMA *);
+bool actualizaCreacionImagen(Database,Table,char*,char*,char*,char*,char*,char*);
+bool actualizaCreacionSoftIncremental(Database,Table,char*,char*);
+bool RestaurarImagen(SOCKET *,TRAMA *);
+bool RestaurarImagenBasica(SOCKET *,TRAMA *);
+bool RestaurarSoftIncremental(SOCKET *,TRAMA *);
+bool RESPUESTA_RestaurarImagen(SOCKET *,TRAMA *);
+bool RESPUESTA_RestaurarImagenBasica(SOCKET *,TRAMA *);
+bool RESPUESTA_RestaurarSoftIncremental(SOCKET *,TRAMA *);
+bool actualizaRestauracionImagen(Database,Table,char*,char*,char*,char*,char*);
+bool Configurar(SOCKET *,TRAMA* );
+bool RESPUESTA_Configurar(SOCKET *,TRAMA* );
+bool actualizaConfigurar(Database , Table , char* );
+bool InventarioHardware(SOCKET *,TRAMA *);
+bool RESPUESTA_InventarioHardware(SOCKET *,TRAMA *);
+bool actualizaHardware(Database, Table,char* ,char*,char*,char*);
+bool cuestionPerfilHardware(Database,Table,char*,char*,int,char*,char*,int *,int);
+bool actualizaSoftware(Database , Table , char* , char* , char*,char*,char*);
+bool cuestionPerfilSoftware(Database, Table, char*, char*,int,int,char*,char*,char*,int *,int);
 
-BOOLEAN enviaArchivo(SOCKET *, TRAMA *);
-BOOLEAN recibeArchivo(SOCKET *, TRAMA *);
-BOOLEAN envioProgramacion(SOCKET *, TRAMA *);
+bool enviaArchivo(SOCKET *, TRAMA *);
+bool recibeArchivo(SOCKET *, TRAMA *);
+bool envioProgramacion(SOCKET *, TRAMA *);
 
 int checkDato(Database,Table,char*,const char*,const char*,const char*);
 

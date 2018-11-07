@@ -19,7 +19,7 @@
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error 
 //________________________________________________________________________________________________________
-BOOLEAN tomaConfiguracion(char* filecfg) {
+bool tomaConfiguracion(char* filecfg) {
 	char modulo[] = "tomaConfiguracion()";
 	char buf[1024], *line;
 	char *key, *value;
@@ -112,7 +112,7 @@ BOOLEAN tomaConfiguracion(char* filecfg) {
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN Sondeo(int socket_c, TRAMA* ptrTrama) {
+bool Sondeo(int socket_c, TRAMA* ptrTrama) {
 	char msglog[LONSTD];
 	char modulo[] = "Sondeo()";
 
@@ -137,7 +137,7 @@ BOOLEAN Sondeo(int socket_c, TRAMA* ptrTrama) {
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN respuestaSondeo(int socket_c, TRAMA* ptrTrama) {
+bool respuestaSondeo(int socket_c, TRAMA* ptrTrama) {
 	int i;
 	long lSize;
 	char *iph, *Ipes;
@@ -185,7 +185,7 @@ BOOLEAN respuestaSondeo(int socket_c, TRAMA* ptrTrama) {
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN Actualizar(int socket_c, TRAMA* ptrTrama) {
+bool Actualizar(int socket_c, TRAMA* ptrTrama) {
 	char msglog[LONSTD];
 	char modulo[] = "Actualizar()";
 
@@ -209,7 +209,7 @@ BOOLEAN Actualizar(int socket_c, TRAMA* ptrTrama) {
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN Purgar(int socket_c, TRAMA* ptrTrama) {
+bool Purgar(int socket_c, TRAMA* ptrTrama) {
 	char msglog[LONSTD];
 	char modulo[] = "Purgar()";
 
@@ -233,7 +233,7 @@ BOOLEAN Purgar(int socket_c, TRAMA* ptrTrama) {
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN ConsolaRemota(int socket_c, TRAMA* ptrTrama)
+bool ConsolaRemota(int socket_c, TRAMA* ptrTrama)
 {
 	char *iph,fileco[LONPRM],msglog[LONSTD],*ptrIpes[MAXIMOS_CLIENTES];;
 	FILE* f;
@@ -271,7 +271,7 @@ BOOLEAN ConsolaRemota(int socket_c, TRAMA* ptrTrama)
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN EcoConsola(int socket_c, TRAMA* ptrTrama)
+bool EcoConsola(int socket_c, TRAMA* ptrTrama)
 {
 	char *iph,fileco[LONPRM],*buffer;
 	int lSize;
@@ -312,7 +312,7 @@ BOOLEAN EcoConsola(int socket_c, TRAMA* ptrTrama)
 //		TRUE: Si el cliente está disponible
 //		FALSE: En caso contrario
 // ________________________________________________________________________________________________________
-BOOLEAN clienteDisponible(char *ip, int* idx) {
+bool clienteDisponible(char *ip, int* idx) {
 	int estado;
 
 	if (clienteExistente(ip, idx)) {
@@ -344,7 +344,7 @@ BOOLEAN clienteDisponible(char *ip, int* idx) {
 //		TRUE: Si el cliente está registrado
 //		FALSE: En caso contrario
 // ________________________________________________________________________________________________________
-BOOLEAN clienteExistente(char *ip, int* idx) {
+bool clienteExistente(char *ip, int* idx) {
 	int i;
 	for (i = 0; i < MAXIMOS_CLIENTES; i++) {
 		if (contieneIP(ip, tbsockets[i].ip)) { // Si existe la IP en la cadena
@@ -365,7 +365,7 @@ BOOLEAN clienteExistente(char *ip, int* idx) {
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN hayHueco(int *idx) {
+bool hayHueco(int *idx) {
 	int i;
 
 	for (i = 0; i < MAXIMOS_CLIENTES; i++) {
@@ -388,7 +388,7 @@ BOOLEAN hayHueco(int *idx) {
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN InclusionClienteWinLnx(int socket_c, TRAMA *ptrTrama)
+bool InclusionClienteWinLnx(int socket_c, TRAMA *ptrTrama)
  {
 	char modulo[] = "InclusionClienteWinLnx()";
 	int res,idordenador,lon;
@@ -425,7 +425,7 @@ BOOLEAN InclusionClienteWinLnx(int socket_c, TRAMA *ptrTrama)
 //	Devuelve:
 //		Código del error producido en caso de ocurrir algún error, 0 si el proceso es correcto
 // ________________________________________________________________________________________________________
-BOOLEAN procesoInclusionClienteWinLnx(int socket_c, TRAMA *ptrTrama,int *idordenador,char* nombreordenador)
+bool procesoInclusionClienteWinLnx(int socket_c, TRAMA *ptrTrama,int *idordenador,char* nombreordenador)
  {
 	char msglog[LONSTD], sqlstr[LONSQL];
 	Database db;
@@ -511,7 +511,7 @@ BOOLEAN procesoInclusionClienteWinLnx(int socket_c, TRAMA *ptrTrama,int *idorden
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN InclusionCliente(int socket_c, TRAMA *ptrTrama) {
+bool InclusionCliente(int socket_c, TRAMA *ptrTrama) {
 	char modulo[] = "InclusionCliente()";
 
 	if (!procesoInclusionCliente(socket_c, ptrTrama)) { // Ha habido algún error...
@@ -536,7 +536,7 @@ BOOLEAN InclusionCliente(int socket_c, TRAMA *ptrTrama) {
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN procesoInclusionCliente(int socket_c, TRAMA *ptrTrama) {
+bool procesoInclusionCliente(int socket_c, TRAMA *ptrTrama) {
 	char msglog[LONSTD], sqlstr[LONSQL];
 	Database db;
 	Table tbl;
@@ -676,7 +676,7 @@ BOOLEAN procesoInclusionCliente(int socket_c, TRAMA *ptrTrama) {
 //			soi= Nombre del sistema de ficheros instalado en la partición
 //			tam= Tamaño de la partición
 // ________________________________________________________________________________________________________
-BOOLEAN actualizaConfiguracion(Database db, Table tbl, char* cfg, int ido)
+bool actualizaConfiguracion(Database db, Table tbl, char* cfg, int ido)
 {
 	char msglog[LONSTD], sqlstr[LONSQL];
 	int lon, p, c,i, dato, swu, idsoi, idsfi,k;
@@ -920,7 +920,7 @@ int checkDato(Database db, Table tbl, char *dato, const char*tabla,
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN registraCliente(char *iph) {
+bool registraCliente(char *iph) {
 	int idx;
 
 	if (!clienteExistente(iph, &idx)) { // Si no existe la IP ...
@@ -944,7 +944,7 @@ BOOLEAN registraCliente(char *iph) {
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN AutoexecCliente(int socket_c, TRAMA *ptrTrama) {
+bool AutoexecCliente(int socket_c, TRAMA *ptrTrama) {
 	int lon;
 	char *iph, *exe, msglog[LONSTD];
 	Database db;
@@ -1002,7 +1002,7 @@ BOOLEAN AutoexecCliente(int socket_c, TRAMA *ptrTrama) {
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN recorreProcedimientos(Database db, char* parametros, FILE* fileexe,
+bool recorreProcedimientos(Database db, char* parametros, FILE* fileexe,
 		char* idp) {
 	int procedimientoid, lsize;
 	char idprocedimiento[LONPRM], msglog[LONSTD], sqlstr[LONSQL];
@@ -1057,7 +1057,7 @@ BOOLEAN recorreProcedimientos(Database db, char* parametros, FILE* fileexe,
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN ComandosPendientes(int socket_c, TRAMA *ptrTrama)
+bool ComandosPendientes(int socket_c, TRAMA *ptrTrama)
 {
 	char *ido,*iph,pids[LONPRM];
 	int ids, idx;
@@ -1104,7 +1104,7 @@ BOOLEAN ComandosPendientes(int socket_c, TRAMA *ptrTrama)
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN buscaComandos(char *ido, TRAMA *ptrTrama, int *ids)
+bool buscaComandos(char *ido, TRAMA *ptrTrama, int *ids)
 {
 	char msglog[LONSTD], sqlstr[LONSQL];
 	Database db;
@@ -1168,7 +1168,7 @@ BOOLEAN buscaComandos(char *ido, TRAMA *ptrTrama, int *ids)
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 //
-BOOLEAN DisponibilidadComandos(int socket_c, TRAMA *ptrTrama)
+bool DisponibilidadComandos(int socket_c, TRAMA *ptrTrama)
 {
 	char *iph, *tpc;
 	int idx,port_old=0,port_new;
@@ -1217,7 +1217,7 @@ BOOLEAN DisponibilidadComandos(int socket_c, TRAMA *ptrTrama)
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN respuestaEstandar(TRAMA *ptrTrama, char *iph, char *ido, Database db,
+bool respuestaEstandar(TRAMA *ptrTrama, char *iph, char *ido, Database db,
 		Table tbl) {
 	char msglog[LONSTD], sqlstr[LONSQL];
 	char *res, *ids, *der;
@@ -1300,7 +1300,7 @@ BOOLEAN respuestaEstandar(TRAMA *ptrTrama, char *iph, char *ido, Database db,
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN enviaComando(TRAMA* ptrTrama, const char *estado)
+bool enviaComando(TRAMA* ptrTrama, const char *estado)
  {
 	char *iph, *Ipes, *ptrIpes[MAXIMOS_CLIENTES];
 	int i, idx, lon;
@@ -1344,7 +1344,7 @@ BOOLEAN enviaComando(TRAMA* ptrTrama, const char *estado)
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN respuestaConsola(int socket_c, TRAMA *ptrTrama, int res) {
+bool respuestaConsola(int socket_c, TRAMA *ptrTrama, int res) {
 	char modulo[] = "respuestaConsola()";
 	initParametros(ptrTrama,0);
 	sprintf(ptrTrama->parametros, "res=%d\r", res);
@@ -1366,9 +1366,9 @@ BOOLEAN respuestaConsola(int socket_c, TRAMA *ptrTrama, int res) {
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN Arrancar(int socket_c, TRAMA* ptrTrama) {
+bool Arrancar(int socket_c, TRAMA* ptrTrama) {
 	char *iph,*mac,*mar, msglog[LONSTD];
-	BOOLEAN res;
+	bool res;
 	char modulo[] = "Arrancar()";
 
 	iph = copiaParametro("iph",ptrTrama); // Toma dirección/es IP
@@ -1410,12 +1410,12 @@ BOOLEAN Arrancar(int socket_c, TRAMA* ptrTrama) {
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN Levanta(char* iph,char *mac, char* mar)
+bool Levanta(char* iph,char *mac, char* mar)
 {
 	char *ptrIP[MAXIMOS_CLIENTES],*ptrMacs[MAXIMOS_CLIENTES];
 	int i, lon, res;
 	SOCKET s;
-	BOOLEAN bOpt;
+	bool bOpt;
 	sockaddr_in local;
 	char modulo[] = "Levanta()";
 
@@ -1466,7 +1466,7 @@ BOOLEAN Levanta(char* iph,char *mac, char* mar)
 //		FALSE: En caso de ocurrir algún error
 //_____________________________________________________________________________________________________________
 //
-BOOLEAN WakeUp(SOCKET *s, char* iph,char *mac,char* mar)
+bool WakeUp(SOCKET *s, char* iph,char *mac,char* mar)
 {
 	int i, res;
 	char HDaddress_bin[6];
@@ -1547,7 +1547,7 @@ void PasaHexBin(char *cadena, char *numero) {
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN RESPUESTA_Arrancar(int socket_c, TRAMA* ptrTrama) {
+bool RESPUESTA_Arrancar(int socket_c, TRAMA* ptrTrama) {
 	char msglog[LONSTD];
 	Database db;
 	Table tbl;
@@ -1596,7 +1596,7 @@ BOOLEAN RESPUESTA_Arrancar(int socket_c, TRAMA* ptrTrama) {
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN Comando(int socket_c, TRAMA* ptrTrama) {
+bool Comando(int socket_c, TRAMA* ptrTrama) {
 	char msglog[LONSTD];
 	char modulo[] = "Comando()";
 
@@ -1621,7 +1621,7 @@ BOOLEAN Comando(int socket_c, TRAMA* ptrTrama) {
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN RESPUESTA_Comando(int socket_c, TRAMA* ptrTrama)
+bool RESPUESTA_Comando(int socket_c, TRAMA* ptrTrama)
  {
 	char msglog[LONSTD];
 	Database db;
@@ -1662,7 +1662,7 @@ BOOLEAN RESPUESTA_Comando(int socket_c, TRAMA* ptrTrama)
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN Apagar(int socket_c, TRAMA* ptrTrama) {
+bool Apagar(int socket_c, TRAMA* ptrTrama) {
 	char msglog[LONSTD];
 	char modulo[] = "Apagar()";
 
@@ -1687,7 +1687,7 @@ BOOLEAN Apagar(int socket_c, TRAMA* ptrTrama) {
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN RESPUESTA_Apagar(int socket_c, TRAMA* ptrTrama) {
+bool RESPUESTA_Apagar(int socket_c, TRAMA* ptrTrama) {
 	char msglog[LONSTD];
 	Database db;
 	Table tbl;
@@ -1733,7 +1733,7 @@ BOOLEAN RESPUESTA_Apagar(int socket_c, TRAMA* ptrTrama) {
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN Reiniciar(int socket_c, TRAMA* ptrTrama) {
+bool Reiniciar(int socket_c, TRAMA* ptrTrama) {
 	char msglog[LONSTD];
 	char modulo[] = "Reiniciar()";
 
@@ -1758,7 +1758,7 @@ BOOLEAN Reiniciar(int socket_c, TRAMA* ptrTrama) {
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN RESPUESTA_Reiniciar(int socket_c, TRAMA* ptrTrama) {
+bool RESPUESTA_Reiniciar(int socket_c, TRAMA* ptrTrama) {
 	char msglog[LONSTD];
 	Database db;
 	Table tbl;
@@ -1804,7 +1804,7 @@ BOOLEAN RESPUESTA_Reiniciar(int socket_c, TRAMA* ptrTrama) {
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN IniciarSesion(int socket_c, TRAMA* ptrTrama) {
+bool IniciarSesion(int socket_c, TRAMA* ptrTrama) {
 	char msglog[LONSTD];
 	char modulo[] = "IniciarSesion()";
 
@@ -1829,7 +1829,7 @@ BOOLEAN IniciarSesion(int socket_c, TRAMA* ptrTrama) {
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN RESPUESTA_IniciarSesion(int socket_c, TRAMA* ptrTrama) {
+bool RESPUESTA_IniciarSesion(int socket_c, TRAMA* ptrTrama) {
 	char msglog[LONSTD];
 	Database db;
 	Table tbl;
@@ -1875,7 +1875,7 @@ BOOLEAN RESPUESTA_IniciarSesion(int socket_c, TRAMA* ptrTrama) {
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN CrearImagen(int socket_c, TRAMA* ptrTrama) {
+bool CrearImagen(int socket_c, TRAMA* ptrTrama) {
 	char msglog[LONSTD];
 	char modulo[] = "CrearImagen()";
 
@@ -1900,14 +1900,14 @@ BOOLEAN CrearImagen(int socket_c, TRAMA* ptrTrama) {
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN RESPUESTA_CrearImagen(int socket_c, TRAMA* ptrTrama)
+bool RESPUESTA_CrearImagen(int socket_c, TRAMA* ptrTrama)
 {
 	char msglog[LONSTD];
 	Database db;
 	Table tbl;
 	char *iph, *dsk, *par, *cpt, *ipr, *ido;
 	char *idi;
-	BOOLEAN res;
+	bool res;
 	char modulo[] = "RESPUESTA_CrearImagen()";
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
@@ -1968,7 +1968,7 @@ BOOLEAN RESPUESTA_CrearImagen(int socket_c, TRAMA* ptrTrama)
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN actualizaCreacionImagen(Database db, Table tbl, char* idi, char* dsk,
+bool actualizaCreacionImagen(Database db, Table tbl, char* idi, char* dsk,
 	char* par, char* cpt, char* ipr, char *ido) {
 	char msglog[LONSTD], sqlstr[LONSQL];
 	char modulo[] = "actualizaCreacionImagen()";
@@ -2052,7 +2052,7 @@ BOOLEAN actualizaCreacionImagen(Database db, Table tbl, char* idi, char* dsk,
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN CrearImagenBasica(int socket_c, TRAMA* ptrTrama) {
+bool CrearImagenBasica(int socket_c, TRAMA* ptrTrama) {
 	char msglog[LONSTD];
 	char modulo[] = "CrearImagenBasica()";
 
@@ -2077,7 +2077,7 @@ BOOLEAN CrearImagenBasica(int socket_c, TRAMA* ptrTrama) {
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN RESPUESTA_CrearImagenBasica(int socket_c, TRAMA* ptrTrama) {
+bool RESPUESTA_CrearImagenBasica(int socket_c, TRAMA* ptrTrama) {
 	return(RESPUESTA_CrearImagen(socket_c,ptrTrama)); // La misma respuesta que la creación de imagen monolítica
 }
 // ________________________________________________________________________________________________________
@@ -2093,7 +2093,7 @@ BOOLEAN RESPUESTA_CrearImagenBasica(int socket_c, TRAMA* ptrTrama) {
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN CrearSoftIncremental(int socket_c, TRAMA* ptrTrama) {
+bool CrearSoftIncremental(int socket_c, TRAMA* ptrTrama) {
 	char msglog[LONSTD];
 	char modulo[] = "CrearSoftIncremental()";
 
@@ -2118,7 +2118,7 @@ BOOLEAN CrearSoftIncremental(int socket_c, TRAMA* ptrTrama) {
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN RESPUESTA_CrearSoftIncremental(int socket_c, TRAMA* ptrTrama)
+bool RESPUESTA_CrearSoftIncremental(int socket_c, TRAMA* ptrTrama)
 {
 	Database db;
 	Table tbl;
@@ -2193,7 +2193,7 @@ BOOLEAN RESPUESTA_CrearSoftIncremental(int socket_c, TRAMA* ptrTrama)
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN actualizaCreacionSoftIncremental(Database db, Table tbl, char* idi,char* idf)
+bool actualizaCreacionSoftIncremental(Database db, Table tbl, char* idi,char* idf)
 {
 	char msglog[LONSTD], sqlstr[LONSQL];
 	char modulo[] = "actualizaCreacionSoftIncremental()";
@@ -2234,7 +2234,7 @@ BOOLEAN actualizaCreacionSoftIncremental(Database db, Table tbl, char* idi,char*
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN RestaurarImagen(int socket_c, TRAMA* ptrTrama) {
+bool RestaurarImagen(int socket_c, TRAMA* ptrTrama) {
 	char msglog[LONSTD];
 	char modulo[] = "RestaurarImagen()";
 
@@ -2259,7 +2259,7 @@ BOOLEAN RestaurarImagen(int socket_c, TRAMA* ptrTrama) {
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN RestaurarImagenBasica(int socket_c, TRAMA* ptrTrama) {
+bool RestaurarImagenBasica(int socket_c, TRAMA* ptrTrama) {
 	char msglog[LONSTD];
 	char modulo[] = "RestaurarImagenBasica()";
 
@@ -2284,7 +2284,7 @@ BOOLEAN RestaurarImagenBasica(int socket_c, TRAMA* ptrTrama) {
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN RestaurarSoftIncremental(int socket_c, TRAMA* ptrTrama) {
+bool RestaurarSoftIncremental(int socket_c, TRAMA* ptrTrama) {
 	char msglog[LONSTD];
 	char modulo[] = "RestaurarSoftIncremental()";
 
@@ -2310,12 +2310,12 @@ BOOLEAN RestaurarSoftIncremental(int socket_c, TRAMA* ptrTrama) {
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 //
-BOOLEAN RESPUESTA_RestaurarImagen(int socket_c, TRAMA* ptrTrama)
+bool RESPUESTA_RestaurarImagen(int socket_c, TRAMA* ptrTrama)
 {
 	char msglog[LONSTD];
 	Database db;
 	Table tbl;
-	BOOLEAN res;
+	bool res;
 	char *iph, *ido, *idi, *dsk, *par, *ifs, *cfg;
 	char modulo[] = "RESPUESTA_RestaurarImagen()";
 
@@ -2377,7 +2377,7 @@ BOOLEAN RESPUESTA_RestaurarImagen(int socket_c, TRAMA* ptrTrama)
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 //
-BOOLEAN RESPUESTA_RestaurarImagenBasica(int socket_c, TRAMA* ptrTrama) {
+bool RESPUESTA_RestaurarImagenBasica(int socket_c, TRAMA* ptrTrama) {
 	return(RESPUESTA_RestaurarImagen(socket_c,ptrTrama));
 }
 // ________________________________________________________________________________________________________
@@ -2392,7 +2392,7 @@ BOOLEAN RESPUESTA_RestaurarImagenBasica(int socket_c, TRAMA* ptrTrama) {
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN RESPUESTA_RestaurarSoftIncremental(int socket_c, TRAMA* ptrTrama) {
+bool RESPUESTA_RestaurarSoftIncremental(int socket_c, TRAMA* ptrTrama) {
 	return(RESPUESTA_RestaurarImagen(socket_c,ptrTrama));
 }
 // ________________________________________________________________________________________________________
@@ -2412,7 +2412,7 @@ BOOLEAN RESPUESTA_RestaurarSoftIncremental(int socket_c, TRAMA* ptrTrama) {
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN actualizaRestauracionImagen(Database db, Table tbl, char* idi,
+bool actualizaRestauracionImagen(Database db, Table tbl, char* idi,
 	char* dsk, char* par, char* ido, char* ifs) {
 	char msglog[LONSTD], sqlstr[LONSQL];
 	char modulo[] = "actualizaRestauracionImagen()";
@@ -2445,7 +2445,7 @@ BOOLEAN actualizaRestauracionImagen(Database db, Table tbl, char* idi,
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN Configurar(int socket_c, TRAMA* ptrTrama) {
+bool Configurar(int socket_c, TRAMA* ptrTrama) {
 	char msglog[LONSTD];
 	char modulo[] = "Configurar()";
 
@@ -2471,12 +2471,12 @@ BOOLEAN Configurar(int socket_c, TRAMA* ptrTrama) {
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 //
-BOOLEAN RESPUESTA_Configurar(int socket_c, TRAMA* ptrTrama)
+bool RESPUESTA_Configurar(int socket_c, TRAMA* ptrTrama)
 {
 	char msglog[LONSTD];
 	Database db;
 	Table tbl;
-	BOOLEAN res;
+	bool res;
 	char *iph, *ido,*cfg;
 	char modulo[] = "RESPUESTA_Configurar()";
 
@@ -2524,7 +2524,7 @@ BOOLEAN RESPUESTA_Configurar(int socket_c, TRAMA* ptrTrama)
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN EjecutarScript(int socket_c, TRAMA* ptrTrama) {
+bool EjecutarScript(int socket_c, TRAMA* ptrTrama) {
 	char msglog[LONSTD];
 	char modulo[] = "EjecutarScript()";
 
@@ -2549,7 +2549,7 @@ BOOLEAN EjecutarScript(int socket_c, TRAMA* ptrTrama) {
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN RESPUESTA_EjecutarScript(int socket_c, TRAMA* ptrTrama)
+bool RESPUESTA_EjecutarScript(int socket_c, TRAMA* ptrTrama)
 {
 	char msglog[LONSTD];
 	Database db;
@@ -2600,7 +2600,7 @@ BOOLEAN RESPUESTA_EjecutarScript(int socket_c, TRAMA* ptrTrama)
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN InventarioHardware(int socket_c, TRAMA* ptrTrama) {
+bool InventarioHardware(int socket_c, TRAMA* ptrTrama) {
 	char msglog[LONSTD];
 	char modulo[] = "InventarioHardware()";
 
@@ -2625,11 +2625,11 @@ BOOLEAN InventarioHardware(int socket_c, TRAMA* ptrTrama) {
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN RESPUESTA_InventarioHardware(int socket_c, TRAMA* ptrTrama) {
+bool RESPUESTA_InventarioHardware(int socket_c, TRAMA* ptrTrama) {
 	char msglog[LONSTD];
 	Database db;
 	Table tbl;
-	BOOLEAN res;
+	bool res;
 	char *iph, *ido, *idc, *npc, *hrd, *buffer;
 	char modulo[] = "RESPUESTA_InventarioHardware()";
 
@@ -2687,7 +2687,7 @@ BOOLEAN RESPUESTA_InventarioHardware(int socket_c, TRAMA* ptrTrama) {
 //			- idc: Identificador del centro o Unidad organizativa
 // ________________________________________________________________________________________________________
 //
-BOOLEAN actualizaHardware(Database db, Table tbl, char* hrd, char*ido,char* npc, char *idc) 
+bool actualizaHardware(Database db, Table tbl, char* hrd, char*ido,char* npc, char *idc) 
 {
 	char msglog[LONSTD], sqlstr[LONSQL];
 	int idtipohardware, idperfilhard;
@@ -2850,7 +2850,7 @@ BOOLEAN actualizaHardware(Database db, Table tbl, char* hrd, char*ido,char* npc,
 //			- con: Número de componentes detectados para configurar un el perfil hardware
 //			- npc: Nombre del cliente
 // ________________________________________________________________________________________________________
-BOOLEAN cuestionPerfilHardware(Database db, Table tbl, char* idc, char* ido,
+bool cuestionPerfilHardware(Database db, Table tbl, char* idc, char* ido,
 		int idperfilhardware, char*idhardwares, char *npc, int *tbidhardware,
 		int lon)
 {
@@ -2979,7 +2979,7 @@ BOOLEAN cuestionPerfilHardware(Database db, Table tbl, char* idc, char* ido,
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN InventarioSoftware(int socket_c, TRAMA* ptrTrama) {
+bool InventarioSoftware(int socket_c, TRAMA* ptrTrama) {
 	char msglog[LONSTD];
 	char modulo[] = "InventarioSoftware()";
 
@@ -3004,11 +3004,11 @@ BOOLEAN InventarioSoftware(int socket_c, TRAMA* ptrTrama) {
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN RESPUESTA_InventarioSoftware(int socket_c, TRAMA* ptrTrama) {
+bool RESPUESTA_InventarioSoftware(int socket_c, TRAMA* ptrTrama) {
 	char msglog[LONSTD];
 	Database db;
 	Table tbl;
-	BOOLEAN res;
+	bool res;
 	char *iph, *ido, *npc, *idc, *par, *sft, *buffer;
 	char modulo[] = "RESPUESTA_InventarioSoftware()";
 
@@ -3072,7 +3072,7 @@ BOOLEAN RESPUESTA_InventarioSoftware(int socket_c, TRAMA* ptrTrama) {
 //
 //	Versión 1.1.0: Se incluye el sistema operativo. Autora: Irina Gómez - ETSII Universidad Sevilla
 // ________________________________________________________________________________________________________
-BOOLEAN actualizaSoftware(Database db, Table tbl, char* sft, char* par,char* ido, char* npc, char* idc) 
+bool actualizaSoftware(Database db, Table tbl, char* sft, char* par,char* ido, char* npc, char* idc) 
 {
 	int i, j, lon, aux, idperfilsoft, idnombreso;
 	bool retval;
@@ -3229,7 +3229,7 @@ BOOLEAN actualizaSoftware(Database db, Table tbl, char* sft, char* par,char* ido
 //
 //	Versión 1.1.0: Se incluye el sistema operativo. Autora: Irina Gómez - ETSII Universidad Sevilla
 //_________________________________________________________________________________________________________
-BOOLEAN cuestionPerfilSoftware(Database db, Table tbl, char* idc, char* ido,
+bool cuestionPerfilSoftware(Database db, Table tbl, char* idc, char* ido,
 		int idperfilsoftware, int idnombreso, char *idsoftwares, char *npc, char *par,
 		int *tbidsoftware, int lon) {
 	char *sqlstr, msglog[LONSTD];
@@ -3361,7 +3361,7 @@ BOOLEAN cuestionPerfilSoftware(Database db, Table tbl, char* idc, char* ido,
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN enviaArchivo(int socket_c, TRAMA *ptrTrama) {
+bool enviaArchivo(int socket_c, TRAMA *ptrTrama) {
 	char *nfl;
 	char modulo[] = "enviaArchivo()";
 
@@ -3387,7 +3387,7 @@ BOOLEAN enviaArchivo(int socket_c, TRAMA *ptrTrama) {
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN recibeArchivo(int socket_c, TRAMA *ptrTrama) {
+bool recibeArchivo(int socket_c, TRAMA *ptrTrama) {
 	char *nfl;
 	char modulo[] = "recibeArchivo()";
 
@@ -3416,7 +3416,7 @@ BOOLEAN recibeArchivo(int socket_c, TRAMA *ptrTrama) {
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN envioProgramacion(int socket_c, TRAMA *ptrTrama)
+bool envioProgramacion(int socket_c, TRAMA *ptrTrama)
 {
 	char sqlstr[LONSQL], msglog[LONSTD];
 	char *idp,iph[LONIP],mac[LONMAC];
@@ -3504,7 +3504,7 @@ BOOLEAN envioProgramacion(int socket_c, TRAMA *ptrTrama)
 // This object stores function handler for messages
 static struct {
 	const char *nf; // Nombre de la función
-	BOOLEAN (*fptr)(int socket,TRAMA *); // Puntero a la función que procesa la trama
+	bool (*fptr)(int socket,TRAMA *); // Puntero a la función que procesa la trama
 } tbfuncionesServer[] = {
 	{ "Sondeo",				Sondeo,			},
 	{ "respuestaSondeo",			respuestaSondeo,	},
@@ -3562,7 +3562,7 @@ static struct {
 //		TRUE: Si el proceso es correcto
 //		FALSE: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN gestionaTrama(int socket_c)
+bool gestionaTrama(int socket_c)
 {
 	TRAMA* ptrTrama;
 	int i, res;
