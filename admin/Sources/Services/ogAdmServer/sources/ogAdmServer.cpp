@@ -1586,73 +1586,6 @@ static bool RESPUESTA_Arrancar(int socket_c, TRAMA* ptrTrama)
 	return (TRUE);
 }
 // ________________________________________________________________________________________________________
-// Función: Comando
-//
-//	Descripción:
-//		Procesa un comando personalizado
-//	Parámetros:
-//		- socket_c: Socket de la consola al envió el mensaje
-//		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
-//	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
-// ________________________________________________________________________________________________________
-static bool Comando(int socket_c, TRAMA* ptrTrama)
-{
-	char msglog[LONSTD];
-	char modulo[] = "Comando()";
-
-	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
-		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
-		errorInfo(modulo, msglog);
-		respuestaConsola(socket_c, ptrTrama, FALSE);
-		return (FALSE);
-	}
-	respuestaConsola(socket_c, ptrTrama, TRUE);
-	return (TRUE);
-}
-// ________________________________________________________________________________________________________
-// Función: RESPUESTA_Comando
-//
-//	Descripción:
-//		Respuesta del cliente al un comando personalizado
-//	Parámetros:
-//		- socket_c: Socket del cliente que envió el mensaje
-//		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
-//	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
-// ________________________________________________________________________________________________________
-static bool RESPUESTA_Comando(int socket_c, TRAMA* ptrTrama)
-{
-	char msglog[LONSTD];
-	Database db;
-	Table tbl;
-	char *iph, *ido;
-	char modulo[] = "RESPUESTA_Comando()";
-
-	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
-		og_log(20, FALSE);
-		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
-		return (FALSE);
-	}
-
-	iph = copiaParametro("iph",ptrTrama); // Toma dirección ip
-	ido = copiaParametro("ido",ptrTrama); // Toma identificador del ordenador
-
-	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
-		liberaMemoria(iph);
-		liberaMemoria(ido);
-		og_log(30, FALSE);
-		return (FALSE); // Error al registrar notificacion
-	}
-	liberaMemoria(iph);
-	liberaMemoria(ido);
-	db.Close(); // Cierra conexión
-	return (TRUE);
-}
-// ________________________________________________________________________________________________________
 // Función: Apagar
 //
 //	Descripción:
@@ -2190,49 +2123,6 @@ static bool RESPUESTA_CrearSoftIncremental(int socket_c, TRAMA* ptrTrama)
 		return (FALSE);
 	}
 	db.Close(); // Cierra conexión
-	return (TRUE);
-}
-// ________________________________________________________________________________________________________
-// Función: actualizaCreacionSoftIncremental
-//
-//	Descripción:
-//		Esta función actualiza la base de datos con el resultado de la creación de software incremental
-//	Parámetros:
-//		- db: Objeto base de datos (ya operativo)
-//		- tbl: Objeto tabla
-//		- idi: Identificador de la imagen
-//		- idf: Identificador del software incremental
-//	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
-// ________________________________________________________________________________________________________
-static bool actualizaCreacionSoftIncremental(Database db, Table tbl, char *idi, char *idf)
-{
-	char msglog[LONSTD], sqlstr[LONSQL];
-	char modulo[] = "actualizaCreacionSoftIncremental()";
-
-
-	/* Comprueba si existe ya relación entre la imagen y el software incremental */
-	sprintf(sqlstr, "SELECT * FROM imagenes_softincremental"
-					" WHERE idimagen=%s AND idsoftincremental=%s", idi,idf);
-
-	if (!db.Execute(sqlstr, tbl)) { // Error al leer
-		og_log(21, FALSE);
-		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
-		return (FALSE);
-	}
-	if (!tbl.ISEOF())
-		return (TRUE); // Ya existe relación
-
-	// Crea relación entre la imagen y el software incremental
-	sprintf(sqlstr,"INSERT INTO imagenes_softincremental (idimagen,idsoftincremental) VALUES (%s,%s)",idi,idf);
-	if (!db.Execute(sqlstr, tbl)) { // Error al ejecutar la sentencia
-		og_log(21, FALSE);
-		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
-		return (FALSE);
-	}
 	return (TRUE);
 }
 // ________________________________________________________________________________________________________
