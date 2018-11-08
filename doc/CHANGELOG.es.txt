@@ -77,6 +77,7 @@ Tickets resueltos en módulo OpenGnsys Client:
 #774	Soportar clientes ogLive de 64 bits
 #783	Browser registra salida de comandos ejecutados al pulsar enlace (mejora)
 #786	Adaptar el ogLive-precise-3.2.0-23-generic-r4820.iso como ogLive de 32 bits
+#788	grubSyntax compatible con grub_probe version 1.99
 #813	Restaurar Imagen no muestra el error en la cola de acciones
 
 Tickets resueltos en módulo OpenGnsys Server:
