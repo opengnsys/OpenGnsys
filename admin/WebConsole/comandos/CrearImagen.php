@@ -7,6 +7,9 @@
 // Nombre del fichero: CrearImagen.php
 // Descripción : 
 //		Implementación del comando "CrearImagen.php"
+// Version 1.1.1: Si no existe repositorio asignado al ordenador se muestra un mensaje informativo (ticket-870).
+//     Autora: Irina Gomez, ETSII Universidad de Sevilla
+//     Fecha: 2018-11-08
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
 include_once("../clases/AdoPhp.php");
@@ -51,12 +54,21 @@ if (!$resul){
 	echo '<p align=center><span class=cabeceras>'.$TbMsg[0].'&nbsp;</span><br>';
 	echo '<IMG src="'.$urlimg.'">&nbsp;&nbsp;<span align=center class=subcabeceras>
 			<U>'.$TbMsg[14].': '.$textambito.','.$nombreambito.'</U></span>&nbsp;&nbsp;</span></p>';
-?>	
-<P align=center><SPAN align=center class=subcabeceras><?php echo $TbMsg[6] ?></SPAN></P>
 
-<FORM  align=center name="fdatos">
-	<?php echo tablaConfiguracionesCrearImagen($cmd,$idambito,$idrepositorio); ?>
-</FORM>		
+	echo '<P align=center><SPAN align=center class=subcabeceras><?php echo $TbMsg[6] ?></SPAN></P>'."\n";
+
+	if (tiene_repo($idambito)) {
+		echo '<FORM  align=center name="fdatos">'."\n".
+		     tablaConfiguracionesCrearImagen($cmd,$idambito,$idrepositorio).
+		     '</FORM>'."\n";
+
+	} else {
+		echo '<TABLE  align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>'."\n".
+		     '	  <TR>'."\n".
+		     '        <TH align=center>'.$TbMsg["CREATE_NOREPO"].'</TH>'."\n".
+		     '    </TR>'."\n".
+		     '</TABLE>'."\n";
+	} ?>
 
 <?php
 	//________________________________________________________________________________________________________
@@ -131,5 +143,29 @@ function HTMLSELECT_imagenes($cmd,$idrepositorio,$idperfilsoft,$disk,$particion,
 	}
 	$SelectHtml.= '</SELECT>';
 	return($SelectHtml);
+}
+
+//____________________________________________________________________________________________________
+//	Devuelve si tiene repositorio asignado o no (true o false)
+//	Param:
+//	  - idordenador: identificador del ordenador
+//____________________________________________________________________________________________________
+function tiene_repo ($idordenador) {
+	global $cmd;
+
+	$idrepositorio = 0;
+	$rs=new Recordset;
+	$cmd->texto="SELECT idrepositorio from ordenadores WHERE idordenador=$idordenador";
+	$rs->Comando=&$cmd;
+	if ($rs->Abrir()) {
+		$rs->Primero();
+		$idrepositorio = $rs->campos["idrepositorio"];
+	}
+	$rs->Cerrar();
+	if ($idrepositorio == 0) {
+		return false;
+	} else {
+		return true;
+	}
 }
 ?>

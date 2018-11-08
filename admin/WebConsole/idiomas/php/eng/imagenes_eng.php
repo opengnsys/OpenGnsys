@@ -15,8 +15,8 @@
 	$TbMsg[7]='"Properties"';
 	$TbMsg[8]='"Remove Image"';
 	$TbMsg[9]='"Images"';
-	$TbMsg[10]='"Incrementals management"';
-        $TbMsg[11]='"Monolithic Image"';
-        $TbMsg[12]='"Base Image"';
-        $TbMsg[13]='"Incremental Image"';
-?>
+	$TbMsg[10]='"Incremental Images Management"';
+	$TbMsg[11]='"Monolithic Images"';
+	$TbMsg[12]='"Base Images"';
+	$TbMsg[13]='"Incremental Images"';
+	$TbMsg["DELETEDREPO"]='Deleted Repository';
