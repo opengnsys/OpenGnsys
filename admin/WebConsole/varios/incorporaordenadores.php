@@ -108,6 +108,8 @@ function procesaLineas($cmd,$idaula,$buffer)
 	$MAC="";
 	$IP="";
 	$sw=false;
+	// Eliminamos comentarios a final de línea
+	$buffer = preg_replace(array("/\#.*\r\n/", "/\#.*\r/", "/\#.*\n/"), "", $buffer."\n");
 
 	$equipos = preg_split('/}/',$buffer);
 
