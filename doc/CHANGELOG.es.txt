@@ -35,6 +35,7 @@ Lista de cambios incluidos en OpenGnsys 1.1.0a (versión de mantenimiento)
 ----------------------------------------------
 
 Tickets resueltos en módulo OpenGnsys Cloning Engine:
+#851	Ampliar parámetros de una sesión multicast para los clientes (corrección)
 #868	ConfiguraOs: error al desinstalar el agente de sistema operativo antiguo (corrección)
 #871	Error al crear particiones lógicas en discos con sectores de 4 KB (corrección)
 
@@ -50,6 +51,7 @@ Tickets resueltos en módulo OpenGnsys Repository Server:
 
 Tickets resueltos en módulo OpenGnsys Web Admin Console:
 #835	Problemas al listar plantillas en Nerboot Avanzado (corrección)
+#849	Incorporar ordenadores de dhcp no admite comentarios tras la declarción de un host (corrección)
 #867	La ayuda en la consola incluirá más información
 #870	Netboot avanzado no crea la plantilla de arranque si el equipo no tiene asignado un repositorio (corrección)
 
