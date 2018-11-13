@@ -318,7 +318,7 @@ IMGLN="ogimg.ln"
 IMGINFO="ogimg.info"
 
 # Copiamos informacion de la imagen a /tmp (para basicas)
-[ -r $DEST/$IMGACL ] && cp $DEST/ogimg.* /tmp
+[ -r $DEST/$IMGINFO ] && cp $DEST/ogimg.* /tmp
 
 #Creamos o modificamos los enlaces.
 # La imagen diferencial tiene ogimg.ln 

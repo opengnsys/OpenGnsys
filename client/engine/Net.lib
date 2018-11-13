@@ -37,6 +37,9 @@ if [ $# -lt 1 ]; then
 fi
 
 
+# Opciones de montaje: lectura o escritura
+mount |grep "ogimages.*rw," &>/dev/null && RW=",rw" || RW=",ro" 
+
 # Si REPO tomamos el repositorio y la unidad organizativa actual
 REPO=$(ogGetRepoIp)
 OGUNIT="$(df | awk -F " " '/ogimages/ {sub("//.*/ogimages","",$1); sub("/","",$1);  print $1}')"
@@ -52,9 +55,6 @@ source /scripts/ogfunctions
 umount $OGIMG
 [ "$2" == "" ] && SRCIMG="ogimages" || SRCIMG="ogimages/$2"
 eval $(grep "OPTIONS=" /scripts/ogfunctions)
-
-# Opciones de montaje: lectura o escritura
-mount |grep "ogimages.*rw," &>/dev/null && RW=",rw" || RW=",ro" 
 
 ogEcho session log "$MSG_HELP_ogChangeRepo $NEWREPO ${2%/}"
 ogConnect $NEWREPO $ogprotocol $SRCIMG $OGIMG $RW
