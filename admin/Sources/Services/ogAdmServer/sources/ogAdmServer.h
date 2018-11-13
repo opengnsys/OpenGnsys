@@ -27,10 +27,12 @@
 char servidoradm[LONPRM];	// Dirección IP del servidor de administración
 char puerto[LONPRM];	// Puerto de comunicación
 
+struct og_client;
+
 typedef struct{ // Estructura usada para guardar información de los clientes
 	char ip[LONIP]; // IP del cliente
 	char estado[4]; // Tipo de Sistema Operativo en que se encuentra el cliente
-	SOCKET sock; // Socket por el que se comunica
+	struct og_client *cli;
 }SOCKETCL;
 SOCKETCL tbsockets[MAXIMOS_CLIENTES];
 
