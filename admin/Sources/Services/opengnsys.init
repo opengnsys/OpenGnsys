@@ -30,11 +30,6 @@ SERVERDAEMON_OPTIONS="-f $SERVERCFG -l $SERVERLOG"
 #
 # Servidor de Repositorio
 #
-REPONAME=ogAdmRepo
-REPODAEMON=$BASEDIR/sbin/$REPONAME
-REPOCFG=$BASEDIR/etc/$REPONAME.cfg
-REPOLOG=$BASEDIR/log/$REPONAME.log
-REPODAEMON_OPTIONS="-f $REPOCFG -l $REPOLOG"
 ############## ADV
 REPOAUXNAME=ogAdmRepoAux
 REPOAUXDAEMON=$BASEDIR/sbin/$REPOAUXNAME
@@ -155,16 +150,13 @@ arranca_demonios() {
      faucet $SERVERAUXPORT --daemon --in bash -c "$SERVERAUXDAEMON"    #   NUEVO
      [ $? = 0 ] && $SUCCESSMSG || $FAILMSG 
   fi
-  if [ $RUN_OGADMSERVER = "yes" ] && [ $RUN_OGADMREPO = "yes" ]; then
-     sleep 5 # Damos tiempo a que ogAdmServer este funcionando
-  fi
   if [ $RUN_OGADMREPO = "yes" ]; then
-     $ACTIONMSG "Iniciando demonio: $REPONAME"
-     $DAEMONSTART $REPODAEMON $EXTRAOPTS $REPODAEMON_OPTIONS $ENDOPTS
-     [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
      $ACTIONMSG "Iniciando demonio: $REPOAUXNAME"
      faucet $REPOAUXPORT --daemon --in bash -c "$REPOAUXDAEMON"
      [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
+  fi
+  if [ $RUN_OGADMSERVER = "yes" ] && [ $RUN_OGADMAGENT = "yes" ]; then
+     sleep 5 # Damos tiempo a que ogAdmServer este funcionando
   fi
   if [ $RUN_OGADMAGENT = "yes" ]; then
      $ACTIONMSG "Iniciando demonio: $AGENTNAME"
@@ -199,9 +191,6 @@ para_demonios() {
   fi 
   $ACTIONMSG "Parando demonio: $AGENTNAME"
   $DAEMONSTOP $AGENTNAME
-  [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
-  $ACTIONMSG "Parando demonio: $REPONAME"
-  $DAEMONSTOP $REPONAME
   [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
   $ACTIONMSG "Parando demonio: $REPOAUXNAME"
   pkill faucet

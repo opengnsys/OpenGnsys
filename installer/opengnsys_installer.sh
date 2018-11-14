@@ -1342,15 +1342,6 @@ function servicesCompilation ()
 		hayErrores=1
 	fi
 	popd
-	# Compilar OpenGnsys Repository Manager
-	echoAndLog "${FUNCNAME}(): Compiling OpenGnsys Repository Manager"
-	pushd $WORKDIR/opengnsys/admin/Sources/Services/ogAdmRepo
-	make && mv ogAdmRepo $INSTALL_TARGET/sbin
-	if [ $? -ne 0 ]; then
-		echoAndLog "${FUNCNAME}(): error while compiling OpenGnsys Repository Manager"
-		hayErrores=1
-	fi
-	popd
 	# Compilar OpenGnsys Agent
 	echoAndLog "${FUNCNAME}(): Compiling OpenGnsys Agent"
 	pushd $WORKDIR/opengnsys/admin/Sources/Services/ogAdmAgent
@@ -1502,7 +1493,7 @@ function openGnsysConfigure()
 				$WORKDIR/opengnsys/admin/Sources/Services/ogAdmServer/ogAdmServer.cfg > $INSTALL_TARGET/etc/ogAdmServer-$dev.cfg
 			sed -e "s/SERVERIP/${SERVERIP[i]}/g" \
 			    -e "s/REPOKEY/$OPENGNSYS_REPOKEY/g" \
-				$WORKDIR/opengnsys/admin/Sources/Services/ogAdmRepo/ogAdmRepo.cfg > $INSTALL_TARGET/etc/ogAdmRepo-$dev.cfg
+				$WORKDIR/opengnsys/repoman/etc/ogAdmRepo.cfg.tmpl > $INSTALL_TARGET/etc/ogAdmRepo-$dev.cfg
 			sed -e "s/SERVERIP/${SERVERIP[i]}/g" \
 			    -e "s/DBUSER/$OPENGNSYS_DB_USER/g" \
 			    -e "s/DBPASSWORD/$OPENGNSYS_DB_PASSWD/g" \

@@ -937,16 +937,8 @@ function compileServices()
 		hayErrores=1
 	fi
 	popd
-	# Compilar OpenGnsys Repository Manager
-	echoAndLog "${FUNCNAME}(): Recompiling OpenGnsys Repository Manager"
-	pushd $WORKDIR/opengnsys/admin/Sources/Services/ogAdmRepo
-	make && moveNewService ogAdmRepo $INSTALL_TARGET/sbin
-	if [ $? -ne 0 ]; then
-		echoAndLog "${FUNCNAME}(): error while compiling OpenGnsys Repository Manager"
-		hayErrores=1
-	fi
-	popd
-	# Actualizar o insertar clave de acceso REST en el fichero de configuración del repositorio.
+	# Parar antiguo servicio de repositorio y añadir clave de acceso REST en su fichero de configuración.
+	pgrep ogAdmRepo > /dev/null && service="ogAdmRepo" $STOPSERVICE
 	grep -q '^ApiToken=' $INSTALL_TARGET/etc/ogAdmRepo.cfg && \
 		sed -i "s/^ApiToken=.*$/ApiToken=$REPOKEY/" $INSTALL_TARGET/etc/ogAdmRepo.cfg || \
 		sed -i "$ a\ApiToken=$REPOKEY/" $INSTALL_TARGET/etc/ogAdmRepo.cfg
