@@ -5,7 +5,7 @@ Alias /opengnsys CONSOLEDIR
 # PHP-FPM configuration
 <IfModule proxy_fcgi_module>
 	<FilesMatch ".+\.ph(p[3457]?|t|tml)$">
-		SetHandler "proxy:unix:SOCKFILE|fcgi://localhost"
+		SetHandler "proxy:fcgi://127.0.0.1:9000"
 	</FilesMatch>
 </IfModule>
 

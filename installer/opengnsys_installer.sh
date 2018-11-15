@@ -1169,8 +1169,14 @@ function installWebConsoleApacheConf()
 			$WORKDIR/opengnsys/server/etc/apache-prev2.4.conf.tmpl > $path_apache2_confd/$APACHESITESDIR/${APACHEOGSITE}
 	else
 		# Configuración específica a partir de Apache 2.4
-		sed -e "s,CONSOLEDIR,$CONSOLEDIR,g; s,SOCKFILE,$sockfile,g" \
-			$WORKDIR/opengnsys/server/etc/apache.conf.tmpl > $path_apache2_confd/$APACHESITESDIR/${APACHEOGSITE}.conf
+		if [ -n "$sockfile" ]; then
+			sed -e "s,CONSOLEDIR,$CONSOLEDIR,g" \
+			    -e "s,proxy:fcgi:.*,proxy:unix:${sockfile%% *}|fcgi://localhost\",g" \
+				$WORKDIR/opengnsys/server/etc/apache.conf.tmpl > $path_apache2_confd/$APACHESITESDIR/${APACHEOGSITE}.conf
+		else
+			sed -e "s,CONSOLEDIR,$CONSOLEDIR,g" \
+				$WORKDIR/opengnsys/server/etc/apache.conf.tmpl > $path_apache2_confd/$APACHESITESDIR/${APACHEOGSITE}.conf
+		fi
 	fi
 	$APACHEENABLEOG
 	if [ $? -ne 0 ]; then

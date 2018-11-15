@@ -572,7 +572,13 @@ function apacheConfiguration ()
 	sockfile=$(find /run/php -name "php*.sock" -type s -print 2>/dev/null)
 	# Actualizar configuración de Apache a partir de fichero de plantilla.
 	for config in $APACHECFGDIR/{,sites-available/}opengnsys.conf; do
-		[ -e $config ] && sed -e "s,CONSOLEDIR,$INSTALL_TARGET/www,g; s/SOCKETFILE/$socketfile/g" $template > $config
+		if [ -e $config ]; then
+			if [ -n "$sockfile" ]; then
+				sed -e "s,CONSOLEDIR,$INSTALL_TARGET/www,g; s,proxy:fcgi:.*,proxy:unix:${sockfile%% *}|fcgi://localhost\",g" $template > $config
+			else
+				sed -e "s,CONSOLEDIR,$INSTALL_TARGET/www,g" $template > $config
+			fi
+		fi
 	done
 
 	# Reiniciar Apache.
