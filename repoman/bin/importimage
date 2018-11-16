@@ -18,7 +18,10 @@ PROG="$(basename "$0")"
 OPENGNSYS="/opt/opengnsys"
 REPODIR="$OPENGNSYS/images"
 SERVERCONF="$OPENGNSYS/etc/ogAdmServer.cfg"
+DEFAULTFILE="/etc/default/opengnsys"
+MYCNF=$(mktemp /tmp/.my.cnf.XXXXX)
 let BACKUP=0
+source $DEFAULTFILE
 
 # Functions.
 source $OPENGNSYS/lib/ogfunctions.sh
@@ -27,7 +30,8 @@ source $OPENGNSYS/lib/ogfunctions.sh
 # Main program.
 
 # Error control.
-[ "$USER" = "root" ] || raiseError access "Need to be root."
+[ "$USER" == "root" ] || raiseError access "Need to be root."
+[ "$RUN_OGADMREPO" == "yes" ] || raiseError access "This server is not defined as image repository."
 [ -w $REPODIR ] || raiseError access "Cannot write in local repository."
 case $# in
     2)  USERNAME="$SUDO_USER"; REPO="$1"; IMAGE="$2" ;;
@@ -35,7 +39,7 @@ case $# in
     *)  [ "$*" == "help" ] && help || raiseError usage
 esac
 source $SERVERCONF &>/dev/null
-[ "${REPO,,}" == "${HOSTNAME,,}" -o "${REPO,,}" == "localhost" -o "${REPO}" == "127.0.0.1" -o "${REPO,,}" == "${IPLocal,,}}" ] && raiseError access "Cannot import from local repository."
+[ "${REPO,,}" == "${HOSTNAME,,}" ] || [ "${REPO,,}" == "localhost" ] || [ "${REPO}" == "127.0.0.1" ] || [ "${REPO,,}" == "${IPLocal,,}}" ] && raiseError access "Cannot import from local repository."
 
 # Fetching image info from the repository.
 read -rp "Enter repository API token: " APITOKEN
@@ -73,7 +77,7 @@ if [ -e "$IMAGEPATH" ]; then
 fi
 
 # Trapping signal to unlock image before exit.
-trap "rm -f $LOCKFILE" 1 2 3 6 9 15
+trap "rm -f $LOCKFILE $MYCNF" 1 2 3 6 9 15
 # Creating lock file.
 touch $LOCKFILE
 # Backing up local image.
@@ -85,18 +89,66 @@ if [ $BACKUP -eq 1 ]; then
 fi
 # Downloading image file.
 [[ $IMAGEPATH =~ / ]] && mkdir -p "$(dirname "$IMAGEPATH")"
-scp $USERNAME@$REPO:$IMAGEPATH $REPODIR
+scp "$USERNAME@$REPO:$IMAGEPATH" $REPODIR
 ERRCODE=$?
 if [ $ERRCODE -eq 0 ]; then
     # Storing creation info.
     jq -r '.clonator+":"+.compressor+":"+.filesystem+":"+(.datasize|tostring)+":"' <<<"$IMAGEINFO" > "$IMAGEPATH.info"
-    #### Si no es backup de imagen y es repo con server,
-    ####    crear objeto imagen asociado a nuevo perfil de software vacío.
-    DOWNLOADSIZE=$(stat -c "%s" $IMAGEPATH)
+    # If this repo is Administration Server, update database.
+    if [ "$RUN_OGADMREPO" == "yes" ]; then
+        # Creating credentials file.
+        cat << EOT > $MYCNF
+[client]
+user=$USUARIO
+password=$PASSWORD
+EOT
+        if [ $BACKUP -eq 1 ]; then
+            # If the image exists, increase its revision number.
+            mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -e \
+                     "UPDATE imagenes
+                         SET revision = revision + 1
+                       WHERE nombreca='$IMAGE';" || \
+                             echo "Warning: database cannot be updated."
+	else
+            # Obtaining defined Organizational Units.
+            while read -re DATA; do 
+                OUS[${#OUS[@]}]="$DATA" 
+            done <<<$(mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -Nse \
+                              "SELECT idcentro, nombrecentro FROM centros;")
+	    if [ ${#OUS[@]} -eq 1 ]; then
+                # Only 1 OU is defined.
+                let OUID="${OUS%% *}"
+	    else
+                # Choose image OU.
+                echo "Choose Organization Unit:"
+                for ((i=0; i<${#OUS[@]}; i++)); do
+                    echo "  $i:  ${OUS[i]#* }"
+                done
+                read -rp "Enter number (0 by default): " ANSWER
+                let OUID="${OUS[ANSWER]%% *}" 2>/dev/null || let OUID="${OUS[0]%% *}"
+	    fi
+            # Creating a new image associated with an empty software profile.
+            mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -e \
+                    "SET @profname = '$IMAGE imported from $REPO';
+                     INSERT INTO perfilessoft (descripcion, idcentro)
+                            SELECT @profname, $OUID FROM DUAL
+                             WHERE NOT EXISTS
+                                   (SELECT descripcion FROM perfilessoft
+                                     WHERE descripcion=@profname AND idcentro='$OUID')
+                             LIMIT 1;
+                     SET @profid = LAST_INSERT_ID();
+                     INSERT INTO imagenes
+                            (nombreca, revision, idperfilsoft, idcentro, comentarios, idrepositorio, fechacreacion)
+                     VALUES ('$IMAGE', 1, @profid, $OUID, 'Image imported from repo $REPO', 1, NOW());" || \
+                            echo "Warning: database cannot be updated."
+        fi
+    fi
+    # Cheking image size.
+    DOWNLOADSIZE=$(stat -c "%s" "$IMAGEPATH")
     [ $IMAGESIZE -ne $DOWNLOADSIZE ] && echo "Warning: image sizes differ: source=$IMAGESIZE, target=$DOWNLOADSIZE."
 else
+    # On download error, trying to recover backup.
     raiseError download "$USERNAME@$REPO:$IMAGEPATH"
-    # Recovering back up, if needed.
     if [ $BACKUP -eq 1 ]; then
         mv -vf "$IMAGEPATH.ant" "$IMAGEPATH" 2>/dev/null
         mv -vf "$IMAGEPATH.torrent.ant" "$IMAGEPATH.torrent" 2>/dev/null
@@ -105,6 +157,6 @@ else
     fi
 fi
 
-# Unlocking image.
-rm -f $LOCKFILE
+# Unlocking image and removing temporary file.
+rm -f $LOCKFILE $MYCNF
 
