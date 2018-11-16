@@ -39,7 +39,7 @@ case $# in
     *)  [ "$*" == "help" ] && help || raiseError usage
 esac
 source $SERVERCONF &>/dev/null
-[ "${REPO,,}" == "${HOSTNAME,,}" ] || [ "${REPO,,}" == "localhost" ] || [ "${REPO}" == "127.0.0.1" ] || [ "${REPO,,}" == "${IPLocal,,}}" ] && raiseError access "Cannot import from local repository."
+[ "${REPO,,}" == "${HOSTNAME,,}" ] || [ "${REPO,,}" == "localhost" ] || [ "${REPO}" == "127.0.0.1" ] || [ "${REPO,,}" == "${IPlocal,,}}" ] && raiseError access "Cannot import from local repository."
 
 # Fetching image info from the repository.
 read -rp "Enter repository API token: " APITOKEN
@@ -59,12 +59,13 @@ IMAGELOCKED="$(jq -r '.locked' <<< "$IMAGEINFO" 2>/dev/null)"
 [ "$IMAGELOCKED" == "true" ] && raiseError access "Image locked by remote repository."
 IMAGESIZE="$(jq -r '.size' <<< "$IMAGEINFO" 2>/dev/null)"
 [ -z "$IMAGESIZE" ] && raiseError access "Cannot retrieve image size"
-# Checking if local image is locked.
-LOCKFILE="$IMAGEPATH.lock"
-[ -f "$LOCKFILE" ] && raiseError access "Local image is locked, cannot write."
 # Checking if local image exists.
 IMAGEPATH="$REPODIR/$IMAGENAME.$IMAGETYPE"
 if [ -e "$IMAGEPATH" ]; then
+    # Checking if local image is locked.
+    LOCKFILE="$IMAGEPATH.lock"
+    [ -f "$LOCKFILE" ] && raiseError access "Local image is locked, cannot write."
+    # Confirm image download.
     read -rp "Image $IMAGENAME exists in the local repository. Do you want to continue? (y/N): " ANSWER
     [ "${ANSWER,,}" = "y" ]  || exit
     BACKUP=1
@@ -94,7 +95,7 @@ ERRCODE=$?
 if [ $ERRCODE -eq 0 ]; then
     # Storing creation info.
     jq -r '.clonator+":"+.compressor+":"+.filesystem+":"+(.datasize|tostring)+":"' <<<"$IMAGEINFO" > "$IMAGEPATH.info"
-    # If this repo is Administration Server, update database.
+    # Updating the database when the repo is also configured as Administration Server.
     if [ "$RUN_OGADMREPO" == "yes" ]; then
         # Creating credentials file.
         cat << EOT > $MYCNF
@@ -105,10 +106,10 @@ EOT
         if [ $BACKUP -eq 1 ]; then
             # If the image exists, increase its revision number.
             mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -e \
-                     "UPDATE imagenes
-                         SET revision = revision + 1
-                       WHERE nombreca='$IMAGE';" || \
-                             echo "Warning: database cannot be updated."
+                    "UPDATE imagenes
+                        SET revision = revision + 1
+                      WHERE nombreca='$IMAGE';" || \
+                            echo "Warning: database cannot be updated."
 	else
             # Obtaining defined Organizational Units.
             while read -re DATA; do 
@@ -129,17 +130,19 @@ EOT
 	    fi
             # Creating a new image associated with an empty software profile.
             mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -e \
-                    "SET @profname = '$IMAGE imported from $REPO';
-                     INSERT INTO perfilessoft (descripcion, idcentro)
-                            SELECT @profname, $OUID FROM DUAL
+                    "SET @repoid = (SELECT idrepositorio FROM repositorios
+                                     WHERE ip='$IPlocal' LIMIT 1),
+                         @profname = '$IMAGE imported from $REPO';
+                     INSERT INTO perfilessoft (descripcion, idcentro, grupoid)
+                            SELECT @profname, '$OUID', 0 FROM DUAL
                              WHERE NOT EXISTS
                                    (SELECT descripcion FROM perfilessoft
                                      WHERE descripcion=@profname AND idcentro='$OUID')
                              LIMIT 1;
                      SET @profid = LAST_INSERT_ID();
                      INSERT INTO imagenes
-                            (nombreca, revision, idperfilsoft, idcentro, comentarios, idrepositorio, fechacreacion)
-                     VALUES ('$IMAGE', 1, @profid, $OUID, 'Image imported from repo $REPO', 1, NOW());" || \
+                            (nombreca, revision, idperfilsoft, idcentro, comentarios, grupoid, idrepositorio, fechacreacion)
+                     VALUES ('$IMAGE', 1, @profid, '$OUID', 'Image imported from repo $REPO', 0, @repoid, NOW());" || \
                             echo "Warning: database cannot be updated."
         fi
     fi
