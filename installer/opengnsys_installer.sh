@@ -1091,12 +1091,8 @@ function installWebFiles()
 	cp -a $COMPATDIR/imagenes.device.php $COMPATDIR/imagenes.device4.php
 	# Acceso al manual de usuario
 	ln -fs ../doc/userManual $INSTALL_TARGET/www/userManual
-	# Cambiar permisos para ficheros especiales.
-	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/images/{fotos,iconos}
-	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/tmp/
 	# Ficheros de log de la API REST.
 	touch $INSTALL_TARGET/log/{ogagent,remotepc,rest}.log
-	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/log/{ogagent,remotepc,rest}.log
 
 	echoAndLog "${FUNCNAME}(): Web files installed successfully."
 }
@@ -1201,7 +1197,6 @@ function makeDoxygenFiles()
 		return 1
 	fi
 	mv "$INSTALL_TARGET/www/html" "$INSTALL_TARGET/www/api"
-	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/api
 	echoAndLog "${FUNCNAME}(): Doxygen web files created successfully."
 }
 
@@ -1247,15 +1242,6 @@ function createDirs()
 			errorAndLog "${FUNCNAME}(): error creating OpenGnsys user"
 			return 1
 		fi
-	fi
-
-	# Establecer los permisos básicos.
-	echoAndLog "${FUNCNAME}(): setting directory permissions"
-	chmod -R 775 $path_opengnsys_base/{log/clients,images}
-	chown -R :$OPENGNSYS_CLIENT_USER $path_opengnsys_base/{log/clients,images}
-	if [ $? -ne 0 ]; then
-		errorAndLog "${FUNCNAME}(): error while setting permissions"
-		return 1
 	fi
 
 	# Mover el fichero de registro de instalación al directorio de logs.
