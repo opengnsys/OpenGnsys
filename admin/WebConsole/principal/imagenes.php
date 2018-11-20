@@ -242,9 +242,8 @@ function SubarbolXML_Imagenes($grupoid,$amb,$litamb,$tipo)
 	// Para hallar el repositorio de las incrementales hay que buscar los datos de la imagen basica (en la propia tablas imágenes)
 	if ($tipo == 3) {
 	    $cmd->texto.="      INNER JOIN imagenes AS basica
-				LEFT JOIN repositorios
-			        WHERE basica.idrepositorio=repositorios.idrepositorio
-			        AND imagenes.imagenid=basica.idimagen AND ";
+				LEFT JOIN repositorios ON basica.idrepositorio=repositorios.idrepositorio
+			        WHERE imagenes.imagenid=basica.idimagen AND ";
 	} else {
 	    $cmd->texto.="      LEFT JOIN repositorios USING  (idrepositorio) WHERE ";
 	}
