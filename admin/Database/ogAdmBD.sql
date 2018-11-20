@@ -811,7 +811,6 @@ CREATE TABLE `repositorios` (
   `idcentro` int(11) DEFAULT NULL,
   `grupoid` int(11) DEFAULT NULL,
   `comentarios` text,
-  `puertorepo` int(11) NOT NULL DEFAULT '0',
   `apikey` varchar(32) NOT NULL DEFAULT '',
   PRIMARY KEY (`idrepositorio`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;

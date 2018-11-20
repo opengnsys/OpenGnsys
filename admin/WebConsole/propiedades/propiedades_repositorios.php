@@ -23,7 +23,6 @@ $opciones=array($TbMsg[0],$TbMsg[1],$TbMsg[2],$TbMsg[3]);
 $idrepositorio=0;
 $nombrerepositorio="";
 $ip="";
-$puertorepo="2002";
 $apiKeyRepo="";
 $grupoid=0;
 $comentarios="";
@@ -116,16 +115,6 @@ if($apiKeyRepo != ""){
 					echo '<TD>'.$ip.'</TD>';
 			else
 				echo'<TD><INPUT  class="formulariodatos" name="ip" type="text" style="width:200" value="'.$ip.'"></TD>';
-			?>
-		</TR>
-<!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
-		<TR>
-			<TH align=center>&nbsp;<?php echo $TbMsg[8]?>&nbsp;</TD>
-			<?php
-				if ($opcion==$op_eliminacion)
-					echo '<TD>'.$puertorepo.'</TD>';
-				else
-					echo'<TD><INPUT  class="formulariodatos" name=puertorepo type="text" style="width:200" value="'.$puertorepo.'"></TD>';
 			?>
 		</TR>
 <!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
@@ -225,12 +214,11 @@ function TomaPropiedades($cmd,$id){
 	global $nombrerepositorio;
 	global $ip;
 	global $comentarios;
-	global $puertorepo;
 	global $apiKeyRepo;
 	global $ordenadores;
 
 	$cmd->texto=<<<EOT
-SELECT repositorios.*, COUNT(*) AS numordenadores
+SELECT repositorios.*, COUNT(ordenadores.idordenador) AS numordenadores
   FROM repositorios
   LEFT JOIN ordenadores USING(idrepositorio)
  WHERE repositorios.idrepositorio='$id';
@@ -243,7 +231,6 @@ EOT;
 		$nombrerepositorio=$rs->campos["nombrerepositorio"];
 		$ip=$rs->campos["ip"];
 		$comentarios=$rs->campos["comentarios"];
-		$puertorepo=$rs->campos["puertorepo"];
 		$apiKeyRepo=$rs->campos["apikey"];
 		$ordenadores=$rs->campos["numordenadores"];
 	}

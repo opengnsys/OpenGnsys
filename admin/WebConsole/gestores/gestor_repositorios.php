@@ -26,7 +26,6 @@ $ip="";
 $passguor="";
 
 $grupoid=0;
-$puertorepo="";
 $apiKeyRepo="";
 $comentarios="";
 
@@ -39,7 +38,6 @@ if (isset($_POST["identificador"])) $idrepositorio=$_POST["identificador"];
 if (isset($_POST["nombrerepositorio"])) $nombrerepositorio=$_POST["nombrerepositorio"]; 
 if (isset($_POST["ip"])) $ip=$_POST["ip"]; 
 if (isset($_POST["passguor"])) $passguor=$_POST["passguor"]; 
-if (isset($_POST["puertorepo"])) $puertorepo=$_POST["puertorepo"];
 if (isset($_POST["apiKeyRepo"])) $apiKeyRepo=$_POST["apiKeyRepo"];
 if (isset($_POST["comentarios"])) $comentarios=$_POST["comentarios"];
 
@@ -111,7 +109,6 @@ function Gestiona(){
 	global	$nombrerepositorio;
 	global	$ip;
 	global	$passguor;
-	global  $puertorepo;
 	global  $apiKeyRepo;
 	global	$comentarios;
 	
@@ -129,13 +126,12 @@ function Gestiona(){
 	$cmd->CreaParametro("@nombrerepositorio",$nombrerepositorio,0);
 	$cmd->CreaParametro("@ip",$ip,0);
 	$cmd->CreaParametro("@passguor",$passguor,0);
-	$cmd->CreaParametro("@puertorepo",$puertorepo,0);
 	$cmd->CreaParametro("@apiKeyRepo",$apiKeyRepo,0);
 	$cmd->CreaParametro("@comentarios",$comentarios,0);
 
 	switch($opcion){
 		case $op_alta :
-			$cmd->texto="INSERT INTO repositorios(idcentro,grupoid,nombrerepositorio,ip,passguor,puertorepo,comentarios,apikey) VALUES (@idcentro,@grupoid,@nombrerepositorio,@ip,@passguor,@puertorepo,@comentarios,@apiKeyRepo)";
+			$cmd->texto="INSERT INTO repositorios(idcentro,grupoid,nombrerepositorio,ip,passguor,comentarios,apikey) VALUES (@idcentro,@grupoid,@nombrerepositorio,@ip,@passguor,@comentarios,@apiKeyRepo)";
 			$resul=$cmd->Ejecutar();
 			if ($resul){ // Crea una tabla nodo para devolver a la p�gina que llam� �sta
 				$idrepositorio=$cmd->Autonumerico();
@@ -147,7 +143,7 @@ function Gestiona(){
 			}
 			break;
 		case $op_modificacion:
-			$cmd->texto="UPDATE repositorios SET nombrerepositorio=@nombrerepositorio,ip=@ip,passguor=@passguor,puertorepo=@puertorepo,comentarios=@comentarios, apikey=@apiKeyRepo WHERE idrepositorio=@idrepositorio";
+			$cmd->texto="UPDATE repositorios SET nombrerepositorio=@nombrerepositorio,ip=@ip,passguor=@passguor,comentarios=@comentarios, apikey=@apiKeyRepo WHERE idrepositorio=@idrepositorio";
 			$resul=$cmd->Ejecutar();
 			if ($resul) {
 				updateBootRepo($cmd, $idrepositorio);
@@ -180,4 +176,3 @@ function SubarbolXML_repositorios($idrepositorio,$nombrerepositorio){
 	$cadenaXML.='</REPOSITORIO>';
 	return($cadenaXML);
 }
-?>
