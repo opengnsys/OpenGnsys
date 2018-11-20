@@ -230,7 +230,7 @@ function TomaPropiedades($cmd,$id){
 	global $ordenadores;
 
 	$cmd->texto=<<<EOT
-SELECT repositorios.*, COUNT(*) AS numordenadores
+SELECT repositorios.*, COUNT(ordenadores.idordenador) AS numordenadores
   FROM repositorios
   LEFT JOIN ordenadores USING(idrepositorio)
  WHERE repositorios.idrepositorio='$id';
