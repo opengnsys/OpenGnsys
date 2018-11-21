@@ -144,7 +144,7 @@ function codeParticionadoMSDOS (form) {
 	var partCode="";
 	var logicalCode="";
 	var sizecacheCode="";
-	var cacheCode;
+	var cacheCode="";
 	var cacheSize;
 	var extended=false;
 	var n_disk = form.n_disk.value;
@@ -203,13 +203,8 @@ function codeParticionadoMSDOS (form) {
 			if (form.size4.value == "0") {
 				sizecacheCode="\
 ogEcho session \"[20] $MSG_HELP_ogGetCacheSize\"\n \
-sizecache=`ogGetCacheSize` \n ";
+sizecache=`ogGetCacheSize` ";
 				cacheCode="\
-ogEcho session \"[30] $MSG_HELP_ogUpdatePartitionTable "+n_disk+"\"\n \
-ogCreatePartitionTable "+n_disk+" "+tipo_part_table +" \n \
-ogDeletePartitionTable "+n_disk+" \n \
-ogExecAndLog command ogUpdatePartitionTable "+n_disk+" \n \
-ogEcho session \"[50] $MSG_HELP_ogCreateCache\"\n \
 initCache "+n_disk+" $sizecache NOMOUNT  &>/dev/null \n ";		
 			} else {
 				if (form.size4.value == "CUSTOM") { 
@@ -218,19 +213,11 @@ initCache "+n_disk+" $sizecache NOMOUNT  &>/dev/null \n ";
 					cacheSize = form.size4.value;
 				} 
 				cacheCode="\
-ogEcho session \"[30] $MSG_HELP_ogUpdatePartitionTable "+n_disk+"\"\n \
-ogCreatePartitionTable "+n_disk+" "+tipo_part_table +" \n \
-ogDeletePartitionTable "+n_disk+" \n \
-ogUpdatePartitionTable "+n_disk+" \n \
-ogEcho session \"[50] $MSG_HELP_ogCreateCache\"\n \
-initCache " + n_disk + " " + cacheSize + " NOMOUNT &>/dev/null";	
+initCache " + n_disk + " " + cacheSize + " NOMOUNT &>/dev/null \n ";
 			} 
+		cacheCode += "ogEcho session \"[60] $MSG_HELP_ogListPartitions "+n_disk+"\" \n ";
+		cacheCode += "ogExecAndLog command session ogListPartitions "+n_disk+" \n ";
 		} else {
-			cacheCode="\
-ogEcho session \"[30] $MSG_HELP_ogUpdatePartitionTable "+n_disk+"\"\n \
-ogCreatePartitionTable "+n_disk+" "+tipo_part_table +" \n \
-ogDeletePartitionTable "+n_disk+" \n \
-ogUpdatePartitionTable "+n_disk+" \n";
 partCode += " EMPTY:0";
 		}
 	}
@@ -276,8 +263,8 @@ partCode += " EMPTY:0";
 	// Formateo de la partición swap
 	if (swapPart.length > 0) {
 	    for (var i=0; i < swapPart.length; i++) {
-		swapCode += "ogEcho session log \"$MSG_HELP_ogFormat "+n_disk+" "+swapPart[i]+" LINUX-SWAP \" \n   " ;
-		swapCode += "ogExecAndLog command session log ogFormat "+n_disk+" "+swapPart[i]+" LINUX-SWAP \n   ";
+		swapCode += " ogEcho session log \"[95] $MSG_HELP_ogFormat "+n_disk+" "+swapPart[i]+" LINUX-SWAP \"\n  " ;
+		swapCode += " ogExecAndLog command ogFormat "+n_disk+" "+swapPart[i]+" LINUX-SWAP \n ";
 	    }
 
         }
@@ -287,17 +274,19 @@ partCode += " EMPTY:0";
 ogEcho session \"[10] $MSG_HELP_ogUnmountAll "+n_disk+"\"\n \
 ogUnmountAll "+n_disk+" 2>/dev/null \n \
 ogUnmountCache \n \
-" + cacheCode + " \n \
-ogEcho session \"[60] $MSG_HELP_ogListPartitions "+n_disk+"\"\n \
-ogExecAndLog command session ogListPartitions "+n_disk+" \n \
+ogEcho session \"[30] $MSG_HELP_ogUpdatePartitionTable "+n_disk+"\"\n \
+ogCreatePartitionTable "+n_disk+" "+tipo_part_table +" \n \
+ogDeletePartitionTable "+n_disk+" \n \
+ogUpdatePartitionTable "+n_disk+" \n \
+" + cacheCode + "\
 ogEcho session \"[70] $MSG_HELP_ogCreatePartitions  " + partCode + "\"\n \
-if ogExecAndLog command session ogCreatePartitions "+n_disk+" " + partCode + "; then \n \
+if ogExecAndLog command ogCreatePartitions "+n_disk+" " + partCode + "; then \n \
   ogEcho session \"[80] $MSG_HELP_ogSetPartitionActive "+n_disk+" 1\"\n \
   ogSetPartitionActive "+n_disk+" 1 \n \
-  ogEcho log session \"[100] $MSG_HELP_ogListPartitions  "+n_disk+"\"\n \
+  ogEcho log session \"[90] $MSG_HELP_ogListPartitions  "+n_disk+"\"\n \
   ogUpdatePartitionTable "+n_disk+" \n \
   ms-sys /dev/sda | grep unknow && ms-sys /dev/sda \n \
-  ogExecAndLog command session log ogListPartitions "+n_disk+" \n \
+  ogExecAndLog command session log ogListPartitions "+n_disk+" \n\
   "+ swapCode +"\
 else \n \
   ogEcho session log \"[100] ERROR: $MSG_HELP_ogCreatePartitions\" \n \
@@ -329,11 +318,8 @@ function codeParticionadoGPT (form) {
 				if (form.sizeGPT4.value == "0") {
                                         sizecacheCode="\
 ogEcho session \"[20] $MSG_HELP_ogGetCacheSize\"\n \
-sizecache=`ogGetCacheSize` \n ";
+sizecache=`ogGetCacheSize` ";
 					cacheCode="\
-ogEcho session \"[30] $MSG_HELP_ogUpdatePartitionTable "+n_disk+"\"\n \
-ogDeletePartitionTable "+n_disk+"  \n \
-ogExecAndLog command ogUpdatePartitionTable "+n_disk+" \n \
 ogEcho session \"[50] $MSG_HELP_ogCreateCache\"\n \
 initCache "+ n_disk +" $sizecache NOMOUNT &>/dev/null \n ";
 				} else {
@@ -343,12 +329,11 @@ initCache "+ n_disk +" $sizecache NOMOUNT &>/dev/null \n ";
 						cacheSize = form.sizeGPT4.value;
 					}
 					cacheCode="\
-ogEcho session \"[30] $MSG_HELP_ogUpdatePartitionTable "+n_disk+"\"\n \
-ogDeletePartitionTable "+n_disk+" \n \
-ogUpdatePartitionTable "+n_disk+" \n \
 ogEcho session \"[50] $MSG_HELP_ogCreateCache\"\n \
-initCache "  + n_disk +" "+ cacheSize + " NOMOUNT &>/dev/null";
+initCache "  + n_disk +" "+ cacheSize + " NOMOUNT &>/dev/null \n ";
 				}
+				cacheCode += "ogEcho session \"[60] $MSG_HELP_ogListPartitions "+n_disk+"\"\n ";
+				cacheCode += "ogExecAndLog command session ogListPartitions "+n_disk+" \n ";
 			} else{
 				var partType=eval("form.partGPT"+nPart);
 				if (partType.value == "CUSTOM" ) {
@@ -372,22 +357,14 @@ initCache "  + n_disk +" "+ cacheSize + " NOMOUNT &>/dev/null";
 				}
 			}
                 } else {
-			if(nPart == 4){
-				cacheCode="\
-ogEcho session \"[30] $MSG_HELP_ogUpdatePartitionTable "+n_disk+"\"\n \
-ogDeletePartitionTable "+n_disk+" \n \
-ogUpdatePartitionTable "+n_disk+" \n";
-partCode += " EMPTY:0";
-			} else{
-                        	partCode += " EMPTY:0";
-			}
+			partCode += " EMPTY:0";
                 }
         }
 	// Formateo de la partición swap
 	if (swapPart.length > 0) {
             for (var i=0; i < swapPart.length; i++) {
-                swapCode += " ogEcho session log \"$MSG_HELP_ogFormat "+n_disk+" "+swapPart[i]+" LINUX-SWAP \" \n" ;
-                swapCode += " ogExecAndLog command session log ogFormat "+n_disk+" "+swapPart[i]+" LINUX-SWAP \n";
+                swapCode += " ogEcho session log \"[95] $MSG_HELP_ogFormat "+n_disk+" "+swapPart[i]+" LINUX-SWAP \" \n" ;
+                swapCode += " ogExecAndLog command ogFormat "+n_disk+" "+swapPart[i]+" LINUX-SWAP \n";
 	    }
 	}
             
@@ -396,16 +373,17 @@ partCode += " EMPTY:0";
 ogCreatePartitionTable "+n_disk+" "+tipo_part_table +" \n \
 ogEcho log session \"[0]  $MSG_HELP_ogCreatePartitions "+n_disk+"\"\n \
 ogEcho session \"[10] $MSG_HELP_ogUnmountAll "+n_disk+"\"\n \
-ogUnmountAll "+n_disk+" \n  \
+ogUnmountAll "+n_disk+" \n \
 ogUnmountCache \n \
-" + cacheCode + " \n \
-ogEcho session \"[60] $MSG_HELP_ogListPartitions "+n_disk+"\"\n \
-ogExecAndLog command session ogListPartitions "+n_disk+" \n \
+ogEcho session \"[30] $MSG_HELP_ogUpdatePartitionTable "+n_disk+"\"\n \
+ogDeletePartitionTable "+n_disk+" \n \
+ogUpdatePartitionTable "+n_disk+" \n \
+" + cacheCode + "\
 ogEcho session \"[70] $MSG_HELP_ogCreatePartitions " + partCode + "\"\n \
 ogExecAndLog command ogCreatePartitions "+n_disk+" " + partCode + " \n \
 ogEcho session \"[80] $MSG_HELP_ogSetPartitionActive "+n_disk+" 1\"\n \
 ogSetPartitionActive "+n_disk+" 1 \n \
-ogEcho log session \"[100] $MSG_HELP_ogListPartitions "+n_disk+"\"\n \
+ogEcho log session \"[90] $MSG_HELP_ogListPartitions "+n_disk+"\"\n \
 ogUpdatePartitionTable "+n_disk+" \n \
 ms-sys /dev/sda | grep unknow && ms-sys /dev/sda \n \
 ogExecAndLog command session log ogListPartitions "+n_disk+" \n";  
@@ -704,5 +682,3 @@ function checkExtendedPartition(form) {
 		logical.style.visibility="hidden";
 	}
 }
-
-
