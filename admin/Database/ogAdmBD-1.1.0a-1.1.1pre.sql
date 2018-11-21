@@ -6,7 +6,8 @@
 ALTER TABLE aulas
 	ADD idordprofesor INT(11) DEFAULT 0 AFTER puestos;
 
-# Borrar campo de puerto del antiguo servicio ogAdmRepo (ticket #875).
+# Borrar campos sin uso del antiguo servicio ogAdmRepo (ticket #875).
 ALTER TABLE repositorios
+	DROP passguor,
 	DROP puertorepo;
 

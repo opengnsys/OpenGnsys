@@ -7,6 +7,7 @@ Lista de cambios incluidos en OpenGnsys 1.1.1 (Espeto)
 ------------------------------------------------------
 
 Tickets resueltos en módulo OpenGnsys Cloning Engine:
+#853	Revisar autodocumentación con doxygen
 #863	smartPartition: incluir scritps de ejemplo de particionado personalizado para múltiples d
 iscos duros
 #864	FirstRunOnceWindows: scripts de ejemplo para installMiniSetup con ratón y teclado desacti
@@ -16,6 +17,13 @@ vado
 Tickets resueltos en módulo OpenGnsys Client:
 #847	La ISO del ogLive debe de utilzar la revisión de Git y no de SVN
 
+Tickets resueltos en módulo OpenGnsys Server:
+#856	Mejoras en setserveraddr
+
+Tickets resueltos en módulo OpenGnsys Repository Server:
+#873	Script para importar imagen de otro repositorio
+#875	Eliminar el servicio inactivo ogAdmRepo
+
 Tickets resueltos en módulo OpenGnsys Web Admin Console:
 #772	Módulo de administración web para dispositivos smartphones y tablets (no se resolverá)
 #804	Conversión de todo el código php de la consola web de administración a Php7 y Mysqli (tarea)
@@ -24,7 +32,7 @@ Tickets resueltos en módulo OpenGnsys Web Admin Console:
 #842	Internacionalización de la consola web
 
 Tickets resueltos en módulo OpenGnsys Installer:
-#784	Mejorar rendimiento de PHP sobre Apache 
+#784	Mejorar rendimiento de PHP sobre Apache
 #869	Compatibilidad de servidor con Ubuntu 18.04 LTS y CentOS 7.x
 
 Tickets genéricos resueltos:
@@ -54,6 +62,9 @@ Tickets resueltos en módulo OpenGnsys Web Admin Console:
 #849	Incorporar ordenadores de dhcp no admite comentarios tras la declarción de un host (corrección)
 #867	La ayuda en la consola incluirá más información
 #870	Netboot avanzado no crea la plantilla de arranque si el equipo no tiene asignado un repositorio (corrección)
+
+Tickets resueltos en módulo OpenGnsys Installer:
+#876	Problemas al actualizar desde Subversion a Git (corrección)
 
 Tickets genéricos resueltos:
 #839	Errores detectado en API REST para Remote PC (corrección)
@@ -106,6 +117,7 @@ Tickets resueltos en módulo OpenGnsys Client:
 #774	Soportar clientes ogLive de 64 bits
 #783	Browser registra salida de comandos ejecutados al pulsar enlace (mejora)
 #786	Adaptar el ogLive-precise-3.2.0-23-generic-r4820.iso como ogLive de 32 bits
+#788	grubSyntax compatible con grub_probe version 1.99
 #813	Restaurar Imagen no muestra el error en la cola de acciones
 
 Tickets resueltos en módulo OpenGnsys Server:
