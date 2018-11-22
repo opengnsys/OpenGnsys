@@ -1,10 +1,10 @@
-Installing OpenGnsys Server 1.1.0
-=================================
+Installing OpenGnsys Server 1.1.1 (Espeto)
+==========================================
 
 Before installation
 -------------------
 
-OpenGnsys Server 1.1.0 is meant to be installed under Ubuntu Server 16.04 LTS or newer, though it has also been tested under operating systems based on CentOS 7.
+OpenGnsys Server 1.1.1 (codename "Espeto") is meant to be installed under Ubuntu Server 16.04 LTS or newer, though it has also been tested under operating systems based on CentOS 7 (read COMPATIBILITY.en.txt for more details).
 
 Network connection is needed in order to download the required packages, the source code and the preconfigured client.
 
