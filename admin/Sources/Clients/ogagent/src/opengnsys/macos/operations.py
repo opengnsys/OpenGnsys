@@ -253,3 +253,11 @@ def showPopup(title, message):
     '''
     # Show a dialog using AppleSctipt
     return subprocess.call('/usr/bin/osascript -e \'display notification "{}" with title "{}"\''.format(message, title), shell=True)
+
+
+def get_etc_path():
+    """
+    :return:
+    Returns etc directory path.
+    """
+    return os.sep + 'etc'
