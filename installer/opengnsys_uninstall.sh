@@ -115,6 +115,7 @@ for dir in $OPENGNSYS/*; do
 done
 rm -f /etc/init.d/opengnsys /etc/default/opengnsys /var/log/opengnsys
 rm -f /etc/cron.d/{opengnsys,torrentcreator,torrenttracker}
+rm -f /etc/logrotate.d/opengnsys*
 # Elminar recursos de OpenGnsys en Samba.
 rm -f /etc/samba/smb-og.conf
 perl -ni -e "print unless /smb-og.conf/" /etc/samba/smb.conf

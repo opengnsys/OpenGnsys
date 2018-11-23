@@ -1043,8 +1043,9 @@ function checkFiles()
 		echoAndLog "${FUNCNAME}(): Deleting unused files"
 		rm -f /tmp/dstate
 	fi
-	# Crear ficheros de logrotate.
+	# Crear nuevos ficheros de logrotate y borrar el fichero antiguo.
 	if [ -d $LOGROTATEDIR ]; then
+		rm -f $LOGROTATEDIR/opengnsys
 		if [ ! -f $LOGROTATEDIR/opengnsysServer ]; then
 			echoAndLog "${FUNCNAME}(): Creating logrotate configuration file for server"
 			sed -e "s/OPENGNSYSDIR/${INSTALL_TARGET//\//\\/}/g" \
