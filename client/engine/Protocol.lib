@@ -507,6 +507,9 @@ else
 	#asignamos valor definido en el engine.cfg
 	STARTTIMEOUT=" --start-timeout $MCASTERRORSESSION"
 fi
+#Verificamos que la opcion start-time out esta soportada por la version del cliente
+echo $ISUDPCAST | grep start-timeout > /dev/null || STARTTIMEOUT=" "
+
 #La cuarta opcion de la sesion para el cliente:   ${SESSION[2]} ERROR TRANSFER - TIMEOUT EEOR IF NOT RECEIVER DATA FROM SERVER 
 if ogCheckStringInReg ${SESSION[3]} "^[0-9]{1,10}$" &>/dev/null
 then 
@@ -522,6 +525,9 @@ else
 	#asignamos valor definido en el engine.cfg
 	RECEIVERTIMEOUT=" --receive-timeout $MCASTWAIT"
 fi 
+#Verificamos que la opcion receive-timeou esta soportada por la version del cliente
+echo $ISUDPCAST | grep receive-timeout > /dev/null || RECEIVERTIMEOUT=" "
+
 #Componenemos la sesion multicast del cliente
 SYNTAXCLIENT="udp-receiver $MBUFFER --portbase $PORTBASE $SERVERADDRESS $STARTTIMEOUT $RECEIVERTIMEOUT  --log /tmp/mcast.log"
 ##########################################################################
