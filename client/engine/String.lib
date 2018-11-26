@@ -14,7 +14,7 @@
 #@author  Antonio Doblas Viso, Universidad de Málaga
 #@date    2010/05/09
 #*/ ##
-#/**
+
 function ogCheckStringInGroup ()
 {
 local i
@@ -54,8 +54,6 @@ return 1
 #@author  Antonio Doblas Viso, Universidad de Málaga
 #@date    2010/05/09
 #*/ ##
-#/**
-
 
 function ogCheckStringInReg()
 {
@@ -91,7 +89,7 @@ REG=$2
 #@author  Antonio Doblas Viso, Universidad de Málaga
 #@date    2010/05/09
 #*/ ##
-#/**
+
 function ogCheckIpAddress()
 {
 local REG IP arrIP

@@ -1,0 +1,165 @@
+#!/bin/bash
+#/**
+#@file    importimage
+#@usage   importimage [str_user] str_repo str_imagename
+#@brief   Imports an image file from other repository
+#@param   str_user      username to access the remote repository (local user, by default)
+#@param   str_repo      repository IP address or hostaname
+#@param   str_imagename image name to download
+#@warning Program will request the repository REST token.
+#@version 1.1.1 - Initial version
+#@author  Ramón M. Gómez, ETSII Universidad de Sevilla
+#@date    2017-10-08
+#*/
+
+
+# Variables.
+PROG="$(basename "$0")"
+OPENGNSYS="/opt/opengnsys"
+REPODIR="$OPENGNSYS/images"
+SERVERCONF="$OPENGNSYS/etc/ogAdmServer.cfg"
+DEFAULTFILE="/etc/default/opengnsys"
+MYCNF=$(mktemp /tmp/.my.cnf.XXXXX)
+let BACKUP=0
+source $DEFAULTFILE
+
+# Functions.
+source $OPENGNSYS/lib/ogfunctions.sh
+
+
+# Main program.
+
+# Error control.
+[ "$USER" == "root" ] || raiseError access "Need to be root."
+[ "$RUN_OGADMREPO" == "yes" ] || raiseError access "This server is not defined as image repository."
+[ -w $REPODIR ] || raiseError access "Cannot write in local repository."
+case $# in
+    2)  USERNAME="$SUDO_USER"; REPO="$1"; IMAGE="$2" ;;
+    3)  USERNAME="$1"; REPO="$2"; IMAGE="$3" ;;
+    *)  [ "$*" == "help" ] && help || raiseError usage
+esac
+source $SERVERCONF &>/dev/null
+[ "${REPO,,}" == "${HOSTNAME,,}" ] || [ "${REPO,,}" == "localhost" ] || [ "${REPO}" == "127.0.0.1" ] || [ "${REPO,,}" == "${IPlocal,,}}" ] && raiseError access "Cannot import from local repository."
+
+# Fetching image info from the repository.
+read -rp "Enter repository API token: " APITOKEN
+IMAGEINFO="$(curl -k -H "Authorization: $APITOKEN" "https://$REPO/opengnsys/rest/repository/image/$IMAGE" 2> /dev/null | jq -r .)"
+IMAGENAME="$(jq -r '.name' <<< "$IMAGEINFO" 2>/dev/null)"
+case "$IMAGEINFO" in
+    "") # Connection error.
+        raiseError access "Cannot connect to $REPO" ;;
+    "[]") # Image not found.
+        raiseError notfound "Image $IMAGE in remote repository $REPO" ;;
+    *)  # Checking REST error.
+        MESSAGE="$(jq -r '.message' <<< "$IMAGEINFO" 2>/dev/null)"
+        [ -n "$MESSAGE" ] && raiseError access "$MESSAGE"
+esac
+IMAGETYPE="$(jq -r '.type' <<< "$IMAGEINFO" 2>/dev/null)"
+IMAGELOCKED="$(jq -r '.locked' <<< "$IMAGEINFO" 2>/dev/null)"
+[ "$IMAGELOCKED" == "true" ] && raiseError access "Image locked by remote repository."
+IMAGESIZE="$(jq -r '.size' <<< "$IMAGEINFO" 2>/dev/null)"
+[ -z "$IMAGESIZE" ] && raiseError access "Cannot retrieve image size"
+# Checking if local image exists.
+IMAGEPATH="$REPODIR/$IMAGENAME.$IMAGETYPE"
+if [ -e "$IMAGEPATH" ]; then
+    # Checking if local image is locked.
+    LOCKFILE="$IMAGEPATH.lock"
+    [ -f "$LOCKFILE" ] && raiseError access "Local image is locked, cannot write."
+    # Confirm image download.
+    read -rp "Image $IMAGENAME exists in the local repository. Do you want to continue? (y/N): " ANSWER
+    [ "${ANSWER,,}" = "y" ]  || exit
+    BACKUP=1
+    REMOTEDATE=$(jq -r '.modified' <<< "$IMAGEINFO" 2>/dev/null)
+    LOCALDATE=$(stat -c "%y" "$IMAGEPATH" | cut -f1 -d.)
+    if [[ "$REMOTEDATE" < "$LOCALDATE" ]]; then
+        read -rp "Remote image seems older than the local one. Do you want to continue? (y/N): " ANSWER
+        [ "${ANSWER,,}" = "y" ]  || exit
+    fi
+fi
+
+# Trapping signal to unlock image before exit.
+trap "rm -f $LOCKFILE $MYCNF" 1 2 3 6 9 15
+# Creating lock file.
+touch $LOCKFILE
+# Backing up local image.
+if [ $BACKUP -eq 1 ]; then
+    mv -vf "$IMAGEPATH" "$IMAGEPATH.ant" 2>/dev/null
+    mv -vf "$IMAGEPATH.torrent" "$IMAGEPATH.torrent.ant" 2>/dev/null
+    mv -vf "$IMAGEPATH.sum" "$IMAGEPATH.sum.ant" 2>/dev/null
+    mv -vf "$IMAGEPATH.full.sum" "$IMAGEPATH.full.sum.ant" 2>/dev/null
+fi
+# Downloading image file.
+[[ $IMAGEPATH =~ / ]] && mkdir -p "$(dirname "$IMAGEPATH")"
+scp "$USERNAME@$REPO:$IMAGEPATH" $REPODIR
+ERRCODE=$?
+if [ $ERRCODE -eq 0 ]; then
+    # Storing creation info.
+    jq -r '.clonator+":"+.compressor+":"+.filesystem+":"+(.datasize|tostring)+":"' <<<"$IMAGEINFO" > "$IMAGEPATH.info"
+    # Updating the database when the repo is also configured as Administration Server.
+    if [ "$RUN_OGADMREPO" == "yes" ]; then
+        # Creating credentials file.
+        cat << EOT > $MYCNF
+[client]
+user=$USUARIO
+password=$PASSWORD
+EOT
+        if [ $BACKUP -eq 1 ]; then
+            # If the image exists, increase its revision number.
+            mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -e \
+                    "UPDATE imagenes
+                        SET revision = revision + 1
+                      WHERE nombreca='$IMAGE';" || \
+                            echo "Warning: database cannot be updated."
+	else
+            # Obtaining defined Organizational Units.
+            while read -re DATA; do 
+                OUS[${#OUS[@]}]="$DATA" 
+            done <<<$(mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -Nse \
+                              "SELECT idcentro, nombrecentro FROM centros;")
+	    if [ ${#OUS[@]} -eq 1 ]; then
+                # Only 1 OU is defined.
+                let OUID="${OUS%% *}"
+	    else
+                # Choose image OU.
+                echo "Choose Organization Unit:"
+                for ((i=0; i<${#OUS[@]}; i++)); do
+                    echo "  $i:  ${OUS[i]#* }"
+                done
+                read -rp "Enter number (0 by default): " ANSWER
+                let OUID="${OUS[ANSWER]%% *}" 2>/dev/null || let OUID="${OUS[0]%% *}"
+	    fi
+            # Creating a new image associated with an empty software profile.
+            mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -e \
+                    "SET @repoid = (SELECT idrepositorio FROM repositorios
+                                     WHERE ip='$IPlocal' LIMIT 1),
+                         @profname = '$IMAGE imported from $REPO';
+                     INSERT INTO perfilessoft (descripcion, idcentro, grupoid)
+                            SELECT @profname, '$OUID', 0 FROM DUAL
+                             WHERE NOT EXISTS
+                                   (SELECT descripcion FROM perfilessoft
+                                     WHERE descripcion=@profname AND idcentro='$OUID')
+                             LIMIT 1;
+                     SET @profid = LAST_INSERT_ID();
+                     INSERT INTO imagenes
+                            (nombreca, revision, idperfilsoft, idcentro, comentarios, grupoid, idrepositorio, fechacreacion)
+                     VALUES ('$IMAGE', 1, @profid, '$OUID', 'Image imported from repo $REPO', 0, @repoid, NOW());" || \
+                            echo "Warning: database cannot be updated."
+        fi
+    fi
+    # Cheking image size.
+    DOWNLOADSIZE=$(stat -c "%s" "$IMAGEPATH")
+    [ $IMAGESIZE -ne $DOWNLOADSIZE ] && echo "Warning: image sizes differ: source=$IMAGESIZE, target=$DOWNLOADSIZE."
+else
+    # On download error, trying to recover backup.
+    raiseError download "$USERNAME@$REPO:$IMAGEPATH"
+    if [ $BACKUP -eq 1 ]; then
+        mv -vf "$IMAGEPATH.ant" "$IMAGEPATH" 2>/dev/null
+        mv -vf "$IMAGEPATH.torrent.ant" "$IMAGEPATH.torrent" 2>/dev/null
+        mv -vf "$IMAGEPATH.sum.ant" "$IMAGEPATH.sum" 2>/dev/null
+        mv -vf "$IMAGEPATH.full.sum.ant" "$IMAGEPATH.full.sum" 2>/dev/null
+    fi
+fi
+
+# Unlocking image and removing temporary file.
+rm -f $LOCKFILE $MYCNF
+

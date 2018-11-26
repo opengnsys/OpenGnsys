@@ -27,8 +27,8 @@ $TbMsg[5092]="View pictures";
 $TbMsg[495]="Content Cache";
 $TbMsg[4951]="Cache Free";
 // AGP
-$TbMsg["PROP_SERIALNO"]="Serial No.";
-$TbMsg["WARN_NOTDETECTED"]="<em>(not detected)</em>";
 $TbMsg['COMM_DEFOGLIVE']="Assigned by administrator";
-// Ticket-816 PCprofesor
+$TbMsg["PROP_SERIALNO"]="Serial No.";
+$TbMsg["WARN_NOREPO"]="<em>WARNING: no repository assigned.</em>";
+$TbMsg["WARN_NOTDETECTED"]="<em>(not detected)</em>";
 $TbMsg['WARN_PROFESSOR']="teacher";

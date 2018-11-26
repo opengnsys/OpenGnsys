@@ -14,9 +14,29 @@ CREATE PROCEDURE addcols() BEGIN
 		ALTER TABLE aulas
 			ADD idordprofesor INT(11) DEFAULT 0 AFTER puestos;
 	END IF;
+	# Borrar campos sin uso del antiguo servicio ogAdmRepo (ticket #875).
+	IF EXISTS (SELECT * FROM information_schema.COLUMNS
+			WHERE COLUMN_NAME='puertorepo' AND TABLE_NAME='repositorios' AND TABLE_SCHEMA=DATABASE())
+	THEN
+		ALTER TABLE repositorios
+			DROP passguor,
+			DROP puertorepo;
+	END IF;
 END//
 # Ejecutar actualización condicional.
 DELIMITER ';'
 CALL addcols();
 DROP PROCEDURE addcols;
+
+# Nueva tabla de proyectores (ticket #794).
+DROP TABLE IF EXISTS projectors;
+CREATE TABLE `projectors` (
+	id INT(11) NOT NULL AUTO_INCREMENT,
+	name VARCHAR(50) NOT NULL DEFAULT '',
+	model VARCHAR(50) NOT NULL DEFAULT '',
+	type ENUM('no-net', 'net-pjlink', 'net-other', 'unknown') NOT NULL DEFAULT 'no-net',
+	ipaddr VARCHAR(16) NOT NULL DEFAULT '',
+	lab_id INT(11) NOT NULL DEFAULT 0,
+	  PRIMARY KEY(`id`)
+	) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
 

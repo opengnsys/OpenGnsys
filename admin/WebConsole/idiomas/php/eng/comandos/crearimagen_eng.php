@@ -21,3 +21,4 @@
 	$TbMsg[13]='Type';
 	$TbMsg[14]='Scope';
 	$TbMsg[15]='Computers';
+	$TbMsg["CREATE_NOREPO"]='<br>&nbsp;Computer whithout repository assigned.&nbsp; <br>Can not create image.<br> &nbsp;';

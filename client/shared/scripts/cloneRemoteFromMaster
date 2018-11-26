@@ -57,6 +57,10 @@
 #@version 1.0.6 - Uso de la funcion ogExecuteAndLog
 #@author  Antonio J. Doblas Viso. Universidad de Malaga.
 #@date    2012/02/12 
+#@version 1.1.0.a - sesion multicast cliente puerto:master:0:0 (ticket #872) 
+#@author  Antonio J. Doblas Viso
+#@date    2018/09/11
+#*/ ##
 #*/ ##
 
 #test 1. cliente sin particiones.    Detectado  TODO: crear estrucutras de particiones
@@ -106,7 +110,7 @@ PROTOCOL="$4"
 case "${PROTOCOL^^}" in 
  	MULTICAST)
 		SESSIONMCASTSERVER=$5
-		SESSIONMCASTCLIENT=`echo $5 | awk -F: '{print $1}'`
+		SESSIONMCASTCLIENT=`echo $5 | awk -F: '{print $1}'`:$MASTERIP:0:0
 	;;
 	UNICAST) 
 		SESSIONUCASTSERVER=$5

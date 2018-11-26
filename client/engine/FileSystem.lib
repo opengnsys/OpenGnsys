@@ -602,7 +602,8 @@ test -n "$(ogGetMountPoint $1 $2)"
 #@version 1.1.0 - Primera versión para OpenGnsys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2016-01-20
-#/**
+#*/ ##
+
 function ogIsReadonly ()
 {
 # Variables locales
@@ -631,7 +632,7 @@ test -n "$(findmnt -n -o OPTIONS $PART | awk 'BEGIN {RS=","} /^ro$/ {print}')"
 #@version 1.0.5 - Primera versión para OpenGnSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2013-10-09
-#/**
+#*/ ##
 function ogIsWritable ()
 {
 # Variables locales
@@ -1145,8 +1146,23 @@ case "$(ogGetFsType $1 $2)" in
 esac
 }
 
-# AVISO:  Componer corretcamente esta función.
-function ogGetFreeSize () {
+
+#/**
+#         ogGetFreeSize int_disco int_partition str_SizeOutput
+#@brief   muestra informacion del tamaño total, datos y libre.
+#@param   int_ndisk     nº de orden del disco
+#@param   int_npart     nº de orden de partición
+#@param   str_unitSize      unidad mostrada
+#@return  int_size:int_data:int_free
+#@TODO  Componer corretcamente esta función.
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@version 
+#@author  
+#@date    
+#*/ ##
+
+function ogGetFreeSize ()
+{
 local particion unit factor valor
 if [ $# = 0 ]
 then

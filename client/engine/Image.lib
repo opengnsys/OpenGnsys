@@ -664,6 +664,8 @@ IMGFILE=$(ogGetPath "$1" "$2.$IMGTYPE")
 
 # comprobamos consistencia de la imagen
 ogGetImageInfo $IMGFILE >/dev/null  || return $(ogRaiseError $OG_ERR_IMAGE " $1 $2"; echo $?)
+
+#/* (Comienzo comentario Doxygen)
 # Error si la imagen no cabe en la particion.
 #IMGSIZE=$(ogGetImageSize "$1" "$2") || return $(ogRaiseError $OG_ERR_IMAGE " $1 $2"; echo $?)
 #DISKSIZE=$(ogGetDiskSize $3)
@@ -671,6 +673,8 @@ ogGetImageInfo $IMGFILE >/dev/null  || return $(ogRaiseError $OG_ERR_IMAGE " $1 
 #    ogRaiseError $OG_ERR_IMGSIZEPARTITION "$DISKSIZE < $IMGSIZE"
 #    return $?
 #fi
+#*/ (Fin comentario Doxygen)
+
 # Comprobar el bloqueo de la imagen y de la partición.
 if ogIsImageLocked "$IMGFILE"; then
     ogRaiseError $OG_ERR_LOCKED "$MSG_IMAGE $1, $2.$IMGTYPE"
@@ -1002,6 +1006,20 @@ else
 fi
 }
 
+#/**
+#         ogGetImageProgram str_REPO str_imagen
+#@brief   muestra información sobre la imagen monolitica.
+#@see     ogGetImageInfo
+#@param 1   REPO o CACHE       contenedor de la imagen
+#@param 2   filename           nombre de la imagen sin extension
+#@return  nombre del programa usado para generar la imagen
+#@exception OG_ERR_FORMAT    formato incorrecto.
+#@exception OG_ERR_NOTFOUND   fichero no encontrado.
+#@note     ogGetImageProgram REPO imagenA -> partclone
+#@version 1.0 - Primeras pruebas
+#@author  Antonio J. Doblas Viso. Universidad de Málaga
+#@date    2010/02/08
+#*/ ##
 
 function ogGetImageProgram ()
 {
@@ -1019,7 +1037,20 @@ IMGFILE=$(ogGetPath "$1" "$2.img")
 ogGetImageInfo $IMGFILE | awk -F: '{print $1}'
 }
 
-
+#/**
+#         ogGetImageCompressor str_REPO str_imagen
+#@brief   muestra información sobre la imagen monolitica.
+#@see     ogGetImageInfo
+#@param 1   REPO o CACHE       contenedor de la imagen
+#@param 2   filename           nombre de la imagen sin extension
+#@return    tipo de compresión usada al generar la imagen
+#@exception OG_ERR_FORMAT    formato incorrecto.
+#@exception OG_ERR_NOTFOUND   fichero no encontrado.
+#@note     ogGetImageCompressor REPO imagenA -> lzop
+#@version 1.0 - Primeras pruebas
+#@author  Antonio J. Doblas Viso. Universidad de Málaga
+#@date    2010/02/08
+#*/ ##
 function ogGetImageCompressor ()
 {
 local IMGFILE
@@ -1037,6 +1068,20 @@ ogGetImageInfo $IMGFILE | awk -F: '{print $2}'
 }
 
 
+#/**
+#         ogGetImageType str_REPO str_imagen
+#@brief   muestra información sobre el sistema de archivos de imagen monolitica.
+#@see     ogGetImageInfo
+#@param 1   REPO o CACHE       contenedor de la imagen
+#@param 2   filename           nombre de la imagen sin extension
+#@return    tipo de compresión usada al generar la imagen
+#@exception OG_ERR_FORMAT    formato incorrecto.
+#@exception OG_ERR_NOTFOUND   fichero no encontrado.
+#@note     ogGetImageType REPO imagenA -> NTFS
+#@version 1.0 - Primeras pruebas
+#@author  Antonio J. Doblas Viso. Universidad de Málaga
+#@date    2010/02/08
+#*/ ##
 function ogGetImageType ()
 {
 local IMGFILE
@@ -1054,6 +1099,20 @@ ogGetImageInfo $IMGFILE | awk -F: '{print $3}'
 }
 
 
+#/**
+#         ogGetImageSize str_REPO str_imagen
+#@brief   muestra información sobre el tamaño (KB) del sistema de archivos de imagen monolitica.
+#@see     ogGetImageInfo
+#@param 1   REPO o CACHE       contenedor de la imagen
+#@param 2   filename           nombre de la imagen sin extension
+#@return    tipo de compresión usada al generar la imagen
+#@exception OG_ERR_FORMAT    formato incorrecto.
+#@exception OG_ERR_NOTFOUND   fichero no encontrado.
+#@note     ogGetImagesize REPO imagenA -> 56432234  > Kb
+#@version 1.0 - Primeras pruebas
+#@author  Antonio J. Doblas Viso. Universidad de Málaga
+#@date    2010/02/08
+#*/ ##
 function ogGetImageSize ()
 {
 # Variables locales

@@ -19,3 +19,4 @@
 	$TbMsg[11]='"Monolithic Images"';
 	$TbMsg[12]='"Base Images"';
 	$TbMsg[13]='"Incremental Images"';
+	$TbMsg["DELETEDREPO"]='Deleted Repository';

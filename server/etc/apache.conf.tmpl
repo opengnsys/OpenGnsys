@@ -2,6 +2,13 @@
 
 Alias /opengnsys CONSOLEDIR
 
+# PHP-FPM configuration
+<IfModule proxy_fcgi_module>
+	<FilesMatch ".+\.ph(p[3457]?|t|tml)$">
+		SetHandler "proxy:fcgi://127.0.0.1:9000"
+	</FilesMatch>
+</IfModule>
+
 RewriteEngine On
 
 # Redirect HTTP to HTTPS and default configuration.

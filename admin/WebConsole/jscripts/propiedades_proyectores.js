@@ -4,14 +4,14 @@
 // Fecha Creación: 2009-2010
 // Fecha Última modificación: Agosto-2010
 // Nombre del fichero: propiedades_proyectores.js
-// Descripción : 
+// Descripción :
 //		Este fichero implementa las funciones javascript del fichero propiedades_proyectores.php
 // *************************************************************************************************************************************************
 var wpadre=window.parent; // Toma frame padre
 var farbol=wpadre.frames["frame_arbol"];
 //________________________________________________________________________________________________________
-//	
-//	Cancela la edición 
+//
+//	Cancela la edición
 //________________________________________________________________________________________________________
 function cancelar(){
 	selfclose();
@@ -30,7 +30,7 @@ function resultado_insertar_proyectores(resul,descrierror,nwid,tablanodo){
 	selfclose();
 }
 //________________________________________________________________________________________________________
-//	
+//
 //		Devuelve el resultado de modificar algún dato de un registro
 //		Especificaciones:
 //		Los parámetros recibidos son:
@@ -43,7 +43,7 @@ function resultado_modificar_proyectores(resul,descrierror,lit){
 	selfclose();
 }
 //________________________________________________________________________________________________________
-//	
+//
 //		Devuelve el resultado de eliminar un registro
 //		Especificaciones:
 //		Los parámetros recibidos son:
@@ -60,8 +60,8 @@ function selfclose(){
 	//document.location.href="../nada.php";
 }
 //________________________________________________________________________________________________________
-//	
-//	Confirma la edición 
+//
+//	Confirma la edición
 //________________________________________________________________________________________________________
 function confirmar(op){
 	if (op!=op_eliminacion){
@@ -70,8 +70,8 @@ function confirmar(op){
 	document.fdatos.submit();
 }
 //________________________________________________________________________________________________________
-//	
-//	Comprobar_datos 
+//
+//	Comprobar_datos
 //________________________________________________________________________________________________________
 function comprobar_datos(){
 	function validate (field, validator, msgi) {

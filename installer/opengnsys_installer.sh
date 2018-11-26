@@ -141,8 +141,9 @@ OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/${OPENGNSYS_DATABASE}.sql
 # - STARTSERVICE, ENABLESERVICE - iniciar y habilitar un servicio
 # - STOPSERVICE, DISABLESERVICE - parar y deshabilitar un servicio
 # - APACHESERV, APACHECFGDIR, APACHESITESDIR, APACHEUSER, APACHEGROUP - servicio y configuración de Apache
-# - APACHESSLMOD, APACHEENABLESSL, APACHEMAKECERT - habilitar módulo Apache y certificado SSL
+# - APACHEENABLEMODS, APACHEENABLESSL, APACHEMAKECERT - habilitar módulos y certificado SSL
 # - APACHEENABLEOG, APACHEOGSITE, - habilitar sitio web de OpenGnsys
+# - PHPFPMSERV - servicio PHP FastCGI Process Manager para Apache
 # - INETDSERV - servicio Inetd
 # - FIREWALLSERV - servicio de cortabuegos IPTables/FirewallD
 # - DHCPSERV, DHCPCFGDIR - servicio y configuración de DHCP
@@ -169,7 +170,7 @@ OSVERSION="${OSVERSION%%.*}"
 # Configuración según la distribución GNU/Linux (usar minúsculas).
 case "$OSDISTRIB" in
 	ubuntu|debian|linuxmint)
-		DEPENDENCIES=( subversion apache2 php php-ldap libapache2-mod-php mysql-server php-mysql isc-dhcp-server bittorrent tftp-hpa tftpd-hpa xinetd build-essential g++-multilib libmysqlclient-dev wget curl doxygen graphviz bittornado ctorrent samba rsync unzip netpipes debootstrap schroot squashfs-tools btrfs-tools procps arp-scan realpath php-curl gettext moreutils jq wakeonlan udpcast shim-signed grub-efi-amd64-signed python-pip )
+		DEPENDENCIES=( subversion apache2 php php-ldap php-fpm mysql-server php-mysql isc-dhcp-server bittorrent tftp-hpa tftpd-hpa xinetd build-essential g++-multilib libmysqlclient-dev wget curl doxygen graphviz bittornado ctorrent samba rsync unzip netpipes debootstrap schroot squashfs-tools btrfs-tools procps arp-scan realpath php-curl gettext moreutils jq wakeonlan udpcast shim-signed grub-efi-amd64-signed python-pip )
 		UPDATEPKGLIST="apt-get update"
 		INSTALLPKG="apt-get -y install --force-yes"
 		CHECKPKG="dpkg -s \$package 2>/dev/null | grep Status | grep -qw install"
@@ -188,8 +189,7 @@ case "$OSDISTRIB" in
 		APACHEOGSITE=opengnsys
 		APACHEUSER="www-data"
 		APACHEGROUP="www-data"
-		APACHESSLMOD="a2enmod ssl"
-		APACHEREWRITEMOD="a2enmod rewrite"
+		APACHEENABLEMODS="a2enmod ssl rewrite proxy_fcgi fastcgi actions alias"
 		APACHEENABLESSL="a2ensite default-ssl"
 		APACHEENABLEOG="a2ensite $APACHEOGSITE"
 		APACHEMAKECERT="make-ssl-cert generate-default-snakeoil --force-overwrite"
@@ -199,6 +199,7 @@ case "$OSDISTRIB" in
 		INETDCFGDIR=/etc/xinetd.d
 		MYSQLSERV=mysql
 		MARIADBSERV=mariadb
+		PHPFPMSERV=php-fpm
 		RSYNCSERV=rsync
 		RSYNCCFGDIR=/etc
 		SAMBASERV=smbd
@@ -206,8 +207,9 @@ case "$OSDISTRIB" in
 		TFTPCFGDIR=/var/lib/tftpboot
 		;;
 	fedora|centos)
-		DEPENDENCIES=( subversion httpd mod_ssl php php-ldap mysql-server mysql-devel mysql-devel.i686 php-mysql dhcp tftp-server tftp xinetd binutils gcc gcc-c++ glibc-devel glibc-devel.i686 glibc-static glibc-static.i686 libstdc++-devel.i686 make wget curl doxygen graphviz ctorrent samba samba-client rsync unzip debootstrap schroot squashfs-tools python-crypto arp-scan procps-ng gettext moreutils jq net-tools http://ftp.altlinux.org/pub/distributions/ALTLinux/5.1/branch/$(arch)/RPMS.classic/netpipes-4.2-alt1.$(arch).rpm python-pip )
-		INSTALLEXTRADEPS=( 'pushd /tmp; wget -t3 http://download.bittornado.com/download/BitTornado-0.3.18.tar.gz && tar xvzf BitTornado-0.3.18.tar.gz && cd BitTornado-CVS && python setup.py install && ln -fs btlaunchmany.py /usr/bin/btlaunchmany && ln -fs bttrack.py /usr/bin/bttrack; popd' )
+		DEPENDENCIES=( subversion httpd mod_ssl php-ldap php-fpm mysql-server mysql-devel mysql-devel.i686 php-mysql dhcp tftp-server tftp xinetd binutils gcc gcc-c++ glibc-devel glibc-devel.i686 glibc-static glibc-static.i686 libstdc++-devel.i686 make wget curl doxygen graphviz ctorrent samba samba-client rsync unzip debootstrap schroot squashfs-tools python-crypto arp-scan procps-ng gettext moreutils jq net-tools udpcast shim-x64 grub2-efi-x64 grub2-efi-x64-modules python-pip http://ftp.altlinux.org/pub/distributions/ALTLinux/5.1/branch/$(arch)/RPMS.classic/netpipes-4.2-alt1.$(arch).rpm )
+		[ "$OSDISTRIB" == "centos" ] && UPDATEPKGLIST="yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-$OSVERSION.noarch.rpm http://rpms.remirepo.net/enterprise/remi-release-$OSVERSION.rpm"
+		INSTALLEXTRADEPS=( 'pushd /tmp; wget -t3 http://ftp.acc.umu.se/mirror/bittornado/BitTornado-0.3.18.tar.gz && tar xvzf BitTornado-0.3.18.tar.gz && cd BitTornado-CVS && python setup.py install && ln -fs btlaunchmany.py /usr/bin/btlaunchmany && ln -fs bttrack.py /usr/bin/bttrack; popd' )
 		INSTALLPKG="yum install -y libstdc++ libstdc++.i686"
 		CHECKPKG="rpm -q --quiet \$package"
 		SYSTEMD=$(which systemctl 2>/dev/null)
@@ -239,6 +241,7 @@ case "$OSDISTRIB" in
 		INETDCFGDIR=/etc/xinetd.d
 		MYSQLSERV=mysqld
 		MARIADBSERV=mariadb
+		PHPFPMSERV=php-fpm
 		RSYNCSERV=rsync
 		RSYNCCFGDIR=/etc
 		SAMBASERV=smb
@@ -302,20 +305,19 @@ case "$OSDISTRIB" in
 			add-apt-repository -y ppa:ondrej/php
 			eval $UPDATEPKGLIST
 			PHP7VERSION=$(apt-cache pkgnames php7 | sort | head -1)
+			PHPFPMSERV="${PHP7VERSION}-fpm"
 			DEPENDENCIES=( ${DEPENDENCIES[@]//php/$PHP7VERSION} )
 		fi
 		# Adaptar dependencias para libmysqlclient.
 		[ -z "$(apt-cache pkgnames libmysqlclient-dev)" ] && [ -n "$(apt-cache pkgnames libmysqlclient15)" ] && DEPENDENCIES=( ${DEPENDENCIES[@]//libmysqlclient-dev/libmysqlclient15} )
+		# Paquete correcto para realpath.
+		[ -z "$(apt-cache pkgnames realpath)" ] && DEPENDENCIES=( ${DEPENDENCIES[@]//realpath/coreutils} )
 		;;
 	centos)	# Postconfiguación personalizada para CentOS.
 		# Configuración para PHP 7.
-		if ! yum list php7 &>/dev/null; then
-			if [ $OSVERSION -lt 7 ]; then
-				yum install -y https://mirror.webtatic.com/yum/el$OSVERSION/latest.rpm
-				PHP7VERSION=$(yum list -q php7\*w | awk -F. '/^php/ {p=$1} END {print p}')
-				DEPENDENCIES=( ${DEPENDENCIES[@]//php/$PHP5VERSION} )
-			fi
-		fi
+		PHP7VERSION=$(yum list -q php7\* 2>/dev/null | awk -F. '/^php/ {print $1; exit;}')
+		PHPFPMSERV="${PHP7VERSION}-${PHPFPMSERV}"
+		DEPENDENCIES=( ${PHP7VERSION} ${DEPENDENCIES[@]//php/$PHP7VERSION-php} )
 		# Cambios a aplicar a partir de CentOS 7.
 		if [ $OSVERSION -ge 7 ]; then
 			# Sustituir MySQL por MariaDB.
@@ -878,8 +880,8 @@ function getNetworkSettings()
 		if [ -n "${SERVERIP[i]}" ]; then
 			NETMASK[i]=$( cidr2mask $(ip -o addr show dev "$dev" | awk '$3~/inet$/ {sub (/.*\//, "", $4); print ($4)}') )
 			NETBROAD[i]=$(ip -o addr show dev "$dev" | awk '$3~/inet$/ {print ($6)}')
-			NETIP[i]=$(ip route | awk -v d="$dev" '$3==d && /src/ {sub (/\/.*/,""); print $1}')
-			ROUTERIP[i]=$(ip route | awk -v d="$dev" '$1=="default" && $5==d {print $3}')
+			NETIP[i]=$(ip route list proto kernel | awk -v d="$dev" '$3==d && /src/ {sub (/\/.*/,""); print $1}')
+			ROUTERIP[i]=$(ip route list default | awk -v d="$dev" '$5==d {print $3}')
 			DEFAULTDEV=${DEFAULTDEV:-"$dev"}
 		fi
 		let i++
@@ -1089,12 +1091,10 @@ function installWebFiles()
 		sed 's/clickcontextualnodo/clicksupnodo/g' $COMPATDIR/$f.php > $COMPATDIR/$f.device.php
 	done
 	cp -a $COMPATDIR/imagenes.device.php $COMPATDIR/imagenes.device4.php
-	# Cambiar permisos para ficheros especiales.
-	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/images/{fotos,iconos}
-	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/tmp/
+	# Acceso al manual de usuario
+	ln -fs ../doc/userManual $INSTALL_TARGET/www/userManual
 	# Ficheros de log de la API REST.
 	touch $INSTALL_TARGET/log/{ogagent,remotepc,rest}.log
-	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/log/{ogagent,remotepc,rest}.log
 
 	echoAndLog "${FUNCNAME}(): Web files installed successfully."
 }
@@ -1138,6 +1138,7 @@ function installWebConsoleApacheConf()
 	local path_opengnsys_base="$1"
 	local path_apache2_confd="$2"
 	local CONSOLEDIR=${path_opengnsys_base}/www
+	local sockfile
 
 	if [ ! -d $path_apache2_confd ]; then
 		errorAndLog "${FUNCNAME}(): path to apache2 conf.d can not found, verify your server installation"
@@ -1148,12 +1149,17 @@ function installWebConsoleApacheConf()
 
 	echoAndLog "${FUNCNAME}(): creating apache2 config file.."
 
+	# Avtivar PHP-FPM.
+	echoAndLog "${FUNCNAME}(): configuring PHP-FPM"
+	service=$PHPFPMSERV
+	$ENABLESERVICE; $STARTSERVICE
+	sockfile=$(find /run/php -name "php*.sock" -type s -print 2>/dev/null)
+
+	# Activar módulos de Apache.
+	$APACHEENABLEMODS
 	# Activar HTTPS.
-	$APACHESSLMOD
 	$APACHEENABLESSL
 	$APACHEMAKECERT
-	# Activar módulo Rewrite.
-	$APACHEREWRITEMOD
 	# Genera configuración de consola web a partir del fichero plantilla.
 	if [ -n "$(apachectl -v | grep "2\.[0-2]")" ]; then
 		# Configuración para versiones anteriores de Apache.
@@ -1161,8 +1167,14 @@ function installWebConsoleApacheConf()
 			$WORKDIR/opengnsys/server/etc/apache-prev2.4.conf.tmpl > $path_apache2_confd/$APACHESITESDIR/${APACHEOGSITE}
 	else
 		# Configuración específica a partir de Apache 2.4
-		sed -e "s,CONSOLEDIR,$CONSOLEDIR,g" \
-			$WORKDIR/opengnsys/server/etc/apache.conf.tmpl > $path_apache2_confd/$APACHESITESDIR/${APACHEOGSITE}.conf
+		if [ -n "$sockfile" ]; then
+			sed -e "s,CONSOLEDIR,$CONSOLEDIR,g" \
+			    -e "s,proxy:fcgi:.*,proxy:unix:${sockfile%% *}|fcgi://localhost\",g" \
+				$WORKDIR/opengnsys/server/etc/apache.conf.tmpl > $path_apache2_confd/$APACHESITESDIR/${APACHEOGSITE}.conf
+		else
+			sed -e "s,CONSOLEDIR,$CONSOLEDIR,g" \
+				$WORKDIR/opengnsys/server/etc/apache.conf.tmpl > $path_apache2_confd/$APACHESITESDIR/${APACHEOGSITE}.conf
+		fi
 	fi
 	$APACHEENABLEOG
 	if [ $? -ne 0 ]; then
@@ -1187,7 +1199,6 @@ function makeDoxygenFiles()
 		return 1
 	fi
 	mv "$INSTALL_TARGET/www/html" "$INSTALL_TARGET/www/api"
-	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/api
 	echoAndLog "${FUNCNAME}(): Doxygen web files created successfully."
 }
 
@@ -1233,15 +1244,6 @@ function createDirs()
 			errorAndLog "${FUNCNAME}(): error creating OpenGnsys user"
 			return 1
 		fi
-	fi
-
-	# Establecer los permisos básicos.
-	echoAndLog "${FUNCNAME}(): setting directory permissions"
-	chmod -R 775 $path_opengnsys_base/{log/clients,images}
-	chown -R :$OPENGNSYS_CLIENT_USER $path_opengnsys_base/{log/clients,images}
-	if [ $? -ne 0 ]; then
-		errorAndLog "${FUNCNAME}(): error while setting permissions"
-		return 1
 	fi
 
 	# Mover el fichero de registro de instalación al directorio de logs.
@@ -1331,15 +1333,6 @@ function servicesCompilation ()
 	make && mv ogAdmServer $INSTALL_TARGET/sbin
 	if [ $? -ne 0 ]; then
 		echoAndLog "${FUNCNAME}(): error while compiling OpenGnsys Admin Server"
-		hayErrores=1
-	fi
-	popd
-	# Compilar OpenGnsys Repository Manager
-	echoAndLog "${FUNCNAME}(): Compiling OpenGnsys Repository Manager"
-	pushd $WORKDIR/opengnsys/admin/Sources/Services/ogAdmRepo
-	make && mv ogAdmRepo $INSTALL_TARGET/sbin
-	if [ $? -ne 0 ]; then
-		echoAndLog "${FUNCNAME}(): error while compiling OpenGnsys Repository Manager"
 		hayErrores=1
 	fi
 	popd
@@ -1477,9 +1470,12 @@ function openGnsysConfigure()
 	echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/deletepreimage ] && $INSTALL_TARGET/bin/deletepreimage" > /etc/cron.d/imagedelete
 	echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/ogagentqueue.cron ] && $INSTALL_TARGET/bin/ogagentqueue.cron" > /etc/cron.d/ogagentqueue
 
-	echoAndLog "${FUNCNAME}(): Creating logrotate configuration file."
+	echoAndLog "${FUNCNAME}(): Creating logrotate configuration files."
 	sed -e "s/OPENGNSYSDIR/${INSTALL_TARGET//\//\\/}/g" \
-		$WORKDIR/opengnsys/server/etc/logrotate.tmpl > /etc/logrotate.d/opengnsys
+		$WORKDIR/opengnsys/server/etc/logrotate.tmpl > /etc/logrotate.d/opengnsysServer
+
+	sed -e "s/OPENGNSYSDIR/${INSTALL_TARGET//\//\\/}/g" \
+		$WORKDIR/opengnsys/repoman/etc/logrotate.tmpl > /etc/logrotate.d/opengnsysRepo
 
 	echoAndLog "${FUNCNAME}(): Creating OpenGnsys config files."
 	for dev in ${DEVICE[*]}; do
@@ -1491,7 +1487,7 @@ function openGnsysConfigure()
 				$WORKDIR/opengnsys/admin/Sources/Services/ogAdmServer/ogAdmServer.cfg > $INSTALL_TARGET/etc/ogAdmServer-$dev.cfg
 			sed -e "s/SERVERIP/${SERVERIP[i]}/g" \
 			    -e "s/REPOKEY/$OPENGNSYS_REPOKEY/g" \
-				$WORKDIR/opengnsys/admin/Sources/Services/ogAdmRepo/ogAdmRepo.cfg > $INSTALL_TARGET/etc/ogAdmRepo-$dev.cfg
+				$WORKDIR/opengnsys/repoman/etc/ogAdmRepo.cfg.tmpl > $INSTALL_TARGET/etc/ogAdmRepo-$dev.cfg
 			sed -e "s/SERVERIP/${SERVERIP[i]}/g" \
 			    -e "s/DBUSER/$OPENGNSYS_DB_USER/g" \
 			    -e "s/DBPASSWORD/$OPENGNSYS_DB_PASSWD/g" \

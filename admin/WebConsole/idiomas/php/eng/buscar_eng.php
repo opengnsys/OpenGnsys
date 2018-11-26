@@ -16,4 +16,4 @@ $TbMsg["SEARCH_DUPLICATES"]="Duplicates";
 $TbMsg["SEARCH_NOMATCHES"]="No matches";
 $TbMsg["SEARCH_NOVALUE"]="You must enter a search criteria value.";
 $TbMsg["SEARCH_PROFESSOR"]="Professor's computers";
-
+$TbMsg["SEARCH_NOREPO"]="Computers without repository";

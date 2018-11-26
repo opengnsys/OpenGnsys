@@ -441,8 +441,6 @@ function tablaConfiguracionesCrearSoftIncremental($idordenador)
 	echo $tablaHtml;
 	return($tbPAR);
 }
-<<<<<<< .mine
-/**/
 
 
 // Devuelve un Array nombres de los sistemas operativos en BD con sus identificadores.

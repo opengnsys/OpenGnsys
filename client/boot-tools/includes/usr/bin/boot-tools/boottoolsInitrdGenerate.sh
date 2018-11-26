@@ -8,7 +8,7 @@ rm -f /usr/lib/initramfs-tools/bin/*
 cp /bin/busybox /usr/lib/initramfs-tools/bin
 cd /tmp
 mkinitramfs -o /tmp/initrd.img-$OSRELEASE -v $OSRELEASE
-cp -v /boot/vmlinuz-$OSRELEASE.efi.signed /tmp
+cp -v /boot/vmlinuz-$OSRELEASE /tmp
 
 history -c
 

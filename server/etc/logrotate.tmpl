@@ -1,24 +1,20 @@
+# Configuración de logrotate para el servidor de administración de OpenGnsys
 # Los archivos se copian y luego se corta el original, para que los equipos puedan seguir escribiendo sobre ellos
 # Las copias se comprimen
-# Clientes: se guardan 500K de cada cliente: se rotan cuando llegan a 100K y se guardan 5
-# Mcastlog: se guardan dos semanas. 
-# servicios opengnsys y tracker: se guardan 4 semanas
-
+# Los registros de las transferencias multicast se guardan una semana (repo).
+# El resto de los registros se comprueban diariamente que no excedan 100k. Se mantienen los últimos 5.
+#    Con esta condición los servicios de OpenGnsys Server conservan datos de más de un mes.
 
 copytruncate
 compress
-OPENGNSYSDIR/log/clients/*.log {
-     rotate 5
-     size 100k
-}
 
-OPENGNSYSDIR/log/mcastlog/ogAdmRepoMcast.*([-0-9]) { 
-     rotate 2
-     weekly
+/opt/opengnsys/log/clients/*.log
+/opt/opengnsys/log/ogAdmServer.log
+/opt/opengnsys/log/ogagent.log
+/opt/opengnsys/log/opengnsys.log
+/opt/opengnsys/log/remotepc.log
+/opt/opengnsys/log/rest.log
+{
+	rotate 5
+	size 100k
 }
-
-OPENGNSYSDIR/log/bttrack.log OPENGNSYSDIR/log/ogAdmRepo.log OPENGNSYSDIR/log/ogAdmServer.log {
-     rotate 4
-     weekly
-}
-
