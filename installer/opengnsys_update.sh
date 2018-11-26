@@ -468,7 +468,7 @@ function checkVersion()
 	if [ $REMOTE -eq 1 ]; then
 		NEWVERSION=$(curl -s $RAW_URL/doc/VERSION.json 2>/dev/null | jq -r '.version')
 	else
-		NEWVERSION=$(jq -r '.version' $PROGRAMDIR/doc/VERSION.json 2>/dev/null)
+		NEWVERSION=$(jq -r '.version' $PROGRAMDIR/../doc/VERSION.json 2>/dev/null)
 	fi
 	[[ "$NEWVERSION" =~ pre ]] && PRE=1
 
@@ -993,7 +993,7 @@ function updateClient()
 		oglivecli convert
 	fi
 	# Comprobar si debe actualizarse el cliente.
-	SOURCELENGTH=$(curl -sI $SOURCEFILE 2>&1 | awk '/Content-Length:/ {print $2}')
+	SOURCELENGTH=$(curl -sI $SOURCEFILE 2>&1 | awk '/Content-Length:/ {gsub("\r", ""); print $2}')
 	TARGETLENGTH=$(stat -c "%s" $TARGETFILE 2>/dev/null)
 	[ -z $TARGETLENGTH ] && TARGETLENGTH=0
 	if [ "$SOURCELENGTH" != "$TARGETLENGTH" ]; then
@@ -1065,8 +1065,14 @@ function updateSummary()
 	# Actualizar fichero de versión y revisión.
 	local VERSIONFILE REVISION
 	VERSIONFILE="$INSTALL_TARGET/doc/VERSION.json"
-	# Revisión: rAñoMesDía.Gitcommit (8 caracteres de fecha y 7 primeros de commit).
-	REVISION=$(curl -s "$API_URL" | jq '"r" + (.commit.commit.committer.date | gsub("-"; "")[:8]) + "." + (.commit.sha[:7])')
+	# Obtener revisión.
+	if [ $REMOTE -eq 1 ]; then
+		# Revisión: rAñoMesDía.Gitcommit (8 caracteres de fecha y 7 primeros de commit).
+		REVISION=$(curl -s "$API_URL" | jq '"r" + (.commit.commit.committer.date | gsub("-"; "")[:8]) + "." + (.commit.sha[:7])')
+	else
+		# Parámetro "release" del fichero JSON.
+		REVISION=$(jq -r '.release' $PROGRAMDIR/../doc/VERSION.json 2>/dev/null)
+	fi
 	[ -f $VERSIONFILE ] || echo '{ "project": "OpenGnsys" }' > $VERSIONFILE
 	jq ".release=$REVISION" $VERSIONFILE | sponge $VERSIONFILE
 	VERSION="$(jq -r '[.project, .version, .codename, .release] | join(" ")' $VERSIONFILE 2>/dev/null)"
