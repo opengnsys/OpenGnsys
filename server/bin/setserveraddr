@@ -1,21 +1,32 @@
 #!/bin/bash
-# setserveraddr: modifica los ficheros de configuración para asignar los valores
-#	de la interfaz de red solicitada.
-# Nota:	se enlazan los ficheros a los predefinidos detectados para la interfaz.
-# Uso:	setserveraddr iface
-# Autor: Ramon Gomez - Univ. Sevilla
-# Fecha: 2011-01-25
-# Versión: 1.0.5 - Regenerar ficheros de configuración.
-# Autor: Ramon Gomez - Univ. Sevilla
-# Fecha: 2014-06-06
+
+#/**
+#         setserveraddr {str_ipaddress | str_netiface}
+#@file    setserveraddr
+#@brief   Command the modifies configuration files to assign the default network interface.
+#@param   str_ipaddress  IP address assigned to a network interface
+#@param   str_netiface   network interface name defined by the operating system.
+#@version Initial version.
+#@author  Ramón M. Gómez - ETSII Univ. Sevilla
+#@date    2011-01-25
+#@version 1.0.5 - Regenerate configuration files.
+#@author  Ramón M. Gómez - ETSII Univ. Sevilla
+#@date    2014-06-06
+#@version 1.1.1 - Updating menu URLs, PXE files, and repository API key.
+#@author  Ramón M. Gómez - ETSII Univ. Sevilla
+#@date    2018-11-15
+#*/ ##
 
 
-# Variables globales.
-PROG="$(basename $0)"
+# Variables.
+PROG="$(basename "$0")"
+OPENGNSYS=/opt/opengnsys
+PXEDIR=$OPENGNSYS/tftpboot/menu.lst
+DEFAULTFILE=/etc/default/opengnsys
 
-# Comprobar parámetros.
+# Checking parameters.
 if [ $# -ne 1 ]; then
-	echo "$PROG: Incorrect operand. Format: $PROG interface" >&2
+	echo "$PROG: Incorrect operand. Format: $PROG ipaddress|netiface" >&2
 	exit 1
 fi
 if [ "$USER" != "root" ]; then
@@ -23,36 +34,40 @@ if [ "$USER" != "root" ]; then
 	exit 1
 fi
 
-# Aviso informando de que los clientes iniciados pueden quedarse colgados.
-read -p "WARNING: initiated clients can hang. Continue? (y/n): " ANSWER
-if [ "${ANSWER^^}" != "Y" ]; then
+# Showing warning to inform that initiated clients may hang.
+read -rp "WARNING: initiated clients can hang. Continue? (y/n): " ANSWER
+if [ "${ANSWER,,}" != "y" ]; then
 	echo "Operation canceled."
 	exit 0
 fi
 
-# Detectar la interfaz de red.
-DEVICES=$(ip -o link show up|awk -F: '$2!~/lo/ {print $2}')
+# Detecting network interfaces.
+DEVICES=$(ip -o link show up | awk -F: '$2!~/lo/ {print $2}')
 for DEV in $DEVICES; do
-	# Si se encuentra la interfaz de red, obtener su dirección IP.
-	[ "$DEV" == "$1" ] && SERVERIP=$(ip -o addr show dev $DEV | awk '$3~/inet$/ {sub (/\/.*/, ""); print ($4)}')
+	# If the network interface is found, get its IP address.
+	IP=$(ip -o addr show dev "$DEV" | awk '$3~/inet$/ {sub (/\/.*/, ""); print ($4)}')
+	if [ "$DEV" == "$1" ] || [ "$IP" == "$1" ]; then
+		SERVERIP="$IP"
+		SERVERDEV="$DEV"
+	fi
 done
 
-# Comprobar si se ha detectado dirección IP.
+# Checking if IP address has been detected.
 if [ -n "$SERVERIP" ]; then
-	# Ficheros temporales.
+	# Temporary files.
 	tmpfile=$(mktemp /tmp/og.XXXXX)
 	MYCNF=$(mktemp /tmp/.my.cnf.XXXXX)
 	trap "rm -f $tmpfile $MYCNF" 1 2 3 6 9 15
 
-	# Comprobar si hay que modificar la configuración de DHCP.
+	# Checking whether the DHCP settings need to be changed.
 	CHANGE=0
 	for f in /etc/{dhcp,hcp3}/dhcpd.conf; do
 		if [ -f $f ]; then
-			# Cambiar el parámetro "next-server" de DHCP.
-			file="${f/./-$1.}"
+			# Changing DHCP "next-server" parameter.
+			file="${f/./-$SERVERDEV.}"
 			sed -e "s/next-server.*/next-server $SERVERIP;/" \
 			    -e "s/option routers ;/option routers ${SERVERIP%.*}.1;/" $file >$tmpfile
-			# Copiar el fichero y enlazarlo si hay cambios.
+			# Copying and linking file if there are changes.
 			if [ ! $f -ef $file ] || ! diff -q $tmpfile $file &>/dev/null; then
 				mv $tmpfile $file
 				chmod 644 $file
@@ -61,7 +76,7 @@ if [ -n "$SERVERIP" ]; then
 			fi
 		fi
 	done
-	# Si ha cambiado la configuración, reiniciar DHCP.
+	# Restarting DHCP service if its configuration has changed.
 	if [ $CHANGE == 1 ]; then
 		for f in /etc/init.d/{isc-dhcp-server,dhcp3-server,dhcpd}; do
 			[ -x $f ] && $f restart
@@ -70,80 +85,94 @@ if [ -n "$SERVERIP" ]; then
 		echo "DHCP configuration has not changed."
 	fi
 
-	# Guardar la IP anterior del repositorio.
-	OPENGNSYS=/opt/opengnsys
+	# Saving old IP address.
 	source $OPENGNSYS/etc/ogAdmRepo.cfg
 	OLDSERVERIP=$IPlocal
 
-	# Comprobar si hay que modificar la configuración de OpenGnsys.
+	# Checking if configuration files need to be modified.
 	CHANGE=0
-	# Procesar los ficheros de configuración de OpenGnsys.
 	for f in $OPENGNSYS/{etc/{ogAdmServer,ogAdmRepo,ogAdmAgent}.cfg,www/controlacceso.php,client/etc/ogAdmClient.cfg}; do
-		# Error si no existe algún fichero de configuración.
+		# Error if configuration file cannot be found.
 		if [ ! -f $f ]; then
 			echo "$PROG: File $file does not exist." >&2
 			exit 2
 		fi
-		# Cambiar la IP del servidor:
-		# - variables  ServidorAdm  e  IPlocal,
-		# - servidor o IP en URLs excepto si contienen "localhost".
+		# Updating configuration variables (if URLs does not contain "localhost").
 		sed -e "s,ServidorAdm=.*,ServidorAdm=$SERVERIP," \
 		    -e "s,IPlocal=.*,IPlocal=$SERVERIP," \
 		    -e "s,UrlMenu=https?://\([^/]*\)/\(.*\),UrlMenu=https://$SERVERIP/\2," \
 		    -e '/localhost/!s,https\?://[^/]*/\(.*\),https://'$SERVERIP'/\1,' $f >$tmpfile
-		file="${f/./-$1.}"
-		# Si se usa otro interfaz o cambian los datos de red; ...
+		file="${f/./-$SERVERDEV.}"
+		# Copying updated file, if needed.
 		if [ ! $f -ef $file ] || ! diff -q $tmpfile $file &>/dev/null; then
-			# Copiar el fichero y enlazarlo.
 			cp $tmpfile $file
 			ln -f $file $f
 			CHANGE=1
 		fi
 	done
 
-	# Si ha cambiado la configuración, reiniciar OpenGnsys y actualizar la BD.
+	# Processing when something has changed.
 	if [ $CHANGE == 1 ]; then
+		# Restart OpenGnsys services.
 		/etc/init.d/opengnsys restart
-		source $OPENGNSYS/etc/ogAdmServer.cfg
-		# Componer fichero con credenciales de conexión.  
- 		cat << EOT > $MYCNF
+		# If Repository is active, generating a new API token.
+		source $DEFAULTFILE
+		if [ "$RUN_OGADMREPO" == "yes" ]; then
+			REPOKEY=$(php -r 'echo md5(uniqid(rand(), true));')
+			sed -i -e "s/ApiToken=.*/ApiToken=$REPOKEY/" $OPENGNSYS/etc/ogAdmRepo.cfg
+		fi
+		# If OpenGnsys Server is active, updating the database.
+		if [ "$RUN_OGADMSERVER" == "yes" ]; then
+			source $OPENGNSYS/etc/ogAdmServer.cfg
+			# Creating credentials file.
+			cat << EOT > $MYCNF
 [client]
 user=$USUARIO
 password=$PASSWORD
 EOT
-		# Actualizar IP del servidor en la BD.
-		mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -e \
-			 "UPDATE entornos
-			     SET ipserveradm='$SERVERIP'
-			   WHERE identorno=1"
+			# Updating OpenGnsys Server IP address.
+			mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -e \
+				 "UPDATE entornos
+				     SET ipserveradm='$SERVERIP'
+				   WHERE identorno=1"
+			# If OpenGnsys Repository is active, updating IP address and API token.
+			if [ "$RUN_OGADMREPO" == "yes" ]; then
+				mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -e \
+					 "UPDATE repositorios
+					     SET ip='$SERVERIP', apikey='$REPOKEY'
+					   WHERE ip='$OLDSERVERIP'"
+				unset REPOKEY
+			fi
+			# Updating all menu URLs.
+			mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -e \
+				 "UPDATE menus
+				     SET htmlmenupub = REPLACE(htmlmenupub, '$OLDSERVERIP', '$SERVERIP'),
+				         htmlmenupri = REPLACE(htmlmenupri, '$OLDSERVERIP', '$SERVERIP');"
+			# Updating all PXE files.
+			find $PXEDIR -name "01-*" -exec sed -i -e "s/$OLDSERVERIP/$SERVERIP/g" {} \;
+		fi
 
-		# Actualizar IP del repositorio en la BD.
-		mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -e \
-			 "UPDATE repositorios
-			     SET ip='$SERVERIP'
-			   WHERE ip='$OLDSERVERIP'"
-
-		# Mostrar instrucciones a realizar tras la ejecución.
+		# Showing manual task to do after execution.
 		cat << EOT
-Default server interface set to: $1 ($SERVERIP)
+Default server interface set to: $SERVERDEV ($SERVERIP)
 
 Manual tasks:
-Check DHCP configuration file and restart service, if needed.
-Log-in as Web Console organization user.
- - Check URLs in all menus.
- - Run Advanced Netboot in all rooms.
-
+- Check DHCP configuration file and restart service, if needed.
+- Check PXE files.
+- Log-in as Web Console user: 
+  - Check menu URLs.
+${REPOKEY:+"  - Update repository API token"}
 EOT
 	else
-		# Mensaje indicando que no se han cambiado datos.
+		# Showing message if nothing changes.
 		echo "Default interface has not changed: $1"
 	fi
 else
-	# Error: interfaz de red no encontrado.
-	echo "$PROG: Network device not found. Format: $PROG interface" >&2
+	# Error if network interface is not found.
+	echo "$PROG: Network device not found. Format: $PROG ipaddress|netiface" >&2
 	exit 1
 fi
 
-# Eliminar ficheros temporales.
+# Removing temporary files.
 rm -f $tmpfile $MYCNF
 

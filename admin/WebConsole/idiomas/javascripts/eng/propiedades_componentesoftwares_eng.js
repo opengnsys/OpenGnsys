@@ -1,9 +1,9 @@
 //________________________________________________________________________________________________________
 //	
-//	Fichero de idiomas javascript: propiedades_componentesoftwares_eng.js 
-//	Idioma: Ingés 
-//________________________________________________________________________________________________________
+//    Javascript language file: propiedades_componentesoftwares_eng.js
+//    Language: English
+//____________________________________________________________________________
 TbMsg=new Array;
-TbMsg[0]="You must introduce a name for this software component ";
-TbMsg[1]="You must introduce a software type for this component";
-TbMsg[2]="You must introduce an operating system name for this component";
+TbMsg[0]="You must enter a name for this software component ";
+TbMsg[1]="You must enter a software type for this component";
+TbMsg[2]="You must enter an OS name for this component";

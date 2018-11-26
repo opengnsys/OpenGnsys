@@ -1,0 +1,62 @@
+#!/bin/bash
+#/**
+#      smartPartition.template
+#@brief  particiona los clientes del laboratorio virtual.
+#@param 1
+#@ejemplo:
+#@return: Scripts de ejemplo para establecer particionado según tamaño.
+#@exception OG_ERR_ NOTFOUND      Disco duro no encontrador.
+#@note
+#@todo:
+#@version 0.1 primera version
+#@author  adv
+#@date    2018/07/08
+
+#Calculamos el numero de discos
+NDISK=$(ogDiskToDev | wc -w)
+
+#Si no hay discos, error
+[ -z $NDISK ] && exit $(ogRaiseError $OG_ERR_NOTFOUND "ogDiskToDev | wc -w")
+
+#asignamos contador al primer disco de OpenGnsys
+COUNTER=1
+until [ $COUNTER -gt $NDISK ]; do
+        ogUnmountAll $COUNTER
+        ogDeletePartitionTable $COUNTER
+    ogCreatePartitionTable $COUNTER MSDOS
+    ogUpdatePartitionTable $COUNTER
+        let COUNTER=COUNTER+1
+done
+
+#Establecemos las Particiones CACHE con tamaños diferentes según la capacidad del disco.
+#Si el PC tiene dos discos duros, el segundo será completo para la CACHE.
+#establecemos rangos de las capacidades con expresiones regulares:  https://goo.gl/gJnK7g
+case $NDISK in
+        1)
+                #Calcular el tamaño máximo del disco duro redondeando a la baja en 500 MB para evitar problemas de calculo"
+                SIZE_DISK1=$(expr $(ogGetDiskSize 1) - 500000)
+                #entre 70 y 73'9GB
+                ogCheckStringInReg $SIZE_DISK1 "^7[0-3][0-9]{6}$" &&  initCache 1 4 32000000 NOMOUNT
+                #entre 50 y 52'9
+                ogCheckStringInReg $SIZE_DISK1 "^5[0-2][0-9]{6}$" &&  initCache 1 4 12000000 NOMOUNT
+        ;;
+        2)
+                #Calcular el tamaño máximo del disco duro redondeando a la baja en 500 MB para evitar problemas de calculo"
+                SIZE_DISK2=$(expr $(ogGetDiskSize 1) - 500000)
+                initCache 2 4 $SIZE_DISK2 NOMOUNT
+        ;;
+esac
+
+#El particionado para los sistemas operativos identicos para todos.
+#Requiere tener una tabla de particiones previa.
+ogCreatePartitions 1  NTFS:19000000 LINUX:19000000 EMPTY:0;
+
+#asignamos contador al primer disco de OpenGnsys
+COUNTER=1
+until [ $COUNTER -gt $NDISK ]; do
+        ogBootMbrGeneric $COUNTER
+        ogSetPartitionActive 1 $COUNTER
+        ogListPartitions $COUNTER
+        ogGetPartitionActive $COUNTER
+        let COUNTER=COUNTER+1
+done

@@ -65,8 +65,13 @@
       "name": "RESTOREPROTOCOLNOTCACHE",
       "value": "UNICAST"
     },
+ 	{
+      "description": "timout if Multicast transfer does not begins (seconds)",
+      "name": "MCASTERRORSESSION",
+      "value": 120
+    },
     {
-      "description": "timout if Multicast transfer does not begins or it's interrupted (seconds)",
+      "description": "timout if Multicast transfer does it's interrupted (seconds)",
       "name": "MCASTWAIT",
       "value": 30
     },

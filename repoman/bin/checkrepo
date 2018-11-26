@@ -1,9 +1,9 @@
 #!/bin/bash
 
 #/**
-#         checkrepo
 #@file    checkrepo
-#@brief   Generate repository information in a JSON file.
+#@brief   Maintain repository information in a JSON file.
+#@usage   checkrepo
 #@warning This script uses "jq" command.
 #@version 1.1.0 - Initial version.
 #@author  Ramón M. Gómez - ETSII Univ. Sevilla
@@ -18,15 +18,8 @@ IMAGESDIR=$OPENGNSYS/images
 INFOFILE=$OPENGNSYS/etc/repoinfo.json
 
 
-# Auxiliar functions.
-
-# Metafunction to check if JSON result exists.
-function jq() {
-    local OUTPUT
-    OUTPUT=$($JQ "$@") || return $?
-    [[ "$OUTPUT" = "null" ]] && return 1
-    echo "$OUTPUT"
-}
+# Functions.
+source $OPENGNSYS/lib/ogfunctions.sh
 
 # Create/edit JSON file about installed ogLive clients.
 function addToJson() {
@@ -105,7 +98,7 @@ EOT
         # Create new JSON file.
         if [ -z "$OUNAME" ]; then
             cat << EOT | jq . > $INFOFILE
-{"directory":"$IMAGESDIR","images":[$JSON],"ous":[]}
+{"directory":"$IMAGESDIR","images":[${IMAGENAME:+$JSON}],"ous":[]}
 EOT
         else
             cat << EOT | jq . > $INFOFILE
@@ -113,34 +106,6 @@ EOT
 EOT
         fi
     fi
-}
-
-# Show an error message.
-function raiseError() {
-    case "$1" in
-        usage)
-            echo "$PROG: Usage error: Type \"$PROG help\"" >&2
-            exit 1 ;;
-        notfound)
-            echo "$PROG: Resource not found: $2" >&2
-            exit 2 ;;
-        access)
-            echo "$PROG: Access error: $2" >&2
-            exit 3 ;;
-        *)
-            echo "$PROG: Unknown error" >&2
-            exit 1 ;;
-    esac
-}
-
-# Command functions.
-
-# Show help message.
-function help() {
-    cat << EOT
-$PROG: maintain the repository information.
-Usage: $PROG
-EOT
 }
 
 # Check for file-based images to update the repository configuration file.
@@ -220,8 +185,8 @@ function checkremoved() {
 # Main progrram.
 
 # Check dependencies.
-[ ! -w "$(dirname "$INFOFILE")" ] && raiseError access "$INFOFILE"
-JQ=$(which jq 2>/dev/null) || raiseError notfound "Need to install \"jq\"."
+[ -w "$(dirname "$INFOFILE")" ] || raiseError access "$INFOFILE"
+[ -e "$INFOFILE" ] || addToJson
 which sponge &>/dev/null || raiseError notfound "Need to install \"moreutils\"."
 
 checkfiles

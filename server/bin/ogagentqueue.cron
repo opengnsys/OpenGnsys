@@ -77,10 +77,10 @@ SELECT ogagent_queue.id, ogagent_queue.exectime, ogagent_queue.operation,
         if [ -n "$AGNTURL" ]; then
             CODE=$(curl -ksm 1 -w "%{http_code}" -o /dev/null -H "Authorization: $AGNTKEY" ${DATA:+"-d $DATA"} "$AGNTURL")
             case "$CODE" in
-                000)    # Client does not respond may be halted).
+                000)    # Client does not respond (may be halted).
                     ;;
-                200)    # Operation sended.
-                    echo "$(date +"%FT%T%z"): $PROG: Operation sended to OGAgent: client=$AGNTIP, oper=$OPER, exectime=\"$DATE $TIME\"" >> $LOGFILE ;;
+                200)    # Operation sent.
+                    echo "$(date +"%FT%T%z"): $PROG: Operation sent to OGAgent: client=$AGNTIP, oper=$OPER, exectime=\"$DATE $TIME\"" >> $LOGFILE ;;
                 *)      # Operation error.
                     echo "$(date +"%FT%T%z"): $PROG: Operation error: client=$AGNTIP, oper=$OPER, code=$CODE" >> $LOGFILE ;;
             esac

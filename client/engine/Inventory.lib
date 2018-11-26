@@ -90,168 +90,6 @@ esac
 }
 
 
-#/**
-#         ogGetOsVersion int_ndisk int_nfilesys
-#@brief   Devuelve la versión del sistema operativo instalado en un sistema de archivos.
-#@param   int_ndisk      nº de orden del disco
-#@param   int_nfilesys   nº de orden de la partición
-#@return  OSType:OSVersion - tipo y versión del sistema operativo.
-#@note    OSType = { Android, BSD, GrubLoader, Hurd, Linux, MacOS, Solaris, Windows, WinLoader }
-#@note    Requisitos: awk, head, chroot
-#@exception OG_ERR_FORMAT    Formato incorrecto.
-#@exception OG_ERR_NOTFOUND  Disco o partición no corresponden con un dispositiv
-#@exception OG_ERR_PARTITION Fallo al montar el sistema de archivos.
-#@version 0.9 - Primera versión para OpenGnSys
-#@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2009-09-15
-#@version 1.0.4 - Incluir tipos BSD, MacOS y Solaris.
-#@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2012-06-29
-#@version 1.0.5 - Incluir tipos GrubLoader, Hurd y WinLoader, leer por defecto fichero /etc/os-release.
-#@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2013-10-07
-#@version 1.0.6 - Detectar GrubLoader al final y sistemas basados en EFI.
-#@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2014-08-27
-#*/ ##
-function ogGetOsVersion ()
-{
-# Variables locales.
-local MNTDIR TYPE DISTRIB VERSION IS64BIT FILE
-# Si se solicita, mostrar ayuda.
-if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_nfilesys" \
-           "$FUNCNAME 1 2  =>  Linux:Ubuntu precise (12.04 LTS) 64 bits"
-    return
-fi
-# Error si no se reciben 2 parametros.
-[ $# = 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
-
-# Montar la particion, si no lo estaba previamente.
-MNTDIR=$(ogMount $1 $2) || return $?
-
-# Buscar tipo de sistema operativo.
-# Para GNU/Linux: leer descripción.
-TYPE="Linux"
-FILE="$MNTDIR/etc/os-release"
-[ -r $FILE ] && VERSION="$(awk -F= '$1~/PRETTY_NAME/ {gsub(/\"/,"",$2); print $2}' $FILE)"
-# Si no se puede obtener, buscar en ficheros del sistema.
-if [ -z "$VERSION" ]; then
-    FILE="$MNTDIR/etc/lsb-release"
-    [ -r $FILE ] && VERSION="$(awk -F= '$1~/DESCRIPTION/ {gsub(/\"/,"",$2); print $2}' $FILE)"
-    for DISTRIB in redhat SuSE mandrake gentoo; do
-        FILE="$MNTDIR/etc/${DISTRIB}-release"
-        [ -r $FILE ] && VERSION="$(head -1 $FILE)"
-    done
-    FILE="$MNTDIR/etc/arch-release"
-    [ -r $FILE ] && VERSION="Arch Linux"
-    FILE="$MNTDIR/etc/slackware-version"
-    [ -r $FILE ] && VERSION="Slackware $(cat $FILE)"
-fi
-# Si no se encuentra, intentar ejecutar "lsb_release".
-[ -z "$VERSION" ] && VERSION=$(chroot $MNTDIR lsb_release -d 2>/dev/null | awk -F":\t" '{print $2}')
-# Comprobar Linux de 64 bits.
-[ -n "$VERSION" ] && [ -e $MNTDIR/lib64 ] && IS64BIT="$MSG_64BIT"
-# Para Android, leer fichero de propiedades.
-if [ -z "$VERSION" ]; then
-    TYPE="Android"
-    FILE="$MNTDIR/android*/system/build.prop"
-    [ -r $FILE ] && VERSION="Android $(awk -F= '$1~/(product.brand|build.version.release)/ {print $2}' $FILE | tr '\n' ' ')"
-    [ -e $MNTDIR/lib64 ] && IS64BIT="$MSG_64BIT"
-fi
-# Para GNU/Hurd, comprobar fichero de inicio (basado en os-prober).
-if [ -z "$VERSION" ]; then
-    TYPE="Hurd"
-    FILE="$MNTDIR/hurd/init"
-    [ -r $FILE ] && VERSION="GNU/Hurd"
-fi
-# Para Windows: leer la version del registro.
-if [ -z "$VERSION" ]; then
-    TYPE="Windows"
-    FILE="$(ogGetHivePath $MNTDIR SOFTWARE)"
-    if [ -n "$FILE" ]; then
-        # Nuevo método más rápido para acceder al registro de Windows..
-        VERSION=$(echo $(hivexsh << EOT 2>/dev/null
-load $FILE
-cd \Microsoft\Windows NT\CurrentVersion
-lsval ProductName
-lsval ReleaseId
-EOT
-        ))
-        [ -n "$(reglookup -H -p "Microsoft/Windows/CurrentVersion/ProgramW6432Dir" "$FILE" 2>/dev/null)" ] && IS64BIT="$MSG_64BIT"
-        if [ -z "$VERSION" ]; then
-            # Compatibilidad con métrodo antiguo y más lento de acceder al registro.
-            VERSION=$(ogGetRegistryValue $MNTDIR software '\Microsoft\Windows NT\CurrentVersion\ProductName' 2>/dev/null)
-            [ -n "$(ogGetRegistryValue $MNTDIR software '\Microsoft\Windows\CurrentVersion\ProgramW6432Dir' 2>/dev/null)" ] && IS64BIT="$MSG_64BIT"
-        fi
-    fi
-fi
-# Para cargador Windows: buscar versión en fichero BCD (basado en os-prober).
-if [ -z "$VERSION" ]; then
-    TYPE="WinLoader"
-    FILE="$(ogGetPath $MNTDIR/boot/bcd)"
-    [ -z "$FILE" ] && FILE="$(ogGetPath $MNTDIR/EFI/Microsoft/boot/bcd)"
-    if [ -n "$FILE" ]; then
-        for DISTRIB in "Windows Recovery" "Windows Boot"; do
-            if grep -aqs "$(echo "$DISTRIB" | sed 's/./&./g')" $FILE; then
-                VERSION="$DISTRIB loader"
-            fi
-        done
-    fi
-fi
-# Para macOS: detectar kernel y completar con fichero plist de información del sistema.
-if [ -z "$VERSION" ]; then
-    TYPE="MacOS"
-    # Kernel de Mac OS (no debe ser fichero de texto).
-    FILE="$MNTDIR/mach_kernel"
-    if [ -z "$(file -b $FILE | grep 'text')" ]; then
-        # Obtener tipo de kernel.
-        [ -n "$(file -b $FILE | grep 'Mach-O')" ] && VERSION="macOS"
-        [ -n "$(file -b $FILE | grep 'Mach-O 64-bit')" ] && IS64BIT="$MSG_64BIT"
-        # Datos de configuración de versión de Mac OS.
-        FILE="$MNTDIR/System/Library/CoreServices/SystemVersion.plist"
-        [ -r $FILE ] && VERSION=$(awk -F"[<>]" '
-                                      /ProductName/ {getline;s=$3}
-                                      /ProductVersion/ {getline;v=$3}
-                                      END {print s,v}' $FILE)
-        # Datos de recuperación de macOS.
-        FILE="$MNTDIR/com.apple.recovery.boot"
-        [ -r $FILE -a -n "$VERSION" ] && VERSION="$VERSION recovery"
-    fi
-fi
-# Para FreeBSD: obtener datos del Kernel.
-### TODO Revisar solución.
-if [ -z "$VERSION" ]; then
-    TYPE="BSD"
-    FILE="$MNTDIR/boot/kernel/kernel"
-    if [ -r $FILE ]; then
-        VERSION="$(strings $FILE|awk '/@.*RELEASE/ {sub(/@\(#\)/,""); print $1,$2}')"
-        [ -n "$(file -b $FILE | grep 'x86-64')" ] && IS64BIT="$MSG_64BIT"
-    fi
-fi
-# Para Solaris: leer el fichero de versión.
-### TODO Revisar solución.
-if [ -z "$VERSION" ]; then
-    TYPE="Solaris"
-    FILE="$MNTDIR/etc/release"
-    [ -r $FILE ] && VERSION="$(head -1 $FILE)"
-fi
-# Para cargador GRUB, comprobar fichero de configuración.
-if [ -z "$VERSION" ]; then
-    TYPE="GrubLoader"
-    for FILE in $MNTDIR/{,boot/}grub/menu.lst; do
-        [ -r $FILE ] && VERSION="GRUB Loader"
-    done
-    for FILE in $MNTDIR/{,boot/}{grub{,2},EFI/*}/grub.cfg; do
-        [ -r $FILE ] && VERSION="GRUB2 Loader"
-    done
-fi
-
-# Mostrar resultado y salir sin errores.
-[ -n "$VERSION" ] && echo "$TYPE:$VERSION $IS64BIT"
-return 0
-}
-
 
 #/**
 #         ogGetSerialNumber
@@ -259,6 +97,8 @@ return 0
 #@version 1.1.0 - Primeras versión con OpenGnsys
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2015-06-08
+#*/ ##
+
 function ogGetSerialNumber ()
 {
 # Si se solicita, mostrar ayuda.
@@ -496,4 +336,167 @@ for k in db.keys():
     *)  ogRaiseError $OG_ERR_PARTITION "$1, $2"
         return $? ;;
 esac
+}
+
+#/**
+#         ogGetOsVersion int_ndisk int_nfilesys
+#@brief   Devuelve la versión del sistema operativo instalado en un sistema de archivos.
+#@param   int_ndisk      nº de orden del disco
+#@param   int_nfilesys   nº de orden de la partición
+#@return  OSType:OSVersion - tipo y versión del sistema operativo.
+#@note    OSType = { Android, BSD, GrubLoader, Hurd, Linux, MacOS, Solaris, Windows, WinLoader }
+#@note    Requisitos: awk, head, chroot
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_NOTFOUND  Disco o partición no corresponden con un dispositiv
+#@exception OG_ERR_PARTITION Fallo al montar el sistema de archivos.
+#@version 0.9 - Primera versión para OpenGnSys
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2009-09-15
+#@version 1.0.4 - Incluir tipos BSD, MacOS y Solaris.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2012-06-29
+#@version 1.0.5 - Incluir tipos GrubLoader, Hurd y WinLoader, leer por defecto fichero /etc/os-release.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2013-10-07
+#@version 1.0.6 - Detectar GrubLoader al final y sistemas basados en EFI.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2014-08-27
+#*/ ##
+function ogGetOsVersion ()
+{
+# Variables locales.
+local MNTDIR TYPE DISTRIB VERSION IS64BIT FILE
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_nfilesys" \
+           "$FUNCNAME 1 2  =>  Linux:Ubuntu precise (12.04 LTS) 64 bits"
+    return
+fi
+# Error si no se reciben 2 parametros.
+[ $# = 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
+
+# Montar la particion, si no lo estaba previamente.
+MNTDIR=$(ogMount $1 $2) || return $?
+
+# Buscar tipo de sistema operativo.
+# Para GNU/Linux: leer descripción.
+TYPE="Linux"
+FILE="$MNTDIR/etc/os-release"
+[ -r $FILE ] && VERSION="$(awk -F= '$1~/PRETTY_NAME/ {gsub(/\"/,"",$2); print $2}' $FILE)"
+# Si no se puede obtener, buscar en ficheros del sistema.
+if [ -z "$VERSION" ]; then
+    FILE="$MNTDIR/etc/lsb-release"
+    [ -r $FILE ] && VERSION="$(awk -F= '$1~/DESCRIPTION/ {gsub(/\"/,"",$2); print $2}' $FILE)"
+    for DISTRIB in redhat SuSE mandrake gentoo; do
+        FILE="$MNTDIR/etc/${DISTRIB}-release"
+        [ -r $FILE ] && VERSION="$(head -1 $FILE)"
+    done
+    FILE="$MNTDIR/etc/arch-release"
+    [ -r $FILE ] && VERSION="Arch Linux"
+    FILE="$MNTDIR/etc/slackware-version"
+    [ -r $FILE ] && VERSION="Slackware $(cat $FILE)"
+fi
+# Si no se encuentra, intentar ejecutar "lsb_release".
+[ -z "$VERSION" ] && VERSION=$(chroot $MNTDIR lsb_release -d 2>/dev/null | awk -F":\t" '{print $2}')
+# Comprobar Linux de 64 bits.
+[ -n "$VERSION" ] && [ -e $MNTDIR/lib64 ] && IS64BIT="$MSG_64BIT"
+# Para Android, leer fichero de propiedades.
+if [ -z "$VERSION" ]; then
+    TYPE="Android"
+    FILE="$MNTDIR/android*/system/build.prop"
+    [ -r $FILE ] && VERSION="Android $(awk -F= '$1~/(product.brand|build.version.release)/ {print $2}' $FILE | tr '\n' ' ')"
+    [ -e $MNTDIR/lib64 ] && IS64BIT="$MSG_64BIT"
+fi
+# Para GNU/Hurd, comprobar fichero de inicio (basado en os-prober).
+if [ -z "$VERSION" ]; then
+    TYPE="Hurd"
+    FILE="$MNTDIR/hurd/init"
+    [ -r $FILE ] && VERSION="GNU/Hurd"
+fi
+# Para Windows: leer la version del registro.
+if [ -z "$VERSION" ]; then
+    TYPE="Windows"
+    FILE="$(ogGetHivePath $MNTDIR SOFTWARE)"
+    if [ -n "$FILE" ]; then
+        # Nuevo método más rápido para acceder al registro de Windows..
+        VERSION=$(echo $(hivexsh << EOT 2>/dev/null
+load $FILE
+cd \Microsoft\Windows NT\CurrentVersion
+lsval ProductName
+lsval ReleaseId
+EOT
+        ))
+        [ -n "$(reglookup -H -p "Microsoft/Windows/CurrentVersion/ProgramW6432Dir" "$FILE" 2>/dev/null)" ] && IS64BIT="$MSG_64BIT"
+        if [ -z "$VERSION" ]; then
+            # Compatibilidad con métrodo antiguo y más lento de acceder al registro.
+            VERSION=$(ogGetRegistryValue $MNTDIR software '\Microsoft\Windows NT\CurrentVersion\ProductName' 2>/dev/null)
+            [ -n "$(ogGetRegistryValue $MNTDIR software '\Microsoft\Windows\CurrentVersion\ProgramW6432Dir' 2>/dev/null)" ] && IS64BIT="$MSG_64BIT"
+        fi
+    fi
+fi
+# Para cargador Windows: buscar versión en fichero BCD (basado en os-prober).
+if [ -z "$VERSION" ]; then
+    TYPE="WinLoader"
+    FILE="$(ogGetPath $MNTDIR/boot/bcd)"
+    [ -z "$FILE" ] && FILE="$(ogGetPath $MNTDIR/EFI/Microsoft/boot/bcd)"
+    if [ -n "$FILE" ]; then
+        for DISTRIB in "Windows Recovery" "Windows Boot"; do
+            if grep -aqs "$(echo "$DISTRIB" | sed 's/./&./g')" $FILE; then
+                VERSION="$DISTRIB loader"
+            fi
+        done
+    fi
+fi
+# Para macOS: detectar kernel y completar con fichero plist de información del sistema.
+if [ -z "$VERSION" ]; then
+    TYPE="MacOS"
+    # Kernel de Mac OS (no debe ser fichero de texto).
+    FILE="$MNTDIR/mach_kernel"
+    if [ -z "$(file -b $FILE | grep 'text')" ]; then
+        # Obtener tipo de kernel.
+        [ -n "$(file -b $FILE | grep 'Mach-O')" ] && VERSION="macOS"
+        [ -n "$(file -b $FILE | grep 'Mach-O 64-bit')" ] && IS64BIT="$MSG_64BIT"
+        # Datos de configuración de versión de Mac OS.
+        FILE="$MNTDIR/System/Library/CoreServices/SystemVersion.plist"
+        [ -r $FILE ] && VERSION=$(awk -F"[<>]" '
+                                      /ProductName/ {getline;s=$3}
+                                      /ProductVersion/ {getline;v=$3}
+                                      END {print s,v}' $FILE)
+        # Datos de recuperación de macOS.
+        FILE="$MNTDIR/com.apple.recovery.boot"
+        [ -r $FILE -a -n "$VERSION" ] && VERSION="$VERSION recovery"
+    fi
+fi
+# Para FreeBSD: obtener datos del Kernel.
+### TODO Revisar solución.
+if [ -z "$VERSION" ]; then
+    TYPE="BSD"
+    FILE="$MNTDIR/boot/kernel/kernel"
+    if [ -r $FILE ]; then
+        VERSION="$(strings $FILE|awk '/@.*RELEASE/ {sub(/@\(#\)/,""); print $1,$2}')"
+        [ -n "$(file -b $FILE | grep 'x86-64')" ] && IS64BIT="$MSG_64BIT"
+    fi
+fi
+# Para Solaris: leer el fichero de versión.
+### TODO Revisar solución.
+if [ -z "$VERSION" ]; then
+    TYPE="Solaris"
+    FILE="$MNTDIR/etc/release"
+    [ -r $FILE ] && VERSION="$(head -1 $FILE)"
+fi
+# Para cargador GRUB, comprobar fichero de configuración.
+if [ -z "$VERSION" ]; then
+    TYPE="GrubLoader"
+    for FILE in $MNTDIR/{,boot/}grub/menu.lst; do
+        [ -r $FILE ] && VERSION="GRUB Loader"
+    done
+#/* (comentario Doxygen)   
+    for FILE in $MNTDIR/{,boot/}{grub{,2},EFI/*}/grub.cfg; do
+        [ -r $FILE ] && VERSION="GRUB2 Loader"
+    done   
+fi
+#*/ (Comentario Doxygen)
+# Mostrar resultado y salir sin errores.
+[ -n "$VERSION" ] && echo "$TYPE:$VERSION $IS64BIT"
+return 0
 }

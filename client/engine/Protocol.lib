@@ -337,13 +337,16 @@ fi
 #@version 1.1 - Control de errores en transferencia multicast (ticket #781) 
 #@author  Irina Gomez, ETSII Universidad de Sevilla 
 #@date    2017/04/20
+#@version 1.1.0.a - Parametros de clientes como sesision de multicast  (ticket #851) 
+#@author  Antonio J. Doblas Viso
+#@date    2018/09/22
 #*/ ##
 #         
 
 function ogMcastSyntax ()
 {
 
-local ISUDPCAST RECEIVERTIMEOUT PARM SESSION SESSIONPARM MODE PORTBASE PERROR
+local ISUDPCAST RECEIVERTIMEOUT STARTTIMEOUT PARM SESSION SESSIONPARM MODE PORTBASE PERROR
 local METHOD ADDRESS BITRATE NCLIENTS MAXTIME CERROR 
 local TOOL LEVEL DEVICE MBUFFER SYNTAXSERVER SYNTAXCLIENT 
 
@@ -356,45 +359,48 @@ if [ "$*" == "help" -o "$2" == "help" ]; then
                    "sessionServer syntax:        portbase:method:mcastaddress:speed:nclients:ntimeWaitingUntilNclients " \
                    "sessionServer example:       9000:full-duplex|half-duplex|broadcast:239.194.17.36:80M:50:60 " \
                    "sessionClient syntax:        portbase " \
-                   "sessionClient example:       9000 "
+		           "sessionClient example:       9000 "\
+		           "sessionClient syntax:        portbase:serverIP:TimeOut_session:TimeOut_transmision" \
+                   "sessionClient example:       9000:172.17.88.161:40:120"
     return
 fi
 PERROR=0
 
 #si no tenemos updcast o su version superior 2009 udpcast error.
 ISUDPCAST=$(udp-receiver --help 2>&1)
-echo $ISUDPCAST | grep start-timeout > /dev/null || ogRaiseError $OG_ERR_NOTEXEC "upd-cast no existe o version antigua -requerida 2009-"|| return $?
+echo $ISUDPCAST | grep "not found" > /dev/null && (ogRaiseError $OG_ERR_NOTEXEC "upd-cast no existe " || return $?)
 
-# Si la version de  udp-receiver permite --receive-timeout utilizamos la opción
-if echo $ISUDPCAST | grep receive-timeout &>/dev/null; then
-    RECEIVERTIMEOUT=" --receive-timeout $MCASTWAIT"
-else
-    RECEIVERTIMEOUT=""
-fi
-
-# Error si no se reciben $PARM parámetros.
+############ BEGIN NUMBERS PARAMETERS CHECK  AND SESSION OPTIONS  IF CLIENT OR SERVER ##############
+# Definimos los parametros de la funcion segun la opcion de envio/recepcion.
 echo "$1" | grep "PARTITION" > /dev/null && PARM=5 || PARM=3
 [ "$#" -eq "$PARM" ] || ogRaiseError $OG_ERR_FORMAT "sin parametros"|| return $?
-
-
-# 1er param check
+# 1er param check:  opcion de envio/recepcion
 ogCheckStringInGroup "$1" "SENDPARTITION sendpartition RECEIVERPARTITION receiverpartition SENDFILE sendfile RECEIVERFILE receiverfile" || ogRaiseError $OG_ERR_FORMAT "1st param: $1" || PERROR=1 #return $?
-
-# 2º param check
+# 1º param check : opcion de cliente/servidor
 echo "$1" | grep "SEND" > /dev/null && MODE=server || MODE=client
 
-#TODO: diferenciamos los paramatros especificos de la sessión multicast  
-#SI: controlamos todos los parametros de la sessión multicast.
+# 2º param check: sesion multicast cliente/servidor.    comprobamos el numero de parametros segun el tipo de sesion cliente o servidor.
+#Definimos los parametros de la sesion multicast.  La sesion de cliente seran 3, aunque uno es el obligado y dos opcionales.  puerto:server:autostart
 [ $MODE == "client" ] && SESSIONPARM=1 || SESSIONPARM=6
+#Controlamos el numero de paratros incluidos en la sesion usada como paraetro $2
 OIFS=$IFS; IFS=':' ; SESSION=($2); IFS=$OIFS
+#Controlamos la sesion multicast del server   
+if [ $MODE == "server" ]
+then  
+	[[ ${#SESSION[*]} == $SESSIONPARM ]]  || ogRaiseError $OG_ERR_FORMAT "parametros session de servidor multicast no completa" || PERROR=2# return $?
+fi
+#controlamos la sesion de cliente.
+if [ $MODE == "client" ]
+then  
+	[[ ${#SESSION[*]} -ge $SESSIONPARM ]]  || ogRaiseError $OG_ERR_FORMAT "parametros session de cliente multicast no completa" || PERROR=2# return $?
+fi
+############ END NUMBERS PARAMETERS CHECK ##############
 
-
-[[ ${#SESSION[*]} == $SESSIONPARM ]]  || ogRaiseError $OG_ERR_FORMAT "parametros session multicast no completa" || PERROR=2# return $?
-
-
-#controlamos el PORTBASE de la sesion. Comun.-
+##### BEGIN SERVER SESSION #####
+# 2º param check: controlamos el primer componente comun de las sesiones de servidor y cliente: PORTBASE
 PORTBASE=${SESSION[0]}
 ogCheckStringInGroup ${SESSION[0]} "$(seq 9000 2 9050)" || ogRaiseError $OG_ERR_FORMAT "McastSession portbase ${SESSION[0]}" || PERROR=3 #return $?
+# 2º param check:  Controlamos el resto de componenentes de la sesion del servidor. 
 if [ $MODE == "server" ]
 then    
 	ogCheckStringInGroup ${SESSION[1]} "full-duplex FULL-DUPLEX half-duplex HALF-DUPLEX broadcast BROADCAST" || ogRaiseError $OG_ERR_FORMAT "McastSession method ${SESSION[1]}" || PERROR=4 #return $?
@@ -422,69 +428,114 @@ then
 	ogCheckStringInGroup "$5" "lzop LZOP gzip GZIP 0 1" || ogRaiseError $OG_ERR_NOTFOUND " compresor $5 no valido" || PERROR=11 #return $?
 	LEVEL=$5
 fi
-
-
+# Controlamos si ha habido errores en la comprobacion de la sesion de servidor.
 if [ "$PERROR" != "0" ]; then
 	ogRaiseError $OG_ERR_MCASTSYNTAXT " $PERROR"; return $?
 fi
-
-
-# Valores estandar no configurables.
+# Asignamos mas valores no configurables a la sesioe servidor.
 CERROR="8x8/128"
-
-# opción del usuo de tuberia intermedia en memoria mbuffer.
+# opcion del usuo de tuberia intermedia en memoria mbuffer.
 which mbuffer > /dev/null && MBUFFER=" --pipe 'mbuffer -q -m 20M' " 
 
-# Generamos la instrucción base de multicast -Envio,Recepcion-
+# Generamos la instruccion base del servidor de multicast -Envio-
 SYNTAXSERVER="udp-sender $MBUFFER --nokbd --portbase $PORTBASE --$METHOD --mcast-data-address $ADDRESS --fec $CERROR --max-bitrate $BITRATE --ttl 16 --min-clients $NCLIENTS --max-wait $MAXTIME --autostart $MAXTIME --log /tmp/mcast.log"
-#SYNTAXCLIENT="udp-receiver $MBUFFER --portbase $PORTBASE "
+##########################################################################
+#### END SERVER SESSION ##############
 
 
-# Deteccion automatica de la subred del cliente para anadir la  IP del repositorio a la orden udp-receiver en el caso de encontrarse en distinta subred del repo
-REPOIP="$(ogGetRepoIp)"
-CLIENTIP=$(ip -o address show up | awk '$2!~/lo/ {if ($3~/inet$/) {printf ("%s ", $4)}}')
-MASCARA=`echo $CLIENTIP | cut -f2 -d/`
-CLIENTIP=`echo $CLIENTIP | cut -f1 -d/`
-RIPBT=""
-IPBT=""
-for (( i = 1 ; i < 5 ; i++ ))
-do
-	RIP=`echo $REPOIP | cut -f$i -d.`
-	RIP=`echo "$[$RIP + 256]"`
-	RIPB=""
-	while [ $RIP -gt 0 ]
-	do
-		let COCIENTE=$RIP/2
-		let RESTO=$RIP%2
-		RIPB=$RESTO$RIPB
-		RIP=$COCIENTE
-	done
-	RIPB=`echo "$RIPB" | cut -c2-`
-	RIPBT=$RIPBT$RIPB
-	IP=`echo $CLIENTIP | cut -f$i -d.`
-	IP=`echo "$[$IP + 256]"`
-	IPB=""
-	while [ $IP -gt 0 ]
-	do
-		let COCIENTE=$IP/2
-		let RESTO=$IP%2
-		IPB=$RESTO$IPB
-		IP=$COCIENTE
-	done
-	IPB=`echo "$IPB" | cut -c2-`
-	IPBT=$IPBT$IPB
-done
-MCASTWAIT=${MCASTWAIT:-120}
-REPOSUBRED=`echo $RIPBT | cut -c1-$MASCARA`
-CLIENTSUBRED=`echo $IPBT | cut -c1-$MASCARA`
-if [ $REPOSUBRED == $CLIENTSUBRED ]; then
-	SYNTAXCLIENT="udp-receiver $MBUFFER --portbase $PORTBASE $RECEIVERTIMEOUT --start-timeout $MCASTWAIT"
+##### BEGIN CLIENT SESSION #####
+#La primera opcion PORTBASE, ya esta controlado. Porque es comun al server y al cliente.
+#La segunda opcion de la sesion para el cliente:: SERVERADDRES
+if ogCheckIpAddress ${SESSION[1]} 2>/dev/null 
+then
+	SERVERADDRESS=" --mcast-rdv-address ${SESSION[1]}"
 else
-	SYNTAXCLIENT="udp-receiver $MBUFFER --portbase $PORTBASE --mcast-rdv-address $REPOIP $RECEIVERTIMEOUT --start-timeout $MCASTWAIT"
+	# Deteccion automatica de la subred del cliente para anadir la  IP del repositorio a la orden udp-receiver en el caso de encontrarse en distinta subred del repo
+	REPOIP="$(ogGetRepoIp)"
+	CLIENTIP=$(ip -o address show up | awk '$2!~/lo/ {if ($3~/inet$/) {printf ("%s ", $4)}}')
+	MASCARA=`echo $CLIENTIP | cut -f2 -d/`
+	CLIENTIP=`echo $CLIENTIP | cut -f1 -d/`
+	RIPBT=""
+	IPBT=""
+	for (( i = 1 ; i < 5 ; i++ ))
+	do
+		RIP=`echo $REPOIP | cut -f$i -d.`
+		RIP=`echo "$[$RIP + 256]"`
+		RIPB=""
+		while [ $RIP -gt 0 ]
+		do
+			let COCIENTE=$RIP/2
+			let RESTO=$RIP%2
+			RIPB=$RESTO$RIPB
+			RIP=$COCIENTE
+		done
+		RIPB=`echo "$RIPB" | cut -c2-`
+		RIPBT=$RIPBT$RIPB
+		IP=`echo $CLIENTIP | cut -f$i -d.`
+		IP=`echo "$[$IP + 256]"`
+		IPB=""
+		while [ $IP -gt 0 ]
+		do
+			let COCIENTE=$IP/2
+			let RESTO=$IP%2
+			IPB=$RESTO$IPB
+			IP=$COCIENTE
+		done
+		IPB=`echo "$IPB" | cut -c2-`
+		IPBT=$IPBT$IPB
+	done
+	REPOSUBRED=`echo $RIPBT | cut -c1-$MASCARA`
+	CLIENTSUBRED=`echo $IPBT | cut -c1-$MASCARA`
+	if [ $REPOSUBRED == $CLIENTSUBRED ]; then
+		SERVERADDRESS=" "
+	else
+		SERVERADDRESS=" --mcast-rdv-address $REPOIP"
+	fi
 fi
+#La tercera opcion de la sesion para el cliente:  ${SESSION[2]}  ERRORSESSION -  TIMEOUT ERROR IF NO FOUNT SESSEION MULTICAST
+if ogCheckStringInReg ${SESSION[2]} "^[0-9]{1,10}$"  &>/dev/null
+then 
+	case ${SESSION[2]} in
+	0)
+		STARTTIMEOUT=" "		
+	;;
+	*)
+		STARTTIMEOUT=" --start-timeout ${SESSION[2]}"
+	;;
+	esac
+else	 
+	#asignamos valor definido en el engine.cfg
+	STARTTIMEOUT=" --start-timeout $MCASTERRORSESSION"
+fi
+#Verificamos que la opcion start-time out esta soportada por la version del cliente
+echo $ISUDPCAST | grep start-timeout > /dev/null || STARTTIMEOUT=" "
 
+#La cuarta opcion de la sesion para el cliente:   ${SESSION[2]} ERROR TRANSFER - TIMEOUT EEOR IF NOT RECEIVER DATA FROM SERVER 
+if ogCheckStringInReg ${SESSION[3]} "^[0-9]{1,10}$" &>/dev/null
+then 
+	case ${SESSION[3]} in
+	0)
+		RECEIVERTIMEOUT=" "		
+	;;
+	*)
+		RECEIVERTIMEOUT=" --receive-timeout ${SESSION[3]}"
+	;;
+	esac
+else	 
+	#asignamos valor definido en el engine.cfg
+	RECEIVERTIMEOUT=" --receive-timeout $MCASTWAIT"
+fi 
+#Verificamos que la opcion receive-timeou esta soportada por la version del cliente
+echo $ISUDPCAST | grep receive-timeout > /dev/null || RECEIVERTIMEOUT=" "
+
+#Componenemos la sesion multicast del cliente
+SYNTAXCLIENT="udp-receiver $MBUFFER --portbase $PORTBASE $SERVERADDRESS $STARTTIMEOUT $RECEIVERTIMEOUT  --log /tmp/mcast.log"
+##########################################################################
+#### END CLIENT SESSION ##############
+
+ ######## BEGIN MAIN PROGAM #####
 case "$1" in
-SENDPARTITION)
+	SENDPARTITION)
 		PROG1=`ogCreateImageSyntax $DEVICE " " $TOOL $LEVEL | awk -F"|" '{print $1 "|" $3}' | tr -d ">"`
 		echo "$PROG1 | $SYNTAXSERVER"
 	;;
@@ -502,6 +553,7 @@ SENDPARTITION)
    *)
    ;;
 esac
+######## END MAIN PROGAM #####
 }
 
 
@@ -781,7 +833,8 @@ fi
 #@author  Irina Gomez, ETSII Universidad de Sevilla 
 #@date    2017/06/23
 #*/ ##
-function ogMcastRequest {
+function ogMcastRequest ()
+{
 # Variables locales
 local FILE PROTOOPT PORT PORTAUX REPOIP REPOPORTAUX REPEAT OGUNIT
 
@@ -828,9 +881,8 @@ done
 #@param (2 parámetros)  $1 path_aboluto_fichero_torrent  $2 Parametros_Session_Torrent  
 #@param (3 parámetros)  $1 Contenedor CACHE $2 path_absoluto_fichero_Torrent $3 Parametros_Session_Torrent
 #@param (4 parámetros)  $1 disk $2 particion $3 path_absoluto_fichero_Torrent 4$ Parametros_Session_Torrent
-
 #@return
-#@note
+#@note    protocoloTORRENT=mode:time   mode=seeder  -> Dejar el equipo seedeando hasta que transcurra el tiempo indicado o un kill desde consola, mode=peer    -> seedear mientras descarga mode=leecher  -> NO seedear mientras descarga time tiempo que una vez descargada la imagen queremos dejar al cliente como seeder.
 #@todo: 
 #@version 0.1 - Integración para OpenGNSys.
 #@author        Antonio J. Doblas Viso. Universidad de Málaga
@@ -845,13 +897,6 @@ done
 #@author        Antonio J. Doblas Viso. Univesidad de Málaga.
 #@date
 #*/ ##
-
-#protocoloTORRENT    mode:time
-#mode=seeder  -> Dejar el equipo seedeando hasta que transcurra el tiempo indicado o un kill desde consola, 
-#mode=peer    -> seedear mientras descarga
-#mode=leecher  -> NO seedear mientras descarga
-#time tiempo que una vez descargada la imagen queremos dejar al cliente como seeder.
-
 function ogTorrentStart ()
 {
 

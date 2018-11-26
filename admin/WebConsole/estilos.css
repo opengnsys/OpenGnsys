@@ -431,4 +431,10 @@ A.tabla_listados_sin:link{
     FONT-SIZE: 14px;
     FONT-WEIGHT: 300;
 }
-
+/* Ayuda enlaces sin subrayado */
+.help_menu
+{
+    text-decoration: none;
+    color: #6b6363;
+    font-weight: bold;
+}

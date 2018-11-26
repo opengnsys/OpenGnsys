@@ -1,7 +1,7 @@
 <?php
 //________________________________________________________________________________________________________
 //
-//	Fichero de idiomas php: crearperfilsoftware_cat.php (Comandos)
+//	Fichero de idiomas php: crearimagen_cat.php (Comandos)
 //	Idioma: Català 
 //________________________________________________________________________________________________________
 	$TbMsg=array();
@@ -21,4 +21,4 @@
 	$TbMsg[13]='Tipus';
 	$TbMsg[14]='Àmbit';
 	$TbMsg[15]='Ordinadors';	
-?>
+	$TbMsg["CREATE_NOREPO"]='<br>&nbsp;Ordenador sin repositorio asignado.&nbsp; <br>No se puede crear imagen.<br> &nbsp;';

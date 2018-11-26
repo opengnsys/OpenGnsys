@@ -1,9 +1,9 @@
 //________________________________________________________________________________________________________
 //	
-//	Fichero de idiomas javascript: propiedades_usuarios_eng.js 
-//	Idioma: Ingés 
-//________________________________________________________________________________________________________
+//    Javascript language file: propiedades_entidades_eng.js
+//    Language: English
+//____________________________________________________________________________
 TbMsg=new Array;
-TbMsg[0]="You must introduce a name for this Entity y sólo puede contener caracteres alfanuméricos";
-TbMsg[1]="El comentario sólo puede contener caracteres alfanuméricos";
-TbMsg['PXE']="Si cambia está opción debe guardar de nuevo la configuración \ndel arranque PXE de los clientes en NetBootAvanzado";
+TbMsg[0]="You must enter a name for this Entity. It can only contain alphanumeric characters";
+TbMsg[1]="The comment can only contain alphanumeric characters";
+TbMsg['PXE']="If you change this option, you must save again the PXE boot configuration \nof clients in AdvancedNetBoot";

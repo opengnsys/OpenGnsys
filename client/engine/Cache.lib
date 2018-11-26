@@ -87,7 +87,7 @@ SIZE=$[$SIZECACHE*2]                            # Tamaño en sectores de 512 B.
 IOSIZE=$(fdisk -l $DISK | awk '/I\/O/ {print $4}')
 if [ $IOSIZE -eq 4096 ]; then
     END=$[$END-8192]
-    START=$[END-SIZE-8192]
+    START=$[END-SIZE+2048-(END-SIZE)%2048]
 else
     START=$[END-SIZE+1]
 fi

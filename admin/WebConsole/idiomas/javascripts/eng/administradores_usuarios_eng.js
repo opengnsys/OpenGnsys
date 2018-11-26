@@ -1,8 +1,8 @@
 ﻿//____________________________________________________________________________
 //	
-//	Fichero de idiomas javascript: administradores_usuarios_eng.js 
-//	Idioma: Ingles
+//    Javascript language file: administradores_usuarios_eng.js 
+//    Language: English
 //____________________________________________________________________________
 TbMsg=new Array;
-TbMsg[0]="The Organizational Unit has been properly assigned to User";
-TbMsg[1]="The Organizational Unit has been properly excluded from this User";
+TbMsg[0]="The Organizational Unit has been assigned successfully to this User";
+TbMsg[1]="The Organizational Unit has been excluded successfully from this User";

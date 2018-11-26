@@ -33,10 +33,8 @@ $TbMsg[5092]="Ver fotos";
 $TbMsg[495]="Fecha/Cach&eacute;";
 $TbMsg[4951]="Cach&eacute; libre";
 //AGP
-$TbMsg["PROP_SERIALNO"]="N&ordm; de serie";
-$TbMsg["WARN_NOTDETECTED"]="<em>(no detectado)</em>";
 $TbMsg['COMM_DEFOGLIVE']="Asignado por el administrador";
-// Ticket-816 PCprofesor
+$TbMsg["PROP_SERIALNO"]="N&ordm; de serie";
+$TbMsg["WARN_NOREPO"]="<em>AVISO: sin repositorio asignado.</em>";
+$TbMsg["WARN_NOTDETECTED"]="<em>(no detectado)</em>";
 $TbMsg['WARN_PROFESSOR']="profesor";
-?>
-

@@ -32,6 +32,7 @@ from __future__ import unicode_literals
 
 import os
 import random
+import shutil
 import string
 import threading
 import time
@@ -136,9 +137,15 @@ class OpenGnSysWorker(ServerWorker):
                 os.remove(os.sep + f)
             except OSError:
                 pass
+        # Copy file "HostsFile.FirstOctetOfIPAddress" to "HostsFile", if it exists
+        # (used in "exam mode" of the University of Seville)
+        hostsFile = os.path.join(operations.get_etc_path(), 'hosts')
+        newHostsFile = hostsFile + '.' + self.interface.ip.split('.')[0]
+        if os.path.isfile(newHostsFile):
+            shutil.copyfile(newHostsFile, hostsFile)
         # Generate random secret to send on activation
         self.random = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(self.length))
-        # Send initalization message
+        # Send initialization message
         self.REST.sendMessage('ogagent/started', {'mac': self.interface.mac, 'ip': self.interface.ip,
                                                   'secret': self.random, 'ostype': operations.os_type,
                                                   'osversion': operations.os_version})
@@ -154,11 +161,11 @@ class OpenGnSysWorker(ServerWorker):
     def processClientMessage(self, message, data):
         logger.debug('Got OpenGnsys message from client: {}, data {}'.format(message, data))
 
-    def onLogin(self, userData):
+    def onLogin(self, data):
         """
         Sends session login notification to OpenGnsys server
         """
-        user, sep, language = userData.partition(',')
+        user, sep, language = data.partition(',')
         logger.debug('Received login for {} with language {}'.format(user, language))
         self.loggedin = True
         self.REST.sendMessage('ogagent/loggedin', {'ip': self.interface.ip, 'user': user, 'language': language,
@@ -174,9 +181,9 @@ class OpenGnSysWorker(ServerWorker):
 
     def process_ogclient(self, path, getParams, postParams, server):
         """
-        his method can be overriden to provide your own message proccessor, or better you can implement a
-        method that is called exactly as "process_" + path[0] (module name has been removed from patharray) and
-        this default processMessage will invoke it
+        This method can be overridden to provide your own message processor, or better you can
+        implement a method that is called exactly as "process_" + path[0] (module name has been removed from path
+        array) and this default processMessage will invoke it
         * Example:
             Imagine this invocation url (no matter if GET or POST): http://example.com:9999/Sample/mazinger/Z
             The HTTP Server will remove "Sample" from path, parse arguments and invoke this method as this:
@@ -189,7 +196,7 @@ class OpenGnSysWorker(ServerWorker):
             In the case path is empty (that is, the path is composed only by the module name, like in
             "http://example.com/Sample", the "process" method will be invoked directly
 
-            The methods must return data that can be serialized to json (i.e. Ojects are not serializable to json,
+            The methods must return data that can be serialized to json (i.e. Objects are not serializable to json,
             basic type are)
         """
         if not path:
@@ -266,7 +273,7 @@ class OpenGnSysWorker(ServerWorker):
         self.checkSecret(server)
         # Sending log off message to OGAgent client.
         self.sendClientMessage('logoff', {})
-        return {'op': 'sended to client'}
+        return {'op': 'sent to client'}
 
     def process_popup(self, path, getParams, postParams, server):
         """

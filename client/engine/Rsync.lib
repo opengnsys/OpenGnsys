@@ -318,7 +318,7 @@ IMGLN="ogimg.ln"
 IMGINFO="ogimg.info"
 
 # Copiamos informacion de la imagen a /tmp (para basicas)
-[ -r $DEST/$IMGACL ] && cp $DEST/ogimg.* /tmp
+[ -r $DEST/$IMGINFO ] && cp $DEST/ogimg.* /tmp
 
 #Creamos o modificamos los enlaces.
 # La imagen diferencial tiene ogimg.ln 
@@ -384,7 +384,6 @@ fi
 }
 
 
-function ogSyncCreate () {
 #/**
 # ogSyncCreate 
 #@brief   sincroniza los datos de la partición a la imagen para crearla. La imagen esta montada en un directorio.
@@ -394,6 +393,7 @@ function ogSyncCreate () {
 #@param 4 Nombre Imagen
 #@param 5 Tipo imagen [ img | diff ]
 #*/
+function ogSyncCreate () {
 local ORIG DIRAUX DIRMOUNT DESTRSYNC USERRSYNC PASSWORD OPTRSYNC RETVAL
 
 # Limpiamos los archivo de log
@@ -525,7 +525,7 @@ echo "      rsync -aHAX$OPTRSYNC --progress  $FILESFROM  $ORIG/ $DESTRSYNC"
 rsync -aHAX$OPTRSYNC $PASSWORD --progress  $FILESFROM  "$ORIG/" "$DESTRSYNC"  2>$OGLOGCOMMAND | egrep "^deleting|^sent|^sending|^total|%"  |tee -a $OGLOGCOMMAND
 RETVAL=${PIPESTATUS[0]}
 cd /
-return $RETVAL
+#*/ " Comentario Doxygen
 }
 
 

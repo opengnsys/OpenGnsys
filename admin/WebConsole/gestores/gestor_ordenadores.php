@@ -165,6 +165,15 @@ if($opcion!=$op_movida){
 	echo '</BODY>	';
 	echo '</HTML>';	
 }
+?>
+<script>
+	// Capturar el iframe donde se muestra el arbol de aulas,
+	// Al estar dentro del iframe de contenido, debemos acceder al padre y desde ahi acceder al iframe del arbol para recargarlo
+	var iframe = this.parent.document.getElementsByName("frame_arbol")[0];
+	// recargar iframe
+	iframe.src = iframe.src;
+</script>
+<?php
 /**************************************************************************************************************************************************
 	Busca identificador del aula de un grupo de ordenador .Devuelve el identificador del aula a la que pertenece el grupo 
 		Parametros: 

@@ -276,3 +276,11 @@ def showPopup(title, message):
     Displays a message box on user's session (during 1 min).
     '''
     return subprocess.call('zenity --info --timeout 60 --title "{}" --text "{}"'.format(title, message), shell=True)
+
+
+def get_etc_path():
+    """
+    :return:
+    Returns etc directory path.
+    """
+    return os.sep + 'etc'

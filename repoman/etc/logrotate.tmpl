@@ -1,0 +1,22 @@
+# Configuración de logrotate para el servidor de repositorio de OpenGnsys
+# Los archivos se copian y luego se corta el original, para que los equipos puedan seguir escribiendo sobre ellos
+# Las copias se comprimen
+# Los registros de las transferencias multicast se guardan una semana (repo).
+# El resto de los registros se comprueban diariamente que no excedan 100k. Se mantienen los últimos 5.
+#    Con esta condición los servicios de OpenGnsys Repository conservan datos de más de un mes.
+
+copytruncate
+compress
+
+prerotate
+    find /opt/opengnsys/log/mcastlog -type f -mtime +7  -exec rm -f {} \;
+endscript
+
+/opt/opengnsys/log/bttrack.log
+/opt/opengnsys/log/torrent-creator.log
+/opt/opengnsys/log/ogAdmRepo.log 
+/opt/opengnsys/log/opengnsys.log
+{
+	rotate 5
+	size 100k
+}

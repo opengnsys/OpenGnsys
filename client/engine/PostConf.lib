@@ -22,7 +22,8 @@
 #@return  (nada)
 #@date    2014-10-27
 #*/ ##
-function ogCleanOs {
+function ogCleanOs ()
+{
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -38,7 +39,7 @@ case "$(ogGetOsType $1 $2)" in
     Linux)
         # Borramos los ficheros de dispositivos y los temporales.
         ogCleanLinuxDevices $1 $2
-        rm -rf $(ogMount $1 $2)/tmp/*
+        rm -rf $(ogMount $1 $2)/tmp/*   #*/ Comentario Doxygen
         ;;
     Windows)
         # Borrar ficheros de hibernación y paginación de Windows.
@@ -314,6 +315,10 @@ Set objComputer = GetObject("winmgmts:{impersonationLevel=Impersonate}!\\\" & _
 ReturnValue = objComputer.JoinDomainOrWorkGroup(strDomain, strPassword, _
     strDomain & "\" & strUser, NULL, JOIN_DOMAIN + ACCT_CREATE)
 EOF
+
+#*/ " (comentario Doxygen)
+
+
 }
 
 

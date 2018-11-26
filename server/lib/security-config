@@ -19,7 +19,8 @@ if [ "$USER" != "root" ]; then
 fi
 
 # UFW configuration.
-if which ufw 2>/dev/null; then
+if which ufw &>/dev/null; then
+	echo "Configuring UFW."
 	# Adding active services.
 	ufw allow "Apache Secure"
 	ufw allow OpenSSH
@@ -28,14 +29,16 @@ if which ufw 2>/dev/null; then
 	ufw allow rsync
 	ufw allow tftp
 	ufw allow 67,68/udp		# DHCP
-	ufw allow 2002,2008/tcp		# OpenGnsys services
-	ufw allow 9000:9051/udp		# Multicast
+	ufw allow 2008/tcp		# OpenGnsys service
 	ufw allow 6881:6999/udp		# BitTorrent
+	ufw allow 9000/tcp		# PHP-FPM
+	ufw allow 9000:9051/udp		# Multicast
 	# Applying configuration.
 	ufw enable
 # FirewallD configuration.
-elif which firewall-cmd 2>/dev/null; then
-	# Defining OpenGnsys services.
+elif which firewall-cmd &>/dev/null; then
+	echo "Configuring FirewallD."
+	# Defining services.
 	python -c "
 import firewall.core.io.service as ios
 s=ios.Service()
@@ -43,15 +46,14 @@ s.short = 'OpenGnsys Server'
 s.name = 'ogAdmServer'
 s.ports = [('2008', 'tcp')]
 ios.service_writer(s, '/etc/firewalld/services')
-s.short = 'OpenGnsys Repository'
-s.name = 'ogAdmRepo'
-s.ports = [('2002', 'tcp')]
+s.name = 'php-fpm'
+s.ports = [('9000', 'tcp')]
 ios.service_writer(s, '/etc/firewalld/services')"
 	# Adding active services.
 	firewall-cmd --permanent --add-service=dhcp
 	firewall-cmd --permanent --add-service=https
+	firewall-cmd --permanent --add-service=php-fpm
 	firewall-cmd --permanent --add-service=mysql --zone internal
-	firewall-cmd --permanent --add-service=ogAdmRepo
 	firewall-cmd --permanent --add-service=ogAdmServer
 	# Ubuntu 14.04 does not define "rsyncd" service.
 	firewall-cmd --permanent --add-service=rsyncd || \
@@ -70,7 +72,8 @@ else
 fi
 
 # SELinux configuration.
-if which setsebool 2>/dev/null; then
+if which setsebool &>/dev/null; then
+	echo "Configuring SELinux."
 	# Configuring Apache.
 	setsebool -P httpd_can_connect_ldap on
 	semanage fcontext -at httpd_sys_content_t "$OPENGNSYS/www(/.*)?"

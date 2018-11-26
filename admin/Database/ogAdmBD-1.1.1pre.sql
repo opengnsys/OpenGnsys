@@ -14,6 +14,14 @@ CREATE PROCEDURE addcols() BEGIN
 		ALTER TABLE aulas
 			ADD idordprofesor INT(11) DEFAULT 0 AFTER puestos;
 	END IF;
+	# Borrar campos sin uso del antiguo servicio ogAdmRepo (ticket #875).
+	IF EXISTS (SELECT * FROM information_schema.COLUMNS
+			WHERE COLUMN_NAME='puertorepo' AND TABLE_NAME='repositorios' AND TABLE_SCHEMA=DATABASE())
+	THEN
+		ALTER TABLE repositorios
+			DROP passguor,
+			DROP puertorepo;
+	END IF;
 END//
 # Ejecutar actualización condicional.
 DELIMITER ';'

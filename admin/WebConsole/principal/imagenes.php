@@ -230,21 +230,22 @@ function SubarbolXML_gruposimagenes($grupoid,$ambg,$litambg,$amb,$litamb,$tipo)
 
 function SubarbolXML_Imagenes($grupoid,$amb,$litamb,$tipo)
 {
+	global $TbMsg;
 	global $cmd;
 	global $idcentro;	
 	
 	$cadenaXML="";
 	$rs=new Recordset; 
 	#### agp ### Añado la consulta el campo idrepositorio	####
-	$cmd->texto="SELECT DISTINCT imagenes.idimagen,imagenes.descripcion,repositorios.nombrerepositorio,repositorios.ip
+	$cmd->texto="SELECT DISTINCT imagenes.idimagen,imagenes.descripcion, IFNULL(repositorios.nombrerepositorio,'".$TbMsg["DELETEDREPO"]."') AS nombrerepositorio
 				FROM  imagenes ";
 	// Para hallar el repositorio de las incrementales hay que buscar los datos de la imagen basica (en la propia tablas imágenes)
 	if ($tipo == 3) {
-	    $cmd->texto.="      INNER JOIN imagenes AS basica INNER JOIN repositorios
-			        WHERE basica.idrepositorio=repositorios.idrepositorio
-			        AND imagenes.imagenid=basica.idimagen AND ";
+	    $cmd->texto.="      INNER JOIN imagenes AS basica
+				LEFT JOIN repositorios ON basica.idrepositorio=repositorios.idrepositorio
+			        WHERE imagenes.imagenid=basica.idimagen AND ";
 	} else {
-	    $cmd->texto.="      INNER JOIN repositorios USING  (idrepositorio) WHERE ";
+	    $cmd->texto.="      LEFT JOIN repositorios USING  (idrepositorio) WHERE ";
 	}
 	$cmd->texto.="          imagenes.idcentro=".$idcentro."
 				AND imagenes.grupoid=".$grupoid."  
