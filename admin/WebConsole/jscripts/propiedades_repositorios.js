@@ -91,7 +91,6 @@ function comprobar_datos(){
 	// Validación general de datos del formulario.
 	return validate (fdatos.nombrerepositorio, validate_text_notnull, 0 ) &&
 	       validate (fdatos.ip, validate_ipadress_notnull, 1 ) &&
-	       validate (fdatos.puertorepo, validate_number_notnull, 3 ) &&
 	       validate (fdatos.comentarios, validate_text, 4 );
 
 }

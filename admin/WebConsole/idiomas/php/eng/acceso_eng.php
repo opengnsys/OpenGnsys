@@ -30,3 +30,4 @@ $TbMsg["ACCESS_ALLOWED"]='Access allowed. Please wait ...';
 $TbMsg["ACCESS_ERROR"]='Access error';
 $TbMsg["ACCESS_UNKNOWNERROR"]='Unknown error';
 $TbMsg["ACCESS_NOFRAMES"]='Sorry, your browser does not handle frames.';
+$TbMsg["WARN_NOREPO"]='There is no repository defined in the Organizational Unit.';

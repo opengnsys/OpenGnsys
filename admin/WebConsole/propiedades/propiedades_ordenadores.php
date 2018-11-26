@@ -156,7 +156,7 @@ function abrir_ventana(URL){
 						echo '<option value="'.$fotomenu.'">'.$fotomenu.'</option>';}
 						if ($handle = opendir("../images/fotos")) {
 						while (false !== ($entry = readdir($handle))) {
-			    			if ($entry != "." && $entry != "..") {?>
+						if ($entry != "." && $entry != "..") {?>
 						<option value="<?php echo $entry ?>"><?php echo $entry ?></option>
 						<?php }
 						}
@@ -165,7 +165,7 @@ function abrir_ventana(URL){
 						?>
 					</SELECT>
 <a href="javascript:abrir_ventana('../images/ver.php')" onclick="MM_openBrWindow('../images/ver.php','Imagenes','scrollbars=yes,resizable=yes,width=950,height=640')"><?php echo $TbMsg[5092] ?></a>
-            				</TD>
+					</TD>
 					<?php
 					}
 					?>
@@ -181,15 +181,17 @@ function abrir_ventana(URL){
 			?>
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
-		<TR>
-			<th align=center>&nbsp;<?php echo $TbMsg[10]?>&nbsp;</th>
+		<tr>
+			<th align="center">&nbsp;<?php echo $TbMsg[10]?>&nbsp;</th>
 			<?php
-				if ($opcion==$op_eliminacion)
-					echo '<TD colspan=3>'.TomaDato($cmd,$idcentro,'repositorios',$idrepositorio,'idrepositorio','nombrerepositorio').'</TD>';
-				else
-					echo '<TD colspan=3>'.HTMLSELECT($cmd,$idcentro,'repositorios',$idrepositorio,'idrepositorio','nombrerepositorio',250).'</TD>';
+				if ($opcion==$op_eliminacion) {
+					echo '<td colspan="3">'.TomaDato($cmd,$idcentro,'repositorios',$idrepositorio,'idrepositorio','nombrerepositorio').'</td>';
+				} else {
+					echo '<td colspan="3">'.HTMLSELECT($cmd,$idcentro,'repositorios',$idrepositorio,'idrepositorio','nombrerepositorio',250);
+					echo ($idrepositorio==0?$TbMsg["WARN_NOREPO"]:'').'</td>';
+				}
 			?>
-		</TR>
+		</tr>
 <!----	AGP	--------------------------------------------------------------------	OGLIVE	--------------------------------------------------------------------------------------------------------->
 		<TR>
 			<th align=center>&nbsp;<?php echo $TbMsg[18]?>&nbsp;</th>
@@ -403,4 +405,3 @@ EOD;
 	}
 	return(false);
 }
-?>

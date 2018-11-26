@@ -18,6 +18,5 @@ OpenGnsys website: https://opengnsys.es/
 
 ## Installation notes
 
-Please, read installer/README.en.txt (or installer/README.es.txt) for detailled
-instructions.
+Please, read `installer/INSTALL.en.txt` (or `installer/INSTALL.es.txt`) for detailled instructions.
 

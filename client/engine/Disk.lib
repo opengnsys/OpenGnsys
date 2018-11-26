@@ -73,15 +73,17 @@ SECTORS=$(ogGetLastSector $1)
 # Se recalcula el nº de sectores del disco 1, si existe partición de caché.
 CACHEPART=$(ogFindCache 2>/dev/null)
 [ "$ND" = "${CACHEPART% *}" ] && CACHESIZE=$(ogGetCacheSize 2>/dev/null | awk '{print $0*2}')
-[ -n "$CACHESIZE" ] && SECTORS=$[SECTORS-CACHESIZE]
 
 # Sector de inicio (la partición 1 empieza en el sector 63).
 IODISCO=$(ogDiskToDev $1)
 IOSIZE=$(fdisk -l $IODISCO | awk '/I\/O/ {print $4}')
 if [ "$IOSIZE" == "4096" ]; then
     START=4096
+    SECTORS=$[SECTORS-8192]
+    [ -n "$CACHESIZE" ] && SECTORS=$[SECTORS-CACHESIZE+2048-(SECTORS-CACHESIZE)%2048-1]
 else
     START=63
+    [ -n "$CACHESIZE" ] && SECTORS=$[SECTORS-CACHESIZE]
 fi
 PART=1
 
@@ -126,6 +128,9 @@ while [ $# -gt 0 ]; do
     echo "$DISK$PART : start=$START, size=$SIZE, Id=$ID" >>$tmpsfdisk
     # Error si se supera el nº total de sectores.
     START=$[START+SIZE]
+    if [ "$IOSIZE" == "4096" -a $PART -gt 4 ]; then
+        START=$[START+2048]
+    fi
     [ $START -le $SECTORS ] || ogRaiseError $OG_ERR_FORMAT "$[START/2] > $[SECTORS/2]" || return $?
     PART=$[PART+1]
     shift

@@ -550,7 +550,7 @@ then
 	for i in bin sbin lib $LIBS etc var usr root boot; do
 		ogUnionLiveDir $i
 	done
-	cat /tmp/mtab.preunion > /etc/mtab
+	[ -L /etc/mtab ] || cat /tmp/mtab.preunion > /etc/mtab
 else
 	echo "Fichero imagen del cliente no encontrado"
 	return 1

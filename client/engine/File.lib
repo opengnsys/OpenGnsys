@@ -229,7 +229,11 @@ rm -fr "$DIR" || ogRaiseError $OG_ERR_NOTFOUND "$*" || return $?
 #@version 0.9 - Pruebas con OpenGnSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-15
+#@version 1.1.1 - Correccion comentarios autodocumentacion doxygen .
+#@author  Antonio J. Doblas Viso. Universidad de Malaga
+#@date    2018-07-05
 #*/ ##
+
 function ogGetPath ()
 {
 # Variables locales.
@@ -266,7 +270,7 @@ case $# in
 esac
 
 # Eliminar caracteres \c / duplicados y finales.
-        # /* (comentario Doxygen)
+       
 FILE="$(echo $FILE|sed -e 's/\(\/\)*\1/\//g; s/\/$//')"
 # Comprobar si existe el fichero para reducir tiempos.
 if [ -e "$FILE" ]; then
@@ -274,13 +278,14 @@ if [ -e "$FILE" ]; then
 else
     # Buscar el nombre correcto en cada subdirectorio del camino.
     FILEPATH="/"
+
     while [ "$FILE" != "$PREVFILE" ]; do
-        FILEPATH="$(ls -d "${FILEPATH%/}/${FILE%%/*}" 2>/dev/null || find "$FILEPATH" -maxdepth 1 -iname "${FILE%%/*}" -print 2>/dev/null)"
+        FILEPATH="$(ls -d "${FILEPATH%/}/${FILE%%/*}" 2>/dev/null || find "$FILEPATH" -maxdepth 1 -iname "${FILE%%/*}" -print 2>/dev/null)" #*/ (Comentario Doxygen) 
         PREVFILE="$FILE"
-        FILE="${FILE#*/}"
+        FILE="${FILE#*/}" 
     done
+    
 fi
-        # (comentario Doxygen) */
 [ -n "$FILEPATH" ] && echo "$FILEPATH"
 return 0
 }
@@ -294,6 +299,7 @@ return 0
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-09-29
 #*/ ##
+
 function ogGetParentPath ()
 {
 local PARENT

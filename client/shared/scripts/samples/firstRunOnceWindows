@@ -1,0 +1,68 @@
+#!/bin/bash
+#/**
+#@file    FirstRunOnceWindows
+#@brief   Guión de rutinas que se ejecutarán en los windows con teclado y raton desactivados.
+#@param   $1 número de disco
+#@param   $2 número de particion
+#@exception OG_ERR_FORMAT   1 formato incorrecto.
+#@exception OG_ERR_NOTFOUND  2 fichero de imagen o partición no detectados.
+#@exception OG_ERR_PARTITION 3	# Error en partición de disco.
+#@exception OG_ERR_LOCKED    4 partición bloqueada por otra operación.
+#@version 1.0.1 - primera version: desactivar/activar ratón y teclado
+#@author  Antonio J. Doblas Viso.
+#@date    2017-02-23
+#**/
+
+
+
+PROG="$(basename $0)"
+if [ $# -lt 2 ]; then
+    ogRaiseError session $OG_ERR_FORMAT "$MSG_FORMAT: $PROG  ndisco nparticion"
+    exit $?
+fi
+
+
+# Asignación de variables 
+## Bloque de variables de parámetros
+DISK=$1
+PART=$2
+POSTCONF=postconf.cmd
+### Bloque de variables basada en un archivo de claves: ADMIN PASSADMIN USER PASSUSER
+source $OGETC/os.cfg $DISK $PART
+
+
+
+OSVERSION=$(ogGetOsVersion $1 $2)
+case "$OSVERSION" in
+    *Windows*)
+        # Desactivamos el telcado y el ratón
+        ogSetRegistryValue $(ogMount $DISK $PART) SYSTEM '\ControlSet001\Services\kbdclass\Start' 4
+        ogSetRegistryValue $(ogMount $DISK $PART) SYSTEM '\ControlSet001\Services\mouclass\Start' 4
+        
+		## Indicación del proceso (variable $POSTCONF), usuario que lo ejecutará ($ADMIN) y configuración del windows para que arranque con autologin tras la postconfiguración (1 "$USER" "$PASSUSER")
+		echo "ogInstallMiniSetup $DISK $PART $POSTCONF $ADMIN $PASSADMIN 1 \"$USER\" \"$PASSUSER\" "
+		ogInstallMiniSetup $DISK $PART $POSTCONF $ADMIN $PASSADMIN 1 "$USER" "$PASSUSER"
+		ogAddCmd $DISK $PART $POSTCONF '@echo off'
+		ogAddCmd $DISK $PART $POSTCONF 'start "C:\Program Files\Internet Explorer\iexplore.exe" wwww.opengnsys.es'
+		ogAddCmd $DISK $PART $POSTCONF "timeout /t 200 /NOBREAK"
+		ogAddCmd $DISK $PART $POSTCONF "shutdown -r -t 300"
+		ogAddCmd $DISK $PART $POSTCONF 'start winword.exe'
+        ogAddCmd $DISK $PART $POSTCONF 'taskkill /F /IM winword.exe'
+        ogAddCmd $DISK $PART $POSTCONF 'REG ADD HKLM\SYSTEM\CurrentControlSet\Services\kbdclass\ /v Start /t REG_DWORD /d 3 /f'
+		ogAddCmd $DISK $PART $POSTCONF 'REG ADD HKLM\SYSTEM\CurrentControlSet\Services\mouclass\ /v Start /t REG_DWORD /d 3 /f'
+		ogAddCmd $DISK $PART $POSTCONF 'REG ADD HKLM\SYSTEM\ControlSet001\Services\kbdclass\ /v Start /t REG_DWORD /d 3 /f'
+		ogAddCmd $DISK $PART $POSTCONF 'REG ADD HKLM\SYSTEM\ControlSet001\Services\mouclass\ /v Start /t REG_DWORD /d 3 /f'
+		#ogAddCmd $DISK $PART $POSTCONF '"c:\Program Files\Toolwiz Time Freeze 2017\ToolwizTimeFreeze.exe" /freezealways /usepass='
+        #ogAddCmd $DISK $PART $POSTCONF 'reg query "HKCU\SOFTWARE\Toolwiz\TimefreezeNew"'
+
+		#ogAddCmd $DISK $PART $POSTCONF "cscript \"c:\Archivo de Programas (x86)\agua\aguac\scripts\MSOfficeActivate.vbs\" "
+		#ogAddCmd $DISK $PART $POSTCONF "del \"c:\Program Files (x86)\agua\aguac\scripts\MSWinActivate.vbs\" "
+		#unix2dos /mnt/sda1/Windows/System32/postconf.cmd
+
+		### reiniciamos el equipo		
+		ogAddCmd $DISK $PART $POSTCONF "shutdown -r"
+		### consultamos
+		cat $(ogMount $DISK $PART)/Windows/System32/$POSTCONF
+
+	;;
+esac

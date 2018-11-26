@@ -1,9 +1,9 @@
 //____________________________________________________________________________
 //	
-//	Fichero de idiomas javascript: informacion_menus_eng.js 
-//	Idioma: Ingés 
+//    Javascript language file: informacion_menus_eng.js
+//    Language: English
 //____________________________________________________________________________
 TbMsg=new Array;
-TbMsg[0]="WARNING.- This item will be removed. ¿ Are you sure ?";
-TbMsg[1]="This item has been successfully excluded from this menu";
-TbMsg[2]="This item has been successfully modified";
+TbMsg[0]="WARNING: This item will be deleted. Are you sure?";
+TbMsg[1]="This item has been excluded successfully from this menu";
+TbMsg[2]="This item has been modified successfully";

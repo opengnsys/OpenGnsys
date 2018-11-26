@@ -31,9 +31,4 @@ if [ "$RUN_OGADMSERVER" == "yes" ]; then
 		/etc/init.d/opengnsys restart
 	fi
 fi
-# Reiniciar servicios si es repositorio y proceso ogAdmRepo está caído.
-if [ "$RUN_OGADMREPO" == "yes" -a $(pgrep ogAdmRepo | wc -w) == 0 ]; then
-	date +"%d/%m/%Y %H:%M ERROR: El servicio ogAdmRepo estaba caido, se reinicia" >> $LOGDIR/ogAdmRepo.log
-	/etc/init.d/opengnsys restart
-fi
 

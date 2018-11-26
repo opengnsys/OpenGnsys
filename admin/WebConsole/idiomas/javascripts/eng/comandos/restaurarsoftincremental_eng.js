@@ -1,14 +1,14 @@
 ﻿//________________________________________________________________________________________________________
 //
-//	Fichero de idiomas javascripts: restaurarsoftincremental_esp.js 
-//	Idioma: Español 
+//    Javascript language file: restaurarsoftincremental_eng.js
+//    Language: English
 //________________________________________________________________________________________________________
 TbMsg=new Array;
-TbMsg[0]="Debe elegir una imagen para esta partición";
-TbMsg[1]="Debe elegir al menos una partición y una imagen";
+TbMsg[0]="You must select an image for this partition";
+TbMsg[1]="You must select at least a partition and an image";
 TbMsg[2]=" ";
-TbMsg[3]="¿ Está seguro ?";
-TbMsg[4]="Debe elegir al menos una imagen para la partición";
-TbMsg[5]="Debe elegir al menos un path de imagen para la partición ";
-TbMsg[6]="Debe elegir un software incremental para esta partición";
-TbMsg[7]="Debe elegir un método de Sincronización";
+TbMsg[3]="Are you sure ?";
+TbMsg[4]="You must  select at least an image for this partition";
+TbMsg[5]="You must select at least an image path for  this partition ";
+TbMsg[6]="You must choose an incremental software for this partition";
+TbMsg[7]="You must choose a synchronization method";

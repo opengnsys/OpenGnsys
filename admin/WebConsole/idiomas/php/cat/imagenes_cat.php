@@ -19,4 +19,4 @@
 	$TbMsg[11]='"Imagenes Monoliticas"';
 	$TbMsg[12]='"Imagenes Basicas"';
 	$TbMsg[13]='"Imagenes Incrementales"';
-?>
+	$TbMsg["DELETEDREPO"]='Repositorio eliminado';

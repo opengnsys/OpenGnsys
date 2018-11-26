@@ -96,7 +96,8 @@ LOG_FILE=/tmp/$(basename $OGLOGFILE)
 # - OSDISTRIB - distribución Linux
 # - DEPENDENCIES - array de dependencias que deben estar instaladas
 # - UPDATEPKGLIST, INSTALLPKGS, CHECKPKG - comandos para gestión de paquetes
-# - APACHECFGDIR, APACHESERV, DHCPSERV, INETDCFGDIR - configuración y servicios
+# - APACHECFGDIR, APACHESERV, PHPFPMSERV, DHCPSERV, INETDCFGDIR - configuración y servicios
+
 function autoConfigure()
 {
 	local service
@@ -117,7 +118,7 @@ function autoConfigure()
 	# Configuración según la distribución de Linux.
 	if [ -f /etc/debian_version ]; then
 		# Distribución basada en paquetes Deb.
-		DEPENDENCIES=( curl rsync btrfs-tools procps arp-scan realpath php-curl gettext moreutils jq wakeonlan udpcast )
+		DEPENDENCIES=( curl rsync btrfs-tools procps arp-scan realpath php-curl gettext moreutils jq wakeonlan udpcast shim-signed grub-efi-amd64-signed php-fpm )
 		UPDATEPKGLIST="add-apt-repository -y ppa:ondrej/php; apt-get update"
 		INSTALLPKGS="apt-get -y install"
 		DELETEPKGS="apt-get -y purge"
@@ -132,14 +133,17 @@ function autoConfigure()
 			SERVICESTATUS="eval /etc/init.d/\$service status"
 		fi
 		ENABLESERVICE="eval update-rc.d \$service defaults"
+		APACHEENABLEMODS="ssl rewrite proxy_fcgi fastcgi actions alias"
+		APACHEDISABLEMODS="php"
 		APACHEUSER="www-data"
 		APACHEGROUP="www-data"
+		PHPFPMSERV="php-fpm"
 		INETDCFGDIR=/etc/xinetd.d
 	elif [ -f /etc/redhat-release ]; then
 		# Distribución basada en paquetes rpm.
-		DEPENDENCIES=( curl rsync btrfs-progs procps-ng arp-scan gettext moreutils jq net-tools )
-		# En CentOS 7 instalar arp-scan de CentOS 6.
-		[ "$OSDISTRIB$OSVERSION" == "centos7" ] && DEPENDENCIES=( ${DEPENDENCIES[*]/arp-scan/http://dag.wieers.com/redhat/el6/en/$(arch)/dag/RPMS/arp-scan-1.9-1.el6.rf.$(arch).rpm} )
+		DEPENDENCIES=( curl rsync btrfs-progs procps-ng arp-scan gettext moreutils jq net-tools udpcast shim-x64 grub2-efi-x64 grub2-efi-x64-modules )
+		# Repositorios para PHP 7 en CentOS.
+		[ "$OSDISTRIB" == "centos" ] && UPDATEPKGLIST="yum update -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-$OSVERSION.noarch.rpm http://rpms.remirepo.net/enterprise/remi-release-$OSVERSION.rpm"
 		INSTALLPKGS="yum install -y"
 		DELETEPKGS="yum remove -y"
 		CHECKPKG="rpm -q --quiet \$package"
@@ -156,6 +160,7 @@ function autoConfigure()
 		fi
 		APACHEUSER="apache"
 		APACHEGROUP="apache"
+		PHPFPMSERV="php-fpm"
 		INETDCFGDIR=/etc/xinetd.d
 	else
 		# Otras distribuciones.
@@ -370,11 +375,22 @@ function installDependencies()
 	if [ -f /etc/debian_version ]; then
 		# Basado en paquetes Deb.
 		PHP7VERSION=$(apt-cache pkgnames php7 2>/dev/null | sort | head -1)
-		PHP5PKGS=( $(dpkg -l |awk '$2~/^php5/ {print $2}') )
+		PHPFPMSERV="${PHP7VERSION}-fpm"
+		PHP5PKGS=( $(dpkg -l | awk '$2~/^php5/ {print $2}') )
 		if [ -n "$PHP5PKGS" ]; then
 			$DELETEPKGS ${PHP5PKGS[@]}
-			PHP5PKGS[0]=$PHP7VERSION
+			PHP5PKGS[0]="$PHP7VERSION"
 			INSTALLDEPS=${PHP5PKGS[@]//php5*-/${PHP7VERSION}-}
+		fi
+	fi
+	if [ "$OSDISTRIB" == "centos" ]; then
+		PHP7VERSION=$(yum list -q php7\* 2>/dev/null | awk -F. '/^php/ {print $1; exit;}')
+		PHPFPMSERV="${PHP7VERSION}-${PHPFPMSERV}"
+		PHP5PKGS=( $(yum list installed | awk '$1~/^php/ && $2~/^5\./ {sub(/\..*$/, "", $1); print $1}') )
+		if [ -n "$PHP5PKGS" ]; then
+			$DELETEPKGS ${PHP5PKGS[@]}
+			PHP5PKGS[0]="$PHP7VERSION-php"
+			INSTALLDEPS=${PHP5PKGS[@]//php-/${PHP7VERSION}-php}
 		fi
 	fi
 
@@ -529,33 +545,44 @@ EOT
 # Configurar HTTPS y exportar usuario y grupo del servicio Apache.
 function apacheConfiguration ()
 {
-	local config template
+	local config template module socketfile
 
-	# Activar HTTPS (solo actualizando desde versiones anteriores a 1.0.2) y
-	#    activar módulo Rewrite (solo actualizaciones desde 1.0.x a 1.1.x).
+	# Avtivar PHP-FPM.
+	echoAndLog "${FUNCNAME}(): configuring PHP-FPM"
+	service=$PHPFPMSERV
+	$ENABLESERVICE; $STARTSERVICE
+
+	# Activar módulos de Apache.
 	if [ -e $APACHECFGDIR/sites-available/opengnsys.conf ]; then
 		echoAndLog "${FUNCNAME}(): Configuring Apache modules"
 		a2ensite default-ssl
-		a2enmod ssl
-		a2enmod rewrite
+		for module in $APACHEENABLEMODS; do a2enmod -q "$module"; done
+		for module in $APACHEDISABLEMODS; do a2dismod -q "${module//PHP7VERSION}"; done
 		a2ensite opengnsys
 	elif [ -e $APACHECFGDIR/conf.modules.d ]; then
 		echoAndLog "${FUNCNAME}(): Configuring Apache modules"
 		sed -i '/rewrite/s/^#//' $APACHECFGDIR/*.conf
 	fi
+	# Elegir plantilla según versión de Apache.
+	if [ -n "$(apachectl -v | grep "2\.[0-2]")" ]; then
+	       template=$WORKDIR/opengnsys/server/etc/apache-prev2.4.conf.tmpl > $config
+	else
+	       template=$WORKDIR/opengnsys/server/etc/apache.conf.tmpl
+	fi
+	sockfile=$(find /run/php -name "php*.sock" -type s -print 2>/dev/null)
 	# Actualizar configuración de Apache a partir de fichero de plantilla.
 	for config in $APACHECFGDIR/{,sites-available/}opengnsys.conf; do
-		# Elegir plantilla según versión de Apache.
-		if [ -n "$(apachectl -v | grep "2\.[0-2]")" ]; then
-		       template=$WORKDIR/opengnsys/server/etc/apache-prev2.4.conf.tmpl > $config
-		else
-		       template=$WORKDIR/opengnsys/server/etc/apache.conf.tmpl
+		if [ -e $config ]; then
+			if [ -n "$sockfile" ]; then
+				sed -e "s,CONSOLEDIR,$INSTALL_TARGET/www,g; s,proxy:fcgi:.*,proxy:unix:${sockfile%% *}|fcgi://localhost\",g" $template > $config
+			else
+				sed -e "s,CONSOLEDIR,$INSTALL_TARGET/www,g" $template > $config
+			fi
 		fi
-		sed -e "s,CONSOLEDIR,$INSTALL_TARGET/www,g" $template > $config
 	done
 
 	# Reiniciar Apache.
-	service=$APACHESERV; $STARTSERCICE
+	service=$APACHESERV; $STARTSERVICE
 
 	# Variables de ejecución de Apache.
 	# - APACHE_RUN_USER
@@ -641,10 +668,10 @@ function updateWebFiles()
 		sed 's/clickcontextualnodo/clicksupnodo/g' $COMPATDIR/$f.php > $COMPATDIR/$f.device.php
 	done
 	cp -a $COMPATDIR/imagenes.device.php $COMPATDIR/imagenes.device4.php
-
+	# Acceso al manual de usuario
+	ln -fs ../doc/userManual $INSTALL_TARGET/www/userManual
 	# Fichero de log de la API REST.
 	touch $INSTALL_TARGET/log/{ogagent,rest,remotepc}.log
-	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/log/{ogagent,rest,remotepc}.log
 
 	echoAndLog "${FUNCNAME}(): Web files successfully updated"
 }
@@ -915,16 +942,8 @@ function compileServices()
 		hayErrores=1
 	fi
 	popd
-	# Compilar OpenGnsys Repository Manager
-	echoAndLog "${FUNCNAME}(): Recompiling OpenGnsys Repository Manager"
-	pushd $WORKDIR/opengnsys/admin/Sources/Services/ogAdmRepo
-	make && moveNewService ogAdmRepo $INSTALL_TARGET/sbin
-	if [ $? -ne 0 ]; then
-		echoAndLog "${FUNCNAME}(): error while compiling OpenGnsys Repository Manager"
-		hayErrores=1
-	fi
-	popd
-	# Actualizar o insertar clave de acceso REST en el fichero de configuración del repositorio.
+	# Parar antiguo servicio de repositorio y añadir clave de acceso REST en su fichero de configuración.
+	pgrep ogAdmRepo > /dev/null && service="ogAdmRepo" $STOPSERVICE
 	grep -q '^ApiToken=' $INSTALL_TARGET/etc/ogAdmRepo.cfg && \
 		sed -i "s/^ApiToken=.*$/ApiToken=$REPOKEY/" $INSTALL_TARGET/etc/ogAdmRepo.cfg || \
 		sed -i "$ a\ApiToken=$REPOKEY/" $INSTALL_TARGET/etc/ogAdmRepo.cfg
@@ -1012,16 +1031,31 @@ function updateClient()
 # Comprobar permisos y ficheros.
 function checkFiles()
 {
+	local LOGROTATEDIR=/etc/logrotate.d
+
 	# Comprobar permisos adecuados.
 	if [ -x	$INSTALL_TARGET/bin/checkperms ]; then
 		echoAndLog "${FUNCNAME}(): Checking permissions"
 		OPENGNSYS_DIR="$INSTALL_TARGET" OPENGNSYS_USER="$OPENGNSYS_CLIENTUSER" APACHE_USER="$APACHE_RUN_USER" APACHE_GROUP="$APACHE_RUN_GROUP" $INSTALL_TARGET/bin/checkperms
 	fi
-
 	# Eliminamos el fichero de estado del tracker porque es incompatible entre los distintos paquetes
 	if [ -f /tmp/dstate ]; then
 		echoAndLog "${FUNCNAME}(): Deleting unused files"
 		rm -f /tmp/dstate
+	fi
+	# Crear nuevos ficheros de logrotate y borrar el fichero antiguo.
+	if [ -d $LOGROTATEDIR ]; then
+		rm -f $LOGROTATEDIR/opengnsys
+		if [ ! -f $LOGROTATEDIR/opengnsysServer ]; then
+			echoAndLog "${FUNCNAME}(): Creating logrotate configuration file for server"
+			sed -e "s/OPENGNSYSDIR/${INSTALL_TARGET//\//\\/}/g" \
+				$WORKDIR/opengnsys/server/etc/logrotate.tmpl > $LOGROTATEDIR/opengnsysServer
+		fi
+		if [ ! -f $LOGROTATEDIR/opengnsysRepo ]; then
+			echoAndLog "${FUNCNAME}(): Creating logrotate configuration file for repository"
+			sed -e "s/OPENGNSYSDIR/${INSTALL_TARGET//\//\\/}/g" \
+				$WORKDIR/opengnsys/server/etc/logrotate.tmpl > $LOGROTATEDIR/opengnsysRepo
+		fi
 	fi
 }
 

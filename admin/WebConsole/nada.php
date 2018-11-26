@@ -221,4 +221,19 @@ if (empty($data->project)) {
 </body>
 </html>
 
+<?php } else { ?>
+
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+  <link rel="stylesheet" type="text/css" href="./estilos.css">
+</head>
+<body>
+
+"Here we will show our content"
+
+</body>
+</html>
+
 <?php } ?>
+

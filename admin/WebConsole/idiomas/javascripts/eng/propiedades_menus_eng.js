@@ -1,9 +1,9 @@
 //____________________________________________________________________________
 //	
-//	Fichero de idiomas javascript: propiedades_menus_eng.js 
-//	Idioma: Ingés 
+//    Javascript language file: propiedades_menus_eng.js propiedades_menus_eng.js
+//    Language: English
 //____________________________________________________________________________
 TbMsg=new Array;
-TbMsg[0]="You must introduce a name for this menu";
-TbMsg[1]="WARNING: There are computers managed by this menu. You can't remove them until you change menu to this computers";
-TbMsg[2]="Las url de los menús personalizados,privados o públicos, deben empezar con http:// o https://";
+TbMsg[0]="You must enter a name for this menu";
+TbMsg[1]="WARNING: Some computers have already this menu. You can't delete it until you change that menu in those computers";
+TbMsg[2]="URLs of Personalized, Private or Public menus must start with http:// or https://";

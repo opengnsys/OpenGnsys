@@ -1,10 +1,9 @@
 ﻿//____________________________________________________________________________
 //	
-//	Fichero de idiomas javascript: ejecutaracciones_eng.js 
-//	Idioma: Ingles
+//    Javascript language file: ejecutaracciones_eng.js
+//    Language: English
 //____________________________________________________________________________
 TbMsg=new Array;
-TbMsg[0]="ATENCIÓN.- El Procedimiento será ejecutado aplicándolo a este ámbito. ¿ Está seguro ?";
-TbMsg[1]="El Procedimiento ha sido gestionado correctamente para este ámbito";
-TbMsg[2]="ATENCIÓN.- El Procedimiento se convertirá en procedimiento de inicio (Autoexec) para todos los ordenadores de este ámbito. ¿ Está seguro ?";
-
+TbMsg[0]="WARNING: This Procedure will be executed by applying it to this scope. Are you sure?";
+TbMsg[1]="This Procedure has been managed successfully for this scope";
+TbMsg[2]="WARNING: This Procedure will become Starting Procedure (Autoexec)for all the computers in this scope. Are you sure?";
