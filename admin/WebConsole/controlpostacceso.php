@@ -174,6 +174,9 @@ if ($idc != 0)
  //        - idcentro: identificador de la unidad organizativa
  //_______________________________________________________________________________________________________
  function alert_norepo($cmd, $idcentro,$mensaje){
+	// Si entramos en la parte administrativo no se muestra mensaje
+	if ($idcentro == 0) return;
+
 	$idrepositorio = '';
 	$rs=new Recordset;
 	$cmd->texto="SELECT idrepositorio FROM repositorios ".
