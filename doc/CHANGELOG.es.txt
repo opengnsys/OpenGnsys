@@ -23,12 +23,15 @@ Tickets resueltos en módulo OpenGnsys Repository Server:
 
 Tickets resueltos en módulo OpenGnsys Web Admin Console:
 #835	Problemas al listar plantillas en Nerboot Avanzado (corrección)
+#839	Errores detectado en API REST para Remote PC (corrección)
 #849	Incorporar ordenadores de dhcp no admite comentarios tras la declarción de un host (corrección)
 #867	La ayuda en la consola incluirá más información
 #870	Netboot avanzado no crea la plantilla de arranque si el equipo no tiene asignado un repositorio (corrección)
 
+Tickets resueltos en módulo OpenGnsys Installer:
+#879	Función checkVersion de opengnsys_update.sh del tar.gz da error si se ejecuta sobre la misma versión de OpenGnsys (corrección)
+
 Tickets genéricos resueltos:
-#839	Errores detectado en API REST para Remote PC (corrección)
 #840	Usar Git como repositorio de código
 #865	Problemas con Trac (corrección)
 #872	Liberar versión de mantenimiento OpenGnsys 1.1.0a
