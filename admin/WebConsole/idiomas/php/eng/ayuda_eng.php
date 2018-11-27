@@ -5,11 +5,12 @@
 //      Idioma: Inglés
 // __________________________________________________
 // Mensajes.
-$TbMsg=array();
+if (empty ($TbMsg)) $TbMsg=array();
 $TbMsg["HELP_TITLE"]='Help';
 $TbMsg["MANUAL"]='User Manual';
-$TbMsg["API"]='API documentation';
+$TbMsg["API"]='Engine API documentation';
 $TbMsg["CFG"]='Client configuration';
+$TbMsg["REST"]='REST API documentation';
 $TbMsg["CHANGELOG"]='Changes in the version:';
 $TbMsg["USERMAIL"]=' User email list';
 $TbMsg["WEB"]='Web of the project: opengnsys.es';

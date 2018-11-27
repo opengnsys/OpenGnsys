@@ -28,6 +28,7 @@ $version=(empty($data->project)) ? "OpenGnsys" : @$data->project.' '.@$data->ver
     <p class=subcabeceras><a class="help_menu" href="manual.php"> <?php echo $TbMsg["MANUAL"] ?> </a> </p>
     <p class=subcabeceras><a class="help_menu" href="../api/index.html"> <?php echo $TbMsg["API"] ?> </a></p>
     <p class=subcabeceras><a class="help_menu" href="engine.php"> <?php echo $TbMsg["CFG"] ?> </a> </p>
+    <p class=subcabeceras><a class="help_menu" href="../rest/"> <?php echo $TbMsg["REST"] ?> </a></p>
     <p>&nbsp;</p>
     <p class=subcabeceras><a class="help_menu" href="changelog.php"> <?php echo $TbMsg["CHANGELOG"]." ".$version ?>  </a> </p>
     <p class=subcabeceras><a class="help_menu" href="https://listas.unizar.es/cgi-bin/mailman/listinfo/opengnsys-users" target="_blank"> <?php echo $TbMsg["USERMAIL"] ?> </a> </p>

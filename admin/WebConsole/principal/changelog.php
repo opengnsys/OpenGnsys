@@ -22,14 +22,12 @@ $changelog=(file_exists ($changelogfile)) ? file_get_contents($changelogfile, TR
 
     <body>
 
-        <div><p align=center class=cabeceras><img  border=0 nod="aulas-1" value="Sala Virtual" style="cursor:pointer" src="../images/iconos/aula.gif" >&nbsp;&nbsp;<?php echo $TbMsg["CHANGELOG_TITLE"] ?><br>
-        <span id="aulas-1" class=subcabeceras><?php echo $version ?></span></p>
+        <div><p align="center" class="cabeceras"><img border="0" src="../images/iconos/aula.gif" >&nbsp;&nbsp;<?php echo $TbMsg["CHANGELOG_TITLE"] ?><br>
+        <span id="aulas-1" class="subcabeceras"><?php echo $version ?></span></p>
         </div>
 
-        <div style="margin: 0 3em 0 3em">
-        <pre>
-        <?php echo $changelog; ?>
-        <pre>
+        <div style="margin: 3em">
+        <pre><?php echo $changelog; ?><pre>
         </div>
     </body>
 </html>
