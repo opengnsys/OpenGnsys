@@ -887,6 +887,18 @@ function updateServerFiles()
 		cp -a $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.init /etc/init.d/opengnsys
 		NEWFILES="$NEWFILES /etc/init.d/opengnsys"
 	fi
+	if ! diff -q $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.default /etc/default/opengnsys >/dev/null; then
+		echoAndLog "${FUNCNAME}(): updating new default file"
+		backupFile /etc/default/opengnsys
+		# Buscar si hay nuevos parámetros.
+		local var valor
+		while IFS="=" read -e var valor; do
+			[[ $var =~ ^# ]] || \
+				grep -q "^$var=" /etc/default/opengnsys || \
+				echo "$var=$valor" >> /etc/default/opengnsys
+		done < $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.default
+		NEWFILES="$NEWFILES /etc/default/opengnsys"
+	fi
 	if egrep -q "(UrlMsg=.*msgbrowser.php)|(UrlMenu=http://)" $INSTALL_TARGET/client/etc/ogAdmClient.cfg 2>/dev/null; then
 		echoAndLog "${FUNCNAME}(): updating new client config file"
 		backupFile $INSTALL_TARGET/client/etc/ogAdmClient.cfg
@@ -1226,7 +1238,7 @@ checkFiles
 # Mostrar resumen de actualización.
 updateSummary
 
-#rm -rf $WORKDIR
+rm -rf $WORKDIR
 echoAndLog "OpenGnsys update finished at $(date)"
 
 popd
