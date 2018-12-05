@@ -3497,7 +3497,7 @@ static bool gestionaTrama(TRAMA *ptrTrama, struct og_client *cli)
 			if (!strncmp(tbfuncionesServer[i].nf, nfn,
 				     strlen(tbfuncionesServer[i].nf))) {
 				res = tbfuncionesServer[i].fcn(ptrTrama, cli);
-				syslog(LOG_INFO, "handling request %s (result=%d) for client %s:%hu\n",
+				syslog(LOG_DEBUG, "handling request %s (result=%d) for client %s:%hu\n",
 				       tbfuncionesServer[i].nf, res,
 				       inet_ntoa(cli->addr.sin_addr),
 				       ntohs(cli->addr.sin_port));
@@ -3517,7 +3517,7 @@ static bool gestionaTrama(TRAMA *ptrTrama, struct og_client *cli)
 static void og_client_release(struct ev_loop *loop, struct og_client *cli)
 {
 	if (cli->keepalive_idx >= 0) {
-		syslog(LOG_INFO, "closing keepalive connection for %s:%hu in slot %d\n",
+		syslog(LOG_DEBUG, "closing keepalive connection for %s:%hu in slot %d\n",
 		       inet_ntoa(cli->addr.sin_addr),
 		       ntohs(cli->addr.sin_port), cli->keepalive_idx);
 		tbsockets[cli->keepalive_idx].cli = NULL;
@@ -3534,7 +3534,7 @@ static void og_client_keepalive(struct ev_loop *loop, struct og_client *cli)
 
 	old_cli = tbsockets[cli->keepalive_idx].cli;
 	if (old_cli && old_cli != cli) {
-		syslog(LOG_INFO, "closing old keepalive connection for %s:%hu\n",
+		syslog(LOG_DEBUG, "closing old keepalive connection for %s:%hu\n",
 		       inet_ntoa(old_cli->addr.sin_addr),
 		       ntohs(old_cli->addr.sin_port));
 
@@ -3574,7 +3574,7 @@ static void og_client_read_cb(struct ev_loop *loop, struct ev_io *io, int events
 			       inet_ntoa(cli->addr.sin_addr), ntohs(cli->addr.sin_port),
 			       strerror(errno));
 		} else {
-			syslog(LOG_INFO, "closed connection by %s:%hu\n",
+			syslog(LOG_DEBUG, "closed connection by %s:%hu\n",
 			       inet_ntoa(cli->addr.sin_addr), ntohs(cli->addr.sin_port));
 		}
 		goto close;
@@ -3623,7 +3623,7 @@ static void og_client_read_cb(struct ev_loop *loop, struct ev_io *io, int events
 		cli->state = OG_CLIENT_PROCESSING_REQUEST;
 		/* fall through. */
 	case OG_CLIENT_PROCESSING_REQUEST:
-		syslog(LOG_INFO, "processing request from %s:%hu\n",
+		syslog(LOG_DEBUG, "processing request from %s:%hu\n",
 		       inet_ntoa(cli->addr.sin_addr),
 		       ntohs(cli->addr.sin_port));
 
@@ -3648,11 +3648,11 @@ static void og_client_read_cb(struct ev_loop *loop, struct ev_io *io, int events
 		liberaMemoria(ptrTrama);
 
 		if (cli->keepalive_idx < 0) {
-			syslog(LOG_INFO, "server closing connection to %s:%hu\n",
+			syslog(LOG_DEBUG, "server closing connection to %s:%hu\n",
 			       inet_ntoa(cli->addr.sin_addr), ntohs(cli->addr.sin_port));
 			goto close;
 		} else {
-			syslog(LOG_INFO, "leaving client %s:%hu in keepalive mode\n",
+			syslog(LOG_DEBUG, "leaving client %s:%hu in keepalive mode\n",
 			       inet_ntoa(cli->addr.sin_addr),
 			       ntohs(cli->addr.sin_port));
 			og_client_keepalive(loop, cli);
@@ -3709,7 +3709,7 @@ static void og_server_accept_cb(struct ev_loop *loop, struct ev_io *io,
 	memcpy(&cli->addr, &client_addr, sizeof(client_addr));
 	cli->keepalive_idx = -1;
 
-	syslog(LOG_INFO, "connection from client %s:%hu\n",
+	syslog(LOG_DEBUG, "connection from client %s:%hu\n",
 	       inet_ntoa(cli->addr.sin_addr), ntohs(cli->addr.sin_port));
 
 	ev_io_init(&cli->io, og_client_read_cb, client_sd, EV_READ);
