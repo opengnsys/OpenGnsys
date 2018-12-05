@@ -3727,7 +3727,7 @@ int main(int argc, char *argv[])
 	int activo=1;
 	int i;
 
-	openlog(argv[0], LOG_PID, LOG_DAEMON);
+	openlog("ogAdmServer", LOG_PID, LOG_DAEMON);
 
 	/*--------------------------------------------------------------------------------------------------------
 	 Validación de parámetros de ejecución y lectura del fichero de configuración del servicio
