@@ -34,13 +34,14 @@ static bool tomaConfiguracion(const char *filecfg)
 	FILE *fcfg;
 
 	if (filecfg == NULL || strlen(filecfg) == 0) {
-		og_log(1, false); // Fichero de configuración del servicio vacío
+		syslog(LOG_ERR, "No configuration file has been specified\n");
 		return false;
 	}
 
 	fcfg = fopen(filecfg, "rt");
 	if (fcfg == NULL) {
-		og_log(2, false); // No existe fichero de configuración del servicio
+		syslog(LOG_ERR, "Cannot open configuration file `%s'\n",
+		       filecfg);
 		return false;
 	}
 
@@ -72,27 +73,27 @@ static bool tomaConfiguracion(const char *filecfg)
 	}
 
 	if (!servidoradm[0]) {
-		og_log(4, false); // Falta parámetro SERVIDORADM
+		syslog(LOG_ERR, "Missing SERVIDORADM in configuration file\n");
 		return false;
 	}
 	if (!puerto[0]) {
-		og_log(5, false); // Falta parámetro PUERTO
+		syslog(LOG_ERR, "Missing PUERTO in configuration file\n");
 		return false;
 	}
 	if (!usuario[0]) {
-		og_log(6, false); // Falta parámetro USUARIO
+		syslog(LOG_ERR, "Missing USUARIO in configuration file\n");
 		return false;
 	}
 	if (!pasguor[0]) {
-		og_log(7, false); // Falta parámetro PASSWORD
+		syslog(LOG_ERR, "Missing PASSWORD in configuration file\n");
 		return false;
 	}
 	if (!datasource[0]) {
-		og_log(8, false); // Falta parámetro DATASOURCE
+		syslog(LOG_ERR, "Missing DATASOURCE in configuration file\n");
 		return false;
 	}
 	if (!catalog[0]) {
-		og_log(9, false); // Falta parámetro CATALOG
+		syslog(LOG_ERR, "Missing CATALOG in configuration file\n");
 		return false;
 	}
 
@@ -174,7 +175,7 @@ static bool respuestaSondeo(TRAMA* ptrTrama, struct og_client *cli)
 	Ipes = (char*) reservaMemoria(lSize + 1);
 	if (Ipes == NULL) {
 		liberaMemoria(iph);
-		og_log(3, false);
+		syslog(LOG_ERR, "%s:%d OOM\n", __FILE__, __LINE__);
 		return false;
 	}
 	strcpy(Ipes, iph); // Copia cadena de IPES
@@ -194,7 +195,9 @@ static bool respuestaSondeo(TRAMA* ptrTrama, struct og_client *cli)
 	strcat(ptrTrama->parametros, "\r");
 	liberaMemoria(Ipes);
 	if (!mandaTrama(&socket_c, ptrTrama)) {
-		og_log(26, false);
+		syslog(LOG_ERR, "failed to send response to %s:%hu reason=%s\n",
+		       inet_ntoa(cli->addr.sin_addr), ntohs(cli->addr.sin_port),
+		       strerror(errno));
 		return false;
 	}
 	return true;
@@ -323,7 +326,9 @@ static bool EcoConsola(TRAMA* ptrTrama, struct og_client *cli)
 	}
 	ptrTrama->tipo=MSG_RESPUESTA; // Tipo de mensaje
 	if (!mandaTrama(&socket_c, ptrTrama)) {
-		og_log(26, false);
+		syslog(LOG_ERR, "failed to send response to %s:%hu reason=%s\n",
+		       inet_ntoa(cli->addr.sin_addr), ntohs(cli->addr.sin_port),
+		       strerror(errno));
 		return false;
 	}
 	return true;
@@ -436,9 +441,11 @@ static bool InclusionClienteWinLnx(TRAMA *ptrTrama, struct og_client *cli)
 	lon += sprintf(ptrTrama->parametros + lon, "ido=%d\r", idordenador);
 	lon += sprintf(ptrTrama->parametros + lon, "npc=%s\r", nombreordenador);	
 	lon += sprintf(ptrTrama->parametros + lon, "res=%d\r", res);	
-	
+
 	if (!mandaTrama(&socket_c, ptrTrama)) {
-		og_log(26, false);
+		syslog(LOG_ERR, "failed to send response to %s:%hu reason=%s\n",
+		       inet_ntoa(cli->addr.sin_addr), ntohs(cli->addr.sin_port),
+		       strerror(errno));
 		return false;
 	}
 	return true;
@@ -467,11 +474,11 @@ bool procesoInclusionClienteWinLnx(int socket_c, TRAMA *ptrTrama, int *idordenad
 	// Toma parámetros
 	iph = copiaParametro("iph",ptrTrama); // Toma ip
 
-	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexión con la BD
+	if (!db.Open(usuario, pasguor, datasource, catalog)) {
 		liberaMemoria(iph);
-		og_log(20, false);
 		db.GetErrorErrStr(msglog);
-		og_info(msglog);
+		syslog(LOG_ERR, "cannot open connection database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
 		return (20);
 	}
 
@@ -480,27 +487,26 @@ bool procesoInclusionClienteWinLnx(int socket_c, TRAMA *ptrTrama, int *idordenad
 			"SELECT idordenador,nombreordenador FROM ordenadores "
 				" WHERE ordenadores.ip = '%s'", iph);
 
-	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
+	if (!db.Execute(sqlstr, tbl)) {
 		liberaMemoria(iph);
-		og_log(21, false);
 		db.GetErrorErrStr(msglog);
-		og_info(msglog);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
 		db.Close();
 		return (21);
 	}
 
-	if (tbl.ISEOF()) { // Si no existe el cliente
+	if (tbl.ISEOF()) {
 		liberaMemoria(iph);
-		og_log(22, false);
+		syslog(LOG_ERR, "client does not exist in database (%s:%d)\n",
+		       __func__, __LINE__);
 		db.liberaResult(tbl);
 		db.Close();
 		return (22);
 	}
 
-	if (ndebug == DEBUG_ALTO) {
-		sprintf(msglog, "%s IP:%s", tbMensajes[2], iph);
-		infoDebug(msglog);
-	}
+	syslog(LOG_DEBUG, "Client %s requesting inclusion\n", iph);
+
 	if (!tbl.Get("idordenador", *idordenador)) {
 		liberaMemoria(iph);
 		db.liberaResult(tbl);
@@ -522,7 +528,7 @@ bool procesoInclusionClienteWinLnx(int socket_c, TRAMA *ptrTrama, int *idordenad
 	
 	if (!registraCliente(iph)) { // Incluyendo al cliente en la tabla de sokets
 		liberaMemoria(iph);
-		og_log(25, false);
+		syslog(LOG_ERR, "client table is full\n");
 		return (25);
 	}
 	liberaMemoria(iph);
@@ -545,11 +551,13 @@ static bool InclusionCliente(TRAMA *ptrTrama, struct og_client *cli)
 {
 	int socket_c = og_client_socket(cli);
 
-	if (!procesoInclusionCliente(socket_c, ptrTrama)) { // Ha habido algún error...
+	if (!procesoInclusionCliente(cli, ptrTrama)) {
 		initParametros(ptrTrama,0);
 		strcpy(ptrTrama->parametros, "nfn=RESPUESTA_InclusionCliente\rres=0\r");
 		if (!mandaTrama(&socket_c, ptrTrama)) {
-			og_log(26, false);
+			syslog(LOG_ERR, "failed to send response to %s:%hu reason=%s\n",
+			       inet_ntoa(cli->addr.sin_addr), ntohs(cli->addr.sin_port),
+			       strerror(errno));
 			return false;
 		}
 	}
@@ -567,8 +575,9 @@ static bool InclusionCliente(TRAMA *ptrTrama, struct og_client *cli)
 //		true: Si el proceso es correcto
 //		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-bool procesoInclusionCliente(int socket_c, TRAMA *ptrTrama)
+bool procesoInclusionCliente(struct og_client *cli, TRAMA *ptrTrama)
 {
+	int socket_c = og_client_socket(cli);
 	char msglog[LONSTD], sqlstr[LONSQL];
 	Database db;
 	Table tbl;
@@ -581,12 +590,12 @@ bool procesoInclusionCliente(int socket_c, TRAMA *ptrTrama)
 	iph = copiaParametro("iph",ptrTrama); // Toma ip
 	cfg = copiaParametro("cfg",ptrTrama); // Toma configuracion
 
-	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexión con la BD
+	if (!db.Open(usuario, pasguor, datasource, catalog)) {
 		liberaMemoria(iph);
 		liberaMemoria(cfg);
-		og_log(20, false);
 		db.GetErrorErrStr(msglog);
-		og_info(msglog);
+		syslog(LOG_ERR, "cannot open connection database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
 		return false;
 	}
 
@@ -597,22 +606,21 @@ bool procesoInclusionCliente(int socket_c, TRAMA *ptrTrama)
 				" INNER JOIN centros ON centros.idcentro=aulas.idcentro"
 				" WHERE ordenadores.ip = '%s'", iph);
 
-	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
-		og_log(21, false);
+	if (!db.Execute(sqlstr, tbl)) {
 		db.GetErrorErrStr(msglog);
-		og_info(msglog);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
 		return false;
 	}
 
-	if (tbl.ISEOF()) { // Si no existe el cliente
-		og_log(22, false);
+	if (tbl.ISEOF()) {
+		syslog(LOG_ERR, "client does not exist in database (%s:%d)\n",
+		       __func__, __LINE__);
 		return false;
 	}
 
-	if (ndebug == DEBUG_ALTO) {
-		sprintf(msglog, "%s IP:%s", tbMensajes[2], iph);
-		infoDebug(msglog);
-	}
+	syslog(LOG_DEBUG, "Client %s requesting inclusion\n", iph);
+
 	if (!tbl.Get("idordenador", idordenador)) {
 		tbl.GetErrorErrStr(msglog);
 		og_info(msglog);
@@ -655,13 +663,13 @@ bool procesoInclusionCliente(int socket_c, TRAMA *ptrTrama)
 
 	if (!resul) {
 		liberaMemoria(iph);
-		og_log(29, false);
+		syslog(LOG_ERR, "Cannot add client to database\n");
 		return false;
 	}
 
 	if (!registraCliente(iph)) { // Incluyendo al cliente en la tabla de sokets
 		liberaMemoria(iph);
-		og_log(25, false);
+		syslog(LOG_ERR, "client table is full\n");
 		return false;
 	}
 
@@ -680,7 +688,9 @@ bool procesoInclusionCliente(int socket_c, TRAMA *ptrTrama)
 	lon += sprintf(ptrTrama->parametros + lon, "res=%d\r", 1); // Confirmación proceso correcto
 
 	if (!mandaTrama(&socket_c, ptrTrama)) {
-		og_log(26, false);
+		syslog(LOG_ERR, "failed to send response to %s:%hu reason=%s\n",
+		       inet_ntoa(cli->addr.sin_addr), ntohs(cli->addr.sin_port),
+		       strerror(errno));
 		return false;
 	}
 	liberaMemoria(iph);
@@ -785,10 +795,10 @@ bool actualizaConfiguracion(Database db, Table tbl, char *cfg, int ido)
 				ido, disk, par);
 
 
-		if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
-			og_log(21, false);
+		if (!db.Execute(sqlstr, tbl)) {
 			db.GetErrorErrStr(msglog);
-			og_info(msglog);
+			syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+			       __func__, __LINE__, msglog);
 			return false;
 		}
 		if (tbl.ISEOF()) { // Si no existe el registro
@@ -851,10 +861,10 @@ bool actualizaConfiguracion(Database db, Table tbl, char *cfg, int ido)
 					" WHERE idordenador=%d AND numdisk=%s AND numpar=%s",
 					uso, ido, disk, par);
 			}
-			if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
-				og_log(21, false);
+			if (!db.Execute(sqlstr, tbl)) {
 				db.GetErrorErrStr(msglog);
-				og_info(msglog);
+				syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+				       __func__, __LINE__, msglog);
 				return false;
 			}
 		}
@@ -863,10 +873,10 @@ bool actualizaConfiguracion(Database db, Table tbl, char *cfg, int ido)
 	// Eliminar particiones almacenadas que ya no existen
 	sprintf(sqlstr, "DELETE FROM ordenadores_particiones WHERE idordenador=%d AND (numdisk, numpar) NOT IN (%s)",
 			ido, tbPar);
-	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
-		og_log(21, false);
+	if (!db.Execute(sqlstr, tbl)) {
 		db.GetErrorErrStr(msglog);
-		og_info(msglog);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
 		return false;
 	}
 	return true;
@@ -903,10 +913,10 @@ int checkDato(Database db, Table tbl, char *dato, const char *tabla,
 			tabla, nomdato, dato);
 
 	// Ejecuta consulta
-	if (!db.Execute(sqlstr, tbl)) { // Error al leer
-		og_log(21, false);
+	if (!db.Execute(sqlstr, tbl)) {
 		db.GetErrorErrStr(msglog);
-		og_info(msglog);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
 		return (0);
 	}
 	if (tbl.ISEOF()) { //  Software NO existente
@@ -992,14 +1002,14 @@ static bool AutoexecCliente(TRAMA *ptrTrama, struct og_client *cli)
 	liberaMemoria(iph);
 	fileexe = fopen(fileautoexec, "wb"); // Abre fichero de script
 	if (fileexe == NULL) {
-		og_log(52, false);
+		syslog(LOG_ERR, "cannot create temporary file\n");
 		return false;
 	}
 
-	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexión con la BD
-		og_log(20, false);
+	if (!db.Open(usuario, pasguor, datasource, catalog)) {
 		db.GetErrorErrStr(msglog);
-		og_info(msglog);
+		syslog(LOG_ERR, "cannot open connection database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
 		return false;
 	}
 	initParametros(ptrTrama,0);
@@ -1017,7 +1027,9 @@ static bool AutoexecCliente(TRAMA *ptrTrama, struct og_client *cli)
 
 	if (!mandaTrama(&socket_c, ptrTrama)) {
 		liberaMemoria(exe);
-		og_log(26, false);
+		syslog(LOG_ERR, "failed to send response to %s:%hu reason=%s\n",
+		       inet_ntoa(cli->addr.sin_addr), ntohs(cli->addr.sin_port),
+		       strerror(errno));
 		return false;
 	}
 	liberaMemoria(exe);
@@ -1045,10 +1057,10 @@ bool recorreProcedimientos(Database db, char *parametros, FILE *fileexe, char *i
 			"SELECT procedimientoid,parametros FROM procedimientos_acciones"
 				" WHERE idprocedimiento=%s ORDER BY orden", idp);
 	// Ejecuta consulta
-	if (!db.Execute(sqlstr, tbl)) { // Error al leer
-		og_log(21, false);
+	if (!db.Execute(sqlstr, tbl)) {
 		db.GetErrorErrStr(msglog);
-		og_info(msglog);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
 		return false;
 	}
 	while (!tbl.ISEOF()) { // Recorre procedimientos
@@ -1100,7 +1112,7 @@ static bool ComandosPendientes(TRAMA *ptrTrama, struct og_client *cli)
 	if (!clienteExistente(iph, &idx)) { // Busca índice del cliente
 		liberaMemoria(iph);
 		liberaMemoria(ido);
-		og_log(47, false);
+		syslog(LOG_ERR, "client does not exist\n");
 		return false;
 	}
 	if (buscaComandos(ido, ptrTrama, &ids)) { // Existen comandos pendientes
@@ -1114,8 +1126,10 @@ static bool ComandosPendientes(TRAMA *ptrTrama, struct og_client *cli)
 	}
 	if (!mandaTrama(&socket_c, ptrTrama)) {
 		liberaMemoria(iph);
-		liberaMemoria(ido);	
-		og_log(26, false);
+		liberaMemoria(ido);
+		syslog(LOG_ERR, "failed to send response to %s:%hu reason=%s\n",
+		       inet_ntoa(cli->addr.sin_addr), ntohs(cli->addr.sin_port),
+		       strerror(errno));
 		return false;
 	}
 	liberaMemoria(iph);
@@ -1142,18 +1156,18 @@ bool buscaComandos(char *ido, TRAMA *ptrTrama, int *ids)
 	Table tbl;
 	int lonprm;
 
-	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexión con la BD
-		og_log(20, false);
+	if (!db.Open(usuario, pasguor, datasource, catalog)) {
 		db.GetErrorErrStr(msglog);
-		og_info(msglog);
+		syslog(LOG_ERR, "cannot open connection database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
 		return false;
 	}
 	sprintf(sqlstr,"SELECT sesion,parametros,length( parametros) as lonprm"\
 			" FROM acciones WHERE idordenador=%s AND estado='%d' ORDER BY idaccion", ido, ACCION_INICIADA);
-	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
-		og_log(21, false);
+	if (!db.Execute(sqlstr, tbl)) {
 		db.GetErrorErrStr(msglog);
-		og_info(msglog);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
 		return false;
 	}
 	if (tbl.ISEOF()) {
@@ -1172,7 +1186,7 @@ bool buscaComandos(char *ido, TRAMA *ptrTrama, int *ids)
 		}
 		if(!initParametros(ptrTrama,lonprm+LONGITUD_PARAMETROS)){
 			db.Close();
-			og_log(3, false);
+			syslog(LOG_ERR, "%s:%d OOM\n", __FILE__, __LINE__);
 			return false;
 		}
 		if (!tbl.Get("parametros", ptrTrama->parametros)) { // Toma parámetros del comando
@@ -1205,7 +1219,7 @@ static bool DisponibilidadComandos(TRAMA *ptrTrama, struct og_client *cli)
 	iph = copiaParametro("iph",ptrTrama); // Toma ip
 	if (!clienteExistente(iph, &idx)) { // Busca índice del cliente
 		liberaMemoria(iph);
-		og_log(47, false);
+		syslog(LOG_ERR, "client does not exist\n");
 		return false;
 	}
 	tpc = copiaParametro("tpc",ptrTrama); // Tipo de cliente (Plataforma y S.O.)
@@ -1257,14 +1271,14 @@ static bool respuestaEstandar(TRAMA *ptrTrama, char *iph, char *ido, Database db
 
 	liberaMemoria(ids);
 
-	if (!db.Execute(sqlstr, tbl)) { // Error al consultar
-		og_log(21, false);
+	if (!db.Execute(sqlstr, tbl)) {
 		db.GetErrorErrStr(msglog);
-		og_info(msglog);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
 		return false;
 	}
-	if (tbl.ISEOF()) { // No existe registro de acciones
-		og_log(31, false);
+	if (tbl.ISEOF()) {
+		syslog(LOG_ERR, "no actions available\n");
 		return true;
 	}
 	if (!tbl.Get("idaccion", idaccion)) { // Toma identificador de la accion
@@ -1324,7 +1338,7 @@ bool enviaComando(TRAMA* ptrTrama, const char *estado)
 	lon = strlen(iph); // Calcula longitud de la cadena de direccion/es IPE/S
 	Ipes = (char*) reservaMemoria(lon + 1);
 	if (Ipes == NULL) {
-		og_log(3, false);
+		syslog(LOG_ERR, "%s:%d OOM\n", __FILE__, __LINE__);
 		return false;
 	}
 	
@@ -1339,7 +1353,8 @@ bool enviaComando(TRAMA* ptrTrama, const char *estado)
 
 			strcpy(tbsockets[idx].estado, estado); // Actualiza el estado del cliente
 			if (!mandaTrama(&sock, ptrTrama)) {
-				og_log(26, false);
+				syslog(LOG_ERR, "failed to send response to %s:%s\n",
+				       ptrIpes[i], strerror(errno));
 				return false;
 			}
 			//close(tbsockets[idx].sock); // Cierra el socket del cliente hasta nueva disponibilidad
@@ -1365,7 +1380,8 @@ bool respuestaConsola(int socket_c, TRAMA *ptrTrama, int res)
 	initParametros(ptrTrama,0);
 	sprintf(ptrTrama->parametros, "res=%d\r", res);
 	if (!mandaTrama(&socket_c, ptrTrama)) {
-		og_log(26, false);
+		syslog(LOG_ERR, "%s:%d failed to send response: %s\n",
+		       __func__, __LINE__, strerror(errno));
 		return false;
 	}
 	return true;
@@ -1438,20 +1454,20 @@ bool Levanta(char *iph, char *mac, char *mar)
 	/* Creación de socket para envío de magig packet */
 	s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
 	if (s < 0) {
-		og_log(13, true);
+		syslog(LOG_ERR, "cannot create socket for magic packet\n");
 		return false;
 	}
 	bOpt = true; // Pone el socket en modo Broadcast
 	res = setsockopt(s, SOL_SOCKET, SO_BROADCAST, (char *) &bOpt, sizeof(bOpt));
 	if (res < 0) {
-		og_log(48, true);
+		syslog(LOG_ERR, "cannot set broadcast socket\n");
 		return false;
 	}
 	local.sin_family = AF_INET;
 	local.sin_port = htons((short) PUERTO_WAKEUP);
 	local.sin_addr.s_addr = htonl(INADDR_ANY); // cualquier interface
 	if (bind(s, (sockaddr *) &local, sizeof(local)) < 0) {
-		og_log(14, true);
+		syslog(LOG_ERR, "cannot bind magic socket\n");
 		exit(EXIT_FAILURE);
 	}
 	/* fin creación de socket */
@@ -1459,7 +1475,7 @@ bool Levanta(char *iph, char *mac, char *mar)
 	lon = splitCadena(ptrMacs, mac, ';');
 	for (i = 0; i < lon; i++) {
 		if (!WakeUp(&s,ptrIP[i],ptrMacs[i],mar)) {
-			og_log(49, true);
+			syslog(LOG_ERR, "problem sending magic packet\n");
 			close(s);
 			return false;
 		}
@@ -1511,7 +1527,7 @@ bool WakeUp(SOCKET *s, char* iph, char *mac, char *mar)
 	res = sendto(*s, (char *) &Trama_WakeUp, sizeof(Trama_WakeUp), 0,
 			(sockaddr *) &WakeUpCliente, sizeof(WakeUpCliente));
 	if (res < 0) {
-		og_log(26, false);
+		syslog(LOG_ERR, "failed to send wake up\n");
 		return false;
 	}
 	return true;
@@ -1572,10 +1588,10 @@ static bool RESPUESTA_Arrancar(TRAMA* ptrTrama, struct og_client *cli)
 	char *iph, *ido;
 	char *tpc;
 
-	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
-		og_log(20, false);
+	if (!db.Open(usuario, pasguor, datasource, catalog)) {
 		db.GetErrorErrStr(msglog);
-		og_info(msglog);
+		syslog(LOG_ERR, "cannot open connection database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
 		return false;
 	}
 
@@ -1585,8 +1601,8 @@ static bool RESPUESTA_Arrancar(TRAMA* ptrTrama, struct og_client *cli)
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
 		liberaMemoria(iph);
 		liberaMemoria(ido);
-		og_log(30, false);
-		return false; // Error al registrar notificacion
+		syslog(LOG_ERR, "failed to register notification\n");
+		return false;
 	}
 
 	tpc = copiaParametro("tpc",ptrTrama); // Tipo de cliente (Plataforma y S.O.)
@@ -1646,10 +1662,10 @@ static bool RESPUESTA_Apagar(TRAMA* ptrTrama, struct og_client *cli)
 	int i;
 	char *iph, *ido;
 
-	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
-		og_log(20, false);
+	if (!db.Open(usuario, pasguor, datasource, catalog)) {
 		db.GetErrorErrStr(msglog);
-		og_info(msglog);
+		syslog(LOG_ERR, "cannot open connection database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
 		return false;
 	}
 
@@ -1659,7 +1675,7 @@ static bool RESPUESTA_Apagar(TRAMA* ptrTrama, struct og_client *cli)
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
 		liberaMemoria(iph);
 		liberaMemoria(ido);
-		og_log(30, false);
+		syslog(LOG_ERR, "failed to register notification\n");
 		return false; // Error al registrar notificacion
 	}
 
@@ -1718,10 +1734,10 @@ static bool RESPUESTA_Reiniciar(TRAMA* ptrTrama, struct og_client *cli)
 	int i;
 	char *iph, *ido;
 
-	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
-		og_log(20, false);
+	if (!db.Open(usuario, pasguor, datasource, catalog)) {
 		db.GetErrorErrStr(msglog);
-		og_info(msglog);
+		syslog(LOG_ERR, "cannot open connection database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
 		return false;
 	}
 
@@ -1731,7 +1747,7 @@ static bool RESPUESTA_Reiniciar(TRAMA* ptrTrama, struct og_client *cli)
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
 		liberaMemoria(iph);
 		liberaMemoria(ido);
-		og_log(30, false);
+		syslog(LOG_ERR, "failed to register notification\n");
 		return false; // Error al registrar notificacion
 	}
 
@@ -1790,10 +1806,10 @@ static bool RESPUESTA_IniciarSesion(TRAMA* ptrTrama, struct og_client *cli)
 	int i;
 	char *iph, *ido;
 
-	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
-		og_log(20, false);
+	if (!db.Open(usuario, pasguor, datasource, catalog)) {
 		db.GetErrorErrStr(msglog);
-		og_info(msglog);
+		syslog(LOG_ERR, "cannot open connection database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
 		return false;
 	}
 
@@ -1803,7 +1819,7 @@ static bool RESPUESTA_IniciarSesion(TRAMA* ptrTrama, struct og_client *cli)
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
 		liberaMemoria(iph);
 		liberaMemoria(ido);
-		og_log(30, false);
+		syslog(LOG_ERR, "failed to register notification\n");
 		return false; // Error al registrar notificacion
 	}
 
@@ -1863,10 +1879,10 @@ static bool RESPUESTA_CrearImagen(TRAMA* ptrTrama, struct og_client *cli)
 	char *idi;
 	bool res;
 
-	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
-		og_log(20, false);
+	if (!db.Open(usuario, pasguor, datasource, catalog)) {
 		db.GetErrorErrStr(msglog);
-		og_info(msglog);
+		syslog(LOG_ERR, "cannot open connection database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
 		return false;
 	}
 
@@ -1876,7 +1892,7 @@ static bool RESPUESTA_CrearImagen(TRAMA* ptrTrama, struct og_client *cli)
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
 		liberaMemoria(iph);
 		liberaMemoria(ido);
-		og_log(30, false);
+		syslog(LOG_ERR, "failed to register notification\n");
 		return false; // Error al registrar notificacion
 	}
 
@@ -1893,10 +1909,10 @@ static bool RESPUESTA_CrearImagen(TRAMA* ptrTrama, struct og_client *cli)
 	liberaMemoria(par);
 	liberaMemoria(cpt);
 	liberaMemoria(ipr);
-	
+
 	if(!res){
-		og_log(94, false);
-		db.Close(); // Cierra conexión
+		syslog(LOG_ERR, "Problem processing update\n");
+		db.Close();
 		return false;
 	}
 
@@ -1934,10 +1950,10 @@ bool actualizaCreacionImagen(Database db, Table tbl, char *idi, char *dsk,
 			"  LEFT JOIN ordenadores USING (idrepositorio)"
 			" WHERE repositorios.ip='%s' AND ordenadores.idordenador=%s", ipr, ido);
 
-	if (!db.Execute(sqlstr, tbl)) { // Error al leer
-		og_log(21, false);
+	if (!db.Execute(sqlstr, tbl)) {
 		db.GetErrorErrStr(msglog);
-		og_info(msglog);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
 		return false;
 	}
 	if (!tbl.Get("idrepositorio", idr)) { // Toma dato
@@ -1952,10 +1968,10 @@ bool actualizaCreacionImagen(Database db, Table tbl, char *idi, char *dsk,
 			"  FROM ordenadores_particiones"
 			" WHERE idordenador=%s AND numdisk=%s AND numpar=%s", ido, dsk, par);
 
-	if (!db.Execute(sqlstr, tbl)) { // Error al leer
-		og_log(21, false);
+	if (!db.Execute(sqlstr, tbl)) {
 		db.GetErrorErrStr(msglog);
-		og_info(msglog);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
 		return false;
 	}
 	if (!tbl.Get("idperfilsoft", ifs)) { // Toma dato
@@ -1972,10 +1988,10 @@ bool actualizaCreacionImagen(Database db, Table tbl, char *idi, char *dsk,
 		"       fechacreacion=NOW(), revision=revision+1"
 		" WHERE idimagen=%s", ido, dsk, par, cpt, ifs, idr, idi);
 
-	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
-		og_log(21, false);
+	if (!db.Execute(sqlstr, tbl)) {
 		db.GetErrorErrStr(msglog);
-		og_info(msglog);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
 		return false;
 	}
 	/* Actualizar los datos en el cliente */
@@ -1985,10 +2001,10 @@ bool actualizaCreacionImagen(Database db, Table tbl, char *idi, char *dsk,
 		"       fechadespliegue=NOW()"
 		" WHERE idordenador=%s AND numdisk=%s AND numpar=%s",
 		idi, idi, ido, dsk, par);
-	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
-		og_log(21, false);
+	if (!db.Execute(sqlstr, tbl)) {
 		db.GetErrorErrStr(msglog);
-		og_info(msglog);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
 		return false;
 	}
 	return true;
@@ -2083,10 +2099,10 @@ static bool RESPUESTA_CrearSoftIncremental(TRAMA* ptrTrama, struct og_client *cl
 	int ifs;
 	char msglog[LONSTD],sqlstr[LONSQL];
 
-	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
-		og_log(20, false);
+	if (!db.Open(usuario, pasguor, datasource, catalog)) {
 		db.GetErrorErrStr(msglog);
-		og_info(msglog);
+		syslog(LOG_ERR, "cannot open connection database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
 		return false;
 	}
 
@@ -2095,9 +2111,9 @@ static bool RESPUESTA_CrearSoftIncremental(TRAMA* ptrTrama, struct og_client *cl
 
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
 		liberaMemoria(iph);
-		liberaMemoria(ido);	
-		og_log(30, false);
-		return false; // Error al registrar notificacion
+		liberaMemoria(ido);
+		syslog(LOG_ERR, "failed to register notification\n");
+		return false;
 	}
 
 	par = copiaParametro("par",ptrTrama);
@@ -2108,11 +2124,11 @@ static bool RESPUESTA_CrearSoftIncremental(TRAMA* ptrTrama, struct og_client *cl
 	liberaMemoria(iph);
 	liberaMemoria(ido);	
 	liberaMemoria(par);	
-		
-	if (!db.Execute(sqlstr, tbl)) { // Error al leer
-		og_log(21, false);
+
+	if (!db.Execute(sqlstr, tbl)) {
 		db.GetErrorErrStr(msglog);
-		og_info(msglog);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
 		return false;
 	}
 	if (!tbl.Get("idperfilsoft", ifs)) { // Toma dato
@@ -2125,11 +2141,11 @@ static bool RESPUESTA_CrearSoftIncremental(TRAMA* ptrTrama, struct og_client *cl
 	idf = copiaParametro("idf",ptrTrama);
 	sprintf(sqlstr,"UPDATE imagenes SET idperfilsoft=%d WHERE idimagen=%s",ifs,idf);
 	liberaMemoria(idf);	
-	
-	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
-		og_log(21, false);
+
+	if (!db.Execute(sqlstr, tbl)) {
 		db.GetErrorErrStr(msglog);
-		og_info(msglog);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
 		return false;
 	}
 	db.Close(); // Cierra conexión
@@ -2234,10 +2250,10 @@ static bool RESPUESTA_RestaurarImagen(TRAMA* ptrTrama, struct og_client *cli)
 	bool res;
 	char *iph, *ido, *idi, *dsk, *par, *ifs, *cfg;
 
-	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
-		og_log(20, false);
+	if (!db.Open(usuario, pasguor, datasource, catalog)) {
 		db.GetErrorErrStr(msglog);
-		og_info(msglog);
+		syslog(LOG_ERR, "cannot open connection database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
 		return false;
 	}
 
@@ -2246,9 +2262,9 @@ static bool RESPUESTA_RestaurarImagen(TRAMA* ptrTrama, struct og_client *cli)
 
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
 		liberaMemoria(iph);
-		liberaMemoria(ido);	
-		og_log(30, false);
-		return false; // Error al registrar notificacion
+		liberaMemoria(ido);
+		syslog(LOG_ERR, "failed to register notification\n");
+		return false;
 	}
 
 	// Acciones posteriores
@@ -2270,8 +2286,8 @@ static bool RESPUESTA_RestaurarImagen(TRAMA* ptrTrama, struct og_client *cli)
 	liberaMemoria(ifs);
 
 	if(!res){
-		og_log(95, false);
-		db.Close(); // Cierra conexión
+		syslog(LOG_ERR, "Problem after restoring image\n");
+		db.Close();
 		return false;
 	}
 
@@ -2342,10 +2358,10 @@ bool actualizaRestauracionImagen(Database db, Table tbl, char *idi,
 			"       idnombreso=IFNULL((SELECT idnombreso FROM perfilessoft WHERE idperfilsoft=%s),0)"
 			" WHERE idordenador=%s AND numdisk=%s AND numpar=%s", idi, ifs, idi, ifs, ido, dsk, par);
 
-	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
-		og_log(21, false);
+	if (!db.Execute(sqlstr, tbl)) {
 		db.GetErrorErrStr(msglog);
-		og_info(msglog);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
 		return false;
 	}
 	return true;
@@ -2397,10 +2413,10 @@ static bool RESPUESTA_Configurar(TRAMA* ptrTrama, struct og_client *ci)
 	bool res;
 	char *iph, *ido,*cfg;
 
-	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
-		og_log(20, false);
+	if (!db.Open(usuario, pasguor, datasource, catalog)) {
 		db.GetErrorErrStr(msglog);
-		og_info(msglog);
+		syslog(LOG_ERR, "cannot open connection database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
 		return false;
 	}
 
@@ -2409,9 +2425,9 @@ static bool RESPUESTA_Configurar(TRAMA* ptrTrama, struct og_client *ci)
 
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
 		liberaMemoria(iph);
-		liberaMemoria(ido);	
-		og_log(30, false);
-		return false; // Error al registrar notificacion
+		liberaMemoria(ido);
+		syslog(LOG_ERR, "failed to register notification\n");
+		return false;
 	}
 
 	cfg = copiaParametro("cfg",ptrTrama); // Toma configuración de particiones
@@ -2420,12 +2436,12 @@ static bool RESPUESTA_Configurar(TRAMA* ptrTrama, struct og_client *ci)
 	liberaMemoria(iph);
 	liberaMemoria(ido);	
 	liberaMemoria(cfg);	
-		
-	if(!res){	
-		og_log(24, false);
-		return false; // Error al registrar notificacion
+
+	if(!res){
+		syslog(LOG_ERR, "Problem updating client configuration\n");
+		return false;
 	}
-	
+
 	db.Close(); // Cierra conexión
 	return true;
 }
@@ -2474,10 +2490,10 @@ static bool RESPUESTA_EjecutarScript(TRAMA* ptrTrama, struct og_client *cli)
 	Table tbl;
 	char *iph, *ido,*cfg;
 
-	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
-		og_log(20, false);
+	if (!db.Open(usuario, pasguor, datasource, catalog)) {
 		db.GetErrorErrStr(msglog);
-		og_info(msglog);
+		syslog(LOG_ERR, "cannot open connection database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
 		return false;
 	}
 
@@ -2486,9 +2502,9 @@ static bool RESPUESTA_EjecutarScript(TRAMA* ptrTrama, struct og_client *cli)
 
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
 		liberaMemoria(iph);
-		liberaMemoria(ido);	
-		og_log(30, false);
-		return false; // Error al registrar notificacion
+		liberaMemoria(ido);
+		syslog(LOG_ERR, "failed to register notification\n");
+		return false;
 	}
 	
 	cfg = copiaParametro("cfg",ptrTrama); // Toma configuración de particiones
@@ -2550,10 +2566,10 @@ static bool RESPUESTA_InventarioHardware(TRAMA* ptrTrama, struct og_client *cli)
 	bool res;
 	char *iph, *ido, *idc, *npc, *hrd, *buffer;
 
-	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
-		og_log(20, false);
+	if (!db.Open(usuario, pasguor, datasource, catalog)) {
 		db.GetErrorErrStr(msglog);
-		og_info(msglog);
+		syslog(LOG_ERR, "cannot open connection database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
 		return false;
 	}
 
@@ -2562,9 +2578,9 @@ static bool RESPUESTA_InventarioHardware(TRAMA* ptrTrama, struct og_client *cli)
 
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
 		liberaMemoria(iph);
-		liberaMemoria(ido);	
-		og_log(30, false);
-		return false; // Error al registrar notificacion
+		liberaMemoria(ido);
+		syslog(LOG_ERR, "failed to register notification\n");
+		return false;
 	}
 	// Lee archivo de inventario enviado anteriormente
 	hrd = copiaParametro("hrd",ptrTrama);
@@ -2583,7 +2599,7 @@ static bool RESPUESTA_InventarioHardware(TRAMA* ptrTrama, struct og_client *cli)
 	liberaMemoria(buffer);		
 	
 	if(!res){
-		og_log(53, false);
+		syslog(LOG_ERR, "Problem updating client configuration\n");
 		return false;
 	}
 		
@@ -2618,10 +2634,10 @@ bool actualizaHardware(Database db, Table tbl, char *hrd, char *ido, char *npc,
 	/* Toma Centro (Unidad Organizativa) */
 	sprintf(sqlstr, "SELECT * FROM ordenadores WHERE idordenador=%s", ido);
 
-	if (!db.Execute(sqlstr, tbl)) { // Error al leer
-		og_log(21, false);
+	if (!db.Execute(sqlstr, tbl)) {
 		db.GetErrorErrStr(msglog);
-		og_info(msglog);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
 		return false;
 	}
 	if (!tbl.Get("idperfilhard", idperfilhard)) { // Toma dato
@@ -2650,10 +2666,10 @@ bool actualizaHardware(Database db, Table tbl, char *hrd, char *ido, char *npc,
 		//RegistraLog(msglog,false);
 		sprintf(sqlstr, "SELECT idtipohardware,descripcion FROM tipohardwares "
 			" WHERE nemonico='%s'", dualHardware[0]);
-		if (!db.Execute(sqlstr, tbl)) { // Error al leer
-			og_log(21, false);
+		if (!db.Execute(sqlstr, tbl)) {
 			db.GetErrorErrStr(msglog);
-			og_info(msglog);
+			syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+			       __func__, __LINE__, msglog);
 			return false;
 		}
 		if (tbl.ISEOF()) { //  Tipo de Hardware NO existente
@@ -2676,11 +2692,10 @@ bool actualizaHardware(Database db, Table tbl, char *hrd, char *ido, char *npc,
 				" WHERE idtipohardware=%d AND descripcion='%s'",
 					idtipohardware, dualHardware[1]);
 
-			// Ejecuta consulta
-			if (!db.Execute(sqlstr, tbl)) { // Error al leer
-				og_log(21, false);
+			if (!db.Execute(sqlstr, tbl)) {
 				db.GetErrorErrStr(msglog);
-				og_info(msglog);
+				syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+				       __func__, __LINE__, msglog);
 				return false;
 			}
 
@@ -2695,10 +2710,10 @@ bool actualizaHardware(Database db, Table tbl, char *hrd, char *ido, char *npc,
 				}
 				// Recupera el identificador del hardware
 				sprintf(sqlstr, "SELECT LAST_INSERT_ID() as identificador");
-				if (!db.Execute(sqlstr, tbl)) { // Error al leer
-					og_log(21, false);
+				if (!db.Execute(sqlstr, tbl)) {
 					db.GetErrorErrStr(msglog);
-					og_info(msglog);
+					syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+					       __func__, __LINE__, msglog);
 					return false;
 				}
 				if (!tbl.ISEOF()) { // Si existe registro
@@ -2733,7 +2748,7 @@ bool actualizaHardware(Database db, Table tbl, char *hrd, char *ido, char *npc,
 	aux = strlen(strInt); // Calcula longitud de cadena para reservar espacio a todos los perfiles
 	idhardwares = reservaMemoria(sizeof(aux) * lon + lon);
 	if (idhardwares == NULL) {
-		og_log(3, false);
+		syslog(LOG_ERR, "%s:%d OOM\n", __FILE__, __LINE__);
 		return false;
 	}
 	aux = sprintf(idhardwares, "%d", tbidhardware[0]);
@@ -2742,8 +2757,7 @@ bool actualizaHardware(Database db, Table tbl, char *hrd, char *ido, char *npc,
 
 	if (!cuestionPerfilHardware(db, tbl, idc, ido, idperfilhard, idhardwares,
 			npc, tbidhardware, lon)) {
-		og_log(55, false);
-		og_info(msglog);
+		syslog(LOG_ERR, "Problem updating client hardware\n");
 		retval=false;
 	}
 	else {
@@ -2777,7 +2791,7 @@ bool cuestionPerfilHardware(Database db, Table tbl, char *idc, char *ido,
 
 	sqlstr = reservaMemoria(strlen(idhardwares)+LONSQL); // Reserva para escribir sentencia SQL
 	if (sqlstr == NULL) {
-		og_log(3, false);
+		syslog(LOG_ERR, "%s:%d OOM\n", __FILE__, __LINE__);
 		return false;
 	}
 	// Busca perfil hard del ordenador que contenga todos los componentes hardware encontrados
@@ -2788,11 +2802,11 @@ bool cuestionPerfilHardware(Database db, Table tbl, char *idc, char *ido,
 		" FROM	perfileshard_hardwares"
 		" GROUP BY perfileshard_hardwares.idperfilhard) AS temp"
 		" WHERE idhardwares LIKE '%s'", idhardwares);
-	// Ejecuta consulta
-	if (!db.Execute(sqlstr, tbl)) { // Error al leer
-		og_log(21, false);
+
+	if (!db.Execute(sqlstr, tbl)) {
 		db.GetErrorErrStr(msglog);
-		og_info(msglog);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
 		liberaMemoria(sqlstr);
 		return false;
 	}
@@ -2929,10 +2943,10 @@ static bool RESPUESTA_InventarioSoftware(TRAMA* ptrTrama, struct og_client *cli)
 	bool res;
 	char *iph, *ido, *npc, *idc, *par, *sft, *buffer;
 
-	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
-		og_log(20, false);
+	if (!db.Open(usuario, pasguor, datasource, catalog)) {
 		db.GetErrorErrStr(msglog);
-		og_info(msglog);
+		syslog(LOG_ERR, "cannot open connection database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
 		return false;
 	}
 
@@ -2941,11 +2955,11 @@ static bool RESPUESTA_InventarioSoftware(TRAMA* ptrTrama, struct og_client *cli)
 
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
 		liberaMemoria(iph);
-		liberaMemoria(ido);	
-		og_log(30, false);
-		return false; // Error al registrar notificacion
+		liberaMemoria(ido);
+		syslog(LOG_ERR, "failed to register notification\n");
+		return false;
 	}
-	
+
 	npc = copiaParametro("npc",ptrTrama); 
 	idc = copiaParametro("idc",ptrTrama); // Toma identificador del Centro	
 	par = copiaParametro("par",ptrTrama);
@@ -2963,10 +2977,10 @@ static bool RESPUESTA_InventarioSoftware(TRAMA* ptrTrama, struct og_client *cli)
 	liberaMemoria(sft);	
 
 	if(!res){
-		og_log(82, false);
+		syslog(LOG_ERR, "cannot update software\n");
 		return false;
-	}	
-	
+	}
+
 	db.Close(); // Cierra conexión
 	return true;
 }
@@ -3003,10 +3017,10 @@ bool actualizaSoftware(Database db, Table tbl, char *sft, char *par,char *ido,
 		" FROM ordenadores_particiones"
 		" WHERE idordenador=%s", ido);
 
-	if (!db.Execute(sqlstr, tbl)) { // Error al leer
-		og_log(21, false);
+	if (!db.Execute(sqlstr, tbl)) {
 		db.GetErrorErrStr(msglog);
-		og_info(msglog);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
 		return false;
 	}
 	idperfilsoft = 0; // Por defecto se supone que el ordenador no tiene aún detectado el perfil software
@@ -3049,11 +3063,10 @@ bool actualizaSoftware(Database db, Table tbl, char *sft, char *par,char *ido,
 				"SELECT idsoftware FROM softwares WHERE descripcion ='%s'",
 				rTrim(tbSoftware[i]));
 
-		// Ejecuta consulta
-		if (!db.Execute(sqlstr, tbl)) { // Error al leer
-			og_log(21, false);
+		if (!db.Execute(sqlstr, tbl)) {
 			db.GetErrorErrStr(msglog);
-			og_info(msglog);
+			syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+			       __func__, __LINE__, msglog);
 			return false;
 		}
 
@@ -3105,7 +3118,7 @@ bool actualizaSoftware(Database db, Table tbl, char *sft, char *par,char *ido,
 	aux = strlen(strInt); // Calcula longitud de cadena para reservar espacio a todos los perfiles
 	idsoftwares = reservaMemoria((sizeof(aux)+1) * lon + lon);
 	if (idsoftwares == NULL) {
-		og_log(3, false);
+		syslog(LOG_ERR, "%s:%d OOM\n", __FILE__, __LINE__);
 		return false;
 	}
 	aux = sprintf(idsoftwares, "%d", tbidsoftware[0]);
@@ -3115,7 +3128,7 @@ bool actualizaSoftware(Database db, Table tbl, char *sft, char *par,char *ido,
 	// Comprueba existencia de perfil software y actualización de éste para el ordenador
 	if (!cuestionPerfilSoftware(db, tbl, idc, ido, idperfilsoft, idnombreso, idsoftwares, 
 			npc, par, tbidsoftware, lon)) {
-		og_log(83, false);
+		syslog(LOG_ERR, "cannot update software\n");
 		og_info(msglog);
 		retval=false;
 	}
@@ -3156,7 +3169,7 @@ bool cuestionPerfilSoftware(Database db, Table tbl, char *idc, char *ido,
 
 	sqlstr = reservaMemoria(strlen(idsoftwares)+LONSQL); // Reserva para escribir sentencia SQL
 	if (sqlstr == NULL) {
-		og_log(3, false);
+		syslog(LOG_ERR, "%s:%d OOM\n", __FILE__, __LINE__);
 		return false;
 	}
 	// Busca perfil soft del ordenador que contenga todos los componentes software encontrados
@@ -3167,11 +3180,11 @@ bool cuestionPerfilSoftware(Database db, Table tbl, char *idc, char *ido,
 		" FROM	perfilessoft_softwares"
 		" GROUP BY perfilessoft_softwares.idperfilsoft) AS temp"
 		" WHERE idsoftwares LIKE '%s'", idsoftwares);
-	// Ejecuta consulta
-	if (!db.Execute(sqlstr, tbl)) { // Error al leer
-		og_log(21, false);
+
+	if (!db.Execute(sqlstr, tbl)) {
 		db.GetErrorErrStr(msglog);
-		og_info(msglog);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
 		liberaMemoria(sqlstr);
 		return false;
 	}
@@ -3288,7 +3301,7 @@ static bool enviaArchivo(TRAMA *ptrTrama, struct og_client *cli)
 	nfl = copiaParametro("nfl",ptrTrama); // Toma nombre completo del archivo
 	if (!sendArchivo(&socket_c, nfl)) {
 		liberaMemoria(nfl);
-		og_log(57, false);
+		syslog(LOG_ERR, "Problem sending file\n");
 		return false;
 	}
 	liberaMemoria(nfl);
@@ -3317,7 +3330,7 @@ static bool recibeArchivo(TRAMA *ptrTrama, struct og_client *cli)
 	enviaFlag(&socket_c, ptrTrama);
 	if (!recArchivo(&socket_c, nfl)) {
 		liberaMemoria(nfl);
-		og_log(58, false);
+		syslog(LOG_ERR, "Problem receiving file\n");
 		return false;
 	}
 	liberaMemoria(nfl);
@@ -3345,10 +3358,10 @@ static bool envioProgramacion(TRAMA *ptrTrama, struct og_client *cli)
 	int idx,idcomando;
 	char modulo[] = "envioProgramacion()";
 
-	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
-		og_log(20, false);
+	if (!db.Open(usuario, pasguor, datasource, catalog)) {
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		syslog(LOG_ERR, "cannot open connection database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
 		return false;
 	}
 
@@ -3359,11 +3372,11 @@ static bool envioProgramacion(TRAMA *ptrTrama, struct og_client *cli)
 			" WHERE acciones.idprogramacion=%s",idp);
 	
 	liberaMemoria(idp);
-			
-	if (!db.Execute(sqlstr, tbl)) { // Error al leer
-		og_log(21, false);
+
+	if (!db.Execute(sqlstr, tbl)) {
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
 		return false;
 	}
 	db.Close();
@@ -3413,7 +3426,8 @@ static bool envioProgramacion(TRAMA *ptrTrama, struct og_client *cli)
 
 			strcpy(tbsockets[idx].estado, CLIENTE_OCUPADO); // Actualiza el estado del cliente
 			if (!mandaTrama(&sock, ptrTrama)) {
-				og_log(26, false);
+				syslog(LOG_ERR, "failed to send response: %s\n",
+				       strerror(errno));
 				return false;
 			}
 			//close(tbsockets[idx].sock); // Cierra el socket del cliente hasta nueva disponibilidad
@@ -3484,7 +3498,7 @@ static struct {
 //		true: Si el proceso es correcto
 //		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-static bool gestionaTrama(TRAMA *ptrTrama, struct og_client *cli)
+static void gestionaTrama(TRAMA *ptrTrama, struct og_client *cli)
 {
 	int i, res;
 	char *nfn;
@@ -3497,10 +3511,17 @@ static bool gestionaTrama(TRAMA *ptrTrama, struct og_client *cli)
 			if (!strncmp(tbfuncionesServer[i].nf, nfn,
 				     strlen(tbfuncionesServer[i].nf))) {
 				res = tbfuncionesServer[i].fcn(ptrTrama, cli);
-				syslog(LOG_DEBUG, "handling request %s (result=%d) for client %s:%hu\n",
-				       tbfuncionesServer[i].nf, res,
-				       inet_ntoa(cli->addr.sin_addr),
-				       ntohs(cli->addr.sin_port));
+				if (!res) {
+					syslog(LOG_ERR, "Failed handling of %s for client %s:%hu\n",
+					       tbfuncionesServer[i].nf,
+					       inet_ntoa(cli->addr.sin_addr),
+					       ntohs(cli->addr.sin_port));
+				} else {
+					syslog(LOG_DEBUG, "Successful handling of %s for client %s:%hu\n",
+					       tbfuncionesServer[i].nf,
+					       inet_ntoa(cli->addr.sin_addr),
+					       ntohs(cli->addr.sin_port));
+				}
 				break;
 			}
 		}
@@ -3511,7 +3532,6 @@ static bool gestionaTrama(TRAMA *ptrTrama, struct og_client *cli)
 
 		liberaMemoria(nfn);
 	}
-	return res;
 }
 
 static void og_client_release(struct ev_loop *loop, struct og_client *cli)
@@ -3641,8 +3661,7 @@ static void og_client_read_cb(struct ev_loop *loop, struct ev_io *io, int events
 		memcpy(ptrTrama->parametros, data, len);
 		ptrTrama->lonprm = len;
 
-		if (!gestionaTrama(ptrTrama, cli))
-			og_log(39, true);
+		gestionaTrama(ptrTrama, cli);
 
 		liberaMemoria(ptrTrama->parametros);
 		liberaMemoria(ptrTrama);
@@ -3697,7 +3716,7 @@ static void og_server_accept_cb(struct ev_loop *loop, struct ev_io *io,
 
 	client_sd = accept(io->fd, (struct sockaddr *)&client_addr, &addrlen);
 	if (client_sd < 0) {
-		og_log(15, true);
+		syslog(LOG_ERR, "cannot accept client connection\n");
 		return;
 	}
 
@@ -3752,7 +3771,7 @@ int main(int argc, char *argv[])
 	socket_s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP); // Crea socket del servicio
 	setsockopt(socket_s, SOL_SOCKET, SO_REUSEPORT, &activo, sizeof(int));
 	if (socket_s < 0) {
-		og_log(13, true);
+		syslog(LOG_ERR, "cannot create main socket\n");
 		exit(EXIT_FAILURE);
 	}
 
@@ -3761,7 +3780,7 @@ int main(int argc, char *argv[])
 	local.sin_port = htons(atoi(puerto));
 
 	if (bind(socket_s, (struct sockaddr *) &local, sizeof(local)) < 0) {
-		og_log(14, true);
+		syslog(LOG_ERR, "cannot bind socket\n");
 		exit(EXIT_FAILURE);
 	}
 

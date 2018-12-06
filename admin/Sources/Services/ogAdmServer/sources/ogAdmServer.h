@@ -38,7 +38,7 @@ SOCKETCL tbsockets[MAXIMOS_CLIENTES];
 
 bool registraCliente(char *);
 bool procesoInclusionClienteWinLnx(int socket, TRAMA*,int*,char*);
-bool procesoInclusionCliente(int socket, TRAMA*);
+bool procesoInclusionCliente(struct og_client *, TRAMA*);
 bool clienteExistente(char *,int *);
 bool clienteDisponible(char *,int *);
 bool actualizaConfiguracion(Database , Table ,char* ,int);
