@@ -461,7 +461,7 @@ bool procesoInclusionClienteWinLnx(int socket_c, TRAMA *ptrTrama, int *idordenad
 		db.GetErrorErrStr(msglog);
 		syslog(LOG_ERR, "cannot open connection database (%s:%d) %s\n",
 		       __func__, __LINE__, msglog);
-		return (20);
+		return false;
 	}
 
 	// Recupera los datos del cliente
@@ -475,7 +475,7 @@ bool procesoInclusionClienteWinLnx(int socket_c, TRAMA *ptrTrama, int *idordenad
 		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
 		       __func__, __LINE__, msglog);
 		db.Close();
-		return (21);
+		return false;
 	}
 
 	if (tbl.ISEOF()) {
@@ -484,7 +484,7 @@ bool procesoInclusionClienteWinLnx(int socket_c, TRAMA *ptrTrama, int *idordenad
 		       __func__, __LINE__);
 		db.liberaResult(tbl);
 		db.Close();
-		return (22);
+		return false;
 	}
 
 	syslog(LOG_DEBUG, "Client %s requesting inclusion\n", iph);
@@ -507,14 +507,14 @@ bool procesoInclusionClienteWinLnx(int socket_c, TRAMA *ptrTrama, int *idordenad
 	}
 	db.liberaResult(tbl);
 	db.Close();
-	
+
 	if (!registraCliente(iph)) { // Incluyendo al cliente en la tabla de sokets
 		liberaMemoria(iph);
 		syslog(LOG_ERR, "client table is full\n");
-		return (25);
+		return false;
 	}
 	liberaMemoria(iph);
-	return(0);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: InclusionCliente
