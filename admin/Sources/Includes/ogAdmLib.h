@@ -232,7 +232,7 @@ const char* tbErrores[]={"Se han generado errores. No se puede continuar la ejec
 		"094-Ha habido algún problerma al procesar la actualización después de crear una imagen",\
 		"095-Ha habido algún problerma al procesar la actualización después de restaurar una imagen",\
 		"096-Ha habido algún problerma al procesar la actualización después de crear un software incremental",\
-
+		"097-Este fichero de log está obsoleto, este proceso usa ahora syslog para gestionar los mensajes de log",\
 };
 // ________________________________________________________________________________________________________
 // Tabla de mensajes

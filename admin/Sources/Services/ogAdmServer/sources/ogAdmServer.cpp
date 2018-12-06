@@ -3699,6 +3699,9 @@ int main(int argc, char *argv[])
 
 	infoLog(1); // Inicio de sesión
 
+	/* old log file has been deprecated. */
+	og_log(97, false);
+
 	syslog(LOG_INFO, "Waiting for connections\n");
 
 	while (1)
