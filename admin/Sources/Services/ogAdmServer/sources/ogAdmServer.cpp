@@ -139,12 +139,7 @@ static inline int og_client_socket(const struct og_client *cli)
 // ________________________________________________________________________________________________________
 static bool Sondeo(TRAMA* ptrTrama, struct og_client *cli)
 {
-	char msglog[LONSTD];
-	char modulo[] = "Sondeo()";
-
 	if (!enviaComando(ptrTrama, CLIENTE_APAGADO)) {
-		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
-		errorInfo(modulo, msglog);
 		respuestaConsola(og_client_socket(cli), ptrTrama, false);
 		return false;
 	}
@@ -216,14 +211,9 @@ static bool respuestaSondeo(TRAMA* ptrTrama, struct og_client *cli)
 // ________________________________________________________________________________________________________
 static bool Actualizar(TRAMA* ptrTrama, struct og_client *cli)
 {
-	char msglog[LONSTD];
-	char modulo[] = "Actualizar()";
-
-	if (!enviaComando(ptrTrama, CLIENTE_APAGADO)) {
-		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
-		errorInfo(modulo, msglog);
+	if (!enviaComando(ptrTrama, CLIENTE_APAGADO))
 		return false;
-	}
+
 	respuestaConsola(og_client_socket(cli), ptrTrama, true);
 	return true;
 }
@@ -241,14 +231,9 @@ static bool Actualizar(TRAMA* ptrTrama, struct og_client *cli)
 // ________________________________________________________________________________________________________
 static bool Purgar(TRAMA* ptrTrama, struct og_client *cli)
 {
-	char msglog[LONSTD];
-	char modulo[] = "Purgar()";
-
-	if (!enviaComando(ptrTrama, CLIENTE_APAGADO)) {
-		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
-		og_info(msglog);
+	if (!enviaComando(ptrTrama, CLIENTE_APAGADO))
 		return false;
-	}
+
 	respuestaConsola(og_client_socket(cli), ptrTrama, true);
 	return true;
 }
@@ -266,14 +251,11 @@ static bool Purgar(TRAMA* ptrTrama, struct og_client *cli)
 // ________________________________________________________________________________________________________
 static bool ConsolaRemota(TRAMA* ptrTrama, struct og_client *cli)
 {
-	char *iph,fileco[LONPRM],msglog[LONSTD],*ptrIpes[MAXIMOS_CLIENTES];;
+	char *iph, fileco[LONPRM], *ptrIpes[MAXIMOS_CLIENTES];;
 	FILE* f;
 	int i,lon;
-	char modulo[] = "ConsolaRemota()";
 
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
-		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
-		errorInfo(modulo, msglog);
 		respuestaConsola(og_client_socket(cli), ptrTrama, false);
 		return false;
 	}
@@ -1400,9 +1382,8 @@ bool respuestaConsola(int socket_c, TRAMA *ptrTrama, int res)
 // ________________________________________________________________________________________________________
 static bool Arrancar(TRAMA* ptrTrama, struct og_client *cli)
 {
-	char *iph,*mac,*mar, msglog[LONSTD];
+	char *iph,*mac,*mar;
 	bool res;
-	char modulo[] = "Arrancar()";
 
 	iph = copiaParametro("iph",ptrTrama); // Toma dirección/es IP
 	mac = copiaParametro("mac",ptrTrama); // Toma dirección/es MAC
@@ -1415,15 +1396,11 @@ static bool Arrancar(TRAMA* ptrTrama, struct og_client *cli)
 	liberaMemoria(mar);
 
 	if(!res){
-		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
-		errorInfo(modulo, msglog);
 		respuestaConsola(og_client_socket(cli), ptrTrama, false);
 		return false;
 	}
 
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
-		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
-		errorInfo(modulo, msglog);
 		respuestaConsola(og_client_socket(cli), ptrTrama, false);
 		return false;
 	}
@@ -1630,12 +1607,7 @@ static bool RESPUESTA_Arrancar(TRAMA* ptrTrama, struct og_client *cli)
 // ________________________________________________________________________________________________________
 static bool Apagar(TRAMA* ptrTrama, struct og_client *cli)
 {
-	char msglog[LONSTD];
-	char modulo[] = "Apagar()";
-
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
-		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
-		errorInfo(modulo, msglog);
 		respuestaConsola(og_client_socket(cli), ptrTrama, false);
 		return false;
 	}
@@ -1702,12 +1674,7 @@ static bool RESPUESTA_Apagar(TRAMA* ptrTrama, struct og_client *cli)
 // ________________________________________________________________________________________________________
 static bool Reiniciar(TRAMA* ptrTrama, struct og_client *cli)
 {
-	char msglog[LONSTD];
-	char modulo[] = "Reiniciar()";
-
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
-		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
-		errorInfo(modulo, msglog);
 		respuestaConsola(og_client_socket(cli), ptrTrama, false);
 		return false;
 	}
@@ -1774,12 +1741,7 @@ static bool RESPUESTA_Reiniciar(TRAMA* ptrTrama, struct og_client *cli)
 // ________________________________________________________________________________________________________
 static bool IniciarSesion(TRAMA* ptrTrama, struct og_client *cli)
 {
-	char msglog[LONSTD];
-	char modulo[] = "IniciarSesion()";
-
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
-		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
-		errorInfo(modulo, msglog);
 		respuestaConsola(og_client_socket(cli), ptrTrama, false);
 		return false;
 	}
@@ -1846,12 +1808,7 @@ static bool RESPUESTA_IniciarSesion(TRAMA* ptrTrama, struct og_client *cli)
 // ________________________________________________________________________________________________________
 static bool CrearImagen(TRAMA* ptrTrama, struct og_client *cli)
 {
-	char msglog[LONSTD];
-	char modulo[] = "CrearImagen()";
-
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
-		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
-		errorInfo(modulo, msglog);
 		respuestaConsola(og_client_socket(cli), ptrTrama, false);
 		return false;
 	}
@@ -2023,12 +1980,7 @@ bool actualizaCreacionImagen(Database db, Table tbl, char *idi, char *dsk,
 // ________________________________________________________________________________________________________
 static bool CrearImagenBasica(TRAMA* ptrTrama, struct og_client *cli)
 {
-	char msglog[LONSTD];
-	char modulo[] = "CrearImagenBasica()";
-
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
-		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
-		errorInfo(modulo, msglog);
 		respuestaConsola(og_client_socket(cli), ptrTrama, false);
 		return false;
 	}
@@ -2067,12 +2019,7 @@ static bool RESPUESTA_CrearImagenBasica(TRAMA* ptrTrama, struct og_client *cli)
 // ________________________________________________________________________________________________________
 static bool CrearSoftIncremental(TRAMA* ptrTrama, struct og_client *cli)
 {
-	char msglog[LONSTD];
-	char modulo[] = "CrearSoftIncremental()";
-
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
-		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
-		errorInfo(modulo, msglog);
 		respuestaConsola(og_client_socket(cli), ptrTrama, false);
 		return false;
 	}
@@ -2165,12 +2112,7 @@ static bool RESPUESTA_CrearSoftIncremental(TRAMA* ptrTrama, struct og_client *cl
 // ________________________________________________________________________________________________________
 static bool RestaurarImagen(TRAMA* ptrTrama, struct og_client *cli)
 {
-	char msglog[LONSTD];
-	char modulo[] = "RestaurarImagen()";
-
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
-		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
-		errorInfo(modulo, msglog);
 		respuestaConsola(og_client_socket(cli), ptrTrama, false);
 		return false;
 	}
@@ -2191,12 +2133,7 @@ static bool RestaurarImagen(TRAMA* ptrTrama, struct og_client *cli)
 // ________________________________________________________________________________________________________
 static bool RestaurarImagenBasica(TRAMA* ptrTrama, struct og_client *cli)
 {
-	char msglog[LONSTD];
-	char modulo[] = "RestaurarImagenBasica()";
-
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
-		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
-		errorInfo(modulo, msglog);
 		respuestaConsola(og_client_socket(cli), ptrTrama, false);
 		return false;
 	}
@@ -2217,12 +2154,7 @@ static bool RestaurarImagenBasica(TRAMA* ptrTrama, struct og_client *cli)
 // ________________________________________________________________________________________________________
 static bool RestaurarSoftIncremental(TRAMA* ptrTrama, struct og_client *cli)
 {
-	char msglog[LONSTD];
-	char modulo[] = "RestaurarSoftIncremental()";
-
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
-		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
-		errorInfo(modulo, msglog);
 		respuestaConsola(og_client_socket(cli), ptrTrama, false);
 		return false;
 	}
@@ -2380,12 +2312,7 @@ bool actualizaRestauracionImagen(Database db, Table tbl, char *idi,
 // ________________________________________________________________________________________________________
 static bool Configurar(TRAMA* ptrTrama, struct og_client *cli)
 {
-	char msglog[LONSTD];
-	char modulo[] = "Configurar()";
-
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
-		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
-		errorInfo(modulo, msglog);
 		respuestaConsola(og_client_socket(cli), ptrTrama, false);
 		return false;
 	}
@@ -2459,12 +2386,7 @@ static bool RESPUESTA_Configurar(TRAMA* ptrTrama, struct og_client *ci)
 // ________________________________________________________________________________________________________
 static bool EjecutarScript(TRAMA* ptrTrama, struct og_client *cli)
 {
-	char msglog[LONSTD];
-	char modulo[] = "EjecutarScript()";
-
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
-		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
-		errorInfo(modulo, msglog);
 		respuestaConsola(og_client_socket(cli), ptrTrama, false);
 		return false;
 	}
@@ -2534,12 +2456,7 @@ static bool RESPUESTA_EjecutarScript(TRAMA* ptrTrama, struct og_client *cli)
 // ________________________________________________________________________________________________________
 static bool InventarioHardware(TRAMA* ptrTrama, struct og_client *cli)
 {
-	char msglog[LONSTD];
-	char modulo[] = "InventarioHardware()";
-
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
-		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
-		errorInfo(modulo, msglog);
 		respuestaConsola(og_client_socket(cli), ptrTrama, false);
 		return false;
 	}
@@ -2911,12 +2828,7 @@ bool cuestionPerfilHardware(Database db, Table tbl, char *idc, char *ido,
 // ________________________________________________________________________________________________________
 static bool InventarioSoftware(TRAMA* ptrTrama, struct og_client *cli)
 {
-	char msglog[LONSTD];
-	char modulo[] = "InventarioSoftware()";
-
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
-		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
-		errorInfo(modulo, msglog);
 		respuestaConsola(og_client_socket(cli), ptrTrama, false);
 		return false;
 	}
@@ -3356,7 +3268,6 @@ static bool envioProgramacion(TRAMA *ptrTrama, struct og_client *cli)
 	Database db;
 	Table tbl;
 	int idx,idcomando;
-	char modulo[] = "envioProgramacion()";
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) {
 		db.GetErrorErrStr(msglog);
@@ -3392,33 +3303,30 @@ static bool envioProgramacion(TRAMA *ptrTrama, struct og_client *cli)
 	while (!tbl.ISEOF()) { // Recorre particiones
 		if (!tbl.Get("ip", iph)) {
 			tbl.GetErrorErrStr(msglog);
-			errorInfo(modulo, msglog);
+			syslog(LOG_ERR, "cannot find ip column in table: %s\n",
+			       msglog);
 			return false;
 		}
 		if (!tbl.Get("idcomando", idcomando)) {
 			tbl.GetErrorErrStr(msglog);
-			errorInfo(modulo, msglog);
+			syslog(LOG_ERR, "cannot find idcomando column in table: %s\n",
+			       msglog);
 			return false;
 		}
 		if(idcomando==1){ // Arrancar
 			if (!tbl.Get("mac", mac)) {
 				tbl.GetErrorErrStr(msglog);
-				errorInfo(modulo, msglog);
+				syslog(LOG_ERR, "cannot find mac column in table: %s\n",
+				       msglog);
 				return false;
 			}
 
 			// Se manda por broadcast y por unicast
-			if (!Levanta(iph, mac, (char*)"1")) {
-				sprintf(msglog, "%s:%s", tbErrores[32], modulo);
-				errorInfo(modulo, msglog);
+			if (!Levanta(iph, mac, (char*)"1"))
 				return false;
-			}
 
-			if (!Levanta(iph, mac, (char*)"2")) {
-				sprintf(msglog, "%s:%s", tbErrores[32], modulo);
-				errorInfo(modulo, msglog);
+			if (!Levanta(iph, mac, (char*)"2"))
 				return false;
-			}
 
 		}
 		if (clienteDisponible(iph, &idx)) { // Si el cliente puede recibir comandos
