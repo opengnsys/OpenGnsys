@@ -1080,7 +1080,7 @@ function updateSummary()
 	# Obtener revisión.
 	if [ $REMOTE -eq 1 ]; then
 		# Revisión: rAñoMesDía.Gitcommit (8 caracteres de fecha y 7 primeros de commit).
-		REVISION=$(curl -s "$API_URL" | jq '"r" + (.commit.commit.committer.date | gsub("-"; "")[:8]) + "." + (.commit.sha[:7])')
+		REVISION=$(curl -s "$API_URL" | jq '"r" + (.commit.commit.committer.date | split("-") | join("")[:8]) + "." + (.commit.sha[:7])')
 	else
 		# Parámetro "release" del fichero JSON.
 		REVISION=$(jq -r '.release' $PROGRAMDIR/../doc/VERSION.json 2>/dev/null)

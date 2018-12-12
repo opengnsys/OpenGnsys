@@ -1558,7 +1558,7 @@ function installationSummary()
 	# de código o si no está incluida en el fichero de versión.
 	if [ $REMOTE -eq 1 ] || [ -z "$(jq -r '.release' $VERSIONFILE)" ]; then
 		# Revisión: rAñoMesDía.Gitcommit (8 caracteres de fecha y 7 primeros de commit).
-		REVISION=$(curl -s "$API_URL" | jq '"r" + (.commit.commit.committer.date | gsub("-"; "")[:8]) + "." + (.commit.sha[:7])')
+		REVISION=$(curl -s "$API_URL" | jq '"r" + (.commit.commit.committer.date | split("-") | join("")[:8]) + "." + (.commit.sha[:7])')
 		jq ".release=$REVISION" $VERSIONFILE | sponge $VERSIONFILE
 	fi
 	VERSION="$(jq -r '[.project, .version, .codename, .release] | join(" ")' $VERSIONFILE 2>/dev/null)"

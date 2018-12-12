@@ -56,6 +56,7 @@ Tickets resueltos en módulo OpenGnsys Server:
 
 Tickets resueltos en módulo OpenGnsys Repository Server:
 #850	Problema con repositorio recién instalado (corrección)
+#882	deleteimage no borra directorio (corrección)
 
 Tickets resueltos en módulo OpenGnsys Web Admin Console:
 #835	Problemas al listar plantillas en Nerboot Avanzado (corrección)
@@ -65,6 +66,8 @@ Tickets resueltos en módulo OpenGnsys Web Admin Console:
 
 Tickets resueltos en módulo OpenGnsys Installer:
 #876	Problemas al actualizar desde Subversion a Git (corrección)
+#879	Función checkVersion de opengnsys_update.sh del tar.gz da error si se ejecuta sobre la misma versión de OpenGnsys (corrección)
+#880	OpenGnsys_update.sh no deja la revisión, solo deja 1.1.0a (corrección)
 
 Tickets genéricos resueltos:
 #839	Errores detectado en API REST para Remote PC (corrección)
