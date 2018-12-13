@@ -268,7 +268,7 @@ function download() {
         echo "Available downloads (+ = installed, * = full compatibility):"
         for i in $(seq 1 $NISOS); do
             [ -e $DOWNLOADDIR/${OGLIVE[i-1]} ] && OGLIVE[i-1]="(+) ${OGLIVE[i-1]}"
-            ISOREL=${OGLIVE[i-1]##*-r}; ISOREL=${ISOREL%.*}
+            ISOREL=${OGLIVE[i-1]##*-r}; ISOREL=${ISOREL%%.*}
             [ $ISOREL -ge $MINREL ] && OGLIVE[i-1]="(*) ${OGLIVE[i-1]}"
         done
         select opt in "${OGLIVE[@]}"; do
