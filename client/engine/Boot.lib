@@ -42,7 +42,7 @@ function ogBoot ()
 {
 # Variables locales.
 local PART TYPE MNTDIR PARAMS KERNEL INITRD APPEND FILE LOADER f
-local EFIDISK EFIPART EFIDIR BOOTLABEL BOOTNO
+local EFIDISK EFIPART EFIDIR BOOTLABEL BOOTNO DIRGRUB b
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -79,28 +79,36 @@ case "$TYPE" in
         [ -e "$MNTDIR/etc" ] && APPEND=$(echo $APPEND | awk -v P="$PART " '{sub (/root=[-+=_/a-zA-Z0-9]* /,"root="P);print}')
         # Comprobar tipo de sistema.
         if ogIsEfiActive; then
-            # Obtener parcición EFI.
-            read -e EFIDISK EFIPART <<<"$(ogGetEsp)"
-            [ -n "$EFIPART" ] || ogRaiseError $OG_ERR_PARTITION "ESP" || return $?
             # Comprobar si el Kernel está firmado.
             if ! file -k "$MNTDIR/$KERNEL" | grep -q "EFI app"; then
                 ogRaiseError $OG_ERR_NOTOS "$1 $2 ($TYPE, EFI)"
                 return $?
             fi
-            # Crear directorio para el cargador y copiar los ficheros.
-            EFIDIR=$(ogMount $EFIDISK $EFIPART) || exit $?
-            BOOTLABEL=$(printf "Part-%02d-%02d" $1 $2)
-            mkdir -p $EFIDIR/EFI/$BOOTLABEL
-            cp $MNTDIR/$KERNEL $EFIDIR/EFI/$BOOTLABEL/vmlinuz.efi
-            cp $MNTDIR/$INITRD $EFIDIR/EFI/$BOOTLABEL/initrd.img
+            ### Se realiza en la postconfiguracion ¿lo volvemos a hacer aquí?
+            ## Configuramos el grub.cfg de la partición EFI
+            ## Directorio del grub en la partición de sistema
+            #for f in $MNTDIR/{,boot/}{{grubMBR,grubPARTITION}/boot/,}{grub{,2},{,efi/}EFI/*}/{menu.lst,grub.cfg}; do
+            #    [ -r $f ] && DIRGRUB=$(dirname $f)
+            #done
+            #DIRGRUB=${DIRGRUB#$MNTDIR/}
+            #ogGrubUEFIConf $1 $2 $DIRGRUB || return $?
+
             # Borrar cargador guardado con la misma etiqueta.
+            BOOTLABEL=$(printf "Part-%02d-%02d" $1 $2)
             BOOTNO=$(efibootmgr -v | awk -v L=$BOOTLABEL '{if ($2==L) print $1}')
-            [ -n "$BOOTNO" ] && efibootmgr -B -b ${BOOTNO:4:4}
+            for b in $BOOTNO; do
+                efibootmgr -B -b ${b:4:4} &>/dev/null
+            done
+            # Obtener parcición EFI.
+            read -e EFIDISK EFIPART <<<"$(ogGetEsp)"
             # Crear orden de arranque (con unos valores por defecto).
-            efibootmgr -C -d $(ogDiskToDev $EFIDISK) -p $EFIPART -L "$BOOTLABEL" -l /EFI/$BOOTLABEL/vmlinuz.efi -u "initrd=/EFI/$BOOTLABEL/initrd.img $APPEND"
+            efibootmgr -C -d $(ogDiskToDev $EFIDISK) -p $EFIPART -L "$BOOTLABEL" -l "/EFI/$BOOTLABEL/grubx64.efi" &>/dev/null
             # Marcar próximo arranque y reiniciar.
             BOOTNO=$(efibootmgr -v | awk -v L="$BOOTLABEL" '{if ($2==L) print $1}')
-            [ -n "$BOOTNO" ] && efibootmgr -n ${BOOTNO:4:4}
+            [ -n "$BOOTNO" ] && efibootmgr -n ${BOOTNO:4:4} &>/dev/null
+            # Incluimos en el orden de arranque
+            BOOTORDER=$(efibootmgr | awk -v L="BootOrder:" '{if ($1==L) print $2}')
+            [[ $BOOTORDER =~ ${BOOTNO:4:4} ]] || efibootmgr -o $BOOTORDER,${BOOTNO:4:4} 
             reboot
         else
             # Arranque BIOS: configurar kernel Linux con los parámetros leídos de su GRUB.
@@ -731,6 +739,7 @@ function ogGrubInstallMbr ()
 
 # Variables locales.
 local PART DISK VERSION FIRSTAGE SECONSTAGE CHECKOS KERNELPARAM BACKUPNAME
+local EFIDISK EFIPART EFISECONDSTAGE EFISUBDIR
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -758,13 +767,26 @@ BACKUPNAME=".backup.og"
 FIRSTSTAGE=$(ogDiskToDev 1)
 
 #localizar disco segunda etapa del grub
-SECONDSTAGE=$(ogMount $DISK $PART)
+SECONDSTAGE=$(ogMount "$DISK" "$PART") || return $?
 
 # prepara el directorio principal de la segunda etapa
 [ -d ${SECONDSTAGE}/boot/grub/ ]  || mkdir -p ${SECONDSTAGE}/boot/grub/
 
 #Localizar directorio segunda etapa del grub   
 PREFIXSECONDSTAGE="/boot/grubMBR"
+
+# Instalamos grub para EFI en ESP
+if ogIsEfiActive; then
+    read EFIDISK EFIPART <<< $(ogGetEsp)
+    # Comprobamos que exista ESP y el directorio para ubuntu
+    EFISECONDSTAGE=$(ogMount $EFIDISK $EFIPART) || ogRaiseError $OG_ERR_PARTITION "ESP" || return $?
+    EFISUBDIR=$(printf "Part-%02d-%02d" $DISK $PART)
+    [ -d ${EFISECONDSTAGE}/EFI/$EFISUBDIR ] || mkdir -p ${EFISECONDSTAGE}/EFI/$EFISUBDIR
+    #Instalar el grub 
+    grub-install --force --target x86_64-efi --efi-directory=${EFISECONDSTAGE} --root-directory=${EFISECONDSTAGE}/EFI/$EFISUBDIR $FIRSTSTAGE
+    # Solo para ubuntu: falta generalizar
+    mv -v $EFISECONDSTAGE/EFI/ubuntu/grubx64.efi $EFISECONDSTAGE/EFI/$EFISUBDIR
+fi 
 
 # Si Reconfigurar segunda etapa (grub.cfg) == FALSE
 if [ -f ${SECONDSTAGE}/boot/grub/grub.cfg -o -f ${SECONDSTAGE}/boot/grub/grub.cfg$BACKUPNAME ]
@@ -776,7 +798,12 @@ then
 		# Si no se reconfigure se borra los ficheros previos de configuración específicos de opengnsys.
         [ -d ${SECONDSTAGE}${PREFIXSECONDSTAGE} ] &&  rm -fr ${SECONDSTAGE}${PREFIXSECONDSTAGE}
         # Reactivamos el grub con el grub.cfg original.
-        grub-install --force --root-directory=${SECONDSTAGE} $FIRSTSTAGE
+        if ogIsEfiActive; then
+            # Configuración de grub.cfg para EFI
+            ogGrubUEFIConf $1 $2
+        else
+            grub-install --force --root-directory=${SECONDSTAGE} $FIRSTSTAGE
+        fi
         return $?
     fi
 fi
@@ -801,8 +828,13 @@ sed -i 's/^set -e/#set -e/' /etc/grub.d/00_header
 #Preparar configuración segunda etapa: crear entrada del sistema operativo
 grubSyntax "$KERNELPARAM" >> ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot/grub/grub.cfg
 
-#Instalar el grub 
-grub-install --force --root-directory=${SECONDSTAGE}${PREFIXSECONDSTAGE} $FIRSTSTAGE
+# Instalar el grub no EFI, configurar EFI
+# Para EFI en ESP para otros en la partición de sistema.
+if ogIsEfiActive; then
+    ogGrubUEFIConf $1 $2 ${PREFIXSECONDSTAGE}
+else
+    grub-install --force --root-directory=${SECONDSTAGE}${PREFIXSECONDSTAGE} $FIRSTSTAGE
+fi 
 }
 
 
@@ -831,6 +863,7 @@ function ogGrubInstallPartition ()
 
 # Variables locales.
 local PART DISK VERSION FIRSTAGE SECONSTAGE CHECKOS KERNELPARAM BACKUPNAME
+local EFIDISK EFIPART EFISECONDSTAGE EFISUBDIR
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -861,6 +894,19 @@ SECONDSTAGE=$(ogMount $DISK $PART)
 #Localizar directorio segunda etapa del grub    
 PREFIXSECONDSTAGE="/boot/grubPARTITION"
 
+# Si es EFI instalamos el grub en la ESP
+if ogIsEfiActive; then
+    read EFIDISK EFIPART <<< $(ogGetEsp)
+    # Comprobamos que exista ESP y el directorio para ubuntu
+    EFISECONDSTAGE=$(ogMount $EFIDISK $EFIPART) || ogRaiseError $OG_ERR_PARTITION "ESP" || return $?
+    EFISUBDIR=$(printf "Part-%02d-%02d" $DISK $PART)
+    [ -d ${EFISECONDSTAGE}/EFI/$EFISUBDIR ] || mkdir -p ${EFISECONDSTAGE}/EFI/$EFISUBDIR
+    #Instalar el grub 
+    grub-install --force --target x86_64-efi --efi-directory ${EFISECONDSTAGE} --root-directory=${EFISECONDSTAGE}/EFI/ubuntu  $FIRSTSTAGE
+    # Solo para ubuntu: falta generalizar
+    mv -v $EFISECONDSTAGE/EFI/ubuntu/grubx64.efi $EFISECONDSTAGE/EFI/$EFISUBDIR
+fi
+
 # Si Reconfigurar segunda etapa (grub.cfg) == FALSE
 if [ -f ${SECONDSTAGE}/boot/grub/grub.cfg -o -f ${SECONDSTAGE}/boot/grub/grub.cfg$BACKUPNAME ]
 then 
@@ -871,7 +917,12 @@ then
 		# Si no se reconfigure se borra los ficheros previos de configuración específicos de opengnsys.
         [ -d ${SECONDSTAGE}${PREFIXSECONDSTAGE} ] &&  rm -fr ${SECONDSTAGE}${PREFIXSECONDSTAGE}
         # Reactivamos el grub con el grub.cfg original.
-        grub-install --force --root-directory=${SECONDSTAGE} $FIRSTSTAGE
+        if ogIsEfiActive; then
+            # Configuración de grub.cfg para EFI
+            ogGrubUEFIConf $1 $2
+        else
+            grub-install --force --root-directory=${SECONDSTAGE} $FIRSTSTAGE
+        fi
         return $?
     fi
 fi
@@ -892,8 +943,12 @@ sed -i 's/^set -e/#set -e/' /etc/grub.d/00_header
 #Preparar configuración segunda etapa: crear entrada del sistema operativo
 grubSyntax $DISK $PART "$KERNELPARAM" >> ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot/grub/grub.cfg
 
-#Instalar el grub 
-grub-install --force --root-directory=${SECONDSTAGE}${PREFIXSECONDSTAGE} $FIRSTSTAGE
+#Instalar el grub si no es EFI, configurar si es EFI
+if ogIsEfiActive; then
+    ogGrubUEFIConf $1 $2 ${PREFIXSECONDSTAGE}
+else
+    grub-install --force --root-directory=${SECONDSTAGE}${PREFIXSECONDSTAGE} $FIRSTSTAGE
+fi
 }
 
 
@@ -912,11 +967,15 @@ grub-install --force --root-directory=${SECONDSTAGE}${PREFIXSECONDSTAGE} $FIRSTS
 #@version 1.0.6b - correccion. Si no hay partición fisica para la SWAP, eliminar entrada del fstab.  
 #@author  Antonio J. Doblas Viso.   Universidad de Malaga.
 #@date    2016-11-03
+#@version 1.1.1 - Se configura la partición ESP (para sistemas EFI) (ticket #802)
+#@author  Irina Gómez, ETSII Universidad de Sevilla
+#@date    2018-12-13
 #*/ ##
 function ogConfigureFstab ()
 {
 # Variables locales.
 local FSTAB DEFROOT PARTROOT DEFSWAP PARTSWAP
+local EFIDISK EFIPART DEVEFI OPTEFI
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -954,9 +1013,19 @@ else
     echo "No hay partición SWAP -> configuramos FSTAB"	# Mensaje temporal.
     sed "/swap/d" ${FSTAB}.backup > ${FSTAB}
 fi
+# Si es un sistema EFI incluimos partición ESP (Si existe la modificamos)
+if [ ogIsEfiActive ]; then
+    read EFIDISK EFIPART <<< $(ogGetEsp)
+    DEVEFI=$(ogDiskToDev $EFIDISK $EFIPART)
+
+    # Opciones de la partición ESP: si no existe ponemos un valor por defecto
+    OPTEFI=$(awk '$1!~/#/ && $2=="/boot/efi" {print $3"\t"$4"\t"$5"\t"$6 }' ${FSTAB})
+    OPTEFI=${OPTEFI:-vfat\tumask=0077\t0\t1}
+
+    sed -i /"boot\/efi"/d  ${FSTAB}
+    echo -e "$DEVEFI\t/boot/efi\tvfat\tumask=0077\t0\t1" >> ${FSTAB}
+fi
 }
-
-
 
 #/**
 #         ogSetLinuxName int_ndisk int_nfilesys [str_name]

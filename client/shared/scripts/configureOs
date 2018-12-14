@@ -82,6 +82,12 @@ case "$OSTYPE" in
         fi
         ;;
     Linux)      # Postconfiguración de GNU/Linux.
+        # Instalamos EFI Boot Loader
+        if [ ogIsEfiActive ]; then
+            # Cambio UUID del sistema de ficheros
+            ogUUIDChange $1 $2
+            ogConfigureFstab $1 $2
+        fi
         ## Instala (no configura) el codigo de arranque del Grub en la partición (no lo configura, se mantiene el original de la imagen)
         ogGrubInstallPartition $1 $2
         # Eliminar el antiguo cliente de Linux.
