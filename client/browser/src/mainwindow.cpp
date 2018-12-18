@@ -12,10 +12,10 @@
 #include <QDateTime>
 #include <QProgressBar>
 #include <QTabWidget>
-#include <QWebView>
 #include <QLineEdit>
 #include <QNetworkReply>
 #include <QSslError>
+#include <QTimer>
 #include <libintl.h>
 
 #include "qtermwidget.h"
@@ -24,7 +24,7 @@
 #define BUFFERSIZE 2048
 #define REGEXP_STRING "^\\[(\\d+)\\]"
 
-#define CURRENT_TIME() QDateTime::currentDateTime().toString("dd/MM/yy hh:mm:ss")
+#define CURRENT_TIME() QDateTime::currentDateTime().toString("dd/MM/yyyy hh:mm:ss")
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),m_web(new QWebView()),m_output(new QTextEdit()),
@@ -33,12 +33,24 @@ MainWindow::MainWindow(QWidget *parent)
 {
     // Graphic
     showFullScreen();
-
     setWindowTitle(tr("OpenGnsys Browser"));
-
     setCentralWidget(m_web);
-
     readEnvironmentValues();
+
+    // Open the log file for append
+    if(m_env.contains("OGLOGFILE") && m_env["OGLOGFILE"]!="")
+    {
+        QFile* m_logfile=new QFile(m_env["OGLOGFILE"]);
+        if(!m_logfile->open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Append))
+        {
+            delete m_logfile;
+            print(tr(gettext("El fichero de log no ha podido ser abierto: "))+m_env["OGLOGFILE"]+".");
+        }
+        else
+        {
+            m_logstream=new QTextStream(m_logfile);
+        }
+    }
 
     // Output
     m_output->setReadOnly(true);
@@ -56,16 +68,13 @@ MainWindow::MainWindow(QWidget *parent)
     button->setFocusPolicy(Qt::TabFocus);
     m_tabs->setCornerWidget(button);
     m_tabs->setFocusPolicy(Qt::NoFocus);
-
     m_tabs->addTab(m_output,tr(gettext("Salida")));
     slotCreateTerminal();
-
     // Assign tabs to dock
     dock->setWidget(m_tabs);
-
     // Assign tabs dock to the mainwindow if admin mode is active
     if(m_env.contains("ogactiveadmin") && m_env["ogactiveadmin"] == "true")
-      addDockWidget(Qt::BottomDockWidgetArea,dock);
+        addDockWidget(Qt::BottomDockWidgetArea,dock);
 
     // Top Dock
     dock=new QDockWidget();
@@ -73,16 +82,13 @@ MainWindow::MainWindow(QWidget *parent)
     QWidget* dummy2=new QWidget();
     dummy2->setMaximumHeight(0);
     dock->setTitleBarWidget(dummy2);
-
     // WebBar
     m_webBar=new QLineEdit(dock);
-
     // WebBar to dock
     dock->setWidget(m_webBar);
-
     // Assign top dock to the mainwindow if admin mode is active
     if(m_env.contains("ogactiveadmin") && m_env["ogactiveadmin"] == "true")
-      addDockWidget(Qt::TopDockWidgetArea,dock);
+        addDockWidget(Qt::TopDockWidgetArea,dock);
 
     // Status bar
     QStatusBar* st=statusBar();
@@ -91,9 +97,9 @@ MainWindow::MainWindow(QWidget *parent)
     m_logo=new QLabel();
     QPixmap logo;
     if(logo.load("/opt/opengnsys/lib/pictures/oglogo.png"))
-      m_logo->setPixmap(logo);
+        m_logo->setPixmap(logo);
     else
-      m_logo->setText("OG");
+        m_logo->setText("OG");
     m_logo->setToolTip(tr(gettext("Proyecto OpenGnsys"))+"\nhttps://opengnsys.es");
     // Progress bar
     m_progressBar=new QProgressBar(this);
@@ -103,8 +109,8 @@ MainWindow::MainWindow(QWidget *parent)
     m_speedInfo=new QLabel(speed);
     m_speedInfo->setAlignment(Qt::AlignCenter);
     if(m_env.contains("DEFAULTSPEED") && m_env["DEFAULTSPEED"]!="")
-      if(speed.compare(m_env["DEFAULTSPEED"])!=0)
-        m_speedInfo->setStyleSheet("background-color: darkred; color: white; font-weight: bold;");
+        if(speed.compare(m_env["DEFAULTSPEED"])!=0)
+            m_speedInfo->setStyleSheet("background-color: darkred; color: white; font-weight: bold;");
     // Clock
     m_clock=new DigitalClock(this);
 
@@ -126,10 +132,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_process,SIGNAL(started()),this,SLOT(slotProcessStarted()));
     connect(m_process,SIGNAL(finished(int,QProcess::ExitStatus)),
             this,SLOT(slotProcessFinished(int,QProcess::ExitStatus)));
-
     connect(m_process,SIGNAL(error(QProcess::ProcessError)),
             this,SLOT(slotProcessError(QProcess::ProcessError)));
-
     connect(m_process,SIGNAL(readyReadStandardOutput()),this,SLOT(slotProcessOutput()));
     connect(m_process,SIGNAL(readyReadStandardError()),
             this,SLOT(slotProcessErrorOutput()));
@@ -137,21 +141,6 @@ MainWindow::MainWindow(QWidget *parent)
     // Dock signals
     connect(button,SIGNAL(clicked()),this,SLOT(slotCreateTerminal()));
     connect(m_webBar,SIGNAL(returnPressed()),this,SLOT(slotWebBarReturnPressed()));
-
-    // Open the log file for append
-    if(m_env.contains("OGLOGFILE") && m_env["OGLOGFILE"]!="")
-    {
-      QFile* m_logfile=new QFile(m_env["OGLOGFILE"]);
-      if(!m_logfile->open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Append))
-      {
-        delete m_logfile;
-        print(tr(gettext("El fichero de log no ha podido ser abierto: "))+m_env["OGLOGFILE"]+".");
-      }
-      else
-      {
-        m_logstream=new QTextStream(m_logfile);
-      }
-    }
 
     QStringList arguments=QCoreApplication::arguments();
     m_webBar->setText(arguments[1]);
@@ -174,10 +163,9 @@ void MainWindow::slotLinkHandle(const QUrl &url)
     // Check if it's executing another process
     if(m_process->state()!=QProcess::NotRunning)
     {
-      print(tr(gettext("Hay otro proceso en ejecución. Por favor espere.")));
-      return;
+        print(tr(gettext("Hay otro proceso en ejecución. Por favor espere.")));
+        return;
     }
- 
     QString urlString = url.toString();
     if(urlString.startsWith(COMMAND))
     {
@@ -188,8 +176,9 @@ void MainWindow::slotLinkHandle(const QUrl &url)
     {
         // For COMMAND_WITH_CONFIRMATION link, show confirmation box and execute, if accepted
         QMessageBox msgBox;
-        msgBox.setIcon(QMessageBox::Question);
+        msgBox.setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowTitleHint);
         msgBox.setWindowTitle(tr(gettext("AVISO")));
+        msgBox.setIcon(QMessageBox::Question);
         msgBox.setTextFormat(Qt::RichText);
         msgBox.setText(tr(gettext("La siguiente acci&oacute;n puede modificar datos o tardar varios minutos. El equipo no podr&aacute; ser utilizado durante su ejecuci&oacute;n.")));
         QPushButton *execButton = msgBox.addButton(tr(gettext("Ejecutar")), QMessageBox::ActionRole);
@@ -227,14 +216,14 @@ void MainWindow::slotWebLoadFinished(bool ok)
     if(ok == false)
     {
         QMessageBox msgBox;
-        msgBox.setIcon(QMessageBox::Question);
+        msgBox.setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowTitleHint);
         msgBox.setWindowTitle(tr(gettext("AVISO")));
+        msgBox.setIcon(QMessageBox::Question);
         msgBox.setTextFormat(Qt::RichText);
         msgBox.setText(tr(gettext("La p&aacute;gina no se puede cargar.")));
 
         QPushButton *reloadButton = msgBox.addButton(tr(gettext("Recargar")), QMessageBox::ActionRole);
         msgBox.addButton(tr(gettext("Abortar")), QMessageBox::RejectRole);
-
         msgBox.exec();
 
         if (msgBox.clickedButton() == reloadButton)
@@ -264,7 +253,6 @@ void MainWindow::slotSslErrors(QNetworkReply* reply)
 
 void MainWindow::slotProcessStarted()
 {
-    m_output->insertPlainText(tr(gettext("Lanzado satisfactoriamente.")));
     startProgressBar();
 }
 
@@ -298,28 +286,31 @@ void MainWindow::slotProcessFinished(int code,QProcess::ExitStatus status)
 {
     if(status==QProcess::NormalExit)
     {
-        print(tr(gettext("Proceso acabado correctamente. Valor de retorno: "))+QString::number(code));
+        print(tr(gettext("Fin del proceso. Valor de retorno: "))+QString::number(code));
     }
     else
     {
         print(tr(gettext("El proceso ha fallado inesperadamente. Salida: ")+code));
     }
+    // On error, show a message box
+    if(code>0)
+        showErrorMessage(gettext("Código de salida: ")+QString::number(code));
     finishProgressBar();
 }
 
 void MainWindow::slotProcessError(QProcess::ProcessError error)
 {
-    m_output->setTextColor(QColor(Qt::darkRed));
+    QString errorMsg;
     switch(error)
     {
         case QProcess::FailedToStart:
-            print(tr(gettext("Imposible lanzar el proceso.")));
+            errorMsg=tr(gettext("Imposible lanzar el proceso."));
             break;
         case QProcess::WriteError:
-            print(tr(gettext("Error de escritura en el proceso.")));
+            errorMsg=tr(gettext("Error de escritura en el proceso."));
             break;
         case QProcess::ReadError:
-            print(tr(gettext("Error de lectura del proceso.")));
+            errorMsg=tr(gettext("Error de lectura del proceso."));
             break;
         // No capturo crashed porque la pillo por finished
         case QProcess::Crashed:
@@ -327,11 +318,17 @@ void MainWindow::slotProcessError(QProcess::ProcessError error)
             break;
         case QProcess::UnknownError:
         default:
-            print(tr(gettext("Error desconocido.")));
+            errorMsg=tr(gettext("Error desconocido."));
             break;
     }
+    // Print error and show message box with timeout.
+    if(!errorMsg.isNull()) {
+        m_output->setTextColor(QColor(Qt::darkRed));
+        print(errorMsg);
+        m_output->setTextColor(QColor(Qt::black));
+        showErrorMessage(errorMsg);
+    }
     finishProgressBar();
-    m_output->setTextColor(QColor(Qt::black));
 }
 
 void MainWindow::slotCreateTerminal()
@@ -343,8 +340,6 @@ void MainWindow::slotCreateTerminal()
     
     console->setTerminalFont(font);
     console->setFocusPolicy(Qt::StrongFocus);
-    
-    //console->setColorScheme(COLOR_SCHEME_BLACK_ON_LIGHT_YELLOW);
     console->setScrollBarPosition(QTermWidget::ScrollBarRight);
 
     ++m_numberTerminal;
@@ -367,7 +362,7 @@ void MainWindow::slotWebBarReturnPressed()
 {
     QUrl url(m_webBar->text());
     if(url.isValid())
-      slotLinkHandle(url);
+        slotLinkHandle(url);
 }
 
 int MainWindow::readEnvironmentValues()
@@ -405,30 +400,30 @@ int MainWindow::readEnvironmentValues()
 
 void MainWindow::print(QString s)
 {
-  if(!s.endsWith("\n"))
-    s+="\n";
-  if(m_logstream)
-  {
-    *m_logstream<<CURRENT_TIME()<<": "<<s;
-    m_logstream->flush();
-  }
-  if(m_output)
-    m_output->insertPlainText(s);
+    if(!s.endsWith("\n"))
+        s+="\n";
+    if(m_logstream)
+    {
+        *m_logstream<<CURRENT_TIME()<<": browser: "<<s;
+        m_logstream->flush();
+    }
+    if(m_output)
+        m_output->insertPlainText(s);
 }
 
 void MainWindow::captureOutputForStatusBar(QString output)
 {
-  // Capturar para modificar status bar
-  output=output.trimmed();
+    // Capturar para modificar status bar
+    output=output.trimmed();
 
-  QRegExp regexp(REGEXP_STRING);
-  if(regexp.indexIn(output) != -1)
-  {
-    int pass=regexp.cap(1).toInt();
-    output.replace(regexp,"");
-    m_progressBar->setValue(pass);
-    m_progressBar->setFormat("%p%"+output);
-  }
+    QRegExp regexp(REGEXP_STRING);
+    if(regexp.indexIn(output) != -1)
+    {
+        int pass=regexp.cap(1).toInt();
+        output.replace(regexp,"");
+        m_progressBar->setValue(pass);
+        m_progressBar->setFormat("%p%"+output);
+    }
 }
 
 // Init status bar
@@ -460,9 +455,8 @@ void MainWindow::executeCommand(QString &string)
     // Assign the same Browser's environment to the process
     m_process->setEnvironment(QProcess::systemEnvironment());
     m_process->start(program,list);
-    print(tr(gettext("Lanzando el comando: ")));
     m_output->setTextColor(QColor(Qt::darkGreen));
-    print(program+" "+list.join(" "));
+    print(tr(gettext("Lanzando el comando: "))+string);
     m_output->setTextColor(QColor(Qt::black));
     startProgressBar();
 }
@@ -483,4 +477,16 @@ QString MainWindow::readSpeed() {
     {
         return QString("");
     }
+}
+
+// Show an error box with timeout
+void MainWindow::showErrorMessage(QString text)
+{
+    QMessageBox* msgBox=new QMessageBox();
+    msgBox->setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowTitleHint);
+    msgBox->setWindowTitle(gettext("ERROR"));
+    msgBox->setIcon(QMessageBox::Warning);
+    msgBox->setText(text);
+    msgBox->show();
+    QTimer::singleShot(5000, msgBox, SLOT(close()));
 }

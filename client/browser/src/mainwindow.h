@@ -67,7 +67,7 @@ class MainWindow : public QMainWindow
         void finishProgressBar();
         void executeCommand(QString &string);
         QString readSpeed();
-
+        void showErrorMessage(QString string);
 
     protected:
         QWebView *m_web;
