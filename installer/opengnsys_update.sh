@@ -119,6 +119,8 @@ function autoConfigure()
 	if [ -f /etc/debian_version ]; then
 		# Distribución basada en paquetes Deb.
 		DEPENDENCIES=( curl rsync btrfs-tools procps arp-scan realpath php-curl gettext moreutils jq wakeonlan udpcast shim-signed grub-efi-amd64-signed php-fpm )
+		# Paquete correcto para realpath.
+		[ -z "$(apt-cache pkgnames realpath)" ] && DEPENDENCIES=( ${DEPENDENCIES[@]//realpath/coreutils} )
 		UPDATEPKGLIST="add-apt-repository -y ppa:ondrej/php; apt-get update"
 		INSTALLPKGS="apt-get -y install"
 		DELETEPKGS="apt-get -y purge"
