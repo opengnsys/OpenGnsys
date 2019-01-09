@@ -3,7 +3,7 @@
 # Las funciones se incluirán las librerías ya existentes
 
 #/**
-#         ogGrubUEFIConf int_ndisk int_part str_dir_grub
+#         ogGrubUefiConf int_ndisk int_part str_dir_grub
 #@brief   Genera el fichero grub.cfg de la ESP
 #@param   int_ndisk    nº de orden del disco
 #@param   int_part     nº de partición
@@ -13,14 +13,14 @@
 #@exception OG_ERR_NOTFOUND  fichero o dispositivo no encontrado.
 #@TODO    Confirmar si el fichero "$EFIDIR/EFI/$BOOTLABEL/grub.cfg" es necesario.
 #*/ ##
-function ogGrubUEFIConf {
+function ogGrubUefiConf () {
 local EFIDIR BOOTLABEL GRUBEFI UUID DEVICE DIRGRUB
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_part [ str_dir_grub ]" \
            "$FUNCNAME 1 2" \
-           "$FUNCNAME 1 3 grubPARTITION/boot/grub" \
+           "$FUNCNAME 1 3 grubPARTITION/boot/grub" 
     return 
 fi
 
@@ -50,7 +50,7 @@ cp $GRUBDIR/grub.cfg "$EFIDIR/EFI/$BOOTLABEL/grub.cfg"
 }
 
 #/**
-#         ogUUIDChange int_ndisk str_repo
+#         ogUuidChange int_ndisk str_repo
 #@brief   Reemplaza el UUID de un sistema de ficheros.
 #@param   int_ndisk    nº de orden del disco
 #@param   int_part     nº de partición
@@ -59,7 +59,7 @@ cp $GRUBDIR/grub.cfg "$EFIDIR/EFI/$BOOTLABEL/grub.cfg"
 #@exception OG_ERR_NOTFOUND  fichero o dispositivo no encontrado.
 #@TODO    Se utiliza el comando uuidgen que no existe en el ogLive
 #*/ ##
-function ogUUIDChange {
+function ogUuidChange () {
 local MNTDIR DEVICE UUID NEWUUID f
 
 # Si se solicita, mostrar ayuda.
@@ -88,4 +88,249 @@ for f in $MNTDIR/etc/fstab $MNTDIR/{,boot/}{{grubMBR,grubPARTITION}/boot/,}{grub
         [ -r $f ] && echo sed -i s/$UUID/$NEWUUID/g $f
         [ -r $f ] && sed -i s/$UUID/$NEWUUID/g $f
 done
+}
+
+#/**
+#         ogCopyEfiBootLoader int_ndisk str_repo path_image
+#@brief   Copia el cargador de arranque desde la partición EFI a la de sistema.
+#@param   int_ndisk    nº de orden del disco
+#@param   int_part     nº de partición
+#@return  (nada, por determinar)
+#@exception OG_ERR_FORMAT    formato incorrecto.
+#@exception OG_ERR_NOTFOUND  fichero o dispositivo no encontrado.
+#@note    Si existe el cargador en la partición de sistema no es válido
+#*/ ##
+function ogCopyEfiBootLoader () {
+# Variables locales
+local MNTDIR EFIDIR BOOTLABEL OSVERSION LOADER f
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_part" \
+           "$FUNCNAME 1 2"
+    return 
+fi
+
+# Error si no se reciben 2 arámetros.
+[ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT "$FUNCNAME int_ndisk int_part" || return $?
+
+# Comprobamos que exista partición de sistema y la  ESP
+MNTDIR=$(ogMount $1 $2) || ogRaiseError $OG_ERR_PARTITION "$DISK $PART" || return $?
+EFIDIR=$(ogMount $(ogGetEsp)) || ogRaiseError $OG_ERR_PARTITION "ESP" || return $?
+
+# Comprobamos que exista el cargador
+BOOTLABEL=$(printf "Part-%02d-%02d" $1 $2)
+OSVERSION=$(ogGetOsVersion $1 $2)
+case $OSVERSION in
+    *Windows\ 10*)
+        for f in $EFIDIR/EFI/{$BOOTLABEL,Microsoft}/Boot/bootmgfw.efi; do
+            [ -r $f ] && LOADER=$f
+        done
+        [ -n "$LOADER" ] || ogRaiseError $OG_ERR_NOTOS "$1 $2 ($OSVERSION, EFI)" || return $?
+        # Si existe el directorio Boot lo borramos
+        [ -d $MNTDIR/Boot ] && rm -rf $MNTDIR/Boot
+        DIRLOADER=$(realpath "${LOADER%/*}/..")
+        cp -r ${DIRLOADER}/Boot $MNTDIR
+        ;;
+esac
+}
+
+#/**
+#         ogRestoreEfiBootLoader int_ndisk str_repo
+#@brief   Copia el cargador de arranque de la partición de sistema a la partición EFI.
+#@param   int_ndisk    nº de orden del disco
+#@param   int_part     nº de partición
+#@return  (nada, por determinar)
+#@exception OG_ERR_FORMAT    formato incorrecto.
+#@exception OG_ERR_NOTFOUND  fichero o dispositivo no encontrado (partición de sistema o EFI).
+#@exception OG_ERR_NOTOS     sin sistema operativo.
+#@note    Si existe el cargador en la partición de sistema puede no ser válido
+#*/ ##
+function ogRestoreEfiBootLoader () {
+# Variables locales
+local MNTDIR EFIDIR BOOTLABEL OSVERSION LOADER f UUID DEVICE
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_part" \
+           "$FUNCNAME 1 2"
+    return 
+fi
+
+# Error si no se reciben 2 arámetros.
+[ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT "$FUNCNAME int_ndisk int_part" || return $?
+
+# Comprobamos que exista partición de sistema y la  ESP
+MNTDIR=$(ogMount $1 $2) || ogRaiseError $OG_ERR_PARTITION "$DISK $PART" || return $?
+EFIDIR=$(ogMount $(ogGetEsp)) || ogRaiseError $OG_ERR_PARTITION "ESP" || return $?
+
+# Comprobamos que exista el cargador
+#BOOTLABEL=$(printf "Part-%02d-%02d" $1 $2)
+OSVERSION=$(ogGetOsVersion $1 $2)
+case $OSVERSION in
+    *Windows\ 10*)
+        BOOTLABEL=$(printf "Part-%02d-%02d" $1 $2)
+        LOADER=$(ogGetPath $MNTDIR/Boot/bootmgfw.efi)
+        [ -n "$LOADER" ] || ogRaiseError $OG_ERR_NOTOS "$1 $2 ($OSVERSION, EFI)" || return $?
+        [ -r $EFIDIR/$BOOTLABEL ] && rm -rf $EFIDIR/$BOOTLABEL
+        mkdir -p $EFIDIR/EFI/$BOOTLABEL
+        cp -r "${LOADER%/*}" $EFIDIR/EFI/$BOOTLABEL
+        ;; 
+esac
+}
+
+
+#         ogRestoreUuidPartitions
+#@brief   Restaura los uuid de las particiones y la tabla de particiones
+#@param   int_ndisk      nº de orden del disco
+#@param   int_nfilesys   nº de orden del sistema de archivos
+#@param   REPO|CACHE     repositorio
+#@param   str_imgname    nombre de la imagen
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_NOTFOUND  No encontrado fichero de información de la imagen (con uuid)
+function ogRestoreUuidPartitions () {
+local DISK PART IMGNAME INFOFILE DEVICE PARTDEVICE DATA GUID UUID IMGGUID IMGUUID
+local EFIPARTDEVICE EFIDEVICE EFIDATA EFIGUID EFIUUID EFIUUID IMGEFIGUID IMGEFIUUID
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME REPO|CACHE str_imgname int_ndisk int_npart" \
+           "$FUNCNAME REPO Windows 1 2"
+    return
+fi
+# Error si no se reciben 4 parámetros.
+[ $# -eq 4 ] || ogRaiseError $OG_ERR_FORMAT "$FUNCNAME REPO|CACHE str_imgname int_ndisk int_npart" || return $?
+
+# Sólo se ejecuta si es UEFI
+[ ogIsEfiActive ] || return
+
+# Parámetros de entrada
+IMGNAME="$2"
+INFOFILE="$OGIMG/.$IMGNAME.img.json"
+[ "${1^^}" == "CACHE" ] && INFOFILE="$OGCAC$INFOFILE"
+# TODO: que la función getPath soporte archivos ocultos
+ls $INFOFILE &>/dev/null || ogRaiseError $OG_ERR_NOTFOUND "$INFOFILE" || return $?
+DISK=$3
+PART=$4
+
+DEVICE=$(ogDiskToDev $DISK)
+PARTDEVICE=$(ogDiskToDev $DISK $PART) || return $?
+read -e EFIDISK EFIPART <<<"$(ogGetEsp)"
+EFIPARTDEVICE=$(ogDiskToDev $EFIDISK $EFIPART) || return $?
+
+# Datos de la imagen
+IMGGUID=$(jq .guid $INFOFILE|tr -d \")
+IMGUUID=$(jq .uuid $INFOFILE|tr -d \")
+IMGEFIGUID=$(jq .espguid $INFOFILE|tr -d \")
+IMGEFIUUID=$(jq .espuuid $INFOFILE|tr -d \")
+
+# Datos actuales
+DATA=$(sfdisk -J $DEVICE)
+GUID=$(echo $DATA|jq ".partitiontable|.id"|tr -d \")
+UUID=$(echo $DATA|jq ".partitiontable.partitions[]|select(.node==\"$PARTDEVICE\").uuid"|tr -d \")
+
+if [ "$IMGGUID" != "$GUID" ]; then
+    echo sgdisk -U "$IMGGUID"  "$DEVICE"
+    sgdisk -U "$IMGGUID"  "$DEVICE"
+    partprobe
+fi
+
+if [ "$IMGUUID" != "$UUID" ]; then
+    NUMPART="${PARTDEVICE##$DEVICE}"
+    echo sgdisk -u "${NUMPART}:$IMGUUID"  "$DEVICE"
+    sgdisk -u "${NUMPART}:$IMGUUID"  "$DEVICE"
+    partprobe
+fi
+
+if [ $DISK -eq $EFIDISK ]; then
+    EFIDATA=$DATA
+    EFIDEVICE=$DEVICE
+else
+    EFIDEVICE=$(ogDiskToDev $EFIDISK) || return $?
+    EFIDATA=$(sfdisk -J $EFIDEVICE)
+    EFIGUID=$(echo $EFIDATA|jq ".partitiontable|.id"|tr -d \")
+    if [ "$IMGEFIGUID" != "$EFIGUID" ]; then
+echo         sgdisk -U "$IMGEFIGUID"  "$EFIDEVICE"
+       sgdisk -U "$IMGEFIGUID"  "$EFIDEVICE"
+       partprobe
+   fi
+fi
+
+EFIUUID=$(echo $EFIDATA|jq ".partitiontable.partitions[]|select(.node==\"$EFIPARTDEVICE\").uuid"|tr -d \")
+if [ "$IMGEFIUUID" != "$EFIUUID" ]; then
+    EFINUMPART="${EFIPARTDEVICE##$EFIDEVICE}"
+    echo sgdisk -u "${EFINUMPART}:$IMGEFIUUID"  "$EFIDEVICE"
+    sgdisk -u "${EFINUMPART}:$IMGEFIUUID"  "$EFIDEVICE"
+    partprobe
+fi
+}
+
+#         ogSaveImageInfo
+#@brief   Crea un fichero con la información de la imagen.
+#@param   int_ndisk      nº de orden del disco
+#@param   int_nfilesys   nº de orden del sistema de archivos
+#@param   REPO|CACHE     repositorio
+#@param   str_imgname    nombre de la imagen
+#@exception OG_ERR_FORMAT    formato incorrecto.
+#@exception OG_ERR_NOTFOUND  fichero o dispositivo no encontrado.
+function ogSaveImageInfo () {
+local DISK PART IMGDIR IMGNAME INFO INFOFILE DEVICE PARTDEVICE DATA GUID UUID
+local EFIPARTDEVICE EFIDEVICE EFIDATA EFIUUID EFIGUID
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_nfilesys REPO|CACHE str_imgname" \
+           "$FUNCNAME 1 2 REPO Windows"
+    return
+fi
+# Error si no se reciben 4 parámetros.
+[ $# -eq 4 ] || ogRaiseError $OG_ERR_FORMAT "$FUNCNAME int_ndisk int_nfilesys REPO|CACHE str_imgname" || return $?
+
+DISK=$1
+PART=$2
+IMGDIR="$(ogGetParentPath "$3" "/$4")"
+# Si no existe el directorio de la imagen me salgo
+[ "$IMGDIR" != "" ] || ogRaiseError $OG_ERR_NOTFOUND "$3 $(dirname $4)" || return $?
+IMGNAME="$(basename "$4")"
+INFOFILE="$IMGDIR/.$IMGNAME.img.json"
+
+DEVICE=$(ogDiskToDev $DISK) || return $?
+PARTDEVICE=$(ogDiskToDev $DISK $PART) || return $?
+DATA=$(sfdisk -J $DEVICE)
+GUID=$(echo $DATA|jq ".partitiontable|.id"|tr -d \")
+UUID=$(echo $DATA|jq ".partitiontable.partitions[]|select(.node==\"$PARTDEVICE\").uuid"|tr -d \")
+
+# Información de la imagen. Valor inicial de efi: false
+INFO=$(cat << EOT | jq .
+{"name":"$IMGNAME","efi":"false","guid":"$GUID","uuid":"$UUID"}
+EOT
+     )
+
+if ogIsEfiActive; then
+    # Cambio valor de efi a true
+    INFO=$(echo $INFO|  jq --arg aux true '. + {efi: $aux}')
+
+    # Obtener partición EFI.
+    read -e EFIDISK EFIPART <<<"$(ogGetEsp)"
+    EFIPARTDEVICE=$(ogDiskToDev $EFIDISK $EFIPART) || return $?
+    if [ $DISK -eq $EFIDISK ]; then
+        EFIDEVICE=$DEVICE
+        EFIDATA=$DATA
+        EFIGUID=$GUID
+    else
+        EFIDEVICE=$(ogDiskToDev $EFIDISK) || return $?
+        EFIDATA=$(sfdisk -J $EFIDEVICE)
+        EFIGUID=$(echo $EFIDATA|jq ".partitiontable|.id"|tr -d \")
+    fi
+    EFIUUID=$(echo $EFIDATA|jq ".partitiontable.partitions[]|select(.node==\"$EFIPARTDEVICE\").uuid"|tr -d \")
+
+    # Incluyo valor de EFIGUID (por si partición EFI en distinto disco que la de sistema)
+    INFO=$(echo $INFO|  jq --arg aux $EFIGUID '. + {espguid: $aux}')
+    # Incluyo valor de EFIUUID
+    INFO=$(echo $INFO|  jq --arg aux $EFIUUID '. + {espuuid: $aux}')
+fi
+
+cat << EOT | jq . > $INFOFILE
+$INFO
+EOT
 }

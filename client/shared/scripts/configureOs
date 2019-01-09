@@ -5,6 +5,8 @@
 #@brief   Script para realizar la configuracion del sistema operativo restaurado.
 #@param 1 disco 
 #@param 2 particion 
+#@param 3 Repositorio (CACHE, REPO o dirección IP)
+#@param 4 Nombre canónico de la imagen (sin extensión)
 #@return  
 #@TODO  comprobar que el tipo de particion corresponde con el sistema de archivos.
 #@exception OG_ERR_FORMAT     # 1 formato incorrecto.
@@ -32,11 +34,44 @@
 #@version 1.0.6b - llamadas opcionales para mejoras varias. Descomentar la instruccion para su activacion. ogConfigureFstab  
 #@author Antonio J. Doblas Viso.    Universidad de Malaga.
 #@date   2016-11-03
+#@version 1.1.1 - Equipos UEFI: cambia uuid de las particiones y restaura el cargador de arranque (Windows) (tickect #802)
+#@author Irina Gomez, ETSII Universidad de Sevilla
+#@date   2019-01-08
 #*/ ##
 
 # Carga el configurador del engine y los parámetros de red.
 [ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
 [ -f $DEVICECFG ] && source $DEVICECFG
+
+PROG="$(basename $0)"
+
+# Para Windows en equipos EFI son necesarios cuatro parámetros
+OSTYPE="$(ogGetOsType $1 $2)"
+if [ ogIsEfiActive -a "$OSTYPE" == "Windows" ]; then
+    if [ $# -lt 4 ]; then
+        ogRaiseError session $OG_ERR_FORMAT
+        ogHelp "$PROG:" \
+               "$PROG ndisco nparticion [ REPO|CACHE|IPSERVER ] [imagename]" \
+               "$PROG 1 1" \
+               "$PROG 1 2 REPO Windows  (UEFI)"
+        exit $OG_ERR_FORMAT
+    fi
+
+    REPO="${3^^}"
+    REPO=${REPO:-"REPO"}
+    IMGNAME="$4"
+    # Cambio de repositorio
+    if [ "$REPO" == "$(ogGetIpAddress)" -o "$REPO" == "CACHE" ]; then
+        REPO="CACHE"
+    else
+        ogCheckIpAddress "$REPO"
+        if [ $? == 0 -o "$REPO" == "REPO"  ]; then
+            # Si falla el cambio -> salimos con error repositorio no valido
+            ogChangeRepo $REPO ${OGUNIT} || exit $(ogRaiseError $OG_ERR_NOTFOUND "$REPO $OGUNIT"; echo $?)
+            REPO="REPO"
+        fi
+    fi
+fi
 
 # Si el sistema de archivos no esta extendido, ampliarlo al tamaño de su partición.
 PARTSIZE=$(ogGetPartitionSize $1 $2) || exit $?
@@ -61,9 +96,13 @@ fi
 HOST="$(ogGetHostname)"
 
 # Post-configuración personalizada para cada tipo de sistema operativo.
-OSTYPE="$(ogGetOsType $1 $2)"
 case "$OSTYPE" in 
     Windows)    # Postconfiguración de Windows.
+        # Si es UEFI pongo el UUID de la partición del modelo
+        if ogIsEfiActive; then
+            echo ogRestoreUuidPartitions $REPO $IMGNAME $1 $2
+            ogRestoreUuidPartitions $REPO $IMGNAME $1 $2
+        fi
         # Cambiar nombre en sistemas Windows.
         HOST=${HOST:-"pc"}
         ogSetWindowsName $1 $2 "$HOST"
@@ -80,12 +119,17 @@ case "$OSTYPE" in
             ogInstallMiniSetup $1 $2 postconf.cmd
             ogUninstallWindowsClient $1 $2 postconf.cmd
         fi
+        # Si es UEFI copio el cargador de arranque a la partición EFI
+        if ogIsEfiActive; then
+            echo ogRestoreEfiBootLoader $1 $2
+            ogRestoreEfiBootLoader $1 $2
+        fi
         ;;
     Linux)      # Postconfiguración de GNU/Linux.
         # Instalamos EFI Boot Loader
         if [ ogIsEfiActive ]; then
             # Cambio UUID del sistema de ficheros
-            ogUUIDChange $1 $2
+            ogUuidChange $1 $2
             ogConfigureFstab $1 $2
         fi
         ## Instala (no configura) el codigo de arranque del Grub en la partición (no lo configura, se mantiene el original de la imagen)
