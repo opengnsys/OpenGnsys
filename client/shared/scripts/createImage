@@ -35,6 +35,9 @@
 #@version 1.1.0 - Se muestra el espacio necesario para alojar la imagen y el disponible (ticket #771)
 #@author  Irina Gomez - ETSII Universidad de Sevilla
 #@date    2017-03-28
+#@version 1.1.1 - #802 Equipos EFI: se guarda el cargador de arranque y UUID de las particiones
+#@author  Irina Gomez - ETSII Universidad de Sevilla
+#@date    2019-01-08
 #*/ ##
 
 # Test 1.  crear una imagen en un REPO sin espacio libre. 
@@ -123,10 +126,20 @@ ogEcho log session "[20] $MSG_HELP_ogCheckFs  $PART $SIZEFS (KB)"
 ogUnmount $1 $2 2>/dev/null
 ogCheckFs $1 $2 || exit $(ogRaiseError $OG_ERR_PARTITION "ogCheckFs $1 $2" && echo $?)
 
+# Si es UEFI copio el cargador de arranque a la partición
+OSTYPE="$(ogGetOsType $1 $2)"
+if [ ogIsEfiActive -a "$OSTYPE" == "Windows" ] ; then
+    ogEcho log session "[25] $MSG_HELP_ogCopyEfiBootLoader" 
+    ogCopyEfiBootLoader $1 $2
+    echo ogSaveImageInfo $1 $2 "$REPO" "$4"
+    ogSaveImageInfo $1 $2 "$REPO" "$4"
+    
+fi
+
 # Evaluar variable de engine.cfg para reducir el sistema de archivos en la creacion
 if [ "$IMGREDUCE" == "TRUE" ]
 then 
-    ogEcho log session "[30]: $MSG_HELP_ogReduceFs"
+    ogEcho log session "[30] $MSG_HELP_ogReduceFs"
     ogReduceFs $1 $2 &>> $OGLOGCOMMAND || exit $(ogRaiseError $OG_ERR_REDUCEFS "$1 $2"; echo $?)
     NEWSIZEFS=$(ogGetFsSize  $1 $2)
     TIMEAUX=$[SECONDS-TIME1]
@@ -135,7 +148,7 @@ fi
 
 # Renombrar el fichero de imagen si ya existe.
 if [ -f "$IMGFILE" ]; then
-    ogEcho log session "[10] $MSG_SCRIPTS_FILE_RENAME \"$IMGFILE\" ->  \"$IMGFILE.ant\"."
+    ogEcho log session "[35] $MSG_SCRIPTS_FILE_RENAME \"$IMGFILE\" ->  \"$IMGFILE.ant\"."
     mv "$IMGFILE" "$IMGFILE.ant"
     mv "$IMGFILE.torrent" "$IMGFILE.torrent.ant" 2>/dev/null
     mv "$IMGFILE.sum" "$IMGFILE.sum.ant" 2>/dev/null
@@ -170,4 +183,3 @@ TIME=$[SECONDS-TIME1]
 ogEcho log session "[100] $MSG_SCRIPTS_TIME_TOTAL $[TIME/60]m $[TIME%60]s"
 ogEcho log session "      FileSystem $PART with $NEWSIZEFS KB data created onto file-image as $4 and used $IMGSIZE KB across DFS $ogprotocol"
 ogEcho log session "      Image-file $4 metada: $IMGOS"
-

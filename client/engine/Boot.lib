@@ -91,7 +91,7 @@ case "$TYPE" in
             #    [ -r $f ] && DIRGRUB=$(dirname $f)
             #done
             #DIRGRUB=${DIRGRUB#$MNTDIR/}
-            #ogGrubUEFIConf $1 $2 $DIRGRUB || return $?
+            #ogGrubUefiConf $1 $2 $DIRGRUB || return $?
 
             # Borrar cargador guardado con la misma etiqueta.
             BOOTLABEL=$(printf "Part-%02d-%02d" $1 $2)
@@ -175,7 +175,7 @@ case "$TYPE" in
         ;;
     GrubLoader)
         # Reiniciar.
-        reboot
+        #reboot
         ;;
     *)  ogRaiseError $OG_ERR_NOTOS "$1 $2 ${TYPE:+($TYPE)}"
         return $?
@@ -732,6 +732,9 @@ ps aux > /dev/null | grep $! | grep -E "T|S" | kill -9 $! > /dev/null
 #@version 1.1.0 - #827 Entrada para el ogLive si el equipo tiene partición cache.
 #@author  Antonio J. Doblas Viso.   Universidad de Malaga.
 #@date    2018-01-21
+#@version 1.1.1 - #802 Equipos EFI: Se crea el grub.cfg de la partición EFI
+#@author Irina Gomez, ETSII Universidad de Sevilla
+#@date   2019-01-08
 #*/ ##
 
 function ogGrubInstallMbr ()
@@ -800,7 +803,7 @@ then
         # Reactivamos el grub con el grub.cfg original.
         if ogIsEfiActive; then
             # Configuración de grub.cfg para EFI
-            ogGrubUEFIConf $1 $2
+            ogGrubUefiConf $1 $2
         else
             grub-install --force --root-directory=${SECONDSTAGE} $FIRSTSTAGE
         fi
@@ -831,7 +834,7 @@ grubSyntax "$KERNELPARAM" >> ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot/grub/grub.c
 # Instalar el grub no EFI, configurar EFI
 # Para EFI en ESP para otros en la partición de sistema.
 if ogIsEfiActive; then
-    ogGrubUEFIConf $1 $2 ${PREFIXSECONDSTAGE}
+    ogGrubUefiConf $1 $2 ${PREFIXSECONDSTAGE}
 else
     grub-install --force --root-directory=${SECONDSTAGE}${PREFIXSECONDSTAGE} $FIRSTSTAGE
 fi 
@@ -856,6 +859,9 @@ fi
 #@version 1.0.3 - Ficheros de configuracion independientes segun ubicación de la priemra etapa
 #@author  Antonio J. Doblas Viso.   Universidad de Malaga.
 #@date    2012-03-13
+#@version 1.1.1 - #802 Equipos EFI: Se crea el grub.cfg de la partición EFI
+#@author Irina Gomez, ETSII Universidad de Sevilla
+#@date   2019-01-08
 #*/ ##
 
 function ogGrubInstallPartition ()
@@ -919,7 +925,7 @@ then
         # Reactivamos el grub con el grub.cfg original.
         if ogIsEfiActive; then
             # Configuración de grub.cfg para EFI
-            ogGrubUEFIConf $1 $2
+            ogGrubUefiConf $1 $2
         else
             grub-install --force --root-directory=${SECONDSTAGE} $FIRSTSTAGE
         fi
@@ -945,7 +951,7 @@ grubSyntax $DISK $PART "$KERNELPARAM" >> ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot
 
 #Instalar el grub si no es EFI, configurar si es EFI
 if ogIsEfiActive; then
-    ogGrubUEFIConf $1 $2 ${PREFIXSECONDSTAGE}
+    ogGrubUefiConf $1 $2 ${PREFIXSECONDSTAGE}
 else
     grub-install --force --root-directory=${SECONDSTAGE}${PREFIXSECONDSTAGE} $FIRSTSTAGE
 fi
