@@ -3654,6 +3654,9 @@ int main(int argc, char *argv[])
 	int activo=1;
 	int i;
 
+	if (signal(SIGPIPE, SIG_IGN) == SIG_ERR)
+		exit(EXIT_FAILURE);
+
 	openlog("ogAdmServer", LOG_PID, LOG_DAEMON);
 
 	/*--------------------------------------------------------------------------------------------------------
