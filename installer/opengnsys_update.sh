@@ -1031,7 +1031,7 @@ function updateSummary()
 	# Obtener revisión.
 	if [ $REMOTE -eq 1 ]; then
 		# Revisión: rAñoMesDía.Gitcommit (8 caracteres de fecha y 7 primeros de commit).
-		REVISION=$(curl -s "$API_URL" | jq -r '"r" + (.commit.commit.committer.date | gsub("-"; "")[:8]) + "." + (.commit.sha[:7])')
+		REVISION=$(curl -s "$API_URL" | jq -r '"r" + (.commit.commit.committer.date | split("-") | join("")[:8]) + "." + (.commit.sha[:7])')
 	else
 		# Leer revisión del fichero de versiones.
 		REVISION=$(awk '{print $3}' $PROGRAMDIR/../doc/VERSION.txt 2>/dev/null)

@@ -17,21 +17,25 @@ Tickets resueltos en módulo OpenGnsys Client:
 Tickets resueltos en módulo OpenGnsys Server:
 #846	Configuración de logrotate para que incluya todos los servicios de OpenGnsys (corrección)
 #859	Gestor de los ficheros PXE duplicado
+#886	Actualización de la 1.0.6b a la 1.1.0 da errores a la hora de agregar ordenadores/aulas (no válido)
 
 Tickets resueltos en módulo OpenGnsys Repository Server:
 #850	Problema con repositorio recién instalado (corrección)
+#882	deleteimage no borra directorio (corrección)
 
 Tickets resueltos en módulo OpenGnsys Web Admin Console:
 #835	Problemas al listar plantillas en Nerboot Avanzado (corrección)
-#839	Errores detectado en API REST para Remote PC (corrección)
 #849	Incorporar ordenadores de dhcp no admite comentarios tras la declarción de un host (corrección)
 #867	La ayuda en la consola incluirá más información
 #870	Netboot avanzado no crea la plantilla de arranque si el equipo no tiene asignado un repositorio (corrección)
 
 Tickets resueltos en módulo OpenGnsys Installer:
+#876	Problemas al actualizar desde Subversion a Git (corrección)
 #879	Función checkVersion de opengnsys_update.sh del tar.gz da error si se ejecuta sobre la misma versión de OpenGnsys (corrección)
+#880	openGnsys_update.sh no deja la revisión, solo deja 1.1.0a (corrección
 
 Tickets genéricos resueltos:
+#839	Errores detectado en API REST para Remote PC (corrección)
 #840	Usar Git como repositorio de código
 #865	Problemas con Trac (corrección)
 #872	Liberar versión de mantenimiento OpenGnsys 1.1.0a
