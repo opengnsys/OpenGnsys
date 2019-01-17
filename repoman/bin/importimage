@@ -9,7 +9,7 @@
 #@warning Program will request the repository REST token.
 #@version 1.1.1 - Initial version
 #@author  Ramón M. Gómez, ETSII Universidad de Sevilla
-#@date    2017-10-08
+#@date    2018-10-08
 #*/
 
 
@@ -17,11 +17,14 @@
 PROG="$(basename "$0")"
 OPENGNSYS="/opt/opengnsys"
 REPODIR="$OPENGNSYS/images"
+REPOCONF="$OPENGNSYS/etc/ogAdmRepo.cfg"
 SERVERCONF="$OPENGNSYS/etc/ogAdmServer.cfg"
 DEFAULTFILE="/etc/default/opengnsys"
 MYCNF=$(mktemp /tmp/.my.cnf.XXXXX)
 let BACKUP=0
 source $DEFAULTFILE
+source $REPOCONF &>/dev/null
+[ "$RUN_OGADMSERVER" == "yes" ] && source $SERVERCONF &>/dev/null
 
 # Functions.
 source $OPENGNSYS/lib/ogfunctions.sh
@@ -32,14 +35,14 @@ source $OPENGNSYS/lib/ogfunctions.sh
 # Error control.
 [ "$USER" == "root" ] || raiseError access "Need to be root."
 [ "$RUN_OGADMREPO" == "yes" ] || raiseError access "This server is not defined as image repository."
-[ -w $REPODIR ] || raiseError access "Cannot write in local repository."
+[ -w "$REPODIR" ] || raiseError access "Cannot write in local repository."
+[ -n "$IPlocal" ] || raiseError access "Cannot read repository configuration file."
 case $# in
     2)  USERNAME="$SUDO_USER"; REPO="$1"; IMAGE="$2" ;;
     3)  USERNAME="$1"; REPO="$2"; IMAGE="$3" ;;
     *)  [ "$*" == "help" ] && help || raiseError usage
 esac
-source $SERVERCONF &>/dev/null
-[ "${REPO,,}" == "${HOSTNAME,,}" ] || [ "${REPO,,}" == "localhost" ] || [ "${REPO}" == "127.0.0.1" ] || [ "${REPO,,}" == "${IPlocal,,}}" ] && raiseError access "Cannot import from local repository."
+[ "${REPO,,}" == "${HOSTNAME,,}" ] || [ "${REPO,,}" == "localhost" ] || [[ ${REPO} =~ ^127\. ]] || [ "${REPO,,}" == "${IPlocal,,}" ] && raiseError access "Cannot import from local repository."
 
 # Fetching image info from the repository.
 read -rp "Enter repository API token: " APITOKEN
@@ -93,10 +96,13 @@ fi
 scp "$USERNAME@$REPO:$IMAGEPATH" $REPODIR
 ERRCODE=$?
 if [ $ERRCODE -eq 0 ]; then
+    # Cheking image size.
+    DOWNLOADSIZE=$(stat -c "%s" "$IMAGEPATH")
+    [ $IMAGESIZE -ne $DOWNLOADSIZE ] && echo "Warning: image sizes differ: source=$IMAGESIZE, target=$DOWNLOADSIZE."
     # Storing creation info.
     jq -r '.clonator+":"+.compressor+":"+.filesystem+":"+(.datasize|tostring)+":"' <<<"$IMAGEINFO" > "$IMAGEPATH.info"
     # Updating the database when the repo is also configured as Administration Server.
-    if [ "$RUN_OGADMREPO" == "yes" ]; then
+    if [ "$RUN_OGADMSERVER" == "yes" ]; then
         # Creating credentials file.
         cat << EOT > $MYCNF
 [client]
@@ -122,11 +128,10 @@ EOT
 	    else
                 # Choose image OU.
                 echo "Choose Organization Unit:"
-                for ((i=0; i<${#OUS[@]}; i++)); do
-                    echo "  $i:  ${OUS[i]#* }"
+                PS3="Enter number: "
+                select opt in "${OUS[@]#* }"; do
+                    [ -n "$opt" ] && let OUID="${OUS[REPLY-1]%% *}" && break
                 done
-                read -rp "Enter number (0 by default): " ANSWER
-                let OUID="${OUS[ANSWER]%% *}" 2>/dev/null || let OUID="${OUS[0]%% *}"
 	    fi
             # Creating a new image associated with an empty software profile.
             mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -e \
@@ -146,9 +151,6 @@ EOT
                             echo "Warning: database cannot be updated."
         fi
     fi
-    # Cheking image size.
-    DOWNLOADSIZE=$(stat -c "%s" "$IMAGEPATH")
-    [ $IMAGESIZE -ne $DOWNLOADSIZE ] && echo "Warning: image sizes differ: source=$IMAGESIZE, target=$DOWNLOADSIZE."
 else
     # On download error, trying to recover backup.
     raiseError download "$USERNAME@$REPO:$IMAGEPATH"
