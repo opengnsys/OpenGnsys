@@ -133,6 +133,12 @@ function comprobarDatos(cc)
 
 		var tama=trCfg.childNodes[itama].childNodes[0].value; // Tamaño de partición
 
+		// Comprobar tamaño negativo.
+		if (tama < 0) {
+			alert(TbMsg[8]);
+			trCfg.childNodes[ipar].childNodes[0].focus();
+			return(false);
+		}
 
 		var par=tomavalorDesple(trCfg.childNodes[ipar].childNodes[0]); // Partición
 		npar=parseInt(par);
