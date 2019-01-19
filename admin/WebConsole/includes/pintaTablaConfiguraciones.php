@@ -138,9 +138,7 @@ function tablaConfiguracionesInventarioSoftware($cmd,$idordenador){
 			WHERE ordenadores.idordenador=".$idordenador."
 			  AND nombresos.nombreso!='DATA'
 			ORDER BY ordenadores_particiones.numdisk,ordenadores_particiones.numpar";
-
-	$rs->Comando=&$cmd; 
-	$rs=new Recordset; 
+	$rs=new Recordset;
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) 
 		return($tablaHtml); // Error al abrir recordset

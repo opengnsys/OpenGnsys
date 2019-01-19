@@ -16,7 +16,8 @@ include_once("./clases/AdoPhp.php");
  $pss="";
  $ident=""; 
  $idc=0; 
- $iph=""; // Switch menu cliente 
+ $iph=""; // Switch menu cliente
+ $adminetboot="";
 
  if (isset($_GET["iph"])) $iph=$_GET["iph"];  
 //________________________________________________________________________________________________________
@@ -32,7 +33,6 @@ include_once("./clases/AdoPhp.php");
 if ($idc != 0)
 {
         $rs=new Recordset;
-//      $cmd->texto="SELECT * FROM  centros WHERE idcentro='$idc'";
         $cmd->texto="SELECT * FROM  centros WHERE idcentro=".$idc;
         $rs->Comando=&$cmd;
         if (!$rs->Abrir()) return(false); // Error al abrir recordset
@@ -122,7 +122,7 @@ if ($idc != 0)
 				  AND usuarios.pasguor=SHA2('".$pasguor."', 224)"; 
 	}
 	$rs->Comando=&$cmd; 
-	if (!$rs->Abrir()) return($false); // Error al abrir recordset 
+	if (!$rs->Abrir()) return(false); // Error al abrir recordset
 	if(!$rs->EOF){
     	$adminetboot=$rs->campos["idtipousuario"];
 		$idtipousuario=$rs->campos["idtipousuario"]; 
@@ -158,7 +158,7 @@ if ($idc != 0)
 	$cmd->texto="SELECT * FROM entornos"; 
 	$rs->Comando=&$cmd; 
 	//echo $cmd->texto;
-	if (!$rs->Abrir()) return($false); // Error al abrir recordset 
+	if (!$rs->Abrir()) return(false); // Error al abrir recordset
 	if(!$rs->EOF){
 		$ips=$rs->campos["ipserveradm"]; 
 		$prt=$rs->campos["portserveradm"];

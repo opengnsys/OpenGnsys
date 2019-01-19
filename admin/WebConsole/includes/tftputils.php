@@ -266,7 +266,7 @@ function updateBootRepo ($cmd, $repoid) {
 			if ($pxecode = @file_get_contents($macfile)) {
 				$pxecode = preg_replace("/ogrepo=[^ ]*/", "ogrepo=$repo", $pxecode);
 				if (! @file_put_contents($macfile, $pxecode)) {
-					$erros++;
+					$errors++;
 				}
 			}
 			$rs->Siguiente();

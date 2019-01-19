@@ -3,18 +3,18 @@
 include_once("EncripDescrip.php");
 
 /*================================================================================
-	Clase para conectarse con el servidor hidra y enviar comandos
-	Cualquier error producido en los procesos se puede recuperar con los m�odos
+	Clase para conectarse con el Servidor OpenGnsys y enviar comandos
+	Cualquier error producido en los procesos se puede recuperar con los métodos
 ================================================================================*/
 class SockHidra{
-	var $ultimoerror;				// Ultimo error detectado
-	var $descripultimoerror;		// Descripción del ltimo error detectado
-	var $socket;					// Stream socket
-	var $servidor;					// El servidor hidra
-	var $puerto;						// El puerto odnde se conectar�
-	var $timeout;					// El tiempo de espera para la conexi�
-	var $encripdescrip;     // El encriptador
-	var $LONGITUD_TRAMA; // M�ima longitud de la trama
+	var $ultimoerror;		// Ultimo error detectado
+	var $descripultimoerror;	// Descripción del último error detectado
+	var $socket;			// Stream socket
+	var $servidor;			// El Servidor OpenGnsys
+	var $puerto;			// El puerto donde se conectará
+	var $timeout;			// El tiempo de espera para la conexión
+	var $encripdescrip;		// El encriptador
+	var $LONGITUD_TRAMA;		// Máxima longitud de la trama
 	
 	//________________________________________________________________________________________
 	//
@@ -22,7 +22,7 @@ class SockHidra{
 	// Parámetros:
 	//	- servidor: El nombre o la IP del servidor
 	//	- puerto: El puerto usado para las comunicaciones
-	//	- timeout: El tiempo de espera para la conexi�
+	//	- timeout: El tiempo de espera para la conexión
 	//________________________________________________________________________________________
 	function __construct($servidor, $puerto, $timeout=30){
 		$this->servidor=$servidor;
@@ -36,7 +36,7 @@ class SockHidra{
 	}
 	//________________________________________________________________________________________
 	//
-	// Averigua si el parametro pasado es una IP. devuelve true en caso afirmativo
+	// Averigua si el parámetro pasado es una IP. devuelve true en caso afirmativo
 	//________________________________________________________________________________________
 	function _esIP(){
 		return(false);
@@ -45,13 +45,13 @@ class SockHidra{
 	//
 	//	Conecta con el servidor 
 	//	Devuelve:
-	//		- false: Si falla la conexi�
+	//		- false: Si falla la conexión
 	//		- true: En caso contrario
 	//________________________________________________________________________________________
 	function conectar(){ 
 		$this->socket = socket_create (AF_INET, SOCK_STREAM, 0);
 		if ($this->socket < 0) {
-			$this->ultimoerror=socket_strerror($socket);
+			$this->ultimoerror=socket_strerror($this->socket);
 			$this->descripultimoerror="socket_create() fallo";
 			return(false);
 		}
@@ -65,9 +65,9 @@ class SockHidra{
 	}
 	//________________________________________________________________________________________
 	//
-	//	Cerrar la conexióncon el servidor 
+	//	Cierra la conexión con el servidor
 	//	Devuelve:
-	//		- false: Si falla la conexi�
+	//		- false: Si falla la conexión
 	//		- true: En caso contrario
 	//________________________________________________________________________________________
 	function desconectar(){
@@ -75,21 +75,21 @@ class SockHidra{
 	}
 	//________________________________________________________________________________________
 	//
-	//		Devuelve el c�igo del ltimo error ocurrido durante el proceso anterior.
+	//		Devuelve el código del último error ocurrido durante el proceso anterior.
 	//________________________________________________________________________________________
 	function UltimoError(){
 		return($this->ultimoerror);
 	}
 	//________________________________________________________________________________________
 	//
-	//		Devuelve una cadena con el mensage del ltimo error ocurrido durante el proceso anterior.
+	//		Devuelve una cadena con el mensage del último error ocurrido durante el proceso anterior.
 	//________________________________________________________________________________________
 	function DescripUltimoError(){
 		return($this->descripultimoerror);
 	}
 	//________________________________________________________________________________________
 	//
-	//	Envia una petición de comando al servidor 
+	//	Envía una petición de comando al servidor
 	//	Parámetros:
 	//		- Parámetros: Parámetros del mensaje
 	//________________________________________________________________________________________
@@ -102,7 +102,7 @@ class SockHidra{
 	}
 	//________________________________________________________________________________________
 	//
-	//	Envia una petición de información al servidor 
+	//	Envía una petición de información al servidor
 	//	Parámetros:
 	//		- Parámetros: Parámetros del mensaje
 	//________________________________________________________________________________________
@@ -115,7 +115,7 @@ class SockHidra{
 	}
 	//________________________________________________________________________________________
 	//
-	//	Envia un mensaje al servidor 
+	//	Envía un mensaje al servidor
 	//	Parámetros:
 	//		- trama: Trama a enviar
 	//		- tipo: Tipo de mensaje
@@ -157,7 +157,7 @@ class SockHidra{
 		global $LONCABECERA;
 		global $LONBLK;
 
-		$lon=$lSize=0;
+		$lon=$hlonprm=$lSize=0;
 		$buffer="";
 		$cadenaret="";
 		do{
@@ -168,13 +168,13 @@ class SockHidra{
 				if (substr($buffer,0,15)!="@JMMLCAMDJ_MCDJ")
 					return($cadenaret); // No se reconoce la trama
 				$hlonprm=hexdec(substr($buffer,$LONCABECERA,$LONHEXPRM));
-				$lSize=$hlonprm; // Longitud total de la trama con los parametros encriptados
+				$lSize=$hlonprm; // Longitud total de la trama con los parámetros encriptados
 			}
 		}while($lon<$lSize);
 	
-		$lon=$lSize-($LONCABECERA+$LONHEXPRM); // Longitud de los parametros aún encriptados
-		$parametros=substr($buffer,$LONCABECERA+$LONHEXPRM,$lon); // Parametros encriptados
-		$parametros=$this->encripdescrip->Desencriptar($parametros,$hlonprm); // Parametros sin encriptar
+		$lon=$lSize-($LONCABECERA+$LONHEXPRM); // Longitud de los parámetros aún encriptados
+		$parametros=substr($buffer,$LONCABECERA+$LONHEXPRM,$lon); // Parámetros encriptados
+		$parametros=$this->encripdescrip->Desencriptar($parametros,$hlonprm); // Parámetros sin encriptar
 		$hlonprm=str_pad(dechex($lon),$LONHEXPRM,"0",STR_PAD_LEFT);	// Rellena con ceros 									
 		$cadenaret=substr($buffer,0,$LONCABECERA).$hlonprm.$parametros;
 		return($cadenaret);

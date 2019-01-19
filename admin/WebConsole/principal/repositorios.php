@@ -325,7 +325,8 @@ function ContextualXMLComandos($litambito,$ambito){
 	global $cmd;
 	global $TbMsg;
  	$maxlongdescri=0;
-	$rs=new Recordset; 
+	$descrip="";
+	$rs=new Recordset;
 	$cmd->texto="SELECT  idcomando,descripcion,pagina,gestor,funcion 
 			FROM comandos 
 			WHERE activo=1 AND aplicambito & ".$ambito.">0 
@@ -335,9 +336,10 @@ function ContextualXMLComandos($litambito,$ambito){
 		$layerXML="";
 		$rs->Primero(); 
 		while (!$rs->EOF){
-			if (isset($TbMsg["COMMAND_".$rs->campos["funcion"]])) {$descrip=$TbMsg["COMMAND_".$rs->campos["funcion"]];}else{$descrip;}
-			//$descrip=$TbMsg["COMMAND_".$rs->campos["funcion"]];
-			if (empty ($descrip)) {
+			if (isset($TbMsg["COMMAND_".$rs->campos["funcion"]])) {
+			    $descrip=$TbMsg["COMMAND_".$rs->campos["funcion"]];
+			}
+			if (empty($descrip)) {
 				$descrip=$rs->campos["funcion"];
 			}
 			$layerXML.='<ITEM';
