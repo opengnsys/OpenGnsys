@@ -19,8 +19,12 @@ Tickets resueltos en módulo OpenGnsys Client:
 #887	Browser: mostrar aviso si falla la ejecución de un comando
 
 Tickets resueltos en módulo OpenGnsys Server:
+#580	Correcciones del Core de OpenGnsys: ogAdmServer (corrección)
 #856	Mejoras en setserveraddr
 #881	Personalizar prioridad de ejecución de proceso de torrents
+#883	Añadir soporte para syslog a ogAdmServer (mejora)
+#884	No ejecutar strip al compilar ogAdmserver
+#885	Eliminar ogAdmBoot
 
 Tickets resueltos en módulo OpenGnsys Repository Server:
 #873	Script para importar imagen de otro repositorio
