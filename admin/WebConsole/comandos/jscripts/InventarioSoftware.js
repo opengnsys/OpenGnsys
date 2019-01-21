@@ -11,7 +11,6 @@
 	if (comprobar_datos()){
 		tb_conf=document.getElementById("tabla_conf");
 		var ochecks=tb_conf.getElementsByTagName('INPUT');
-		var particion;
 		for(var i=0;i<ochecks.length;i++){
 			if(ochecks[i].checked){
 				diskPart=ochecks[i].value.split(";");

@@ -69,7 +69,7 @@ switch($ambito){
 	</p>
 		<?php echo tablaConfiguracionesInventarioSoftware($cmd,$idambito); ?>
 
-	</BR>
+	<BR>
 <?php
 //________________________________________________________________________________________________________
 	include_once("./includes/formularioacciones.php");

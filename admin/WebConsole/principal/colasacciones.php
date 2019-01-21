@@ -861,11 +861,10 @@ function escribeResumen($oA)
 {
 		global $cmd;
 		global $TbMsg;
-				
 		global $ACCION_EXITOSA; 
 		global $ACCION_FALLIDA; 
-		global $ACCION_SINRESULTADO; 
-			
+		global $ACCION_SINRESULTADO;
+		global $ACCION_DETENIDA;
 		global $EJECUCION_TAREA;
 			
 		$html="";		

@@ -6,7 +6,7 @@
 // Fecha Última modificación: Agosto-2010
 // Nombre del fichero: IniciarSesion.php
 // Descripción : 
-//		Implementación� del comando "Iniciar Sesión"
+//		Implementación del comando "Iniciar Sesión"
 // Version 0.1 - En ambito distinto a ordenador muestra los equipos agrupados en configuraciones iguales.
 // 	Fecha: 2014-10-23
 //	 Autora: Irina Gomez, ETSII Universidad de Sevilla
@@ -56,11 +56,10 @@ if (!$cmd)
                 $cadenaip="";
                 $cadenamac="";
                 RecopilaIpesMacs($cmd,$ambito,$idambito);
-	
+
         ?>
-	<P align=center>
-	<SPAN align=center class=subcabeceras><?php echo $TbMsg[7] ?></SPAN>
-	</BR>
+	<P align=center><SPAN class=subcabeceras><?php echo $TbMsg[7] ?></SPAN></P>
+	<BR>
 <form  align=center name="fdatos" method="POST"> 
 	<INPUT type="hidden" name="idambito" value="<?php echo $idambito?>">
 	<INPUT type="hidden" name="ambito" value="<?php echo $ambito?>">
@@ -134,9 +133,7 @@ function tabla_configuraciones($cmd,$idordenador){
 			  AND tipospar.clonable=1
 			  AND nombresos.nombreso!='DATA'
 			ORDER BY ordenadores_particiones.numpar";
-				
-	$rs->Comando=&$cmd; 
-	$rs=new Recordset; 
+	$rs=new Recordset;
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) return($tablaHtml); // Error al abrir recordset
 	$rs->Primero(); 

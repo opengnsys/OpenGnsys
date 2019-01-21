@@ -59,12 +59,14 @@ function Gestiona(){
 	global $EJECUCION_COMANDO;
 	global $PROCESOS;
 	global $ACCION_INICIADA;
-	global $ACCION_SINERRORES; 
+	global $ACCION_SINERRORES;
+	global $ACCION_SINRESULTADO;
 	global $servidorhidra;
 	global $hidraport;
 	global $idcentro;
 	global $idtareacomando;
 	global $orden;
+	$resul=true;
 
 	$cmd->CreaParametro("@orden",$orden,1);
 
@@ -89,8 +91,6 @@ function Gestiona(){
 				$ambito=$Datos["ambito"];
 				$idambito=$Datos["idambito"];
 				$parametros=$Datos["parametros"];
-
-				$resul=true;
 
 				$cmd->CreaParametro("@tipoaccion",$EJECUCION_COMANDO,1);
 				$cmd->CreaParametro("@idtipoaccion",$idtipoaccion,1);

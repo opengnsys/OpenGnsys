@@ -50,10 +50,10 @@ if (!$resul){
 <!------------------------------------------------------------------------------------------
  Cabecera 
 -------------------------------------------------------------------------------------------> 
-	<P align=center class=cabeceras><?php echo $TbMsg[0] ?><P>
+	<P align=center class=cabeceras><?php echo $TbMsg[0] ?></P>
 	<P align=center>
-	<SPAN align=center class=subcabeceras><?php echo $TbMsg[1] ?></SPAN>
-	</BR>
+	<SPAN class=subcabeceras><?php echo $TbMsg[1] ?></SPAN>
+	<BR>
 	<TABLE  align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
 		<TR>
 			<TH align=center>&nbsp;<?php echo $TbMsg[2] ?>&nbsp;</TD>
@@ -73,7 +73,7 @@ if (!$resul){
 <!------------------------------------------------------------------------------------------
  Subcabecera 
 -------------------------------------------------------------------------------------------> 	
-	<P align=center><SPAN align=center class=subcabeceras><?php echo $TbMsg[6] ?></SPAN></p>
+	<P align=center><SPAN class=subcabeceras><?php echo $TbMsg[6] ?></SPAN></p>
 	<FORM  align=center name="fdatos"> 
 	<TABLE  width=90% align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
 		<TR>

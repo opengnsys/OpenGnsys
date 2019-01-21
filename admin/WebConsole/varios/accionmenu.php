@@ -178,6 +178,7 @@ else
 
 function pintaMenus($cmd,$identificador,$tipoaccion,$op)
 { 
+	global $pagerror;
 	global $TbMsg;
 	global $ITEM_PUBLICO;
 	global $ITEM_PRIVADO;
