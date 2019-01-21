@@ -1024,6 +1024,9 @@ echo "$TYPE"
 #@version 1.0 - Versión en pruebas.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2010/01/12
+#@version 1.1.1 - Se incluye tipo Windows para UEFI (ticket #802)
+#@author  Irina Gomez, ETSII Universidad de Sevilla
+#@date    2019/01/18
 #*/ ##
 function ogHidePartition ()
 {
@@ -1046,6 +1049,7 @@ case "$TYPE" in
     FAT32)  NEWTYPE="HFAT32" ;;
     FAT16)  NEWTYPE="HFAT16" ;;
     FAT12)  NEWTYPE="HFAT12" ;;
+    WINDOWS)NEWTYPE="WIN-RESERV";;
     *)      ogRaiseError $OG_ERR_PARTITION "$TYPE"
             return $? ;;
 esac
@@ -1595,6 +1599,9 @@ echo $ID
 #@version 1.0 - Versión en pruebas.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2010/01/12
+#@version 1.1.1 - Se incluye tipo Windows Reserver para UEFI (ticket #802)
+#@author  Irina Gomez, ETSII Universidad de Sevilla
+#@date    2019/01/18
 #*/ ##
 function ogUnhidePartition ()
 {
@@ -1613,10 +1620,11 @@ PART=$(ogDiskToDev "$1" "$2") || return $?
 # Obtener tipo de partición.
 TYPE=$(ogGetPartitionType "$1" "$2")
 case "$TYPE" in
-    HNTFS)   NEWTYPE="NTFS"  ;;
-    HFAT32)  NEWTYPE="FAT32" ;;
-    HFAT16)  NEWTYPE="FAT16" ;;
-    HFAT12)  NEWTYPE="FAT12" ;;
+    HNTFS)      NEWTYPE="NTFS"    ;;
+    HFAT32)     NEWTYPE="FAT32"   ;;
+    HFAT16)     NEWTYPE="FAT16"   ;;
+    HFAT12)     NEWTYPE="FAT12"   ;;
+    WIN-RESERV) NEWTYPE="WINDOWS" ;;
     *)      ogRaiseError $OG_ERR_PARTITION "$TYPE"
             return $? ;;
 esac

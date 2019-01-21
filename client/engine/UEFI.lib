@@ -189,8 +189,8 @@ esac
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_NOTFOUND  No encontrado fichero de información de la imagen (con uuid)
 function ogRestoreUuidPartitions () {
-local DISK PART IMGNAME INFOFILE DEVICE PARTDEVICE DATA GUID UUID IMGGUID IMGUUID
-local EFIPARTDEVICE EFIDEVICE EFIDATA EFIGUID EFIUUID EFIUUID IMGEFIGUID IMGEFIUUID
+local DISK PART IMGNAME INFOFILE DEVICE DATA GUID UUID IMGGUID
+local EFIDEVICE EFIDATA EFIGUID EFIUUID EFIUUID IMGEFIGUID
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -214,31 +214,19 @@ DISK=$3
 PART=$4
 
 DEVICE=$(ogDiskToDev $DISK)
-PARTDEVICE=$(ogDiskToDev $DISK $PART) || return $?
 read -e EFIDISK EFIPART <<<"$(ogGetEsp)"
-EFIPARTDEVICE=$(ogDiskToDev $EFIDISK $EFIPART) || return $?
 
 # Datos de la imagen
 IMGGUID=$(jq .guid $INFOFILE|tr -d \")
-IMGUUID=$(jq .uuid $INFOFILE|tr -d \")
 IMGEFIGUID=$(jq .espguid $INFOFILE|tr -d \")
-IMGEFIUUID=$(jq .espuuid $INFOFILE|tr -d \")
 
 # Datos actuales
 DATA=$(sfdisk -J $DEVICE)
 GUID=$(echo $DATA|jq ".partitiontable|.id"|tr -d \")
-UUID=$(echo $DATA|jq ".partitiontable.partitions[]|select(.node==\"$PARTDEVICE\").uuid"|tr -d \")
 
 if [ "$IMGGUID" != "$GUID" ]; then
     echo sgdisk -U "$IMGGUID"  "$DEVICE"
     sgdisk -U "$IMGGUID"  "$DEVICE"
-    partprobe
-fi
-
-if [ "$IMGUUID" != "$UUID" ]; then
-    NUMPART="${PARTDEVICE##$DEVICE}"
-    echo sgdisk -u "${NUMPART}:$IMGUUID"  "$DEVICE"
-    sgdisk -u "${NUMPART}:$IMGUUID"  "$DEVICE"
     partprobe
 fi
 
@@ -256,13 +244,6 @@ echo         sgdisk -U "$IMGEFIGUID"  "$EFIDEVICE"
    fi
 fi
 
-EFIUUID=$(echo $EFIDATA|jq ".partitiontable.partitions[]|select(.node==\"$EFIPARTDEVICE\").uuid"|tr -d \")
-if [ "$IMGEFIUUID" != "$EFIUUID" ]; then
-    EFINUMPART="${EFIPARTDEVICE##$EFIDEVICE}"
-    echo sgdisk -u "${EFINUMPART}:$IMGEFIUUID"  "$EFIDEVICE"
-    sgdisk -u "${EFINUMPART}:$IMGEFIUUID"  "$EFIDEVICE"
-    partprobe
-fi
 }
 
 #         ogSaveImageInfo
@@ -274,8 +255,8 @@ fi
 #@exception OG_ERR_FORMAT    formato incorrecto.
 #@exception OG_ERR_NOTFOUND  fichero o dispositivo no encontrado.
 function ogSaveImageInfo () {
-local DISK PART IMGDIR IMGNAME INFO INFOFILE DEVICE PARTDEVICE DATA GUID UUID
-local EFIPARTDEVICE EFIDEVICE EFIDATA EFIUUID EFIGUID
+local DISK PART IMGDIR IMGNAME INFO INFOFILE DEVICE DATA GUID
+local EFIPARTDEVICE EFIDEVICE EFIDATA EFIGUID
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -295,14 +276,12 @@ IMGNAME="$(basename "$4")"
 INFOFILE="$IMGDIR/.$IMGNAME.img.json"
 
 DEVICE=$(ogDiskToDev $DISK) || return $?
-PARTDEVICE=$(ogDiskToDev $DISK $PART) || return $?
 DATA=$(sfdisk -J $DEVICE)
 GUID=$(echo $DATA|jq ".partitiontable|.id"|tr -d \")
-UUID=$(echo $DATA|jq ".partitiontable.partitions[]|select(.node==\"$PARTDEVICE\").uuid"|tr -d \")
 
 # Información de la imagen. Valor inicial de efi: false
 INFO=$(cat << EOT | jq .
-{"name":"$IMGNAME","efi":"false","guid":"$GUID","uuid":"$UUID"}
+{"name":"$IMGNAME","efi":"false","guid":"$GUID"}
 EOT
      )
 
@@ -318,16 +297,13 @@ if ogIsEfiActive; then
         EFIDATA=$DATA
         EFIGUID=$GUID
     else
-        EFIDEVICE=$(ogDiskToDev $EFIDISK) || return $?
+        EFIDEVICE=$(ogDiskToDev $EFIDISK)
         EFIDATA=$(sfdisk -J $EFIDEVICE)
         EFIGUID=$(echo $EFIDATA|jq ".partitiontable|.id"|tr -d \")
     fi
-    EFIUUID=$(echo $EFIDATA|jq ".partitiontable.partitions[]|select(.node==\"$EFIPARTDEVICE\").uuid"|tr -d \")
 
     # Incluyo valor de EFIGUID (por si partición EFI en distinto disco que la de sistema)
     INFO=$(echo $INFO|  jq --arg aux $EFIGUID '. + {espguid: $aux}')
-    # Incluyo valor de EFIUUID
-    INFO=$(echo $INFO|  jq --arg aux $EFIUUID '. + {espuuid: $aux}')
 fi
 
 cat << EOT | jq . > $INFOFILE

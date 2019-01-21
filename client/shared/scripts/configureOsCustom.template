@@ -28,7 +28,7 @@ IMGNAME="$4"		# Nombre canónico de imagen (sin extensión).
 # Nota: incluye llamada al script "configureOs" para realizar previamente una configuración estándar.
 
 # Configurarción típica.
-configureOs "$1" "$2"
+configureOs "$DISK" "$PART" "$REPO" "$IMGNAME"
 # Postconfiguración personalizada para cada tipo de sistema operativo.
 OSTYPE="$(ogGetOsType $1 $2)"
 case "$OSTYPE" in 

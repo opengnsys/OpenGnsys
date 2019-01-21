@@ -50,11 +50,11 @@ case "$OSTYPE" in
         #echo "[40] Activar particion de Windows $PART y ocultar las demás."
         #for (( i=1; i<=$(ogGetPartitionsNumber $DISK); i++ )); do
         #        if [ $i == $PART -o $i == $PARTDATA ]; then
-        #	    [ $(ogGetPartitionType $DISK $PART) == "HNTFS" ] && ogUnhidePartition $1 $PART
+        #	    [ $(ogGetPartitionType $DISK $PART) == "HNTFS" -o $(ogGetPartitionType $DISK $PART) == "WIN-RESERV" ] && ogUnhidePartition $1 $PART
         #            # Activo la particion si no es de datos
         #            [ $i -ne $PARTDATA ] && ogSetPartitionActive $DISK $i
         #        else
-        #            [ "$(ogGetPartitionType $DISK $i)" == NTFS ] && ogHidePartition $DISK $i
+        #            [ "$(ogGetPartitionType $DISK $i)" == NTFS -o "$(ogGetPartitionType $DISK $i)" == "WINDOWS" ] && ogHidePartition $DISK $i
         #        fi
         #done
     ;;
