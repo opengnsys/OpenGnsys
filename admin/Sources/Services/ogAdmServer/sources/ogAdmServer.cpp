@@ -1512,41 +1512,6 @@ bool WakeUp(SOCKET *s, char* iph, char *mac, char *mar)
 	}
 	return true;
 }
-//_____________________________________________________________________________________________________________
-// Función: PasaHexBin
-//
-//	Descripción:
-//		Convierte a binario una dirección mac desde una cadena con formato XXXXXXXXXXXX
-//
-//	Parámetros de entrada:
-//		- cadena : Cadena con el contenido de la mac
-//		- numero : la dirección mac convertida a binario (6 bytes)
-//_____________________________________________________________________________________________________________
-void PasaHexBin(char *cadena, char *numero)
-{
-	int i, j, p;
-	char matrizHex[] = "0123456789ABCDEF";
-	char Ucadena[12], aux;
-
-	for (i = 0; i < 12; i++)
-		Ucadena[i] = toupper(cadena[i]);
-	p = 0;
-	for (i = 0; i < 12; i++) {
-		for (j = 0; j < 16; j++) {
-			if (Ucadena[i] == matrizHex[j]) {
-				if (i % 2) {
-					aux = numero[p];
-					aux = (aux << 4);
-					numero[p] = j;
-					numero[p] = numero[p] | aux;
-					p++;
-				} else
-					numero[p] = j;
-				break;
-			}
-		}
-	}
-}
 // ________________________________________________________________________________________________________
 // Función: RESPUESTA_Arrancar
 //
