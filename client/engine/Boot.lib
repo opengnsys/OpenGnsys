@@ -734,7 +734,7 @@ ps aux > /dev/null | grep $! | grep -E "T|S" | kill -9 $! > /dev/null
 #@date    2018-01-21
 #@version 1.1.1 - #802 Equipos EFI: Se crea el grub.cfg de la partición EFI
 #@author Irina Gomez, ETSII Universidad de Sevilla
-#@date   2019-01-08
+#@date    2019-01-08
 #*/ ##
 
 function ogGrubInstallMbr ()
@@ -785,10 +785,9 @@ if ogIsEfiActive; then
     EFISECONDSTAGE=$(ogMount $EFIDISK $EFIPART) || ogRaiseError $OG_ERR_PARTITION "ESP" || return $?
     EFISUBDIR=$(printf "Part-%02d-%02d" $DISK $PART)
     [ -d ${EFISECONDSTAGE}/EFI/$EFISUBDIR ] || mkdir -p ${EFISECONDSTAGE}/EFI/$EFISUBDIR
-    #Instalar el grub 
-    grub-install --force --target x86_64-efi --efi-directory=${EFISECONDSTAGE} --root-directory=${EFISECONDSTAGE}/EFI/$EFISUBDIR $FIRSTSTAGE
-    # Solo para ubuntu: falta generalizar
-    mv -v $EFISECONDSTAGE/EFI/ubuntu/grubx64.efi $EFISECONDSTAGE/EFI/$EFISUBDIR
+    EFIOPTGRUB=" --target x86_64-efi --efi-directory=${EFISECONDSTAGE}/EFI/$EFISUBDIR "
+else 
+    EFIOPTGRUB=""
 fi 
 
 # Si Reconfigurar segunda etapa (grub.cfg) == FALSE
@@ -801,12 +800,12 @@ then
 		# Si no se reconfigure se borra los ficheros previos de configuración específicos de opengnsys.
         [ -d ${SECONDSTAGE}${PREFIXSECONDSTAGE} ] &&  rm -fr ${SECONDSTAGE}${PREFIXSECONDSTAGE}
         # Reactivamos el grub con el grub.cfg original.
+        grub-install --force ${EFIOPTGRUB} --root-directory=${SECONDSTAGE} $FIRSTSTAGE
+        # Movemos el grubx64.efi
         if ogIsEfiActive; then
-            # Configuración de grub.cfg para EFI
-            ogGrubUefiConf $1 $2
-        else
-            grub-install --force --root-directory=${SECONDSTAGE} $FIRSTSTAGE
-        fi
+            mv ${EFISECONDSTAGE}/EFI/$EFISUBDIR/EFI/ubuntu/grubx64.efi ${EFISECONDSTAGE}/EFI/$EFISUBDIR
+            rm -rf ${EFISECONDSTAGE}/EFI/$EFISUBDIR/EFI
+        fi 
         return $?
     fi
 fi
@@ -831,12 +830,13 @@ sed -i 's/^set -e/#set -e/' /etc/grub.d/00_header
 #Preparar configuración segunda etapa: crear entrada del sistema operativo
 grubSyntax "$KERNELPARAM" >> ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot/grub/grub.cfg
 
-# Instalar el grub no EFI, configurar EFI
-# Para EFI en ESP para otros en la partición de sistema.
+#Instalar el grub
+grub-install --force ${EFIOPTGRUB} --root-directory=${SECONDSTAGE}${PREFIXSECONDSTAGE} $FIRSTSTAGE
+
+# Movemos el grubx64.efi
 if ogIsEfiActive; then
-    ogGrubUefiConf $1 $2 ${PREFIXSECONDSTAGE}
-else
-    grub-install --force --root-directory=${SECONDSTAGE}${PREFIXSECONDSTAGE} $FIRSTSTAGE
+    mv ${EFISECONDSTAGE}/EFI/$EFISUBDIR/EFI/ubuntu/grubx64.efi ${EFISECONDSTAGE}/EFI/$EFISUBDIR
+    rm -rf ${EFISECONDSTAGE}/EFI/$EFISUBDIR/EFI
 fi 
 }
 
@@ -861,7 +861,7 @@ fi
 #@date    2012-03-13
 #@version 1.1.1 - #802 Equipos EFI: Se crea el grub.cfg de la partición EFI
 #@author Irina Gomez, ETSII Universidad de Sevilla
-#@date   2019-01-08
+#@date    2019-01-08
 #*/ ##
 
 function ogGrubInstallPartition ()
@@ -907,10 +907,9 @@ if ogIsEfiActive; then
     EFISECONDSTAGE=$(ogMount $EFIDISK $EFIPART) || ogRaiseError $OG_ERR_PARTITION "ESP" || return $?
     EFISUBDIR=$(printf "Part-%02d-%02d" $DISK $PART)
     [ -d ${EFISECONDSTAGE}/EFI/$EFISUBDIR ] || mkdir -p ${EFISECONDSTAGE}/EFI/$EFISUBDIR
-    #Instalar el grub 
-    grub-install --force --target x86_64-efi --efi-directory ${EFISECONDSTAGE} --root-directory=${EFISECONDSTAGE}/EFI/ubuntu  $FIRSTSTAGE
-    # Solo para ubuntu: falta generalizar
-    mv -v $EFISECONDSTAGE/EFI/ubuntu/grubx64.efi $EFISECONDSTAGE/EFI/$EFISUBDIR
+    EFIOPTGRUB=" --target x86_64-efi --efi-directory=${EFISECONDSTAGE}/EFI/$EFISUBDIR "
+else
+    EFIOPTGRUB=""
 fi
 
 # Si Reconfigurar segunda etapa (grub.cfg) == FALSE
@@ -923,11 +922,11 @@ then
 		# Si no se reconfigure se borra los ficheros previos de configuración específicos de opengnsys.
         [ -d ${SECONDSTAGE}${PREFIXSECONDSTAGE} ] &&  rm -fr ${SECONDSTAGE}${PREFIXSECONDSTAGE}
         # Reactivamos el grub con el grub.cfg original.
+        grub-install --force ${EFIOPTGRUB} --root-directory=${SECONDSTAGE} $FIRSTSTAGE
+        # Movemos el grubx64.efi
         if ogIsEfiActive; then
-            # Configuración de grub.cfg para EFI
-            ogGrubUefiConf $1 $2
-        else
-            grub-install --force --root-directory=${SECONDSTAGE} $FIRSTSTAGE
+            mv ${EFISECONDSTAGE}/EFI/$EFISUBDIR/EFI/ubuntu/grubx64.efi ${EFISECONDSTAGE}/EFI/$EFISUBDIR
+            rm -rf ${EFISECONDSTAGE}/EFI/$EFISUBDIR/EFI
         fi
         return $?
     fi
@@ -949,11 +948,13 @@ sed -i 's/^set -e/#set -e/' /etc/grub.d/00_header
 #Preparar configuración segunda etapa: crear entrada del sistema operativo
 grubSyntax $DISK $PART "$KERNELPARAM" >> ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot/grub/grub.cfg
 
-#Instalar el grub si no es EFI, configurar si es EFI
+#Instalar el grub
+grub-install --force ${EFIOPTGRUB} --root-directory=${SECONDSTAGE}${PREFIXSECONDSTAGE} $FIRSTSTAGE
+
+# Movemos el grubx64.efi
 if ogIsEfiActive; then
-    ogGrubUefiConf $1 $2 ${PREFIXSECONDSTAGE}
-else
-    grub-install --force --root-directory=${SECONDSTAGE}${PREFIXSECONDSTAGE} $FIRSTSTAGE
+    mv ${EFISECONDSTAGE}/EFI/$EFISUBDIR/EFI/ubuntu/grubx64.efi ${EFISECONDSTAGE}/EFI/$EFISUBDIR
+    rm -rf ${EFISECONDSTAGE}/EFI/$EFISUBDIR/EFI
 fi
 }
 
@@ -981,7 +982,7 @@ function ogConfigureFstab ()
 {
 # Variables locales.
 local FSTAB DEFROOT PARTROOT DEFSWAP PARTSWAP
-local EFIDISK EFIPART DEVEFI OPTEFI
+local EFIDISK EFIPART EFIDEV EFIOPT
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -1022,14 +1023,14 @@ fi
 # Si es un sistema EFI incluimos partición ESP (Si existe la modificamos)
 if [ ogIsEfiActive ]; then
     read EFIDISK EFIPART <<< $(ogGetEsp)
-    DEVEFI=$(ogDiskToDev $EFIDISK $EFIPART)
+    EFIDEV=$(ogDiskToDev $EFIDISK $EFIPART)
 
     # Opciones de la partición ESP: si no existe ponemos un valor por defecto
-    OPTEFI=$(awk '$1!~/#/ && $2=="/boot/efi" {print $3"\t"$4"\t"$5"\t"$6 }' ${FSTAB})
-    OPTEFI=${OPTEFI:-vfat\tumask=0077\t0\t1}
+    EFIOPT=$(awk '$1!~/#/ && $2=="/boot/efi" {print $3"\t"$4"\t"$5"\t"$6 }' ${FSTAB})
+    [ "$EFIOPT" == "" ] && EFIOPT='vfat\tumask=0077\t0\t1'
 
     sed -i /"boot\/efi"/d  ${FSTAB}
-    echo -e "$DEVEFI\t/boot/efi\tvfat\tumask=0077\t0\t1" >> ${FSTAB}
+    echo -e "$EFIDEV\t/boot/efi\t$EFIOPT" >> ${FSTAB}
 fi
 }
 

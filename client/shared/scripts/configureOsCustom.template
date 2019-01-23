@@ -39,8 +39,8 @@ case "$OSTYPE" in
         #ogLoadHiveWindows $1 $2; ogSetWindowsChkdisk $OGWINCHKDISK; ogUpdateHiveWindows
         ;;
     Linux)      # Postconfiguración de GNU/Linux.
-        ##OPCIONAL: Configurar el FSTAB. En esta versión solo autoconfigura la partición SWAP
-        #ogConfigureFstab $1 $2
+        ##OPCIONAL Para UEFI: cambia el UUID de la partición (para tener dos linux en un equipo)
+        #ogUuidChange $DISK $PART
         ##OPCIONAL Limpiar dispositivos reconocidos previamente
         #ogCleanLinuxDevices $1 $2
         ## Instala (no configura) el codigo de arranque del Grub en la partición (no lo configura, se mantiene el original de la imagen)

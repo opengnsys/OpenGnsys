@@ -7,20 +7,20 @@
 #@brief   Genera el fichero grub.cfg de la ESP
 #@param   int_ndisk    nº de orden del disco
 #@param   int_part     nº de partición
-#@param   str_dir_grub nombre del directorio de grub en la partición de sistema. ej: grubPARTITION
+#@param   str_dir_grub prefijo del directorio de grub en la partición de sistema. ej: /boot/grubPARTITION
 #@return  (nada, por determinar)
 #@exception OG_ERR_FORMAT    formato incorrecto.
 #@exception OG_ERR_NOTFOUND  fichero o dispositivo no encontrado.
 #@TODO    Confirmar si el fichero "$EFIDIR/EFI/$BOOTLABEL/grub.cfg" es necesario.
 #*/ ##
 function ogGrubUefiConf () {
-local EFIDIR BOOTLABEL GRUBEFI UUID DEVICE DIRGRUB
+local EFIDIR BOOTLABEL GRUBEFI UUID DEVICE PREFIXSECONDSTAGE EFIGRUBDIR
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_part [ str_dir_grub ]" \
            "$FUNCNAME 1 2" \
-           "$FUNCNAME 1 3 grubPARTITION/boot/grub" 
+           "$FUNCNAME 1 3 /boot/grubPARTITION" 
     return 
 fi
 
@@ -28,25 +28,25 @@ fi
 [ $# -ge 2 ] || ogRaiseError $OG_ERR_FORMAT "$FUNCNAME int_ndisk int_part [ str_dir_grub ]" || return $?
 
 # Directorio del grub en la partición de sistema
-DIRGRUB="${3:-boot/grub}"
+PREFIXSECONDSTAGE="$3"
 
 EFIDIR=$(ogMount $(ogGetEsp)) || ogRaiseError $OG_ERR_PARTITION "ESP" || return $?
 BOOTLABEL=$(printf "Part-%02d-%02d" $1 $2)
-GRUBDIR="$EFIDIR/EFI/$BOOTLABEL/boot/grub"
+EFIGRUBDIR="$EFIDIR/EFI/$BOOTLABEL/boot/grub"
 # Comprobamos que existe directorio
-[ -d "$GRUBDIR" ] || mkdir -p "$GRUBDIR"
+[ -d "$EFIGRUBDIR" ] || mkdir -p "$EFIGRUBDIR"
 # Parcheamos uuid y particion en grub.cfg
 UUID=$(blkid -o value -s UUID $(ogDiskToDev $1 $2))
 DEVICE="hd$(expr $1 - 1 ),gpt$2"
 
-cat << EOT > $GRUBDIR/grub.cfg
+cat << EOT > $EFIGRUBDIR/grub.cfg
 set root='$DEVICE'
-set prefix=(\$root)'/$DIRGRUB'
+set prefix=(\$root)'${PREFIXSECONDSTAGE}/boot/grub'
 configfile \$prefix/grub.cfg
 EOT
 
 # Provisional: confirmar si el segundo archivo se utiliza
-cp $GRUBDIR/grub.cfg "$EFIDIR/EFI/$BOOTLABEL/grub.cfg"
+#cp $EFIGRUBDIR/grub.cfg "$EFIDIR/EFI/$BOOTLABEL/grub.cfg"
 }
 
 #/**
@@ -57,7 +57,6 @@ cp $GRUBDIR/grub.cfg "$EFIDIR/EFI/$BOOTLABEL/grub.cfg"
 #@return  (nada, por determinar)
 #@exception OG_ERR_FORMAT    formato incorrecto.
 #@exception OG_ERR_NOTFOUND  fichero o dispositivo no encontrado.
-#@TODO    Se utiliza el comando uuidgen que no existe en el ogLive
 #*/ ##
 function ogUuidChange () {
 local MNTDIR DEVICE UUID NEWUUID f
@@ -76,7 +75,7 @@ fi
 MNTDIR=$(ogMount $1 $2) || ogRaiseError $OG_ERR_NOTFOUND "Device $1 $2" || return $?
 DEVICE=$(ogDiskToDev $1 $2)
 UUID=$(blkid -o value -s UUID $DEVICE)
-NEWUUID=$(uuidgen)
+NEWUUID=$(cat /proc/sys/kernel/random/uuid)
 
 # Cambiamos UUID a la partición
 ogUnmount $1 $2
@@ -85,7 +84,6 @@ tune2fs $DEVICE -U $NEWUUID
 # Cambiamos UUID en la configuración (fstab y grub)
 ogMount $1 $2
 for f in $MNTDIR/etc/fstab $MNTDIR/{,boot/}{{grubMBR,grubPARTITION}/boot/,}{grub{,2},{,efi/}EFI/*}/{menu.lst,grub.cfg}; do
-        [ -r $f ] && echo sed -i s/$UUID/$NEWUUID/g $f
         [ -r $f ] && sed -i s/$UUID/$NEWUUID/g $f
 done
 }
