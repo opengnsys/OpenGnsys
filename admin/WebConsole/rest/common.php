@@ -294,4 +294,4 @@ $app->get('/status', function() {
       jsonResponse(200, $response);
    } 
 );
-?>
+

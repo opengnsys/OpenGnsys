@@ -48,4 +48,4 @@ echo "<br>".$rs->campos["nemonico"];
 	}
 	$cont_parametros=$cont;
 }
-?>
+

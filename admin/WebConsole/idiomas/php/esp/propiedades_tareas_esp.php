@@ -20,4 +20,3 @@ $TbMsg[11]="Grupos de Aulas";
 $TbMsg[12]="Aulas";
 $TbMsg[13]="Grupos de Ordenadores";
 $TbMsg[14]="Ordenadores";
-?>

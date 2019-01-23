@@ -29,7 +29,7 @@ function validate_user($user,$password){
 				$thedata = $info[0]["dn"];					
 				if ($r=@ldap_bind($ds,$thedata,$password)){ 
 					$result['validation'] = 1;
-					// A parte de la validacion, se podrían coger otros datos...
+					// A parte de la validacion, se podrÃ­an coger otros datos...
 					/*
 					$result['name'] = $info[0]["cn"][0];
 					$result['dni'] = $info[0]["uhuuserdni"][0];
@@ -50,7 +50,7 @@ function validate_user($user,$password){
 }
 
 /**
- * Sincroniza una base de datos externa con la de opengnsys.
+ * Sincroniza una base de datos externa con la de OpenGnsys.
  * No es necesaria su implementacion, puede dejarse en blanco
  */
 function synchronize($validation){
@@ -71,5 +71,3 @@ function validate($VARS){
 	}
 	return $result;
 }
-
-?>

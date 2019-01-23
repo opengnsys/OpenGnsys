@@ -6,4 +6,4 @@ echo '<TD width=20></TD>';
 echo '<TD><A href=#><IMG border=0 src="../images/boton_confirmar.gif"  onclick="confirmar('.$opcion.')" ></A></TD>';
 echo '</TR>';
 echo '</TABLE>';
-?>
+

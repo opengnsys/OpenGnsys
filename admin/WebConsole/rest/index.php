@@ -72,4 +72,4 @@ $app->get('/',
 // Execute REST using Slim.
 $app->run();
 
-?>
+

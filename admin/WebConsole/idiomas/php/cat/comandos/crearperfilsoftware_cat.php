@@ -18,4 +18,4 @@
 	$TbMsg[10]='Descripció de la Imatge ';
 	$TbMsg[11]='Repositori de destí';
 
-?>
+

@@ -58,5 +58,5 @@
 	$TbMsg["WCRP35"]='Elige el metodo de transferencia';
 	$TbMsg["WCRP36"]='Elige herramienta de clonaci&oacute;n:';
 	$TbMsg["WCRP37"]='Elige compresor para la herramienta de clonaci&oacute;n:';
-?>
+
 

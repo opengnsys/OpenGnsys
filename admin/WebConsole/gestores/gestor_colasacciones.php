@@ -175,4 +175,4 @@ function enviaComandoActualizar($aplicacion)
 	if($trama_notificacion==1) return(true); // Devuelve respuesta	
 	return(false); // Error de actualización
 }
-?>
+

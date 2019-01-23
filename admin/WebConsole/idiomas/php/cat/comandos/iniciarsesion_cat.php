@@ -18,4 +18,4 @@
 	$TbMsg[10]='Nom de la Imatge ';
 	
 	
-?>
+

@@ -2,28 +2,27 @@
 //________________________________________________________________________________________________________
 //
 //	Fitxer d'idiomes php: informacion_menus_cat.php 
-//	Idioma: Català 
+//	Idioma: Catalï¿½ 
 //________________________________________________________________________________________________________
 	$TbMsg=array();
-	$TbMsg[0]='Ítems del Menú';
-	$TbMsg[1]='Informació del Menú';
-	$TbMsg[2]='Menú';
-	$TbMsg[3]='Informació Menú';
-	$TbMsg[4]='Propietats dels ítems';
+	$TbMsg[0]='ï¿½tems del Menï¿½';
+	$TbMsg[1]='Informaciï¿½ del Menï¿½';
+	$TbMsg[2]='Menï¿½';
+	$TbMsg[3]='Informaciï¿½ Menï¿½';
+	$TbMsg[4]='Propietats dels ï¿½tems';
 	$TbMsg[5]='Propietats';
-	$TbMsg[6]='Eliminar Ítem';
-	$TbMsg[7]='Títol';
-	$TbMsg[8]='Propietats dels ítems públics del Menú';
+	$TbMsg[6]='Eliminar ï¿½tem';
+	$TbMsg[7]='Tï¿½tol';
+	$TbMsg[8]='Propietats dels ï¿½tems pï¿½blics del Menï¿½';
 	$TbMsg[9]='Coordenada x';
 	$TbMsg[10]='Coordenada y';
 	$TbMsg[11]='Modalitat';
-	$TbMsg[12]='Propietats de los ítems privats del Menú';
-	$TbMsg[13]='Ítems públics ';
-	$TbMsg[14]='Ítems privats';
-	$TbMsg[15]='Ordre del ítem';
-	$TbMsg[16]='Literal del ítem';
+	$TbMsg[12]='Propietats de los ï¿½tems privats del Menï¿½';
+	$TbMsg[13]='ï¿½tems pï¿½blics ';
+	$TbMsg[14]='ï¿½tems privats';
+	$TbMsg[15]='Ordre del ï¿½tem';
+	$TbMsg[16]='Literal del ï¿½tem';
 	$TbMsg[17]='Nombre de la Imatge';
-	$TbMsg[18]='Menú simple';
-	$TbMsg[19]='Menú doble';
-	$TbMsg[20]='Codi del ítem';
-?>
+	$TbMsg[18]='Menï¿½ simple';
+	$TbMsg[19]='Menï¿½ doble';
+	$TbMsg[20]='Codi del ï¿½tem';

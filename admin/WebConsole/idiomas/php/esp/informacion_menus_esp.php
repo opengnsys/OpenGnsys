@@ -28,4 +28,4 @@
 	$TbMsg[20]='Código del item';
 	$TbMsg[21]='Ordenadores con este menú';	
 	$TbMsg[22]='Items';	
-?>
+

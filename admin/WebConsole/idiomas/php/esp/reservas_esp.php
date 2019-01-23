@@ -17,4 +17,4 @@
 	$TbMsg[9]='"Reservas"';
 	$TbMsg[10]='"Programaciones"';
 
-?>
+

@@ -34,4 +34,4 @@ function metefechaDB($fecha){
 function HoraValida($hora){
 	if ($hora=="00:00:00")return("");
 }
-?>
+

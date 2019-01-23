@@ -68,4 +68,4 @@ function Gestiona(){
 	}
 	return($resul);
 }
-?>
+

@@ -119,4 +119,4 @@ function Gestiona(){
 	}
 	return($resul);
 }
-?>
+

@@ -16,4 +16,4 @@
 	$TbMsg[8]='Comentarios';
 	$TbMsg[9]='Partición';
 	$TbMsg[10]='Comentarios';		
-?>
+

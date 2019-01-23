@@ -8,4 +8,3 @@
 	$TbMsg[0]='Parámetros de los Comandos del Procedimiento';
 	$TbMsg[1]='Parámetro';
 	$TbMsg[2]='Valor';
-?>

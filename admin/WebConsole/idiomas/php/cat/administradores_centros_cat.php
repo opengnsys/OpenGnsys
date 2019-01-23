@@ -11,4 +11,4 @@
 	$TbMsg[3]='Nom de l\'administrador';
 	$TbMsg[4]='(*)Per incluir algun administrador en aquesta Unitat Organitzativa ha de fer click sobre la casella de verificació corresponent.';
 	$TbMsg[5]='Administradors disponibles';
-?>
+

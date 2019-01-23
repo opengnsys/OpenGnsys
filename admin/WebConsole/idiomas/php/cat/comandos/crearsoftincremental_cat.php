@@ -16,4 +16,4 @@
 	$TbMsg[8]='Par';
 	$TbMsg[9]='Nom Perfil';
 	$TbMsg[10]='Software incremental disponible';
-?>
+

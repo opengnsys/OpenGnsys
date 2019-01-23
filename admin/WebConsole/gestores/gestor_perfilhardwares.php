@@ -166,5 +166,5 @@ function SubarbolXML_perfileshard($idperfilhard,$descripcion){
 		$cadenaXML.='</PERFILESHARDWARES>';
 		return($cadenaXML);
 }
-?>
+
 

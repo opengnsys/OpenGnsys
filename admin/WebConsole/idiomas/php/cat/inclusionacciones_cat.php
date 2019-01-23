@@ -18,4 +18,4 @@ $TbMsg[8]='Procediments disponibles';
 $TbMsg[9]='Tasques disponibles';
 $TbMsg[10]='Paràmetres';
 
-?>
+

@@ -26,4 +26,4 @@
 	$TbMsg[18]='Grand�ria de la imatge disponible si Repositori i Servidor Web allotjats al mateix Servidor';
 	$TbMsg[19]='Tipus';
 	$TbMsg["CONFIG_NOCONFIG"]='Sense configuraci�: client no connectat al servidor.';
-?>
+

@@ -58,5 +58,5 @@ $TbMsg["SEND"]='Protocolo';
 $TbMsg["WARN_PROTOCOL"]='La opción "protocolo" sólo se utiliza en las sincronizadas tipo archivo la primera vez que se envía la imagen a caché. <br>En otro caso el protocolo es RSYNC.';
 $TbMsg["WARN_DIFFIMAGE"]='Hay una nueva versi&oacute; de la imagen (se muestra la diferencia de revisiones).';
 $TbMsg["WARN_DIFFDISKSIZE"]='ATENCI&Oacute;N: no se pueden particionar grupos de ordenadores con distinto tama&ntilde;o de disco.<br>Marcar la opción de &quot;Desagrupar por tama&ntilde;o de partici&oacute;n&quot; y pulsar &quot;Aceptar&quot; en el men&uacute; superior para aplicar esta operaci&oacute;n adecuadamente.';
-?>
+
 

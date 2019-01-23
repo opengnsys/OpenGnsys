@@ -27,4 +27,3 @@ $TbMsg[18]="(Sin acción anticipada)";
 $TbMsg[19]="Tarea previa";
 $TbMsg[20]="Trabajo previo";
 
-?>

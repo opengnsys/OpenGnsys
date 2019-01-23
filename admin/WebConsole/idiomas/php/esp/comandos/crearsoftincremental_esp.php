@@ -22,4 +22,4 @@
 	$TbMsg[14]='Copiar Incremental en cache';
 	$TbMsg[15]='Borrarla previamente de la cache';	
 	$TbMsg[16]='No borrar archivos en destino';			
-?>
+

@@ -166,4 +166,4 @@ function SubarbolXML_ComponenteHardwares($cmd,$idhardware,$descripcion,$idtipoha
 		$cadenaXML.='</COMPONENTEHARDWARES>';
 		return($cadenaXML);
 }
-?>
+

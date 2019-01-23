@@ -194,4 +194,4 @@ function SubarbolXML_menus($idmenu,$descripcion){
 	$cadenaXML.='</MENU>';
 	return($cadenaXML);
 }
-?>
+

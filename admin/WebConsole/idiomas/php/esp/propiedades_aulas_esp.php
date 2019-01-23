@@ -59,5 +59,5 @@ $TbMsg['COMM_REMOTEACCESS']="permitir gesti&oacute;n de acceso remoto a los orde
 $TbMsg['COMM_DEFOGLIVE']="Asignado por el administrador";
 // Ticket-816 PCprofesor
 $TbMsg['PROP_PROFCOMPUTER']="Ordenador de profesor";
-?>
+
 

@@ -13,4 +13,3 @@
 	$TbMsg[5]='Activar rembo Offline';
 	$TbMsg[6]='Àmbit';
 
-?>

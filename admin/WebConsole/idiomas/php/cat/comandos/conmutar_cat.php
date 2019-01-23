@@ -13,4 +13,3 @@
 	$TbMsg[5]='Commutar ordinadors';
 	$TbMsg[6]='Àmbit';
 
-?>

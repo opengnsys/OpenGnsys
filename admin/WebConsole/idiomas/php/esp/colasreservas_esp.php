@@ -50,4 +50,3 @@ $TbMsg=array();
 	$TbMsg[28]="Tarea previa";
 	$TbMsg[29]="Trabajo previo";
 
-?>

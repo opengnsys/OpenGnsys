@@ -10,4 +10,4 @@ $TbMsg['DOWNLOADS']="Descàrregues disponibles";
 $TbMsg['NOFILES']="No hi ha fitxers disponibles";
 
 // Avís: no hi ha cap deixar caràcter fora del codi PHP.
-?>
+

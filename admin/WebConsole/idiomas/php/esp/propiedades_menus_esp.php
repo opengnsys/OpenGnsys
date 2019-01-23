@@ -22,4 +22,4 @@ $TbMsg[15]="URL menú personalizado";
 $TbMsg[17]="Resolución de pantalla";
 $TbMsg[18]="Imagen de fondo";
 $TbMsg["PROP_DEFAULT"]="Detectada por defecto";
-?>
+

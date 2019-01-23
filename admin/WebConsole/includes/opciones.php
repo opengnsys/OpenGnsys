@@ -13,4 +13,3 @@ $op_modificacion=2;
 $op_eliminacion=3;
 $op_movida=4;
 $op_ejecucion=5;
-?>

@@ -39,4 +39,4 @@
 	$TbMsg[31]='Tareas';
 	$TbMsg[32]='';
 	$TbMsg[33]='Acciones';
-?>
+

@@ -180,4 +180,4 @@ class SockHidra{
 		return($cadenaret);
 	}
  }
-?>
+

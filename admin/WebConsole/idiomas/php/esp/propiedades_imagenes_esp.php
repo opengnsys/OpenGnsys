@@ -32,4 +32,4 @@ $TbMsg[22]="Introduzca otra Descripci&oacute;n";
 $TbMsg['PROP_OS']="Sistema operativo";
 $TbMsg['PROP_REMOTEACCESS']="Acceso remoto";
 $TbMsg['COMM_REMOTEACCESS']="permitir gesti&oacute;n de acceso remoto a los ordenadores";
-?>
+

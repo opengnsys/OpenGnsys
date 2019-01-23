@@ -23,5 +23,5 @@ $TbMsg["HARDWARE_net"]="Tarjetas de red";
 $TbMsg["HARDWARE_sto"]="Controladores de almacenamiento";
 $TbMsg["HARDWARE_usb"]="Controladores USB";
 $TbMsg["HARDWARE_vga"]="Tarjetas gr&aacute;ficas";
-?>
+
 
