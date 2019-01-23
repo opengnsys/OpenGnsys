@@ -186,7 +186,7 @@ if (!empty ($valor) or $criterio == "duplic" or $criterio == "profe" or $criteri
 		echo '<p class="subcabeceras" align="center">'.$TbMsg["SEARCH_NOMATCHES"].'</p>';
 	} else {
 ?>
-<div align="center" style="margin:20;">
+<div align="center" style="margin: 20px;">
 <table class="tabla_listados">
   <caption><?php echo $TbMsg["SEARCH_RESULTS"];?></caption>
   <tr>
@@ -210,7 +210,7 @@ if (!empty ($valor) or $criterio == "duplic" or $criterio == "profe" or $criteri
 <hr width="50%">
 <?php } ?>
 
-<div align="center" style="margin:20;">
+<div align="center" style="margin: 20px;">
 	<form action="#" class="formulariodatos" name="fdatos" method="post">
 		<?php echo $TbMsg["SEARCH_CRITERIA"] ?>:
 		<select name="criterio" id="criterio" onchange="if (document.fdatos.criterio.value=='duplic' || document.fdatos.criterio.value=='profe' || document.fdatos.criterio.value=='norepo') document.fdatos.valor.disabled=true; else document.fdatos.valor.disabled=false">
@@ -223,7 +223,7 @@ if (!empty ($valor) or $criterio == "duplic" or $criterio == "profe" or $criteri
 		</select>
 		<input type="text" name="valor" id="valor" size="20" />
 		<div align="center">
-			<img onclick="confirmar()" src="../images/botonok.png" style="margin:20;cursor: hand" />
+			<img onclick="confirmar()" src="../images/botonok.png" style="margin: 20px; cursor: hand" />
 		</div>
 	</form>
 </div>

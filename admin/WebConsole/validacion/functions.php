@@ -79,7 +79,7 @@ function GeneraMenu($rs,$tipo,$iph){
 	global $ITEMS_PUBLICOS;
 	global $ITEMS_PRIVADOS;
 	global $UrlPaginaIconos;
-
+	$lit='';
 	$titulo=$rs->campos["titulo"]; 
 	$modalidad=$rs->campos["modalidad"]; 
 	$smodalidad=$rs->campos["smodalidad"]; 
@@ -163,5 +163,4 @@ function GeneraMenu($rs,$tipo,$iph){
 	return($codeHTML);
 }
 
-?>
 

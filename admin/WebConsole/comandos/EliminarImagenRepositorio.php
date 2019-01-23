@@ -16,12 +16,9 @@ include_once("../idiomas/php/".$idioma."/comandos/opcionesacciones_".$idioma.".p
 
 include_once("../gestores/relaciones/imagenes_eliminacion.php");
 
-if (isset($_POST["opcion"])) {$opcion=$_POST["opcion"];}else{$opcion;} // Recoge parametros
-//$opcion=$_POST["opcion"]; // Recoge parametros
-if (isset($_POST["idrepositorio"])) {$idrepositorio=$_POST["idrepositorio"];}else{$idrepositorio;}
-//$idrepositorio=$_POST["idrepositorio"]; 
+if (isset($_POST["opcion"])) {$opcion=$_POST["opcion"];}else{$opcion='';} // Recoge parametros
+if (isset($_POST["idrepositorio"])) {$idrepositorio=$_POST["idrepositorio"];}else{$idrepositorio=0;}
 if (isset($_POST["grupoid"])) {$grupoid=$_POST["grupoid"];}else{$grupoid='';}
-//$grupoid=$_POST["grupoid"]; 
 $idcentro=$_SESSION["widcentro"];
 if (isset($_GET["opcion"])) $opcion=$_GET["opcion"]; // Recoge parametros
 if (isset($_GET["idrepositorio"])) $idrepositorio=$_GET["idrepositorio"]; 
@@ -32,13 +29,12 @@ if (isset($_POST["modov"])) {$modov=$_POST["modov"];}else{$modov=0;}
 //________________________________________________________________________________________________________
 $idcomando=10;
 $descricomando="Ejecutar Script";
-//echo $ambito."<br>";
-//echo $idambito."<br>";
 $funcion="EjecutarScript";
-//echo $atributos."<br>";
-//echo $gestor;
 $gestor="../comandos/gestores/gestor_Comandos.php";
 //$gestor="./ElimininarImagenRepositorio.php";
+$espaciorepos=array();
+$separarogunit=0;
+$iprepositorio='';
 //________________________________________________________________________________________________________
 $cmd=CreaComando($cadenaconexion);
 if (!$cmd)
@@ -145,8 +141,7 @@ $repolocal="si";
 
 	sort($imarepo); // Ordenamos el Array
 
-	if (isset($_POST["contar"])) {$cuantos=$_POST["contar"];}else{$cuantos=0;$contar;}
-	//$cuantos=$_POST["contar"];
+	if (isset($_POST["contar"])) {$cuantos=$_POST["contar"];}else{$cuantos=0;}
 	for ($i=1;$i<=$cuantos;$i++)
 	{
 		//#########################################################################
@@ -627,4 +622,3 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 </HTML>
 
 <?php } ?>
-

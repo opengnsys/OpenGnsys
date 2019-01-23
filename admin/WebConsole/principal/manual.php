@@ -37,7 +37,8 @@ foreach ($fichero as $ficheros) {
 </head>
 
 <body class='acercade'>
-<div><p align=center class=cabeceras><img  border=0 nod="aulas-1" value="Sala Virtual" style="cursor:pointer" src="../images/iconos/aula.gif" >&nbsp;&nbsp;<?php echo $TbMsg["MANUAL"] ?><br>
+<p align=center class=cabeceras><img border=0 style="cursor: pointer;" src="../images/iconos/aula.gif" >&nbsp;&nbsp;<?php echo $TbMsg["MANUAL"] ?></p>
+<br>
 
 <table width='100%' border='0'>
   <tr>

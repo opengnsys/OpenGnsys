@@ -28,9 +28,9 @@ if (!$cmd)
 //___________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE>Administraci??n web de aulas</TITLE>
 <HEAD>
-        <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<TITLE>Administración web de aulas</TITLE>
 <LINK rel="stylesheet" type="text/css" href="../estilos.css">
 <SCRIPT language="javascript" src="./jscripts/EliminarImagenCache.js"></SCRIPT>
 <SCRIPT language="javascript" src="../clases/jscripts/HttpLib.js"></SCRIPT>
@@ -159,9 +159,7 @@ switch($ambito){
 <?php }?>
 <!-- //#agp-->
 
-        <P align=center>
-        <SPAN align=center class=subcabeceras><?php echo $TbMsg[7] ?></SPAN>
-	</P>
+        <P align=center><SPAN class=subcabeceras><?php echo $TbMsg[7] ?></SPAN></P>
 
 <form  align=center name="fdatos"> 
      <?php echo tabla_configuraciones($cmd,$idambito); ?>
@@ -330,8 +328,7 @@ switch($ambito){
 
         $tablaHtml="";
 
-        $rs->Comando=&$cmd;  
-        $rs=new Recordset; 
+        $rs=new Recordset;
         $rs->Comando=&$cmd; 
         if (!$rs->Abrir()) return($tablaHtml); // Error al abrir recordset
         $rs->Primero(); 
