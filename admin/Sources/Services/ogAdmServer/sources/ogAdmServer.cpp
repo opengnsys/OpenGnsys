@@ -1423,10 +1423,10 @@ static bool Arrancar(TRAMA* ptrTrama, struct og_client *cli)
 bool Levanta(char *iph, char *mac, char *mar)
 {
 	char *ptrIP[MAXIMOS_CLIENTES],*ptrMacs[MAXIMOS_CLIENTES];
+	unsigned int on = 1;
+	sockaddr_in local;
 	int i, lon, res;
 	SOCKET s;
-	bool bOpt;
-	sockaddr_in local;
 
 	/* Creación de socket para envío de magig packet */
 	s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
@@ -1434,20 +1434,17 @@ bool Levanta(char *iph, char *mac, char *mar)
 		syslog(LOG_ERR, "cannot create socket for magic packet\n");
 		return false;
 	}
-	bOpt = true; // Pone el socket en modo Broadcast
-	res = setsockopt(s, SOL_SOCKET, SO_BROADCAST, (char *) &bOpt, sizeof(bOpt));
+	res = setsockopt(s, SOL_SOCKET, SO_BROADCAST, (unsigned int *) &on,
+			 sizeof(on));
 	if (res < 0) {
 		syslog(LOG_ERR, "cannot set broadcast socket\n");
 		return false;
 	}
+	memset(&local, 0, sizeof(local));
 	local.sin_family = AF_INET;
-	local.sin_port = htons((short) PUERTO_WAKEUP);
-	local.sin_addr.s_addr = htonl(INADDR_ANY); // cualquier interface
-	if (bind(s, (sockaddr *) &local, sizeof(local)) < 0) {
-		syslog(LOG_ERR, "cannot bind magic socket\n");
-		exit(EXIT_FAILURE);
-	}
-	/* fin creación de socket */
+	local.sin_port = htons(PUERTO_WAKEUP);
+	local.sin_addr.s_addr = htonl(INADDR_ANY);
+
 	lon = splitCadena(ptrIP, iph, ';');
 	lon = splitCadena(ptrMacs, mac, ';');
 	for (i = 0; i < lon; i++) {
@@ -1488,7 +1485,13 @@ bool WakeUp(SOCKET *s, char* iph, char *mac, char *mar)
 	for (i = 0; i < 6; i++) // Primera secuencia de la trama Wake Up (0xFFFFFFFFFFFF)
 		Trama_WakeUp.secuencia_FF[i] = 0xFF;
 
-	PasaHexBin(mac, HDaddress_bin); // Pasa a binario la MAC
+	sscanf(mac, "%02x%02x%02x%02x%02x%02x",
+	       (unsigned int *)&HDaddress_bin[0],
+	       (unsigned int *)&HDaddress_bin[1],
+	       (unsigned int *)&HDaddress_bin[2],
+	       (unsigned int *)&HDaddress_bin[3],
+	       (unsigned int *)&HDaddress_bin[4],
+	       (unsigned int *)&HDaddress_bin[5]);
 
 	for (i = 0; i < 16; i++) // Segunda secuencia de la trama Wake Up , repetir 16 veces su la MAC
 		memcpy(&Trama_WakeUp.macbin[i][0], &HDaddress_bin, 6);
