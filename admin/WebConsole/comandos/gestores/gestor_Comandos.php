@@ -20,6 +20,10 @@ include_once("../../includes/RecopilaIpesMacs.php");
 //________________________________________________________________________________________________________
 include_once("../includes/capturaacciones.php");
 //________________________________________________________________________________________________________
+
+define("IDCOMANDWAKEUP", 1);
+define("IDCOMANDSENDMESSAGE", 16);
+
 // Recoge parametros de seguimiento
 $sw_ejya="";
 $sw_seguimiento="";
@@ -174,8 +178,7 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 		$ValorParametros=extrae_parametros($parametros,chr(13),'=');
 		$script=@urldecode($ValorParametros["scp"]);
 		if($sw_ejya=='on'){ 	
-			// comando 16 sólo agente nuevo
-			if ($idcomando != 16){
+			if ($idcomando != IDCOMANDSENDMESSAGE && $idcomando != IDCOMANDWAKEUP) {
 			    // Envio al servidor 
 			    $shidra=new SockHidra($servidorhidra,$hidraport); 
 			    if ($shidra->conectar()){ // Se ha establecido la conexión con el servidor hidra
