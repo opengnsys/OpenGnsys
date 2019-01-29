@@ -142,7 +142,6 @@ esac
 #@exception OG_ERR_FORMAT    formato incorrecto.
 #@exception OG_ERR_NOTFOUND  fichero o dispositivo no encontrado (partición de sistema o EFI).
 #@exception OG_ERR_NOTOS     sin sistema operativo.
-#@note    Si existe el cargador en la partición de sistema puede no ser válido
 #*/ ##
 function ogRestoreEfiBootLoader () {
 # Variables locales

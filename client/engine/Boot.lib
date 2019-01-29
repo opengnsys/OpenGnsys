@@ -119,18 +119,20 @@ case "$TYPE" in
     Windows)
         # Comprobar tipo de sistema.
         if ogIsEfiActive; then
+            BOOTLABEL=$(printf "Part-%02d-%02d" $1 $2)
             # Obtener parcición EFI.
             read -e EFIDISK EFIPART <<<"$(ogGetEsp)"
             [ -n "$EFIPART" ] || ogRaiseError $OG_ERR_PARTITION "ESP" || return $?
             EFIDIR=$(ogMount $EFIDISK $EFIPART) || exit $?
             # Comprobar cargador (si no existe buscar por defecto en ESP).
-            LOADER=$(ogGetPath $1 $2 /Boot/bootmgfw.efi)
-            [ -z "$LOADER" ] && LOADER=$(ogGetPath $EFIDIR/EFI/Microsoft/Boot/bootmgfw.efi)
+            #LOADER=$(ogGetPath $1 $2 /Boot/bootmgfw.efi)
+            LOADER=$(ogGetPath $EFIDIR/EFI/$BOOTLABEL/Boot/bootmgfw.efi)
+            [ -z "$LOADER" ] && BOOTLABEL=Microsoft && LOADER=$(ogGetPath $EFIDIR/EFI/Microsoft/Boot/bootmgfw.efi)
             [ -n "$LOADER" ] || ogRaiseError $OG_ERR_NOTOS "$1 $2 ($TYPE, EFI)" || return $?
-            # Crear directorio para el cargador y copiar los ficheros.
-            BOOTLABEL=$(printf "Part-%02d-%02d" $1 $2)
-            mkdir -p $EFIDIR/EFI/$BOOTLABEL
-            cp -a $(dirname "$LOADER") $EFIDIR/EFI/$BOOTLABEL
+            # El directorio se crea en la postconfiguración
+            ## Crear directorio para el cargador y copiar los ficheros.
+            #mkdir -p $EFIDIR/EFI/$BOOTLABEL
+            #cp -a $(dirname "$LOADER") $EFIDIR/EFI/$BOOTLABEL
             # Borrar cargador guardado con la misma etiqueta.
             BOOTNO=$(efibootmgr -v | awk -v L=$BOOTLABEL '{if ($2==L) print $1}')
             [ -n "$BOOTNO" ] && efibootmgr -B -b ${BOOTNO:4:4}
@@ -141,7 +143,7 @@ case "$TYPE" in
             [ -n "$BOOTNO" ] && efibootmgr -n ${BOOTNO:4:4}
             reboot
         else
-            # Arranque BIOS: compruebar si hay un cargador de Windows.
+            # Arranque BIOS: comprueba si hay un cargador de Windows.
             for f in io.sys ntldr bootmgr; do
                 FILE="$(ogGetPath $1 $2 $f 2>/dev/null)"
                 [ -n "$FILE" ] && LOADER="$f"
@@ -479,7 +481,7 @@ fi
 #TODO, solo si es ntfs o fat
 PARTYPE=$(ogGetPartitionId $1 $2) 
 case "$PARTYPE" in
-	1|4|6|7|b|c|e|f|17|700)
+	1|4|6|7|b|c|e|f|17|700|EF00)
 	;;
 	*)
 	return $(ogRaiseError $OG_ERR_PARTITION; echo $?)
@@ -498,9 +500,7 @@ main_part=$PART
 fix_first_sector=yes
 EOF
 
-spartlnx.run -cui -nm -a -f $FILE &
-sleep 5
-ps aux > /dev/null | grep $! | grep -E "T|S" | kill -9 $! > /dev/null
+timeout --foreground --signal=SIGKILL 5s spartlnx.run -cui -nm -a -f $FILE
 rm -f $FILE
 }
 
@@ -526,12 +526,15 @@ rm -f $FILE
 #@version 1.1.0 - Soporte para Windows 10.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2016-01-19
+#@version 1.1.1 - Compatibilidad con UEFI (ticket #802 #889)
+#@author  Irina Gomez, ETSII Universidad de Sevilla
+#@date    2019-01-28
 #*/ ##
 
 function ogWindowsBootParameters ()
 {
 # Variables locales.
-local PART DISK FILE WINVER MOUNT
+local PART DISK BOOTLABEL BCDFILE BOOTDISK BOOTPART FILE WINVER MOUNT
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -549,6 +552,19 @@ ogDiskToDev $1 $2 || return $(ogRaiseError $OG_ERR_PARTITION; echo $?)
 let DISK=$1-1
 PART=$2	
 FILE=/tmp/temp$$
+if [ ogIsEfiActive ]; then
+    read BOOTDISK BOOTPART <<< $(ogGetEsp)
+    ogUnmount $BOOTDISK $BOOTPART || ogRaiseError $OG_ERR_PARTITION "ESP: $BOOTDISK $BOOTPART" || return $?
+
+    let BOOTDISK=$BOOTDISK-1
+    BOOTLABEL=$(printf "Part-%02d-%02d" $1 $2)
+    BCDFILE="boot_BCD_file=/EFI/$BOOTLABEL/Boot/BCD"
+else
+    BOOTDISK=$DISK
+    BOOTPART=$PART
+    BCDFILE=""
+fi
+
 
 # Obtener versión de Windows.
 WINVER=$(ogGetOsVersion $1 $2 | awk -F"[: ]" '$1=="Windows" {if ($3=="Server") print $2,$3,$4; else print $2,$3;}')
@@ -567,69 +583,94 @@ ogUnmount $1 $2 || return $(ogRaiseError $OG_ERR_PARTITION; echo $?)
 
 #Preparando instruccion	Windows Resume Application
 cat > $FILE <<EOF
-boot_disk=$DISK
-boot_main_part=$PART
+boot_disk=$BOOTDISK
+boot_main_part=$BOOTPART
+$BCDFILE
 disk=$DISK
 main_part=$PART
 boot_entry=Windows Resume Application
 EOF
-spartlnx.run -cui -nm -w -f $FILE &
-sleep 5
-ps aux > /dev/null | grep $! | grep -E "T|S" | kill -9 $! > /dev/null
+timeout --foreground --signal=SIGKILL 5s spartlnx.run -cui -nm -w -f $FILE
 
- 
 
 #Preparando instruccion	tipo windows
 cat > $FILE <<EOF
-boot_disk=$DISK
-boot_main_part=$PART
+boot_disk=$BOOTDISK
+boot_main_part=$BOOTPART
+$BCDFILE
 disk=$DISK
 main_part=$PART
 boot_entry=$WINVER
 EOF
-spartlnx.run -cui -nm -w -f $FILE &
-sleep 5
-ps aux > /dev/null | grep $! | grep -E "T|S" | kill -9 $! > /dev/null
-
+timeout --foreground --signal=SIGKILL 5s spartlnx.run -cui -nm -w -f $FILE
 
 ##Preparando instruccion	Ramdisk Options
 cat > $FILE <<EOF
-boot_disk=$DISK
-boot_main_part=$PART
+boot_disk=$BOOTDISK
+boot_main_part=$BOOTPART
+$BCDFILE
 disk=$DISK
 main_part=$PART
 boot_entry=Ramdisk Options
 EOF
-spartlnx.run -cui -nm -w -f $FILE &
-sleep 5
-ps aux > /dev/null | grep $! | grep -E "T|S" | kill -9 $! > /dev/null
+timeout --foreground --signal=SIGKILL 5s spartlnx.run -cui -nm -w -f $FILE
 
+##Preparando instruccion	Recovery Environment
+cat > $FILE <<EOF
+boot_disk=$BOOTDISK
+boot_main_part=$BOOTPART
+$BCDFILE
+disk=$DISK
+main_part=$PART
+boot_entry=Windows Recovery Environment
+EOF
+timeout --foreground --signal=SIGKILL 5s spartlnx.run -cui -nm -w -f $FILE
+
+##Preparando instruccion	Recovery
+cat > $FILE <<EOF
+boot_disk=$BOOTDISK
+boot_main_part=$BOOTPART
+$BCDFILE
+disk=$DISK
+main_part=$PART
+boot_entry=Windows Recovery
+EOF
+timeout --foreground --signal=SIGKILL 5s spartlnx.run -cui -nm -w -f $FILE
 
 #Preparando instruccion	Windows Boot Manager
 cat > $FILE <<EOF
-boot_disk=$DISK
-boot_main_part=$PART
-disk=$DISK
-main_part=$PART
+boot_disk=$BOOTDISK
+boot_main_part=$BOOTPART
+$BCDFILE
+disk=$BOOTDISK
+main_part=$BOOTPART
 boot_entry=Windows Boot Manager
 EOF
-spartlnx.run -cui -nm -w -f $FILE &
-sleep 5
-ps aux > /dev/null | grep $! | grep -E "T|S" | kill -9 $! > /dev/null
-
+timeout --foreground --signal=SIGKILL 5s spartlnx.run -cui -nm -w -f $FILE
 
 #Preparando instruccion	Herramienta de diagnóstico de memoria de Windows
 cat > $FILE <<EOF
-boot_disk=$DISK
-boot_main_part=$PART
-disk=$DISK
-main_part=$PART
+boot_disk=$BOOTDISK
+boot_main_part=$BOOTPART
+$BCDFILE
+disk=$BOOTDISK
+main_part=$BOOTPART
 boot_entry=Herramienta de diagnóstico de memoria de Windows
 EOF
-spartlnx.run -cui -nm -w -f $FILE &
-sleep 5
-ps aux > /dev/null | grep $! | grep -E "T|S" | kill -9 $! > /dev/null
+timeout --foreground --signal=SIGKILL 5s spartlnx.run -cui -nm -w -f $FILE
 
+#Preparando instruccion	Herramienta de diagnóstico de memoria de Windows
+cat > $FILE <<EOF
+boot_disk=$BOOTDISK
+boot_main_part=$BOOTPART
+$BCDFILE
+disk=$BOOTDISK
+main_part=$BOOTPART
+boot_entry=Herramienta de diagn<f3>stico de memoria de Windows
+EOF
+timeout --foreground --signal=SIGKILL 5s spartlnx.run -cui -nm -w -f $FILE
+
+rm -f $FILE
 }
 
 
@@ -703,9 +744,7 @@ main_part=$REGISTREDPART
 ;ext_part
 part_letter=$REGISTREDVOL
 EOF
-spartlnx.run -cui -nm -u -f $FILE &
-sleep 5
-ps aux > /dev/null | grep $! | grep -E "T|S" | kill -9 $! > /dev/null
+timeout --foreground --signal=SIGKILL 5s spartlnx.run -cui -nm -u -f $FILE
 
 }
 
