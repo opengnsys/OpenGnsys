@@ -47,6 +47,7 @@ from opengnsys import operations
 from opengnsys.log import logger
 from opengnsys.scriptThread import ScriptExecutorThread
 
+
 # Error handler decorator.
 def catchBackgroundError(fnc):
     def wrapper(*args, **kwargs):
@@ -57,9 +58,10 @@ def catchBackgroundError(fnc):
             this.REST.sendMessage('error?id={}'.format(kwargs.get('requestId', 'error')), {'error': '{}'.format(e)})
     return wrapper
 
+
 class OpenGnSysWorker(ServerWorker):
     name = 'opengnsys'
-    interface = None  # Binded interface for OpenGnsys
+    interface = None  # Bound interface for OpenGnsys
     loggedin = False  # User session flag
     locked = {}
     random = None     # Random string for secure connections
@@ -106,7 +108,7 @@ class OpenGnSysWorker(ServerWorker):
             except OSError:
                 pass
         # Copy file "HostsFile.FirstOctetOfIPAddress" to "HostsFile", if it exists
-        # (used in "exam mode" of the University of Seville)
+        # (used in "exam mode" from the University of Seville)
         hostsFile = os.path.join(operations.get_etc_path(), 'hosts')
         newHostsFile = hostsFile + '.' + self.interface.ip.split('.')[0]
         if os.path.isfile(newHostsFile):
@@ -114,14 +116,28 @@ class OpenGnSysWorker(ServerWorker):
         # Generate random secret to send on activation
         self.random = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(self.length))
         # Send initialization message
-        self.REST.sendMessage('ogagent/started', {'mac': self.interface.mac, 'ip': self.interface.ip, 'secret': self.random, 'ostype': operations.osType, 'osversion': operations.osVersion})
+        try:
+            try:
+                self.REST.sendMessage('ogagent/started', {'mac': self.interface.mac, 'ip': self.interface.ip,
+                                                          'secret': self.random, 'ostype': operations.osType,
+                                                          'osversion': operations.osVersion})
+            except:
+                # Trying to initialize on alternative server, if defined
+                # (used in "exam mode" from the University of Seville)
+                self.REST = REST(self.service.config.get('opengnsys', 'altremote'))
+                self.REST.sendMessage('ogagent/started', {'mac': self.interface.mac, 'ip': self.interface.ip,
+                                                          'secret': self.random, 'ostype': operations.osType,
+                                                          'osversion': operations.osVersion, 'alt_url': True})
+        except:
+            logger.error('Initialization error')
 
     def onDeactivation(self):
         """
         Sends OGAgent stopping notification to OpenGnsys server
         """
         logger.debug('onDeactivation')
-        self.REST.sendMessage('ogagent/stopped', {'mac': self.interface.mac, 'ip': self.interface.ip, 'ostype': operations.osType, 'osversion': operations.osVersion})
+        self.REST.sendMessage('ogagent/stopped', {'mac': self.interface.mac, 'ip': self.interface.ip,
+                                                  'ostype': operations.osType, 'osversion': operations.osVersion})
 
     def processClientMessage(self, message, data):
         logger.debug('Got OpenGnsys message from client: {}, data {}'.format(message, data))
@@ -133,7 +149,8 @@ class OpenGnSysWorker(ServerWorker):
         user, sep, language = data.partition(',')
         logger.debug('Received login for {} with language {}'.format(user, language))
         self.loggedin = True
-        self.REST.sendMessage('ogagent/loggedin', {'ip': self.interface.ip, 'user': user, 'language': language, 'ostype': operations.osType, 'osversion': operations.osVersion})
+        self.REST.sendMessage('ogagent/loggedin', {'ip': self.interface.ip, 'user': user, 'language': language,
+                                                   'ostype': operations.osType, 'osversion': operations.osVersion})
 
     def onLogout(self, user):
         """
@@ -200,6 +217,7 @@ class OpenGnSysWorker(ServerWorker):
         """
         logger.debug('Received reboot operation')
         self.checkSecret(server)
+
         # Rebooting thread.
         def rebt():
             operations.reboot()
@@ -212,6 +230,7 @@ class OpenGnSysWorker(ServerWorker):
         """
         logger.debug('Received poweroff operation')
         self.checkSecret(server)
+
         # Powering off thread.
         def pwoff():
             time.sleep(2)

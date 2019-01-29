@@ -33,7 +33,6 @@
 from __future__ import unicode_literals
 
 from ConfigParser import SafeConfigParser
-from .log import logger
 
 config = None
 
