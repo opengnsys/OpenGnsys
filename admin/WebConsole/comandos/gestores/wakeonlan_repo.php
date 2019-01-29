@@ -81,6 +81,7 @@ function existREPO($repo, $repos){
 	$index = 0;
 	while(!$found && $index < count($repos)){
 		$r = $repos[$index];
+		$index++;
 		if($r == $repo)
 			$found=true;
 	}
