@@ -191,36 +191,44 @@ $app->get('/repository/image(/:ouname)/:imagename(/)', 'validateRepositoryApiKey
  */
 $app->post('/repository/poweron', 'validateRepositoryApiKey',
     function() use($app) {
-		// The macs parameter must come in the post (JSON object with array of MACs)
-		$data = json_decode($app->request()->getBody());
-		if(empty($data->macs)){
-			// Print error message.
-			$response['message'] = 'Required param macs not found';
-			jsonResponse(400, $response);
-		}
-		else{
-			// Execute WakeOnLan command with ogAdmServer
-			$strMacs = implode(';', $data->macs);
-			$strMacs = str_replace(':', '', $strMacs);
-			$strIps = implode(';', $data->ips);
-			$params="nfn=Arrancar" . chr(13) . "mac=" . $strMacs . chr(13) . "iph=" . $strIps . chr(13) . "mar=" . $data->mar . 
-				chr(13);
-			$shidra=new SockHidra("127.0.0.1", "2008");
-			if ($shidra->conectar()) { // The connection to the hydra server has been established
-				$resul=$shidra->envia_comando($params);
-				if($resul) {
-					$frame=$shidra->recibe_respuesta();
-					$hlonprm=hexdec(substr($frame, LENHEAD, LENHEXPRM));
-					$params=substr($frame, LENHEAD + LENHEXPRM, $hlonprm);
-					$ParamsValue=extrae_parametros($params, chr(13), '=');
-					$resul=$ParamsValue["res"];
-					jsonResponse(200, $resul);
-				} else {
-					$response['message'] = 'Error in ogAdmServer';
-					jsonResponse(404, $response);
+		// Fetch repository token from ogAdmServer.cfg configuration file.
+		@$confFile = parse_ini_file('../../etc/ogAdmServer.cfg', 'r');
+		if ($confFile) {
+			// The macs parameter must come in the post (JSON object with array of MACs)
+			$data = json_decode($app->request()->getBody());
+			if (empty($data->macs)) {
+				// Print error message.
+				$response['message'] = 'Required param macs not found';
+				jsonResponse(400, $response);
+			} else {
+				// Execute WakeOnLan command with ogAdmServer
+				$strMacs = implode(';', $data->macs);
+				$strMacs = str_replace(':', '', $strMacs);
+				$strIps = implode(';', $data->ips);
+				$params="nfn=Arrancar" . chr(13) . "mac=" . $strMacs . chr(13) . "iph=" . $strIps . chr(13) . 
+					"mar=" . $data->mar . chr(13);
+				$shidra=new SockHidra($confFile['ServidorAdm'], $confFile['PUERTO']);
+				if ($shidra->conectar()) { // The connection to the hydra server has been established
+					$resul=$shidra->envia_comando($params);
+					if($resul) {
+						$frame=$shidra->recibe_respuesta();
+						$hlonprm=hexdec(substr($frame, LENHEAD, LENHEXPRM));
+						$params=substr($frame, LENHEAD + LENHEXPRM, $hlonprm);
+						$ParamsValue=extrae_parametros($params, chr(13), '=');
+						$resul=$ParamsValue["res"];
+						jsonResponse(200, $resul);
+					} else {
+						$response['message'] = 'Error in ogAdmServer';
+						jsonResponse(404, $response);
+					}
+					$shidra->desconectar();
 				}
-				$shidra->desconectar();
 			}
+		} else {
+			// Cannot access configuration file.
+			$response['message'] = "An error occurred, please try again";
+			jsonResponse(500, $response);
+			$app->stop();
 		}
 	}
 );
