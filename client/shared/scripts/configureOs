@@ -88,6 +88,10 @@ case "$OSTYPE" in
         [ -n "$(find $MNTDIR/usr/sbin $MNTDIR/sbin $MNTDIR/usr/local/sbin -name ogAdmLnxClient -print)" ] && ogUninstallLinuxClient $1 $2
         # Configurar nuevo agente OGAgent.
         ogConfigureOgagent $1 $2
+        ## Modificar el nombre del equipo
+        echo "Asignar nombre Linux \"$HOST\"."
+        ETC=$(ogGetPath $1 $2 /etc)
+        [ -d "$ETC" ] && echo "$HOST" >$ETC/hostname 2>/dev/null
         ;;
     MacOS)      # Postconfiguración de Mac OS X.
         # Fichero indicador de activación de postconfiguración.
