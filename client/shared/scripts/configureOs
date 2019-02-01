@@ -64,7 +64,7 @@ HOST="$(ogGetHostname)"
 OSTYPE="$(ogGetOsType $1 $2)"
 case "$OSTYPE" in 
     Windows)    # Postconfiguración de Windows.
-        # Cambiar nombre en sistemas Windows.
+        # Asignar nombre del equipo.
         HOST=${HOST:-"pc"}
         ogSetWindowsName $1 $2 "$HOST"
         # Configurar el boot sector de la partición Windows.
@@ -82,14 +82,18 @@ case "$OSTYPE" in
         fi
         ;;
     Linux)      # Postconfiguración de GNU/Linux.
-        ## Instala (no configura) el codigo de arranque del Grub en la partición (no lo configura, se mantiene el original de la imagen)
+        # Asignar nombre del equipo.
+        HOST=${HOST:-"pc"}
+        ETC=$(ogGetPath $1 $2 /etc)
+        [ -d "$ETC" ] && echo "$HOST" >$ETC/hostname 2>/dev/null
+        # Instala (no configura) el codigo de arranque del Grub en la partición (no lo configura, se mantiene el original de la imagen)
         ogGrubInstallPartition $1 $2
         # Eliminar el antiguo cliente de Linux.
         [ -n "$(find $MNTDIR/usr/sbin $MNTDIR/sbin $MNTDIR/usr/local/sbin -name ogAdmLnxClient -print)" ] && ogUninstallLinuxClient $1 $2
         # Configurar nuevo agente OGAgent.
         ogConfigureOgagent $1 $2
         ;;
-    MacOS)      # Postconfiguración de Mac OS X.
+    MacOS)      # Postconfiguración de macOS.
         # Fichero indicador de activación de postconfiguración.
         touch $MNTDIR/osxpostconf
 
