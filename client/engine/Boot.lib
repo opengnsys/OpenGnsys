@@ -821,7 +821,11 @@ PREFIXSECONDSTAGE="/boot/grubMBR"
 if ogIsEfiActive; then
     read EFIDISK EFIPART <<< $(ogGetEsp)
     # Comprobamos que exista ESP y el directorio para ubuntu
-    EFISECONDSTAGE=$(ogMount $EFIDISK $EFIPART) || ogRaiseError $OG_ERR_PARTITION "ESP" || return $?
+    EFISECONDSTAGE=$(ogMount $EFIDISK $EFIPART)
+    if [ $? -ne 0 ]; then
+        ogFormat $EFIDISK $EFIPART FAT32
+        EFISECONDSTAGE=$(ogMount $EFIDISK $EFIPART) || ogRaiseError $OG_ERR_PARTITION "ESP" || return $?
+    fi
     EFISUBDIR=$(printf "Part-%02d-%02d" $DISK $PART)
     [ -d ${EFISECONDSTAGE}/EFI/$EFISUBDIR ] || mkdir -p ${EFISECONDSTAGE}/EFI/$EFISUBDIR
     EFIOPTGRUB=" --target x86_64-efi --efi-directory=${EFISECONDSTAGE}/EFI/$EFISUBDIR "
@@ -943,7 +947,11 @@ PREFIXSECONDSTAGE="/boot/grubPARTITION"
 if ogIsEfiActive; then
     read EFIDISK EFIPART <<< $(ogGetEsp)
     # Comprobamos que exista ESP y el directorio para ubuntu
-    EFISECONDSTAGE=$(ogMount $EFIDISK $EFIPART) || ogRaiseError $OG_ERR_PARTITION "ESP" || return $?
+    EFISECONDSTAGE=$(ogMount $EFIDISK $EFIPART)
+    if [ $? -ne 0 ]; then 
+        ogFormat $EFIDISK $EFIPART FAT32 
+        EFISECONDSTAGE=$(ogMount $EFIDISK $EFIPART) || ogRaiseError $OG_ERR_PARTITION "ESP" || return $?
+    fi
     EFISUBDIR=$(printf "Part-%02d-%02d" $DISK $PART)
     [ -d ${EFISECONDSTAGE}/EFI/$EFISUBDIR ] || mkdir -p ${EFISECONDSTAGE}/EFI/$EFISUBDIR
     EFIOPTGRUB=" --target x86_64-efi --efi-directory=${EFISECONDSTAGE}/EFI/$EFISUBDIR "

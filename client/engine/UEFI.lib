@@ -159,7 +159,11 @@ fi
 
 # Comprobamos que exista partición de sistema y la  ESP
 MNTDIR=$(ogMount $1 $2) || ogRaiseError $OG_ERR_PARTITION "$DISK $PART" || return $?
-EFIDIR=$(ogMount $(ogGetEsp)) || ogRaiseError $OG_ERR_PARTITION "ESP" || return $?
+EFIDIR=$(ogMount $(ogGetEsp))
+if [ "$EFIDIR" == "" ]; then
+    ogFormat $(ogGetEsp) FAT32
+    EFIDIR=$(ogMount $(ogGetEsp)) || ogRaiseError $OG_ERR_PARTITION "ESP" || return $?
+fi
 
 # Comprobamos que exista el cargador
 #BOOTLABEL=$(printf "Part-%02d-%02d" $1 $2)

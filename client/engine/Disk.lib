@@ -258,7 +258,7 @@ ogCreatePartitionTable $ND
 # Definir particiones y notificar al kernel.
 # Borramos primero las particiones y luego creamos las nuevas
 sgdisk $DELOPTIONS $OPTIONS $DISK 2>/dev/null && partprobe $DISK
-[ -n "$CACHESIZE" ] && ogMountCache 2>/dev/null
+[ -n "$CACHESIZE" ] && ogMountCache 2>/dev/null || return 0
 }
 
 
@@ -684,8 +684,9 @@ echo $TYPE
 function ogGetEsp ()
 {
 local PART d
-for d in $(blkid -t TYPE=vfat -o device); do
-    PART="$(ogDevToDisk $d)"
+for d in $(blkid -o device|sort); do
+    # Previene error para /dev/loop0
+    PART="$(ogDevToDisk $d 2>/dev/null)" || continue
     if [ "$(ogGetPartitionId $PART)" == "$(ogTypeToId EFI GPT)" ]; then
         echo $PART
         break
