@@ -28,12 +28,12 @@ function confirmar(){
 }
 //________________________________________________________________________________________________________
 function comprobar_datos(){
-	if (document.fdatos.usu.value==""){
+	if (document.fdatos.usu.value===""){
 		alert("Debe introducir un nombre de Usuario");
 		document.fdatos.usu.focus();
 		return(false)
 	}
-	if (document.fdatos.pss.value==""){
+	if (document.fdatos.pss.value===""){
 		alert("Debe introducir una contraseña");
 		document.fdatos.pss.focus();
 		return(false)
@@ -51,14 +51,14 @@ function PulsaEnter(oEvento){
 		else 
 			return false; 
 	}
-    if (iAscii == 13)  confirmar();
+    if (iAscii === 13)  confirmar();
 	return true; 
 } 
 //________________________________________________________________________________________________________
     </SCRIPT>
 </HEAD>
 <BODY>
-<DIV style="POSITION:absolute;top:20;left:150">
+<DIV style="POSITION:absolute;top:20px;left:150px">
 	<FORM action="controlacceso.php" name="fdatos" method="post"></FORM>
 </DIV>
 </BODY>

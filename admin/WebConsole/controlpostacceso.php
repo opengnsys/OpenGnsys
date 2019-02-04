@@ -91,7 +91,7 @@ if ($idc != 0)
 
  //________________________________________________________________________________________________________ 
  //    Busca datos del usuario que intenta acceder a la aplicación  
- //        Parametros:  
+ //        Parámetros:
  //        - cmd:Una comando ya operativo (con conexión abierta)   
  //        - usuario: Nombre del usuario   
  //        - pasguor: Password del uuario   
@@ -144,7 +144,7 @@ if ($idc != 0)
  } 
 //________________________________________________________________________________________________________ 
  //    Busca datos de configuración del sistema  
- //        Parametros:  
+ //        Paráametros:
  //        - cmd:Una comando ya operativo (con conexión abierta)   
  //        - ips: Dirección IP del servidor de administración   
  //        - prt: Puerto de comunicaciones
@@ -157,7 +157,6 @@ if ($idc != 0)
  	$rs=new Recordset;  
 	$cmd->texto="SELECT * FROM entornos"; 
 	$rs->Comando=&$cmd; 
-	//echo $cmd->texto;
 	if (!$rs->Abrir()) return(false); // Error al abrir recordset
 	if(!$rs->EOF){
 		$ips=$rs->campos["ipserveradm"]; 
@@ -169,7 +168,7 @@ if ($idc != 0)
  } 
  //_______________________________________________________________________________________________________ 
  //    Muestra mensaje de alerta si no existe repositorio en la unidad organizativa
- //        Parametros:
+ //        Parámetros:
  //        - cmd:Una comando ya operativo (con conexión abierta)
  //        - idcentro: identificador de la unidad organizativa
  //_______________________________________________________________________________________________________
@@ -202,17 +201,17 @@ if ($idc != 0)
 </head> 
 
 <body> 
-<div id="mensaje" style="position:absolute;TOP:250;LEFT:330; visibility:visible"> 
-     <span align="center" class="subcabeceras"><?php echo $TbMsg["ACCESS_ALLOWED"] ?></span>
+<div id="mensaje" style="position:absolute;TOP:250px;LEFT:330px; visibility:visible; text-align: center">
+     <span class="subcabeceras"><?php echo $TbMsg["ACCESS_ALLOWED"] ?></span>
 </div>
      <script language="javascript"> 
              var vez=0; 
              setTimeout("acceso();",300); 
 
              function acceso(){ 
-                 o=document.getElementById("mensaje"); 
+                 var o=document.getElementById("mensaje");
                  var s=o.style.visibility; 
-                 if(s=="hidden") 
+                 if(s==="hidden")
                      o.style.visibility="visible"; 
                  else 
                      o.style.visibility="hidden"; 

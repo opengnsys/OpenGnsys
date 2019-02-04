@@ -237,8 +237,8 @@ $repolocal="no";
 ?>
 
 <HTML>
-<TITLE>Administración web de aulas</TITLE>
 <HEAD>
+    <TITLE>Administración web de aulas</TITLE>
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 <LINK rel="stylesheet" type="text/css" href="../estilos.css">
 <SCRIPT language="javascript" src="../clases/jscripts/HttpLib.js"></SCRIPT>
@@ -287,7 +287,7 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 	<div align=center class=subcabeceras><?php echo $TbMsg[7] ?>
 
 		
-			<form  align="center" name="modoadmin" action="./EliminarImagenRepositorio.php" method="post">
+			<form name="modoadmin" action="./EliminarImagenRepositorio.php" method="post">
 			<INPUT type="hidden" name="opcion" value="<?php echo $opcion?>">
 			<INPUT type="hidden" name="idrepositorio" value="<?php echo $idrepositorio?>">
 			<INPUT type="hidden" name="grupoid" value="<?php echo $grupoid ?>">
@@ -604,7 +604,7 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 	<INPUT type="hidden" name="grupoid" value="<?php echo $grupoid ?>">
 	<INPUT type="hidden" name="modov" value="<?php echo $modov; ?>">
 
-	</TABLE><BR/>
+	</TABLE><P>
 	<TABLE align=center>
 		<TR>
 			<TD></TD>

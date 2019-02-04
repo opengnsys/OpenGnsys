@@ -61,8 +61,8 @@ if  ($opcion!=$op_alta){
 //________________________________________________________________________________________________________
 ?>
 <html>
-<title>Administración web de aulas</title>
 <head>
+    <title>Administración web de aulas</title>
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
 	<link rel="stylesheet" type="text/css" href="../estilos.css" />
 	<SCRIPT language="javascript" src="../jscripts/validators.js"></SCRIPT>
@@ -196,6 +196,7 @@ function abrir_ventana(URL){
 		<TR>
 			<th align=center>&nbsp;<?php echo $TbMsg[18]?>&nbsp;</th>
 <?php
+$bdogLive="";
 $cmd->texto="SELECT * FROM ordenadores WHERE idordenador=".$idordenador;
 $rs=new Recordset;
 $rs->Comando=&$cmd;
@@ -210,14 +211,14 @@ if ($opcion==$op_eliminacion){
 	echo '<td colspan="3">'.$bdogLive.'</td>';
 }else{
 	exec("bash /opt/opengnsys/bin/oglivecli list", $listogcli);
-	echo '<TD colspan=3><select class="formulariodatos" name="seleoglive" style=width:250>'."\n";
+	echo '<TD colspan=3><select class="formulariodatos" name="seleoglive" style=width:250px>'."\n";
 	echo '<option value="ogLive">'.$TbMsg['COMM_DEFOGLIVE'].'</option>';
 	foreach ($listogcli as $oglive) {
 		if (preg_match("/ogLive/",$oglive)){
 			$oglive=substr($oglive,1);
 			$oglive=trim($oglive);
 			$Selectcli = '<option value="'.$oglive.'"';
-			If ($bdogLive==$oglive)  $Selectcli.= ' selected ' ;
+			if ($bdogLive==$oglive)  $Selectcli.= ' selected ' ;
 			$Selectcli.= '>'.$oglive.'</OPTION>';
 			echo $Selectcli;
 		}

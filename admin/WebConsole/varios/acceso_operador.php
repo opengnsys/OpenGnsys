@@ -8,7 +8,7 @@
 // Descripción : Presenta la pantalla de login del operador
 // *************************************************************************************************************************************************
 
-session_start(); // Activa variables de sesi�
+session_start(); // Activa variables de sesión
 
 $herror=0;
 
@@ -31,11 +31,10 @@ $TbErr[2]="ERROR de conexión con el servidor de datos";
 //________________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE>Administración web de aulas</TITLE>
 <HEAD>
-	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
-	<LINK rel="stylesheet" type="text/css" href="estilos.css">
-</HEAD>
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<TITLE>Administración web de aulas</TITLE>
+<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 <SCRIPT LANGUAGE="JAVASCRIPT">
 //________________________________________________________________________________________________________
 function confirmar(){
@@ -44,12 +43,12 @@ function confirmar(){
 }
 //________________________________________________________________________________________________________
 function comprobar_datos(){
-	if (document.fdatos.usu.value==""){
+	if (document.fdatos.usu.value===""){
 		alert("Debe introducir un nombre de Usuario");
 		document.fdatos.usu.focus();
 		return(false)
 	}
-	if (document.fdatos.pss.value==""){
+	if (document.fdatos.pss.value===""){
 		alert("Debe introducir una contraseña");
 		document.fdatos.pss.focus();
 		return(false)
@@ -67,20 +66,20 @@ function PulsaEnter(oEvento){
 		else 
 			return false; 
 	}
-    if (iAscii == 13)  confirmar();
+    if (iAscii === 13)  confirmar();
 	return true; 
 } 
 //________________________________________________________________________________________________________
 </SCRIPT>
 </HEAD>
 <BODY>
-<DIV style="POSITION:absolute;top:20;left:150">
+<DIV style="POSITION:absolute;top:20px;left:150px">
 	<FORM action="accesoperadores.php" name="fdatos" method="post">
 		<DIV align="center">
 			<IMG src="../images/login_operador.png" width=500 >
-			<INPUT onkeypress="PulsaEnter(event)" name="usu"  style="POSITION:absolute;top:125px;left:365px;width:90;height:20;COLOR: #999999; FONT-FAMILY: Verdana; FONT-SIZE: 12px;">
-			<INPUT onkeypress="PulsaEnter(event)"  name="pss" type="password"  style="POSITION:absolute;top:160px;left:365;width:90;height:20;COLOR: #999999; FONT-FAMILY: Verdana; FONT-SIZE: 12px;">
-			<IMG onclick="confirmar()" src="../images/botonok.png" style="POSITION:absolute;top:190;left:400;CURSOR: hand">
+			<INPUT onkeypress="PulsaEnter(event)" name="usu"  style="POSITION:absolute;top:125px;left:365px;width:90px;height:20px;COLOR: #999999; FONT-FAMILY: Verdana; FONT-SIZE: 12px;">
+			<INPUT onkeypress="PulsaEnter(event)"  name="pss" type="password"  style="POSITION:absolute;top:160px;left:365px;width:90px;height:20px;COLOR: #999999; FONT-FAMILY: Verdana; FONT-SIZE: 12px;">
+			<IMG onclick="confirmar()" src="../images/botonok.png" style="POSITION:absolute;top:190px;left:400px;CURSOR: hand">
 		</DIV>
 	</FORM>
 </DIV>

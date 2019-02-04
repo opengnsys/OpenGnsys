@@ -34,7 +34,7 @@ function splitConfigurationsByDisk($configuraciones){
 //	Descripción:
 //		Crea una taba html con las especificaciones de particiones de un ambito ya sea ordenador,
 //		grupo de ordenadores o aula
-//	Parametros:
+//	Parámetros:
 //		$configuraciones: Cadena con las configuraciones de particioners del ámbito. El formato 
 //		sería una secuencia de cadenas del tipo "clave de configuración" separados por "@" 
 //			Ejemplo:1;7;30000000;3;3;0;@2;130;20000000;5;4;0;@3;131;1000000;0;0;0;0
@@ -137,13 +137,11 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 							for ($x=0;$x<count($ima); $x++) {
 								if(substr($ima[$x],-3)==".MB") {
 									if ( $ima[$x] == "0.MB" ){
-										echo '<font color=red><strong>'.$TbMsg["CACHE_COMPLETE"].': '.$ima[$x].'</strong></font>';
+										echo '<span style="color: red"><strong>'.$TbMsg["CACHE_COMPLETE"].': '.$ima[$x].'</strong></span>';
 									}else{
 										echo '<strong>'.$TbMsg["CACHE_FREESPACE"].':  '.$ima[$x].'</strong>';
 									}
 								}elseif (! empty($ima[1])){
-									// $dir=is_dir('$ima');echo $dir;
-									// if ($ima == "directorio"){$dir="si";}
 									// Esto para la informacion de la imagen
 									if (substr($ima[$x],-5)==".diff"){$info="F";}elseif(substr($ima[$x],-4)==".img"){$info="F";}else{$info="D";}
 									// Esto para numerarla
@@ -152,7 +150,7 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 									} elseif(preg_match("/.sum/",$ima[$x]) or preg_match("/.torrent/",$ima[$x]) or preg_match("/.full.sum/",$ima[$x])) {
 										echo '<br />&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.$ima[$x];
 										}else{
-											echo '<br /><font color=blue>('.$info.') </font>'.$numero++.'.-<font color=blue>'.$ima[$x]."</font>";
+											echo '<br /><span style="color: blue">('.$info.') </span>'.$numero++.'.-<span style="color: blue">'.$ima[$x]."</span>";
 											}
 								}
 							}
@@ -193,7 +191,7 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 	if (!empty($aviso)) {
 		echo '<tr><th colspan="'.$columns.'">&nbsp;* '.$aviso.'&nbsp;</th></tr>'."\n";
 	}
-	echo '<tr height="5"><td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #FFFFFF;">&nbsp;</td></tr>';
+	echo '<tr><td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #FFFFFF; height: 5px;">&nbsp;</td></tr>';
 }
 
 
@@ -203,7 +201,7 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 //		(Esta función es llamada por pintaConfiguraciones que está incluida en ConfiguracionesParticiones.php)
 //		Crea una taba html con las especificaciones de particiones de un ambito ya sea ordenador,
 //		grupo de ordenadores o aula
-//	Parametros:
+//	Parámetros:
 //		$configuraciones: Cadena con las configuraciones de particioners del ámbito. El formato 
 //		sería una secuencia de cadenas del tipo "clave de configuración" separados por "@" 
 //			Ejemplo:1;7;30000000;3;3;0;@2;130;20000000;5;4;0;@3;131;1000000;0;0;0;0
@@ -289,7 +287,7 @@ function pintaParticionesRestaurarImagen($cmd,$configuraciones,$idordenadores,$c
 			}
 		}
 	}
-	echo '<TR height=5><TD colspan='.$columns.' style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #FFFFFF;">&nbsp;</TD></TR>';
+	echo '<TR><TD colspan='.$columns.' style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #FFFFFF; height:5px;">&nbsp;</TD></TR>';
 }
 
 /*________________________________________________________________________________________________________
@@ -298,7 +296,7 @@ function pintaParticionesRestaurarImagen($cmd,$configuraciones,$idordenadores,$c
 		(Esta función es llamada por pintaConfiguraciones que está incluida en ConfiguracionesParticiones.php)
 		Crea una taba html con las especificaciones de particiones de un ambito ya sea ordenador,
 		grupo de ordenadores o aula
-	Parametros:
+	Parámetros:
 		$configuraciones: Cadena con las configuraciones de particioners del ámbito. El formato 
 						sería una secuencia de cadenas del tipo "clave de configuración" separados por "@" 
 						Ejemplo:1;7;30000000;3;3;0;@2;130;20000000;5;4;0;@3;131;1000000;0;0;0;0
@@ -342,7 +340,7 @@ function pintaParticionesConfigurar($cmd,$configuraciones,$idordenadores,$cc)
 						$sf=tomaSistemasFicheros($tbKeys[$k]["numpar"],$idordenadores,true);
 						echo '<td>'.HTMLSELECT_sistemasficheros($cmd,$sf).'</td>';
 						$tm=tomaTamano($tbKeys[$k]["numpar"],$idordenadores);
-						echo '<td><input type="text" style="width:100" value="'.$tm.'"></td>';		
+						echo '<td><input type="text" style="width:100px" value="'.$tm.'"></td>';
 						echo '<td>'.tomaNombresSO($tbKeys[$k]["numpar"],$idordenadores).'</td>';					
 						echo '<td>'.opeFormatear().'</td>';
 						echo '</tr>';
@@ -361,8 +359,8 @@ function pintaParticionesConfigurar($cmd,$configuraciones,$idordenadores,$cc)
 	// Datos del disco
 	$tm=tomaTamano(0,$idordenadores);
 	echo '<tr id="TRIMG_'.$cc.'" align="center">'.
-	     "\n<td></td>\n<td></td>\n<td".' style="font-size: 1em; padding: 1px 0px;  "'.">".$TbMsg["DISK"]."</td>".
-     "\n<td></td>\n<td".' style="font-size: 1em; padding: 1px 0px; "> '.(isset($tm)?$tm:("<em>".$TbMsg["VARIABLE"]."</em>"))." <input type='hidden' id='hdsize$cc' name='hdsize$cc' style='width:100' value='".$tm."'></td>".
+	     "\n<td></td>\n<td></td>\n<td".' style="font-size: 1em; padding: 1px 0;  "'.">".$TbMsg["DISK"]."</td>".
+     "\n<td></td>\n<td".' style="font-size: 1em; padding: 1px 0; "> '.(isset($tm)?$tm:("<em>".$TbMsg["VARIABLE"]."</em>"))." <input type='hidden' id='hdsize$cc' name='hdsize$cc' style='width:100px' value='".$tm."'></td>".
 	     "\n<td></td>\n<td></td>\n</tr>";
 	echo '<tr><th colspan="'.$colums.'">&nbsp;'.$TbMsg["WARN_DISKSIZE"].'</th></tr>';
 	// Mostrar aviso: solo disco 1 con tabla MSDOS.
@@ -371,14 +369,14 @@ function pintaParticionesConfigurar($cmd,$configuraciones,$idordenadores,$cc)
 	}
 	// Botones de añadir y confirmar.
 	if (isset($tm)) {
-		echo '<TR height=30><TD style="BACKGROUND-COLOR: #FFFFFF;" colspan='.$colums.' align=center>';
-		echo '	<A href="#add" style="text-decoration:none">
-						<IMG id="IMG_'.$icp.'" border=0 src="../images/boton_insertar.gif" 
-						value="'.$k.'" onclick="addParticion(this,'.$cc.')"></A>
-					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-					<A href="#add" style="text-decoration:none">
-						<IMG border=0 src="../images/boton_aceptar.gif" onclick="Confirmar('.$cc.')"></A></TD>
-					</TR>';
+		echo '<tr><td style="background-color: #FFFFFF; height: 30px;" colspan="'.$colums.'" align="center">';
+		echo '	<a href="#add" style="text-decoration:none">
+				<img id="IMG_'.$icp.'" border=0 src="../images/boton_insertar.gif"
+					value="'.$k.'" onclick="addParticion(this,'.$cc.')"></a>
+			&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+			<a href="#add" style="text-decoration:none">
+				<img border=0 src="../images/boton_aceptar.gif" onclick="Confirmar('.$cc.')"></a></td>
+			</tr>';
 	} else {
 		echo '<tr><th colspan="'.$colums.'">'.$TbMsg["WARN_DIFFDISKSIZE"].'</th></tr>'."\n";
 	}
@@ -386,24 +384,24 @@ function pintaParticionesConfigurar($cmd,$configuraciones,$idordenadores,$cc)
 
 /*
 //
-//	Descripcion:
-//		(Esta funci�n es llamada por pintaConfiguraciones que est� incluida en ConfiguracionesParticiones.php)
+//	Descripcián:
+//		(Esta función es llamada por pintaConfiguraciones que está incluida en ConfiguracionesParticiones.php)
 //		Crea una taba html con las especificaciones de particiones de un ambito ya sea ordenador,
 //		grupo de ordenadores o aula
-//	Parametros:
-//		$configuraciones: Cadena con las configuraciones de particioners del �mbito. El formato 
-//		ser�a una secuencia de cadenas del tipo "clave de configuraci�n" separados por "@" 
+//	Parámetros:
+//		$configuraciones: Cadena con las configuraciones de particioners del ámbito. El formato 
+//		sería una secuencia de cadenas del tipo "clave de configuración" separados por "@" 
 //			Ejemplo:1;7;30000000;3;3;0;@2;130;20000000;5;4;0;@3;131;1000000;0;0;0;0
 //	Devuelve:
-//		El c�digo html de la tabla
+//		El código html de la tabla
 //________________________________________________________________________________________________________
 //
 //
 */
 function pintaParticionesRestaurarImagenSincronizacion1($cmd,$configuraciones,$idordenadores,$cc,$ambito,$idambito)
 {
-	global $tbKeys; // Tabla contenedora de claves de configuraci�n
-	global $conKeys; // Contador de claves de configuraci�n
+	global $tbKeys; // Tabla contenedora de claves de configuración
+	global $conKeys; // Contador de claves de configuración
 	global $TbMsg;
 	global $_SESSION;
 	
@@ -445,7 +443,7 @@ function pintaParticionesRestaurarImagenSincronizacion1($cmd,$configuraciones,$i
 					echo '<TR>'.chr(13);
 					echo '<TD align=center>&nbsp;&nbsp;</TD>';
 					if($swcc){
-						$icp=$cc."_".$tbKeys[$k]["numdisk"]."_".$tbKeys[$k]["numpar"]; // Identificador de la configuraci�n-partici�n
+						$icp=$cc."_".$tbKeys[$k]["numdisk"]."_".$tbKeys[$k]["numpar"]; // Identificador de la configuración-partición
 						echo '<TD align=center><input type=radio idcfg="'.$cc.'" id="'.$icp.'" name="particion" value='.$tbKeys[$k]["numdisk"].";".$tbKeys[$k]["numpar"].'></TD>'.chr(13);
 						echo '<TD align=center>&nbsp;'.$tbKeys[$k]["numpar"].'&nbsp;</TD>'.chr(13);
 						echo '<TD align=center>&nbsp;'.$tbKeys[$k]["tipopar"].'&nbsp;</TD>'.chr(13);
@@ -479,169 +477,6 @@ function pintaParticionesRestaurarImagenSincronizacion1($cmd,$configuraciones,$i
 		}
 	}	
 
-	echo '<TR height=5><TD colspan='.$columns.' style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #FFFFFF;">&nbsp;</TD></TR>';
+	echo '<TR><TD colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #FFFFFF; height: 5px;">&nbsp;</TD></TR>';
 	echo '<tr><th colspan="14">'.$TbMsg["WARN_PROTOCOL"].'</th></tr>';
 }
-/**
- * Las funcion pintaParticionesRestaurarImagenSincronizacion1 sustituye a las funciones 
- * pintaParticionesRestaurarSoftIncremental y pintaParticionesRestaurarImagenBasica
- * para volver a usarlas tan sólo hay que ir al fichero comandos/RestaurarImagenBasica o comandos/RestaurarSoftIncremental y cambiar la
- * llamada a la función que queramos en el parametro de pintaConfiguraciones.
- * Actualmente en ambos ficheros llaman a la función pintaParticionesRestaurarImagenSincronizacion1 ya que pintan
- * exactamente lo mismo.
- *
-
-//*********************************************************************************************
-//	FUNCIONES
-//*********************************************************************************************
-//
-//	Descripci�n:
-//		(Esta funci�n es llamada por pintaConfiguraciones que est� incluida en ConfiguracionesParticiones.php)
-//		Crea una taba html con las especificaciones de particiones de un ambito ya sea ordenador,
-//		grupo de ordenadores o aula
-//	Parametros:
-//		$configuraciones: Cadena con las configuraciones de particioners del �mbito. El formato 
-//		ser�a una secuencia de cadenas del tipo "clave de configuraci�n" separados por "@" 
-//			Ejemplo:1;7;30000000;3;3;0;@2;130;20000000;5;4;0;@3;131;1000000;0;0;0;0
-//	Devuelve:
-//		El c�digo html de la tabla
-//________________________________________________________________________________________________________
-//
-//
-function pintaParticionesRestaurarSoftIncremental($cmd,$configuraciones,$idordenadores,$cc,$ambito,$idambito)
-{
-	global $tbKeys; // Tabla contenedora de claves de configuraci�n
-	global $conKeys; // Contador de claves de configuraci�n
-	global $TbMsg;
-	global $_SESSION;
-	
-	// Separamos las configuraciones segun el disco al que pertenezcan
-	$diskConfigs = splitConfigurationsByDisk($configuraciones);
-	
-	$columns=9;
-	echo '<TR>';
-	echo '<TH align=center>&nbsp;&nbsp;</TH>';
-	echo '<th align="center">&nbsp;'.$TbMsg["DISK"].'&nbsp;</th>'; // Número de  disco
-	echo '<TH align=center>&nbsp;'.$TbMsg["PARTITION"].'&nbsp;</TH>';
-	echo '<th align="center">&nbsp;'.$TbMsg["PARTITION_TYPE"].'&nbsp;</th>'; // Tipo de partición
-	echo '<th align="center">&nbsp;'.$TbMsg["INST_SO"].'&nbsp;</th>'; // Sistema Operativo Instalado
-	echo '<th align="center">&nbsp;'.$TbMsg["FILESYSTEM_SHORT"].'&nbsp;</th>'; // Sistema de ficheros
-	echo '<th align="center">&nbsp;'.$TbMsg["SIZE_KB"].'&nbsp;</th>'; // Tamaño
-	echo '<TH align=center>&nbsp;'.$TbMsg[10].'&nbsp;</TH>';
-	echo '<TH align=center>&nbsp;'.$TbMsg[16].'&nbsp;</TH>';	
-	echo '</TR>';
-
-	
-	// Recorremos todas las configuraciones encontradas para cada disco
-	
-	foreach($diskConfigs as $disk => $diskConfig){
-		$disk = (int)$disk;
-		echo'<tr height="16">'.chr(13);
-		echo '<td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;'.$TbMsg["DISK"].'&nbsp;'.$disk.'</td>'.chr(13);
-	     
-		$auxCfg=explode("@",$diskConfig); // Crea lista de particiones
-		for($i=0;$i<sizeof($auxCfg);$i++){
-			$auxKey=explode(";",$auxCfg[$i]); // Toma clave de configuracion
-			for($k=0;$k<$conKeys;$k++){ // Busca los literales para las claves de esa partici�n
-				if($tbKeys[$k]["cfg"]==$auxCfg[$i]){ // Claves encontradas
-					$swcc=$tbKeys[$k]["clonable"];
-					echo '<TR>'.chr(13);
-					echo '<TD align=center>&nbsp;&nbsp;</TD>';
-					if($swcc){
-						$icp=$cc."_".$tbKeys[$k]["numpar"]; // Identificador de la configuraci�n-partici�n
-						echo '<TD align=center><input type=radio idcfg="'.$cc.'" id="'.$icp.'" name="particion" value='.$tbKeys[$k]["numpar"].'></TD>'.chr(13);
-						echo '<TD align=center>&nbsp;'.$tbKeys[$k]["numpar"].'&nbsp;</TD>'.chr(13);
-						echo '<TD align=center>&nbsp;'.$tbKeys[$k]["tipopar"].'&nbsp;</TD>'.chr(13);
-						echo '<TD align=center>&nbsp;'.tomaNombresSO($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</TD>'.chr(13);	
-						echo'<TD align=center>&nbsp;'.tomaSistemasFicheros($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</TD>'.chr(13);
-						echo'<TD align=center>&nbsp;'.tomaTamano($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</TD>'.chr(13);	
-						echo '<TD align=center>'.HTMLSELECT_imagenes($cmd,$tbKeys[$k]["idimagen"],$tbKeys[$k]["numpar"],$tbKeys[$k]["codpar"],$icp,true,$idordenadores,$ambito).'</TD>';
-						$metodos="CACHE=".$TbMsg[13].chr(13);
-						$metodos.="REPO=".$TbMsg[9];		
-						echo '<TD align=center>'.HTMLCTESELECT($metodos,"desplemet_".$icp,"estilodesple","",1,100).'</TD>';
-							
-					}
-					echo '</TR>'.chr(13);
-				}
-			}
-		}
-	}	
-	echo '<TR height=5><TD colspan='.$columns.' style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #FFFFFF;">&nbsp;</TD></TR>';
-}
-
-//*********************************************************************************************
-//	FUNCIONES
-//*********************************************************************************************
-//
-//	Descripci�n:
-//		(Esta funci�n es llamada por pintaConfiguraciones que est� incluida en ConfiguracionesParticiones.php)
-//		Crea una taba html con las especificaciones de particiones de un ambito ya sea ordenador,
-//		grupo de ordenadores o aula
-//	Parametros:
-//		$configuraciones: Cadena con las configuraciones de particioners del �mbito. El formato 
-//		ser�a una secuencia de cadenas del tipo "clave de configuraci�n" separados por "@" 
-//			Ejemplo:1;7;30000000;3;3;0;@2;130;20000000;5;4;0;@3;131;1000000;0;0;0;0
-//	Devuelve:
-//		El c�digo html de la tabla
-//________________________________________________________________________________________________________
-//
-//
-function pintaParticionesRestaurarImagenBasica($cmd,$configuraciones,$idordenadores,$cc,$ambito,$idambito)
-{
-	global $tbKeys; // Tabla contenedora de claves de configuraci�n
-	global $conKeys; // Contador de claves de configuraci�n
-	global $TbMsg;
-	global $_SESSION;
-	
-	// Separamos las configuraciones segun el disco al que pertenezcan
-	$diskConfigs = splitConfigurationsByDisk($configuraciones);
-	
-	$columns=9;
-	echo '<TR>';
-	echo '<TH align=center>&nbsp;&nbsp;</TH>';
-	echo '<th align="center">&nbsp;'.$TbMsg["DISK"].'&nbsp;</th>'; // Número de  disco
-	echo '<TH align=center>&nbsp;'.$TbMsg["PARTITION"].'&nbsp;</TH>';
-	echo '<th align="center">&nbsp;'.$TbMsg["PARTITION_TYPE"].'&nbsp;</th>'; // Tipo de partición
-	echo '<th align="center">&nbsp;'.$TbMsg["INST_SO"].'&nbsp;</th>'; // Sistema Operativo Instalado
-	echo '<th align="center">&nbsp;'.$TbMsg["FILESYSTEM_SHORT"].'&nbsp;</th>'; // Sistema de ficheros
-	echo '<th align="center">&nbsp;'.$TbMsg["SIZE_KB"].'&nbsp;</th>'; // Tamaño
-	echo '<TH align=center>&nbsp;'.$TbMsg[10].'&nbsp;</TH>';
-	echo '<TH align=center>&nbsp;'.$TbMsg[16].'&nbsp;</TH>';
-	echo '</TR>';
-
-	// Recorremos todas las configuraciones encontradas para cada disco
-	
-	foreach($diskConfigs as $disk => $diskConfig){
-		$disk = (int)$disk;
-		echo'<tr height="16">'.chr(13);
-		echo '<td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;'.$TbMsg["DISK"].'&nbsp;'.$disk.'</td>'.chr(13);
-	     
-		$auxCfg=explode("@",$diskConfig); // Crea lista de particiones
-		for($i=0;$i<sizeof($auxCfg);$i++){
-			$auxKey=explode(";",$auxCfg[$i]); // Toma clave de configuracion
-			for($k=0;$k<$conKeys;$k++){ // Busca los literales para las claves de esa partici�n
-				if($tbKeys[$k]["cfg"]==$auxCfg[$i]){ // Claves encontradas
-					$swcc=$tbKeys[$k]["clonable"];
-					if($swcc){
-						echo '<TR>'.chr(13);
-						echo '<TD align=center>&nbsp;&nbsp;</TD>';
-						$icp=$cc."_".$tbKeys[$k]["numpar"]; // Identificador de la configuraci�n-partici�n
-						echo '<TD align=center><input type=radio idcfg="'.$cc.'" id="'.$icp.'" name="particion" value='.$tbKeys[$k]["numpar"].'></TD>'.chr(13);
-						echo '<TD align=center>&nbsp;'.$tbKeys[$k]["numpar"].'&nbsp;</TD>'.chr(13);
-						echo '<TD align=center>&nbsp;'.$tbKeys[$k]["tipopar"].'&nbsp;</TD>'.chr(13);
-						echo '<TD align=center>&nbsp;'.tomaNombresSO($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</TD>'.chr(13);	
-						echo'<TD align=center>&nbsp;'.tomaSistemasFicheros($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</TD>'.chr(13);
-						echo'<TD align=center>&nbsp;'.tomaTamano($tbKeys[$k]["numpar"],$idordenadores).'&nbsp;</TD>'.chr(13);	
-						echo '<TD align=center>'.HTMLSELECT_imagenes($cmd,$tbKeys[$k]["idimagen"],$tbKeys[$k]["numpar"],$tbKeys[$k]["codpar"],$icp,true,$idordenadores,$ambito).'</TD>';
-						$metodos="CACHE=".$TbMsg[13].chr(13);
-						$metodos.="REPO=".$TbMsg[9];		
-						echo '<TD align=center>'.HTMLCTESELECT($metodos,"desplemet_".$icp,"estilodesple","",1,100).'</TD>';
-					}
-				}
-			}
-		}
-	}	
-	echo '<TR height=5><TD colspan='.$columns.' style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #FFFFFF;">&nbsp;</TD></TR>';
-}
-**/
-

@@ -73,7 +73,7 @@ if  ($opcion!=$op_alta){
 				<?php if ($opcion==$op_eliminacion){?>
 					<TD><?php echo $nombrecentro?></TD>
 				<?php }else{?>
-					<TD><INPUT type=text class=cajatexto  name="nombrecentro"  style="width:350" value="<?php echo $nombrecentro?>">
+					<TD><INPUT type=text class=cajatexto  name="nombrecentro"  style="width:350px" value="<?php echo $nombrecentro?>">
 				<?php }?>
 			</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->

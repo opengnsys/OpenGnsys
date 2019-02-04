@@ -120,7 +120,7 @@ function GeneraMenu($rs,$tipo,$iph){
 			$codeHTML.='<TD align=center>
 				<A href="ejecutaritem.php?iph='.$iph.'&idt='.$idaccionmenu.'">
 					<IMG border=0 src="http://'.$UrlPaginaIconos.'/'.$urlicono.'" width=64></A></TD>';
-			$codeHTML.='<TD style="font-family:Arial;color: #a71026;FONT-SIZE:14">
+			$codeHTML.='<TD style="font-family:Arial,sans-serif;color: #a71026;FONT-SIZE:14px">
 				<A style="text-decoration:none" href="ejecutaritem.php?iph='.$iph.'&idt='.$idaccionmenu.'">
 					<span style="FONT-FAMILY: Verdana,Arial, Helvetica, sans-serif;FONT-SIZE: 12px;COLOR:#999999">'.$descripitem.'</span></A></TD>';
 			if($mod>1){

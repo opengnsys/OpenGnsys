@@ -121,7 +121,7 @@
 		$cont=0;
 		while (!$rs->EOF){
 			$nemo=$rs->campos["nemonico"];
-			$auxtabla_parametros="";
+			$auxtabla_parametros=array();
 			$auxtabla_parametros["nemonico"]=$nemo;
 			$auxtabla_parametros["descripcion"]=$rs->campos["descripcion"];
 			$auxtabla_parametros["nomidentificador"]=$rs->campos["nomidentificador"];
@@ -300,7 +300,7 @@
 	
 		Devuelve la descripción de un ambito 
 		Parametros: 
-			-	cmd: Objeto comando (Operativo)
+			- cmd: Objeto comando (Operativo)
 			- ambito: tipo de ambito
 			- idambito: Identificador del ambito
 			- textambito: Por referencia. Es donde se devuelve la descripción
@@ -309,7 +309,7 @@
 			- Los dos parámetros pasados por referencia
 	________________________________________________________________________*/
 	
-	function tomaDescriAmbito($cmd,$ambito,$idambito,$textambito)
+	function tomaDescriAmbito($cmd,$ambito,$idambito,&$textambito)
 	{
 		global $AMBITO_CENTROS;
 		global $AMBITO_GRUPOSAULAS;
@@ -334,7 +334,7 @@
 					$textambito=TomaDato($cmd,0,'ordenadores',$idambito,'idordenador','nombreordenador');
 					break;
 				default: 	
-					$textambito;					
+					$textambito="";
 			}
 	}
 	/*______________________________________________________________________
