@@ -203,7 +203,7 @@ function codeParticionadoMSDOS (form) {
 			if (form.size4.value == "0") {
 				sizecacheCode="\
 ogEcho session \"[20] $MSG_HELP_ogGetCacheSize\"\n \
-sizecache=`ogGetCacheSize` ";
+sizecache=`ogGetCacheSize` \n ";
 				cacheCode="\
 initCache "+n_disk+" $sizecache NOMOUNT  &>/dev/null \n ";		
 			} else {
@@ -270,17 +270,20 @@ partCode += " EMPTY:0";
         }
 
 	form.codigo.value="\
-" + sizecacheCode + " \n \
+ ogEcho log session \"[0]  $MSG_HELP_ogCreatePartitions "+n_disk+"\"\n \
 ogEcho session \"[10] $MSG_HELP_ogUnmountAll "+n_disk+"\"\n \
 ogUnmountAll "+n_disk+" 2>/dev/null \n \
 ogUnmountCache \n \
+" + sizecacheCode + "\
 ogEcho session \"[30] $MSG_HELP_ogUpdatePartitionTable "+n_disk+"\"\n \
 ogCreatePartitionTable "+n_disk+" "+tipo_part_table +" \n \
 ogDeletePartitionTable "+n_disk+" \n \
 ogUpdatePartitionTable "+n_disk+" \n \
 " + cacheCode + "\
 ogEcho session \"[70] $MSG_HELP_ogCreatePartitions  " + partCode + "\"\n \
-if ogExecAndLog command ogCreatePartitions "+n_disk+" " + partCode + "; then \n \
+ogExecAndLog command ogCreatePartitions "+n_disk+" " + partCode + " \n \
+EVAL=$? \n \
+if [ $EVAL -eq 0 ]; then \n \
   ogEcho session \"[80] $MSG_HELP_ogSetPartitionActive "+n_disk+" 1\"\n \
   ogSetPartitionActive "+n_disk+" 1 \n \
   ogEcho log session \"[90] $MSG_HELP_ogListPartitions  "+n_disk+"\"\n \
@@ -290,7 +293,7 @@ if ogExecAndLog command ogCreatePartitions "+n_disk+" " + partCode + "; then \n 
   "+ swapCode +"\
 else \n \
   ogEcho session log \"[100] ERROR: $MSG_HELP_ogCreatePartitions\" \n \
-  sleep 5 \n \
+  return $EVAL \n \
 fi";
 }
 
@@ -317,8 +320,8 @@ function codeParticionadoGPT (form) {
 			if(nPart == 4 && form.partGPT4.value == "CACHE") {
 				if (form.sizeGPT4.value == "0") {
                                         sizecacheCode="\
-ogEcho session \"[20] $MSG_HELP_ogGetCacheSize\"\n \
-sizecache=`ogGetCacheSize` ";
+ogEcho session \"[20] $MSG_HELP_ogGetCacheSize\" \n \
+sizecache=`ogGetCacheSize` \n ";
 					cacheCode="\
 ogEcho session \"[50] $MSG_HELP_ogCreateCache\"\n \
 initCache "+ n_disk +" $sizecache NOMOUNT &>/dev/null \n ";
@@ -369,24 +372,30 @@ initCache "  + n_disk +" "+ cacheSize + " NOMOUNT &>/dev/null \n ";
 	}
             
 	form.codigo.value="\
-" + sizecacheCode + " \n \
-ogCreatePartitionTable "+n_disk+" "+tipo_part_table +" \n \
-ogEcho log session \"[0]  $MSG_HELP_ogCreatePartitions "+n_disk+"\"\n \
+ ogEcho log session \"[0]  $MSG_HELP_ogCreatePartitions "+n_disk+"\"\n \
 ogEcho session \"[10] $MSG_HELP_ogUnmountAll "+n_disk+"\"\n \
 ogUnmountAll "+n_disk+" \n \
 ogUnmountCache \n \
+" + sizecacheCode + "\
 ogEcho session \"[30] $MSG_HELP_ogUpdatePartitionTable "+n_disk+"\"\n \
+ogCreatePartitionTable "+n_disk+" "+tipo_part_table +" \n \
 ogDeletePartitionTable "+n_disk+" \n \
 ogUpdatePartitionTable "+n_disk+" \n \
 " + cacheCode + "\
 ogEcho session \"[70] $MSG_HELP_ogCreatePartitions " + partCode + "\"\n \
-ogExecAndLog command ogCreatePartitions "+n_disk+" " + partCode + " \n \
-ogEcho session \"[80] $MSG_HELP_ogSetPartitionActive "+n_disk+" 1\"\n \
-ogSetPartitionActive "+n_disk+" 1 \n \
-ogEcho log session \"[90] $MSG_HELP_ogListPartitions "+n_disk+"\"\n \
-ogUpdatePartitionTable "+n_disk+" \n \
-ms-sys /dev/sda | grep unknow && ms-sys /dev/sda \n \
-ogExecAndLog command session log ogListPartitions "+n_disk+" \n";  
+ogExecAndLog command ogCreatePartitions "+n_disk+" " + partCode + "\n \
+EVAL=$? \n \
+if [ $EVAL -eq 0 ]; then \n \
+    ogEcho session \"[80] $MSG_HELP_ogSetPartitionActive "+n_disk+" 1\"\n \
+    ogSetPartitionActive "+n_disk+" 1 \n \
+    ogEcho log session \"[90] $MSG_HELP_ogListPartitions "+n_disk+"\"\n \
+    ogUpdatePartitionTable "+n_disk+" \n \
+    ms-sys /dev/sda | grep unknow && ms-sys /dev/sda \n \
+    ogExecAndLog command session log ogListPartitions "+n_disk+" \n \
+else \n \
+    ogEcho session log \"[100] ERROR: $MSG_HELP_ogCreatePartitions\" \n \
+    return $EVAL \n \
+fi \n ";
 
 // Formateo de la swap
 form.codigo.value += swapCode;
@@ -479,12 +488,17 @@ function getMinDiskSize(disk){
 // Calcula el tamaño de la mayor cache y lo guarda en un campo oculto
 function getMaxCacheSize() {
 	var cacheSizeArray = document.getElementsByName("cachesize");
-	var maxSize = cacheSizeArray[0].value;
-	for(var i= 1; i < cacheSizeArray.length; i++){
+        // Si no existe cache el valor es cero.
+        if (cacheSizeArray[0]) {
+	    var maxSize = cacheSizeArray[0].value;
+	    for(var i= 1; i < cacheSizeArray.length; i++){
 		if(maxSize < cacheSizeArray[i].value)
 			maxSize = cacheSizeArray[i].value;
-	}
-	document.getElementById("maxcachesize").value = maxSize;
+	    }
+	    document.getElementById("maxcachesize").value = maxSize;
+        } else {
+	    document.getElementById("maxcachesize").value = 0;
+        }
 }
 
 

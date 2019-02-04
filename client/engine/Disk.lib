@@ -258,7 +258,7 @@ ogCreatePartitionTable $ND
 # Definir particiones y notificar al kernel.
 # Borramos primero las particiones y luego creamos las nuevas
 sgdisk $DELOPTIONS $OPTIONS $DISK 2>/dev/null && partprobe $DISK
-[ -n "$CACHESIZE" ] && ogMountCache 2>/dev/null
+[ -n "$CACHESIZE" ] && ogMountCache 2>/dev/null || return 0
 }
 
 
