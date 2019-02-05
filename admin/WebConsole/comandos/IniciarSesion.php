@@ -32,9 +32,9 @@ if (!$cmd)
 //___________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE>Administración web de aulas</TITLE>
 <HEAD>
-	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<TITLE>Administración web de aulas</TITLE>
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 <LINK rel="stylesheet" type="text/css" href="../estilos.css">
 <SCRIPT language="javascript" src="./jscripts/IniciarSesion.js"></SCRIPT>
 <SCRIPT language="javascript" src="../clases/jscripts/HttpLib.js"></SCRIPT>
@@ -83,7 +83,7 @@ if (!$cmd)
 <?php
 /**************************************************************************************************************************************************
 	Recupera los datos de un ordenador
-		Parametros: 
+		Parámetros:
 		- cmd: Una comando ya operativo (con conexiónabierta)  
 		- ido: El identificador del ordenador
 ________________________________________________________________________________________________________*/
@@ -150,5 +150,3 @@ function tabla_configuraciones($cmd,$idordenador){
 	$rs->Cerrar();
 	return($tablaHtml);
 }
-?>
-

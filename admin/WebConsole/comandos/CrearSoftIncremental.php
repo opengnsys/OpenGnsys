@@ -1,12 +1,12 @@
 <?php
 // *************************************************************************************************************************************************
-// Aplicaci�n WEB: ogAdmWebCon
-// Autor: Jos� Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creaci�n: A�o 2012
-// Fecha �ltima modificaci�n: Noviembre-2012
+// Aplicación WEB: ogAdmWebCon
+// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha Creación: Año 2012
+// Fecha última modificación: Noviembre-2012
 // Nombre del fichero: CrearImagenBas.php
-// Descripci�n : 
-//		Implementaci�n del comando "CrearImagenBas.php"
+// Descripción: 
+//		Implementación del comando "CrearImagenBas.php"
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
 include_once("../clases/AdoPhp.php");
@@ -26,19 +26,19 @@ include_once("./includes/capturaacciones.php");
 //
 $cmd=CreaComando($cadenaconexion);
 if (!$cmd)
-	Header('Location: '.$pagerror.'?herror=2'); // Error de conexi�n con servidor B.D.
+	Header('Location: '.$pagerror.'?herror=2'); // Error de conexión con servidor B.D.
 //________________________________________________________________________________________________________
 //
 $resul=tomaPropiedades($cmd,$idambito);
 if (!$resul){
-		Header('Location: '.$pagerror.'?herror=3'); // Error de recuperaci�n de datos.
+		Header('Location: '.$pagerror.'?herror=3'); // Error de recuperación de datos.
 }
 //________________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE>Administraci�n web de aulas</TITLE>
 <HEAD>
-	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<TITLE>Administración web de aulas</TITLE>
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 <LINK rel="stylesheet" type="text/css" href="../estilos.css">
 <SCRIPT language="javascript" src="./jscripts/CrearSoftIncremental.js"></SCRIPT>
 <SCRIPT language="javascript" src="../clases/jscripts/HttpLib.js"></SCRIPT>
@@ -56,20 +56,19 @@ if (!$resul){
 	<BR>
 	<TABLE  align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
 		<TR>
-			<TH align=center>&nbsp;<?php echo $TbMsg[2] ?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?php echo $TbMsg[2] ?>&nbsp;</TH>
 			<?php echo '<TD>'.$nombreordenador.'</TD>';?>
 			<TD colspan=2 valign=top align=left rowspan=3><IMG border=2 style="border-color:#63676b" src="../images/fotoordenador.gif"></TD>
 		</TR>	
 		<TR>
-			<TH align=center>&nbsp;<?php echo $TbMsg[3] ?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?php echo $TbMsg[3] ?>&nbsp;</TH>
 			<?php echo '<TD>'.$ip.'</TD>';?>
 		</TR>
 		<TR>
-			<TH align=center>&nbsp;<?php echo $TbMsg[4] ?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?php echo $TbMsg[4] ?>&nbsp;</TH>
 			<?php echo '<TD>'.$mac.'</TD>';?>
 		</TR>	
 	</TABLE>
-	</P>
 <!------------------------------------------------------------------------------------------
  Subcabecera 
 -------------------------------------------------------------------------------------------> 	
@@ -115,7 +114,7 @@ if (!$resul){
 
 /*----------------------------------------------------------------------------------------------
 	Recupera los datos de un ordenador
-		Parametros: 
+		Parámetros:
 		- ido: El identificador del ordenador
 ----------------------------------------------------------------------------------------------*/
 function tomaPropiedades($cmd,$ido)
@@ -154,13 +153,13 @@ function opcionesAdicionales()
 	$tablaHtml.='<tr><th colspan=8 align=center><b>&nbsp;'.$TbMsg[11].'&nbsp;</b></th></tr>';
 	$tablaHtml.='<tr id="trOpc">
 					<td align=right>'.$TbMsg[13].'</td>
-					<td ><input  type=checkbox name="bpi"></td>'; // Borrar imagen del servidor  o borrar partici�n previamente			
+					<td ><input  type=checkbox name="bpi"></td>'; // Borrar imagen del servidor  o borrar partición previamente
 	$tablaHtml.='		
 					<td  align=right>'.$TbMsg[14].'</td>
-					<td><input type=checkbox name="cpc"></td>'; // Copiar adem�s la imagen a la cach�
+					<td><input type=checkbox name="cpc"></td>'; // Copiar además la imagen a la caché
 	$tablaHtml.='		
 					<td  align=right>'.$TbMsg[15].'</td>
-					<td><input type=checkbox name="bpc"></td>'; // Borrar imagen de la cach� previamente antes de copiarla 	
+					<td><input type=checkbox name="bpc"></td>'; // Borrar imagen de la caché previamente antes de copiarla
 	$tablaHtml.='		
 					<td  align=right>'.$TbMsg[16].'</td>
 					<td><input type=checkbox name="nba"></td>'; // No borrar archivos en destino  						
@@ -206,5 +205,4 @@ function HTMLSELECT_imagenes($idimagen)
 	$SelectHtml.= '</SELECT>';
 	return($SelectHtml);
 }
-?>
 

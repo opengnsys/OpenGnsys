@@ -116,8 +116,8 @@ function comprobarDatos(cc)
 	var SL="%";
 	var TB="*";
 	var maxpar=0;
-	var tbpar=new Array(); // Para control de particiones duplicadas
-	var tbparam=new Array(); // Para control de configuración 
+	var tbpar=[]; // Para control de particiones duplicadas
+	var tbparam=[]; // Para control de configuración
 	var npar; // Partición en formato integer
 	var tch=0; // Tamaño de la caché
 
@@ -266,7 +266,7 @@ function comprobarDatos(cc)
 	if(maxpar<4){
 		var up=4;
 		if(swc) up=3;  
-		for(var i=maxpar+1;i<=up;i++)
+		for(i=maxpar+1;i<=up;i++)
 			atributos+="par="+i+TB+"cpt=EMPTY"+TB+"sfi=EMPTY"+TB+"tam=0"+TB+"ope=0"+SL;
 	}
 											

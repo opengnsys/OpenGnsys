@@ -263,10 +263,10 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<?php if ($espaciorepo != ""){?>
 			<TR>
-			<TH align=center>&nbsp;<?php echo $TbMsg[18]?>&nbsp;</TD>
-			<TH align=center>&nbsp;<?php echo $TbMsg[19]?>&nbsp;</TD>
-			<TH align=center>&nbsp;<?php echo $TbMsg[20]?>&nbsp;</TD>
-			<TH align=center>&nbsp;<?php echo $TbMsg[21]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?php echo $TbMsg[18]?>&nbsp;</TH>
+			<TH align=center>&nbsp;<?php echo $TbMsg[19]?>&nbsp;</TH>
+			<TH align=center>&nbsp;<?php echo $TbMsg[20]?>&nbsp;</TH>
+			<TH align=center>&nbsp;<?php echo $TbMsg[21]?>&nbsp;</TH>
 		</TR>
                 <TR>
 			<TD align=center width=110>&nbsp;<?php echo $totalrepo?>&nbsp;</TD>
@@ -276,7 +276,7 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
                 </TR>
 		<?php }else {?>
         			<TR>
-            <TH align=center width=485>&nbsp;<?php echo $TbMsg[22]?>&nbsp;</TD>
+            <TH align=center width=485>&nbsp;<?php echo $TbMsg[22]?>&nbsp;</TH>
 
 					</TR>
         <?php } ?>
@@ -512,11 +512,11 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 
 		if ($bustor<>"") 
 			{
-			echo '<TD align=center><font color=red><strong>&nbsp;'.$TbMsg[14].'</strong></TD>'.chr(13);
+			echo '<TD align=center><div style="color: red; font-weight: bold;">&nbsp;'.$TbMsg[14].'</div></TD>'.chr(13);
 			}
 			elseif (file_exists($ficherodelete))
 				{
-					echo '<TD align=center><font color=red><strong>&nbsp;'.$TbMsg[15].'</strong></TD>'.chr(13);}
+					echo '<TD align=center><div style="color: red; font-weight: bold;"><div>&nbsp;'.$TbMsg[15].'</div></TD>'.chr(13);}
 				else
 				{
 					echo '<TD align=center ><input type="checkbox" name="checkbox'.$contar.'"  value="si"></TD>'.chr(13);
@@ -525,11 +525,11 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 		// ########## Tipo ####################################################################
 		if ($tipo[$contandotipo]=="D")
 		{
-			echo '<TD align=center ><font color=blue>'.$tipo[$contandotipo].'</TD>'.chr(13);
+			echo '<TD align=center ><div style="color: blue;">'.$tipo[$contandotipo].'</div></TD>'.chr(13);
 		}
 		elseif ($tipo[$contandotipo]=="B")
 		{
-			echo '<TD align=center><font color=red>&nbsp;'.$tipo[$contandotipo].'&nbsp;</TD>'.chr(13);
+			echo '<TD align=center><div style="color: red;">&nbsp;'.$tipo[$contandotipo].'&nbsp;</div></TD>'.chr(13);
 			}else{
 			echo '<TD align=center >'.$tipo[$contandotipo].'</TD>'.chr(13);
 		}
@@ -543,8 +543,8 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 		// ########## Aviso si directorio distinto al del centro - en vista repositorio ##########
 		$aviso='';
 		if ($separarogunit == 1) {
- 		    if ( $nombrecaidcentro != 0 and  "/".$imgdir != $dircentros[$nombrecaidcentro]){
- 			$aviso="<font color=red> * </font>";
+		    if ( $nombrecaidcentro != 0 and  "/".$imgdir != $dircentros[$nombrecaidcentro]){
+			$aviso="<style=\"color: red;\"> * </div>";
 			$textoaviso="<tr>\n	<th colspan='7' align='center'>".
 				"&nbsp;<sup>*</sup> $TbMsg[33] &nbsp;</th>\n".
 				"</tr>\n";
@@ -554,7 +554,7 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 		// ########## Nombre de Imagen ########################################################
 		if ($tipo[$contandotipo]=="D")
 		{
-			echo '<TD align=center><font color=blue>&nbsp;'.str_replace(":"," / ",$value).' '.$aviso.'&nbsp;</TD>'.chr(13);
+			echo '<TD align=center><div style="color: blue;">&nbsp;'.str_replace(":"," / ",$value).' '.$aviso.'&nbsp;</div></TD>'.chr(13);
 		}
 		else
 		{
@@ -574,9 +574,9 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 		}
 		elseif (preg_match("/.ant/",$nombrefichero))
 			{
-				echo '<TD align=center><font color=red>&nbsp;------</strong></TD>'.chr(13);
+				echo '<TD align=center><div style="color: red;">&nbsp;------</div></TD>'.chr(13);
 			}else{
-				echo '<TD align=center><font color=red>&nbsp;'.$TbMsg[25].'</strong></TD>'.chr(13);
+				echo '<TD align=center><div style="color: red;">&nbsp;'.$TbMsg[25].'</div></TD>'.chr(13);
 		}
 		// VISTA REPOSITORIO COMPLETO
 		if ($modov == 1){

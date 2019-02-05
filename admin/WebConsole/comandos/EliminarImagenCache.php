@@ -412,9 +412,9 @@ switch($ambito){
 					if ($esdir[$numdir] == "d"){$ruta[$numdir]='rm%20-r%20/opt/opengnsys/cache/opt/opengnsys/images/'.$value;}else{$ruta[$numdir]='rm%20-r%20/opt/opengnsys/cache/opt/opengnsys/images/'.$value.$todo;}
 					echo '<TR>'.chr(13);
 					echo '<TD align=center>&nbsp;'.$contar.'&nbsp;</TD>'.chr(13);
-					if ($esdir[$numdir]=="d"){echo '<TD align=center><font color=blue>&nbsp;D&nbsp;</font></TD>'.chr(13);}else{echo '<TD align=center>&nbsp;F&nbsp;</TD>'.chr(13);}
+					if ($esdir[$numdir]=="d"){echo '<TD align=center><div style="color: blue">&nbsp;D&nbsp;</div></TD>'.chr(13);}else{echo '<TD align=center>&nbsp;F&nbsp;</TD>'.chr(13);}
 					echo '<TD align=center ><input type="radio" name="codigo"  value='.$ruta[$numdir].'></TD>'.chr(13);
-					if ($esdir[$numdir]=="d"){echo '<TD align=center><font color=blue>&nbsp;'.$value.'&nbsp;</font></TD>'.chr(13);}else{echo '<TD align=center>&nbsp;'.$value.'&nbsp;</TD>'.chr(13);}
+					if ($esdir[$numdir]=="d"){echo '<TD align=center><div style="color: blue">&nbsp;'.$value.'&nbsp;</div></TD>'.chr(13);}else{echo '<TD align=center>&nbsp;'.$value.'&nbsp;</TD>'.chr(13);}
 					if ($cuentarepos==1){echo '<TD align=center>&nbsp;'.$tamanofich[0].'</TD>'.chr(13);}
 					echo '</TR>'.chr(13);
 					$contar++;$numdir++;
