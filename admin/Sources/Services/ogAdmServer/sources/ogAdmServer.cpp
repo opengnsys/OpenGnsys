@@ -3608,7 +3608,7 @@ static void og_client_read_cb(struct ev_loop *loop, struct ev_io *io, int events
 		       ntohs(cli->addr.sin_port));
 
 		len = cli->msg_len - (LONGITUD_CABECERATRAMA + LONHEXPRM);
-		data = desencriptar(&cli->buf[LONGITUD_CABECERATRAMA + LONHEXPRM], &len);
+		data = &cli->buf[LONGITUD_CABECERATRAMA + LONHEXPRM];
 
 		ptrTrama = (TRAMA *)reservaMemoria(sizeof(TRAMA));
 		if (!ptrTrama) {

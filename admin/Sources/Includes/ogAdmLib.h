@@ -267,8 +267,6 @@ const char* tbMensajes[]={"",\
 // ________________________________________________________________________________________________________
 // Prototipo de funciones
 // ________________________________________________________________________________________________________
-char *desencriptar(char *,int*);
-char *encriptar(char *,int*);
 struct tm * tomaHora();
 void registraLog(const char *,const char *,int );
 void errorLog(const char *,int ,int);

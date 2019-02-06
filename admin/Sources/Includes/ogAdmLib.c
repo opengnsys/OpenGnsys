@@ -7,53 +7,6 @@
 // Descripción: Este fichero implementa una libreria de funciones para uso común de los servicios
 // **************************************************************************************************************************************************
 // ________________________________________________________________________________________________________
-// Función: encriptar
-//
-//	Descripción:
-//		Encripta una cadena
-//	Parametros:
-//		- cadena : Cadena a encriptar
-//		- ret : Longitud de la caden cadena encriptada
-// ________________________________________________________________________________________________________
-char * encriptar(char *cadena,int*ret)
-{
-	/*
-	int i,lon;
-	char clave; 
-	
-	clave = 12 & 0xFFU; // La clave elegida entre 0-255, en este caso 12
-	lon=strlen(cadena);
-	for(i=0;i<lon;i++)
-      cadena[i]=((char)cadena[i] ^ clave) & 0xFF; 
-	*ret=lon;
-	*/
-	return(cadena);
-}
-// ________________________________________________________________________________________________________
-// Función: desencriptar
-//
-//	Descripción:
-//		Desencripta una cadena
-//	Parametros:
-//		- cadena : Cadena a desencriptar
-//		- ret : Longitud de la caden cadena encriptada
-// ________________________________________________________________________________________________________
-char * desencriptar(char *cadena,int* ret)
-{
-	/*
-	int i,lon;
-	char clave; 
-	
-	clave = 12 & 0xFFU; // La clave elegida entre 0-255, en este caso 12
-	lon=strlen(cadena);
-	for(i=0;i<lon;i++)
-		cadena[i]=((char)cadena[i] ^ clave) & 0xFF;
-	*ret=lon;
-	*/
-	return(cadena);
-
-}
-// ________________________________________________________________________________________________________
 // Función: tomaHora
 //
 //	Descripción:
@@ -606,7 +559,6 @@ BOOLEAN mandaTrama(SOCKET *sock, TRAMA* ptrTrama)
 	BOOLEAN res;
 
 	lonprm=strlen(ptrTrama->parametros);
-	ptrTrama->parametros=encriptar(ptrTrama->parametros,&lonprm); // Encripta los parámetros
 	sprintf(hlonprm,"%05X",LONGITUD_CABECERATRAMA+LONHEXPRM+lonprm); // Convierte en hexadecimal la longitud
 
 	buffer=reservaMemoria(LONGITUD_CABECERATRAMA+LONHEXPRM+lonprm); // Longitud total de la trama
@@ -699,7 +651,7 @@ TRAMA* recibeTrama(SOCKET *sock)
 	if (!ptrTrama)	return(NULL);
 	memcpy(ptrTrama,buffer,LONGITUD_CABECERATRAMA); // Copia cabecera de trama
 	lon=lSize-(LONGITUD_CABECERATRAMA+LONHEXPRM); // Longitud de los parametros aún encriptados
-	bufferd=desencriptar(&buffer[LONGITUD_CABECERATRAMA+LONHEXPRM],&lon);
+	bufferd = &buffer[LONGITUD_CABECERATRAMA+LONHEXPRM];
 	initParametros(ptrTrama,lon); // Desencripta la trama
 	memcpy(ptrTrama->parametros,bufferd,lon);
 	liberaMemoria((char*)buffer);
