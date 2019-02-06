@@ -10,11 +10,14 @@
 #include "ogAdmLib.c"
 #include <ev.h>
 #include <syslog.h>
+#include <sys/ioctl.h>
+#include <ifaddrs.h>
 
 static char usuario[LONPRM]; // Usuario de acceso a la base de datos
 static char pasguor[LONPRM]; // Password del usuario
 static char datasource[LONPRM]; // Dirección IP del gestor de base de datos
 static char catalog[LONPRM]; // Nombre de la base de datos
+static char interface[LONPRM]; // Interface name
 
 //________________________________________________________________________________________________________
 //	Función: tomaConfiguracion
@@ -68,6 +71,9 @@ static bool tomaConfiguracion(const char *filecfg)
 			snprintf(datasource, sizeof(datasource), "%s", value);
 		else if (!strcmp(StrToUpper(key), "CATALOG"))
 			snprintf(catalog, sizeof(catalog), "%s", value);
+		else if (!strcmp(StrToUpper(key), "INTERFACE"))
+			snprintf(interface, sizeof(interface), "%s", value);
+
 
 		line = fgets(buf, sizeof(buf), fcfg);
 	}
@@ -96,6 +102,8 @@ static bool tomaConfiguracion(const char *filecfg)
 		syslog(LOG_ERR, "Missing CATALOG in configuration file\n");
 		return false;
 	}
+	if (!interface[0])
+		syslog(LOG_ERR, "Missing INTERFACE in configuration file\n");
 
 	return true;
 }
@@ -1457,6 +1465,76 @@ bool Levanta(char *iph, char *mac, char *mar)
 	close(s);
 	return true;
 }
+
+#define OG_WOL_SEQUENCE		6
+#define OG_WOL_MACADDR_LEN	6
+#define OG_WOL_REPEAT		16
+
+struct wol_msg {
+	char secuencia_FF[OG_WOL_SEQUENCE];
+	char macbin[OG_WOL_REPEAT][OG_WOL_MACADDR_LEN];
+};
+
+static bool wake_up_broadcast(int sd, struct sockaddr_in *client,
+			      const struct wol_msg *msg)
+{
+	struct sockaddr_in *broadcast_addr;
+	struct ifaddrs *ifaddr, *ifa;
+	int ret;
+
+	if (getifaddrs(&ifaddr) < 0) {
+		syslog(LOG_ERR, "cannot get list of addresses\n");
+		return false;
+	}
+
+	client->sin_addr.s_addr = htonl(INADDR_BROADCAST);
+
+	for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) {
+		if (ifa->ifa_addr == NULL ||
+		    ifa->ifa_addr->sa_family != AF_INET ||
+		    strcmp(ifa->ifa_name, interface) != 0)
+			continue;
+
+		broadcast_addr =
+			(struct sockaddr_in *)ifa->ifa_ifu.ifu_broadaddr;
+		client->sin_addr.s_addr = broadcast_addr->sin_addr.s_addr;
+		break;
+	}
+	free(ifaddr);
+
+	ret = sendto(sd, msg, sizeof(*msg), 0,
+		     (sockaddr *)client, sizeof(*client));
+	if (ret < 0) {
+		syslog(LOG_ERR, "failed to send broadcast wol\n");
+		return false;
+	}
+
+	return true;
+}
+
+static bool wake_up_unicast(int sd, struct sockaddr_in *client,
+			    const struct wol_msg *msg,
+			    const struct in_addr *addr)
+{
+	int ret;
+
+	client->sin_addr.s_addr = addr->s_addr;
+
+	ret = sendto(sd, msg, sizeof(*msg), 0,
+		     (sockaddr *)client, sizeof(*client));
+	if (ret < 0) {
+		syslog(LOG_ERR, "failed to send unicast wol\n");
+		return false;
+	}
+
+	return true;
+}
+
+enum wol_delivery_type {
+	OG_WOL_BROADCAST = 1,
+	OG_WOL_UNICAST = 2
+};
+
 //_____________________________________________________________________________________________________________
 // Función: WakeUp
 //
@@ -1474,13 +1552,12 @@ bool Levanta(char *iph, char *mac, char *mar)
 //
 bool WakeUp(SOCKET *s, char* iph, char *mac, char *mar)
 {
-	int i, res;
-	char HDaddress_bin[6];
-	struct {
-		BYTE secuencia_FF[6];
-		char macbin[16][6];
-	} Trama_WakeUp;
-	sockaddr_in WakeUpCliente;
+	char HDaddress_bin[OG_WOL_MACADDR_LEN];
+	struct sockaddr_in WakeUpCliente;
+	struct wol_msg Trama_WakeUp;
+	struct in_addr addr;
+	bool ret;
+	int i;
 
 	for (i = 0; i < 6; i++) // Primera secuencia de la trama Wake Up (0xFFFFFFFFFFFF)
 		Trama_WakeUp.secuencia_FF[i] = 0xFF;
@@ -1499,18 +1576,25 @@ bool WakeUp(SOCKET *s, char* iph, char *mac, char *mar)
 	/* Creación de socket del cliente que recibe la trama magic packet */
 	WakeUpCliente.sin_family = AF_INET;
 	WakeUpCliente.sin_port = htons((short) PUERTO_WAKEUP);
-	if(atoi(mar)==2)
-		WakeUpCliente.sin_addr.s_addr = inet_addr(iph); //  Para hacerlo con IP
-	else
-		WakeUpCliente.sin_addr.s_addr = htonl(INADDR_BROADCAST); //  Para hacerlo con broadcast
 
-	res = sendto(*s, (char *) &Trama_WakeUp, sizeof(Trama_WakeUp), 0,
-			(sockaddr *) &WakeUpCliente, sizeof(WakeUpCliente));
-	if (res < 0) {
-		syslog(LOG_ERR, "failed to send wake up\n");
-		return false;
+	switch (atoi(mar)) {
+	case OG_WOL_BROADCAST:
+		ret = wake_up_broadcast(*s, &WakeUpCliente, &Trama_WakeUp);
+		break;
+	case OG_WOL_UNICAST:
+		if (inet_aton(iph, &addr) < 0) {
+			syslog(LOG_ERR, "bad IP address for unicast wol\n");
+			ret = false;
+			break;
+		}
+		ret = wake_up_unicast(*s, &WakeUpCliente, &Trama_WakeUp, &addr);
+		break;
+	default:
+		syslog(LOG_ERR, "unknown wol type\n");
+		ret = false;
+		break;
 	}
-	return true;
+	return ret;
 }
 // ________________________________________________________________________________________________________
 // Función: RESPUESTA_Arrancar
