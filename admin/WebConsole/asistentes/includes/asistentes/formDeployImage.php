@@ -25,21 +25,16 @@ for($cfgIndex = 0; $cfgIndex < $conKeys; $cfgIndex++){
 	<td class="op_basic">
 	   
 	    <?php echo $TbMsg["WDI20"] ?> 
-		<select name="idparticion" id="idparticion" style="WIDTH:220">
+		<select name="idparticion" id="idparticion" style="width:220px">
 				<?php
 				foreach($disksPartitions as $diskPartition){
 					echo "<option value='".$diskPartition["value"]."'>".$diskPartition["text"]." </option>";
 				}
 				?>
-				<!--
-				<option value="1"> 1 </option>
-				<option value="2"> 2 </option>
-				<option value="3"> 3 </option>
-				-->
 		</select>
 		<br />
 	    <?php echo $TbMsg["WDI21"] ?>
-		<select name="idimagen" id="idimagen" style="WIDTH:220">
+		<select name="idimagen" id="idimagen" style="width:220px">
 				<option value=""> <?php echo $TbMsg["WDI22"] ?></option>
 				<?php echo ''. htmlOPTION_images($cmd,$ambito,$idambito) .'';   ?>
 		</select>		
@@ -47,7 +42,7 @@ for($cfgIndex = 0; $cfgIndex < $conKeys; $cfgIndex++){
 	    <?php echo $TbMsg["WDI23"] ?>
 	
 		<br />
-		<select name="idmetodo" id="idmetodo" style="WIDTH:220;">
+		<select name="idmetodo" id="idmetodo" style="width:220px;">
 			<option value="TORRENT"> TORRENT </option>
 			<option value="MULTICAST"> MULTICAST </option>
 			<option value="MULTICAST-DIRECT"> MULTICAST-DIRECT </option>

@@ -18,7 +18,7 @@
 // ***********************************************************************************************************
 
 function codeCloneRemotePartition(form){
-var command ;
+var protocol;
 switch (form.idmetodo.value)
 {
 	case "MULTICAST":
@@ -29,7 +29,7 @@ switch (form.idmetodo.value)
 		break;
 }
 //form.codigo.value="cloneRemoteFromMaster " + form.ipMaster.value + " 1 " + form.PartOrigen.value + "  " + form.mcastpuerto.value  + ":" + form.mcastmodo.value + ":" + form.mcastdireccion.value + ":" + form.mcastvelocidad.value + "M:" + form.mcastnclien.value + ":" + form.mcastseg.value + " 1 " + form.PartOrigen.value + " " + form.tool.value + " " + form.compresor.value;
-command="cloneRemoteFromMaster " + form.ipMaster.value + " " + form.source.value + "  " + protocol  + " " + form.targetpart.value + " " + form.tool.value + " " + form.compresor.value;
+var command="cloneRemoteFromMaster " + form.ipMaster.value + " " + form.source.value + "  " + protocol  + " " + form.targetpart.value + " " + form.tool.value + " " + form.compresor.value;
 form.codigo.value="\
 ogEcho log session \"[0] $MSG_SCRIPTS_TASK_START " + command + "\"\n \
 ogExecAndLog command " + command + " \n ";
@@ -52,6 +52,10 @@ function enableDirect(form){
 
 
 function codeDeployImage(form){
+var diskPart;
+var imagen;
+var command;
+
 switch (form.idmetodo.value)
 {
 	case "MULTICAST":
@@ -72,14 +76,14 @@ switch (form.idmetodo.value)
 }
 
 // Datos imagen
-var imagen = form.idimagen.value.split("_");
+imagen = form.idimagen.value.split("_");
 
 //form.codigo.value="deployImage REPO /";
 if (form.modo[0].checked) 
 {
 	// UHU - Distinguimos entre disco y particion, el valor de idparticion sera disco;particion. eje. 1;1
-	var diskPart = form.idparticion.value.split(";");
-	var imagen = form.idimagen.value.split("_");
+	diskPart = form.idparticion.value.split(";");
+	imagen = form.idimagen.value.split("_");
 	command="deployImage " + imagen[0] + " /" + imagen[1] + " "+diskPart[0]+" " + diskPart[1] + " " + protocol  ;
 	form.codigo.value="\
 ogEcho log session \"[0] $MSG_SCRIPTS_TASK_START " + command + "\"\n \ " +
@@ -109,9 +113,11 @@ function modificarCodigo() {
 function codeParticionado(form){
 	var n_disk = form.n_disk.value;
 	var tipo_part_table = form.tipo_part_table.value;
+	var freedisk;
+	var freediskGPT;
 	// Comprobamos si la opcion elejida es GPT o MSDOS para llamar a una funcion u otra
-	if(tipo_part_table == "GPT"){
-		var freediskGPT = parseInt(document.getElementById("freediskGPT").value);
+	if(tipo_part_table === "GPT"){
+		freediskGPT = parseInt(document.getElementById("freediskGPT").value);
 		// Comprobamos que el espacio libre en el disco no sea negativo, si lo es, dar aviso
 		if(freediskGPT < 0){
 			alert(TbMsg['NODISKSIZE']);
@@ -124,7 +130,7 @@ function codeParticionado(form){
 		}
 	}
 	else{
-		var freedisk = parseInt(document.getElementById("freedisk").value);
+		freedisk = parseInt(document.getElementById("freedisk").value);
 		// Comprobamos que el espacio libre en el disco no sea negativo, si lo es, dar aviso
 		if(freedisk < 0){
 			alert(TbMsg['NODISKSIZE']);
@@ -136,7 +142,6 @@ function codeParticionado(form){
 			codeParticionadoMSDOS(form);
 		}
 	}
-
 }
 
 
@@ -150,19 +155,23 @@ function codeParticionadoMSDOS (form) {
 	var n_disk = form.n_disk.value;
 	var tipo_part_table = form.tipo_part_table.value;
 	var maxParts = 4;
-	var swapPart = new Array();
+	var swapPart = [];
 	var swapCode = "";
-	
+	var partCheck;
+	var partType;
+	var partTypeCustom;
+	var partSize;
+	var partSizeCustom;
 	// Comprobamos si esta seleccionada la cuarta particion y no es CACHE
-        if(form.check4.checked && form.part4.value != "CACHE")
-                maxParts = 5;
+	if(form.check4.checked && form.part4.value !== "CACHE")
+		maxParts = 5;
 
 	for (var nPart=1; nPart<maxParts; nPart++) {
-		var partCheck=eval("form.check"+nPart);
+		partCheck=eval("form.check"+nPart);
 		if (partCheck.checked) {
-			var partType=eval("form.part"+nPart);
-			if (partType.value == "CUSTOM" ) {
-				var partTypeCustom=eval("form.part"+nPart+"custom");
+			partType=eval("form.part"+nPart);
+			if (partType.value === "CUSTOM" ) {
+				partTypeCustom=eval("form.part"+nPart+"custom");
 				partCode += " " + partTypeCustom.value;
 				switch(partTypeCustom.value) {
 				    case "EXTENDED":
@@ -184,9 +193,9 @@ function codeParticionadoMSDOS (form) {
 					break;
 				}
 			}
-			var partSize=eval("form.size"+nPart);
-			if (partSize.value == "CUSTOM" ) {
-				var partSizeCustom=eval("form.size"+nPart+"custom");
+			partSize=eval("form.size"+nPart);
+			if (partSize.value === "CUSTOM" ) {
+				partSizeCustom=eval("form.size"+nPart+"custom");
 				partCode += ":" + partSizeCustom.value;
 			} else {
 				partCode += ":" + partSize.value;
@@ -195,19 +204,18 @@ function codeParticionadoMSDOS (form) {
 			partCode += " EMPTY:0";
 		}
 	}
-	var cacheCode="";
 
 	// Si se selecciono la particion 4 y es CACHE
-	if(form.part4.value == "CACHE"){
+	if(form.part4.value === "CACHE"){
 		if (form.check4.checked) {
-			if (form.size4.value == "0") {
+			if (form.size4.value === "0") {
 				sizecacheCode="\
 ogEcho session \"[20] $MSG_HELP_ogGetCacheSize\"\n \
 sizecache=`ogGetCacheSize` \n ";
 				cacheCode="\
 initCache "+n_disk+" $sizecache NOMOUNT  &>/dev/null \n ";		
 			} else {
-				if (form.size4.value == "CUSTOM") { 
+				if (form.size4.value === "CUSTOM") {
 					cacheSize = form.size4custom.value; 
 				} else {
 					cacheSize = form.size4.value;
@@ -215,40 +223,40 @@ initCache "+n_disk+" $sizecache NOMOUNT  &>/dev/null \n ";
 				cacheCode="\
 initCache " + n_disk + " " + cacheSize + " NOMOUNT &>/dev/null \n ";
 			} 
-		cacheCode += "ogEcho session \"[60] $MSG_HELP_ogListPartitions "+n_disk+"\" \n ";
-		cacheCode += "ogExecAndLog command session ogListPartitions "+n_disk+" \n ";
+			cacheCode += "ogEcho session \"[60] $MSG_HELP_ogListPartitions "+n_disk+"\" \n ";
+			cacheCode += "ogExecAndLog command session ogListPartitions "+n_disk+" \n ";
 		} else {
-partCode += " EMPTY:0";
+			partCode += " EMPTY:0";
 		}
 	}
 
 	if (extended) {
 		var lastLogical=5;
-		for (var nPart=9; nPart>5; nPart--) {
+		for (nPart=9; nPart>5; nPart--) {
 			if (eval ("form.check"+nPart+".checked")) {
 				lastLogical = nPart;
 				break;
 			}
 		}
-		for (var nPart=5; nPart<=lastLogical; nPart++) {
-			var partCheck=eval("form.check"+nPart);
+		for (nPart=5; nPart<=lastLogical; nPart++) {
+			partCheck=eval("form.check"+nPart);
 			if (partCheck.checked) {
-				var partType=eval("form.part"+nPart);
-				if (partType.value == "CUSTOM" ) {
-					var partTypeCustom=eval("form.part"+nPart+"custom");
+				partType=eval("form.part"+nPart);
+				if (partType.value === "CUSTOM" ) {
+					partTypeCustom=eval("form.part"+nPart+"custom");
 					logicalCode += " " + partTypeCustom.value;
 					// Partición swap
-					if (partTypeCustom.value == "LINUX-SWAP")
+					if (partTypeCustom.value === "LINUX-SWAP")
 						swapPart.push(nPart);
 				} else {
 					logicalCode += " " + partType.value;
 					// Partición swap
-					if (partType.value == "LINUX-SWAP")
+					if (partType.value === "LINUX-SWAP")
 						swapPart.push(nPart);
 				}
-				var partSize=eval("form.size"+nPart);
-				if (partSize.value == "CUSTOM" ) {
-					var partSizeCustom=eval("form.size"+nPart+"custom");
+				partSize=eval("form.size"+nPart);
+				if (partSize.value === "CUSTOM" ) {
+					partSizeCustom=eval("form.size"+nPart+"custom");
 					logicalCode += ":" + partSizeCustom.value;
 				} else {
 					logicalCode += ":" + partSize.value;
@@ -270,7 +278,7 @@ partCode += " EMPTY:0";
         }
 
 	form.codigo.value="\
- ogEcho log session \"[0]  $MSG_HELP_ogCreatePartitions "+n_disk+"\"\n \
+ogEcho log session \"[0]  $MSG_HELP_ogCreatePartitions "+n_disk+"\"\n \
 ogEcho session \"[10] $MSG_HELP_ogUnmountAll "+n_disk+"\"\n \
 ogUnmountAll "+n_disk+" 2>/dev/null \n \
 ogUnmountCache \n \
@@ -307,18 +315,17 @@ function codeParticionadoGPT (form) {
         var extended=false;
         var n_disk = form.n_disk.value;
         var tipo_part_table = form.tipo_part_table.value;
-	var swapPart = new Array();
+	var swapPart = [];
 	var swapCode = "";
-
-		numParts=document.getElementById("numGPTpartitions").value;
+		var numParts=document.getElementById("numGPTpartitions").value;
 		
         for (var nPart=1; nPart <= numParts; nPart++) {
                 var partCheck=eval("form.checkGPT"+nPart);
                 if (partCheck.checked) {
 			// Distinguimos entre cache y el resto de particiones
 			// Solo tratamos la particion 4 como cache, si se selecciono este tipo
-			if(nPart == 4 && form.partGPT4.value == "CACHE") {
-				if (form.sizeGPT4.value == "0") {
+			if(nPart === 4 && form.partGPT4.value === "CACHE") {
+				if (form.sizeGPT4.value === "0") {
                                         sizecacheCode="\
 ogEcho session \"[20] $MSG_HELP_ogGetCacheSize\" \n \
 sizecache=`ogGetCacheSize` \n ";
@@ -326,7 +333,7 @@ sizecache=`ogGetCacheSize` \n ";
 ogEcho session \"[50] $MSG_HELP_ogCreateCache\"\n \
 initCache "+ n_disk +" $sizecache NOMOUNT &>/dev/null \n ";
 				} else {
-					if (form.sizeGPT4.value == "CUSTOM") {
+					if (form.sizeGPT4.value === "CUSTOM") {
 						cacheSize = form.sizeGPT4custom.value;
 					} else {
 						cacheSize = form.sizeGPT4.value;
@@ -339,20 +346,20 @@ initCache "  + n_disk +" "+ cacheSize + " NOMOUNT &>/dev/null \n ";
 				cacheCode += "ogExecAndLog command session ogListPartitions "+n_disk+" \n ";
 			} else{
 				var partType=eval("form.partGPT"+nPart);
-				if (partType.value == "CUSTOM" ) {
+				if (partType.value === "CUSTOM" ) {
 					var partTypeCustom=eval("form.partGPT"+nPart+"custom");
 					partCode += " " + partTypeCustom.value;
 					// Partición swap
-					if (partTypeCustom.value == "LINUX-SWAP")
-                                                swapPart.push(nPart);
+					if (partTypeCustom.value === "LINUX-SWAP")
+						swapPart.push(nPart);
 				} else {
 					partCode += " " + partType.value;
 					// Partición swap
-					if (partType.value == "LINUX-SWAP")
-                                                swapPart.push(nPart);
+					if (partType.value === "LINUX-SWAP")
+						swapPart.push(nPart);
 				}
 				var partSize=eval("form.sizeGPT"+nPart);
-				if (partSize.value == "CUSTOM" ) {
+				if (partSize.value === "CUSTOM" ) {
 					var partSizeCustom=eval("form.sizeGPT"+nPart+"custom");
 					partCode += ":" + partSizeCustom.value;
 				} else {
@@ -372,7 +379,7 @@ initCache "  + n_disk +" "+ cacheSize + " NOMOUNT &>/dev/null \n ";
 	}
             
 	form.codigo.value="\
- ogEcho log session \"[0]  $MSG_HELP_ogCreatePartitions "+n_disk+"\"\n \
+ogEcho log session \"[0]  $MSG_HELP_ogCreatePartitions "+n_disk+"\"\n \
 ogEcho session \"[10] $MSG_HELP_ogUnmountAll "+n_disk+"\"\n \
 ogUnmountAll "+n_disk+" \n \
 ogUnmountCache \n \
@@ -404,7 +411,7 @@ form.codigo.value += swapCode;
 
 function showPartitionForm (tipo_table_part) {
 	document.getElementById("form"+tipo_table_part).style.display="inline";
-	if(tipo_table_part == "MSDOS"){
+	if(tipo_table_part === "MSDOS"){
 		// De los dos tipos, se oculta el otro
 		document.getElementById("formGPT").style.display="none";
 		document.getElementById("warngpt").style.display="none";
@@ -428,10 +435,9 @@ function showPartitionForm (tipo_table_part) {
 function clickPartitionCheckbox (form, npart, isGPT) {
 	// Si el parametro no esta definido, se toma como false
 	isGPT = (isGPT)?isGPT:"false";
-	if(isGPT == true){
+	var prefix="";
+	if(isGPT === true){
 		prefix="GPT";
-	} else {
-		prefix="";
 	}
 	var partCheck=eval("form.check"+prefix+npart);
 	var partType=eval("form.part"+prefix+npart);
@@ -443,27 +449,23 @@ function clickPartitionCheckbox (form, npart, isGPT) {
 	if (partCheck.checked) {
 		partType.disabled=false;
 		partSize.disabled=false;
-		if(npart != 4){
-			if (partType.options[partType.selectedIndex].value == "CUSTOM") {
+		if(npart !== 4){
+			if (partType.options[partType.selectedIndex].value === "CUSTOM") {
 				partTypeCustom.disabled=false;
 			}
 		}
-		if (partSize.options[partSize.selectedIndex].value == "CUSTOM") {
-			partSizeCustom.disabled=false;
-		} else {
-			partSizeCustom.disabled=true;
-		}
+		partSizeCustom.disabled = partSize.options[partSize.selectedIndex].value !== "CUSTOM";
 	} else {
 		partType.disabled=true;
 		partSize.disabled=true;
 		// El campo TypeCustom no existe para la particion 4
-		if(npart != 4)
+		if(npart !== 4)
 			partTypeCustom.disabled=true;
 		partSizeCustom.disabled=true;
 	}
 	if (npart <= 4) {
 		// Si el formulario es GPT no hay extendidas
-		if(isGPT != true){
+		if(isGPT !== true){
 			checkExtendedPartition(form);
 		}
 		calculateFreeDisk(form);
@@ -506,7 +508,7 @@ function getMaxCacheSize() {
 function validaCache (freedisk) {
 	var form = document.fdatos;
 	var maxcachesize = parseInt(document.getElementById("maxcachesize").value);
-        if(form.part4.value === "CACHE" && form.check4.checked && form.size4.value == 0 ){
+	if(form.part4.value === "CACHE" && form.check4.checked && form.size4.value === 0 ){
 	    return ((freedisk - maxcachesize) > 0);
 	}
 	return true;
@@ -515,7 +517,7 @@ function validaCache (freedisk) {
 // Código para calcular el espacio libre del disco.
 function calculateFreeDisk(form) {
 	// Si esta seleccionada la opcion GPT, se llama a la funcion correspondiente
-	if(document.getElementById("tipo_part_table").value == "GPT"){
+	if(document.getElementById("tipo_part_table").value === "GPT"){
 		calculateFreeGPTDisk(form);
 	}
 	// Capturamos el disco seleccionado
@@ -531,7 +533,7 @@ function calculateFreeDisk(form) {
 		var partSize=eval("form.size"+npart);
 		var partSizeCustom=eval("form.size"+npart+"custom");
 		if (partCheck.checked) {
-			if (partSize.options[partSize.selectedIndex].value == "CUSTOM") {
+			if (partSize.options[partSize.selectedIndex].value === "CUSTOM") {
 				freeDisk.value -= parseInt(partSizeCustom.value);
 			} else {
 				freeDisk.value -= parseInt(partSize.options[partSize.selectedIndex].value);
@@ -545,7 +547,7 @@ function calculateFreeDisk(form) {
 		freeDisk.style.fontWeight = "normal";
 		freeDisk.style.fontStyle = "normal";
 	}
-	if (form.size4.value == 0) {
+	if (form.size4.value === 0) {
 		freeDisk.value += " (- cache)";		// Aviso de caché sin modificar.
 	}
 }
@@ -553,7 +555,7 @@ function calculateFreeDisk(form) {
 // Código para calcular el espacio libre del disco. en el formulario GPT
 function calculateFreeGPTDisk(form) {
 	// Si esta seleccionada la opcion MSDOS, se llama a la funcion correspondiente
-	if(document.getElementById("tipo_part_table").value == "MSDOS"){
+	if(document.getElementById("tipo_part_table").value === "MSDOS"){
 		calculateFreeDisk(form);
 	}
 	// Capturamos el disco seleccionado
@@ -563,13 +565,13 @@ function calculateFreeGPTDisk(form) {
 	
 	var freeDisk=document.getElementById("freediskGPT");
 	// Capturamos el numero de particiones que hay hechas
-	numParts=document.getElementById("numGPTpartitions").value;
-	for (npart=1; npart<=numParts; npart++) {
+	var numParts=document.getElementById("numGPTpartitions").value;
+	for (var npart=1; npart<=numParts; npart++) {
             var partCheck=eval("form.checkGPT"+npart);
             var partSize=eval("form.sizeGPT"+npart);
             var partSizeCustom=eval("form.sizeGPT"+npart+"custom");
             if (partCheck.checked) {
-                    if (partSize.options[partSize.selectedIndex].value == "CUSTOM") {
+                    if (partSize.options[partSize.selectedIndex].value === "CUSTOM") {
                             freeDisk.value -= parseInt(partSizeCustom.value);
                     } else {
                             freeDisk.value -= parseInt(partSize.options[partSize.selectedIndex].value);
@@ -583,7 +585,7 @@ function calculateFreeGPTDisk(form) {
             freeDisk.style.fontWeight = "normal";
             freeDisk.style.fontStyle = "normal";
     }
-    if (form.size4.value == 0) {
+    if (form.size4.value === 0) {
             freeDisk.value += " (- cache)";         // Aviso de caché sin modificar.
     }
 }
@@ -617,28 +619,28 @@ function addGPTPartition(){
 	partitionTypes+='<OPTION value="BIOS-BOOT"> BIOS Boot </OPTION>';
 
 
-	table = document.getElementById("particionesGPT");
+	var table = document.getElementById("particionesGPT");
 	// Capturamos el numero de particiones, antes incrementamos
 	document.getElementById("numGPTpartitions").value = parseInt(document.getElementById("numGPTpartitions").value)+1;
-	numPart=document.getElementById("numGPTpartitions").value;
-	partitionRow = table.insertRow(-1);
+	var numPart=document.getElementById("numGPTpartitions").value;
+	var partitionRow = table.insertRow(-1);
 	partitionRow.id = "trPartition"+numPart;
 	partitionRow.innerHTML="<td> \
 <input type='checkbox' name='checkGPT"+numPart+"' value='checkGPT"+numPart+"' onclick='clickPartitionCheckbox(this.form, "+numPart+",true);' /> Partici&oacute;n "+numPart+"</td> \
 <td>\
 <select name='partGPT"+numPart+"' id='partGPT"+numPart+"' style='width:220' disabled='true' onclick=' \
-        if (this.options[this.selectedIndex].value == \'CUSTOM\') { \
+        if (this.options[this.selectedIndex].value === \"CUSTOM\") { \
                 this.form.partGPT"+numPart+"custom.disabled=false; \
         } else { \
                 this.form.partGPT"+numPart+"custom.disabled=true; \
         }'><option value='CUSTOM'> Personalizar </option> \
 </select> \
 <br> \
-<select name='partGPT"+numPart+"custom' id='partGPT"+numPart+"custom' style='width:220' disabled='true' >"+partitionTypes+"</select> \
+<select name='partGPT"+numPart+"custom' id='partGPT"+numPart+"custom' style='width:220px' disabled='true' >"+partitionTypes+"</select> \
 </td> \
 <td> \
-<select name='sizeGPT"+numPart+"' id='sizeGPT"+numPart+"' style='width:220' disabled='true' onclick=' \
-        if (this.form.size"+numPart+".options[this.form.size"+numPart+".selectedIndex].value == \'CUSTOM\') { \
+<select name='sizeGPT"+numPart+"' id='sizeGPT"+numPart+"' style='width:220px' disabled='true' onclick=' \
+        if (this.form.size"+numPart+".options[this.form.size"+numPart+".selectedIndex].value === \"CUSTOM\") { \
                 this.form.sizeGPT"+numPart+"custom.disabled=false; \
         } else { \
                 this.form.sizeGPT"+numPart+"custom.disabled=true; \
@@ -646,19 +648,19 @@ function addGPTPartition(){
 ' onchange='calculateFreeGPTDisk(this.form);'>0<option value='CUSTOM'> Personalizar </option> \
 </select> \
 <br /> \
-<input type='text' style='width:100' name='sizeGPT"+numPart+"custom' value='0' disabled='true' onchange='calculateFreeDisk(this.form);' /> \
+<input type='text' style='width:100px' name='sizeGPT"+numPart+"custom' value='0' disabled='true' onchange='calculateFreeDisk(this.form);' /> \
 </td>"
 
 }
 
 // Agrega una nueva fila a la tabla de particiones con una nueva particion
 function deleteGPTPartition(){
-	table = document.getElementById("particionesGPT");
+	var table = document.getElementById("particionesGPT");
         // Capturamos el numero de particiones
-	numPart=document.getElementById("numGPTpartitions").value;
+	var numPart=document.getElementById("numGPTpartitions").value;
 	// Si ya solo quedan 4 particiones, no se elimina ni se decrementa el contador
 	if(numPart > 4){
-        	partitionRow = document.getElementById("trPartition"+numPart);
+		var partitionRow = document.getElementById("trPartition"+numPart);
 		table.deleteRow(partitionRow.rowIndex);
 		// Decrementamos el numero de particiones
 		document.getElementById("numGPTpartitions").value = parseInt(document.getElementById("numGPTpartitions").value)-1;
@@ -669,21 +671,21 @@ function deleteGPTPartition(){
 function checkExtendedPartition(form) {
 	var logical=document.getElementById("logicas");
 	var visible=false;
-	for (npart=1; npart<=4; npart++) {
+	for (var npart=1; npart<=4; npart++) {
 		var partCheck=eval("form.check"+npart);
 		var partType=eval("form.part"+npart);
 		var partTypeCustom=eval("form.part"+npart+"custom");
 		if (partCheck.checked) {
 			partType.style.fontWeight = "normal";
 
-			if (partType.value == "EXTENDED") {
+			if (partType.value === "EXTENDED") {
 				visible=true;
 				partType.style.fontWeight = "bold";
 			}
 			// La particion 4 no tiene partTypeCustom
-                        if(npart != 4){
-                        	partTypeCustom.style.fontWeight = "normal";
-				if (partType.value == "CUSTOM" && partTypeCustom.value == "EXTENDED") {
+			if(npart !== 4){
+				partTypeCustom.style.fontWeight = "normal";
+				if (partType.value === "CUSTOM" && partTypeCustom.value === "EXTENDED") {
 					visible=true;
 					partTypeCustom.style.fontWeight = "bold";
 				}
