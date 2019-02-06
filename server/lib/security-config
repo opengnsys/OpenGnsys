@@ -23,13 +23,13 @@ if which ufw &>/dev/null; then
 	echo "Configuring UFW."
 	# Adding active services.
 	ufw allow "Apache Secure"
+	ufw allow from 127.0.0.1/8 to any port mysql proto tcp    # MySQL from the loopback
 	ufw allow OpenSSH
 	ufw allow Samba
-	ufw allow mysql
 	ufw allow rsync
 	ufw allow tftp
 	ufw allow 67,68/udp		# DHCP
-	ufw allow 2008/tcp		# OpenGnsys service
+	ufw allow 2008,2009,2011/tcp	# OpenGnsys services
 	ufw allow 6881:6999/udp		# BitTorrent
 	ufw allow 9000/tcp		# PHP-FPM
 	ufw allow 9000:9051/udp		# Multicast
@@ -42,9 +42,9 @@ elif which firewall-cmd &>/dev/null; then
 	python -c "
 import firewall.core.io.service as ios
 s=ios.Service()
-s.short = 'OpenGnsys Server'
-s.name = 'ogAdmServer'
-s.ports = [('2008', 'tcp')]
+s.short = 'OpenGnsys Services'
+s.name = 'opengnsys'
+s.ports = [('2008', 'tcp'), ('2009', 'tcp'), ('2011', 'tcp')]
 ios.service_writer(s, '/etc/firewalld/services')
 s.name = 'php-fpm'
 s.ports = [('9000', 'tcp')]
@@ -52,9 +52,9 @@ ios.service_writer(s, '/etc/firewalld/services')"
 	# Adding active services.
 	firewall-cmd --permanent --add-service=dhcp
 	firewall-cmd --permanent --add-service=https
-	firewall-cmd --permanent --add-service=php-fpm
 	firewall-cmd --permanent --add-service=mysql --zone internal
-	firewall-cmd --permanent --add-service=ogAdmServer
+	firewall-cmd --permanent --add-service=opengnsys
+	firewall-cmd --permanent --add-service=php-fpm
 	# Ubuntu 14.04 does not define "rsyncd" service.
 	firewall-cmd --permanent --add-service=rsyncd || \
 		firewall-cmd --permanent --add-port=873/tcp
@@ -73,16 +73,20 @@ fi
 
 # SELinux configuration.
 if which setsebool &>/dev/null; then
-	echo "Configuring SELinux."
-	# Configuring Apache.
-	setsebool -P httpd_can_connect_ldap on
-	semanage fcontext -at httpd_sys_content_t "$OPENGNSYS/www(/.*)?"
-	# Configuring Samba. 
-	setsebool -P samba_export_all_ro=1 samba_export_all_rw=1
-	semanage fcontext -at samba_share_t "$OPENGNSYS/client(/.*)?"
-	semanage fcontext -at samba_share_t "$OPENGNSYS/images(/.*)?"
-	# Applying configuration.
-	restorecon -R $OPENGNSYS
+	if [ "$(getenforce)" != "Disabled" ]; then
+		echo "Configuring SELinux."
+		# Configuring Apache.
+		setsebool -P httpd_can_connect_ldap on
+		semanage fcontext -at httpd_sys_content_t "$OPENGNSYS/www(/.*)?"
+		# Configuring Samba.
+		setsebool -P samba_export_all_ro=1 samba_export_all_rw=1
+		semanage fcontext -at samba_share_t "$OPENGNSYS/client(/.*)?"
+		semanage fcontext -at samba_share_t "$OPENGNSYS/images(/.*)?"
+		# Applying configuration.
+		restorecon -R $OPENGNSYS
+	else
+		echo "$PROG: Warning: SELinux is disabled, it won't be configured."
+	fi
 else
 	echo "$PROG: Warning: SELinux won't be configured (policycoreutils is not installed)."
 fi
