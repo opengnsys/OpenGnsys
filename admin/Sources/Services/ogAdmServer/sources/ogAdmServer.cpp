@@ -1434,7 +1434,7 @@ bool Levanta(char *iph, char *mac, char *mar)
 	unsigned int on = 1;
 	sockaddr_in local;
 	int i, lon, res;
-	SOCKET s;
+	int s;
 
 	/* Creación de socket para envío de magig packet */
 	s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
@@ -1456,7 +1456,7 @@ bool Levanta(char *iph, char *mac, char *mar)
 	lon = splitCadena(ptrIP, iph, ';');
 	lon = splitCadena(ptrMacs, mac, ';');
 	for (i = 0; i < lon; i++) {
-		if (!WakeUp(&s,ptrIP[i],ptrMacs[i],mar)) {
+		if (!WakeUp(s, ptrIP[i], ptrMacs[i], mar)) {
 			syslog(LOG_ERR, "problem sending magic packet\n");
 			close(s);
 			return false;
@@ -1550,7 +1550,7 @@ enum wol_delivery_type {
 //		false: En caso de ocurrir algún error
 //_____________________________________________________________________________________________________________
 //
-bool WakeUp(SOCKET *s, char* iph, char *mac, char *mar)
+bool WakeUp(int s, char* iph, char *mac, char *mar)
 {
 	char HDaddress_bin[OG_WOL_MACADDR_LEN];
 	struct sockaddr_in WakeUpCliente;
@@ -1579,7 +1579,7 @@ bool WakeUp(SOCKET *s, char* iph, char *mac, char *mar)
 
 	switch (atoi(mar)) {
 	case OG_WOL_BROADCAST:
-		ret = wake_up_broadcast(*s, &WakeUpCliente, &Trama_WakeUp);
+		ret = wake_up_broadcast(s, &WakeUpCliente, &Trama_WakeUp);
 		break;
 	case OG_WOL_UNICAST:
 		if (inet_aton(iph, &addr) < 0) {
@@ -1587,7 +1587,7 @@ bool WakeUp(SOCKET *s, char* iph, char *mac, char *mar)
 			ret = false;
 			break;
 		}
-		ret = wake_up_unicast(*s, &WakeUpCliente, &Trama_WakeUp, &addr);
+		ret = wake_up_unicast(s, &WakeUpCliente, &Trama_WakeUp, &addr);
 		break;
 	default:
 		syslog(LOG_ERR, "unknown wol type\n");

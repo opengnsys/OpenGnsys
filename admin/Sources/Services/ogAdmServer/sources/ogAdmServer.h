@@ -47,7 +47,7 @@ bool buscaComandos(char *,TRAMA *,int *);
 bool respuestaConsola(int socket, TRAMA *,int);
 bool enviaComando(TRAMA *ptrTrama,const char*);
 bool Levanta(char*,char*,char*);
-bool WakeUp(SOCKET *,char*,char*,char*);
+bool WakeUp(int,char*,char*,char*);
 void PasaHexBin(char *,char *);
 bool actualizaCreacionImagen(Database,Table,char*,char*,char*,char*,char*,char*);
 bool actualizaRestauracionImagen(Database,Table,char*,char*,char*,char*,char*);
