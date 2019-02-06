@@ -310,7 +310,6 @@ BOOLEAN escribeArchivo(char *,char*);
 BOOLEAN sendArchivo(SOCKET *,char *);
 BOOLEAN recArchivo(SOCKET *,char *);
 SOCKET TCPConnect(char *,char*);
-int tomaPuerto(SOCKET);
 
 #include <stddef.h> /* for offsetof. */
 
