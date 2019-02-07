@@ -73,7 +73,7 @@ fi
 
 # SELinux configuration.
 if which setsebool &>/dev/null; then
-	if [ "$(getenforce)" != "Disabled" ]; then
+	if selinuxenabled; then
 		echo "Configuring SELinux."
 		# Configuring Apache.
 		setsebool -P httpd_can_connect_ldap on
