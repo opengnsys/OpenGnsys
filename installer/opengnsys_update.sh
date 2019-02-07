@@ -571,7 +571,7 @@ function apacheConfiguration ()
 	else
 	       template=$WORKDIR/opengnsys/server/etc/apache.conf.tmpl
 	fi
-	sockfile=$(find /run/php -name "php*.sock" -type s -print 2>/dev/null)
+	sockfile=$(find /run/php -name "php*.sock" -type s -print 2>/dev/null | tail -1)
 	# Actualizar configuración de Apache a partir de fichero de plantilla.
 	for config in $APACHECFGDIR/{,sites-available/}opengnsys.conf; do
 		if [ -e $config ]; then

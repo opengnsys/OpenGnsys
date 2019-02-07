@@ -1151,7 +1151,7 @@ function installWebConsoleApacheConf()
 	echoAndLog "${FUNCNAME}(): configuring PHP-FPM"
 	service=$PHPFPMSERV
 	$ENABLESERVICE; $STARTSERVICE
-	sockfile=$(find /run/php -name "php*.sock" -type s -print 2>/dev/null)
+	sockfile=$(find /run/php -name "php*.sock" -type s -print 2>/dev/null | tail -1)
 
 	# Activar módulos de Apache.
 	$APACHEENABLEMODS
