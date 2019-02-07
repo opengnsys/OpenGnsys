@@ -45,8 +45,8 @@ if  ($opcion!=$op_alta){
 //________________________________________________________________________________________________________
 ?>
 <html>
-<title>Administración web de aulas</title>
 <head>
+    <title>Administración web de aulas</title>
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
 	<link rel="stylesheet" type="text/css" href="../estilos.css" />
 	<script language="javascript" src="../jscripts/propiedades_perfilhardwares.js"></script>
@@ -62,16 +62,16 @@ if  ($opcion!=$op_alta){
 	<input type="hidden" name="grupoid" value="<?php echo $grupoid?>" />
 	<input type="hidden" name="winboot" value="reboot" />
 	<p align="center" class="cabeceras"><?php echo $TbMsg["HARD_TITLE"]?><br />
-	<span align="center" class="subcabeceras"><?php echo $opciones[$opcion]?></span></p>
+	<span class="subcabeceras"><?php echo $opciones[$opcion]?></span></p>
 	<table align="center" border="0" cellPadding="1" cellSpacing="1" class="tabla_datos">
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<tr>
 			<th align="center">&nbsp;<?php echo $TbMsg["HARD_NAME"]?>&nbsp;</th>
 			<?php	if ($opcion==$op_eliminacion)
-					echo '<td style="width:215">'.$descripcion.'</td>';
+					echo '<td style="width:215px">'.$descripcion.'</td>';
 				else
-					echo '<td><input class="formulariodatos" name="descripcion" style="width:215" type="text" value="'.$descripcion.'" /></td>'; ?>
-			<td align="left" rowspan="3"><img border="3" style="border-color:#63676b" src="../images/aula.jpg" /><br /> <?php echo $TbMsg["HARD_COMPUTERS"].": $ordenadores"?></td>
+					echo '<td><input class="formulariodatos" name="descripcion" style="width:215px" type="text" value="'.$descripcion.'" /></td>'; ?>
+			<td align="left" rowspan="3"><img border="3" style="border-color:#63676b" src="../images/aula.jpg" alt="*" /><br /> <?php echo $TbMsg["HARD_COMPUTERS"].": $ordenadores"?></td>
 		</tr>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<tr>
@@ -123,4 +123,4 @@ function TomaPropiedades($cmd,$id)
 	$rs->Cerrar();
 	return(true);
 }
-?>
+

@@ -38,8 +38,8 @@ if  ($opcion!=$op_alta){
 //________________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE>Administración web de aulas</TITLE>
 <HEAD>
+    <TITLE>Administración web de aulas</TITLE>
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../jscripts/propiedades_procedimientos.js"></SCRIPT>
@@ -53,19 +53,19 @@ if  ($opcion!=$op_alta){
 	<INPUT type=hidden name=idprocedimiento value=<?php echo $idprocedimiento?>>
 	<INPUT type=hidden name=grupoid value=<?php echo $grupoid?>>
 	<P align=center class=cabeceras><?php echo $TbMsg[4]?><BR>
-	<SPAN align=center class=subcabeceras><?php echo $opciones[$opcion]?></SPAN></P>
+	<SPAN class=subcabeceras><?php echo $opciones[$opcion]?></SPAN></P>
 	<TABLE  align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?php echo $TbMsg[5]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?php echo $TbMsg[5]?>&nbsp;</TH>
 			<?php if ($opcion==$op_eliminacion)
-					echo '<TD style="width:300">'.$descripcion.'</TD>';
+					echo '<TD style="width:300px">'.$descripcion.'</TD>';
 				else
-					echo '<TD><INPUT  class="formulariodatos" name=descripcion style="width:300" type=text value="'.$descripcion.'"></TD>';?>
+					echo '<TD><INPUT  class="formulariodatos" name=descripcion style="width:300px" type=text value="'.$descripcion.'"></TD>';?>
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?php echo $TbMsg[6]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?php echo $TbMsg[6]?>&nbsp;</TH>
 			<?php if ($opcion==$op_eliminacion)
 					echo '<TD>'.$comentarios.'</TD>';
 				else
@@ -107,4 +107,3 @@ function TomaPropiedades($cmd,$id){
 	else
 		return(false);
 }
-?>
