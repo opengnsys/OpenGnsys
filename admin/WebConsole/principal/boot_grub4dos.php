@@ -1,4 +1,8 @@
 <?php
+// Version 1.1.1 - Muestra las plantillas tipo BIOS y UEFI. Se incluyen algunos id para pasar los datos necesarios a serclientmode (#802).
+// Autor: Irina Gomez - ETSII Universidad de Sevilla.
+// Fecha: 2019/02/12
+
 include_once("../includes/ctrlacc.php");
 include_once("../clases/AdoPhp.php");
 include_once("../clases/XmlPhp.php");
@@ -20,15 +24,12 @@ $nombreambito="";
 $opcion=0;
 $modo="";
 
-
-if (isset($_GET["litambito"])) $litambito=$_GET["litambito"]; // Recoge parametros
-if (isset($_GET["idambito"])) $idambito=$_GET["idambito"]; 
-if (isset($_GET["nombreambito"])) $nombreambito=$_GET["nombreambito"]; 
-if (isset($_POST["litambito"])) $litambito=$_POST["litambito"]; // Recoge parametros
-if (isset($_POST["idambito"])) $idambito=$_POST["idambito"]; 
-if (isset($_POST["nombreambito"])) $nombreambito=$_POST["nombreambito"]; 
-if (isset($_POST["opcion"])) $opcion=$_POST["opcion"];
-if (isset($_POST["modo"])) $modo=$_POST["modo"];
+if (isset($_REQUEST["litambito"])) $litambito=$_REQUEST["litambito"]; // Recoge parametros
+if (isset($_REQUEST["idambito"])) $idambito=$_REQUEST["idambito"];
+if (isset($_REQUEST["nombreambito"])) $nombreambito=$_REQUEST["nombreambito"];
+if (isset($_REQUEST["opcion"])) $opcion=$_REQUEST["opcion"];
+if (isset($_REQUEST["modo"])) $modo=$_REQUEST["modo"];
+if (empty($_SESSION["widcentro"])) $modo=1;
 
 switch($litambito){
 	case "aulas":
@@ -38,14 +39,25 @@ switch($litambito){
 		$seleccion= "and grupoid=" .  $idambito . "";
 	break;
 }
+
 //#########################################################################
 // LEYENDO EL DIRECTORIO
-// /var/lib/tftboot/menu.lst/templates
+// /var/lib/tftboot/menu.lst/templates y /var/lib/tftpboot/grub/templates/
 //#########################################################################
-$dirtemplates="/var/lib/tftpboot/menu.lst/templates/";
-// Leer nombres de ficheros y quitar plantilla "pxe".
-chdir($dirtemplates);
-$pn=glob("*");
+// Leer nombres de ficheros plantillas bios
+$dirtemplatesbios="/var/lib/tftpboot/menu.lst/templates/";
+chdir($dirtemplatesbios);
+$pnbios=glob("*");
+
+// Leer nombres de ficheros plantillas uefi
+$dirtemplatesuefi="/var/lib/tftpboot/grub/templates/";
+chdir($dirtemplatesuefi);
+$pnuefi=glob("*");
+
+// Unimos las plantillas y eliminamos repetidos
+$pn=array_unique(array_merge($pnbios,$pnuefi));
+
+# quitar plantilla "pxe".
 unset($pn[array_search("pxe", $pn)]);
 sort($pn);
 chdir(__DIR__);
@@ -74,14 +86,14 @@ while($encontrado==FALSE)
 }
 ?>
 <html>
-<TITLE>Administración web de aulas</TITLE>
 <head>
+<TITLE>Administración web de aulas</TITLE>
 <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../jscripts/propiedades_aulas.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/opciones.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/boot_grub4dos.js"></SCRIPT>
-	<SCRIPT language="javascript" src="../idiomas/javascripts/esp/propiedades_aulas_esp.js"></SCRIPT></HEAD>
+	<SCRIPT language="javascript" src="../idiomas/javascripts/esp/propiedades_aulas_esp.js"></SCRIPT>
 </head>
 <body>
 <TABLE  align=center border=1 cellPadding=1 cellSpacing=1 class=tabla_datos >
@@ -91,22 +103,14 @@ while($encontrado==FALSE)
 		<input type="hidden" name="idambito" value="<?php echo $idambito?>">
    		<input type="hidden" name="nombreambito" value="<?php echo $nombreambito?>">
    		<input type="hidden" name="opcion" value="<?php echo $opcion?>">
-<?php	
-	if (empty($_SESSION["widcentro"])) {
-		$modo=1;
-	}
-?>
 </form>
-
 </TD></TR>
 <tr>
 <?php
-if (! empty($modo))
-{?>
-<td valign="top">
-<?php include_once("./boot_grub4dos_tabla.php");?>
-</td>
-<?php }?>
+// Si el modo no está vacio estamos en la parte de administración
+// Incluyo un a primera columna con las opciones crear, modificar,...
+if (! empty($modo)) include_once("./boot_grub4dos_tabla.php");
+?>
 <form name="myForm" method="post" action="../gestores/gestor_pxe_grub4dos.php?idaula=<?php echo $idambito ?>&nombreambito=<?php echo $nombreambito?>&litambito=<?php echo $litambito?>" >
 
 	<P align=center class=cabeceras><?php echo $TbMsg[42]; ?><BR>
@@ -122,11 +126,11 @@ if (! empty($modo))
 <?php
 ?>
 <!-- primer file, nombre de las equipos por pxe hace falta  <td>  </td>-->
-<td width="80"> 
+<td width="80" id='ogLive'>
  <!-- <a href="./muestramenu.php?labelmenu=pxe">  OGlive </a><br> pxe <br> -->
 <?php 
 //Leer fichero pxe
-$description=exec("awk 'NR==1 {print $2}' ".$dirtemplates."pxe");//$text=trim($text);
+$description=exec("awk 'NR==1 {print $2}' ".$dirtemplatesbios."pxe");
 ?> 
 <br><?php echo $description;?> <br><br>
 <select multiple size="28" name="Lpxe" id="Lpxe">
@@ -151,15 +155,16 @@ if (!empty($_SESSION["widcentro"]))
 //
 
 //mostrar los datos
-for($i=0; $i<count($pn); $i++)
-	{//for
+for($i=0; $i<count($pn); $i++) {
+    $description=exec("awk 'NR==1 {print $2}' ".$dirtemplatesbios.$pn[$i]);
+    // Si la descripción está vacía consultamos las plantillas uefi
+    if ($description == "") $description=exec("awk 'NR==1 {print $2}' ".$dirtemplatesuefi.$pn[$i]);
+
     if ($pn[$i]==$desconocido)
 	{$listadopxe=listadesconocido($cmd,$desconocido,$seleccion);
-		if ($existe==""){}else{
-
-			$description=exec("awk 'NR==1 {print $2}' ".$dirtemplates.$pn[$i]);	//$text=trim($text);
+		if ($existe!==""){
 			echo "<td></td>";
-			echo "<td> <font color=red>";
+			echo "<td id='$description'> <font color=red>";
 			echo $description;
  			echo " <br>";
  			echo "<input type='button' onClick='move(this.form.L" . $pn[$i] . ",this.form.Lpxe)' value='OUT' style='height: 25px; width: 50px' >";
@@ -168,22 +173,15 @@ for($i=0; $i<count($pn); $i++)
 			echo "<select multiple size='28' name='L" . $pn[$i] . "' >";
  			$listadopxe="";
   			$desconocido="00unknown";
-				if ($pn[$i]==$desconocido)
-				{
-				$listadopxe=listaequipos($cmd,$desconocido,$seleccion);
-				echo $listadopxe;
-				}else{
-				$listadopxe=listaequipos($cmd,$pn[$i],$seleccion);
-				echo $listadopxe;
-				}
-	echo "</select>";
-	echo "</td>";
-					}
+			$listadopxe=listaequipos($cmd,$pn[$i],$seleccion);
+			echo $listadopxe;
+			echo "</select>";
+			echo "</td>";
+		}
 
-	}else{
-	$description=exec("awk 'NR==1 {print $2}' ".$dirtemplates.$pn[$i]);	//$text=trim($text);
-	echo "<td></td>";
-	echo "<td> ";
+    } else {
+	echo "<td></td>\n";
+	echo "<td id='$description'> ";
 	echo $description;
  	echo " <br>";
  	   echo "<input type='button' onClick='move(this.form.L" . $pn[$i] . ",this.form.Lpxe)' value='OUT' style='height: 25px; width: 50px' >";
@@ -192,25 +190,28 @@ for($i=0; $i<count($pn); $i++)
 	echo "<select multiple size='28' name='L" . $pn[$i] . "' >";
  	$listadopxe="";
  	$desconocido="00unknown";
-///////////////////////////////////////////////////////////////
-if (!empty($_SESSION["widcentro"]))
-{
-	if ($pn[$i]==$desconocido)
+	///////////////////////////////////////////////////////////////
+	if (!empty($_SESSION["widcentro"]))
 	{
-	$listadopxe=listaequipos($cmd,$desconocido,$seleccion);
-	echo $listadopxe;
-	}else{
-	$listadopxe=listaequipos($cmd,$pn[$i],$seleccion);
-	echo $listadopxe;
-		}
-}
-////////////////////////////////////////////////////////////////
+		$listadopxe=listaequipos($cmd,$pn[$i],$seleccion);
+		echo $listadopxe;
+	}
+	////////////////////////////////////////////////////////////////
 	echo "</select>";
 	echo "</td>";
-		}//Primer if
-	}//for
+    }//Primer if
+}//for
 //##agp
+?>
+</form>
+</tr>
 
+</table>
+
+</body>
+</html>
+
+<?php
 // esta funcion genera los elementos de un select(formulario html) donde aparecen los nombres de los ordenadores, según su menu pxe
 function listaequipos($cmd,$menupxe,$seleccion)
 {
@@ -245,16 +246,3 @@ $existe= $rs->campos["nombreordenador"];
 }
 $rs->Cerrar();
 }
-
-
-?>
-</form>
-</tr>
-
-
-
-</table>
-
-
-</body>
-</html>

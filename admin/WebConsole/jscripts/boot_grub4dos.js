@@ -8,6 +8,8 @@
 //		Este fichero implementa las funciones javascript del fichero boot_grub4dos.php
 // *************************************************************************************************************************************************
 //________________________________________________________________________________________________________
+// Se utiliza en los botones in y out de las columnas
+// Permite mover los equipos seleccionados desde una columna a otra
 function move(fbox, tbox) {
 	var arrFbox = new Array();
 	var arrTbox = new Array();
@@ -50,27 +52,24 @@ no.text = arrTbox[c];
 tbox[c] = no;
     }
 }
-
+// Se utiliza al enviar el formulario
+// Asigna como valor del campo listOfItems un listado
+// con las correspodendencias nombre plantilla - nombre equipo.
+// Version 1.1.1 - Se identifica plantilla y equipo como necesita el script setclienmode (#802)
 function allSelect()
 {
-var saveString = "";
-// seleccionamos cada uno de los select
-var input = document.getElementsByTagName('select');
-//alert(input.length);
-for(var i=0; i<input.length; i++){
-//if(inputs[i].getAttribute('type')=='button'){
-// your statements
-patron = "L";
-parm = input[i].name;
-//alert(parm);
-parm = parm.replace(patron,'');
-//alert(parm);
-for (j=0;j<input[i].length;j++)
+    var saveString = "";
+    // seleccionamos cada uno de los select
+    var input = document.getElementsByTagName('select');
+
+    for(var i=0; i<input.length; i++){
+
+        label = input[i].parentNode.id;
+
+        for (j=0;j<input[i].length;j++)
 		{
-			//List.options[i].selected = true;
-			saveString = saveString + parm + '|' + input[i].options[j].value + ';';
-			//alert(saveString);			
+			saveString = saveString + label + '|' + input[i].options[j].text + ';';
 		}
-}
-document.forms['myForm'].listOfItems.value = saveString;
+    }
+    document.forms['myForm'].listOfItems.value = saveString;
 }

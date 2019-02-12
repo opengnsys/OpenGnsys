@@ -1,3 +1,4 @@
+<td valign="top">
 <TABLE width="150" align=left border=1 cellPadding=1 cellSpacing=1 class=tabla_datos >
 <TR>
 	<TD width="150" height="45" valign="middle">
@@ -54,3 +55,4 @@
 	</TD>
 </TR>
 </TABLE>
+</td>
