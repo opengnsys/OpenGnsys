@@ -77,8 +77,8 @@ function PulsaEnter(oEvento){
 	<FORM action="accesoperadores.php" name="fdatos" method="post">
 		<DIV align="center">
 			<IMG src="../images/login_operador.png" width=500 >
-			<INPUT onkeypress="PulsaEnter(event)" name="usu"  style="POSITION:absolute;top:125px;left:365px;width:90px;height:20px;COLOR: #999999; FONT-FAMILY: Verdana; FONT-SIZE: 12px;">
-			<INPUT onkeypress="PulsaEnter(event)"  name="pss" type="password"  style="POSITION:absolute;top:160px;left:365px;width:90px;height:20px;COLOR: #999999; FONT-FAMILY: Verdana; FONT-SIZE: 12px;">
+			<INPUT onkeypress="PulsaEnter(event)" name="usu"  style="POSITION:absolute;top:125px;left:365px;width:90px;height:20px;COLOR: #999999; FONT-FAMILY: Verdana, sans-serif; FONT-SIZE: 12px;">
+			<INPUT onkeypress="PulsaEnter(event)"  name="pss" type="password"  style="POSITION:absolute;top:160px;left:365px;width:90px;height:20px;COLOR: #999999; FONT-FAMILY: Verdana, sans-serif; FONT-SIZE: 12px;">
 			<IMG onclick="confirmar()" src="../images/botonok.png" style="POSITION:absolute;top:190px;left:400px;CURSOR: hand">
 		</DIV>
 	</FORM>

@@ -184,7 +184,7 @@ function Gestiona(){
 ________________________________________________________________________________________________________*/
 function SubarbolXML_menus($idmenu,$descripcion){
 	global $LITAMBITO_MENUS;
-	$cadenaXML.='<MENU';
+	$cadenaXML='<MENU';
 	// Atributos
 	$cadenaXML.=' imagenodo="../images/iconos/menu.gif"';	
 	$cadenaXML.=' infonodo="' .$descripcion.'"';

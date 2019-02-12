@@ -31,10 +31,10 @@ if (isset($_POST["anno_elegido"])) $anno_elegido=$_POST["anno_elegido"];
 //_________________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE>Administración web de aulas</TITLE>
 <HEAD>
-	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
-	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
+<TITLE>Administración web de aulas</TITLE>
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 <SCRIPT language="JavaScript">
 
 var rojo="#cc3366";
@@ -103,7 +103,7 @@ function mes_anterior(){
 		}
 	}
 	var swbi=0;
-	if (wanno%4==0 && wmes==2) swbi=1;
+	if (wanno%4===0 && wmes===2) swbi=1;
 
 	document.forms.fdatos.dia_elegido.value=dias_meses[wmes]+swbi;
 	document.forms.fdatos.mes_elegido.value=wmes;
@@ -162,8 +162,8 @@ $mialmanaque=new Almanaque("tabla_meses");
 echo '<TABLE align="center">';
 echo '	<TR>';
 echo '	<TD align="left"><img SRC="../images/iconos/salir_on.gif" onclick="cerrar_ventana()"></TD>';
-echo '<TD style="COLOR: MediumBlue;FONT-FAMILY: Arial, Helvetica, sans-serif;FONT-SIZE:12">&nbsp;&nbsp;Año:&nbsp;';
-echo '<SELECT name="despleanno" onchange="elige_anno()" style="width:60">';
+echo '<TD style="COLOR: MediumBlue;FONT-FAMILY: Arial, Helvetica, sans-serif;FONT-SIZE:12px">&nbsp;&nbsp;Año:&nbsp;';
+echo '<SELECT name="despleanno" onchange="elige_anno()" style="width:60px">';
 for($i=2010;$i<2015;$i++){
 		echo '<OPTION value='.$i;
 		if($anno_elegido==$i) echo" selected ";
@@ -175,8 +175,8 @@ echo '</TR>';
 
 echo '<table align=center border=0>';
 echo '<tr>';
-echo '<td onclick="mes_anterior();" style="cursor:pointer;COLOR: MediumBlue;FONT-FAMILY: Arial, Helvetica, sans-serif;FONT-SIZE:10" align=left><<</td>';
-echo '<td onclick="mes_siguiente();" style="cursor:pointer;COLOR: MediumBlue;FONT-FAMILY: Arial, Helvetica, sans-serif;FONT-SIZE:10" align=right>>></td>';
+echo '<td onclick="mes_anterior();" style="cursor:pointer;COLOR: MediumBlue;FONT-FAMILY: Arial, Helvetica, sans-serif;FONT-SIZE:10px" align="left"><<</td>';
+echo '<td onclick="mes_siguiente();" style="cursor:pointer;COLOR: MediumBlue;FONT-FAMILY: Arial, Helvetica, sans-serif;FONT-SIZE:10px" align="right">>></td>';
 echo '</tr>';
 echo '<tr>';
 echo '<td colspan=2 valign=top width=100>'.$mialmanaque->MesAnno($mes_elegido,$anno_elegido).'</td>';

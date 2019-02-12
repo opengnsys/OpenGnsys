@@ -276,19 +276,13 @@ for ($i=0;$i<count($numidcentro);$i++)
 
 </select>
 <TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
-<TD width=4 align=middle><input name="submit" type="submit" value="Cambiar" ></input></TD>
+<TD width=4 align=middle><input name="submit" type="submit" value="Cambiar"></TD>
 
 </form>
 <TD width=0 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
 <TD><?php echo "Usuario.:.".ucwords($_SESSION["wusuario"]); ?></TD>
 
-</TD>
 <?php } }?>
-
-
-
-
-
 
 						   </TR>
 						 </TABLE>

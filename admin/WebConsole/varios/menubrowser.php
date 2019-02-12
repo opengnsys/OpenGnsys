@@ -19,7 +19,7 @@ if(!empty($iph)){
 <HEAD>
     <TITLE>Administración web de aulas</TITLE>
     <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
-    <link rel="stylesheet" type="text/css" href="estilos.css">
+    <link rel="stylesheet" type="text/css" href="../estilos.css">
     <SCRIPT LANGUAGE="JAVASCRIPT">
 //________________________________________________________________________________________________________
 function confirmar(){
@@ -59,7 +59,7 @@ function PulsaEnter(oEvento){
 </HEAD>
 <BODY>
 <DIV style="POSITION:absolute;top:20px;left:150px">
-	<FORM action="controlacceso.php" name="fdatos" method="post"></FORM>
+	<FORM action="../controlacceso.php" name="fdatos" method="post"></FORM>
 </DIV>
 </BODY>
 </HTML>
@@ -80,4 +80,3 @@ function tomaIP(){
 		
 	return($ipcliente);
 }
-?>
