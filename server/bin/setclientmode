@@ -8,6 +8,7 @@
 #@param   $1 NombrePlatilla
 #@param   $2 Ámbito { NombrePC | NombreAula }
 #@param   $3 Modo_trabajo = { 0, TEMP, 1, PERM } - 0 si es temporal y 1 si es permanente. 
+#@param   $4 Fichero con los datos de acceso a la base de datos (USUARIO, PASSWORD, datasource y CATALOG).
 #@version 1.0 - Versión inicial.
 #@author  Irina Gomez y Ramon Gomez - Univ. Sevilla, noviembre 2010
 #@version 1.0.1 - Identificacion de la plantilla por nombre en consola = en primera linea de la plantilla
@@ -22,32 +23,38 @@
 #@version 1.1.0a - El server siempre es el servidor PXE. El segundo parámetro de la IP es el SERVER. La asignación del ogLive siempre es el server. (ticket #859).
 #@author  Antonio J. Doblas Viso, Universidad de Malaga
 #@date    2018-07-11
+#@version 1.1.1 - Crea configuración PXE para BIOS y UEFI. Permite pasar datos de acceso a la base de datos en un fichero. (ticket #802)
+#@author  Irina Gomez, ETSII Universidad de Sevilla
+#@date    2019-02-13
 #*/ ##
-
 
 # Variables.
 PROG=$(basename $0)
 OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
-SERVERCONF=$OPENGNSYS/etc/ogAdmServer.cfg
-PXEDIR=$OPENGNSYS/tftpboot/menu.lst
+SERVERCONF="$4"
+SERVERCONF=${SERVERCONF:-$OPENGNSYS/etc/ogAdmServer.cfg}
+PXEDIR[0]=$OPENGNSYS/tftpboot/menu.lst
+PXEDIR[1]=$OPENGNSYS/tftpboot/grub
 LOGFILE=$OPENGNSYS/log/opengnsys.log
 MYCNF=/tmp/.my.cnf.$$
 
 # Control básico de errores.
-if [ $# -ne 3 ]; then
+if [ $# -ne 3 -a $# -ne 4 ]; then
 	echo "$PROG: Error de ejecución"
-	echo "Formato: $PROG PLANTILLA [NOMBRE_PC|NOMBRE_AULA] MODO"
+	echo "Formato: $PROG PLANTILLA [NOMBRE_PC|NOMBRE_AULA] MODO [ BD_CONF ]"
 	exit 1
 fi
 if [ ! -r $SERVERCONF ]; then
 	echo "$PROG: Sin acceso a fichero de configuración"
 	exit 2
 fi
-TEMPLATE=$(grep -l "^#.* $1 *$" $PXEDIR/templates/*)
-if [ -z "$TEMPLATE" ]; then
+TEMPLATE[0]=$(grep -l "^#.* $1 *$" ${PXEDIR[0]}/templates/*)
+TEMPLATE[1]=$(grep -l "^#.* $1 *$" ${PXEDIR[1]}/templates/*)
+if [ -z "${TEMPLATE[0]}" -a -z "${TEMPLATE[1]}" ]; then
 	echo "No existe archivo platilla: $1"
 	exit
 fi
+
 case "$3" in
 	0|TEMP)	MODE="TEMP" ;;
 	1|PERM)	MODE="PERM" ;;
@@ -87,9 +94,7 @@ NPC=0
 for MAC in $ETHERNET; do
 	date +"%b %d %T $PROG: Detectada ethernet \"$MAC\" en \"$2\"" | tee -a $LOGFILE
 	MACFILE="${MAC^^}"
-	PXEFILE=$PXEDIR/01-${MACFILE:0:2}-${MACFILE:2:2}-${MACFILE:4:2}-${MACFILE:6:2}-${MACFILE:8:2}-${MACFILE:10:2}
-	# Renombra el fichero PXE original
-	[ -e $PXEFILE ] && mv $PXEFILE $PXEFILE.netboot
+	PXEFILE=01-${MACFILE:0:2}-${MACFILE:2:2}-${MACFILE:4:2}-${MACFILE:6:2}-${MACFILE:8:2}-${MACFILE:10:2}
 	if [ "$1" != "default" ]; then
 		# Si no está definida la variable LANG, usar idioma inglés por defecto.
 		[ -z "$LANG" -o "$LANG" == "C" ] && LANG="en"
@@ -130,30 +135,50 @@ for MAC in $ETHERNET; do
 		[[ "$DATOS" =~ (vga|video) ]] || DATOS="$DATOS vga=788"
 		# Obtener directorio ogLive a partir de los datos.
 		OGLIVEDIR=$(echo "$DATOS" | awk -F= 'BEGIN {RS=" "} $1=="oglivedir" {print $2}')
-		# Comprobar si existe "oglivedir" en la plantilla para evitar duplicados.
-		if grep -q "oglivedir=" $TEMPLATE 2>/dev/null; then
-			DATOS="${DATOS/oglivedir=$OGLIVEDIR/}"
-		fi
-		# Crear fichero PXE a partir de la plantilla con los datos obtenidos en la BD.
-		sed -e "s,vga=[0-9]*,,g; s,INFOHOST,${DATOS//,/\\,},g; s,set ISODIR=.*,set ISODIR=$OGLIVEDIR,g" $TEMPLATE >$PXEFILE
-		# Ponemos como propietario al usuario y grupo de Apache para que se pueda cambiar desde la consola web.
+
+		# Pondremos como propietario al usuario y grupo de Apache para que se pueda cambiar desde la consola web.
 		PERMS=$(ps axho user,group,comm|awk '!/root/ && /httpd|apache/ {u=$1; g=$2} END {if (g) printf "%s:%s",u,g}')
-		[ -n "$PERMS" ] && chown $PERMS $PXEFILE
+
+		for BOOTTYPE in 0 1; do
+			# Si no existe la plantilla borramos el archivo PXE anterior continuamos
+			if [ -z "${TEMPLATE[$BOOTTYPE]}" ]; then
+				rm ${PXEDIR[$BOOTTYPE]}/$PXEFILE
+				continue
+			fi
+			# Comprobar si existe "oglivedir" en la plantilla para evitar duplicados.
+			if grep -q "oglivedir=" ${TEMPLATE[$BOOTTYPE]} 2>/dev/null; then
+				DATOSAUX="${DATOS/oglivedir=$OGLIVEDIR/}"
+			fi
+			# Renombra el fichero PXE original
+			[ -e ${PXEDIR[$BOOTTYPE]}/$PXEFILE ] && mv ${PXEDIR[$BOOTTYPE]}/$PXEFILE ${PXEDIR[$BOOTTYPE]}/$PXEFILE.netboot
+
+			# Crear fichero PXE a partir de la plantilla con los datos obtenidos en la BD.
+			sed -e "s,vga=[0-9]*,,g; s,INFOHOST,${DATOSAUX//,/\\,},g; s,set ISODIR=.*,set ISODIR=$OGLIVEDIR,g" ${TEMPLATE[$BOOTTYPE]} >${PXEDIR[$BOOTTYPE]}/$PXEFILE
+			[ -n "$PERMS" ] && chown $PERMS ${PXEDIR[$BOOTTYPE]}/$PXEFILE
+		done
+
+
 		# Si el modo de trabajo es temporal (0) mete un retardo, restaura el fichero PXE a su estado original y no toca la base de datos
 		if [ "$MODE" == "TEMP" ]; then
 			sleep 60
-			rm $PXEFILE	
-			[ -e $PXEFILE.netboot ] && mv $PXEFILE.netboot $PXEFILE
+			for BOOTTYPE in 0 1; do
+				[ -e ${PXEDIR[$BOOTTYPE]}/$PXEFILE ] && rm ${PXEDIR[$BOOTTYPE]}/$PXEFILE
+				[ -e ${PXEDIR[$BOOTTYPE]}/$PXEFILE.netboot ] && mv ${PXEDIR[$BOOTTYPE]}/$PXEFILE.netboot ${PXEDIR[$BOOTTYPE]}/$PXEFILE
+			done
 		fi
+
 
 		# Si el modo de trabajo es permanente (1)  borra el fichero PXE.netboot si existe y graba los datos en la base de datos
 		if [ "$MODE" == "PERM" ]; then
-			[ -e $PXEFILE.netboot ] && rm $PXEFILE.netboot
+			[ -e ${PXEDIR[0]}/$PXEFILE.netboot ] && rm ${PXEDIR[0]}/$PXEFILE.netboot
+			[ -e ${PXEDIR[1]}/$PXEFILE.netboot ] && rm ${PXEDIR[1]}/$PXEFILE.netboot
+			# Si no existe la plantilla de tipo BIOS tomo el nombre de la UEFI
+			[ -z "${TEMPLATE[0]}" ] && TEMPLATE[0]=${TEMPLATE[1]}
+
 			mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -e \
-				"UPDATE ordenadores SET arranque='$(basename $TEMPLATE)' WHERE mac='$MAC';"
+				"UPDATE ordenadores SET arranque='$(basename ${TEMPLATE[0]})' WHERE mac='$MAC';"
 		fi
 	fi
 	let NPC=NPC+1
 done
 date +"%b %d %T $PROG: $NPC equipo(s) configurado(s)" | tee -a $LOGFILE
-

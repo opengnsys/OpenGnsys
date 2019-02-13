@@ -63,8 +63,9 @@ function allSelect()
     var input = document.getElementsByTagName('select');
 
     for(var i=0; i<input.length; i++){
-
         label = input[i].parentNode.id;
+	// La plantilla 00unknown no existe, no se incluye en el listado
+	if (label === "00unknown") continue;
 
         for (j=0;j<input[i].length;j++)
 		{

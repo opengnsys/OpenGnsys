@@ -23,7 +23,7 @@ foreach ($lista as $sublista) {
         $optboot=$elementos[0];
 
         // Llamamos al script setclientmode
-        shell_exec("/opt/opengnsys/bin/setclientmode $optboot $hostname 1 $file");
+        shell_exec("/opt/opengnsys/bin/setclientmode $optboot $hostname PERM $file");
 	unlink($file);
     }
 }

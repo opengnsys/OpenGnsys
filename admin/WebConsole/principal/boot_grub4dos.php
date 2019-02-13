@@ -163,8 +163,9 @@ for($i=0; $i<count($pn); $i++) {
     if ($pn[$i]==$desconocido)
 	{$listadopxe=listadesconocido($cmd,$desconocido,$seleccion);
 		if ($existe!==""){
+			$description=$desconocido;
 			echo "<td></td>";
-			echo "<td id='$description'> <font color=red>";
+			echo "<td><font id='$description' color=red>";
 			echo $description;
  			echo " <br>";
  			echo "<input type='button' onClick='move(this.form.L" . $pn[$i] . ",this.form.Lpxe)' value='OUT' style='height: 25px; width: 50px' >";
