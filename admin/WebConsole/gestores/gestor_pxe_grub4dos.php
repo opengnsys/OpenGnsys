@@ -5,6 +5,11 @@
 
 include_once("../includes/ctrlacc.php");
 
+// Recogemos los parametros
+$litambito=(isset($_REQUEST["litambito"])) ? $_REQUEST["litambito"] : "";
+$idambito=(isset($_REQUEST["idambito"])) ? $_REQUEST["idambito"] : "";
+$nombreambito=(isset($_REQUEST["nombreambito"])) ? $_REQUEST["nombreambito"]) : "";
+
 // Datos para el acceso a mysql
 $strcn=explode(";",$cadenaconexion);
 $file=tempnam("/tmp",".server.cnf.");
@@ -27,5 +32,5 @@ foreach ($lista as $sublista) {
 	unlink($file);
     }
 }
-header("Location: ../principal/boot.php?idambito=". $_GET['idaula'] ."&nombreambito=" . $_GET['nombreambito'] . "&litambito=" . $_GET['litambito']);
+header("Location: ../principal/boot.php?idambito=". $idambito ."&nombreambito=" . $nombreambito . "&litambito=" . $litambito);
 exit();

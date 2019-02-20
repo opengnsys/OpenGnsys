@@ -5,11 +5,6 @@
 
 include_once("../includes/ctrlacc.php");
 include_once("../clases/AdoPhp.php");
-include_once("../clases/XmlPhp.php");
-include_once("../clases/MenuContextual.php");
-include_once("../clases/SockHidra.php");
-include_once("../includes/constantes.php");
-include_once("../includes/comunes.php");
 include_once("../includes/CreaComando.php");
 include_once("../idiomas/php/".$idioma."/boot_grub4dos_".$idioma.".php");
 
@@ -23,7 +18,6 @@ $idambito=0;
 $nombreambito=""; 
 $opcion=0;
 $modo="";
-
 if (isset($_REQUEST["litambito"])) $litambito=$_REQUEST["litambito"]; // Recoge parametros
 if (isset($_REQUEST["idambito"])) $idambito=$_REQUEST["idambito"];
 if (isset($_REQUEST["nombreambito"])) $nombreambito=$_REQUEST["nombreambito"];
@@ -37,6 +31,8 @@ switch($litambito){
 		break;
 	case "gruposordenadores":
 		$seleccion= "and grupoid=" .  $idambito . "";
+	default:
+		$seleccion="";
 	break;
 }
 
@@ -57,33 +53,18 @@ $pnuefi=glob("*");
 // Unimos las plantillas y eliminamos repetidos
 $pn=array_unique(array_merge($pnbios,$pnuefi));
 
-# quitar plantilla "pxe".
+// Numero columnas
+$column=count($pn);
+
+// Plantilla en los dos directorios
+$pncomun=array_intersect($pnbios,$pnuefi);
+
+// quitar plantilla "pxe".
 unset($pn[array_search("pxe", $pn)]);
 sort($pn);
 chdir(__DIR__);
 
-//Leemos el ultimo fichero y extraemos su numero 
-$ultimofichero=end($pn);
-$ultimonumero=substr($ultimofichero,0,2);
 
-//Comprobamos que no se mayor que 99 (tendria 3 caracteres)
-if ($ultimonumero==99)
-	{$ultimonumero=20;
-}else{
-	$ultimonumero++;
-}
-
-//Buscamos si el siguiente numero esta disponible
-$encontrado=FALSE;
-while($encontrado==FALSE)
-{
-	if (in_array($ultimonumero, $pn))
-	{
-		$ultimonumero++;
-	}else{
-		$encontrado=TRUE;
-	}
-}
 ?>
 <html>
 <head>
@@ -96,14 +77,18 @@ while($encontrado==FALSE)
 	<SCRIPT language="javascript" src="../idiomas/javascripts/esp/propiedades_aulas_esp.js"></SCRIPT>
 </head>
 <body>
-<TABLE  align=center border=1 cellPadding=1 cellSpacing=1 class=tabla_datos >
-<TR valign="bottom"><TD colspan="100%" align="left" nowrap>
-<form name="modoadmin" id="modoadmin" method="post" action="./boot_grub4dos.php">
+<form name="modoadmin" id="modoadmin" method="post" action="../gestores/gestor_pxe_grub4dos.php">
 		<input type="hidden" name="litambito" value="<?php echo $litambito?>">
 		<input type="hidden" name="idambito" value="<?php echo $idambito?>">
    		<input type="hidden" name="nombreambito" value="<?php echo $nombreambito?>">
    		<input type="hidden" name="opcion" value="<?php echo $opcion?>">
-</form>
+		<input type="hidden" name="listOfItems" value="">
+                <!-- para la zona de administración -->
+		<input type="hidden" name="opcioncrear" value="">
+	<P align=center class=cabeceras><?php echo $TbMsg[42]; ?><BR>
+	<span align=center class=subcabeceras>&nbsp; <?php echo $nombreambito; ?> </span>
+<TABLE  align=center border=1 cellPadding=1 cellSpacing=1 class=tabla_datos >
+<TR valign="bottom"><TD colspan="100%" align="left" nowrap>&nbsp;
 </TD></TR>
 <tr>
 <?php
@@ -111,10 +96,7 @@ while($encontrado==FALSE)
 // Incluyo un a primera columna con las opciones crear, modificar,...
 if (! empty($modo)) include_once("./boot_grub4dos_tabla.php");
 ?>
-<form name="myForm" method="post" action="../gestores/gestor_pxe_grub4dos.php?idaula=<?php echo $idambito ?>&nombreambito=<?php echo $nombreambito?>&litambito=<?php echo $litambito?>" >
 
-	<P align=center class=cabeceras><?php echo $TbMsg[42]; ?><BR>
-	<span align=center class=subcabeceras> <?php echo $nombreambito; ?> </span>
 <?php /////////////////////////////////////////////////
  if (!empty($_SESSION["widcentro"])){ ?>
 	<input type="submit" value=<?php echo $TbMsg[43]; ?> name="saveButton"  onclick="allSelect()"></P>
@@ -122,9 +104,6 @@ if (! empty($modo)) include_once("./boot_grub4dos_tabla.php");
  } ?>
 
 
-<input type="hidden" name="listOfItems" value="">
-<?php
-?>
 <!-- primer file, nombre de las equipos por pxe hace falta  <td>  </td>-->
 <td width="80" id='ogLive'>
  <!-- <a href="./muestramenu.php?labelmenu=pxe">  OGlive </a><br> pxe <br> -->
@@ -156,13 +135,19 @@ if (!empty($_SESSION["widcentro"]))
 
 //mostrar los datos
 for($i=0; $i<count($pn); $i++) {
+    $nocomun="";
     $description=exec("awk 'NR==1 {print $2}' ".$dirtemplatesbios.$pn[$i]);
+    // Si la plantilla no es comun, definimos si es bios o uefi
+    if ( ! array_key_exists($pn[$i],$pncomun)) {
+        $nocomun= ($description === "") ? "(uefi)" : "(bios)";
+    }
     // Si la descripción está vacía consultamos las plantillas uefi
     if ($description == "") $description=exec("awk 'NR==1 {print $2}' ".$dirtemplatesuefi.$pn[$i]);
 
     if ($pn[$i]==$desconocido)
 	{$listadopxe=listadesconocido($cmd,$desconocido,$seleccion);
-		if ($existe!==""){
+		// Solo lo mostramos si existen aquipos no asignados.
+		if (isset($existe)){
 			$description=$desconocido;
 			echo "<td></td>";
 			echo "<td><font id='$description' color=red>";
@@ -183,7 +168,7 @@ for($i=0; $i<count($pn); $i++) {
     } else {
 	echo "<td></td>\n";
 	echo "<td id='$description'> ";
-	echo $description;
+	echo $description ." ". $nocomun;
  	echo " <br>";
  	   echo "<input type='button' onClick='move(this.form.L" . $pn[$i] . ",this.form.Lpxe)' value='OUT' style='height: 25px; width: 50px' >";
  	echo "<input type='button' onClick='move(this.form.Lpxe,this.form.L" . $pn[$i] .")' value='IN' style='height: 25px; width: 35px' >";
@@ -204,10 +189,10 @@ for($i=0; $i<count($pn); $i++) {
 }//for
 //##agp
 ?>
-</form>
 </tr>
-
+<tr><th colspan="<?php echo (2*$column) ?>"><?php echo $TbMsg["UEFI"]; ?></th></tr>
 </table>
+</form>
 
 </body>
 </html>
