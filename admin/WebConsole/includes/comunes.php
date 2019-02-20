@@ -5,10 +5,10 @@
 	//	Parámetros:
 	//		- trama: La trama
 	//	 Devuelve:
-	//		Una matriz con las parejas de paramertos "nombre=valor"
+	//		Una matriz con las parejas de parámertos "nombre=valor"
 	//________________________________________________________________________________________
 	function extrae_parametros($parametros,$chsep,$chval){
-		$ParametrosCadena="";
+		$ParametrosCadena=array();
 		$auxP=explode($chsep,$parametros);
 		for ($i=0;$i<sizeof($auxP);$i++){
 			$dualparam=explode($chval,$auxP[$i]);
