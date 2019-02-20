@@ -2,11 +2,19 @@
 # Set parameters here that may be different on each deployment target of the app, e.g. development, staging, production.
 # http://symfony.com/doc/current/best_practices/configuration.html#infrastructure-related-configuration
 parameters:
+    database_driver: pdo_mysql
     database_host:     127.0.0.1
     database_port:     ~
-    database_name:     symfony
-    database_user:     root
-    database_password: ~
+    database_name:     ogAdmBD3
+    database_user:     u1consola1OG
+    database_password: c1consola1OG
+
+    og_1_database_driver: pdo_mysql
+    og_1_database_host: 127.0.0.1
+    og_1_database_port: 3606
+    og_1_database_name: "ogAdmBD"
+    og_1_database_user: "u1consola1OG"
+    og_1_database_password: "c1consola1OG"
 
     mailer_transport:  smtp
     mailer_host:       127.0.0.1

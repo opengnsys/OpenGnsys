@@ -45,28 +45,49 @@ twig:
 # Doctrine Configuration
 doctrine:
     dbal:
-        driver:   pdo_mysql
-        server_version: '5.5' # your database server version here
-        host:     "%database_host%"
-        port:     "%database_port%"
-        dbname:   "%database_name%"
-        user:     "%database_user%"
-        password: "%database_password%"
-        charset:  UTF8
-        # if using pdo_sqlite as your database driver:
-        #   1. add the path in parameters.yml
-        #     e.g. database_path: "%kernel.root_dir%/data/data.db3"
-        #   2. Uncomment database_path in parameters.yml.dist
-        #   3. Uncomment next line:
-        #     path:     "%database_path%"
-        mapping_types:
-            enum: string
-            set: string
-
+        default_connection: default
+        connections:
+            default:
+                driver:   '%database_driver%'
+                #server_version: '5.5' # your database server version here
+                host:     "%database_host%"
+                port:     "%database_port%"
+                dbname:   "%database_name%"
+                user:     "%database_user%"
+                password: "%database_password%"
+                charset:  UTF8
+                mapping_types:
+                    enum: string
+                    set: string
+            og_1:
+                driver:   '%og_1_database_driver%'
+                host:     '%og_1_database_host%'
+                port:     '%og_1_database_port%'
+                dbname:   '%og_1_database_name%'
+                user:     '%og_1_database_user%'
+                password: '%og_1_database_password%'
+                charset:  UTF8
+                mapping_types:
+                    enum: string
+                    set: string
     orm:
         auto_generate_proxy_classes: "%kernel.debug%"
-        naming_strategy: doctrine.orm.naming_strategy.underscore
-        auto_mapping: true
+        #naming_strategy: doctrine.orm.naming_strategy.underscore
+        #auto_mapping: true
+        entity_managers:
+            default:
+                connection: default
+                mappings:
+                    OpengnsysServerBundle: ~
+                    OpengnsysRepositoryBundle: ~
+                    GlobunetUserBundle: ~
+                    FOSUserBundle: ~
+                    FOSOAuthServerBundle: ~
+                    #OpengnsysMigrationBundle: ~
+            og_1:
+                connection: og_1
+                mappings:
+                    OpengnsysMigrationBundle: ~
 
 # Swiftmailer Configuration
 swiftmailer:

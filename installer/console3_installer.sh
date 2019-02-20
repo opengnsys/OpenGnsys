@@ -1,4 +1,5 @@
-####  AVISO: NO EDITAR variables de configuraciÃ³n.
+#!/usr/bin/env bash
+####  AVISO: NO EDITAR variables de configuracion.
 ####  WARNING: DO NOT EDIT configuration variables.
 INSTALL_TARGET=/opt/opengnsys           # Directorio de instalaciÃ³n
 PATH=$PATH:$INSTALL_TARGET/bin
@@ -15,7 +16,7 @@ if [ ! -d $INSTALL_TARGET ]; then
         echo "ERROR: OpenGnsys is not installed, cannot update!!"
         exit 1
 fi
-# Cargar configuraciÃ³n de acceso a la base de datos.
+# Cargar configuracion de acceso a la base de datos.
 if [ -r $INSTALL_TARGET/etc/ogAdmServer.cfg ]; then
         source $INSTALL_TARGET/etc/ogAdmServer.cfg
 elif [ -r $INSTALL_TARGET/etc/ogAdmAgent.cfg ]; then
@@ -39,7 +40,7 @@ if [ -d "$PROGRAMDIR/../installer" ]; then
 else
         USESVN=1
 fi
-SVN_URL="https://$OPENGNSYS_SERVER/svn/branches/version1.1/"
+# SVN_URL="https://$OPENGNSYS_SERVER/svn/branches/version1.1/"
 
 WORKDIR=/tmp/console3_installer
 mkdir -p $WORKDIR
@@ -81,7 +82,8 @@ function getNetworkSettings()
 
 
 function downloadFiles() {
-	git clone gituser@opengnsys.es:/git/opengnsys -b webconsole3 $WORKDIR
+    cp -r /root/opengnsys/* $WORKDIR
+	#git clone gituser@opengnsys.es:/git/opengnsys -b webconsole3 $WORKDIR
 }
 
 
@@ -121,22 +123,45 @@ function configureClient() {
 
 function configureBackend() {
 	mkdir -p $INSTALL_TARGET/www3
-	cp -r $WORKDIR/admin/WebConsole3/backend $INSTALL_TARGET/www3/backend
+    INSTALL_BACKEND=$INSTALL_TARGET/www3/backend
+    echo $INSTALL_BACKEND
+	cp -r $WORKDIR/admin/WebConsole3/backend $INSTALL_BACKEND
 	pushd $INSTALL_TARGET/www3/backend
+
+	echo "Configuración de la base de datos MYSQL"
+	echo "Usuario: "
+    read MYSQL_USER
+    sed -i -e "s/database_user:.*/database_user: "$MYSQL_USER"/g" $INSTALL_BACKEND/app/config/parameters.yml
+
+    echo "Password: "
+    read MYSQL_PASSWORD
+    sed -i -e "s/database_password:.*/database_password: "$MYSQL_PASSWORD"/g" $INSTALL_BACKEND/app/config/parameters.yml
+
+    echo "Nombre de la base de datos. (En caso de que el usuario tenga permiso de crear nueva base de datos, dejar este campo vacío)"
+    read MYSQL_DB
+    if [ -z $MYSQL_DB ] || [ $MYSQL_DB = "" ]
+    then
+        MYSQL_DB="opengnsys"
+    fi
+    sed -i -e "s/database_name:.*/database_name: "$MYSQL_DB"/g" $INSTALL_BACKEND/app/config/parameters.yml
+
 	php composer.phar update
-	chmod 777 -R cache
-	chmod 777 -R logs
+	chmod 777 -R var/cache
+	chmod 777 -R var/logs
+
+	# Pedir usuario y contraseña de la base de datos Mysql y guardar en en parameters.yml
+
 	php app/console doctrine:database:create --if-not-exists
 	php app/console doctrine:schema:update --force
 	php app/console doctrine:fixtures:load
 	php app/console fos:user:create test test@opengnsys.es test
 	popd
-	# Añadir al fichero de configuracion del cliente "ogAdmClient.cfg" la Url de la nueva API Rest
-	echo "UrlApi=https://$SERVERIP/opengnsys3/rest/web/app_dev.php/api/" >> $INSTALL_TARGET/client/etc/ogAdmClient.cfg
-	# TODO - añadir la url del endpoint para la gestion de menus cuando este hecho
+	## Añadir al fichero de configuracion del cliente "ogAdmClient.cfg" la Url de la nueva API Rest
+	#echo "UrlApi=https://$SERVERIP/opengnsys3/rest/web/app_dev.php/api/" >> $INSTALL_TARGET/client/etc/ogAdmClient.cfg
+	## TODO - añadir la url del endpoint para la gestion de menus cuando este hecho
 	#sed -e "s,\(UrlMenu=.*\),UrlMenu=nuevaurl,g" $INSTALL_TARGET/client/etc/ogAdmClient.cfg >> $WORKDIR/ogAdmClient.cfg
-	#
-	cp $WORKDIR/ogAdmClient.cfg $INSTALL_TARGET/client/etc/ogAdmClient.cfg
+	##
+	#cp $WORKDIR/ogAdmClient.cfg $INSTALL_TARGET/client/etc/ogAdmClient.cfg
 }
 
 function configureFrontend() {
@@ -193,7 +218,7 @@ echoAndLog "OpenGnsys WebConsole 3 installation begins at $(date)"
 
 pushd $WORKDIR
 
-# Comprobar si hay conexiÃ³n y detectar parÃ¡metros de red por defecto.
+# Comprobar si hay conexion y detectar parÃ¡metros de red por defecto.
 checkNetworkConnection
 if [ $? -ne 0 ]; then
         errorAndLog "Error connecting to server. Causes:"
@@ -202,19 +227,19 @@ if [ $? -ne 0 ]; then
         errorAndLog " - Server is temporally down, try again later"
         exit 1
 fi
-getNetworkSettings
-echoAndLog "Install dependencies"
-installDependencies
-echoAndLog "Download source files"
-downloadFiles
-echoAndLog "Configuring apache"
-configureApache
-echoAndLog "Configuring opengnsys client"
-configureClient
+#getNetworkSettings
+#echoAndLog "Install dependencies"
+#installDependencies
+#echoAndLog "Download source files"
+#downloadFiles
+#echoAndLog "Configuring apache"
+#configureApache
+#echoAndLog "Configuring opengnsys client"
+#configureClient
 echoAndLog "Configuring backend"
 configureBackend
-echoAndLog "Configuring frontend"
-configureFrontend
+#echoAndLog "Configuring frontend"
+#configureFrontend
 
 
 popd
