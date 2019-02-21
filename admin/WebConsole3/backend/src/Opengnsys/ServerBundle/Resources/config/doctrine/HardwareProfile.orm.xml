@@ -19,8 +19,7 @@
 
         <many-to-many field="hardwares" target-entity="\Opengnsys\ServerBundle\Entity\Hardware">
             <cascade>
-                <cascade-persist/>
-                <cascade-remove/>
+                <cascade-all/>
             </cascade>
 
             <join-table name="og_hardware_profiles_hardwares">

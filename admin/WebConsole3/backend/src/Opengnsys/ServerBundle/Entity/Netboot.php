@@ -5,7 +5,7 @@ namespace Opengnsys\ServerBundle\Entity;
 /**
  * NetBoot
  */
-class Netboot
+class Netboot extends BaseEntity
 {
 
     /**

@@ -5,7 +5,7 @@ namespace Opengnsys\ServerBundle\Entity;
 /**
  * HardwareProfile
  */
-class HardwareProfile
+class HardwareProfile extends BaseEntity
 {
 
     /**

@@ -11,6 +11,7 @@
 
         <field name="name" type="string" column="name" length="200" nullable="false"/>
         <field name="description" type="text" column="description" nullable="true"/>
+        <field name="comments" type="text" column="comments" nullable="true"/>
 
         <!--
         <field name="urlphoto" type="string" column="url_photo" length="250" nullable="true"/>
@@ -48,9 +49,7 @@
 
         <many-to-one field="networkSettings" target-entity="\Opengnsys\ServerBundle\Entity\NetworkSettings">
             <cascade>
-                <cascade-persist/>
-                <cascade-remove/>
-                <!--<cascade-all/>-->
+                <cascade-all/>
             </cascade>
             <join-columns>
                 <join-column name="network_settings_id" referenced-column-name="id"/>

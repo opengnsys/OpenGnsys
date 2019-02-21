@@ -5,10 +5,8 @@ namespace Opengnsys\ServerBundle\Entity;
 /**
  * NetworkSettings
  */
-class NetworkSettings
+class NetworkSettings extends BaseEntity
 {
-    
-    
     /**
      * @var string
      */

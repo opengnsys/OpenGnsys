@@ -5,7 +5,7 @@ namespace Opengnsys\ServerBundle\Entity;
 /**
  * Menu
  */
-class Menu
+class Menu extends BaseEntity
 {
     /**
      * @var string

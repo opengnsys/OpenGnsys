@@ -22,9 +22,6 @@
 
         <field name="fileSize" column="file_size" type="string" length="20" nullable="true"/>
 
-        <field name="createdAt" type="datetime" column="created_at" nullable="true"/>
-        <field name="updatedAt" type="datetime" column="updated_at" nullable="true"/>
-
         <!--
         <field name="filesystem" column="filesystem" type="string" length="250" nullable="true"/>
         <field name="partitionCode" column="partition_code" type="string" length="250"  nullable="true"/>

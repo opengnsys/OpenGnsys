@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+  <entity name="Opengnsys\MigrationBundle\Entity\Asistentes" table="asistentes">
+    <id name="idcomando" type="integer" column="idcomando"/>
+    <id name="descripcion" type="string" column="descripcion" length="250"/>
+    <field name="pagina" type="string" column="pagina" length="256" nullable="false">
+      <options>
+        <option name="fixed"/>
+      </options>
+    </field>
+    <field name="gestor" type="string" column="gestor" length="256" nullable="false">
+      <options>
+        <option name="fixed"/>
+      </options>
+    </field>
+    <field name="funcion" type="string" column="funcion" length="64" nullable="false">
+      <options>
+        <option name="fixed"/>
+      </options>
+    </field>
+    <field name="urlimg" type="string" column="urlimg" length="250" nullable="true">
+      <options>
+        <option name="fixed"/>
+      </options>
+    </field>
+    <field name="aplicambito" type="boolean" column="aplicambito" nullable="true"/>
+    <field name="visuparametros" type="string" column="visuparametros" length="250" nullable="true">
+      <options>
+        <option name="fixed"/>
+      </options>
+    </field>
+    <field name="parametros" type="string" column="parametros" length="250" nullable="true">
+      <options>
+        <option name="fixed"/>
+      </options>
+    </field>
+    <field name="comentarios" type="text" column="comentarios" length="65535" nullable="true">
+      <options>
+        <option name="fixed"/>
+      </options>
+    </field>
+    <field name="activo" type="boolean" column="activo" nullable="false"/>
+  </entity>
+</doctrine-mapping>

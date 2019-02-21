@@ -5,10 +5,8 @@ namespace Opengnsys\ServerBundle\Entity;
 /**
  * Partition
  */
-class Partition
+class Partition extends BaseEntity
 {
-    
-    
     /**
      * @var integer
      */

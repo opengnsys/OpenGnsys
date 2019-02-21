@@ -5,7 +5,7 @@ namespace Opengnsys\ServerBundle\Entity;
 /**
  * Hardware
  */
-class Hardware
+class Hardware extends BaseEntity
 {
 
 

@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+  <entity name="Opengnsys\MigrationBundle\Entity\Ordenadores" table="ordenadores">
+    <indexes>
+      <index name="idaulaip" columns="idaula,ip"/>
+    </indexes>
+    <id name="idordenador" type="integer" column="idordenador">
+      <generator strategy="IDENTITY"/>
+    </id>
+    <field name="nombreordenador" type="string" column="nombreordenador" length="100" nullable="true">
+      <options>
+        <option name="fixed"/>
+      </options>
+    </field>
+    <field name="numserie" type="string" column="numserie" length="25" nullable="true">
+      <options>
+        <option name="fixed"/>
+      </options>
+    </field>
+    <field name="ip" type="string" column="ip" length="16" nullable="false">
+      <options>
+        <option name="fixed"/>
+      </options>
+    </field>
+    <field name="mac" type="string" column="mac" length="12" nullable="true">
+      <options>
+        <option name="fixed"/>
+      </options>
+    </field>
+    <field name="idaula" type="integer" column="idaula" nullable="true">
+      <options>
+        <option name="unsigned"/>
+      </options>
+    </field>
+    <field name="idperfilhard" type="integer" column="idperfilhard" nullable="true">
+      <options>
+        <option name="unsigned"/>
+      </options>
+    </field>
+    <field name="idrepositorio" type="integer" column="idrepositorio" nullable="true">
+      <options>
+        <option name="unsigned"/>
+      </options>
+    </field>
+    <field name="grupoid" type="integer" column="grupoid" nullable="true">
+      <options>
+        <option name="unsigned"/>
+      </options>
+    </field>
+    <field name="idmenu" type="integer" column="idmenu" nullable="true">
+      <options>
+        <option name="unsigned"/>
+      </options>
+    </field>
+    <field name="cache" type="integer" column="cache" nullable="true">
+      <options>
+        <option name="unsigned"/>
+      </options>
+    </field>
+    <field name="router" type="string" column="router" length="16" nullable="false">
+      <options>
+        <option name="fixed"/>
+      </options>
+    </field>
+    <field name="mascara" type="string" column="mascara" length="16" nullable="false">
+      <options>
+        <option name="fixed"/>
+      </options>
+    </field>
+    <field name="idproautoexec" type="integer" column="idproautoexec" nullable="false">
+      <options>
+        <option name="unsigned"/>
+        <option name="default">0</option>
+      </options>
+    </field>
+    <field name="arranque" type="string" column="arranque" length="30" nullable="false">
+      <options>
+        <option name="fixed"/>
+        <option name="default">00unknown</option>
+      </options>
+    </field>
+    <field name="netiface" type="string" column="netiface" length="0" nullable="true">
+      <options>
+        <option name="fixed"/>
+        <option name="default">eth0</option>
+      </options>
+    </field>
+    <field name="netdriver" type="string" column="netdriver" length="30" nullable="false">
+      <options>
+        <option name="fixed"/>
+        <option name="default">generic</option>
+      </options>
+    </field>
+    <field name="fotoord" type="string" column="fotoord" length="250" nullable="false">
+      <options>
+        <option name="fixed"/>
+        <option name="default">fotoordenador.gif</option>
+      </options>
+    </field>
+    <field name="validacion" type="boolean" column="validacion" nullable="true">
+      <options>
+        <option name="default">0</option>
+      </options>
+    </field>
+    <field name="paginalogin" type="string" column="paginalogin" length="100" nullable="true">
+      <options>
+        <option name="fixed"/>
+      </options>
+    </field>
+    <field name="paginavalidacion" type="string" column="paginavalidacion" length="100" nullable="true">
+      <options>
+        <option name="fixed"/>
+      </options>
+    </field>
+    <field name="agentkey" type="string" column="agentkey" length="32" nullable="true">
+      <options>
+        <option name="fixed"/>
+      </options>
+    </field>
+    <field name="oglivedir" type="string" column="oglivedir" length="50" nullable="false">
+      <options>
+        <option name="fixed"/>
+        <option name="default">ogLive</option>
+      </options>
+    </field>
+  </entity>
+</doctrine-mapping>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+  <entity name="Opengnsys\MigrationBundle\Entity\Programaciones" table="programaciones">
+    <id name="idprogramacion" type="integer" column="idprogramacion">
+      <generator strategy="IDENTITY"/>
+    </id>
+    <field name="tipoaccion" type="integer" column="tipoaccion" nullable="true">
+      <options>
+        <option name="unsigned"/>
+      </options>
+    </field>
+    <field name="identificador" type="integer" column="identificador" nullable="true">
+      <options>
+        <option name="unsigned"/>
+      </options>
+    </field>
+    <field name="nombrebloque" type="string" column="nombrebloque" length="255" nullable="true">
+      <options>
+        <option name="fixed"/>
+      </options>
+    </field>
+    <field name="annos" type="smallint" column="annos" nullable="true">
+      <options>
+        <option name="unsigned"/>
+      </options>
+    </field>
+    <field name="meses" type="smallint" column="meses" nullable="true">
+      <options>
+        <option name="unsigned"/>
+      </options>
+    </field>
+    <field name="diario" type="integer" column="diario" nullable="true">
+      <options>
+        <option name="unsigned"/>
+      </options>
+    </field>
+    <field name="dias" type="boolean" column="dias" nullable="true"/>
+    <field name="semanas" type="boolean" column="semanas" nullable="true"/>
+    <field name="horas" type="smallint" column="horas" nullable="true">
+      <options>
+        <option name="unsigned"/>
+      </options>
+    </field>
+    <field name="ampm" type="boolean" column="ampm" nullable="true"/>
+    <field name="minutos" type="boolean" column="minutos" nullable="true"/>
+    <field name="segundos" type="boolean" column="segundos" nullable="true"/>
+    <field name="horasini" type="smallint" column="horasini" nullable="true">
+      <options>
+        <option name="unsigned"/>
+      </options>
+    </field>
+    <field name="ampmini" type="boolean" column="ampmini" nullable="true"/>
+    <field name="minutosini" type="boolean" column="minutosini" nullable="true"/>
+    <field name="horasfin" type="smallint" column="horasfin" nullable="true">
+      <options>
+        <option name="unsigned"/>
+      </options>
+    </field>
+    <field name="ampmfin" type="boolean" column="ampmfin" nullable="true"/>
+    <field name="minutosfin" type="boolean" column="minutosfin" nullable="true"/>
+    <field name="suspendida" type="boolean" column="suspendida" nullable="true"/>
+    <field name="sesion" type="integer" column="sesion" nullable="false">
+      <options>
+        <option name="unsigned"/>
+      </options>
+    </field>
+  </entity>
+</doctrine-mapping>

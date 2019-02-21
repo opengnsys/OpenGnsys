@@ -5,38 +5,39 @@ namespace Opengnsys\ServerBundle\Entity;
 /**
  * View
  */
-class View
+class View extends BaseEntity
 {
+
     /**
      * @var string
      */
     private $name;
 
     /**
-     * @var string
+     * @var string|null
      */
     private $comments;
 
     /**
-     * @var integer
+     * @var int
      */
     private $id;
 
     /**
      * @var \Doctrine\Common\Collections\Collection
      */
-    private $Client;
+    private $client;
 
     /**
      * Constructor
      */
     public function __construct()
     {
-        $this->Client = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->client = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     /**
-     * Set name
+     * Set name.
      *
      * @param string $name
      *
@@ -50,7 +51,7 @@ class View
     }
 
     /**
-     * Get name
+     * Get name.
      *
      * @return string
      */
@@ -60,13 +61,13 @@ class View
     }
 
     /**
-     * Set comments
+     * Set comments.
      *
-     * @param string $comments
+     * @param string|null $comments
      *
      * @return View
      */
-    public function setComments($comments)
+    public function setComments($comments = null)
     {
         $this->comments = $comments;
 
@@ -74,9 +75,9 @@ class View
     }
 
     /**
-     * Get comments
+     * Get comments.
      *
-     * @return string
+     * @return string|null
      */
     public function getComments()
     {
@@ -84,9 +85,9 @@ class View
     }
 
     /**
-     * Get id
+     * Get id.
      *
-     * @return integer
+     * @return int
      */
     public function getId()
     {
@@ -94,7 +95,7 @@ class View
     }
 
     /**
-     * Add client
+     * Add client.
      *
      * @param \Opengnsys\ServerBundle\Entity\Client $client
      *
@@ -102,28 +103,30 @@ class View
      */
     public function addClient(\Opengnsys\ServerBundle\Entity\Client $client)
     {
-        $this->Client[] = $client;
+        $this->client[] = $client;
 
         return $this;
     }
 
     /**
-     * Remove client
+     * Remove client.
      *
      * @param \Opengnsys\ServerBundle\Entity\Client $client
+     *
+     * @return boolean TRUE if this collection contained the specified element, FALSE otherwise.
      */
     public function removeClient(\Opengnsys\ServerBundle\Entity\Client $client)
     {
-        $this->Client->removeElement($client);
+        return $this->client->removeElement($client);
     }
 
     /**
-     * Get client
+     * Get client.
      *
      * @return \Doctrine\Common\Collections\Collection
      */
     public function getClient()
     {
-        return $this->Client;
+        return $this->client;
     }
 }

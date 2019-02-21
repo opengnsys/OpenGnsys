@@ -22,7 +22,7 @@
         </many-to-one>
         -->
 
-        <many-to-many field="Client" target-entity="\Opengnsys\ServerBundle\Entity\Client">
+        <many-to-many field="client" target-entity="\Opengnsys\ServerBundle\Entity\Client">
             <join-table name="og_views__clients">
                 <join-columns>
                     <join-column name="views_id" referenced-column-name="id"/>

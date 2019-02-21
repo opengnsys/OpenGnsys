@@ -5,7 +5,7 @@ namespace Opengnsys\ServerBundle\Entity;
 /**
  * SoftwareProfile
  */
-class SoftwareProfile
+class SoftwareProfile extends BaseEntity
 {
 
     /**

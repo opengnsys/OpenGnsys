@@ -5,7 +5,7 @@ namespace Opengnsys\ServerBundle\Entity;
 /**
  * Repository
  */
-class Repository
+class Repository extends BaseEntity
 {
     /**
      * @var string
@@ -312,4 +312,5 @@ class Repository
     {
         return $this->group;
     }
+
 }

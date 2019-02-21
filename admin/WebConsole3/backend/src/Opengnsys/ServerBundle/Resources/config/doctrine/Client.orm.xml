@@ -25,8 +25,7 @@
 
         <one-to-many field="partitions" target-entity="\Opengnsys\ServerBundle\Entity\Partition" mapped-by="client">
             <cascade>
-                <cascade-persist/>
-                <cascade-remove/>
+                <cascade-all/>
             </cascade>
         </one-to-many>
 

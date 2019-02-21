@@ -5,10 +5,8 @@ namespace Opengnsys\ServerBundle\Entity;
 /**
  * Software
  */
-class Software
+class Software extends BaseEntity
 {
-
-    
     /**
      * @var string
      */

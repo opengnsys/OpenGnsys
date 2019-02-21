@@ -2,25 +2,24 @@
 
 namespace Opengnsys\ServerBundle\Entity;
 
-use Doctrine\ORM\Mapping as ORM;
-
 /**
  * Client
  */
-class Client
+class Client extends BaseEntity
 {
+
     /**
-     * @var string
+     * @var string|null
      */
     private $name;
 
     /**
-     * @var string
+     * @var string|null
      */
     private $serialno;
 
     /**
-     * @var string
+     * @var string|null
      */
     private $netiface;
 
@@ -30,7 +29,7 @@ class Client
     private $netdriver;
 
     /**
-     * @var string
+     * @var string|null
      */
     private $mac;
 
@@ -40,27 +39,27 @@ class Client
     private $ip;
 
     /**
-     * @var string
+     * @var string|null
      */
     private $status;
 
     /**
-     * @var integer
+     * @var int|null
      */
     private $cache;
 
     /**
-     * @var integer
+     * @var int
      */
     private $idproautoexec;
 
     /**
-     * @var string
+     * @var string|null
      */
-    private $urlphoto;
+    private $oglive;
 
     /**
-     * @var integer
+     * @var int
      */
     private $id;
 
@@ -85,16 +84,6 @@ class Client
     private $menu;
 
     /**
-     * @var string
-     */
-    private $oglive;
-
-    /**
-     * @var \Opengnsys\ServerBundle\Entity\Netboot
-     */
-    private $netboot;
-
-    /**
      * @var \Opengnsys\ServerBundle\Entity\Repository
      */
     private $repository;
@@ -105,6 +94,11 @@ class Client
     private $organizationalUnit;
 
     /**
+     * @var \Opengnsys\ServerBundle\Entity\Netboot
+     */
+    private $netboot;
+
+    /**
      * Constructor
      */
     public function __construct()
@@ -113,13 +107,13 @@ class Client
     }
 
     /**
-     * Set name
+     * Set name.
      *
-     * @param string $name
+     * @param string|null $name
      *
      * @return Client
      */
-    public function setName($name)
+    public function setName($name = null)
     {
         $this->name = $name;
 
@@ -127,9 +121,9 @@ class Client
     }
 
     /**
-     * Get name
+     * Get name.
      *
-     * @return string
+     * @return string|null
      */
     public function getName()
     {
@@ -137,13 +131,13 @@ class Client
     }
 
     /**
-     * Set serialno
+     * Set serialno.
      *
-     * @param string $serialno
+     * @param string|null $serialno
      *
      * @return Client
      */
-    public function setSerialno($serialno)
+    public function setSerialno($serialno = null)
     {
         $this->serialno = $serialno;
 
@@ -151,9 +145,9 @@ class Client
     }
 
     /**
-     * Get serialno
+     * Get serialno.
      *
-     * @return string
+     * @return string|null
      */
     public function getSerialno()
     {
@@ -161,13 +155,13 @@ class Client
     }
 
     /**
-     * Set netiface
+     * Set netiface.
      *
-     * @param string $netiface
+     * @param string|null $netiface
      *
      * @return Client
      */
-    public function setNetiface($netiface)
+    public function setNetiface($netiface = null)
     {
         $this->netiface = $netiface;
 
@@ -175,9 +169,9 @@ class Client
     }
 
     /**
-     * Get netiface
+     * Get netiface.
      *
-     * @return string
+     * @return string|null
      */
     public function getNetiface()
     {
@@ -185,7 +179,7 @@ class Client
     }
 
     /**
-     * Set netdriver
+     * Set netdriver.
      *
      * @param string $netdriver
      *
@@ -199,7 +193,7 @@ class Client
     }
 
     /**
-     * Get netdriver
+     * Get netdriver.
      *
      * @return string
      */
@@ -209,13 +203,13 @@ class Client
     }
 
     /**
-     * Set mac
+     * Set mac.
      *
-     * @param string $mac
+     * @param string|null $mac
      *
      * @return Client
      */
-    public function setMac($mac)
+    public function setMac($mac = null)
     {
         $this->mac = $mac;
 
@@ -223,9 +217,9 @@ class Client
     }
 
     /**
-     * Get mac
+     * Get mac.
      *
-     * @return string
+     * @return string|null
      */
     public function getMac()
     {
@@ -233,7 +227,7 @@ class Client
     }
 
     /**
-     * Set ip
+     * Set ip.
      *
      * @param string $ip
      *
@@ -247,7 +241,7 @@ class Client
     }
 
     /**
-     * Get ip
+     * Get ip.
      *
      * @return string
      */
@@ -257,13 +251,37 @@ class Client
     }
 
     /**
-     * Set cache
+     * Set status.
      *
-     * @param integer $cache
+     * @param string|null $status
      *
      * @return Client
      */
-    public function setCache($cache)
+    public function setStatus($status = null)
+    {
+        $this->status = $status;
+
+        return $this;
+    }
+
+    /**
+     * Get status.
+     *
+     * @return string|null
+     */
+    public function getStatus()
+    {
+        return $this->status;
+    }
+
+    /**
+     * Set cache.
+     *
+     * @param int|null $cache
+     *
+     * @return Client
+     */
+    public function setCache($cache = null)
     {
         $this->cache = $cache;
 
@@ -271,9 +289,9 @@ class Client
     }
 
     /**
-     * Get cache
+     * Get cache.
      *
-     * @return integer
+     * @return int|null
      */
     public function getCache()
     {
@@ -281,9 +299,9 @@ class Client
     }
 
     /**
-     * Set idproautoexec
+     * Set idproautoexec.
      *
-     * @param integer $idproautoexec
+     * @param int $idproautoexec
      *
      * @return Client
      */
@@ -295,9 +313,9 @@ class Client
     }
 
     /**
-     * Get idproautoexec
+     * Get idproautoexec.
      *
-     * @return integer
+     * @return int
      */
     public function getIdproautoexec()
     {
@@ -305,33 +323,33 @@ class Client
     }
 
     /**
-     * Set urlphoto
+     * Set oglive.
      *
-     * @param string $urlphoto
+     * @param string|null $oglive
      *
      * @return Client
      */
-    public function setUrlphoto($urlphoto)
+    public function setOglive($oglive = null)
     {
-        $this->urlphoto = $urlphoto;
+        $this->oglive = $oglive;
 
         return $this;
     }
 
     /**
-     * Get urlphoto
+     * Get oglive.
      *
-     * @return string
+     * @return string|null
      */
-    public function getUrlphoto()
+    public function getOglive()
     {
-        return $this->urlphoto;
+        return $this->oglive;
     }
 
     /**
-     * Get id
+     * Get id.
      *
-     * @return integer
+     * @return int
      */
     public function getId()
     {
@@ -339,7 +357,7 @@ class Client
     }
 
     /**
-     * Add partition
+     * Add partition.
      *
      * @param \Opengnsys\ServerBundle\Entity\Partition $partition
      *
@@ -348,23 +366,24 @@ class Client
     public function addPartition(\Opengnsys\ServerBundle\Entity\Partition $partition)
     {
         $this->partitions[] = $partition;
-        $partition->setClient($this);
 
         return $this;
     }
 
     /**
-     * Remove partition
+     * Remove partition.
      *
      * @param \Opengnsys\ServerBundle\Entity\Partition $partition
+     *
+     * @return boolean TRUE if this collection contained the specified element, FALSE otherwise.
      */
     public function removePartition(\Opengnsys\ServerBundle\Entity\Partition $partition)
     {
-        $this->partitions->removeElement($partition);
+        return $this->partitions->removeElement($partition);
     }
 
     /**
-     * Get partitions
+     * Get partitions.
      *
      * @return \Doctrine\Common\Collections\Collection
      */
@@ -374,25 +393,9 @@ class Client
     }
 
     /**
-     * Get partitions
+     * Set validationSettings.
      *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getPartition($key)
-    {
-        $partition = null;
-        if(!$partition = $this->partitions->get($key)){
-            $partition = new Partition();
-            $partition->setClient($this);
-            $this->partitions[$key] = $partition;
-        }
-        return $partition;
-    }
-
-    /**
-     * Set validationSettings
-     *
-     * @param \Opengnsys\ServerBundle\Entity\ValidationSettings $validationSettings
+     * @param \Opengnsys\ServerBundle\Entity\ValidationSettings|null $validationSettings
      *
      * @return Client
      */
@@ -404,9 +407,9 @@ class Client
     }
 
     /**
-     * Get validationSettings
+     * Get validationSettings.
      *
-     * @return \Opengnsys\ServerBundle\Entity\ValidationSettings
+     * @return \Opengnsys\ServerBundle\Entity\ValidationSettings|null
      */
     public function getValidationSettings()
     {
@@ -414,9 +417,9 @@ class Client
     }
 
     /**
-     * Set hardwareProfile
+     * Set hardwareProfile.
      *
-     * @param \Opengnsys\ServerBundle\Entity\HardwareProfile $hardwareProfile
+     * @param \Opengnsys\ServerBundle\Entity\HardwareProfile|null $hardwareProfile
      *
      * @return Client
      */
@@ -428,9 +431,9 @@ class Client
     }
 
     /**
-     * Get hardwareProfile
+     * Get hardwareProfile.
      *
-     * @return \Opengnsys\ServerBundle\Entity\HardwareProfile
+     * @return \Opengnsys\ServerBundle\Entity\HardwareProfile|null
      */
     public function getHardwareProfile()
     {
@@ -438,9 +441,9 @@ class Client
     }
 
     /**
-     * Set menu
+     * Set menu.
      *
-     * @param \Opengnsys\ServerBundle\Entity\Menu $menu
+     * @param \Opengnsys\ServerBundle\Entity\Menu|null $menu
      *
      * @return Client
      */
@@ -452,9 +455,9 @@ class Client
     }
 
     /**
-     * Get menu
+     * Get menu.
      *
-     * @return \Opengnsys\ServerBundle\Entity\Menu
+     * @return \Opengnsys\ServerBundle\Entity\Menu|null
      */
     public function getMenu()
     {
@@ -462,9 +465,9 @@ class Client
     }
 
     /**
-     * Set repository
+     * Set repository.
      *
-     * @param \Opengnsys\ServerBundle\Entity\Repository $repository
+     * @param \Opengnsys\ServerBundle\Entity\Repository|null $repository
      *
      * @return Client
      */
@@ -476,9 +479,9 @@ class Client
     }
 
     /**
-     * Get repository
+     * Get repository.
      *
-     * @return \Opengnsys\ServerBundle\Entity\Repository
+     * @return \Opengnsys\ServerBundle\Entity\Repository|null
      */
     public function getRepository()
     {
@@ -486,9 +489,9 @@ class Client
     }
 
     /**
-     * Set organizationalUnit
+     * Set organizationalUnit.
      *
-     * @param \Opengnsys\ServerBundle\Entity\OrganizationalUnit $organizationalUnit
+     * @param \Opengnsys\ServerBundle\Entity\OrganizationalUnit|null $organizationalUnit
      *
      * @return Client
      */
@@ -500,9 +503,9 @@ class Client
     }
 
     /**
-     * Get organizationalUnit
+     * Get organizationalUnit.
      *
-     * @return \Opengnsys\ServerBundle\Entity\OrganizationalUnit
+     * @return \Opengnsys\ServerBundle\Entity\OrganizationalUnit|null
      */
     public function getOrganizationalUnit()
     {
@@ -510,57 +513,9 @@ class Client
     }
 
     /**
-     * Set status
+     * Set netboot.
      *
-     * @param string $status
-     *
-     * @return Client
-     */
-    public function setStatus($status)
-    {
-        $this->status = $status;
-
-        return $this;
-    }
-
-    /**
-     * Get status
-     *
-     * @return string
-     */
-    public function getStatus()
-    {
-        return $this->status;
-    }
-
-    /**
-     * Set oglive
-     *
-     * @param string $oglive
-     *
-     * @return Client
-     */
-    public function setOglive($oglive)
-    {
-        $this->oglive = $oglive;
-
-        return $this;
-    }
-
-    /**
-     * Get oglive
-     *
-     * @return string
-     */
-    public function getOglive()
-    {
-        return $this->oglive;
-    }
-
-    /**
-     * Set netboot
-     *
-     * @param \Opengnsys\ServerBundle\Entity\Netboot $netboot
+     * @param \Opengnsys\ServerBundle\Entity\Netboot|null $netboot
      *
      * @return Client
      */
@@ -572,9 +527,9 @@ class Client
     }
 
     /**
-     * Get netboot
+     * Get netboot.
      *
-     * @return \Opengnsys\ServerBundle\Entity\Netboot
+     * @return \Opengnsys\ServerBundle\Entity\Netboot|null
      */
     public function getNetboot()
     {

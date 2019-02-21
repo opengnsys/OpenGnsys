@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+  <entity name="Opengnsys\MigrationBundle\Entity\AccionesMenus" table="acciones_menus">
+    <id name="idaccionmenu" type="integer" column="idaccionmenu">
+      <generator strategy="IDENTITY"/>
+    </id>
+    <field name="tipoaccion" type="boolean" column="tipoaccion" nullable="false">
+      <options>
+        <option name="default">0</option>
+      </options>
+    </field>
+    <field name="idtipoaccion" type="integer" column="idtipoaccion" nullable="false">
+      <options>
+        <option name="unsigned"/>
+        <option name="default">0</option>
+      </options>
+    </field>
+    <field name="idmenu" type="integer" column="idmenu" nullable="false">
+      <options>
+        <option name="unsigned"/>
+        <option name="default">0</option>
+      </options>
+    </field>
+    <field name="tipoitem" type="boolean" column="tipoitem" nullable="true"/>
+    <field name="idurlimg" type="integer" column="idurlimg" nullable="true">
+      <options>
+        <option name="unsigned"/>
+      </options>
+    </field>
+    <field name="descripitem" type="string" column="descripitem" length="250" nullable="true">
+      <options>
+        <option name="fixed"/>
+      </options>
+    </field>
+    <field name="orden" type="boolean" column="orden" nullable="true"/>
+  </entity>
+</doctrine-mapping>

@@ -2,12 +2,10 @@
 
 namespace Opengnsys\ServerBundle\Entity;
 
-use Doctrine\ORM\Mapping as ORM;
-
 /**
  * Command
  */
-class Command
+class Command extends BaseEntity
 {
     /**
      * @var string

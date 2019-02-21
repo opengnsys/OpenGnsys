@@ -5,32 +5,33 @@ namespace Opengnsys\ServerBundle\Entity;
 /**
  * OrganizationalUnit
  */
-class OrganizationalUnit
+class OrganizationalUnit extends BaseEntity
 {
+    
     /**
      * @var string
      */
     private $name;
 
     /**
-     * @var string
+     * @var string|null
      */
     private $description;
 
     /**
-     * @var string
-     */
-    private $urlphoto;
-
-    /**
-     * @var string
+     * @var string|null
      */
     private $comments;
 
     /**
-     * @var integer
+     * @var int
      */
     private $id;
+
+    /**
+     * @var \Doctrine\Common\Collections\Collection
+     */
+    private $clients;
 
     /**
      * @var \Doctrine\Common\Collections\Collection
@@ -52,17 +53,17 @@ class OrganizationalUnit
      */
     private $networkSettings;
 
-
     /**
      * Constructor
      */
     public function __construct()
     {
+        $this->clients = new \Doctrine\Common\Collections\ArrayCollection();
         $this->children = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     /**
-     * Set name
+     * Set name.
      *
      * @param string $name
      *
@@ -76,7 +77,7 @@ class OrganizationalUnit
     }
 
     /**
-     * Get name
+     * Get name.
      *
      * @return string
      */
@@ -86,13 +87,13 @@ class OrganizationalUnit
     }
 
     /**
-     * Set description
+     * Set description.
      *
-     * @param string $description
+     * @param string|null $description
      *
      * @return OrganizationalUnit
      */
-    public function setDescription($description)
+    public function setDescription($description = null)
     {
         $this->description = $description;
 
@@ -100,9 +101,9 @@ class OrganizationalUnit
     }
 
     /**
-     * Get description
+     * Get description.
      *
-     * @return string
+     * @return string|null
      */
     public function getDescription()
     {
@@ -110,37 +111,13 @@ class OrganizationalUnit
     }
 
     /**
-     * Set urlphoto
+     * Set comments.
      *
-     * @param string $urlphoto
-     *
-     * @return OrganizationalUnit
-     */
-    public function setUrlphoto($urlphoto)
-    {
-        $this->urlphoto = $urlphoto;
-
-        return $this;
-    }
-
-    /**
-     * Get urlphoto
-     *
-     * @return string
-     */
-    public function getUrlphoto()
-    {
-        return $this->urlphoto;
-    }
-
-    /**
-     * Set comments
-     *
-     * @param string $comments
+     * @param string|null $comments
      *
      * @return OrganizationalUnit
      */
-    public function setComments($comments)
+    public function setComments($comments = null)
     {
         $this->comments = $comments;
 
@@ -148,9 +125,9 @@ class OrganizationalUnit
     }
 
     /**
-     * Get comments
+     * Get comments.
      *
-     * @return string
+     * @return string|null
      */
     public function getComments()
     {
@@ -158,9 +135,9 @@ class OrganizationalUnit
     }
 
     /**
-     * Get id
+     * Get id.
      *
-     * @return integer
+     * @return int
      */
     public function getId()
     {
@@ -168,120 +145,7 @@ class OrganizationalUnit
     }
 
     /**
-     * Add child
-     *
-     * @param \Opengnsys\ServerBundle\Entity\OrganizationalUnit $child
-     *
-     * @return OrganizationalUnit
-     */
-    public function addChild(\Opengnsys\ServerBundle\Entity\OrganizationalUnit $child)
-    {
-        $this->children[] = $child;
-
-        return $this;
-    }
-
-    /**
-     * Remove child
-     *
-     * @param \Opengnsys\ServerBundle\Entity\OrganizationalUnit $child
-     */
-    public function removeChild(\Opengnsys\ServerBundle\Entity\OrganizationalUnit $child)
-    {
-        $this->children->removeElement($child);
-    }
-
-    /**
-     * Get children
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getChildren()
-    {
-        return $this->children;
-    }
-
-    /**
-     * Set parent
-     *
-     * @param \Opengnsys\ServerBundle\Entity\OrganizationalUnit $parent
-     *
-     * @return OrganizationalUnit
-     */
-    public function setParent(\Opengnsys\ServerBundle\Entity\OrganizationalUnit $parent = null)
-    {
-        $this->parent = $parent;
-
-        return $this;
-    }
-
-    /**
-     * Get parent
-     *
-     * @return \Opengnsys\ServerBundle\Entity\OrganizationalUnit
-     */
-    public function getParent()
-    {
-        return $this->parent;
-    }
-
-    /**
-     * Set validationSettings
-     *
-     * @param \Opengnsys\ServerBundle\Entity\ValidationSettings $validationSettings
-     *
-     * @return OrganizationalUnit
-     */
-    public function setValidationSettings(\Opengnsys\ServerBundle\Entity\ValidationSettings $validationSettings = null)
-    {
-        $this->validationSettings = $validationSettings;
-
-        return $this;
-    }
-
-    /**
-     * Get validationSettings
-     *
-     * @return \Opengnsys\ServerBundle\Entity\ValidationSettings
-     */
-    public function getValidationSettings()
-    {
-        return $this->validationSettings;
-    }
-
-    /**
-     * Set networkSettings
-     *
-     * @param \Opengnsys\ServerBundle\Entity\NetworkSettings $networkSettings
-     *
-     * @return OrganizationalUnit
-     */
-    public function setNetworkSettings(\Opengnsys\ServerBundle\Entity\NetworkSettings $networkSettings = null)
-    {
-        $this->networkSettings = $networkSettings;
-
-        return $this;
-    }
-
-    /**
-     * Get networkSettings
-     *
-     * @return \Opengnsys\ServerBundle\Entity\NetworkSettings
-     */
-    public function getNetworkSettings()
-    {
-        return $this->networkSettings;
-    }
-
-
-    /**
-     * @var \Doctrine\Common\Collections\Collection
-     */
-    private $clients;
-
-
-    /**
-     * Add client
+     * Add client.
      *
      * @param \Opengnsys\ServerBundle\Entity\Client $client
      *
@@ -295,22 +159,132 @@ class OrganizationalUnit
     }
 
     /**
-     * Remove client
+     * Remove client.
      *
      * @param \Opengnsys\ServerBundle\Entity\Client $client
+     *
+     * @return boolean TRUE if this collection contained the specified element, FALSE otherwise.
      */
     public function removeClient(\Opengnsys\ServerBundle\Entity\Client $client)
     {
-        $this->clients->removeElement($client);
+        return $this->clients->removeElement($client);
     }
 
     /**
-     * Get clients
+     * Get clients.
      *
      * @return \Doctrine\Common\Collections\Collection
      */
     public function getClients()
     {
         return $this->clients;
+    }
+
+    /**
+     * Add child.
+     *
+     * @param \Opengnsys\ServerBundle\Entity\OrganizationalUnit $child
+     *
+     * @return OrganizationalUnit
+     */
+    public function addChild(\Opengnsys\ServerBundle\Entity\OrganizationalUnit $child)
+    {
+        $this->children[] = $child;
+
+        return $this;
+    }
+
+    /**
+     * Remove child.
+     *
+     * @param \Opengnsys\ServerBundle\Entity\OrganizationalUnit $child
+     *
+     * @return boolean TRUE if this collection contained the specified element, FALSE otherwise.
+     */
+    public function removeChild(\Opengnsys\ServerBundle\Entity\OrganizationalUnit $child)
+    {
+        return $this->children->removeElement($child);
+    }
+
+    /**
+     * Get children.
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getChildren()
+    {
+        return $this->children;
+    }
+
+    /**
+     * Set parent.
+     *
+     * @param \Opengnsys\ServerBundle\Entity\OrganizationalUnit|null $parent
+     *
+     * @return OrganizationalUnit
+     */
+    public function setParent(\Opengnsys\ServerBundle\Entity\OrganizationalUnit $parent = null)
+    {
+        $this->parent = $parent;
+
+        return $this;
+    }
+
+    /**
+     * Get parent.
+     *
+     * @return \Opengnsys\ServerBundle\Entity\OrganizationalUnit|null
+     */
+    public function getParent()
+    {
+        return $this->parent;
+    }
+
+    /**
+     * Set validationSettings.
+     *
+     * @param \Opengnsys\ServerBundle\Entity\ValidationSettings|null $validationSettings
+     *
+     * @return OrganizationalUnit
+     */
+    public function setValidationSettings(\Opengnsys\ServerBundle\Entity\ValidationSettings $validationSettings = null)
+    {
+        $this->validationSettings = $validationSettings;
+
+        return $this;
+    }
+
+    /**
+     * Get validationSettings.
+     *
+     * @return \Opengnsys\ServerBundle\Entity\ValidationSettings|null
+     */
+    public function getValidationSettings()
+    {
+        return $this->validationSettings;
+    }
+
+    /**
+     * Set networkSettings.
+     *
+     * @param \Opengnsys\ServerBundle\Entity\NetworkSettings|null $networkSettings
+     *
+     * @return OrganizationalUnit
+     */
+    public function setNetworkSettings(\Opengnsys\ServerBundle\Entity\NetworkSettings $networkSettings = null)
+    {
+        $this->networkSettings = $networkSettings;
+
+        return $this;
+    }
+
+    /**
+     * Get networkSettings.
+     *
+     * @return \Opengnsys\ServerBundle\Entity\NetworkSettings|null
+     */
+    public function getNetworkSettings()
+    {
+        return $this->networkSettings;
     }
 }

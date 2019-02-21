@@ -5,7 +5,7 @@ namespace Opengnsys\ServerBundle\Entity;
 /**
  * Task
  */
-class Task
+class Task extends BaseEntity
 {
     
     /**

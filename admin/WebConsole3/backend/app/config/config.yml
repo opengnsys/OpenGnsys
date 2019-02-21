@@ -98,13 +98,17 @@ swiftmailer:
     spool:     { type: memory }
 
 monolog:
-    channels: ['opengnsys']
+    channels: ['og_server', 'og_migration']
     handlers:
-        varicentrolog:
-            # log all messages (since debug is the lowest level)
+        og_server:
             type:     stream
             level:    debug
-            path:     '%kernel.logs_dir%/opengnsys.log'
-            channels: [opengnsys]
+            path:     '%kernel.logs_dir%/og_server.log'
+            channels: [og_server]
+        og_migration:
+            type:     stream
+            level:    debug
+            path:     '%kernel.logs_dir%/og_migration.log'
+            channels: [og_migration]
 nelmio_api_doc:
     name: Page Opengnsys API

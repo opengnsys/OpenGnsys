@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+  <entity name="Opengnsys\MigrationBundle\Entity\AccionesLog" table="acciones_log">
+    <indexes>
+      <index name="idprocedimiento" columns="idprocedimiento"/>
+      <index name="idprogramacion" columns="idprogramacion"/>
+      <index name="idordenador" columns="idordenador"/>
+      <index name="idtarea" columns="idtarea"/>
+    </indexes>
+    <id name="idaccion" type="integer" column="idaccion">
+      <generator strategy="IDENTITY"/>
+    </id>
+    <field name="tipoaccion" type="smallint" column="tipoaccion" nullable="false">
+      <options>
+        <option name="unsigned"/>
+      </options>
+    </field>
+    <field name="idtipoaccion" type="integer" column="idtipoaccion" nullable="false">
+      <options>
+        <option name="unsigned"/>
+      </options>
+    </field>
+    <field name="descriaccion" type="string" column="descriaccion" length="250" nullable="false">
+      <options>
+        <option name="fixed"/>
+      </options>
+    </field>
+    <field name="idordenador" type="integer" column="idordenador" nullable="false">
+      <options>
+        <option name="unsigned"/>
+      </options>
+    </field>
+    <field name="ip" type="string" column="ip" length="50" nullable="false">
+      <options>
+        <option name="fixed"/>
+      </options>
+    </field>
+    <field name="sesion" type="integer" column="sesion" nullable="false">
+      <options>
+        <option name="unsigned"/>
+      </options>
+    </field>
+    <field name="idcomando" type="integer" column="idcomando" nullable="false">
+      <options>
+        <option name="unsigned"/>
+      </options>
+    </field>
+    <field name="parametros" type="text" column="parametros" length="65535" nullable="true">
+      <options>
+        <option name="fixed"/>
+      </options>
+    </field>
+    <field name="fechahorareg" type="datetime" column="fechahorareg" nullable="false">
+      <options>
+        <option name="default">1970-01-01 00:00:00</option>
+      </options>
+    </field>
+    <field name="fechahorafin" type="datetime" column="fechahorafin" nullable="false">
+      <options>
+        <option name="default">1970-01-01 00:00:00</option>
+      </options>
+    </field>
+    <field name="estado" type="boolean" column="estado" nullable="false">
+      <options>
+        <option name="default">0</option>
+      </options>
+    </field>
+    <field name="resultado" type="boolean" column="resultado" nullable="false">
+      <options>
+        <option name="default">0</option>
+      </options>
+    </field>
+    <field name="descrinotificacion" type="string" column="descrinotificacion" length="256" nullable="true">
+      <options>
+        <option name="fixed"/>
+      </options>
+    </field>
+    <field name="ambito" type="smallint" column="ambito" nullable="false">
+      <options>
+        <option name="unsigned"/>
+        <option name="default">0</option>
+      </options>
+    </field>
+    <field name="idambito" type="integer" column="idambito" nullable="false">
+      <options>
+        <option name="unsigned"/>
+        <option name="default">0</option>
+      </options>
+    </field>
+    <field name="restrambito" type="text" column="restrambito" length="65535" nullable="true">
+      <options>
+        <option name="fixed"/>
+      </options>
+    </field>
+    <field name="idprocedimiento" type="integer" column="idprocedimiento" nullable="false">
+      <options>
+        <option name="unsigned"/>
+        <option name="default">0</option>
+      </options>
+    </field>
+    <field name="idtarea" type="integer" column="idtarea" nullable="false">
+      <options>
+        <option name="unsigned"/>
+        <option name="default">0</option>
+      </options>
+    </field>
+    <field name="idcentro" type="integer" column="idcentro" nullable="false">
+      <options>
+        <option name="unsigned"/>
+        <option name="default">0</option>
+      </options>
+    </field>
+    <field name="idprogramacion" type="integer" column="idprogramacion" nullable="false">
+      <options>
+        <option name="unsigned"/>
+        <option name="default">0</option>
+      </options>
+    </field>
+    <field name="fechaBorrado" type="datetime" column="fecha_borrado" nullable="true"/>
+  </entity>
+</doctrine-mapping>

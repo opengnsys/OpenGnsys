@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+  <entity name="Opengnsys\MigrationBundle\Entity\Aulas" table="aulas">
+    <id name="idaula" type="integer" column="idaula">
+      <generator strategy="IDENTITY"/>
+    </id>
+    <field name="nombreaula" type="string" column="nombreaula" length="100" nullable="false">
+      <options>
+        <option name="fixed"/>
+        <option name="default"/>
+      </options>
+    </field>
+    <field name="idcentro" type="integer" column="idcentro" nullable="false">
+      <options>
+        <option name="unsigned"/>
+        <option name="default">0</option>
+      </options>
+    </field>
+    <field name="urlfoto" type="string" column="urlfoto" length="250" nullable="true">
+      <options>
+        <option name="fixed"/>
+      </options>
+    </field>
+    <field name="cagnon" type="boolean" column="cagnon" nullable="true"/>
+    <field name="pizarra" type="boolean" column="pizarra" nullable="true"/>
+    <field name="grupoid" type="integer" column="grupoid" nullable="true">
+      <options>
+        <option name="unsigned"/>
+      </options>
+    </field>
+    <field name="ubicacion" type="string" column="ubicacion" length="255" nullable="true">
+      <options>
+        <option name="fixed"/>
+      </options>
+    </field>
+    <field name="comentarios" type="text" column="comentarios" length="65535" nullable="true">
+      <options>
+        <option name="fixed"/>
+      </options>
+    </field>
+    <field name="puestos" type="smallint" column="puestos" nullable="true">
+      <options>
+        <option name="unsigned"/>
+      </options>
+    </field>
+    <field name="horaresevini" type="boolean" column="horaresevini" nullable="true"/>
+    <field name="horaresevfin" type="boolean" column="horaresevfin" nullable="true"/>
+    <field name="modomul" type="boolean" column="modomul" nullable="false"/>
+    <field name="ipmul" type="string" column="ipmul" length="16" nullable="false">
+      <options>
+        <option name="fixed"/>
+      </options>
+    </field>
+    <field name="pormul" type="integer" column="pormul" nullable="false">
+      <options>
+        <option name="unsigned"/>
+      </options>
+    </field>
+    <field name="velmul" type="smallint" column="velmul" nullable="false">
+      <options>
+        <option name="unsigned"/>
+        <option name="default">70</option>
+      </options>
+    </field>
+    <field name="router" type="string" column="router" length="30" nullable="true">
+      <options>
+        <option name="fixed"/>
+      </options>
+    </field>
+    <field name="netmask" type="string" column="netmask" length="30" nullable="true">
+      <options>
+        <option name="fixed"/>
+      </options>
+    </field>
+    <field name="dns" type="string" column="dns" length="30" nullable="true">
+      <options>
+        <option name="fixed"/>
+      </options>
+    </field>
+    <field name="proxy" type="string" column="proxy" length="30" nullable="true">
+      <options>
+        <option name="fixed"/>
+      </options>
+    </field>
+    <field name="ntp" type="string" column="ntp" length="30" nullable="true">
+      <options>
+        <option name="fixed"/>
+      </options>
+    </field>
+    <field name="modp2p" type="string" column="modp2p" length="0" nullable="true">
+      <options>
+        <option name="fixed"/>
+        <option name="default">peer</option>
+      </options>
+    </field>
+    <field name="timep2p" type="integer" column="timep2p" nullable="false">
+      <options>
+        <option name="unsigned"/>
+        <option name="default">60</option>
+      </options>
+    </field>
+    <field name="validacion" type="boolean" column="validacion" nullable="true">
+      <options>
+        <option name="default">0</option>
+      </options>
+    </field>
+    <field name="paginalogin" type="string" column="paginalogin" length="100" nullable="true">
+      <options>
+        <option name="fixed"/>
+      </options>
+    </field>
+    <field name="paginavalidacion" type="string" column="paginavalidacion" length="100" nullable="true">
+      <options>
+        <option name="fixed"/>
+      </options>
+    </field>
+    <field name="inremotepc" type="boolean" column="inremotepc" nullable="true">
+      <options>
+        <option name="default">0</option>
+      </options>
+    </field>
+    <field name="oglivedir" type="string" column="oglivedir" length="50" nullable="false">
+      <options>
+        <option name="fixed"/>
+        <option name="default">ogLive</option>
+      </options>
+    </field>
+  </entity>
+</doctrine-mapping>

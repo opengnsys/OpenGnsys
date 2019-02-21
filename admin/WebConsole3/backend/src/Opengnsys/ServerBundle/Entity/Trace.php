@@ -7,7 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * Trace
  */
-class Trace
+class Trace extends BaseEntity
 {
 
     /**

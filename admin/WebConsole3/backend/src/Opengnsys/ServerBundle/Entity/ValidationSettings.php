@@ -5,7 +5,7 @@ namespace Opengnsys\ServerBundle\Entity;
 /**
  * ValidationSettings
  */
-class ValidationSettings
+class ValidationSettings extends BaseEntity
 {
     /**
      * @var string
