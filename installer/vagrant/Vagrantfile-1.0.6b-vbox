@@ -42,7 +42,7 @@ fi
 # Install OpenGnsys and change server address.
 wget -q https://opengnsys.es/svn/tags/opengnsys-1.0.6b/installer/opengnsys_installer.sh -O - | bash || exit $?
 mv /opt/opengnsys/log/bash.log /opt/opengnsys/log/opengnsys_installer.log
-echo y | /opt/opengnsys/bin/setserveraddr eth1
+echo y | /opt/opengnsys/bin/setserveraddr $(ip -o link show | tail -1 | cut -d: -f2)
 # Insert DHCP data.
 for ((i=#{NCLIENTS+10}; i>10; i--)); do
     sed -i "/^}$/ i host pc${i} { hardware ethernet #{MACPREFIX}:${i}; fixed-address #{NETPREFIX}.${i}; }" /etc/dhcp/dhcpd.conf
