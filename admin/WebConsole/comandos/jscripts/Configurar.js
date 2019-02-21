@@ -15,7 +15,7 @@ var swe=false; // Switch para detectar partición extendida
 //________________________________________________________________________________________________________ 
 // 
 //	Elimina una fila de una tabla de configuraciones perteneciente a las propiedades de una partición
-//	Parametros:
+//	Parámetros:
 //		icp: Identificador de la configuración-partición
 //		o: Objeto checkbox que invoca la función
 //________________________________________________________________________________________________________ 
@@ -31,8 +31,8 @@ function eliminaParticion(o,icp)
 // Toma desplegable de tipo de partición
 	var desplepar=o.parentNode.nextSibling.nextSibling.childNodes[0]; 
 	var tipar=tomavalorDesple(desplepar); // Partición
-	if(tipar=="CACHE") swc=false; // Si es la caché se pone a false su switch
-	if(tipar=="EXTENDED") swe=false; // Si es la EXTENDED se pone a false su switch
+	if(tipar==="CACHE") swc=false; // Si es la caché se pone a false su switch
+	if(tipar==="EXTENDED") swe=false; // Si es la EXTENDED se pone a false su switch
 
 	var tbCfg = document.getElementById("tabla_conf"); // Recupera objeto <TABLE>
 	var trCfg = document.getElementById("TR_"+icp); // Recupera <TR> de la fila a eliminar
@@ -69,7 +69,7 @@ function addParticion(objImg,cc)
 //________________________________________________________________________________________________________ 
 // 
 //	Confirma un bloque de configuración de particiones
-//	Parametros:
+//	Parámetros:
 //		idordenadores: Identificadores de los ordenadores a los que se aplicará el comando
 //		cc: Identificador de la configuración (bloque de particiones)
 // 	Especificaciones:
@@ -81,11 +81,11 @@ function addParticion(objImg,cc)
 function Confirmar(cc)
 {
 	if(comprobarDatos(cc)){
-		if(document.fdatosejecucion.ambito.value!=AMBITO_ORDENADORES){
+		if(document.fdatosejecucion.ambito.value!==AMBITO_ORDENADORES){
 			var tbOrd= document.getElementById("tbOrd_"+cc); // Recupera tabla de ordenadores de la configuración
 			var idordenadores=tbOrd.getAttribute('value'); // Toma identificadores de los ordenadores
 			var cadenaid=document.fdatos.cadenaid.value; // Cadena de identificadores de todos los ordenadores del ámbito
-			if(idordenadores!=cadenaid){ // Si no son iguales es que el ámbito de aplicación es restringido
+			if(idordenadores!==cadenaid){ // Si no son iguales es que el ámbito de aplicación es restringido
 				document.fdatosejecucion.ambito.value=0; // Ambito de aplicación restringido
 				document.fdatosejecucion.idambito.value=idordenadores;
 			}
@@ -129,7 +129,7 @@ function comprobarDatos(cc)
 
 	var trCfg = document.getElementById("TR_"+cc); // Recupera primer <TR> de la configuración
 	trCfg=trCfg.nextSibling; // Primera fila de particiones
-	while(trCfg.id!="TRIMG_"+cc){
+	while(trCfg.id!=="TRIMG_"+cc){
 
 		var tama=trCfg.childNodes[itama].childNodes[0].value; // Tamaño de partición
 
@@ -144,18 +144,18 @@ function comprobarDatos(cc)
 		npar=parseInt(par);
 		if(maxpar<npar) maxpar=npar; // Guarda partición de mayor orden
 
-		if (npar==4){
+		if (npar===4){
 			swc=true; // Se especifica partición caché
 			tch=tama;
 		}
 
-		if(npar==0){
+		if(npar===0){
 			alert(TbMsg[1]);
 			trCfg.childNodes[ipar].childNodes[0].focus();
 			return(false);
 		}	
 
-		if(tbpar[npar]==1){ // Existe ya una partición con ese número
+		if(tbpar[npar]===1){ // Existe ya una partición con ese número
 			alert(TbMsg[0]);
 			trCfg.childNodes[ipar].childNodes[0].focus();
 			return(false);
@@ -163,13 +163,13 @@ function comprobarDatos(cc)
 
 		tbpar[npar]=1;
 		var codpar=tomavalorDesple(trCfg.childNodes[icodpar].childNodes[0]); // Tipo de partición
-		if(codpar==""){
+		if(codpar===""){
 			alert(TbMsg[2]);
 			trCfg.childNodes[icodpar].childNodes[0].focus();
 			return(false);
 		}	
 
-		if(codpar=="EXTENDED") {
+		if(codpar==="EXTENDED") {
 			swe=true;
 			extsize=tama;
 		} else {
@@ -180,7 +180,7 @@ function comprobarDatos(cc)
 			}
 		}
 
-		if(codpar=="CACHE" && npar!=4){
+		if(codpar==="CACHE" && npar!==4){
 			alert(TbMsg[6]);
 			trCfg.childNodes[icodpar].childNodes[0].focus();
 			return(false);
@@ -189,8 +189,8 @@ function comprobarDatos(cc)
 		var ope=tomavalorCheck(trCfg.childNodes[iope].childNodes[0]); // Formatar a realizar	
 
 		var sysfi=tomatextDesple(trCfg.childNodes[isysfi].childNodes[0]); // Sistema de ficheros
-		if(sysfi=="" || sysfi=="EMPTY" ){ // Si el sistema de fichero es vacio o empty...
-				if(ope==1){ // Si se quiere formatear...
+		if(sysfi==="" || sysfi==="EMPTY" ){ // Si el sistema de fichero es vacio o empty...
+				if(ope===1){ // Si se quiere formatear...
 					alert(TbMsg[5]);
 					trCfg.childNodes[isysfi].childNodes[0].focus();
 					return(false);
@@ -199,7 +199,7 @@ function comprobarDatos(cc)
 					sysfi="EMPTY";
 		}
 
-		if(tama==0 && codpar!="EXTENDED") {
+		if(tama===0 && codpar!=="EXTENDED") {
 			alert(TbMsg[3]);
 			trCfg.childNodes[itama].childNodes[0].focus();
 			return(false);
@@ -226,13 +226,12 @@ function comprobarDatos(cc)
 			alert(TbMsg["EXTSIZE"]);
 			return(false);
 		}
-		allpartsize+=parseInt(extsize);
+		allpartsize+=extsize;
 	}
 	// Alerta si tamaño del disco menor que las particiones 
 	if (hdsize<allpartsize) {
 		alert(TbMsg["HDSIZE"]);
 		return(false);
-
 	}
 
 	/* Compone cadena de particiones (Deja fuera la cache,

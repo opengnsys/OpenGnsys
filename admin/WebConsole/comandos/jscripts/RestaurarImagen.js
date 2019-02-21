@@ -12,6 +12,7 @@
 		var RC="@";
 		// UHU - Ahora puede ser cualquier disco
 		var disco;
+		var numequipos;
 		var atributos="";
 		var tb_conf=document.getElementById("tabla_conf");
 		var ochecks=tb_conf.getElementsByTagName('INPUT');
@@ -46,12 +47,12 @@
 				var ipfiltro=document.fdatosejecucion.filtro.value;
 
 				// Elimino los ordenadores del filtro que no estén en la tabla.
-				if (ipfiltro!=''){
+				if (ipfiltro!==''){
 					var arraytabla = iptabla.split(",");
 					var arrayfiltro =ipfiltro.split(";");
 					arrayfiltro = array_interset (arrayfiltro.sort(), arraytabla.sort());
 					ipfiltro = arrayfiltro.join(";");
-					if (ipfiltro ==''){
+					if (ipfiltro===''){
 					        alert(TbMsg["FILTER"]);
 					        return(false);
 					}
@@ -63,8 +64,8 @@
 				}
 
 				// Mensaje de aviso si protocolo UNICAST y más de un ordenador
-				if ( ( protoclonacion.value=="UNICAST" || protoclonacion.value=="UNICAST-DIRECT") && numequipos > 1 ) {
-					if (confirm(TbMsg["UNICAST"]) != true) {
+				if ( ( protoclonacion.value==="UNICAST" || protoclonacion.value==="UNICAST-DIRECT") && numequipos > 1 ) {
+					if (confirm(TbMsg["UNICAST"]) !== true) {
 						cancelar();
 						return(false);
 					}
@@ -84,32 +85,32 @@
 //________________________________________________________________________________________________________
   function comprobar_datos()
 {
-		tb_conf=document.getElementById("tabla_conf");
+		var tb_conf=document.getElementById("tabla_conf");
 		var ochecks=tb_conf.getElementsByTagName('INPUT');
 		var op=0;
 		for(var i=0;i<ochecks.length;i++){
 			if(ochecks[i].checked){
 				op++;
 				var idradio=ochecks[i].id; // Toma idemtificador del desplegable de imagenes
-				despleimagenizda=document.getElementById("despleimagen_"+idradio+"_1"); // Desplegable izda.
-				despleimagendcha=document.getElementById("despleimagen_"+idradio+"_0"); // Desplegable derecha.
+				var despleimagenizda=document.getElementById("despleimagen_"+idradio+"_1"); // Desplegable izda.
+				var despleimagendcha=document.getElementById("despleimagen_"+idradio+"_0"); // Desplegable derecha.
 				
 				var  p1=despleimagenizda.selectedIndex; // Toma índice seleccionado
 				var  p2=despleimagendcha.selectedIndex; // Toma índice seleccionado
 
-				if (p1==0 && p2==0){  
+				if (p1===0 && p2===0){
 						alert(TbMsg[0]);
 						despleimagenizda.focus();
 			      return(false)
 				}
-				if (p1==p2){  
+				if (p1===p2){
 						alert(TbMsg[6]);
 						despleimagenizda.focus();
 			      return(false)
 				}				
 			}
 		}
-		if(op==0){
+		if(op===0){
 			   alert(TbMsg[1]);
 			 return(false);
 		}

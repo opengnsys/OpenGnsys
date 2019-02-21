@@ -33,7 +33,7 @@
 
   function comprobar_datos()
 {
-	if (document.fdatos.codigo.value=="") {
+	if (document.fdatos.codigo.value==="") {
 		alert(TbMsg[1]);
 		document.fdatos.codigo.focus();
 		return(false);
