@@ -8,7 +8,7 @@ include_once("../includes/ctrlacc.php");
 // Recogemos los parametros
 $litambito=(isset($_REQUEST["litambito"])) ? $_REQUEST["litambito"] : "";
 $idambito=(isset($_REQUEST["idambito"])) ? $_REQUEST["idambito"] : "";
-$nombreambito=(isset($_REQUEST["nombreambito"])) ? $_REQUEST["nombreambito"]) : "";
+$nombreambito=(isset($_REQUEST["nombreambito"])) ? $_REQUEST["nombreambito"] : "";
 
 // Datos para el acceso a mysql
 $strcn=explode(";",$cadenaconexion);
