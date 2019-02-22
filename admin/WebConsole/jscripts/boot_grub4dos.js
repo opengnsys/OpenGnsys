@@ -72,5 +72,5 @@ function allSelect()
 			saveString = saveString + label + '|' + input[i].options[j].text + ';';
 		}
     }
-    document.forms['myForm'].listOfItems.value = saveString;
+    document.forms[0].listOfItems.value = saveString;
 }

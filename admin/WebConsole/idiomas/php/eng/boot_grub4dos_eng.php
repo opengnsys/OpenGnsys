@@ -51,3 +51,4 @@
 	$TbMsg[43]='"Save"';
 	$TbMsg[44]='Computer locator';
 	$TbMsg[45]='Scope name';
+	$TbMsg["UEFI"]='AVISO: Hay plantillas PXE que sólo son compatibles con un tipo de firmware, uefi o bios.<br>Al elegir estas plantillas la otra opción quedará configurada por defecto';

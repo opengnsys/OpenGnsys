@@ -1,8 +1,8 @@
 <?php
 //____________________________________________________________
 //
-//	Fichero de idiomas php: aulas_cat.php 
-//	Idioma: Catal‡ 
+//	Fichero de idiomas php: aulas_cat.php
+//	Idioma: Catal√†
 //_____________________________________________________________
 	$TbMsg=array();
 	$TbMsg[0]='Nou';
@@ -16,22 +16,22 @@
 	$TbMsg[8]='Arrancada Eliminada Correctament';
 	$TbMsg[9]='Selecciona Columna Arrancada';
 	$TbMsg[10]='"Mode Usuari"';
-	$TbMsg[11]='"Mode AdministraciÛ"';
+	$TbMsg[11]='"Mode Administraci√≥"';
 	$TbMsg[12]='Nom';
 	$TbMsg[13]='Acceptar';
 	$TbMsg[14]='Introdueixi un Nom de Columna';
 	$TbMsg[15]='"Renombrar"';
-	$TbMsg[16]='Cancel∑lar';
+	$TbMsg[16]='Cancel¬∑lar';
 	$TbMsg[17]='Plantilla';
 	$TbMsg[18]='Sense Plantilla';
 	$TbMsg[19]='Comandes';
-	$TbMsg[20]='DescripciÛ';
+	$TbMsg[20]='Descripci√≥';
 	$TbMsg[21]='Fitxer';
 	$TbMsg[22]='##NO-TOCAR-ESTA-LINEA ';
 	$TbMsg[23]='NO HI HA COLUMNA NOVA';
-	$TbMsg[24]='¿mbit: Centros';
-	$TbMsg[25]='¿mbit: Grup d\'aulas';
-	$TbMsg[26]='¿mbit: Grup d\'ordinadors';
+	$TbMsg[24]='√Ämbit: Centros';
+	$TbMsg[25]='√Ämbit: Grup d\'aulas';
+	$TbMsg[26]='√Ämbit: Grup d\'ordinadors';
 	$TbMsg[27]='"Incorporar ordinadors"';
 	$TbMsg[28]='"Procediments"';
 	$TbMsg[29]='"Reserves d\'aulas"';
@@ -39,15 +39,16 @@
 	$TbMsg[31]='"Pendents"';
 	$TbMsg[32]='"Denegades"';
 	$TbMsg[33]='"Consola remota"';
-	$TbMsg[34]='"ProgramaciÛ reserves"';
+	$TbMsg[34]='"Programaci√≥ reserves"';
 	$TbMsg[35]='"Operadors"';
 	$TbMsg[36]='"Eliminar Operador"';
 	$TbMsg[37]='"Afegir nou Operador"';
 	$TbMsg[38]='"Assistents"';
 	$TbMsg[39]='"Eco de Consola"';
-	$TbMsg[40]='"NetBoot avanÁat"';
+	$TbMsg[40]='"NetBoot avan√ßat"';
 	$TbMsg[41]='"Reubicar ordinadors"';
-	$TbMsg[42]='GestiÛ Arrancada AvanÁada';
+	$TbMsg[42]='Gesti√≥ Arrancada Avan√ßada';
 	$TbMsg[43]='"Guardar"';
 	$TbMsg[44]='Ubicador Ordinadors';
-	$TbMsg[45]='Nom ‡mbit';
+	$TbMsg[45]='Nom √†mbit';
+	$TbMsg["UEFI"]='AVISO: Hay plantillas PXE que s√≥lo son compatibles con un tipo de firmware, uefi o bios.<br>Al elegir estas plantillas la otra opci√≥n quedar√° configurada por defecto';

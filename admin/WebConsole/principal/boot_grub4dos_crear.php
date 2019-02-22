@@ -14,7 +14,6 @@ if (isset($_POST["idambito"])) $idambito=$_POST["idambito"];
 if (isset($_POST["nombreambito"])) $nombreambito=$_POST["nombreambito"]; 
 if (isset($_POST["opcion"])) $opcion=$_POST["opcion"];
 if (isset($_POST["opcioncrear"])) $opcioncrear=$_POST["opcioncrear"];
-$ultimonumero = isset($_POST["ultimonumero"]) ? $_POST["ultimonumero"] : "";
 $boton = isset ($_REQUEST["boton"]) ? $_REQUEST["boton"] : "";
 $confirmado = ($boton == $TbMsg[13] && ($opcioncrear == "crear" || $opcioncrear == "modificar")) ? "1" : "";
 $guarnomb = isset($_POST["nombrenuevoboot"]) ? ucfirst($_POST["nombrenuevoboot"]) : "";
@@ -65,7 +64,7 @@ if ($opcioncrear == "crear")
 				//     y me quedo con el primero
 				chdir($dirtemplates);
 				$pn=array_map("principio",glob("*"));
-				$todos=range(20,99);
+				$todos=range(21,99);
 				$ultimonumero=current(array_diff($todos,$pn));
 
 				$nombrenuevoboot=$ultimonumero.$guarnomb;

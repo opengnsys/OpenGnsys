@@ -138,7 +138,7 @@ for($i=0; $i<count($pn); $i++) {
     $nocomun="";
     $description=exec("awk 'NR==1 {print $2}' ".$dirtemplatesbios.$pn[$i]);
     // Si la plantilla no es comun, definimos si es bios o uefi
-    if ( ! array_key_exists($pn[$i],$pncomun)) {
+    if ( ! in_array($pn[$i],$pncomun)) {
         $nocomun= ($description === "") ? "(uefi)" : "(bios)";
     }
     // Si la descripción está vacía consultamos las plantillas uefi
