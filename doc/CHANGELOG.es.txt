@@ -17,7 +17,7 @@ Tickets resueltos en módulo OpenGnsys Client:
 Tickets resueltos en módulo OpenGnsys Server:
 #846	Configuración de logrotate para que incluya todos los servicios de OpenGnsys (corrección)
 #859	Gestor de los ficheros PXE duplicado
-#886	Actualización de la 1.0.6b a la 1.1.0 da errores a la hora de agregar ordenadores/aulas (no válido)
+#904	ogAdmClient se cuelga al programar una tarea para un equipo
 
 Tickets resueltos en módulo OpenGnsys Repository Server:
 #850	Problema con repositorio recién instalado (corrección)
@@ -32,7 +32,8 @@ Tickets resueltos en módulo OpenGnsys Web Admin Console:
 Tickets resueltos en módulo OpenGnsys Installer:
 #876	Problemas al actualizar desde Subversion a Git (corrección)
 #879	Función checkVersion de opengnsys_update.sh del tar.gz da error si se ejecuta sobre la misma versión de OpenGnsys (corrección)
-#880	openGnsys_update.sh no deja la revisión, solo deja 1.1.0a (corrección
+#880	openGnsys_update.sh no deja la revisión, solo deja 1.1.0a (corrección)
+#886	Actualización de la 1.0.6b a la 1.1.0 da errores a la hora de agregar ordenadores/aulas (no válido)
 
 Tickets genéricos resueltos:
 #839	Errores detectado en API REST para Remote PC (corrección)
