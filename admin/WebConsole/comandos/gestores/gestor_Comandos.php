@@ -77,7 +77,6 @@ $atributos=str_replace('$',chr(9),$atributos);
 <HTML>
 <HEAD>
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
-<BODY>
 	<SCRIPT language="javascript" src="../jscripts/comunescomandos.js"></SCRIPT>
 	<?php echo '<SCRIPT language="javascript" src="../../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>
 
@@ -179,7 +178,7 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 		$script=@urldecode($ValorParametros["scp"]);
 		if($sw_ejya=='on'){ 	
 			if ($idcomando != IDCOMANDSENDMESSAGE && $idcomando != IDCOMANDWAKEUP) {
-			    // Envio al servidor 
+			    // Envío al servidor
 			    $shidra=new SockHidra($servidorhidra,$hidraport); 
 			    if ($shidra->conectar()){ // Se ha establecido la conexión con el servidor hidra
 				$parametros.=$aplicacion;
@@ -202,7 +201,7 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 			    $resulhidra = 1;
 			}
 
-	                // Comprobamos si el comando es soportado por el nuevo ogAgent
+			// Comprobamos si el comando es soportado por el nuevo ogAgent
 			$numip=0;
 			$ogAgentNuevo = false;
 			switch ($idcomando) {
@@ -231,7 +230,7 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 					break;
 			}
 
-	                // Se envía acción al nuevo ogAgent
+			// Se envía acción al nuevo ogAgent
 			if ( $ogAgentNuevo ) {
 				// Send REST requests to new OGAgent clients.
 				$urls = array();
@@ -244,7 +243,6 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 					$urls[$ip]['url'] = "https://$ip:8000/opengnsys/$urlcomando";
 					if (isset($auxKey[$i]))  $urls[$ip]['header'] = Array("Authorization: ".$auxKey[$i]);
 					if (isset($paramsPost))  $urls[$ip]['post'] = $paramsPost;
-
 					$i++;
 				}
 				// Launch concurrent requests.
@@ -387,6 +385,8 @@ if ($resul){
 	}
 }
 ?>
+</HEAD>
+<BODY>
 </BODY>
 </HTML>	
 

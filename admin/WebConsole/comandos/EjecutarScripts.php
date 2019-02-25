@@ -26,8 +26,8 @@ if (!$cmd)
 //________________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE>Administración web de aulas</TITLE>
 <HEAD>
+	<TITLE>Administración web de aulas</TITLE>
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="./jscripts/EjecutarScripts.js"></SCRIPT>
@@ -45,8 +45,8 @@ if (!$cmd)
 	//________________________________________________________________________________________________________
 ?>			
 	<P align=center>
-	<SPAN align=center class=subcabeceras><?php echo $TbMsg[10] ?></SPAN>
-	<form  align=center name="fdatos"> 				
+	<SPAN class=subcabeceras><?php echo $TbMsg[10] ?></SPAN>
+	<form name="fdatos">
 		<table align=center  class=tabla_datos border="0" cellpadding="0" cellspacing="1">
 			<tr>
 			<th><?php echo $TbMsg[12] ?></th>

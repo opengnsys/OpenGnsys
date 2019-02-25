@@ -141,8 +141,8 @@
 	//________________________________________________________________________________________________________
 	?>
 	<HTML>
-	<TITLE>Administración web de aulas</TITLE>
 	<HEAD>
+		<TITLE>Administración web de aulas</TITLE>
 		<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 		<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 		<SCRIPT language="javascript" src="../clases/jscripts/MenuContextual.js"></SCRIPT>
@@ -175,8 +175,8 @@
 
 	$HTMLCriterios=""; 
 	$HTMLCriterios.='<TABLE class=tabla_busquedas align=center border="0">'; // Filtro de búsquedas
-	$HTMLCriterios.='	<TR HEIGHT=30>';
-	$HTMLCriterios.='		<TD style="	BORDER-BOTTOM:#5a86b5 1px solid;"colspan=2 align="center" >';
+	$HTMLCriterios.='	<TR>';
+	$HTMLCriterios.='		<TD HEIGHT="30px" style="BORDER-BOTTOM:#5a86b5 1px solid;" colspan=2 align="center">';
 	$HTMLCriterios.='			<SPAN style="FONT-FAMILY: Verdana, Arial, Helvetica, sans-serif; 
 													FONT-SIZE: 11px;COLOR:#5a86b5;FONT-WEIGHT: 700;">____ '.$TbMsg[1].'____</SPAN></TD></TR>';
 
@@ -1197,9 +1197,7 @@ function ContextualXMLComun()
 	global $EJECUCION_TAREA;
 	global $sesion;
 	
-	$layerXML="";
-	
-	$layerXML.='<ITEM';
+	$layerXML ='<ITEM';
 	$layerXML.=' alpulsar="eleccion(1,document.facciones.localaccion)"';
 	$layerXML.=' imgitem="../images/iconos/eliminar.gif"';
 	$layerXML.=' textoitem='.$TbMsg[46];
@@ -1243,5 +1241,4 @@ function ContextualXMLComun()
 	$layerXML.='</MENUCONTEXTUAL>';
 	return($layerXML);
 }
-?>
 
