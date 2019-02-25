@@ -1,0 +1,4 @@
+##NO-TOCAR-ESTA-LINEA 1hd-2partition
+root='hd0,gpt1'
+chainloader /EFI/Part-01-02/Boot/ogloader.efi
+boot

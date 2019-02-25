@@ -84,14 +84,6 @@ case "$TYPE" in
                 ogRaiseError $OG_ERR_NOTOS "$1 $2 ($TYPE, EFI)"
                 return $?
             fi
-            ### Se realiza en la postconfiguracion ¿lo volvemos a hacer aquí?
-            ## Configuramos el grub.cfg de la partición EFI
-            ## Directorio del grub en la partición de sistema
-            #for f in $MNTDIR/{,boot/}{{grubMBR,grubPARTITION}/boot/,}{grub{,2},{,efi/}EFI/*}/{menu.lst,grub.cfg}; do
-            #    [ -r $f ] && DIRGRUB=$(dirname $f)
-            #done
-            #DIRGRUB=${DIRGRUB#$MNTDIR/}
-            #ogGrubUefiConf $1 $2 $DIRGRUB || return $?
 
             # Borrar cargador guardado con la misma etiqueta.
             BOOTLABEL=$(printf "Part-%02d-%02d" $1 $2)
@@ -844,12 +836,17 @@ then
         [ -d ${SECONDSTAGE}${PREFIXSECONDSTAGE} ] &&  rm -fr ${SECONDSTAGE}${PREFIXSECONDSTAGE}
         # Reactivamos el grub con el grub.cfg original.
         grub-install --force ${EFIOPTGRUB} --root-directory=${SECONDSTAGE} $FIRSTSTAGE
+        EVAL=$?
         # Movemos el grubx64.efi
         if ogIsEfiActive; then
+            # Nombre genérico para cargador
+            mkdir ${EFISECONDSTAGE}/EFI/$EFISUBDIR/Boot
+            cp ${EFISECONDSTAGE}/EFI/$EFISUBDIR/EFI/ubuntu/grubx64.efi ${EFISECONDSTAGE}/EFI/$EFISUBDIR/Boot/ogloader.efi
+
             mv ${EFISECONDSTAGE}/EFI/$EFISUBDIR/EFI/ubuntu/grubx64.efi ${EFISECONDSTAGE}/EFI/$EFISUBDIR
             rm -rf ${EFISECONDSTAGE}/EFI/$EFISUBDIR/EFI
         fi 
-        return $?
+        return $EVAL
     fi
 fi
 
@@ -878,6 +875,10 @@ grub-install --force ${EFIOPTGRUB} --root-directory=${SECONDSTAGE}${PREFIXSECOND
 
 # Movemos el grubx64.efi
 if ogIsEfiActive; then
+    # Nombre genérico para cargador
+    mkdir ${EFISECONDSTAGE}/EFI/$EFISUBDIR/Boot
+    cp ${EFISECONDSTAGE}/EFI/$EFISUBDIR/EFI/ubuntu/grubx64.efi ${EFISECONDSTAGE}/EFI/$EFISUBDIR/Boot/ogloader.efi
+
     mv ${EFISECONDSTAGE}/EFI/$EFISUBDIR/EFI/ubuntu/grubx64.efi ${EFISECONDSTAGE}/EFI/$EFISUBDIR
     rm -rf ${EFISECONDSTAGE}/EFI/$EFISUBDIR/EFI
 fi 
@@ -970,12 +971,17 @@ then
         [ -d ${SECONDSTAGE}${PREFIXSECONDSTAGE} ] &&  rm -fr ${SECONDSTAGE}${PREFIXSECONDSTAGE}
         # Reactivamos el grub con el grub.cfg original.
         grub-install --force ${EFIOPTGRUB} --root-directory=${SECONDSTAGE} $FIRSTSTAGE
+        EVAL=$?
         # Movemos el grubx64.efi
         if ogIsEfiActive; then
+            # Nombre genérico para cargador
+            mkdir ${EFISECONDSTAGE}/EFI/$EFISUBDIR/Boot
+            cp ${EFISECONDSTAGE}/EFI/$EFISUBDIR/EFI/ubuntu/grubx64.efi ${EFISECONDSTAGE}/EFI/$EFISUBDIR/Boot/ogloader.efi
+
             mv ${EFISECONDSTAGE}/EFI/$EFISUBDIR/EFI/ubuntu/grubx64.efi ${EFISECONDSTAGE}/EFI/$EFISUBDIR
             rm -rf ${EFISECONDSTAGE}/EFI/$EFISUBDIR/EFI
         fi
-        return $?
+        return $EVAL
     fi
 fi
 
@@ -1000,6 +1006,10 @@ grub-install --force ${EFIOPTGRUB} --root-directory=${SECONDSTAGE}${PREFIXSECOND
 
 # Movemos el grubx64.efi
 if ogIsEfiActive; then
+    # Nombre genérico para cargador
+    mkdir ${EFISECONDSTAGE}/EFI/$EFISUBDIR/Boot
+    cp ${EFISECONDSTAGE}/EFI/$EFISUBDIR/EFI/ubuntu/grubx64.efi ${EFISECONDSTAGE}/EFI/$EFISUBDIR/Boot/ogloader.efi
+
     mv ${EFISECONDSTAGE}/EFI/$EFISUBDIR/EFI/ubuntu/grubx64.efi ${EFISECONDSTAGE}/EFI/$EFISUBDIR
     rm -rf ${EFISECONDSTAGE}/EFI/$EFISUBDIR/EFI
 fi

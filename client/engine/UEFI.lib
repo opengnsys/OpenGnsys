@@ -176,6 +176,8 @@ case $OSVERSION in
         [ -r $EFIDIR/$BOOTLABEL ] && rm -rf $EFIDIR/$BOOTLABEL
         mkdir -p $EFIDIR/EFI/$BOOTLABEL
         cp -r "${LOADER%/*}" $EFIDIR/EFI/$BOOTLABEL
+        # Nombre genérico para cargador
+        cp $LOADER $EFIDIR/EFI/$BOOTLABEL/Boot/ogloader.efi
         ;; 
 esac
 }
