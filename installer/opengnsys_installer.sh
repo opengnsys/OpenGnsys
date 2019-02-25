@@ -170,7 +170,7 @@ OSVERSION="${OSVERSION%%.*}"
 # Configuración según la distribución GNU/Linux (usar minúsculas).
 case "$OSDISTRIB" in
 	ubuntu|debian|linuxmint)
-		DEPENDENCIES=( subversion apache2 php php-ldap php-fpm mysql-server php-mysql isc-dhcp-server bittorrent tftp-hpa tftpd-hpa xinetd build-essential g++-multilib libmysqlclient-dev wget curl doxygen graphviz bittornado ctorrent samba rsync unzip netpipes debootstrap schroot squashfs-tools btrfs-tools procps arp-scan realpath php-curl gettext moreutils jq wakeonlan udpcast libev-dev shim-signed grub-efi-amd64-signed )
+		DEPENDENCIES=( subversion apache2 php php-ldap php-fpm mysql-server php-mysql isc-dhcp-server bittorrent tftp-hpa tftpd-hpa xinetd build-essential g++-multilib libmysqlclient-dev wget curl doxygen graphviz bittornado ctorrent samba rsync unzip netpipes debootstrap schroot squashfs-tools btrfs-tools procps arp-scan realpath php-curl gettext moreutils jq udpcast libev-dev shim-signed grub-efi-amd64-signed )
 		UPDATEPKGLIST="apt-get update"
 		INSTALLPKG="apt-get -y install --force-yes"
 		CHECKPKG="dpkg -s \$package 2>/dev/null | grep Status | grep -qw install"
@@ -263,18 +263,17 @@ TMPMYCNF=/tmp/.my.cnf.$$
 # Modificar variables de configuración tras instalar paquetes del sistema.
 function autoConfigurePost()
 {
-local f
+local f MKNETDIR
 
 # Configuraciones específicas para Samba y TFTP en Debian 6.
 [ -z "$SYSTEMD" -a ! -e /etc/init.d/$SAMBASERV ] && SAMBASERV=samba
 [ ! -e $TFTPCFGDIR ] && TFTPCFGDIR=/srv/tftp
 
-# Configuraciones específicas para SELinux permisivo en distintas versiones.
-[ -f /selinux/enforce ] && echo 0 > /selinux/enforce
-for f in /etc/sysconfig/selinux /etc/selinux/config; do
-	[ -f $f ] && perl -pi -e 's/SELINUX=enforcing/SELINUX=permissive/g' $f
+# Preparar arranque en red con Grub.
+for f in grub-mknetdir grub2-mknetdir; do
+	if which $f &>/dev/null; then MKNETDIR=$f; fi
 done
-selinuxenabled 2>/dev/null && setenforce 0 2>/dev/null
+$MKNETDIR --net-directory=$TFTPCFGDIR --subdir=grub
 }
 
 
@@ -1151,7 +1150,7 @@ function installWebConsoleApacheConf()
 	echoAndLog "${FUNCNAME}(): configuring PHP-FPM"
 	service=$PHPFPMSERV
 	$ENABLESERVICE; $STARTSERVICE
-	sockfile=$(find /run/php -name "php*.sock" -type s -print 2>/dev/null)
+	sockfile=$(find /run/php -name "php*.sock" -type s -print 2>/dev/null | tail -1)
 
 	# Activar módulos de Apache.
 	$APACHEENABLEMODS
