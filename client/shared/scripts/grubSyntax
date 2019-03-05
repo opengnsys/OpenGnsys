@@ -7,6 +7,7 @@ set -e
 #basado en scripts del paquete de grub
 #Antonio Doblas Viso
 #Universidad de Málaga
+#@version 1.1.1 - En los parámetros del kernel se sustituye el UUID por el dispositivo.
 
 DISK=
 PART=
@@ -358,6 +359,9 @@ EOF
         LKERNEL="`echo ${LINUX} | cut -d ':' -f 4`"
         LINITRD="`echo ${LINUX} | cut -d ':' -f 5`"
         LPARAMS="`echo ${LINUX} | cut -d ':' -f 6- | tr '^' ' '`"
+        # En los parámetros cambiamos el UUID por el valor de LROOT
+        UUID=$(blkid -s UUID -o value $LROOT)
+        LPARAMS="$(echo $LPARAMS | sed "s|UUID=$UUID|$LROOT|g")"
         if [ -z "${LLABEL}" ] ; then
           LLABEL="${LONGNAME}"
         fi
