@@ -37,12 +37,15 @@
 #@version 1.1.0 - Nuevo parámetro opcional con opciones de arranque del Kernel.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2015-07-15
+#@version 1.1.1 - UEFI: Permite iniciar linux recien instalados (ticket #802 #890)
+#@author  Irina Gomez, ETSII Universidad de Sevilla
+#@date    2019-03-13
 #*/ ##
 function ogBoot ()
 {
 # Variables locales.
 local PART TYPE MNTDIR PARAMS KERNEL INITRD APPEND FILE LOADER f
-local EFIDISK EFIPART EFIDIR BOOTLABEL BOOTNO DIRGRUB b
+local EFIDISK EFIPART EFIDIR BOOTLABEL BOOTLOADER BOOTNO DIRGRUB b
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -63,6 +66,8 @@ case "$TYPE" in
     Linux|Android)
         # Si no se indican, obtiene los parámetros de arranque para Linux.
         PARAMS="${3:-$(ogLinuxBootParameters $1 $2 2>/dev/null)}"
+        # Si no existe y el UEFI buscar en particion ESP
+        [ -z "$PARAMS" -a ogIsEfiActive ] && PARAMS="$(ogLinuxBootParameters $(ogGetEsp))"
         # Si no existe, buscar sistema de archivo /boot en /etc/fstab.
         if [ -z "$PARAMS" -a -e $MNTDIR/etc/fstab ]; then
             # Localizar S.F. /boot en /etc/fstab del S.F. actual.
@@ -87,14 +92,34 @@ case "$TYPE" in
 
             # Borrar cargador guardado con la misma etiqueta.
             BOOTLABEL=$(printf "Part-%02d-%02d" $1 $2)
+            BOOTLOADER="grubx64.efi"
+            # Obtener parcición EFI.
+            read -e EFIDISK EFIPART <<<"$(ogGetEsp)"
+            # TODO: Comprobamos que existe la BOOTLABEL, si no buscamos por sistema operativo
+            if [ "$(ogGetPath $EFIDISK $EFIPART EFI/$BOOTLABEL)" == "" ]; then
+                OSVERSION="$(ogGetOsVersion $1 $2)"
+                case $OSVERSION in
+                    *SUSE*)
+                       BOOTLABEL="opensuse"
+                       ;;
+                    *Fedora*)
+                       BOOTLABEL="fedora"
+                       ;;
+                    *Ubuntu*)
+                       BOOTLABEL="ubuntu"
+                       ;;
+                    *)
+                       ogRaiseError $OG_ERR_NOTFOUND "$EFIDISK $EFIPART Boot loader"; return $?
+                       ;;
+                esac
+            fi
+
+            # Crear orden de arranque (con unos valores por defecto).
             BOOTNO=$(efibootmgr -v | awk -v L=$BOOTLABEL '{if ($2==L) print $1}')
             for b in $BOOTNO; do
                 efibootmgr -B -b ${b:4:4} &>/dev/null
             done
-            # Obtener parcición EFI.
-            read -e EFIDISK EFIPART <<<"$(ogGetEsp)"
-            # Crear orden de arranque (con unos valores por defecto).
-            efibootmgr -C -d $(ogDiskToDev $EFIDISK) -p $EFIPART -L "$BOOTLABEL" -l "/EFI/$BOOTLABEL/grubx64.efi" &>/dev/null
+            efibootmgr -C -d $(ogDiskToDev $EFIDISK) -p $EFIPART -L "$BOOTLABEL" -l "/EFI/$BOOTLABEL/$BOOTLOADER" &>/dev/null
             # Marcar próximo arranque y reiniciar.
             BOOTNO=$(efibootmgr -v | awk -v L="$BOOTLABEL" '{if ($2==L) print $1}')
             [ -n "$BOOTNO" ] && efibootmgr -n ${BOOTNO:4:4} &>/dev/null
@@ -1561,13 +1586,16 @@ function ogBootLoaderDeleteEntry ()
 #@version 1.1.1 - Se incluye comentarios en codigo para autodocuemtnacion con Doxygen
 #@author  Antonio J. Doblas Viso.   Universidad de Malaga.
 #@date    2018-07-05
+#@version 1.1.1 - UEFI: Es necesario grub.cfg para detectar parametros del kernel. Si no existe se recupera backup temporalmente (ticket #802 #890)
+#@author  Irina Gomez, ETSII Universidad de Sevilla
+#@date    2019-03-13
 #*/ ##
 
 function ogBurgInstallMbr ()
 {
  
 # Variables locales.
-local PART DISK FIRSTAGE SECONSTAGE PREFIXSECONDSTAGE CHECKOS KERNELPARAM BACKUPNAME FILECFG
+local PART DISK FIRSTAGE SECONSTAGE PREFIXSECONDSTAGE CHECKOS KERNELPARAM BACKUPNAME FILECFG RECOVERBACKUP
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -1620,6 +1648,12 @@ fi
 
 #llamada a updateBootCache para que aloje la primera fase del ogLive
 updateBootCache
+
+# Si no existe el fichero grub.cfg pero sí el backup lo recupero (para UEFI)
+if [ ogIsEfiActive -a -f ${SECONDSTAGE}/boot/grub/grub.cfg$BACKUPNAME ]; then
+    [ -f ${SECONDSTAGE}/boot/grub/grub.cfg ] || mv ${SECONDSTAGE}/boot/grub/grub.cfg$BACKUPNAME ${SECONDSTAGE}/boot/grub/grub.cfg
+    RECOVERYBACKUP=TRUE
+fi
 
 #Configur la sintaxis grub para evitar menus de "recovery" en el OGLive
 echo "GRUB_DISABLE_RECOVERY=\"true\"" >> /etc/default/grub
@@ -1722,6 +1756,8 @@ EOF
 #Preparar configuración segunda etapa: crear entrada del sistema operativo
 grubSyntax "$KERNELPARAM" >> "$FILECFG" 
 
+# Si hemos recuperado el backup del grub, volvemos a la situación original
+[ "$RECOVERYBACKUP" == TRUE ] && mv ${SECONDSTAGE}/boot/grub/grub.cfg ${SECONDSTAGE}/boot/grub/grub.cfg$BACKUPNAME
 
 #Instalar el burg 
 burg-install --force --root-directory=${SECONDSTAGE} $FIRSTSTAGE 2>&1>/dev/null
