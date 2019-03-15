@@ -55,7 +55,7 @@ tbox[c] = no;
 // Se utiliza al enviar el formulario
 // Asigna como valor del campo listOfItems un listado
 // con las correspodendencias nombre plantilla - nombre equipo.
-// Version 1.1.1 - Se identifica plantilla y equipo como necesita el script setclienmode (#802)
+// Version 1.1.1 - Se identifica plantilla y equipo como necesita la función createBootMode (#802 #888)
 function allSelect()
 {
     var saveString = "";
@@ -63,14 +63,14 @@ function allSelect()
     var input = document.getElementsByTagName('select');
 
     for(var i=0; i<input.length; i++){
-        label = input[i].parentNode.id;
-	// La plantilla 00unknown no existe, no se incluye en el listado
-	if (label === "00unknown") continue;
+        // quitamos L inicial
+        patron = "L";
+        parm = input[i].name;
+        parm = parm.replace(patron,'');
 
-        for (j=0;j<input[i].length;j++)
-		{
-			saveString = saveString + label + '|' + input[i].options[j].text + ';';
-		}
+        for (j=0;j<input[i].length;j++) {
+            saveString = saveString + parm + '|' + input[i].options[j].text + ';';
+        }
     }
     document.forms[0].listOfItems.value = saveString;
 }

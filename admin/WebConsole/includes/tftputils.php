@@ -12,7 +12,8 @@ include_once("../includes/ctrlacc.php");
 include_once("../clases/AdoPhp.php");
 
 // Directorio de ficheros PXE.
-define("PXEDIR", "/opt/opengnsys/tftpboot/menu.lst");
+define("PXEDIRBIOS", "/opt/opengnsys/tftpboot/menu.lst");
+define("PXEDIRUEFI", "/opt/opengnsys/tftpboot/grub");
 
 
 /**
@@ -47,12 +48,12 @@ function clientKernelVersion () {
 
 
 /**
- *           createBootMode ($cmd, $bootopt, $hostid, $lang) 
+ *           createBootMode ($cmd, $bootopt, $hostname, $lang)
  * @brief    Crea un fichero PXE para el ordenador basado en la plantilla indicada y usando
  *           los datos almacenados en la BD.
  * @param    {Object}  cmd       Objeto de conexión a la base de datos.
  * @param    {String}  bootopt   Plantilla de arranque PXE.
- * @param    {Number}  hostid    Id. del ordenador.
+ * @param    {String}  hostname  Nombre del ordenador.
  * @param    {String}  lang      Idioma de arranque.
  * @version  1.0.5 - Primera versión, adaptada de NetBoot Avanzado (Antonio J. Doblas Viso - Universidad de Málaga)
  * @author  Ramón Gómez - ETSII Universidad de Sevilla
@@ -66,64 +67,25 @@ function clientKernelVersion () {
   * @version  1.1.0 - Se incluye el nombre del perfil hardware y se elimina el winboot (ticket #828).
  * @author   Antonio J. Doblas Viso - Universidad de Malaga
  * @date     2018-01-21 
+ * @version  1.1.1 - Se utiliza setclientmode. Gestiona plantilla bios y uefi (ticket #802 #888)
+ * @author   Irina Gómez - ETSII Universidad de Sevilla
+ * @date     2019-03-14
  */
-function createBootMode ($cmd, $bootopt, $hostid, $lang) {	
+function createBootMode ($cmd, $bootopt, $hostname, $lang) {
+	global $cadenaconexion;
+
+	// Datos para el acceso a mysql
+	$strcn=explode(";",$cadenaconexion);
+	$file=tempnam("/tmp",".server.cnf.");
+
+	// Creo fichero con datos para mysql
+	$gestor=fopen($file, "w");
+	fwrite($gestor, "USUARIO=".$strcn[1]."\nPASSWORD=".$strcn[2]."\n");
+	fwrite($gestor, "datasource=".$strcn[0]."\nCATALOG=".$strcn[3]);
+	fclose($gestor);
 
 	// Plantilla con las opciones por defecto.
 	if (empty ($bootopt))  $bootopt = "00unknown";
-
-	// Actualizar opción de arranque para el equipo.
-	$cmd->CreaParametro("@arranque",$bootopt,0);
-	$cmd->CreaParametro("@idordenador",$hostid,1);
-	$cmd->texto="UPDATE ordenadores SET arranque=@arranque WHERE idordenador=@idordenador";
-	$cmd->Ejecutar();
-
-	// Obtener información de la base de datos.
-	$cmd->texto="SELECT ordenadores.nombreordenador AS hostname, ordenadores.ip AS ip,
-			    ordenadores.mac AS mac, ordenadores.netiface AS netiface,
-			    ordenadores.oglivedir AS oglivedir,
-			    aulas.netmask AS netmask, aulas.router AS router,
-			    aulas.ntp AS ntp, aulas.dns AS dns, aulas.proxy AS proxy,
-			    aulas.nombreaula AS grupo, IFNULL(repositorios.ip, '') AS iprepo,
-			    (SELECT ipserveradm FROM entornos LIMIT 1) AS ipserveradm,
-			    menus.resolucion AS vga, perfileshard.descripcion AS hardprofile,
-			    centros.directorio, entidades.ogunit
-			FROM ordenadores 
-			JOIN aulas USING (idaula)
-			JOIN centros USING (idcentro)
-			JOIN entidades USING (identidad)
-			LEFT JOIN repositorios USING (idrepositorio)
-			LEFT JOIN menus USING (idmenu)
-			LEFT JOIN perfileshard USING (idperfilhard)
-			WHERE ordenadores.idordenador='$hostid'";
-
-	$rs=new Recordset; 
-	$rs->Comando=&$cmd; 
-	if (!$rs->Abrir())  return;
-	$rs->Primero(); 
-	$hostname=$rs->campos["hostname"];
-	$ip=$rs->campos["ip"];
-	$mac=$rs->campos["mac"];
-	$netiface=$rs->campos["netiface"];
-	$netmask=$rs->campos["netmask"];
-	$router=$rs->campos["router"];
-	$ntp=$rs->campos["ntp"];
-	$dns=$rs->campos["dns"];
-	$proxy=$rs->campos["proxy"];
-	$group=cleanString($rs->campos["grupo"]);
-	$repo=$rs->campos["iprepo"];
-	$server=$rs->campos["ipserveradm"];
-	$vga=$rs->campos["vga"];
-	$hardprofile=cleanString($rs->campos["hardprofile"]);
-	$oglivedir=$rs->campos["oglivedir"];
-	$ogunit=$rs->campos["ogunit"];
-	if ($ogunit == 0 or $rs->campos["directorio"] == null) {
-		$directorio="" ;
-	} else {
-		$directorio=$rs->campos["directorio"];
-	}
-
-	$rs->Cerrar();
 
 	// Componer código de idioma para el parámetro de arranque.
 	switch ($lang) {
@@ -138,42 +100,14 @@ function createBootMode ($cmd, $bootopt, $hostid, $lang) {
 			break;
 	}
 
-	// Componer parámetros del kernel.
-	$infohost=" LANG=$lang".
-		  " ip=$ip:$server:$router:$netmask:$hostname:$netiface:none" .
-		  " group=$group" .
-		  " ogrepo=$repo" .
-		  " oglive=$server" .
-		  " oglog=$server" .
-		  " ogshare=$server";
-	// Añadir parámetros opcionales.
-	if (! empty ($ntp))	{ $infohost.=" ogntp=$ntp"; }
-	if (! empty ($dns))	{ $infohost.=" ogdns=$dns"; }
-	if (! empty ($proxy))	{ $infohost.=" ogproxy=$proxy"; }
-	if (! empty ($hardprofile))	{ $infohost.=" hardprofile=$hardprofile"; }
-	// Comprobar si se usa el parámetro "vga" (número de 3 cifras) o "video" (cadena).
-	if (! empty ($vga)) {
-		// UHU - Se sustituye la función is_int por is_numeric, ya que al ser un string no funciona bien con is_int
-		if (is_numeric($vga) && strlen($vga) == 3) {
-			$infohost.=" vga=$vga";
-		} else {
-			$infohost.=" video=$vga";
-		}
-	}
-	if (! empty ($directorio)) { $infohost.=" ogunit=$directorio"; }
-	
-	$mac = substr($mac,0,2) . ":" . substr($mac,2,2) . ":" . substr($mac,4,2) . ":" . substr($mac,6,2) . ":" . substr($mac,8,2) . ":" . substr($mac,10,2);
-	$macfile = PXEDIR . "/01-" . str_replace(":", "-", strtoupper($mac));	
+	// Descripción plantilla PXE
+	$description=exec("awk 'NR==1 {print $2}' ".PXEDIRBIOS."/templates/".$bootopt);
+	if ($description === "") $description=exec("awk 'NR==1 {print $2}' ".PXEDIRUEFI."/templates/".$bootopt);
+	// Llamamos al script setclientmode
+	shell_exec("export LANG=$lang; /opt/opengnsys/bin/setclientmode $description $hostname PERM $file");
 
-	// Crear fichero de arranque a partir de la plantilla y los datos del cliente.
-	// UHU - si el parametro vga no existe, no se quita.
-	if (! empty ($vga)) {
-		exec("sed -e 's|vga=...||g; s|INFOHOST|$infohost|g; s|set ISODIR=.*|set ISODIR=$oglivedir|g' " . PXEDIR . "/templates/$bootopt > $macfile");
-	}
-	else{
-		exec("sed -e 's|INFOHOST|$infohost|g; s|set ISODIR=.*|set ISODIR=$oglivedir|g; s|set ISODIR=.*|set ISODIR=$oglivedir|g' " . PXEDIR . "/templates/$bootopt > $macfile");
-	}
-	chmod($macfile, 0777);
+	// Borro fichero para mysql
+	unlink($file);
 }
 
 
@@ -189,9 +123,10 @@ function deleteBootFile ($mac) {
 
 	// Obtener nombre de fichero a partir de dirección MAC.
 	$mac = strtoupper($mac);
-	$macfile = PXEDIR . "/01-" . substr($mac, 0, 2) . "-" . substr($mac, 2, 2) . "-" . substr($mac, 4, 2) . "-" . substr($mac, 6, 2) . "-" . substr($mac, 8, 2) . "-" . substr($mac, 10, 2);
+	$macfile = "/01-" . substr($mac, 0, 2) . "-" . substr($mac, 2, 2) . "-" . substr($mac, 4, 2) . "-" . substr($mac, 6, 2) . "-" . substr($mac, 8, 2) . "-" . substr($mac, 10, 2);
 	// Eliminar el fichero.
-	@unlink($macfile);
+	@unlink(PXEDIRBIOS.$macfile);
+	@unlink(PXEDIRUEFI.$macfile);
 }
 
 /**
@@ -216,7 +151,7 @@ function updateBootMode ($cmd, $idfield, $idvalue, $lang) {
 	$idvalue = mysqli_real_escape_string ($cmd->Conexion->controlador, $idvalue);
 
 	// Obtener los ordenadores asociados al aula y sus plantillas de arranque.
-	$cmd->texto = "SELECT idordenador AS hostid, arranque AS bootopt
+	$cmd->texto = "SELECT nombreordenador AS hostname, arranque AS bootopt
 			 FROM ordenadores
 			WHERE $idfield=$idvalue";
 	$rs = new Recordset;
@@ -224,11 +159,12 @@ function updateBootMode ($cmd, $idfield, $idvalue, $lang) {
 	if ($rs->Abrir()) {
 		$rs->Primero();
 		while (! $rs->EOF) {
-			$hostid=$rs->campos["hostid"];
-			if (! empty ($hostid)) {
+			$hostname=$rs->campos["hostname"];
+			if (! empty ($hostname)) {
 				$bootopt=$rs->campos["bootopt"];
+
 				// Volver a crear el fichero de arranque.
-				createBootMode ($cmd, $bootopt, $hostid, $lang);
+				createBootMode ($cmd, $bootopt, $hostname, $lang);
 			}
 			$rs->Siguiente();
 		}
@@ -261,13 +197,15 @@ function updateBootRepo ($cmd, $repoid) {
 			$mac = $rs->campos["mac"];
 			$repo = $rs->campos["iprepo"];
 			// Obtener nombre de fichero PXE a partir de la MAC del ordenador cliente.
-			$macfile = PXEDIR . "/01-" . substr($mac, 0, 2) . "-" . substr($mac, 2, 2) . "-" . substr($mac, 4, 2) . "-" . substr($mac, 6, 2) . "-" . substr($mac, 8, 2) . "-" . substr($mac, 10, 2);
+			$macfile = "/01-" . substr($mac, 0, 2) . "-" . substr($mac, 2, 2) . "-" . substr($mac, 4, 2) . "-" . substr($mac, 6, 2) . "-" . substr($mac, 8, 2) . "-" . substr($mac, 10, 2);
 			// Actualizar parámetro "ogrepo" en el fichero PXE.
-			if ($pxecode = @file_get_contents($macfile)) {
+			foreach (array (PXEDIRBIOS,PXEDIRUEFI) as $bootdir) {
+			    if ($pxecode = @file_get_contents($bootdir.$macfile)) {
 				$pxecode = preg_replace("/ogrepo=[^ ]*/", "ogrepo=$repo", $pxecode);
-				if (! @file_put_contents($macfile, $pxecode)) {
-					$erros++;
+				if (! @file_put_contents($bootdir.$macfile, $pxecode)) {
+					$errors++;
 				}
+			    }
 			}
 			$rs->Siguiente();
 		}

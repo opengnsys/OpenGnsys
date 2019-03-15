@@ -284,7 +284,7 @@ function Gestiona(){
 			if ($resul){ // Crea una tabla nodo para devolver a la página que llamó ésta
 			    $idordenador=$cmd->Autonumerico();
 			    // Crear fichero TFTP/PXE por defecto para el nuevo ordenador.
-			    createBootMode ($cmd, "", $idordenador, $idioma); 
+			    createBootMode ($cmd, "", $nombreordenador, $idioma); 
 			    // Insertar datos en el árbol de configuración.
 			    $arbolXML=SubarbolXML_ordenadores($idordenador,$nombreordenador);
 			    $baseurlimg="../images/signos"; // Url de las imagenes de signo
@@ -299,7 +299,7 @@ function Gestiona(){
 			WHERE idordenador=@idordenador";
 			$resul=$cmd->Ejecutar();
 			// Actualizar fichero TFTP/PXE a partir de la plantilla asociada.
-			createBootMode ($cmd, $arranque, $idordenador, $idioma);
+			createBootMode ($cmd, $arranque, $nombreordenador, $idioma);
 			break;
 		case $op_eliminacion :
 			$resul=EliminaOrdenadores($cmd,$idordenador,"idordenador");// Eliminación en cascada
@@ -310,7 +310,7 @@ function Gestiona(){
 			$cmd->texto="UPDATE ordenadores SET idaula=@idaula, grupoid=@grupoid WHERE idordenador=@idordenador";
 			$resul=$cmd->Ejecutar();
 			// Actualizar fichero TFTP/PXE a partir de la plantilla asociada.
-			createBootMode ($cmd, $arranque, $idordenador, $idioma);
+			createBootMode ($cmd, $arranque, $nombreordenador, $idioma);
 			break;
 		default:
 			break;

@@ -148,7 +148,6 @@ for($i=0; $i<count($pn); $i++) {
 	{$listadopxe=listadesconocido($cmd,$desconocido,$seleccion);
 		// Solo lo mostramos si existen aquipos no asignados.
 		if (isset($existe)){
-			$description=$desconocido;
 			echo "<td></td>";
 			echo "<td><font id='$description' color=red>";
 			echo $description;
