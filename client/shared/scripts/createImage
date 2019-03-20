@@ -128,7 +128,7 @@ ogCheckFs $1 $2 || exit $(ogRaiseError $OG_ERR_PARTITION "ogCheckFs $1 $2" && ec
 
 # Si es UEFI copio el cargador de arranque a la partición
 OSTYPE="$(ogGetOsType $1 $2)"
-if [ ogIsEfiActive -a "$OSTYPE" == "Windows" ] ; then
+if ogIsEfiActive && [ "$OSTYPE" == "Windows" ]; then
     ogEcho log session "[25] $MSG_HELP_ogCopyEfiBootLoader" 
     ogCopyEfiBootLoader $1 $2
     echo ogSaveImageInfo $1 $2 "$REPO" "$4"

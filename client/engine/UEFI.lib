@@ -176,7 +176,7 @@ case $OSVERSION in
         [ -r $EFIDIR/$BOOTLABEL ] && rm -rf $EFIDIR/$BOOTLABEL
         mkdir -p $EFIDIR/EFI/$BOOTLABEL
         cp -r "${LOADER%/*}" $EFIDIR/EFI/$BOOTLABEL
-        # Nombre genérico para cargador
+        # Nombre OpenGnsys para cargador
         cp $LOADER $EFIDIR/EFI/$BOOTLABEL/Boot/ogloader.efi
         ;; 
 esac
@@ -205,7 +205,7 @@ fi
 [ $# -eq 4 ] || ogRaiseError $OG_ERR_FORMAT "$FUNCNAME REPO|CACHE str_imgname int_ndisk int_npart" || return $?
 
 # Sólo se ejecuta si es UEFI
-[ ogIsEfiActive ] || return
+ogIsEfiActive || return
 
 # Parámetros de entrada
 IMGNAME="$2"

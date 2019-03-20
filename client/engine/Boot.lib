@@ -67,7 +67,7 @@ case "$TYPE" in
         # Si no se indican, obtiene los parámetros de arranque para Linux.
         PARAMS="${3:-$(ogLinuxBootParameters $1 $2 2>/dev/null)}"
         # Si no existe y el UEFI buscar en particion ESP
-        [ -z "$PARAMS" -a ogIsEfiActive ] && PARAMS="$(ogLinuxBootParameters $(ogGetEsp))"
+        [ -z "$PARAMS" ] && ogIsEfiActive && PARAMS="$(ogLinuxBootParameters $(ogGetEsp))"
         # Si no existe, buscar sistema de archivo /boot en /etc/fstab.
         if [ -z "$PARAMS" -a -e $MNTDIR/etc/fstab ]; then
             # Localizar S.F. /boot en /etc/fstab del S.F. actual.
@@ -569,7 +569,7 @@ ogDiskToDev $1 $2 || return $(ogRaiseError $OG_ERR_PARTITION; echo $?)
 let DISK=$1-1
 PART=$2	
 FILE=/tmp/temp$$
-if [ ogIsEfiActive ]; then
+if ogIsEfiActive; then
     read BOOTDISK BOOTPART <<< $(ogGetEsp)
     ogUnmount $BOOTDISK $BOOTPART || ogRaiseError $OG_ERR_PARTITION "ESP: $BOOTDISK $BOOTPART" || return $?
 
@@ -885,7 +885,7 @@ fi
 updateBootCache
 
 # Si no existe el fichero grub.cfg pero sí el backup lo recupero (para UEFI)
-if [ ogIsEfiActive -a -f ${SECONDSTAGE}/boot/grub/grub.cfg$BACKUPNAME ]; then
+if ogIsEfiActive && [ -f ${SECONDSTAGE}/boot/grub/grub.cfg$BACKUPNAME ]; then
     [ -f ${SECONDSTAGE}/boot/grub/grub.cfg ] || mv ${SECONDSTAGE}/boot/grub/grub.cfg$BACKUPNAME ${SECONDSTAGE}/boot/grub/grub.cfg
 fi
 
@@ -1025,7 +1025,7 @@ then
 fi
 
 # Si no existe el fichero grub.cfg pero sí el backup lo recupero (para UEFI)
-if [ ogIsEfiActive -a -f ${SECONDSTAGE}/boot/grub/grub.cfg$BACKUPNAME ]; then
+if ogIsEfiActive && [ -f ${SECONDSTAGE}/boot/grub/grub.cfg$BACKUPNAME ]; then
     [ -f ${SECONDSTAGE}/boot/grub/grub.cfg ] || mv ${SECONDSTAGE}/boot/grub/grub.cfg$BACKUPNAME ${SECONDSTAGE}/boot/grub/grub.cfg
 fi
 
@@ -1123,7 +1123,7 @@ else
     sed "/swap/d" ${FSTAB}.backup > ${FSTAB}
 fi
 # Si es un sistema EFI incluimos partición ESP (Si existe la modificamos)
-if [ ogIsEfiActive ]; then
+if ogIsEfiActive; then
     read EFIDISK EFIPART <<< $(ogGetEsp)
     EFIDEV=$(ogDiskToDev $EFIDISK $EFIPART)
 
@@ -1650,10 +1650,11 @@ fi
 updateBootCache
 
 # Si no existe el fichero grub.cfg pero sí el backup lo recupero (para UEFI)
-if [ ogIsEfiActive -a -f ${SECONDSTAGE}/boot/grub/grub.cfg$BACKUPNAME ]; then
+if ogIsEfiActive && [ -f ${SECONDSTAGE}/boot/grub/grub.cfg$BACKUPNAME ]; then
     [ -f ${SECONDSTAGE}/boot/grub/grub.cfg ] || mv ${SECONDSTAGE}/boot/grub/grub.cfg$BACKUPNAME ${SECONDSTAGE}/boot/grub/grub.cfg
     RECOVERYBACKUP=TRUE
 fi
+
 
 #Configur la sintaxis grub para evitar menus de "recovery" en el OGLive
 echo "GRUB_DISABLE_RECOVERY=\"true\"" >> /etc/default/grub
