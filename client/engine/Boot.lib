@@ -2017,6 +2017,39 @@ function ogBurgSetTheme  ()
 }
 
 
+#/**
+# ogRefindSetTheme int_ndiskESP int_partitionESP str_theme
+#@brief ver ogBootLoaderSetTheme
+#@see ogBootLoaderSetTheme
+#*/ ##
+function ogRefindSetTheme () {
+    local PART DIRTHEME CFGFILE
+    # Si se solicita, mostrar ayuda.
+    if [ "$*" == "help" ]; then
+        ogHelp "$FUNCNAME" "$FUNCNAME int_ndiskESP int_partitionESP str_themeName" \
+               "$FUNCNAME 1 1 ThemeBasic"
+        echo -e "\nThemes in $OGLIB/refind:\n$(ls $OGLIB/refind/themes/)"
+
+        return
+    fi
+
+    PART=$(ogMount $1 $2) || return $?
+    DIRTHEME="$PART/EFI/refind/themes"
+    CFGFILE="$PART/EFI/refind/refind.conf"
+
+    # Para utilizar ogBootLoaderSetTheme es necesario la entrada set theme_name
+    if [ -f $CFGFILE ]; then
+        sed -i '/showtools/i\set theme_name=none' $CFGFILE
+    else
+        ogRaiseError $OG_ERR_NOTFOUND "$CFGFILE" || return $?
+    fi
+    # Creamos el directorio para los temas
+    [ -d $DIRTHEME ] || mkdir $DIRTHEME
+
+    ogBootLoaderSetTheme $@
+    return $?
+}
+
 
 #/**
 # ogBootLoaderSetTheme
@@ -2027,17 +2060,22 @@ function ogBurgSetTheme  ()
 #@return  
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_PARTITION Partición errónea o desconocida (ogMount).
-#@exception OG_ERR_NOTFOUND  Fichero de configuración no encontrado: grub.cfg burg.cfg.
+#@exception OG_ERR_NOTFOUND  Fichero de configuración no encontrado: grub.cfg burg.cfg refind.conf.
 #@exception OG_ERR_NOTFOUND  Entrada deltema no encontrada en burg.cfg.
+#@exception OG_ERR_NOTFOUND  Fichero de configuración del tema no encontrado: theme.conf (sólo refind).
+#@note    El tema debe situarse en OGLIB/BOOTLOADER/themes
 #@version 1.1.0 - Primeras pruebas con Burg. grub no soportado.
 #@author  Antonio J. Doblas Viso. Universidad de Malaga
 #@date    2018-01-24
+#@version 1.1.1 - Soporta rEFInd (ticket #802 #888).
+#@author  Irina Gomez. Universidad de Sevilla
+#@date    2019-03-22
 #*/ ##
 function  ogBootLoaderSetTheme ()
 {
 
 # Variables locales.
-local FUNC PART CFGFILE THEME NEWTHEME BOOTLOADER MSG
+local FUNC PART CFGFILE THEME NEWTHEME BOOTLOADER MSG NEWTHEMECFG
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -2054,7 +2092,7 @@ FUNC="${FUNC%%\ *}"
 
 
 
-# Error si no se reciben 2 parametros.
+# Error si no se reciben 3 parametros.
 [ $# -eq 3 ] || ogRaiseError $OG_ERR_FORMAT "$FUNCNAME  int_ndiskSecondStage int_partitionSecondStage str_themeName" || return $?
 
 # Error si no puede montar sistema de archivos.
@@ -2063,18 +2101,23 @@ PART=$(ogMount $1 $2) || return $?
 case "$FUNC" in
     ogGrubSetTheme)
     	BOOTLOADER="grug"
-    	BOOTLOADERDIR="grubMBR"
+	BOOTLOADERDIR="boot/grubMBR"
         CFGFILE="$PART/boot/grubMBR/boot/grub/grub.cfg"  
         ogRaiseError $OG_ERR_FORMAT "ogGrubSetTheme not sopported" 
         return $?               
         ;;
     ogBurgSetTheme)
         BOOTLOADER="burg"
-        BOOTLOADERDIR="burg"
+        BOOTLOADERDIR="boot/burg"
         CFGFILE="$PART/boot/burg/burg.cfg"        
         ;;
+    ogRefindSetTheme)
+        BOOTLOADER="refind"
+        BOOTLOADERDIR="EFI/refind"
+	CFGFILE="$PART/EFI/refind/refind.conf"
+	;;
     *)
-        ogRaiseError $OG_ERR_FORMAT "Use ogGrubSetTheme or ogBurgSetTheme."
+        ogRaiseError $OG_ERR_FORMAT "Use ogGrubSetTheme, ogBurgSetTheme or ogRefindSetTheme."
         return $?
         ;;
 esac
@@ -2084,18 +2127,23 @@ esac
 
 # Detectamos cual es el tema asignado 
 THEME=$(grep "set theme_name=" $CFGFILE | grep ^set | cut -d= -f2)
-
 # Si no existe entrada de theme_name  nos salimos
 [ -z "$THEME" ] && (ogRaiseError $OG_ERR_NOTFOUND "theme_name in $CFGFILE" || return $?)
 
 #Actualizamos el tema del servidor a la particion
 if [ -d $OGLIB/$BOOTLOADER/themes/$NEWTHEME ]; then
-	cp -pr $OGLIB/$BOOTLOADER/themes/$NEWTHEME $PART/boot/$BOOTLOADERDIR/themes/	
+	# Para refind es necesario que exista theme.conf en el directorio del tema.
+	if [ "$BOOTLOADER" == "refind" ]; then
+	    NEWTHEMECFG="$OGLIB/$BOOTLOADER/themes/$NEWTHEME/theme.conf"
+	    [ -f $NEWTHEMECFG ] || ogRaiserError $OG_ERR_NOTFOUND "theme.conf" || return $?
+	    grep -v "^#" $NEWTHEMECFG >> $CFGFILE
+	fi
+	cp -pr $OGLIB/$BOOTLOADER/themes/$NEWTHEME $PART/$BOOTLOADERDIR/themes/
 fi
 
 #Verificamos que el tema esta en la particion
-if ! [ -d $PART/boot/$BOOTLOADERDIR/themes/$NEWTHEME ]; then
-		ogRaiseError $OG_ERR_NOTFOUND "theme_name=$NEWTHEME in $PART/boot/$BOOTLOADERDIR/themes/" || return $?
+if ! [ -d $PART/$BOOTLOADERDIR/themes/$NEWTHEME ]; then
+		ogRaiseError $OG_ERR_NOTFOUND "theme_name=$NEWTHEME in $PART/$BOOTLOADERDIR/themes/" || return $?
 fi 
 
 #Cambiamos la entrada el fichero de configuración.
@@ -2461,61 +2509,110 @@ fi
 sed -i s/gfxmode=.*$/gfxmode=$NEWRESOLUTION/g $CFGFILE
 }
 
-#/**
-#         ogRefindInstall  int_ndisk bool_autoconfig
+#         ogRefindInstall bool_autoconfig
 #@brief   Instala y actualiza el gestor rEFInd en la particion EFI
-#@param   int_ndisk
 #@param   bolean_Check__auto_config   true | false[default]
 #@return
 #@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_NOTFOUND  No se encuentra la partición ESP.
+#@exception OG_ERR_NOTFOUND  No se encuentra shimx64.efi.signed.
+#@exception OG_ERR_NOTFOUND  No se encuentra refind-install o refind en OGLIB
+#@exception OG_ERR_PARTITION No se puede montar la partición ESP.
+#@note    Refind debe estar instalado en el ogLive o compartido en OGLIB
 #@version 1.1.0 - Primeras pruebas.
 #@author  Juan Carlos Garcia.   Universidad de ZAragoza.
 #@date    2017-06-26
+#@version 1.1.1 - Usa refind-install. Obtiene partición con ogGetEsp. Configura Part-X-Y y ogLive.
+#@author  Irina Gomez. Universidad de Sevilla.
+#@date    2019-03-22
 #*/ ##
-function ogRefindInstall ()
-{
-
+function ogRefindInstall () {
 # Variables locales.
-local DISK EFIDIR CONFIG EFIPARTITIONID
-
+local CONFIG EFIDISK EFIPART EFIDEVICE EFIMNT EFIDIR SHIM DIRREFIND CFGFILE DIR OGLIVE CMDLINE
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk boolean_autoconfig " \
+    ogHelp "$FUNCNAME" "$FUNCNAME boolean_autoconfig " \
            "$FUNCNAME 1 TRUE"
     return
 fi
 
-# Error si no se recibe 1 parÃ¡metro.
-[ $# -ge 1 ] || return $(ogRaiseError $OG_ERR_FORMAT; echo $?)
+# Recogemos parametros
+CONFIG=${1:-"FALSE"}
 
+read -e EFIDISK EFIPART  <<< $(ogGetEsp)
+EFIDEVICE=$(ogDiskToDev $EFIDISK $EFIPART) || ogRaiseError $OG_ERR_NOTFOUND "ESP" || return $?
+EFIMNT=$(ogMount $EFIDISK $EFIPART) || ogRaiseError $OG_ERR_PARTITION "$MSG_ERROR mount ESP" || return $?
+EFIDIR="$EFIMNT/EFI"
+[ -d $EFIDIR ] || mkdir $EFIDIR
 
-DISK=$1
-EFIDIR=/mnt/$(ogDiskToDev $1 1 | cut -c 6-8)$1/EFI
-CONFIG=${2:-"FALSE"}
-EFIPARTITIONID=$(ogGetPartitionId $1 1)
-if [ "$EFIPARTITIONID" == "EF00" ] || [ "$EFIPARTITIONID" == "ef00" ]; then
-    cp -pr /opt/opengnsys/lib/refind ${EFIDIR}
-    case "$CONFIG" in
-        FALSE)
-        if [ -a ${EFIDIR}/ubuntu ]; then
-            echo "menuentry \"Ubuntu\" {" >> ${EFIDIR}/refind/refind.conf
-            echo "loader /EFI/ubuntu/grubx64.efi" >> ${EFIDIR}/refind/refind.conf
-            echo "icon /EFI/refind/icons/os_linux.png" >> ${EFIDIR}/refind/refind.conf
-            echo "}" >> ${EFIDIR}/refind/refind.conf
-        fi
-        if [ -a ${EFIDIR}/Microsoft ]; then
-            echo "menuentry \"Windows\" {" >> ${EFIDIR}/refind/refind.conf
-            echo "loader /EFI/Microsoft/Boot/bootmgfw.efi" >> ${EFIDIR}/refind/refind.conf
-            echo "}" >> ${EFIDIR}/refind/refind.conf
-        fi
-        ;;
-        TRUE)
-        cp  ${EFIDIR}/refind/refind.conf.auto ${EFIDIR}/refind/refind.conf
-        ;;
-    esac
+# Instalamos rEFInd. Con refind-install o copiandolo del OGLIB
+if which refind-install &>/dev/null; then
+    # Comprobamos que exista shimx64
+    SHIM=$(ogGetPath /usr/lib/shim/shimx64.efi.signed)
+    [ "$SHIM" == "" ] && return $(ogRaiseError $OG_ERR_NOTFOUND "shimx64.efi.signed")
+
+    refind-install --yes --alldrivers --usedefault $EFIDEVICE  --shim $SHIM
+
+    # Cambiamos el nombre del directorio
+    [ -d $EFIDIR/refind ] && rm -rf $EFIDIR/refind
+    mv $EFIDIR/BOOT  $EFIDIR/refind
+
+    # Desmontamos directorio temporal
+    umount /tmp/refind_install
 else
-$(ogRaiseError $OG_ERR_FORMAT; echo $?)
+    DIRREFIND=$OGLIB/refind
+    [ -d $DIRREFIND ] || ogRaiseError $OG_ERR_NOTFOUND "refind-install or $DIRREFIND" || return $?
+    cp -r $DIRREFIND $EFIDIR
+fi
+
+# Configuramos rEFInd si es necesario
+if [ "$CONFIG" == "FALSE" ]; then
+    # Renombramos la configuración por defecto
+    mv  ${EFIDIR}/refind/refind.conf ${EFIDIR}/refind/refind.conf.auto
+
+    # Creamos nueva configuración
+    CFGFILE="${EFIDIR}/refind/refind.conf"
+    echo "timeout 20" > $CFGFILE
+    echo "showtools reboot, shutdown" >> $CFGFILE
+    echo -e "scanfor manual\n" >> $CFGFILE
+    if [ -a ${EFIDIR}/Microsoft ]; then
+        echo "menuentry \"Windows\" {" >> $CFGFILE
+        echo "    loader /EFI/Microsoft/Boot/bootmgfw.efi" >> $CFGFILE
+        echo "    icon /EFI/refind/icons/os_win8.png" >> $CFGFILE
+        echo "}" >> $CFGFILE
+    fi
+    if [ -a ${EFIDIR}/ubuntu ]; then
+        echo "menuentry \"Ubuntu\" {" >> $CFGFILE
+        echo "    loader /EFI/ubuntu/grubx64.efi" >> $CFGFILE
+        echo "    icon /EFI/refind/icons/os_ubuntu.png" >> $CFGFILE
+        echo "}" >> $CFGFILE
+    fi
+    for DIR in $(ls -d /mnt/sda1/EFI/Part-*-* 2>/dev/null); do
+        echo "menuentry \"${DIR##*/}\" {" >> $CFGFILE
+        echo "    loader /EFI/${DIR##*/}/Boot/ogloader.efi" >> $CFGFILE
+        [ -f $DIR/Boot/bootmgfw.efi ] && echo "    icon /EFI/refind/icons/os_win8.png" >> $CFGFILE
+        [ -f $DIR/grubx64.efi ] && echo "    icon /EFI/refind/icons/os_linux.png" >> $CFGFILE
+        echo "}" >> $CFGFILE
+    done
+    ogMountCache &>/dev/null
+    OGLIVE=$(find $OGCAC -name ogvmlinuz|head -1)
+    if [ "$OGLIVE" != "" ]; then
+        read -e CACDISK CACPART <<< $(ogFindCache)
+        # Obtenemos parametros del kernel y sustituimos root
+        CMDLINE="$(cat /proc/cmdline)"
+        CMDLINE="root=$(ogDiskToDev $CACDISK $CACPART) ${CMDLINE#*ogvmlinuz}"
+        echo "menuentry \"OpenGnsys Client\" {" >> $CFGFILE
+        echo "    volume CACHE" >> $CFGFILE
+        echo "    ostype Linux" >> $CFGFILE
+        echo "    loader /boot/$(basename ${OGLIVE%/*})/ogvmlinuz" >> $CFGFILE
+        echo "    initrd /boot/$(basename ${OGLIVE%/*})/oginitrd.img" >> $CFGFILE
+        echo "    options \"$CMDLINE\"" >> $CFGFILE
+        echo "    icon /EFI/refind/icons/os_unknown.png" >> $CFGFILE
+        echo "}" >> $CFGFILE
+
+        # Ponemos ogLive como la entrada por defecto
+        sed -i '/showtools/i\default_selection "OpenGnsys Client"' $CFGFILE
+    fi
 fi
 }
-
