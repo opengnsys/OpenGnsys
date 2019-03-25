@@ -2137,6 +2137,8 @@ if [ -d $OGLIB/$BOOTLOADER/themes/$NEWTHEME ]; then
 	    NEWTHEMECFG="$OGLIB/$BOOTLOADER/themes/$NEWTHEME/theme.conf"
 	    [ -f $NEWTHEMECFG ] || ogRaiserError $OG_ERR_NOTFOUND "theme.conf" || return $?
 	    grep -v "^#" $NEWTHEMECFG >> $CFGFILE
+	    # eliminamos "set theme" es de grub y no de refind
+	    sed -i '/theme_name/d' $CFGFILE
 	fi
 	cp -pr $OGLIB/$BOOTLOADER/themes/$NEWTHEME $PART/$BOOTLOADERDIR/themes/
 fi
@@ -2147,7 +2149,7 @@ if ! [ -d $PART/$BOOTLOADERDIR/themes/$NEWTHEME ]; then
 fi 
 
 #Cambiamos la entrada el fichero de configuración.
-sed --regexp-extended -i  s/"$THEME"/"$NEWTHEME"/g $CFGFILE
+sed --regexp-extended -i  s/"set theme_name=$THEME"/"set theme_name=$NEWTHEME"/g $CFGFILE
 
 
 }
