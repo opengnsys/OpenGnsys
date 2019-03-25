@@ -52,3 +52,4 @@
 	$TbMsg[44]='Ubicador Ordinadors';
 	$TbMsg[45]='Nom àmbit';
 	$TbMsg["UEFI"]='AVISO: Hay plantillas PXE que sólo son compatibles con un tipo de firmware, uefi o bios.<br>Al elegir estas plantillas la otra opción quedará configurada por defecto';
+	$TbMsg["ERR_DUPLICADO"]='ERROR: El nombre o la descripción de la plantilla están duplicados';

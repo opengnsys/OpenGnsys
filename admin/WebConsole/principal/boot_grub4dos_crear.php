@@ -21,6 +21,7 @@ $admin = isset($_POST["modo"]) ? $_POST["modo"] : "";
 $selectfile = isset($_POST["selectfile"]) ? $_POST["selectfile"] : "";
 $boottype = isset($_POST["boottype"]) ? $_POST["boottype"] : "";
 $dirtemplates= ( $boottype === "uefi" ) ? "/var/lib/tftpboot/grub/templates/"  : "/var/lib/tftpboot/menu.lst/templates/";
+$otrodirtemplates= ( $boottype === "uefi" ) ? "/var/lib/tftpboot/menu.lst/templates/" : "/var/lib/tftpboot/grub/templates/";
 $descripcion = "";
 $modo = "";
 ?>
@@ -47,37 +48,49 @@ $modo = "";
 
 if ($opcioncrear == "crear")
 	{
-	//$confirmado=$_POST["confirmado"];
 	if ($confirmado == 1)
 		{	
-				$descripfich=$guarnomb;$descripfich=preg_replace("/[^A-Za-z0-9]/", "-", $descripfich);
-				$guarnomb=preg_replace("/[^A-Za-z0-9]/", "", $descripfich);
-
+			$descripfich=preg_replace("/[^A-Za-z0-9]/", "-", $guarnomb);
+			$guarnomb=preg_replace("/[^A-Za-z0-9]/", "", $descripfich);
+			$action="./boot_grub4dos.php";
 
 			if($guarnomb === "") {
+				// Mensaje de error si no ha incluido descripción
 				$action="./boot_grub4dos_crear.php";
 				$mensaje="<br><br><SPAN align=center class=subcabeceras>".$TbMsg[14]."</span>";
 
 			} else {
+				// Nombre archivo: Si para el otro tipo de plantillas existe un fichero con igual descripción uso el nombre.
+				$nombrenuevoboot=exec("grep -i -m 1 \"^##NO-TOCAR-ESTA-LINEA[[:blank:]]*$descripfich$\" $otrodirtemplates* |awk -F: '{print $1}'");
+				if (isset($nombrenuevoboot) && $nombrenuevoboot != "") {
+					$nombrenuevoboot=basename($nombrenuevoboot);
+				} else {
+					// Nombre archivo: numDescripción
+					// número: a todos los números posibles le quito los ya usados y me quedo con el primero
+					chdir($dirtemplates);
+					$pn=array_map("principio",glob("*"));
+					$todos=range(21,99);
+					$ultimonumero=current(array_diff($todos,$pn));
 
-				// ultimo número: a todos los números posibles le quito los ya usados
-				//     y me quedo con el primero
-				chdir($dirtemplates);
-				$pn=array_map("principio",glob("*"));
-				$todos=range(21,99);
-				$ultimonumero=current(array_diff($todos,$pn));
+					$nombrenuevoboot=$ultimonumero.$guarnomb;
+				}
 
-				$nombrenuevoboot=$ultimonumero.$guarnomb;
-				$parametrosnuevoboot=$_POST["parametrosnuevoboot"];
 				$nuevoboot = $dirtemplates.$nombrenuevoboot;
 
-				$fp = fopen($nuevoboot, "w");
-				$string = $TbMsg[22].$descripfich."\n".$parametrosnuevoboot;
-				$write = fputs($fp, $string);
-				fclose($fp);
+				// Comprobamos que no exista
+				if ( file_exists($nuevoboot)) {
+					$mensaje=$TbMsg["ERR_DUPLICADO"]."<br><br><SPAN align=center class=subcabeceras>".$nombrenuevoboot." - '".$guarnomb."' ($boottype)</span>";
+				} else {
+					// Creo plantilla
+					$parametrosnuevoboot=$_POST["parametrosnuevoboot"];
 
-				$action="./boot_grub4dos.php";
-				$mensaje=$TbMsg[6]."<br><br><SPAN align=center class=subcabeceras>".$descripfich."</span>";
+					$fp = fopen($nuevoboot, "w");
+					$string = $TbMsg[22].$descripfich."\n".$parametrosnuevoboot;
+					$write = fputs($fp, $string);
+					fclose($fp);
+
+					$mensaje=$TbMsg[6]."<br><br><SPAN align=center class=subcabeceras>".$descripfich."</span>";
+				}
 			}
 			?>
 						<form name="crearranque" method="post" action="<?php echo $action ?>">
