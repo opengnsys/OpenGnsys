@@ -81,6 +81,14 @@ esac
 
 TMPFILE=/tmp/sfdisk$$
 DISK=$(ogDiskToDev $NDSK) || return $?
+
+ # PATCH Para discos nvme la particion debe ser p1, p2, etc...en lugar de 1,2, sino falla sfdisk
+NVME_PREFIX=""
+if [[ $DISK == *"nvme"* ]]; then
+        NVME_PREFIX="p"
+fi
+
+
 END=$[$(ogGetLastSector $NDSK 2>/dev/null)]  # Sector final del disco.
 SIZE=$[$SIZECACHE*2]                            # Tamaño en sectores de 512 B.
 # Inicio partición cache según el disco tenga sectores de 4k o menores
@@ -127,7 +135,7 @@ case "$(ogGetPartitionTableType $NDSK)" in
         # Salvamos la configuración de las particiones e incluimos la cache.
         trap "rm -f $TMPFILE" 1 2 3 9 15
         sfdisk --dump $DISK | grep -v $DISK$PART > $TMPFILE
-        echo  "$DISK$PART : start= $START, size= $SIZE, Id=$ID" >> $TMPFILE
+        echo  "$DISK$NVME_PREFIX$PART : start= $START, size= $SIZE, Id=$ID" >> $TMPFILE
         # Ordenamos las líneas de los dispositivos
         UNIT=$(grep unit $TMPFILE)
         grep ^/dev $TMPFILE|sort -o $TMPFILE
