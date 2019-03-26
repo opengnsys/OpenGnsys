@@ -850,7 +850,7 @@ if ogIsEfiActive; then
     # Borramos la configuración anterior
     [ -d ${EFISECONDSTAGE}/EFI/$EFISUBDIR ] && rm -rf ${EFISECONDSTAGE}/EFI/$EFISUBDIR
     mkdir -p ${EFISECONDSTAGE}/EFI/$EFISUBDIR/Boot
-    EFIOPTGRUB=" --target x86_64-efi --efi-directory=${EFISECONDSTAGE}/EFI/$EFISUBDIR "
+    EFIOPTGRUB=" --no-nvram --target x86_64-efi --efi-directory=${EFISECONDSTAGE}/EFI/$EFISUBDIR "
 else 
     EFIOPTGRUB=""
 fi 
@@ -995,7 +995,7 @@ if ogIsEfiActive; then
     # Borramos la configuración anterior
     [ -d ${EFISECONDSTAGE}/EFI/$EFISUBDIR ] && rm -rf ${EFISECONDSTAGE}/EFI/$EFISUBDIR
     mkdir -p ${EFISECONDSTAGE}/EFI/$EFISUBDIR/Boot
-    EFIOPTGRUB=" --target x86_64-efi --efi-directory=${EFISECONDSTAGE}/EFI/$EFISUBDIR "
+    EFIOPTGRUB=" --no-nvram --target x86_64-efi --efi-directory=${EFISECONDSTAGE}/EFI/$EFISUBDIR "
 else
     EFIOPTGRUB=""
 fi

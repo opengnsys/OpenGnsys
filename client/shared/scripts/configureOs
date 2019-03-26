@@ -73,8 +73,6 @@ case "$OSTYPE" in
         # Si es UEFI copio el cargador de arranque a la partición EFI
         if ogIsEfiActive; then
             ogRestoreEfiBootLoader $1 $2
-            # Configurar el boot sector de la partición Windows.
-            ogFixBootSector $(ogGetEsp)
         else
             # Configurar el boot sector de la partición Windows.
             ogFixBootSector $1 $2
