@@ -4,7 +4,7 @@
 #@brief   Librería o clase Disk
 #@class   Disk
 #@brief   Funciones para gestión de discos y particiones.
-#@version 1.1.0
+#@version 1.1.1
 #@warning License: GNU GPLv3+
 #*/
 
@@ -47,7 +47,8 @@ timeout -k 5s -s KILL 3s $(which parted) "$@"
 function ogCreatePartitions ()
 {
 # Variables locales.
-local ND DISK PTTYPE PART SECTORS START SIZE TYPE CACHEPART IODISCO IOSIZE CACHESIZE EXTSTART EXTSIZE tmpsfdisk
+local ND DISK PTTYPE PART SECTORS START SIZE TYPE CACHEPART IODISCO IOSIZE CACHESIZE
+local EXTSTART EXTSIZE NVME_PREFIX tmpsfdisk
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk str_parttype:int_partsize ..." \
@@ -402,7 +403,7 @@ esac
 function ogDevToDisk ()
 {
 # Variables locales.
-local CACHEFILE DEV PART d n
+local CACHEFILE DEV PART NVME_PREFIX d n
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME path_device | LABEL=str_label | UUID=str_uuid" \

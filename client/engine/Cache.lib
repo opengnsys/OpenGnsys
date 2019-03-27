@@ -4,7 +4,7 @@
 #@brief   Librería o clase Cache
 #@class   Cache
 #@brief   Funciones para gestión de la caché local de disco.
-#@version 1.1.0
+#@version 1.1.1
 #@warning License: GNU GPLv3+
 #*/
 
@@ -44,7 +44,8 @@
 function ogCreateCache ()
 {
 # Variables locales.
-local FINDCACHE IOSIZE NDSK SIZECACHE PART DISK START END ENDPREVPART SIZE MINSIZE MAXSIZE PTTYPE ID TMPFILE
+local FINDCACHE IOSIZE NDSK SIZECACHE PART DISK START END ENDPREVPART SIZE MINSIZE MAXSIZE
+local PTTYPE ID TMPFILE NVME_PREFIX
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME [int_ndisk [int_npart]] int_partsize" \
