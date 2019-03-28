@@ -8,6 +8,7 @@ set -e
 #Antonio Doblas Viso
 #Universidad de Málaga
 #@version 1.1.1 - En los parámetros del kernel se sustituye el UUID por el dispositivo.
+#@version 1.1.1 - Detecta cargador de Windows en directorio Part-xx-yy dentro de ESP (#802 #888)
 
 DISK=
 PART=
@@ -32,7 +33,13 @@ fi
 grub_probe=${grub_probe:-$OGBIN/grub-probe1.99_$(arch)}
 
 #librerias del osProber para kernel antiguos: detecta e identifica sistema operativos.
-grub-install --version | grep 1.99 && cp -r /opt/opengnsys/lib/os-probes/* /usr/lib/os-probes/
+if grub-install --version | grep 1.99 ; then
+    cp -r /opt/opengnsys/lib/os-probes/* /usr/lib/os-probes/
+else
+    # Librería os-probe para cargador de microsoft en dir part-x-y (uefi)
+    OSPROBE_MS_PART="/opt/opengnsys/lib/os-probes/mounted/efi/31part-x-y"
+    [ -f $OSPROBE_MS_PART ] && cp $OSPROBE_MS_PART /usr/lib/os-probes/mounted/efi
+fi
 
 
 #Autoreconocimiento del ogLive en cache
@@ -339,6 +346,24 @@ EOF
 
       cat <<EOF
 	chainloader +1
+}
+EOF
+    ;;
+    efi)
+
+        found_other_os=1
+        EFIPATH=${DEVICE#*@}
+        DEVICE=${DEVICE%@*}
+        onstr="$(gettext_printf "(on %s)" "${DEVICE}")"
+      cat << EOF
+menuentry '$(echo "${LONGNAME} $onstr" | grub_quote)' --class windows --class os \$menuentry_id_option 'osprober-efi-$(grub_get_device_id "${DEVICE}")' {
+EOF
+      save_default_entry | sed -e "s/^/\t/"
+#ADV      prepare_grub_to_access_device ${DEVICE} | sed -e "s/^/\t/"
+      OG_prepare_grub_to_access_device ${DEVICE} | sed -e "s/^/\t/"
+
+      cat <<EOF
+        chainloader ${EFIPATH}
 }
 EOF
     ;;

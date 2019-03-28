@@ -846,7 +846,7 @@ if ogIsEfiActive; then
         ogFormat $EFIDISK $EFIPART FAT32
         EFISECONDSTAGE=$(ogMount $EFIDISK $EFIPART) || ogRaiseError $OG_ERR_PARTITION "ESP" || return $?
     fi
-    EFISUBDIR=$(printf "Part-%02d-%02d" $DISK $PART)
+    EFISUBDIR="grub"
     # Borramos la configuración anterior
     [ -d ${EFISECONDSTAGE}/EFI/$EFISUBDIR ] && rm -rf ${EFISECONDSTAGE}/EFI/$EFISUBDIR
     mkdir -p ${EFISECONDSTAGE}/EFI/$EFISUBDIR/Boot
@@ -1586,16 +1586,13 @@ function ogBootLoaderDeleteEntry ()
 #@version 1.1.1 - Se incluye comentarios en codigo para autodocuemtnacion con Doxygen
 #@author  Antonio J. Doblas Viso.   Universidad de Malaga.
 #@date    2018-07-05
-#@version 1.1.1 - UEFI: Es necesario grub.cfg para detectar parametros del kernel. Si no existe se recupera backup temporalmente (ticket #802 #890)
-#@author  Irina Gomez, ETSII Universidad de Sevilla
-#@date    2019-03-13
 #*/ ##
 
 function ogBurgInstallMbr ()
 {
  
 # Variables locales.
-local PART DISK FIRSTAGE SECONSTAGE PREFIXSECONDSTAGE CHECKOS KERNELPARAM BACKUPNAME FILECFG RECOVERBACKUP
+local PART DISK FIRSTAGE SECONSTAGE PREFIXSECONDSTAGE CHECKOS KERNELPARAM BACKUPNAME FILECFG
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -1648,13 +1645,6 @@ fi
 
 #llamada a updateBootCache para que aloje la primera fase del ogLive
 updateBootCache
-
-# Si no existe el fichero grub.cfg pero sí el backup lo recupero (para UEFI)
-if ogIsEfiActive && [ -f ${SECONDSTAGE}/boot/grub/grub.cfg$BACKUPNAME ]; then
-    [ -f ${SECONDSTAGE}/boot/grub/grub.cfg ] || mv ${SECONDSTAGE}/boot/grub/grub.cfg$BACKUPNAME ${SECONDSTAGE}/boot/grub/grub.cfg
-    RECOVERYBACKUP=TRUE
-fi
-
 
 #Configur la sintaxis grub para evitar menus de "recovery" en el OGLive
 echo "GRUB_DISABLE_RECOVERY=\"true\"" >> /etc/default/grub
@@ -1756,9 +1746,6 @@ EOF
 
 #Preparar configuración segunda etapa: crear entrada del sistema operativo
 grubSyntax "$KERNELPARAM" >> "$FILECFG" 
-
-# Si hemos recuperado el backup del grub, volvemos a la situación original
-[ "$RECOVERYBACKUP" == TRUE ] && mv ${SECONDSTAGE}/boot/grub/grub.cfg ${SECONDSTAGE}/boot/grub/grub.cfg$BACKUPNAME
 
 #Instalar el burg 
 burg-install --force --root-directory=${SECONDSTAGE} $FIRSTSTAGE 2>&1>/dev/null
