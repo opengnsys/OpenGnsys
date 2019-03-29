@@ -1,4 +1,0 @@
-##NO-TOCAR-ESTA-LINEA OpenSuse
-root='hd0,gpt1'
-chainloader /EFI/opensuse/grubx64.efi
-boot

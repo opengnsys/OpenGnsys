@@ -1,4 +1,4 @@
-##NO-TOCAR-ESTA-LINEA MBR
+##NO-TOCAR-ESTA-LINEA 1hd
 timeout 1
 title  MBR
 chainloader (hd0)+1

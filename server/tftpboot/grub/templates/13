@@ -1,4 +1,0 @@
-##NO-TOCAR-ESTA-LINEA 1hd-3partition 
-root='hd0,gpt1'
-chainloader /EFI/Part-01-03/Boot/ogloader.efi
-boot

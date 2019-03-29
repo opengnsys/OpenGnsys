@@ -1,4 +1,0 @@
-##NO-TOCAR-ESTA-LINEA Fedora
-root='hd0,gpt1'
-chainloader /EFI/fedora/grubx64.efi
-boot

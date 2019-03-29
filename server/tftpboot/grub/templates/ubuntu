@@ -1,4 +1,0 @@
-##NO-TOCAR-ESTA-LINEA Ubuntu
-root='hd0,gpt1'
-chainloader /EFI/ubuntu/grubx64.efi
-boot

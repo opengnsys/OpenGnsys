@@ -1,4 +1,0 @@
-##NO-TOCAR-ESTA-LINEA Windows
-root='hd0,gpt1'
-chainloader /EFI/Microsoft/Boot/bootmgfw.efi
-boot
