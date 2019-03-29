@@ -305,9 +305,11 @@ done
 
 # TFTP
 echo "   * Guardamos los ficheros PXE de los clientes."
-mv $OPENGNSYS/tftpboot/menu.lst $OPENGNSYS/tftpboot/menu.lst-$DATE
-cp -r $TMPDIR/menu.lst  $OPENGNSYS/tftpboot
-chown -R www-data:www-data $OPENGNSYS/tftpboot/menu.lst
+for BOOTLOADER in menu.lst grub; do
+    mv $OPENGNSYS/tftpboot/$BOOTLOADER $OPENGNSYS/tftpboot/$BOOTLOADER-$DATE
+    cp -r $TMPDIR/$BOOTLOADER  $OPENGNSYS/tftpboot
+    chown -R www-data:www-data $OPENGNSYS/tftpboot/$BOOTLOADER
+done
 
 # Configuración de los clientes
 echo "   * Guardamos la configuración de los clientes."

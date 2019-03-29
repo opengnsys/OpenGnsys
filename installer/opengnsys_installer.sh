@@ -1440,6 +1440,7 @@ function clientCreate()
 			oglivecli install $FILENAME
 	# Adaptar permisos.
 	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/tftpboot/menu.lst
+	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/tftpboot/grub
 
 	echoAndLog "${FUNCNAME}(): Client generation success"
 }
