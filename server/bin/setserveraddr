@@ -1,0 +1,149 @@
+#!/bin/bash
+# setserveraddr: modifica los ficheros de configuración para asignar los valores
+#	de la interfaz de red solicitada.
+# Nota:	se enlazan los ficheros a los predefinidos detectados para la interfaz.
+# Uso:	setserveraddr iface
+# Autor: Ramon Gomez - Univ. Sevilla
+# Fecha: 2011-01-25
+# Versión: 1.0.5 - Regenerar ficheros de configuración.
+# Autor: Ramon Gomez - Univ. Sevilla
+# Fecha: 2014-06-06
+
+
+# Variables globales.
+PROG="$(basename $0)"
+
+# Comprobar parámetros.
+if [ $# -ne 1 ]; then
+	echo "$PROG: Incorrect operand. Format: $PROG interface" >&2
+	exit 1
+fi
+if [ "$USER" != "root" ]; then
+	echo "$PROG: Need to be root." >&2
+	exit 1
+fi
+
+# Aviso informando de que los clientes iniciados pueden quedarse colgados.
+read -p "WARNING: initiated clients can hang. Continue? (y/n): " ANSWER
+if [ "${ANSWER^^}" != "Y" ]; then
+	echo "Operation canceled."
+	exit 0
+fi
+
+# Detectar la interfaz de red.
+DEVICES=$(ip -o link show up|awk -F: '$2!~/lo/ {print $2}')
+for DEV in $DEVICES; do
+	# Si se encuentra la interfaz de red, obtener su dirección IP.
+	[ "$DEV" == "$1" ] && SERVERIP=$(ip -o addr show dev $DEV | awk '$3~/inet$/ {sub (/\/.*/, ""); print ($4)}')
+done
+
+# Comprobar si se ha detectado dirección IP.
+if [ -n "$SERVERIP" ]; then
+	# Ficheros temporales.
+	tmpfile=$(mktemp /tmp/og.XXXXX)
+	MYCNF=$(mktemp /tmp/.my.cnf.XXXXX)
+	trap "rm -f $tmpfile $MYCNF" 1 2 3 6 9 15
+
+	# Comprobar si hay que modificar la configuración de DHCP.
+	CHANGE=0
+	for f in /etc/{dhcp,hcp3}/dhcpd.conf; do
+		if [ -f $f ]; then
+			# Cambiar el parámetro "next-server" de DHCP.
+			file="${f/./-$1.}"
+			sed -e "s/next-server.*/next-server $SERVERIP;/" \
+			    -e "s/option routers ;/option routers ${SERVERIP%.*}.1;/" $file >$tmpfile
+			# Copiar el fichero y enlazarlo si hay cambios.
+			if [ ! $f -ef $file ] || ! diff -q $tmpfile $file &>/dev/null; then
+				mv $tmpfile $file
+				chmod 644 $file
+				ln -f $file $f
+				CHANGE=1
+			fi
+		fi
+	done
+	# Si ha cambiado la configuración, reiniciar DHCP.
+	if [ $CHANGE == 1 ]; then
+		for f in /etc/init.d/{isc-dhcp-server,dhcp3-server,dhcpd}; do
+			[ -x $f ] && $f restart
+		done
+	else
+		echo "DHCP configuration has not changed."
+	fi
+
+	# Guardar la IP anterior del repositorio.
+	OPENGNSYS=/opt/opengnsys
+	source $OPENGNSYS/etc/ogAdmRepo.cfg
+	OLDSERVERIP=$IPlocal
+
+	# Comprobar si hay que modificar la configuración de OpenGnsys.
+	CHANGE=0
+	# Procesar los ficheros de configuración de OpenGnsys.
+	for f in $OPENGNSYS/{etc/{ogAdmServer,ogAdmRepo,ogAdmAgent}.cfg,www/controlacceso.php,client/etc/ogAdmClient.cfg}; do
+		# Error si no existe algún fichero de configuración.
+		if [ ! -f $f ]; then
+			echo "$PROG: File $file does not exist." >&2
+			exit 2
+		fi
+		# Cambiar la IP del servidor:
+		# - variables  ServidorAdm  e  IPlocal,
+		# - servidor o IP en URLs excepto si contienen "localhost".
+		sed -e "s,ServidorAdm=.*,ServidorAdm=$SERVERIP," \
+		    -e "s,IPlocal=.*,IPlocal=$SERVERIP," \
+		    -e "s,UrlMenu=https?://\([^/]*\)/\(.*\),UrlMenu=https://$SERVERIP/\2," \
+		    -e '/localhost/!s,https\?://[^/]*/\(.*\),https://'$SERVERIP'/\1,' $f >$tmpfile
+		file="${f/./-$1.}"
+		# Si se usa otro interfaz o cambian los datos de red; ...
+		if [ ! $f -ef $file ] || ! diff -q $tmpfile $file &>/dev/null; then
+			# Copiar el fichero y enlazarlo.
+			cp $tmpfile $file
+			ln -f $file $f
+			CHANGE=1
+		fi
+	done
+
+	# Si ha cambiado la configuración, reiniciar OpenGnsys y actualizar la BD.
+	if [ $CHANGE == 1 ]; then
+		/etc/init.d/opengnsys restart
+		source $OPENGNSYS/etc/ogAdmServer.cfg
+		# Componer fichero con credenciales de conexión.  
+ 		cat << EOT > $MYCNF
+[client]
+user=$USUARIO
+password=$PASSWORD
+EOT
+		# Actualizar IP del servidor en la BD.
+		mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -e \
+			 "UPDATE entornos
+			     SET ipserveradm='$SERVERIP'
+			   WHERE identorno=1"
+
+		# Actualizar IP del repositorio en la BD.
+		mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -e \
+			 "UPDATE repositorios
+			     SET ip='$SERVERIP'
+			   WHERE ip='$OLDSERVERIP'"
+
+		# Mostrar instrucciones a realizar tras la ejecución.
+		cat << EOT
+Default server interface set to: $1 ($SERVERIP)
+
+Manual tasks:
+Check DHCP configuration file and restart service, if needed.
+Log-in as Web Console organization user.
+ - Check URLs in all menus.
+ - Run Advanced Netboot in all rooms.
+
+EOT
+	else
+		# Mensaje indicando que no se han cambiado datos.
+		echo "Default interface has not changed: $1"
+	fi
+else
+	# Error: interfaz de red no encontrado.
+	echo "$PROG: Network device not found. Format: $PROG interface" >&2
+	exit 1
+fi
+
+# Eliminar ficheros temporales.
+rm -f $tmpfile $MYCNF
+

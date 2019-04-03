@@ -1,0 +1,6 @@
+Separamos los test que no modifican el cliente y los que sí lo hacen (pueden modificar la partitiones, imagenes, etc) en dos directorios distintos. 
+
+Ademas los numeramos diferentes por si los queremos mover de sitio:
+	Los test acabados en 1x no modifican nada
+	Los test acabados en 2x modifican el cliente
+

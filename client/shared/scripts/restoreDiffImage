@@ -1,0 +1,142 @@
+#!/bin/bash
+#/**
+#         restoreDiffImage
+#@brief Script de ejemplo para restaurar una imagen diferencial.
+#@brief Se usa como base para el programa de restauración de imágenes de OpenGnsys Admin).
+#@param 1 REPO|CACHE
+#@param 2 imagen basica
+#@param 3 imagen diferencial
+#@param 4 disco 
+#@param 5 particion 
+#@param 6 protocolo 
+#@param 7 opciones protocolo
+#@return 
+#@exception OG_ERR_FORMAT   # 1 formato incorrecto.
+#@exception OG_ERR_NOTFOUND # 2 Fichero o dispositivo no encontrado
+#@exception OG_ERR_PARTITION# 3 Error en partición de disco.
+#@exception OG_ERR_LOCKED   # 4 Partición o fichero bloqueado.
+#@exception updateCache     # 15 No hay cache 
+#@exception updateCache     # 16 no hay espacio sufiente 
+#@exception OG_ERR_DONTSYNC_IMAGE   # 71 Imagen no sincronizable (es monolitica)
+#@exception OG_ERR_DONTMOUNT_IMAGE  # 70 Error al montar una imagen sincronizada.
+#@todo: Se puede dar la opcion de que mantenga los ficheros nuevos.
+#@todo: Se puede dar la opcion que la trasferencia se manden los datos comprimidos.
+#@version 1.0 - restauración de imagen con sincronizacion.
+#@author  
+#@date   2012-12-04
+#*/ ##
+
+trap "onexit $1 \"$2\" \"$3\" $4 $5" 1 2 3 6 9 14 15 EXIT
+
+# Si salimos con error demontamos la imagen y desbloqueamos la imagen y la particion
+function onexit() {
+    local exit_status=$?
+    ogUnmountImage "$1" "$3" "$DIFFTYPE" &>/dev/null
+    [ $exit_status -ne 4 ] && ogUnlock $4 $5 &>/dev/null
+    exit $exit_status
+}
+
+
+# Limpiamos los archivo de log
+echo  -n ""> $OGLOGSESSION
+echo "" >$OGLOGCOMMAND
+
+TIME1=$SECONDS
+PROG="$(basename $0)"
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp  "$PROG: $MSG_HELP_restoreDiffImage" \
+            "$PROG REPO|CACHE base_image diff_image ndisco nparticion [ UNICAST|MULTICAST|TORRENT ] [opciones protocolo]" \
+            "$PROG REPO Windows7 Windows7_pc123 1 1 " \
+            "$PROG CACHE Ubuntu12 Ubuntu12_aula21 1 6 MULTICAST 9000:full-duplex:239.194.14.00:150M:50:60"
+    exit 0
+fi
+
+[ $# -lt 5 ] &&  exit $(ogRaiseError session $OG_ERR_FORMAT "$MSG_FORMAT: $PROG REPO|CACHE base_image diff_imagen ndisco nparticion [ UNICAST|MULTICAST|TORRENT ] [opciones protocolo]"; echo $?)
+
+ogEcho log session "[1] $MSG_SCRIPTS_START $0 $*" 
+
+# Procesar parámetros de entrada
+DIFFTYPE="diff"
+DIFFEXT="img.diff"
+REPODIFFFILE="$(ogGetPath "REPO" "$3.$DIFFEXT")"
+[ -n "$REPODIFFFILE" ] || exit $(ogRaiseError session $OG_ERR_NOTFOUND "REPO $3.$DIFFEXT";echo $?)
+
+# Comprobamos si la imagen o la particion estan bloqueada:
+ogIsImageLocked "$1" "$3.$DIFFEXT" && exit $(ogRaiseError session $OG_ERR_LOCKED "$1 $3.$DIFFEXT";echo $?)
+ogIsLocked "$4" "$5" && exit $(ogRaiseError session $OG_ERR_LOCKED  "$4 $5";echo $?)
+
+PART=$(ogDiskToDev "$4" "$5" 2>/dev/null )  || exit $(ogRaiseError session $OG_ERR_PARTITION "$1 $3";echo $?)
+
+# Carga del configurador del engine
+[ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
+
+# Comprobar que es sincronizable
+ogIsSyncImage REPO "$3" diff || exit $(ogRaiseError session $OG_ERR_DONTSYNC_IMAGE "$1 $3";echo $?)
+
+# Restauramos la imagen Basica.
+restoreBaseImage $1 "$2" "$4" "$5" "$6" "$7"
+
+PROTO=${6:-"UNICAST"}
+
+if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
+   ogEcho log session "[10] $MSG_HELP_updateCache." 
+   ogEcho log session "     updateCache REPO" "/$3.$DIFFEXT" "$PROTO" "$7"  
+   updateCache REPO "/$3.$DIFFEXT" "$PROTO" "$7"
+   RETVAL=$?
+   if [ "$RETVAL" != "0" ] 
+        then 
+        ogEcho log session "[39] $MSG_SCRIPTS_TASK_END updateCache REPO $3.$DIFFEXT $6 $7 con error $RETVAL" 
+        # RC=15 No hay cache 
+        # RC=16 no hay espacio sufiente 
+        exit $RETVAL 
+   fi 
+
+   TIMEAUX1=$[SECONDS-TIME]
+   ogEcho log session "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL : $[TIMEAUX1/60]m $[TIMEAUX1%60]s" 
+fi 
+TIME2=$SECONDS
+
+# Restaurar la imagen.
+ogEcho log session "[40] $MSG_RESTORE $PART" 
+
+# Montamos la diferencial
+ogMountImage "$1" "$3" "$DIFFTYPE" &>/dev/null
+#  Comprobar que la imagen diferencial se ha montado 
+ogWaitSyncImage "$1" "$3" "$DIFFTYPE" "mounted" || exit $(ogRaiseError session $OG_ERR_DONTMOUNT_IMAGE "$1 $3 $DIFFTYPE: time_out $TIMEAUX seg.";echo $?)
+
+ogMount $4 $5 >/dev/null
+ogLock $4 $5
+# Sincronizamos la partición con la imagen.
+ogEcho log session  "[60] $MSG_HELP_ogSyncRestore: $1 $3 $DIFFTYPE $4 $5" 
+ogSyncRestore "$1" "$3" "$DIFFTYPE" $4 $5
+RETVAL=$?
+[ $RETVAL == 0 ] || ogEcho session warning "$MSG_ERR_SYNCHRONIZING"
+
+# Desmontamos la imagen
+ogUnmountImage "$1" "$3" "$DIFFTYPE"
+ogUnlock $4 $5
+
+TIMEAUX2=$[SECONDS-TIME2]
+ogEcho log session "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL : $[TIMEAUX2/60]m $[TIMEAUX2%60]s" 
+
+# creando enlaces y restableciendo ACL (en windows)
+ogEcho log session "[70] $MSG_HELP_ogRestoreInfoImage"
+ogExecAndLog command ogRestoreInfoImage "$4" "$5"
+ogExecAndLog command ogRestoreAclImage  "$4" "$5"
+TIMEAUX3=$[SECONDS-TIMEAUX2]
+ogEcho log session "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL : $[TIMEAUX3/60]m $[TIMEAUX3%60]s"
+
+# Llamar al script de post-configuración del sistema operativo.
+if which configureOsCustom &>/dev/null; then
+        ogEcho log session "[90] configureOsCustom"
+        configureOsCustom "$4" "$5" "$1" "$2"
+else
+	ogEcho log session "[90] $MSG_HELP_configureOs." 
+	configureOs $4 $5 
+fi
+TIME=$[SECONDS-TIME1]
+ogEcho log session "[100] $MSG_SCRIPTS_END $MSG_SCRIPTS_TIME_TOTAL: $[TIME/60]m $[TIME%60]s"
+
+# Si ha habido problema al sincronizar nos salimos con error 
+[ $RETVAL == 0 ] || exit $OG_ERR_SYNCHRONIZING

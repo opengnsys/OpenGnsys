@@ -1,0 +1,5 @@
+
+Ver información completa en:
+    https://opengnsys.es/trac/wiki/InitrdClienteSecondFileSystem
+
+ 

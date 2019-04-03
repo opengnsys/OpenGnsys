@@ -1,0 +1,157 @@
+#!/bin/bash
+#/**
+#         restoreBaseImage
+#@brief Script de ejemplo para restaurar una imagen 
+#@brief   Se usa como base para el programa de restauración de imágenes de OpenGnsys Admin).
+#@param 1 REPO|CACHE
+#@param 2 imagen
+#@param 3 disco 
+#@param 4 particion 
+#@param 5 protocolo 
+#@param 6 opciones protocolo
+#@return 
+#@exception OG_ERR_FORMAT  # 1 formato incorrecto.
+#@exception updateCache    # 15 No hay cache 
+#@exception updateCache    # 16 no hay espacio sufiente 
+#@exception OG_ERR_LOCKED          # 4 Partición o fichero bloqueado.
+#@exception OG_ERR_NOTFOUND        # 2 Fichero o dispositivo no encontrado.
+#@exception OG_ERR_FILESYS         # 20 Sistema de archivos desconocido o no se puede montar
+#@exception OG_ERR_DONTSYNC_IMAGE  # 71 Imagen no sincronizable (es monolitica)
+#@exception OG_ERR_DONTMOUNT_IMAGE # 70 Error al montar una imagen sincronizada.
+#@note  se toma como punto de partida el script restoreImage
+#@version 1.0 - restauración de imagen con sincronizacion.
+#@author  
+#@date   2012-12-04
+#*/ ##
+
+trap "onexit $1 \"$2\" $3 $4" 1 2 3 6 9 14 15 EXIT
+
+# Si salimos con error demontamos la imagen y desbloqueamos la imagen y la particion
+function onexit() {
+    local exit_status=$?
+    ogUnmountImage "$1" "$2" "$IMGEXT"  &>/dev/null
+    [ $exit_status -ne 4 ] && ogUnlock $3 $4 &>/dev/null
+    exit $exit_status
+}
+
+# Limpiamos los archivo de log
+echo -n "" >$OGLOGCOMMAND;
+[ "$(ogGetCaller)" == "RestaurarImagenBasica" -o "$(ogGetCaller)" == "restoreDiffImage" ] ||  echo -n "" > $OGLOGSESSION
+
+# Mensaje de inicio de script salvo si es llamado desde restoreDiffImage.
+[ "$(ogGetCaller)" == "restoreDiffImage" ] || ogEcho log session "[1] $MSG_SCRIPTS_START  $0 $*" 
+
+TIME1=$SECONDS
+PROG="$(basename $0)"
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp  "$PROG: $MSG_HELP_restoreBaseImage" \
+	    "$PROG REPO|CACHE imagen ndisco nparticion [ UNICAST|MULTICAST|TORRENT ] [opciones protocolo]" \
+            "$PROG REPO Windows7 1 1 " \
+	    "$PROG CACHE Ubuntu12 1 6 MULTICAST 9000:full-duplex:239.194.14.00:150M:50:60"
+    exit 0
+fi
+
+[ $# -lt 4 ] &&     exit $(ogRaiseError session $OG_ERR_FORMAT "$MSG_FORMAT: $PROG REPO|CACHE imagen ndisco nparticion [ UNICAST|MULTICAST|TORRENT ] [opciones protocolo]"; echo $?)
+
+# Carga del configurador del engine
+[ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
+
+# Procesar parámetros de entrada
+REPOFILE="$(ogGetPath "REPO" "$2.$IMGEXT")"
+[ -n "$REPOFILE" ] || exit $(ogRaiseError session $OG_ERR_NOTFOUND "REPO, $2.$IMGEXT"; echo $?)
+
+# Comprobar que es sincronizable (con REPO)
+ogIsSyncImage REPO "$2" $IMGEXT  ||  exit $(ogRaiseError session $OG_ERR_DONTSYNC_IMAGE  "$1 $2"; echo $?)
+
+IMGEXT="img"
+# Comprobamos si la imagen o la particion estan bloqueada:
+ogIsImageLocked "REPO" "$2.$IMGEXT" && exit $(ogRaiseError session $OG_ERR_LOCKED "$1 $2.$IMGEXT"; echo $?)
+ogIsLocked "$3" "$4" && exit $(ogRaiseError session $OG_ERR_LOCKED  "$3 $4"; echo $?)
+
+# Detectamos el sistema de ficheros de la imagen
+# TODO ogGetImageInfo
+DIRMOUNT=$(ogMountImage "REPO" "$2")
+ogWaitSyncImage "REPO" "$2" "$IMGEXT" "mounted"  || exit $(ogRaiseError session $OG_ERR_DONTMOUNT_IMAGE "$1 $2 $IMGEXT: time_out."; echo $?)
+IMGFSTYPE=$(head -1 $DIRMOUNT/ogimg.info |cut -d: -f3)
+
+# Comprobamos si el sistema de ficheros se puede montar
+ogMount "$3" "$4" &>/dev/null || RETVAL=$?
+# Si da error formateamos el sistema de ficheros.
+if [  "$RETVAL" ] ; then
+	ogEcho log session "      $MSG_HELP_ogFormat: $3 $4 $IMGFSTYPE" 
+	ogFormat "$3" "$4" "$IMGFSTYPE" || exit $(ogRaiseError session $OG_ERR_FILESYS "$3 $4"; echo $?)
+	ogMount "$3" "$4"  || exit $(ogRaiseError session $OG_ERR_FILESYS "$3 $4"; echo $?)
+fi
+
+# Warning si el sistema de ficheros de la imagen es distinto del de la particion destino
+[ "$IMGFSTYPE" == "$(ogGetFsType $3 $4)" ] || ogEcho session warning "$MSG_SYNC_DIFFERENTFS"
+
+
+PROTO=${5:-"UNICAST"}
+if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
+   # Las imagenes sincronizables aunque sean iguales no tienen el mismo sum. 
+   # Sincronizamos si existe el fichero y si no usamos updateCache.
+   ogEcho log session "[10] $MSG_SCRIPTS_TASK_START updateCache REPO $2.$IMGEXT $PROTO $6" 
+   ogEcho log session "      updateCache REPO" "/$2.$IMGEXT" "$PROTO" "$6"  
+   updateCache REPO "/$2.$IMGEXT" "$PROTO" "$6" 
+   RETVAL=$?
+   if [ "$RETVAL" != "0" ] 
+        then 
+        ogEcho log session "[39] $MSG_SCRIPTS_TASK_END updateCache REPO $2.$IMGEXT $5 $6 con error $RETVAL"
+        # RC=15 No hay cache 
+        # RC=16 no hay espacio sufiente 
+        exit $RETVAL 
+   fi 
+   TIMEAUX1=$[SECONDS-TIME]
+   ogEcho log session "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL : $[TIMEAUX1/60]m $[TIMEAUX1%60]s" 
+
+   # Montamos la imagen de cache
+   ogMountImage "$1" "$2" >/dev/null
+   ogWaitSyncImage "$1" "$2" "$IMGEXT" "mounted"  || exit $(ogRaiseError session $OG_ERR_DONTMOUNT_IMAGE "$1 $2 $IMGEXT: time_out."; echo $?)
+fi 
+
+TIME2=$SECONDS
+
+# Restaurar la imagen.
+ogEcho log session "[40] $MSG_HELP_ogRestoreImage: $1 $2 $3 $4"  
+
+ogLock $3 $4
+
+# Sincronizamos la partición con la imagen.
+ogEcho log session  "[60] $MSG_HELP_ogSyncRestore: $1 $2 $IMGEXT $3 $4" 
+ogSyncRestore "$1" "$2" "$IMGEXT" $3 $4
+RETVAL=$?
+[ $RETVAL == 0 ] || ogEcho session warning "$MSG_ERR_SYNCHRONIZING"
+
+TIMEAUX2=$[SECONDS-TIME2]
+ogEcho log session "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL : $[TIMEAUX2/60]m $[TIMEAUX2%60]s" 
+
+# Desmontamos imagen basica.
+ogUnmountImage "$1" "$2" "$IMGEXT"
+
+# Restableciendo acl
+ogUnlock $3 $4
+ogEcho log session "[70] $MSG_HELP_ogRestoreInfoImage" 
+ogExecAndLog command ogRestoreInfoImage $3 $4
+
+# Llamar al script de post-configuración del sistema operativo.
+# Si a este script lo ha llamado el script restoreDiffImage no post-configuramos
+if [ "$(ogGetCaller)" != "restoreDiffImage" ];then
+   ogExecAndLog command ogRestoreAclImage  $3 $4
+   if which configureOsCustom &>/dev/null; then
+	ogEcho log session "[90] configureOsCustom"
+	configureOsCustom "$3" "$4" "$1" "$2"
+   else
+	ogEcho log session "[90] $MSG_HELP_configureOs" 
+	configureOs $3 $4 
+   fi
+fi
+TIMEAUX3=$[SECONDS-TIMEAUX2]
+ogEcho log session "      $MSG_SCRIPTS_TASK_END, $MSG_SCRIPTS_TIME_PARTIAL : $[TIMEAUX3/60]m $[TIMEAUX3%60]s" 
+
+TIME=$[SECONDS-TIME1]
+ogEcho log session "[100] $MSG_SCRIPTS_END $MSG_SCRIPTS_TIME_TOTAL: $[TIME/60]m $[TIME%60]s" 
+
+# Si ha habido problema al sincronizar nos salimos con error 
+[ $RETVAL == 0 ] || exit $OG_ERR_SYNCHRONIZING

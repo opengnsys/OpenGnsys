@@ -1,0 +1,368 @@
+#!/bin/bash
+#___________________________________________________________________
+#
+#@file    ImagenesSincronizadas.lib
+#@brief   Librería o clase ImagenesSincronizadas
+#@class   ImagenesSincronizadas
+#@brief   Funciones para la creación y restauración de imagenes por sincronización.
+#@version 1.0.4
+#@warning License: GNU GPLv3+
+#___________________________________________________________________
+
+		#Load engine configurator from engine.cfg file.
+		#Carga el configurador del engine desde el fichero engine.cfg
+		[ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
+		
+		# Clear temporary file used as log track by httpdlog
+		# Limpia los ficheros temporales usados como log de seguimieincludento para httpdlog
+		echo " " > $OGLOGSESSION; echo " " > $OGLOGCOMMAND; echo " " > ${OGLOGCOMMAND}.tmp
+		
+		# Registro de inicio de ejecución
+		#echo "[START Interface ] Run this command: $0 $*" | tee -a $OGLOGSESSION $OGLOGFILE
+		echo "$MSG_INTERFACE_START $0 $*" | tee -a $OGLOGSESSION $OGLOGFILE
+		
+		# Solo ejecutable por OpenGnsys Client.
+		PATH=$PATH:$(dirname $0)
+		PROG=$(basename $0)
+
+		#___________________________________________________________________
+		#	
+		# Variables globales
+		#___________________________________________________________________
+
+		TIPOPARTICION="$(ogGetPartitionId $DISCO $NPART)"; # Tipo de particion	
+		if [ -z $TIPOPARTICION ]; then
+		echo "No existe la partición $NPART, debe crearla" | tee -a $OGLOGSESSION $OGLOGFILE
+		exit $OG_ERR_PARTITION
+		fi
+
+		PARTICION=$(ogMount $DISCO $NPART); # Monta partición	
+		if [ -z $PARTICION ]; then
+		echo "No existe la unidad /dev/sda$NPART o no está formateada" | tee -a $OGLOGSESSION $OGLOGFILE
+		exit $OG_ERR_PARTITION
+		fi
+
+		SISTEMAFICHERO="$(ogGetFsType $DISCO $NPART)" # Sistema de ficheros	
+		if [ -z $SISTEMAFICHERO ]; then
+		echo "No se ha definido un sistema de fichero en la unidad /dev/sda$NPART. Debe formatearla previamente." | tee -a $OGLOGSESSION $OGLOGFILE
+		exit $OG_ERR_PARTITION
+		fi
+
+		REPOSITORIO="opengnsys@$IPREPOSITORIO::ogimages" # Ruta de las imagenes en el repositorio
+		
+		FILE_ACL="ogwinimage.acl"
+
+			
+		# Envío de archivo completo
+		OP_WHOLE="--whole"
+		if [ $WHLFILE -eq 0 ]; then
+			OP_WHOLE=""
+		fi	
+		
+		# Borrar archivos en destino
+		OP_DELETE="--delete"
+		if [ $NOBORRACHIVOS -eq 1 ]; then
+			OP_DELETE=""
+		fi	
+		if [ $RMVFILE -eq 0 ]; then
+			OP_DELETE=""
+		fi			
+
+		# Opción de compresión
+		OP_COMPRESS="-z"
+		if [ $CMPFILE -eq 0 ]; then
+			OP_COMPRESS=""
+		fi			
+
+		#___________________________________________________________________
+		#
+		# Fichero con la clave remota del rsync para el parámetro
+		# "--password-file" para que no se pida ésta en el proceso.
+		#___________________________________________________________________
+		#
+		FILE_PASSWD="--password-file=/scripts/passrsync"
+	
+	
+	#___________________________________________________________________
+	#
+	#	Función: montaCache
+	#
+	#	Descripción:
+	#
+	#		Monta la cache y devuelve la ruta hacía ella
+	#
+	#	Parámetros:
+	#	
+	#		Ninguno
+	#___________________________________________________________________
+	#
+	function montaCache()
+	{	
+		# Error si no existe caché
+		if ! $(ogFindCache >/dev/null); then
+			echo ""
+			return
+		fi
+		cache=$(ogMountCache)
+		echo $cache
+	}
+	#___________________________________________________________________
+	#
+	#	Función: editarLista
+	#
+	#	Descripción:
+	#
+	#		Edita lista de archivos a transferir para depurar lineas
+	#
+	#	Parámetros:
+	#	
+	#		$1 Lista de entrada
+	#		$2 Lista de salida
+	#___________________________________________________________________
+	#
+	function editarLista()
+	{	
+		# Edición: 
+		#	a) Quitarle lineas que contengan './' 
+		#	b) La primera linea (reporter del rsync)
+		#	c) Las dos últimas lineas del final (reporter del rsync)
+		
+		echo "Editando lista de archivos Entrada:$1 Salida:$2" | tee -a $OGLOGSESSION $OGLOGFILE
+		cat $1 | sed '/\.\//d' | sed '1d' | sed -n -e :a -e '1,2!{P;N;D;};N;ba'>$2
+
+		# Otra forma
+		#sed -i -e s/"^sent.*.bytes\/sec"//g -e s/^total.*.speedup.*.$//g -e s/"sending.*.list"//g $IMGINFO
+		#sed -i  '/^\.\//d' $IMGINFO
+
+	}	
+	
+	#___________________________________________________________________
+	#
+	#	Función: crearImagen
+	#
+	#	Descripción:
+	#
+	#		Sincroniza archivos entre origen y destino. Al final del
+	#		proceso el contenido de destino será igual al de origen.
+	#		La creación de imagen siempre tiene lugar entre una partición
+	#		y un repositorio como origen y destino respectivamente.
+	#
+	#	Parámetros:
+	#	
+	#		$1: Origen
+	#		$2: Destino
+	#		$3: Sistema de ficheros de la partición
+	#		$4: Indica si la sincronización es local o remota
+	#				1: El origen o el destino es remoto
+	#				2: Tanto el origen como el destino son locales
+	#		$5: Vale 
+	#				1=Para crear la lista de archivos a transferir
+	#				2= Cuando se quiere sincronizar usando la lista
+	#		$6: Path a la lista de archivos 
+	#___________________________________________________________________
+	#
+	function crearImagen()
+	{
+		case "$3" in 
+			NTFS)
+				OP_ARCHIVO="-aH"
+				rm "$1pagefile.sys"
+				#OP_EXCLUDE="--exclude 'pagefile.sys'"
+			;;
+			 EXT2 | EXT3 | EXT4 )
+				OP_ARCHIVO="-alH"
+				OP_EXCLUDE="--exclude 'tmp' --exclude 'proc' --exclude 'sys'"
+			;;
+		esac
+
+
+		case "$4" in 
+			1)
+				OP_PASSWD=$FILE_PASSWD
+			;;
+			2)
+				OP_PASSWD=""
+			;;
+		esac
+		
+		FREG=$OGLOGCOMMAND # Por defecto se redirecciona al archivo de log de comandos	
+		case "$5" in 
+			1)
+				OP_ARCHIVO=$OP_ARCHIVO"nv" # Simulación para crear lista
+				FREG=$6
+			;;
+			2)
+				OP_FILELIST="--files-from=$6"
+				OP_ARCHIVO="$OP_ARCHIVO $OP_FILELIST"
+			;;
+		esac
+
+		echo "rsync $OP_ARCHIVO $OP_COMPRESS $OP_DELETE $OP_EXCLUDE $OP_PASSWD $1 $2 " | tee -a $OGLOGSESSION $OGLOGFILE
+		rsync $OP_ARCHIVO $OP_COMPRESS $OP_DELETE $OP_EXCLUDE $OP_PASSWD $1 $2>$FREG;
+	}
+	
+	#___________________________________________________________________
+	#
+	#	Función: restaurarImagen
+	#
+	#	Descripción:
+	#
+	#		Sincroniza archivos entre origen y destino. Al final del
+	#		proceso el contenido de destino será igual al de origen.
+	#		La restauración de imagen siempre tiene lugar entre la caché
+	#		o un repositorio y una partición o carpeta como origen y destino
+	#		respectivamente.
+	#
+	#	Parámetros:
+	#	
+	#		$1: Origen
+	#		$2: Destino
+	#		$3: Sistema de ficheros de la partición
+	#		$4: Indica si la sincronización es local o remota
+	#			1: El origen o el destino es remoto
+	#			2: Tanto el origen como el destino son locales
+	#___________________________________________________________________
+	#
+	function restaurarImagen()
+	{
+		case "$3" in 
+			NTFS)
+				OP_ARCHIVO="-aH"
+			;;
+			EXT2 | EXT3 | EXT4)
+				OP_ARCHIVO="-alH"
+			;;
+		esac
+		
+		case "$4" in 
+			1)
+				OP_PASSWD=$FILE_PASSWD
+			;;
+			2)
+				OP_PASSWD=""
+			;;
+		esac
+		
+		echo "rsync $OP_ARCHIVO $OP_COMPRESS $OP_DELETE $OP_PASSWD $1 $2" | tee -a $OGLOGSESSION $OGLOGFILE
+		rsync $OP_ARCHIVO $OP_COMPRESS $OP_DELETE $OP_PASSWD $1 $2>$OGLOGCOMMAND;
+	}
+	
+	#___________________________________________________________________
+	#
+	#	Función: crearListaAcl
+	#
+	#	Descripción:
+	#
+	#		Crea la lista de control de archivos para el sistema operativo
+	#		que ocupa la partición que se quiere clonar
+	#
+	#	Parámetros:
+	#	
+	#		$1: Origen
+	#		$2: Destino
+	#		$3: Sistema de ficheros de la partición
+	#		$4: disco
+	#		$5: partición
+	#___________________________________________________________________
+	#
+	function crearListaAcl()
+	{
+		case "$3" in 
+			NTFS)
+				echo "Creando lista de control de acceso a ficheros para el sistema windows de la particion $5" | tee -a $OGLOGSESSION $OGLOGFILE
+				echo "Desmontando la particion $5" | tee -a $OGLOGSESSION $OGLOGFILE
+				ogUnmount $4 $5 | tee -a $OGLOGSESSION $OGLOGFILE
+				echo "Ejecutando comando ntfs-3g.secaudit -b /dev/sda$5 /" | tee -a $OGLOGSESSION $OGLOGFILE
+				ntfs-3g.secaudit -b /dev/sda$5 / > /tmp/$FILE_ACL
+				echo "Montando de nuevo la particion $5" | tee -a $OGLOGSESSION $OGLOGFILE				
+				ogMount $4 $5
+				echo "Copiando archivo de listas de control (ACL) desde /tmp/$FILE_ACL a $1." | tee -a $OGLOGSESSION $OGLOGFILE				
+				cp /tmp/$FILE_ACL $1.
+			;;
+		esac
+	}	
+	#___________________________________________________________________
+	#
+	#	Función: restauraListaAcl
+	#
+	#	Descripción:
+	#
+	#		Restaura la lista de control de archivos para el sistema operativo
+	#		que ocupa la partición que se quiere restaurar
+	#
+	#	Parámetros:
+	#	
+	#		$1: Origen
+	#		$2: Destino
+	#		$3: Sistema de ficheros de la partición
+	#		$4: disco
+	#		$5: partición
+	#___________________________________________________________________
+	#
+	function restauraListaAcl()
+	{
+		case "$3" in 
+			NTFS)
+				echo "Restaurando lista de control de acceso a ficheros para el sistema windows de la particion $5" | tee -a $OGLOGSESSION $OGLOGFILE	
+				echo "Copiando archivo de listas de control (ACL) desde $2$FILE_ACL a /tmp/." | tee -a $OGLOGSESSION $OGLOGFILE				
+				cp $2$FILE_ACL /tmp/.
+				echo "Desmontando la particion $5" | tee -a $OGLOGSESSION $OGLOGFILE
+				ogUnmount $4 $5 | tee -a $OGLOGSESSION $OGLOGFILE
+				echo "Ejecutando comando ntfs-3g.secaudit -se /dev/sda$5 /" | tee -a $OGLOGSESSION $OGLOGFILE
+				ntfs-3g.secaudit -se /dev/sda$5 /tmp/$FILE_ACL
+				echo "Montando de nuevo la particion $5" | tee -a $OGLOGSESSION $OGLOGFILE				
+				ogMount $4 $5
+				echo "Borrando archivo de listas de control (ACL) de $2$FILE_ACL" | tee -a $OGLOGSESSION $OGLOGFILE				
+				rm $2$FILE_ACL
+			;;
+		esac
+	}	
+	#___________________________________________________________________
+	#
+	#	Función: eliminaListaAcl
+	#
+	#	Descripción:
+	#
+	#		Elimina la lista de control de archivos creada temporalmente
+	#		para el proceso de creación e imagen
+	#
+	#	Parámetros:
+	#	
+	#		$1: Origen
+	#		$2: Sistema de ficheros de la partición
+	#___________________________________________________________________
+	#
+	function eliminaListaAcl()
+	{
+		case "$2" in 
+			NTFS)
+				echo "Borrando archivo de listas de control (ACL) de $1$FILE_ACL" | tee -a $OGLOGSESSION $OGLOGFILE				
+				rm $1$FILE_ACL
+			;;
+		esac
+	}	
+	#___________________________________________________________________
+	#
+	#	Función: comprimeImagen
+	#
+	#	Descripción:
+	#
+	#		Comprimer  la carpeta donde está se ha almacenado la imagen 
+	#		recientemente creada
+	#
+	#	Parámetros:
+	#	
+	#		$1: Nombre de la imagen (Es el mismo que la carpeta que la alberga)
+	#___________________________________________________________________
+	#
+	function comprimeImagen()
+	{
+		TIME1=$SECONDS
+		RUTAIMG="/opt/opengnsys/images"
+		CARPETAIMAGEN=$RUTAIMG/$1
+		echo "Comprimiendo la imagen $1. Ruta de la imagen: $RUTAIMG" | tee -a $OGLOGSESSION $OGLOGFILE		
+		echo "find $CARPETAIMAGEN | cpio -H newc -oa | gzip -9c  en $CARPETAIMAGEN.IMG"  | tee -a $OGLOGSESSION $OGLOGFILE		
+		find $CARPETAIMAGEN | cpio -H newc -oa | gzip -9c > $CARPETAIMAGEN.IMG
+		TIME=$[SECONDS-TIME1]
+		echo "[100] $MSG_SCRIPTS_TIME_TOTAL $[TIME/60]m $[TIME%60]s" | tee -a $OGLOGSESSION $OGLOGFILE
+	}	

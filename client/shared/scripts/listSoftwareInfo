@@ -1,0 +1,35 @@
+#!/bin/bash
+# Scirpt de ejemplo para almacenear en fichero temporal el listado de software.
+# Nota: se usa como base para el programa de recogida de listado de software de OpenGnsys Admin.
+# Formato:  listSoftwareInfo [-r] ndisk npart
+#		-r   listado reducido (sin parches de Windows)
+
+PROG=$(basename "$0")
+REDUCED="no"
+if [ "$1" = "-r" ]; then
+    REDUCED="yes"
+    shift
+fi
+if [ $# -ne 2 ]; then
+    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG ndisco nparticion"
+    exit $?
+fi
+
+# Directorio del servidor donde se exportan los ficheros de registro.
+SERVERLOGDIR=$(mount | awk -v d=$OGLOG '
+				BEGIN {FS="[: ]"}
+				{if ($4==d) dir=$2}
+				END {print dir}')
+
+# Fichero de listado:  soft-IP-ndisco-npart
+SOFTFILE="soft-$(ogGetIpAddress)-$1-$2"
+# Redirigir salida al fichero de listado.
+if [ "$REDUCED" = "no" ]; then
+    ogListSoftware "$1" "$2" >$OGLOG/$SOFTFILE || exit $?
+else
+    ogListSoftware "$1" "$2" | egrep -v "\(KB[0-9]{6}\)" >$OGLOG/$SOFTFILE || exit $?
+fi
+# Salid: camino del fichero de listado en el servidor de repositorio.
+#echo $SERVERLOGDIR/$SOFTFILE
+echo $OGLOG/$SOFTFILE
+

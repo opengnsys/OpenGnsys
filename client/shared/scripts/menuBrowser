@@ -1,0 +1,11 @@
+#!/bin/bash
+# Scirpt de ejemplo para iniciar el browser del cliente con un menú predefinido
+
+PROG=$(basename "$0")
+if [ $# -ne 1 ]; then
+    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG urlmenu"
+    exit $?
+fi
+
+url="$1"
+browser -qws $url

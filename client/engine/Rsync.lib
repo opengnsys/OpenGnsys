@@ -1,0 +1,899 @@
+#!/bin/bash
+
+#/**
+# rsync
+#@brief Función para utilizar la versión de rsync situada en $OPENGNSYS/bin en vez de la del sistema operativo.
+#@param los mismos que el comando rsync del sistema operativo.
+#@return  instrucción para ser ejecutada.
+#*/
+function rsync ()
+{
+local RSYNC
+[ -x $OPENGNSYS/bin/rsync ] && RSYNC=$OPENGNSYS/bin/rsync
+RSYNC=${RSYNC:-$(which rsync)}
+
+$RSYNC "$@"
+}
+
+
+#/**
+# ogCreateFileImage  [ REPO | CACHE ] image_name extension size
+#@brief   Crear el archivo 
+#@param 1 Repositorio  [ REPO | CACHE ]
+#@param 2 Nombre Imagen
+#@param 3 Tipo imagen [ img |diff ]
+#@param 4 Tamaño de la imagen
+#@return  instrucción para ser ejecutada.
+#*/
+
+function ogCreateFileImage () {
+local SIZEREQUIRED IMGDIR IMGFILE DIRMOUNT LOOPDEVICE  IMGSIZE IMGEXT KERNELVERSION
+
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" \
+           "$FUNCNAME [ REPO|CACHE ] image_name extension  size(K)" \
+           "$FUNCNAME REPO Ubuntu12 img 300000" \
+           "$FUNCNAME CACHE Windows7 diff 20000000"
+    return
+fi
+
+
+if [ $# -lt 4 ]; then
+    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $FUNCNAME  [ REPO|CACHE ] image_name extension  size(k)"
+    return $?
+fi
+
+SIZEREQUIRED=$4
+[ $SIZEREQUIRED -lt 300000 ] && SIZEREQUIRED=300000
+KERNELVERSION=$(uname -r| awk '{printf("%d",$1);sub(/[0-9]*\./,"",$1);printf(".%02d",$1)}')
+
+if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
+	IMGDIR="$(ogGetParentPath "$1" "/$2")"
+	[ "$3" == "img" ] && IMGEXT="img" ||  IMGEXT="img.diff"
+	IMGFILE="${IMGDIR}/$(basename "/$2").$IMGEXT"
+	## Si no existe, crear subdirectorio de la imagen.
+	if [ $? != 0 ]; then
+            ogEcho log session  "      $MSG_HELP_ogMakeDir \"$1 $(dirname "$2")." 
+            ogMakeDir "$1" "$(dirname "/$2")" || return $(ogRaiseError $OG_ERR_NOTWRITE "$3 /$4"; echo $?)
+            IMGDIR="$(ogGetParentPath "$1" "/$2")" || return $(ogRaiseError $OG_ERR_NOTWRITE "$3 /$4"; echo $?)
+	fi
+	DIRMOUNT="/tmp/$(ogGetMountImageDir "$2" "$3")"
+        mkdir -p "$DIRMOUNT"
+        LOOPDEVICE=$(losetup -f)
+        # Si existe el fichero de la imagen se hace copia de seguridad, si  no existe se crea.
+        if [ -f "$IMGFILE" ]; then
+		# Si la imagen esta montada la desmonto
+                if [ -r "$DIRMOUNT/ogimg.info" ]; then
+                    umount "$DIRMOUNT"
+                    [ $? -ne 0 ] && return $(ogRaiseError $OG_ERR_DONTUNMOUNT_IMAGE "$1 $2.$IMGEXT"; echo $?)
+                fi
+
+		if [ "$BACKUP" == "true" -o "$BACKUP" == "TRUE" ]; then
+                    # Copia seguridad 
+                    ogEcho log session  "     $MSG_SCRIPTS_FILE_RENAME \"$IMGFILE\" ->  \"$IMGFILE.ant\"." 
+                    cp -f  "$IMGFILE" "$IMGFILE.ant"  
+                    mv -f "$IMGFILE.torrent" "$IMGFILE.torrent.ant" 2>/dev/null
+                    rm -f "$IMGFILE.sum"
+		fi
+
+                IMGSIZE=$(ls -l --block-size=1024 "$IMGFILE" | awk '{print $5}')
+                if [ $IMGSIZE -lt $SIZEREQUIRED ];then
+                   ogEcho log session  "      $MSG_SYNC_RESIZE" 
+                   echo "      truncate --size=>$SIZEREQUIRED k $IMGFILE" 
+                   truncate --size=">$SIZEREQUIRED"k "$IMGFILE" &> $OGLOGCOMMAND
+		   # FS de la imagen segun el contenido del archivo .img
+		   if file "$IMGFILE" |grep -i -e " ext4 filesystem " 2>&1 > /dev/null ; then
+                	losetup $LOOPDEVICE "$IMGFILE"
+			echo "      resize2fs -f $LOOPDEVICE"
+			resize2fs -f $LOOPDEVICE &> $OGLOGCOMMAND
+			
+		   else
+		   	echo "      ogMountImage $1 "$2" $3"
+		   	ogMountImage $1 "$2" $3
+                   	echo "      btrfs filesystem resize max $DIRMOUNT"
+                   	btrfs filesystem resize max "$DIRMOUNT" &> $OGLOGCOMMAND
+		   fi
+                fi
+        else
+                touch "$IMGFILE"
+                echo "      truncate --size=>$SIZEREQUIRED k $IMGFILE" 
+                truncate --size=">$SIZEREQUIRED"k "$IMGFILE" &> $OGLOGCOMMAND
+                #Formateamos imagen
+                losetup $LOOPDEVICE $IMGFILE
+		# FS de la imagen segun la configuracion y la version del kernel: < 3.7 ext4, si >=  btrfs 
+		[ $KERNELVERSION \< 3.07 ] && IMGFS="EXT4" || IMGFS=${IMGFS:-"BTRFS"}
+
+		if [ "$IMGFS" == "EXT4" ]; then
+		   echo "      mkfs.ext4 -i 4096  -b 4096 -L "${2##*\/}" $LOOPDEVICE"
+		   mkfs.ext4 -i 4096  -b 4096 -L "${2##*\/}" $LOOPDEVICE 2>&1 |tee -a $OGLOGCOMMAND
+		else
+                   echo "      mkfs.btrfs  -L ${2##*\/} $LOOPDEVICE "
+                   mkfs.btrfs  -L "${2##*\/}" $LOOPDEVICE 2>&1 | tee -a $OGLOGCOMMAND
+		fi
+	fi
+	# Monto la imagen 
+	ogMountImage $1 "$2" $3 &>/dev/null
+	[ $? -eq 0 ] || return $( ogRaiseError $OG_ERR_IMAGE "$3 $4"; echo $?)
+	echo "mounted"> $IMGFILE.lock
+
+	# Si existe dispositivo de loop lo borro.
+        [ $LOOPDEVICE ] && losetup -d $LOOPDEVICE 2>&1 &>/dev/null
+
+else
+	[ -z $REPOIP ] && REPOIP=$(ogGetRepoIp)
+        echo "      hose $REPOIP 2009 --out sh -c \"echo -ne CREATE_IMAGE $2 $3 $SIZEREQUIRED \"" 
+        hose $REPOIP 2009 --out sh -c "echo -ne CREATE_IMAGE \"$2\" $3 $SIZEREQUIRED"
+fi
+
+}
+
+
+#/**
+#  ogCreateInfoImage
+#@brief   Crear listados con la informacion de la imagen, los situa en /tmp.
+#@param 1 num_disk
+#@param 2 num_part
+#@param 3 Repositorio  [ REPO | CACHE ] (opcional en las completas)
+#@param 4 Nombre Imagen Basica (opcional en las completas)
+#@param 5 Tipo imagen [ img | diff ]
+#@version 1.0.6 rsync opcion W (whole) para que sea más rápido
+#*/
+function ogCreateInfoImage () {
+local  IMGTYPE IMGDIRAUX DIRMOUNT DESTRSYNC PASSWORD USERRSYNC ORIG FSTYPE PART DIREMPTY IMGLIST IMGINFO IMGACL KERNELVERSION
+# Ayuda o menos de 5 parametros y la imagen no es basica
+if [ "$*" == "help" -o   $# -lt 5 -a "$3" != "img"  ]; then
+    ogHelp "$FUNCNAME" \
+		"$FUNCNAME num_disk num_part [ REPO|CACHE ] [ base_image_name ] extension  " \
+       		"base image -> $FUNCNAME 1 2 img" \
+     		"diff image -> $FUNCNAME 1 1 CACHE Windows7 diff "
+    return
+fi
+
+if [ $# -lt 3 ]; then
+    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $FUNCNAME  num_disk num_part [ REPO|CACHE ] [ base_image_name]  extension  "
+    return $?
+fi
+
+# Comprobar errores.
+PART=$(ogDiskToDev "$1" "$2") || return $?
+ORIG=$(ogMount $1 $2) || return $?
+
+if [ $3 == "img" ]; then
+   IMGTYPE="img"
+else
+   # Comprobamos que las extension sea valida
+   ogCheckStringInGroup $5 "img diff" || return $( ogRaiseError  $OG_ERR_FORMAT "$MSG_SYNC_EXTENSION"; echo $?)
+   IMGTYPE=$5
+   if [ "$IMGTYPE" == "diff" ]; then
+	# Imagen completa con la que comparo la particion.
+	IMGDIRAUX="$(ogGetMountImageDir "$4" "img")"
+	if [ "$3" == "CACHE" -o "$3" == "cache" ]; then
+           DIRMOUNT="/tmp/$IMGDIRAUX"
+           DESTRSYNC="$DIRMOUNT"
+	else
+	   [ -z $REPOIP ] && REPOIP=$(ogGetRepoIp)
+           DIRMOUNT="$OGIMG/$IMGDIRAUX"
+           USERRSYNC="opengnsys"
+           PASSWORD="--password-file=/scripts/passrsync"
+           DESTRSYNC="$USERRSYNC@$REPOIP::ogimages/$IMGDIRAUX"
+	fi
+   fi
+fi
+
+
+FSTYPE=$(ogGetFsType $1 $2)
+
+# Creamos la lista del contenido y lo situamos en la particion a copiar.
+DIREMPTY="/tmp/empty$$"
+IMGLIST="/tmp/ogimg.list"
+IMGINFO="/tmp/ogimg.info"
+IMGACL="/tmp/ogimg.acl"
+
+# Borramos archivos antiguos.
+rm -f /tmp/ogimg.* 2>/dev/null
+rm -f $ORIG/ogimg.* 2>/dev/null
+
+# En las diferenciales no sabemos el tamaño -> ponemos una constante.
+SIZEDATA=${SIZEDATA:-"SIZEDATA"}
+
+# Incluimos información de la imagen. Segun el kernel sera ext4 o btrfs.
+KERNELVERSION=$(uname -r| awk '{printf("%d",$1);sub(/[0-9]*\./,"",$1);printf(".%02d",$1)}')
+[ $KERNELVERSION \< 3.07 ] && IMGFS="EXT4" || IMGFS=${IMGFS:-"BTRFS"}
+echo "#$IMGFS:NO:$FSTYPE:$SIZEDATA" > $IMGINFO
+
+if [ "$IMGTYPE" == "img" ]; then
+	# Imagen Basica
+	echo "      rsync -aHAXWvn --delete $ORIG/ $DIREMPTY >> $IMGINFO" 
+	rsync -aHAXWvn --delete $ORIG/ $DIREMPTY>> $IMGINFO
+	sed -i -e s/"^sent.*.bytes\/sec"//g -e s/^total.*.speedup.*.$//g -e s/"sending.*.list"//g $IMGINFO
+	sed -i  '/^\.\//d' $IMGINFO
+
+else
+	# Imagen Diferencial
+	echo "      rsync -aHAXWvn  --delete  $ORIG/ $DESTRSYNC a $IMGLIST" 
+	rsync -aHAXWvn $PASSWORD  --delete  "$ORIG/" "$DESTRSYNC" >> $IMGLIST
+	sed -i -e s/"^sent.*.bytes\/sec"//g -e s/^total.*.speedup.*.$//g -e s/"sending.*.list"//g $IMGLIST
+	sed -i  '/^\.\//d' $IMGLIST
+
+	# Creamos informacion de la imagen
+	grep -e '\->' -e  '\=>' $IMGLIST > /tmp/ogimg.ln
+	grep -e  ^deleting  $IMGLIST | sed s/^deleting\ //g | grep -v ^ogimg  > /tmp/ogimg.rm
+	#grep -v -e '\->' -e  '\=>'  -e ^deleting  $IMGLIST >> $IMGINFO
+	grep -v -e '\->' -e  '\=>'  -e ^deleting -e ^created  $IMGLIST >> $IMGINFO
+
+	rm -f $IMGLIST
+
+	# Comprobamos que los ficheros de diferencias no esten vacios o salimos con error.
+	if [ $(grep -v -e "^$"  -e "^#" $IMGINFO /tmp/ogimg.ln /tmp/ogimg.rm |wc -l) -eq 0 ]; then 
+		ogRaiseError $OG_ERR_NOTDIFFERENT "$1 $2 $3 $4 $5" 
+		return $?	
+	fi
+
+fi
+
+# Guardamos el contenido de las acl (Solo win) Necesario particion desmontada (esta asi)
+ogUnmount $1 $2
+if [ $FSTYPE == "NTFS" ]; then
+	echo "      ntfs-3g.secaudit -b $PART /"
+	ntfs-3g.secaudit -b $PART / > $IMGACL 
+fi
+
+}
+
+
+#/**
+#  ogAclFilter
+#@brief Del fichero de acl de la partición extraemos las acl de los ficheros de la diferencial (falla: no se usa)
+#@param No.
+#@return  (nada)
+#*/
+function ogAclFilter () {
+local  IMGACL IMGINFO FILES ACLTMP
+
+# Ayuda 
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME"
+    return
+fi
+
+IMGACL="/tmp/ogimg.acl"
+IMGINFO="/tmp/ogimg.info"
+FILES="/tmp/files$$"
+ACLTMP="/tmp/acl$$.tmp"
+ACLFILES="/tmp/aclfiles$$"
+
+# comprobamos que existan los archivos de origen. Si no salimos sin error.
+[ -f $IMGACL -a -f $IMGINFO ] || return 0
+
+echo "" > $ACLTMP
+grep -n  -e "File" -e "Directory" $IMGACL > $ACLFILES
+
+# Al listado de ficheros le quitamos las líneas sobrantes: comentarios y lineas vacias.
+sed -e s/"^#.*$"//g -e '/^$/d' $IMGINFO > $FILES
+
+
+# Recorremos el listado y extraemos la acl correspondiente al fichero o directorio.
+while read LINE; do
+    read END INI <<< "$(grep -A 1 "$LINE" $ACLFILES | awk -F :  '!(NR%2){print $1" "p}{p=$1}' )"
+    let NUM=$END-$INI-1
+    # Si algún archivo no se encuentra, el error lo mandamos a /dev/null
+    sed -n -e $INI,+"$NUM"p  $IMGACL 2>/dev/null >> $ACLTMP
+    echo "aclfilter: $LINE" >> $OGLOGCOMMAND
+done < $FILES
+
+cp $ACLTMP $IMGACL
+rm -f $FILES $ACLTMP $ACLFILES 
+}
+
+
+#/**
+#  ogRestoreInfoImage
+#@brief Crear o modificar enlaces y restaurar las ACL. La informacion esta ya copiada a la particion.
+#@param 1 num_disk
+#@param 2 num_part
+#*/
+function ogRestoreInfoImage () {
+local  DEST PART IMGACL IMGLN OPTLN LINEA DESTLN ORIGLN TYPELN 
+
+# Ayuda o menos de 5 parametros y la imagen no es basica
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" \
+		"$FUNCNAME num_disk num_part" \
+       		"base image -> $FUNCNAME 1 2 " \
+		"diff image -> $FUNCNAME 1 1 "
+    return
+fi
+
+if [ $# -lt 2 ]; then
+    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $FUNCNAME num_disk num_part  "
+    return $?
+fi
+
+# Control de errores.
+PART=$(ogDiskToDev "$1" "$2") || return $?
+DEST=$(ogMount $1 $2) || return $?
+
+IMGACL="ogimg.acl"
+IMGLN="ogimg.ln"
+IMGINFO="ogimg.info"
+
+# Copiamos informacion de la imagen a /tmp (para basicas)
+[ -r $DEST/$IMGACL ] && cp $DEST/ogimg.* /tmp
+
+#Creamos o modificamos los enlaces.
+# La imagen diferencial tiene ogimg.ln 
+# para la completa lo generamos con los enlaces que contengan  /mnt/
+[ -r "/tmp/$IMGLN" ] || grep -e "->" -e "=>" "/tmp/$IMGINFO"|grep "/mnt/" > "/tmp/$IMGLN"
+if [ $(wc -l "/tmp/$IMGLN"|cut -f1 -d" ") -ne 0 ]; then
+   while read LINEA
+   do
+        ORIGLN="${LINEA#*> }"
+        # Si origen hace referencia a la particion lo modificamos
+        echo $ORIGLN|grep "/mnt/"> /dev/null && ORIGLN="$DEST/${ORIGLN#/mnt/*/}"
+	# rsync marca - los enlaces simbolicos y = enlaces "duros"
+        LINEA="${LINEA%>*}"
+        TYPELN="${LINEA##* }"
+        DESTLN="${LINEA% *}"
+
+   	if [ "$TYPELN" == "-" ]
+   	then
+           OPTLN='-s'
+   	else
+           OPTLN=''
+   	fi
+   	cd "$DEST/$(dirname "$DESTLN")"
+	rm -f "$(basename "$DESTLN")"
+   	ln $OPTLN "$ORIGLN" "$(basename "$DESTLN")"
+   	echo -n "."
+   done < "/tmp/$IMGLN"  2>/dev/null
+   echo ""
+
+fi
+cd /
+}
+
+
+#/**
+#  ogRestoreAclImage
+#@brief Restaurar las ACL. La informacion esta ya copiada al directorio /tmp
+#@param 1 num_disk
+#@param 2 num_part
+#*/
+function ogRestoreAclImage () {
+local PART IMGACL
+
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" \
+                "$FUNCNAME num_disk num_part" \
+                "$FUNCNAME 1 1"
+    return
+fi
+
+PART=$(ogDiskToDev "$1" "$2") || return $?
+IMGACL="ogimg.acl"
+
+# Restauramos acl
+if [ "$(ogGetFsType $1 $2)" == "NTFS"  -a -f "/tmp/$IMGACL" ] ; then
+	cd /
+        ogUnmount "$1" "$2"
+        echo "ntfs-3g.secaudit -se $PART /tmp/$IMGACL"
+        ntfs-3g.secaudit -se $PART /tmp/$IMGACL
+	# Para evitar que de falso error
+	echo ""	
+fi
+}
+
+
+function ogSyncCreate () {
+#/**
+# ogSyncCreate 
+#@brief   sincroniza los datos de la partición a la imagen para crearla. La imagen esta montada en un directorio.
+#@param 1 num_disk
+#@param 2 num_part
+#@param 3 Repositorio  [ REPO | CACHE ]
+#@param 4 Nombre Imagen
+#@param 5 Tipo imagen [ img | diff ]
+#*/
+local ORIG DIRAUX DIRMOUNT DESTRSYNC USERRSYNC PASSWORD OPTRSYNC RETVAL
+
+# Limpiamos los archivo de log
+echo  "" >$OGLOGCOMMAND;
+
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" \
+		"$FUNCNAME num_disk num_part [ REPO|CACHE ] image_name extension  " \
+       		"$FUNCNAME 1 2 REPO Ubuntu12 img" \
+     		"$FUNCNAME 1 1 CACHE Windows7 diff "
+    return
+fi
+
+
+if [ $# -lt 4 ]; then
+    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $FUNCNAME  num_disk num_part [ REPO|CACHE ] image_name extension  "
+    return $?
+fi
+
+ORIG=$(ogMount $1 $2) || return $?
+
+DIRMOUNT="$(ogGetMountImageDir "$4" $5)"
+# Si la imagen es diferencial la lista de ficheros a transferir esta dentro de la imagen.
+if [ "$5" == "diff" ]; then
+	FILESFROM=" --files-from=/tmp/ogimg.info"
+	# Borramos los directorios
+	sed -i '/\/$/d' /tmp/ogimg.info
+else
+	FILESFROM=""
+fi
+
+if [ "$3" == "CACHE" -o "$3" == "cache" ]; then
+        DESTRSYNC="/tmp/$DIRMOUNT"
+else
+	[ -z $REPOIP ] && REPOIP=$(ogGetRepoIp)
+        PASSWORD="--password-file=/scripts/passrsync"
+        [ "$ogrsyncz" ==  "true" ] && OPTRSYNC="z "
+	[ "$ogrsyncw" == "true" ] && OPTRSYNC="W$OPTRSYNC"
+	USERRSYNC="opengnsys"
+        DESTRSYNC="$USERRSYNC@$REPOIP::ogimages/$DIRMOUNT"
+fi
+# Sincronizamos los datos de la partición a la imagen
+echo "      rsync -aHAX$OPTRSYNC --progress --inplace --delete $FILESFROM  $ORIG/ $DESTRSYNC" 
+rsync -aHAX$OPTRSYNC $PASSWORD --progress --inplace --delete $FILESFROM  "$ORIG/" "$DESTRSYNC" 2>$OGLOGCOMMAND | egrep "^deleting|^sent|^sending|^total|%" |tee -a $OGLOGCOMMAND
+RETVAL=${PIPESTATUS[0]}
+echo "      rsync -aHAX$OPTRSYNC --inplace /tmp/ogimg* $DESTRSYNC" 
+rsync -aHAX$OPTRSYNC  $PASSWORD  --inplace /tmp/ogimg* "$DESTRSYNC"
+
+return $RETVAL
+}
+
+
+#/**
+# ogSyncRestore
+#@brief   sincroniza los datos de la imagen a la partición para restaurarla.
+#@param 1 Repositorio  [ REPO | CACHE ]
+#@param 2 Nombre Imagen
+#@param 3 Tipo imagen [ img | diff ]
+#@param 4 num_disk
+#@param 5 num_part
+#*/
+function ogSyncRestore () {
+local DIRMOUNT ORIG DESTRSYNC PASSWORD OPTRSYNC USERRSYNC IMGINFO FILESFROM
+
+# Limpiamos los archivo de log
+echo  "" >$OGLOGCOMMAND;
+
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" \
+		"$FUNCNAME [ REPO|CACHE ] image_name extension  num_disk num_part  " \
+		"$FUNCNAME REPO Ubuntu12 img 1 2" \
+		"$FUNCNAME CACHE Windows7 diff 1 1"
+    return
+fi
+
+
+if [ $# -lt 5 ]; then
+    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $FUNCNAME  [ REPO|CACHE ] image_name extension   num_disk num_part "
+    return $?
+fi
+
+
+DIRMOUNT="$(ogGetMountImageDir "$2" "$3")"
+DESTRSYNC=$(ogGetMountPoint $4 $5)
+
+# Borramos ficheros de informacion de restauraciones antiguas
+rm -rf $DESTRSYNC/ogimg.*
+rm -rf /tmp/ogimg.*
+
+# Origen y destino de la sincronizacion y en REPO opciones rsync
+if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
+        ORIG="/tmp/$DIRMOUNT"
+else
+	[ -z $REPOIP ] && REPOIP=$(ogGetRepoIp)
+        PASSWORD="--password-file=/scripts/passrsync"
+        [ "$ogrsyncz" ==  "true" ] && OPTRSYNC="z "
+	[ "$ogrsyncw" == "true" ] && OPTRSYNC="W$OPTRSYNC"
+	USERRSYNC="opengnsys"
+        ORIG="$USERRSYNC@$REPOIP::ogimages/$DIRMOUNT"
+fi
+
+# Opciones rsync en cache y repo
+# Para la imagen basica, opcion de borrar archivos de la particion que no existen en la imagen
+[ "$3" == "img" ] && [ "$ogrsyncdel" != "false" ] && OPTRSYNC="$OPTRSYNC --delete"
+
+# Nos traemos listado ficheros y bajamos la imagen
+
+ogEcho log session "      $MSG_SYNC_RESTORE"
+
+# Si la imagen es diferencial nos traemos los archivos de informacion de la imagen.
+if [ "$3" == "diff" ]; then
+	# Lista de archivos a copiar:
+	IMGINFO="ogimg.info"
+	FILESFROM=" --files-from=/tmp/$IMGINFO"
+
+        echo "      rsync -aHAX$OPTRSYNC --progress  $ORIG/ogimg* /tmp"
+        rsync -aHAX$OPTRSYNC $PASSWORD --progress  "$ORIG"/ogimg* /tmp
+        # Borramos linea de información de la imagen, sino busca un fichero con ese nombre
+        sed -i   '/^\#/d' /tmp/$IMGINFO
+
+	cd $DESTRSYNC
+	# Diferencial: Borramos archivos sobrantes.
+	ogEcho log session "      $MSG_SYNC_DELETE"  
+	sed -e s/^/\"/g -e s/$/\"/g "/tmp/ogimg.rm" 2>/dev/null | xargs rm -rf
+
+fi
+
+echo "      rsync -aHAX$OPTRSYNC --progress  $FILESFROM  $ORIG/ $DESTRSYNC"
+rsync -aHAX$OPTRSYNC $PASSWORD --progress  $FILESFROM  "$ORIG/" "$DESTRSYNC"  2>$OGLOGCOMMAND | egrep "^deleting|^sent|^sending|^total|%"  |tee -a $OGLOGCOMMAND
+RETVAL=${PIPESTATUS[0]}
+cd /
+return $RETVAL
+}
+
+
+#/**
+# ogMountImage
+#@brief   Monta la imagen para sincronizar.
+#@param 1 Repositorio  [ REPO | CACHE ]
+#@param 2 Nombre Imagen
+#@param 3 Tipo imagen [ img |diff ]
+#@return punto de montaje
+#*/
+function ogMountImage () {
+local IMGEXT IMGFILE DIRMOUNT KERNELVERSION
+
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" \
+		"$FUNCNAME [ REPO|CACHE ] image_name [ extension ]" \
+		"$FUNCNAME REPO Ubuntu12" \
+		"$FUNCNAME CACHE Windows7 diff"
+    return
+fi
+
+
+if [ $# -lt 2 ]; then
+    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $FUNCNAME [ REPO|CACHE ]  image_name [ extension ]"
+    return $?
+fi
+
+[ "$3" == "" -o "$3" == "img" ] && IMGEXT="img" || IMGEXT="img.diff"
+
+DIRMOUNT="$(ogGetMountImageDir "$2" ${IMGEXT#*\.})"
+
+if [ "$1" == "REPO" -o "$1" == "repo" ]; then
+        [ -z $REPOIP ] && REPOIP=$(ogGetRepoIp)
+        hose $REPOIP 2009 --out sh -c "echo -ne MOUNT_IMAGE \"$2\" ${IMGEXT#*\.}"
+        echo "$OGIMG/$DIRMOUNT"
+else
+	# Si está montado nada que hacer.
+	df | grep "$DIRMOUNT$" 2>&1 >/dev/null && echo "/tmp/$DIRMOUNT" && return 0
+
+        IMGFILE="$(ogGetPath "$1" /"$2.$IMGEXT")" \
+		|| return $(ogRaiseError $OG_ERR_NOTFOUND "$1 $2.$IMGEXT"; echo $?)
+        mkdir -p "/tmp/$DIRMOUNT"
+	
+
+	# FS de la imagen segun el contenido del archivo .img
+	if file "$IMGFILE" |grep -i -e " ext4 filesystem " 2>&1 > /dev/null ; then
+	    mount -t ext4 -o loop "$IMGFILE" "/tmp/$DIRMOUNT" 1>/dev/null
+	else
+	    mount -o compress=lzo  "$IMGFILE" "/tmp/$DIRMOUNT" 1>/dev/null
+	fi
+
+	# Comprobamos que se ha montado bien
+	[ $? -eq 0 ] || return $(ogRaiseError $OG_ERR_DONTMOUNT_IMAGE "$1 $2 $3"; echo $?)
+        echo "/tmp/$DIRMOUNT"
+fi
+
+}
+
+
+#/**
+# ogUnmountImage  [ REPO | CACHE ] Image_name [ extension ]
+#@brief   Desmonta la imagen para sincronizar.
+#@param 1 Repositorio  [ REPO | CACHE ]
+#@param 2 Nombre Imagen
+#@param 3 Tipo imagen [ img |diff ]
+#*/
+function ogUnmountImage () {
+local IMGTYPE DIRMOUNT
+
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" \
+		"$FUNCNAME [ REPO|CACHE ] image_name [ extension ]" \
+		"$FUNCNAME REPO Ubuntu12" \
+		"$FUNCNAME CACHE Windows7 diff"
+    return
+fi
+
+if [ $# -lt 2 ]; then
+    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $FUNCNAME  [ REPO|CACHE ]  image_name [ extension ]"
+    return $?
+fi
+
+[ "$3" == "" ] && IMGTYPE="img" || IMGTYPE="$3"
+
+if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
+	DIRMOUNT="/tmp/$(ogGetMountImageDir "$2" $IMGTYPE)"
+	umount "$DIRMOUNT"
+	rmdir "$DIRMOUNT"
+	[ -f $IMGFILE.lock ] && sed -i s/"mounted"//g $IMGFILE.lock
+else
+	[ -z $REPOIP ] && REPOIP=$(ogGetRepoIp)
+        echo "      hose $REPOIP 2009 --out sh -c echo -ne UMOUNT_IMAGE \"$2\" $IMGTYPE"
+        hose $REPOIP 2009 --out sh -c "echo -ne UMOUNT_IMAGE \"$2\" $IMGTYPE"
+fi
+}
+
+
+#/**
+# ogGetMountImageDir
+#@brief   Devuelve el directorio de montaje de la imagen.
+#@param 1 Nombre Imagen
+#@param 2 Tipo imagen [ img |diff ]
+#*/
+function ogGetMountImageDir () {
+local DIRMOUNT
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" \
+		"$FUNCNAME image_name [ extension ]" \
+		"$FUNCNAME Ubuntu12" \
+		"$FUNCNAME Windows7 diff"
+    return
+fi
+
+
+if [ $# -lt 1 ]; then
+    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $FUNCNAME image_name [ extension ]"
+    return $?
+fi
+
+
+DIRMOUNT="mount/$1"
+[ "$2" == "diff" ] && DIRMOUNT="$DIRMOUNT.diff"
+echo "$DIRMOUNT"
+
+}
+
+
+#/**
+#  ogWaitSyncImage image_name extension stado imagen_size
+#@brief Se espera un tiempo a que se monte la imagen en el servidor.
+#@brief Cuando se esta creando la imagen hay que dar el tamaño, para que espere el tiempo de creación.	
+#@param 1 Respositorio [ REPO | CACHE ]
+#@param 2 Nombre Imagen 
+#@param 3 Tipo imagen [ img | diff ] 
+#@param 4 Estado [ mounted | reduced ]
+#@param 5 Tamaño imagen (opcional)
+#*/
+function ogWaitSyncImage () {
+local SIZE TIME DIRMOUNT TIMEOUT TIMEAUX LOCKFILE IMGDIR IMGEXT STATE
+
+TIME=$SECONDS
+
+# Ayuda o menos de 5 parametros y la imagen no es basica
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" \
+		"$FUNCNAME [ REPO | CACHE ] image_name extension state [ image_size ] " \
+		"$FUNCNAME REPO Ubuntu12 img 30000000" \
+		"$FUNCNAME CACHE Windows7 diff "
+    return
+fi
+
+if [ $# -lt 4 ]; then
+    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $FUNCNAME [ REPO | CACHE ]  image_name extension state [ image_size ] " 
+    return $?
+fi
+
+SIZE=${5:-"300000"}
+STATE="$4"
+ogCheckStringInGroup "$STATE" "mounted reduced" || \
+	return $(ogRaiseError  command $OG_ERR_FORMAT "STATE = [ mounted | reduced  ]" ) 
+
+IMGDIR="$(ogGetParentPath "$1" "/$2")"
+[ "$3" == "img" ] && IMGEXT="img" ||  IMGEXT="img.diff"
+LOCKFILE="${IMGDIR}/$(basename "/$2").$IMGEXT.lock"
+
+if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
+	DIRMOUNT="/tmp/$(ogGetMountImageDir "$2" $3)"
+else
+	DIRMOUNT="$OGIMG/$(ogGetMountImageDir "$2" $3)"
+fi
+
+echo -n -e "      $MSG_SYNC_SLEEP: $DIRMOUNT\n      #"  | tee -a $OGLOGSESSION $OGLOGFILE
+
+# Comprobamos: mounted -> que exista $DIRMOUNT/ogimg.info o que el fichero de lock contenga mounted
+#              reduced -> que el fichero de lock contenga reduced.
+
+# time-out segun el tamaño de la imagen. por defecto: 100000k -> 3s
+let TIMEOUT=$SIZE/$CREATESPEED
+[ $TIMEOUT -lt 60 ] && TIMEOUT=60
+until $(grep -i $STATE $LOCKFILE &>/dev/null) ; do
+	[ $STATE = "mounted" -a -f "$DIRMOUNT/ogimg.info" ] && ogEcho log session "" && return 0
+        TIMEAUX=$[SECONDS-TIME]
+        [  "$TIMEAUX" -lt "$TIMEOUT" ] || return $(ogRaiseError $OG_ERR_DONTMOUNT_IMAGE "$3 $4 $IMGEXT: time_out."; echo $?)
+        echo -n "#"  | tee -a $OGLOGSESSION $OGLOGFILE
+        sleep 5
+done
+echo  "" | tee -a $OGLOGSESSION $OGLOGFILE
+
+}
+
+
+#/**
+# ogReduceImage
+#@brief   Reduce el archivo de la imagen a tamaño datos + 500M
+#@param 1 Repositorio  [ REPO | CACHE ]
+#@param 2 Nombre Imagen
+#@param 3 Tipo Imagen [ img |diff ]
+#@return 
+#@exception OG_ERR_FORMAT     # 1 formato incorrecto.
+#@exception OG_ERR_NOTFOUND        # 2 Fichero o dispositivo no encontrado.
+#*/
+function ogReduceImage () {
+local IMGEXT DIRMOUNT AVAILABLE USED IMGDIR IMGFILE ENDSIZE LOOPDEVICE
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" \
+		"$FUNCNAME [ REPO|CACHE ] image_name [ extension ]" \
+		"$FUNCNAME REPO Ubuntu12" \
+		"$FUNCNAME CACHE Windows7 diff"
+    return
+fi
+
+if [ $# -lt 2 ]; then
+    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $FUNCNAME [ REPO|CACHE ] image_name [ extension ]"
+    return $?
+fi
+
+
+[ "$3" == "" -o "$3" == "img" ] && IMGEXT="img" || IMGEXT="img.diff"
+IMGDIR="$(ogGetParentPath "$1" "/$2")"
+IMGFILE="${IMGDIR}/$(basename "/$2").$IMGEXT"
+
+
+if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
+    # Para imagenes EXT4 reduzco, para BTRFS solo desmonto.
+    if file "$IMGFILE" | grep -i " ext4 filesystem " 2>&1 > /dev/null; then
+        # Al montar se comprueba la existencia de la imagen
+        DIRMOUNT="$(ogMountImage $1 "$2" ${IMGEXT#*\.})"
+        AVAILABLE=$(df -k|grep "$DIRMOUNT$"|awk '{print $4}')
+        # Si el espacio libre menor que 500Mb nos salimos
+        if [ $AVAILABLE -lt 200000 ]; then
+        	ogUnmountImage $1 "$2" ${IMGEXT#*\.}
+		echo "reduced" > "$IMGFILE.lock"
+	 	return 0
+	fi
+
+        # Calculamos la diferencia entre el tamaño interno y externo
+        EXTSIZE=$(ls -l --block-size=1024 "$IMGFILE" | cut -f5 -d" ")
+        INTSIZE=$(df -k|grep "$DIRMOUNT"|awk '{print $2}')
+        let EDGESIZE=$EXTSIZE-$INTSIZE
+        ogUnmountImage $1 "$2" ${IMGEXT#*\.}
+	LOOPDEVICE=$(losetup -f)
+	losetup $LOOPDEVICE "$IMGFILE"
+
+	# Redimensiono sistema de ficheros
+	echo "      resize2fs -fpM $LOOPDEVICE"
+	resize2fs -fpM $LOOPDEVICE |tee -a $OGLOGCOMMAND
+        ogMountImage $1 "$2" ${IMGEXT#*\.} >/dev/null
+
+	# Calculamos el tamaño final del archivo
+        INTSIZE=$(df -k|grep "$DIRMOUNT"|awk '{print $2}')
+        let EXTSIZE=$INTSIZE+$EDGESIZE
+        umount "$DIRMOUNT"
+
+	# Si existe dispositivo de loop lo borro.
+	[ $LOOPDEVICE ] && losetup -d $LOOPDEVICE
+
+	# Corto el archivo al tamaño del sistema de ficheros.
+        echo "      truncate --size=\"$EXTSIZE\"k $IMGFILE  "
+        truncate --size="$EXTSIZE"k "$IMGFILE"
+    else
+	# Desmonto  la imagen
+	umount "$DIRMOUNT"
+    fi
+
+    echo "reduced" > "$IMGFILE.lock"
+    rmdir "$DIRMOUNT"
+
+else
+	[ -z $REPOIP ] && REPOIP=$(ogGetRepoIp)
+        echo "      hose $REPOIP 2009 --out sh -c echo -ne REDUCE_IMAGE \"$2\" ${IMGEXT#*\.}"
+        hose $REPOIP 2009 --out sh -c "echo -ne REDUCE_IMAGE \"$2\" ${IMGEXT#*\.}"
+fi
+
+}
+
+
+
+#/**
+# ogIsSyncImage
+#@brief   Comprueba si la imagen es sincronizable
+#@param 1 Repositorio  [ REPO | CACHE ]
+#@param 2 Nombre Imagen
+#@param 3 Tipo Imagen [ img |diff ]
+#@return 
+#@exception OG_ERR_FORMAT     # 1 formato incorrecto.
+#@exception OG_ERR_NOTFOUND        # 2 Fichero o dispositivo no encontrado.
+#*/
+function ogIsSyncImage () {
+local IMGEXT IMGDIR IMGFILE 
+
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" \
+		"$FUNCNAME [ REPO|CACHE ] image_name [ extension ]" \
+		"$FUNCNAME REPO Ubuntu12" \
+		"$FUNCNAME CACHE Windows7 diff"
+    return
+fi
+
+if [ $# -lt 2 ]; then
+    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $FUNCNAME [ REPO|CACHE ] image_name [ extension ]"
+    return $?
+fi
+
+[ "$3" == "" -o "$3" == "img" ] && IMGEXT="img" || IMGEXT="img.diff"
+IMGDIR="$(ogGetParentPath "$1" "/$2")"
+IMGFILE="${IMGDIR}"/$(basename "/$2").$IMGEXT
+
+file "$IMGFILE" | grep -i -e " BTRFS Filesystem " -e " ext4 filesystem " >/dev/null
+[ $? -eq 0 ] && return 0 || return $OG_ERR_DONTSYNC_IMAGE 
+
+}
+
+
+#/**
+# ogCheckSyncImage
+#@brief   Muestra el contenido de la imagen para comprobarla.
+#@param 1 Repositorio  [ REPO | CACHE ]
+#@param 2 Nombre Imagen
+#@param 3 Tipo Imagen [ img |diff ]
+#@return 
+#@exception OG_ERR_FORMAT     # 1 formato incorrecto.
+#@exception OG_ERR_NOTFOUND        # 2 Fichero o dispositivo no encontrado.
+#*/
+function ogCheckSyncImage () {
+local IMGEXT  IMGDIR  IMGFILE DIRMOUNT ISMOUNT RETVAL KERNELVERSION
+
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" \
+		"$FUNCNAME [ REPO|CACHE ] image_name [ extension ]" \
+		"$FUNCNAME REPO Ubuntu12" \
+		"$FUNCNAME CACHE Windows7 diff"
+    return
+fi
+
+if [ $# -lt 2 ]; then
+    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $FUNCNAME [ REPO|CACHE ] image_name [ extension ]"
+    return $?
+fi
+
+[ "$3" == "" -o "$3" == "img" ] && IMGEXT="img" || IMGEXT="img.diff"
+IMGDIR="$(ogGetParentPath "$1" "/$2")"
+IMGFILE="${IMGDIR}/$(basename "/$2").$IMGEXT"
+
+ogIsSyncImage $1 "$2" "${IMGEXT#*\.}" || return $(ogRaiseError $OG_ERR_DONTSYNC_IMAGE "$3 $4"; echo $?)
+
+# Comprobamos que no esté montada (daria falso error)
+if [ "$1" == "CACHE" -o "$1" == "cache" ]; then
+	$(df | grep "/tmp/mount/$2${IMGEXT#img}$" &>/dev/null) && ISMOUNT=TRUE
+else
+	[ -f "$OGIMG/mount/$2${IMGEXT#img}/ogimg.info" ] && ISMOUNT=TRUE
+fi
+[ "$ISMOUNT" == TRUE ] && ogEcho log session warning "$MSG_SYNC_NOCHECK" && return 0
+
+DIRMOUNT="/tmp/ogCheckImage$$"
+mkdir "$DIRMOUNT" 
+# FS de la imagen segun el contenido del archivo .img
+if file "$IMGFILE" |grep -i -e " ext4 filesystem " 2>&1 > /dev/null ; then
+	mount -t ext4 -o loop "$IMGFILE" "$DIRMOUNT" 2>&1 | tee -a $OGLOGCOMMAND
+	RETVAL=${PIPESTATUS[0]}
+else
+	mount -o compress=lzo  "$IMGFILE" "$DIRMOUNT" 2>&1 | tee -a $OGLOGCOMMAND
+	RETVAL=${PIPESTATUS[0]}
+fi
+ls -C "$DIRMOUNT" | tee -a $OGLOGCOMMAND
+umount "$DIRMOUNT" 
+
+rmdir "$DIRMOUNT"
+return $RETVAL
+}
+

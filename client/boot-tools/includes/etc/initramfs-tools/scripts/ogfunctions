@@ -1,0 +1,840 @@
+#/**
+#@file    ogfunctions.lib
+#@brief   Librería o clase para la gestion del sistema operativo de los clientes OpenGnsys.
+#@class   client
+#@version 1.1.0
+#@warning License: GNU GPLv3+
+#*/ ##
+
+
+#/**
+#         ogGetNetworkDevice
+#@brief   Devuelve el nombre de dispositivo de red correpondiente al índice indicado.
+#@param   int_devindex   índice de dispositivo de red.
+#@return  str_devname    nombre de dispositivo de red.
+#@note    Índice 0 debe corresponder a interfaz "lo" y a partir de 1 para las reales.
+#@version 1.1.0 - Primera versión de la función.
+#@author  Ramón Gómez, ETSII Universidad de Sevilla
+#@date    2016/04/20
+#*/ ##
+ogGetNetworkDevice ()
+{
+# Mantener retrocompatibilidad con interfaces antiguas tipo eth.
+case "$1" in
+	eth0)	ind=1 ;;
+	eth1)	ind=2 ;;
+	eth2)	ind=3 ;;
+	*)	ind="$1" ;;
+esac
+# Buscar el dispositivo del índice.
+dev=""
+for f in /sys/class/net/*/uevent; do
+	source $f
+	let aux=$IFINDEX-1
+	[ "$ind" = "$INTERFACE" -o "$ind" = $aux ] && dev="$INTERFACE"
+done
+[ -n "$dev" ] && echo "$dev"
+}
+
+
+#/**
+#         ogExportKernelParameters
+#@brief   Exporta los parametros pasados al kernel
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@version 0.7 - Primera versión de la función.
+#@author  Antonio J. Doblas. Universidad de Malaga.
+#@date    2010/05/24
+#@version 1.1.0 - Sustituir índice de interfaz de red por su dispositivo.
+#@author  Ramón Gómez, ETSII Universidad de Sevilla
+#@date    2016/04/20
+#*/ ##
+ogExportKernelParameters ()
+{
+	GLOBAL="cat /proc/cmdline"
+	for i in `${GLOBAL}`
+	do
+		echo $i | grep "=" > /dev/null && export $i
+	done
+	# Sustituir índice de interfaz de red por su dispositivo.
+	DEVIND=$(echo "$ip" | cut -f6 -d:)
+	if [ -n "$DEVIND" ]; then
+		PRE=$(echo "$ip" | cut -f1-5 -d:)
+		POST=$(echo "$ip" | cut -f7- -d:)
+		DEVICE=$(ogGetNetworkDevice $DEVIND)
+		[ -n "$DEVICE" ] && export ip="$PRE:$DEVICE:${POST:-none}"
+	fi
+	return 0
+}
+
+
+#/**
+#         ogChangeVideoResolution
+#@brief   Cambia la resolución de vídeo utilizando el parámetro "video" del Kernel
+#         (sustituye al parámetro "vga").
+#@note    Formato del parámetro vídeo:    video=DRIVER:RESXxRESY-BITS
+#@note    El valor por defecto es:        video=uvesafb:640x480-16
+#@todo    Control de errores en el foramto de la variable "video".
+#@version 1.0.5 - Primera versión de la función.
+#@author  Ramón Gómez, ETSII Universidad de Sevilla
+#@date    2013/02/18
+#*/ ##
+ogChangeVideoResolution ()
+{
+# Variables locales.
+local DRIVER MODE
+# Mostrar resolución y driver por defecto si solo hay una opción disponible.
+if [ $(grep -c "" /sys/class/graphics/fb0/modes) -eq 1 ]; then
+	echo "Default screen mode: $(cat /sys/class/graphics/fb0/modes),$(cat /sys/class/graphics/fb0/bits_per_pixel)bpp$(lsmod|awk '$1=="video" && $3>0 {printf " (%s)",$4}')."
+else
+	# Obtener driver y resolución.
+	DRIVER="$(echo $video|cut -f1 -d:)"
+	MODE="$(echo $video|cut -f2 -d:)"
+	case "$DRIVER" in
+		# Cambiar resolución para driver "uvesafb".
+		uvesafb)
+			# Obtener modo por defecto si parámetro "video=uvesafb:D".
+			[ "$MODE" == "D" ] && MODE=$(awk -F: '$1=="D" {print $2; nextfile}' /sys/class/graphics/fb0/modes)
+			# Cambiar resolución según valor del parámetro "video".
+			grep ":$(echo ${MODE/p/}|cut -f1 -d-)p" /sys/class/graphics/fb0/modes | head -1 > /sys/class/graphics/fb0/mode 2>&1
+			echo "$(echo $MODE|cut -f2 -d-)" > /sys/class/graphics/fb0/bits_per_pixel 2>&1
+			echo "Screen mode: $(cat /sys/class/graphics/fb0/mode),$(cat /sys/class/graphics/fb0/bits_per_pixel)bpp."
+			;;
+		# Resolución por defecto para el resto de casos.
+		*)	echo "Unknown video driver, using default mode."
+			;;
+	esac
+fi
+}
+
+
+#/**
+#       ogExportVarEnvironment
+#@brief   Exporta las variables usadas en el proceso de inicio OpenGnsys y las almacena en /tmp
+#@param   
+#@return  
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@version 0.9
+#@author Antonio J. Doblas. Universidad de Malaga.
+#@date    2011/05/24
+#*/ ##
+ogExportVarEnvironment ()
+{
+	export CFGINITRD="/tmp/initrd.cfg"	
+	OGPROTOCOL="${ogprotocol:-smb}"
+	[ "$ogunit" != "" ] && OGUNIT="/$ogunit"
+	# OPTIONS Para samba y local (a nfs no le afecta)
+	export OPTIONS=" -o vers=1.0,sec=ntlm,user=opengnsys,pass=og"
+	DEFOGLIVE="ogclient"
+	export OGLIVEDIR="${oglivedir:-$DEFOGLIVE}" && echo "OGLIVEDIR=$OGLIVEDIR" >> $CFGINITRD
+	case "$OGPROTOCOL" in
+		nfs|NFS)			
+			export SRCOGLIVE="/var/lib/tftpboot" && echo "SRCOGLIVE=$SRCOGLIVE" >> $CFGINITRD	
+			export SRCOGSHARE="/opt/opengnsys/client" && echo "SRCOGSHARE=$SRCOGSHARE" >> $CFGINITRD
+			export SRCOGLOG="/opt/opengnsys/log/clients" && echo "SRCOGLOG=$SRCOGLOG" >> $CFGINITRD	
+			export SRCOGIMAGES="/opt/opengnsys/images$OGUNIT" && echo "SRCOGIMAGES=$SRCOGIMAGES" >> $CFGINITRD	
+		;;
+		smb|SMB|cifs|CIFS|samba|SAMBA)
+			export SRCOGLIVE="tftpboot"  && echo "SRCOGLIVE=$SRCOGLIVE" >> $CFGINITRD
+			export SRCOGSHARE="ogclient" && echo "SRCOGSHARE=$SRCOGSHARE" >> $CFGINITRD
+			export SRCOGLOG="oglog" && echo "SRCOGLOG=$SRCOGLOG" >> $CFGINITRD	
+			export SRCOGIMAGES="ogimages$OGUNIT" && echo "SRCOGIMAGES=$SRCOGIMAGES" >> $CFGINITRD
+		;;
+		local|LOCAL)
+			# Ponemos variables SRC compatibles con smb y nfs.
+			export SRCOGLIVE="local"
+			export SRCOGSHARE="client" && echo "SRCOGSHARE=$SRCOGSHARE" >> $CFGINITRD
+			export SRCOGLOG="log" && echo "SRCOGLOG=$SRCOGLOG" >> $CFGINITRD
+			export SRCOGIMAGES="images" && echo "SRCOGIMAGES=$SRCOGIMAGES" >> $CFGINITRD
+		;;
+	esac
+	#punto de acceso al boot-tools live
+	export DSTOGLIVE="/opt/oglive/tftpboot"
+	#punto de montaje para unionfs 
+	export OGLIVERAMFS="/opt/oglive/ramfs" && echo "OGLIVERAMFS=$OGLIVERAMFS" >> $CFGINITRD
+	#punto de montaje donde se accede al 2nd FS mediante loop
+	export OGLIVEROOTFS="/opt/oglive/rootfs" && echo "OGLIVEROOTFS=$OGLIVEROOTFS" >> $CFGINITRD
+	#punto de union entre LOCALROOTIMG y LOCALROOTRAM
+	export OGLIVEUNIONFS="/opt/oglive/unionfs" && echo "OGLIVEUNIONFS=$OGLIVEUNIONFS" >> $CFGINITRD
+	#etiquta para los dispositivos offline
+	export OGLIVELABEL="ogClient"
+	
+	#echo "puntos de montajes para los demas accesos"
+	#echo "acceso al client, engine, scritps, interfaz"
+	export DSTOGSHARE="/opt/opengnsys" && echo "DSTOGSHARE=$DSTOGSHARE" >> $CFGINITRD		
+	export DSTOGLOG="/opt/opengnsys/log" && echo "DSTOGLOG=$DSTOGLOG" >> $CFGINITRD
+	export DSTOGIMAGES="/opt/opengnsys/images" && echo "DSTOGIMAGES=$DSTOGIMAGES" >> $CFGINITRD
+		
+	##INFORMACION DE OTRAS VARIABLES OBTENDIAS EN OTRAS FUNCIONES ogConfigureNetwork.
+		#DEVICE
+		#IPV4DDR
+		#IPV4BROADCAST
+		#IPV4NETMASK
+		#IPV4GATEWAY
+		#HOSTNAME
+    #INFORMACION de otras variasbles obteneidas desde ogGetROOTSERVER
+		#ROOTSERVER  si ip=dhcp -> ROOTSERVER=NEXT-SERVER; si ip=host:rootserver:gw:mask:hostname:interfaz -> ROOTSERVER=rootserver
+		#BOOTIF -> si el gestor remoto es pxelinux.0 y se añade una linea más tipo "IPAPPEND 2" esta variable tendrá la mac de la interfaz.
+		#$OGSERVERLIVE
+		#$OGSERVERSHARE
+		#$OGSERVERLOG
+		#$OGSERVERIMAGES
+	return 0
+}
+
+
+#/**
+#       ogConfigureRamfs
+#@brief   Configura el initrd para adaptarlo al sistema raiz.
+#@param   
+#@return  
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@version 0.9
+#@author Antonio J. Doblas. Universidad de Malaga.
+#@date    2010/05/24
+#*/ ##
+ogConfigureRamfs ()
+{
+	mkdir -p $DSTOGLIVE	
+	mkdir -p $OGLIVERAMFS	
+	mkdir -p $OGLIVEROOTFS	  			 
+	mkdir -p $OGLIVEUNIONFS 
+
+	touch /etc/fstab
+}
+
+
+#/**
+#       ogLoadNetModule
+#@brief   Carga en un demerminado modulo de red, requiere compilación previo del modulo
+#@param   
+#@return  
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@version 0.9
+#@author Antonio J. Doblas. Universidad de Malaga.
+#@date    2010/05/24
+#*/ ##
+ogLoadNetModule ()
+{
+	if [ -n "$ognetmodule" ]
+	then
+   		echo "Cargando modulo de red $ognetmodule"
+   		modprobe ${ognetmodule}
+	fi
+}
+
+
+#/**
+#      ogPostConfigureFS
+#@brief   Configura el sistema raiz, para independizarlo entre los clientes.
+#@param   
+#@return  
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@version 0.9
+#@author Antonio J. Doblas. Universidad de Malaga.
+#@date    2010/05/24
+#*/ ##
+ogPostConfigureFS()
+{
+	# configuramos el /etc/hostname.
+	echo $HOSTNAME > /etc/hostname
+	
+	#configuramos el /etc/hosts
+	echo "127.0.0.1 localhost" > /etc/hosts
+	echo "$IPV4ADDR $HOSTNAME" >> /etc/hosts
+	
+	#configuramos el host.conf
+	echo "order hosts,bind" > /etc/host.conf
+	echo "multi on" >> /etc/host.conf
+	
+	#configuramos el dns anterior ubuntu 12.04 (parámetro del Kernel "ogdns=IP_DNS")
+	if [ -n "$ogdns" ]; then
+		mkdir -p /run/resolvconf
+		echo "nameserver $ogdns" > /run/resolvconf/resolv.conf
+	fi
+	
+	#configuramos el uso del servicio http proxy (parámetro del Kernel "ogproxy=URL_Proxy")
+	if [ -n "${ogproxy}" ]; then
+		export http_proxy="$ogproxy"
+		export https_proxy="$ogproxy"
+		export ftp_proxy="$ogproxy"
+		export ftps_proxy="$ogproxy"   	
+	fi	
+	
+	# configuramos el /etc/networks
+	#read -e NETIP NETDEFAULT <<<$(route -n | grep eth0 | awk -F" " '{print $1}')
+	NETIP=$(route -n | grep eth0 | awk -F" " '{print $1}') && NETIP=$(echo $NETIP | cut -f1 -d" ")
+	echo "default 0.0.0.0" > /etc/networks
+	echo "loopback 127.0.0.0" >> /etc/networks
+	echo "link-local 169.254.0.0" >> /etc/networks
+	echo "localnet $NETIP" >> /etc/networks
+	#route
+
+	#echo "ogLive1.0.2" > /etc/debian_chroot
+
+	#enlace si iniciamos desde ogprotocolo=local { cdrom, usb, cache } .
+	# monta el raiz del dispositivo local en /opt/og2fs/tftpboot  - acceso al fichero .sqfs
+	# y monta el sistema root sqfs en /opt/og2fs/2ndfs
+	#[ "$LOCALMEDIA" == "CACHE" ] && ln -s $DSTOGLIVE /opt/opengnsys/cache
+	#[ "$ogprotocol" == "local" ] &&  ln -s ${OGLIVEROOTFS}/opt/opengnsys/* /opt/opengnsys/
+	if [ "$ogprotocol" == "local" ]; then
+	   # Creamos los subdirectorios de /opt/opengnsys/
+	   [ "$ogstatus" == "offline" ] && ln -s ${OGLIVEROOTFS}/opt/opengnsys/* /opt/opengnsys/
+	   # Montamos CACHE
+	   # Si existe particion identificada como CACHE se monta.
+	   DEVICECACHE=$(blkid -L "CACHE")
+	   if [ "$DEVICECACHE" != "" ]; then
+		# Se monta diferente segun el dispositivo de cache igual o no al de ogclient.
+		DEVICEOGLIVE=$(df |grep $DSTOGLIVE|awk '{print $1}')
+		if [[ "$DEVICECACHE" == "*$DEVICEOGLIVE*" ]];then
+		   mount --bind $DSTOGLIVE /opt/opengnsys/cache
+		else
+		   mount $DEVICECACHE /opt/opengnsys/cache
+		fi
+		if [ "$ogstatus" == "offline" ]; then
+		   [ -d /opt/opengnsys/cache/log ] || mkdir /opt/opengnsys/cache/log
+		   mount --bind /opt/opengnsys/cache/log /opt/opengnsys/log
+		fi
+	   fi
+	   # Montamos REPO
+	   if [ "$ogstatus" == "offline" ]; then
+		# Si estatus distinto de online buscamos un dispositivo con etiqueta repo
+		# y si no existe montamos la cache como repo (si existe).
+		TYPE=$(blkid | grep REPO | awk -F"TYPE=" '{print $2}' | tr -d \")
+		if [ "$TYPE" == "" ]; then
+		   [ -d "/opt/opengnsys/cache$DSTOGIMAGES" ] && mount --bind  /opt/opengnsys/cache$DSTOGIMAGES $DSTOGIMAGES
+		else
+		   mount -t $TYPE LABEL=REPO $DSTOGIMAGES &>/dev/null
+		fi
+	   fi
+	fi
+
+	#Montamos un directorio temporal para permitir instalacion de softare desde el comando apt-get (parametor kernel "ogtmpfs=50" valor en megas
+    ogtmpfs="${ogtmpfs:-15}"
+    mount tmpfs /var/cache/apt/archives -t tmpfs -o size=${ogtmpfs}M
+    mkdir -p /var/cache/apt/archives/partial
+}
+
+
+#/**
+#     ogGetROOTSERVER
+#@brief   Determina los puntos de accesos a los distintos recursos.
+#Requiere ogConfigureNetworking.
+#Exporta ROOTSERVER
+# si la red ha sido configurada con dhcp el valor de ROOTSERVER será el valor de next-server del dhcp
+# si la red ha sido configurada con el parametro de kernel ip, será el segundo valor.
+## ip=iphost:ipnext-server:ipgateway:netmask:hostname:iface:none
+## ip=172.17.36.21:62.36.225.150:172.17.36.254:255.255.255.0:prueba1:eth0:none
+#@param   
+#@return  
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@version 0.9
+#@author Antonio J. Doblas. Universidad de Malaga.
+#@date    2010/05/24
+#*/ ##
+ogGetROOTSERVER ()
+{
+	# get nfs root from dhcp
+	if [ "x${NFSROOT}" = "xauto" ]; then
+		# check if server ip is part of dhcp root-path
+		if [ "${ROOTPATH#*:}" = "${ROOTPATH}" ]; then
+			NFSROOT=${ROOTSERVER}:${ROOTPATH}
+		else
+			NFSROOT=${ROOTPATH}
+		fi
+
+	# nfsroot=[<server-ip>:]<root-dir>[,<nfs-options>]
+	elif [ -n "${NFSROOT}" ]; then
+		# nfs options are an optional arg
+		if [ "${NFSROOT#*,}" != "${NFSROOT}" ]; then
+			NFSOPTS="-o ${NFSROOT#*,}"
+		fi
+		NFSROOT=${NFSROOT%%,*}
+		if [ "${NFSROOT#*:}" = "$NFSROOT" ]; then
+			NFSROOT=${ROOTSERVER}:${NFSROOT}
+		fi
+	fi
+	export ROOTSERVER
+	echo "ROOTSERVER=$ROOTSERVER" >> $CFGINITRD
+	
+	#si oglive no oglive=R
+	export OGSERVERIMAGES="${ogrepo:-$ROOTSERVER}" && echo "OGSERVERIMAGES=$OGSERVERIMAGES" >> $CFGINITRD 
+	export OGSERVERSHARE="${ogshare:-$ROOTSERVER}" && echo "OGSERVERSHARE=$OGSERVERSHARE" >> $CFGINITRD
+	export OGSERVERLOG="${oglog:-$ROOTSERVER}" && echo "OGSERVERLOG=$OGSERVERLOG" >> $CFGINITRD
+	export OGSERVERLIVE="${oglive:-$OGSERVERIMAGES}" && echo "OGSERVERLIVE=$OGSERVERLIVE" >> $CFGINITRD
+		
+	return 0
+}
+
+
+
+#       ogUpdateInitrd
+#@brief   Actualiza el initrd de la cache desde el servidor. Si el arranque ha sido desde cache, comprueba desde el servidor nueva version del initird.
+#@param1 
+#@return  
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@version 0.9
+#@author Antonio J. Doblas. Universidad de Malaga.
+#@date    2011/05/24
+#@version 1.1.0 - Permite varios ogLive dentro de subdirectorios
+#@author Irina Gómez. ETSII Universidad de Sevilla
+#@date    2017/04/27
+#@version 1.1.0 - Se permite varios ogLives en la CACHE
+#@author Antonio J. Doblas Viso. Universidad de Malaga
+#@date    2017/05/31
+#*/ ##
+
+ogUpdateInitrd ()
+{
+	local OGLIVEDIR
+	OGLIVEDIR=${oglivedir:-"ogclient"}
+	cd /tmp
+	mkdir /tmp/cache
+	TYPE=$(blkid -po export $(blkid -L CACHE) 2>/dev/null | awk -F= '$1=="TYPE" { print $2}')
+	# Salir si no se detecta caché.
+	[ -z "$TYPE" ] && return
+	mount -t $TYPE LABEL=CACHE /tmp/cache || return
+	mkdir -p /tmp/cache/boot/$OGLIVEDIR
+	
+	
+	# comparamos los del server
+	busybox tftp -g -r $OGLIVEDIR/ogvmlinuz.sum $ROOTSERVER
+	busybox tftp -g -r $OGLIVEDIR/oginitrd.img.sum $ROOTSERVER
+	SERVERVMLINUZ=`cat ogvmlinuz.sum`
+	SERVERINITRD=`cat oginitrd.img.sum`
+
+	
+	#comparamos los de la cache
+	CACHEVMLINUZ=`cat /tmp/cache/boot/$OGLIVEDIR/ogvmlinuz.sum`
+	CACHEINITRD=`cat /tmp/cache/boot/$OGLIVEDIR/oginitrd.img.sum`
+	
+	echo "MD5 on SERVER: $SERVERVMLINUZ $SERVERINITRD"
+	echo "MD5 on  CACHE: $CACHEVMLINUZ $CACHEINITRD"
+	
+	cd /tmp/cache/boot/$OGLIVEDIR || mkdir -p /tmp/cache/boot/$OGLIVEDIR
+	
+	if [ "$CACHEVMLINUZ" != "$SERVERVMLINUZ" ]
+	then		
+		echo "ogvmlinuz updating"
+		busybox tftp -g -r $OGLIVEDIR/ogvmlinuz $ROOTSERVER
+		busybox tftp -g -r $OGLIVEDIR/ogvmlinuz.sum $ROOTSERVER
+		DOREBOOT=true
+	fi
+	if [ "$CACHEINITRD" != "$SERVERINITRD" ]
+	then
+		echo "oginitrd updating"
+		busybox tftp -g -r $OGLIVEDIR/oginitrd.img $ROOTSERVER
+		busybox tftp -g -r $OGLIVEDIR/oginitrd.img.sum $ROOTSERVER
+		DOREBOOT=true
+	fi
+
+	cd /; umount /tmp/cache
+
+	[ "$DOREBOOT" == "true" ] && reboot -f
+
+}
+
+#/**
+#       ogConnect
+#@brief   Conecta con los recursos necesarios para opengnsys
+#@param1 ip del servidor TODO:dns
+#@param2 protocolo
+#@param3 punto de acceso remoto
+#@param4  punto de montaje local
+#@param5 acceso de lectura tipo ",ro"
+#@return  
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@version 0.9
+#@author Antonio J. Doblas. Universidad de Malaga.
+#@date    2011/05/24
+#*/ ##
+   
+ogConnect ()
+{
+	SERVER=$1
+	PROTOCOL=$2
+	SRC=$3
+	DST=$4
+	READONLY=$5
+	
+	case "$PROTOCOL" in
+		nfs)
+			nfsmount  ${SERVER}:${SRC} ${DST} -o nolock${READONLY} 2> /dev/null || mount.nfs ${SERVER}:${SRC} ${DST} -o nolock${READONLY}
+		;;
+		smb)
+			mount.cifs //${SERVER}/${SRC} ${DST} ${OPTIONS}${READONLY}		
+		;;
+		local)
+		   # Comprobamos que estatus sea online y que la variable del server no esta vacia.
+		   if [ "$ogstatus" != "offline" -a "$SERVER" != "" -a "$SRC" != "" ]; then
+			# Comprobamos que existe un servicio de samba.
+			smbclient -L $SERVER -N &>/dev/null
+			if [ $? -eq 0 ]; then
+			   mount.cifs //${SERVER}/og${SRC} ${DST} ${OPTIONS}${READONLY}
+			fi
+			# TODO: buscar condicion para NFS
+		   fi
+		;;
+		*)
+			return 1
+		;;
+	esac
+	return $?
+}
+
+
+#/**
+#       ogConnectOgLive
+#@brief   Conecta con el recurso para usar el sistema raiz externo, remoto o local
+#@param1 
+#@return  
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@version 0.9
+#@author Antonio J. Doblas. Universidad de Malaga.
+#@date    2011/05/24	
+ogConnectOgLive ()
+{
+# Si ogprotocol=local, la funcion ogExportVar => SRCOGLIVE=local
+	if [ "$SRCOGLIVE" == "local" ]
+	then		
+		echo  "Montar imagen del sistema root desde dispositivo local"
+		for i in $(blkid /dev/s* | grep $OGLIVELABEL  | awk -F: '{print $2}' | tr -d \"); do export $i; done
+		# si local usb| cd con partcion es identificada como label $OGLIVELABEL		 
+		mount -t $TYPE LABEL=$OGLIVELABEL $DSTOGLIVE  
+		if [ $? != 0 ]
+		then
+			# Si local es particion CACHE es identificada como CACHE
+			mount LABEL=CACHE $DSTOGLIVE
+			#export LOCALMEDIA=CACHE
+		fi
+	else
+		# Si ogprotocol es remoto.    TODO en smb rw y en nfs ro??
+		ogConnect $OGSERVERLIVE $OGPROTOCOL $SRCOGLIVE $DSTOGLIVE 		
+	fi		
+# Si el montaje ha sido correcto, tanto en local como en remoto. Procedemos con la union
+	ogMergeLive
+}
+
+
+#/**
+#       ogMergeLive
+#@brief   Metafuncion para fusionar el initrd con el sistema raiz.
+#@param1 
+#@return  
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@version 0.9
+#@author Antonio J. Doblas. Universidad de Malaga.
+#@date    2011/05/24	
+ogMergeLive()
+{
+#Si existe en el punto de acceso del del oglive el fichero ogclient.sqfs	
+if [ ! -d $DSTOGLIVE/$OGLIVEDIR ]; then
+	echo "Usando ogLive por defecto."
+	export OGLIVEDIR=$DEFOGLIVE
+fi
+if [ -f $DSTOGLIVE/$OGLIVEDIR/ogclient.sqfs ]
+then	
+	cat /proc/mounts > /tmp/mtab.preunion
+	if [ "$og2nd" == "img" ]
+	then
+		#Montamos el ROOTFS tipo  img, para desarrolladores
+		#TODO: comprobar que se tiene acceso de escritura
+		losetup /dev/loop0 $DSTOGLIVE/$OGLIVEDIR/ogclient.img -o 32256
+		mount /dev/loop0 $OGLIVEROOTFS
+	else
+		## Montamos el ROOTFS tipo squashfs
+		mount $DSTOGLIVE/$OGLIVEDIR/ogclient.sqfs $OGLIVEROOTFS -t squashfs -o loop
+	fi
+# Realizamos la union entre el ogliveram(initrd) y el ogliverootfs(ogclient.sqfs)	
+# Nota: el orden es muy importante para evitar errores de montaje.
+	[ -d $OGLIVEROOTFS/lib32 ] && LIBS=lib32
+	for i in bin sbin lib $LIBS etc var usr root boot; do
+		ogUnionLiveDir $i
+	done
+	cat /tmp/mtab.preunion > /etc/mtab
+else
+	echo "Fichero imagen del cliente no encontrado"
+	return 1
+fi
+}
+
+
+
+#/**
+#       ogUnionLiveDir
+#@brief  fusiona dos directorios con unionfs
+#@param1 
+#@return  
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@version 0.9
+#@author Antonio J. Doblas. Universidad de Malaga.
+#@date    2011/05/24
+ogUnionLiveDir()
+{
+	TMPDIR=/$1		#dir
+	FUSE_OPT="-o default_permissions -o allow_other -o use_ino -o nonempty -o suid"
+	UNION_OPT="-o cow -o noinitgroups"
+	UBIN="unionfs-fuse"
+
+	mkdir -p $OGLIVERAMFS$TMPDIR
+	U1STDIR="${OGLIVERAMFS}${TMPDIR}=RW"
+	U2NDDIR="${OGLIVEROOTFS}${TMPDIR}=RO"
+	UNIONDIR=${OGLIVEUNIONFS}${TMPDIR}
+	mkdir -p $UNIONDIR $TMPDIR
+	$UBIN $FUSE_OPT $UNION_OPT ${U1STDIR}:${U2NDDIR} $UNIONDIR
+	mount --bind  $UNIONDIR $TMPDIR
+}
+
+
+
+#/**
+#     ogConfigureLoopback
+#@brief   Configura la interfaz loopback para cliente torrent
+#@param   
+#@return  
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@version 0.9   Usando funciones generales de ubuntu
+#@author Antonio J. Doblas. Universidad de Malaga.
+#@date    2010/05/24
+#@version 1.0.1   Deteccion automatica de interfaz con enlace activo.
+#@author Antonio J. Doblas. Universidad de Malaga.
+#@date    2011/05/24
+#*/ ##
+ogConfigureLoopback()
+{
+	# for the portmapper we need localhost
+	ifconfig lo 127.0.0.1
+	#/etc/init.d/portmap start
+}
+
+#/**
+#    ogConfigureNetworking
+#@brief   Configura la interfaz de red usada en el pxe
+#@param   
+#@return  
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@version 0.9
+#@author Antonio J. Doblas. Universidad de Malaga.
+#@date    2010/05/24
+#*/ ##
+ogConfigureNetworking()
+{
+#echo "ogConfigureNetworking: Buscando interfaz a configurar DEVICE"
+if [ -n "${BOOTIF}" ] 
+then
+	#echo " variable BOOTIF exportada con pxelinux.0 con valor $BOOTIF"
+	IP=$IPOPTS
+	temp_mac=${BOOTIF#*-}
+	# convert to typical mac address format by replacing "-" with ":"
+	bootif_mac=""
+	IFS='-'
+	for x in $temp_mac ; do
+		if [ -z "$bootif_mac" ]; then
+        bootif_mac="$x"
+        else
+        	bootif_mac="$x:$bootif_mac"
+        fi
+	done
+	unset IFS
+	# look for devices with matching mac address, and set DEVICE to
+	# appropriate value if match is found.
+	for device in /sys/class/net/* ; do
+		if [ -f "$device/address" ]; then
+			current_mac=$(cat "$device/address")
+			if [ "$bootif_mac" = "$current_mac" ]; then
+				DEVICE=${device##*/}
+				break
+			fi
+		fi
+	done
+else
+	#echo "variable BOOTIF no exportada, intentamos detectar que interfaz se ha iniciado"
+	IP=$ip
+	#TODO Detectar que interfaz se ha iniciado
+	case "$IP" in
+		none|off)
+			return 0
+			;;
+		""|on|any)
+			# Bring up device
+			DEVICE=1
+			;;
+		dhcp|bootp|rarp|both)
+			DEVICE=1
+			;;
+		*)
+			DEVICE=`echo $IP | cut -f6 -d:`
+			;;
+	esac
+fi
+DEVICE=$(ogGetNetworkDevice $DEVICE)
+if [ -z "${DEVICE}" ]; then
+	echo "variable DEVICE con valor $DEVICE no encontrada, llamamos de nuevo a ogconfigure_networking"
+	ogConfigureNetworking
+fi
+
+[ -n "${DEVICE}" ] && [ -e /run/net-"${DEVICE}".conf ] && return 0
+#if [ -n "${DEVICE}" ] && [ -e /run/net-"${DEVICE}".conf ]; then 
+#	echo "variable DEVICE con valor $DEVICE  y fichero /run/net-$DEVICE encontrados"
+#	return 0
+#else
+#	echo "variable DEVICE con valor $DEVICE encontrada, procedemos a configurala y a crear el fichero /run/net-$DEVICE"
+#fi
+
+# Activamos la interfaz antes de configurar.
+ip address flush $DEVICE
+ip link set dev $DEVICE up
+# Si no se detecta señal portadora volver a configurar.
+sleep 1
+CARRIER=$(cat /sys/class/net/${DEVICE}/carrier)
+if [ "$CARRIER" != "1" ]
+then
+	ogConfigureNetworking
+fi
+
+# support ip options see linux sources
+# Documentation/filesystems/nfsroot.txt
+# Documentation/frv/booting.txt
+for ROUNDTTT in 2 3 4 6 9 16 25 36 64 100; do
+	# The NIC is to be configured if this file does not exist.
+	# Ip-Config tries to create this file and when it succeds
+	# creating the file, ipconfig is not run again.
+	if [ -e /run/net-"${DEVICE}".conf ]; then
+		break;
+	fi
+	case "$IP" in
+		none|off)
+			return 0
+		;;
+		""|on|any)
+			# Bring up device
+			echo "Setting $DEVICE  with option:on|any and Variable IP= $IP: ipconfig -t ${ROUNDTTT} ${DEVICE} "
+			ipconfig -t ${ROUNDTTT} ${DEVICE}
+		;;
+		dhcp|bootp|rarp|both)
+			echo "Setting $DEVICE with option:dhcp|bootp|rarp|both and Variable IP=  $IP: ipconfig -t ${ROUNDTTT} -c ${IP} -d ${DEVICE} "
+			ipconfig -t ${ROUNDTTT} -c ${IP} -d ${DEVICE}
+		;;
+		*)
+			echo "Setting $DEVICE with option *  and Variable IP= $IP: ipconfig -t ${ROUNDTTT} -d $IP  "
+			ipconfig -t ${ROUNDTTT} -d $IP
+			# grab device entry from ip option
+			NEW_DEVICE=${IP#*:*:*:*:*:*}
+			if [ "${NEW_DEVICE}" != "${IP}" ]; then
+				NEW_DEVICE=${NEW_DEVICE%:*}
+			else
+				# wrong parse, possibly only a partial string
+				NEW_DEVICE=
+			fi
+			if [ -n "${NEW_DEVICE}" ]; then
+				DEVICE="${NEW_DEVICE}"
+			fi
+		;;
+	esac
+done
+
+# source ipconfig output
+if [ -n "${DEVICE}" ]; then	
+	export DEVICE
+	export DEVICECFG="/run/net-${DEVICE}.conf"
+	# En algunos casos, el fichero de configuración está en /tmp.
+	[ ! -f $DEVICECFG -a -f ${DEVICECFG/run/tmp} ] && mv ${DEVICECFG/run/tmp} $DEVICECFG
+	source $DEVICECFG
+	echo "DEVICE=$DEVICE" >> $CFGINITRD
+	echo "DEVICECFG=$DEVICECFG" >> $CFGINITRD
+	echo "exportando variable DEVICE con valor = $DEVICE y DEVICECFG con valor $DEVICECFG"
+	# Compatibilidad con versiones anteriores.
+	ln -fs $DEVICECFG /tmp
+else
+	# source any interface as not exaclty specified
+	source /run/net-*.conf
+fi
+}
+
+
+#/**
+#    ogYesNo
+#@brief   Gestion de peticiones de usuario en modo ogdebug=true
+#@param1  OPTIONS    --timeout N    --default ANSWER
+#@param1 Questions   
+#@return  1=yes 0=no
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@version 0.9
+#@author:  
+#@date    2010/05/24
+#*/ ##
+ogYesNo()
+{
+    local ans
+    local ok=0
+    local timeout=0
+    local default
+    local t
+
+    while [[ "$1" ]]
+    do
+        case "$1" in
+        --default)
+            shift
+            default=$1
+            if [[ ! "$default" ]]; then error "Missing default value"; fi
+            t=$(echo $default | tr '[:upper:]' '[:lower:]')
+
+            if [[ "$t" != 'y'  &&  "$t" != 'yes'  &&  "$t" != 'n'  &&  "$t" != 'no' ]]; then
+                error "Illegal default answer: $default"
+            fi
+            default=$t
+            shift
+            ;;
+
+        --timeout)
+            shift
+            timeout=$1
+            if [[ ! "$timeout" ]]; then error "Missing timeout value"; fi
+            #if [[ ! "$timeout" =~ ^[0-9][0-9]*$ ]]; then error "Illegal timeout value: $timeout"; fi
+            shift
+            ;;
+
+        -*)
+            error "Unrecognized option: $1"
+            ;;
+
+        *)
+            break
+            ;;
+        esac
+    done
+
+    if [[ $timeout -ne 0  &&  ! "$default" ]]; then
+        error "Non-zero timeout requires a default answer"
+    fi
+
+    if [[ ! "$*" ]]; then error "Missing question"; fi
+
+    while [[ $ok -eq 0 ]]
+    do
+        if [[ $timeout -ne 0 ]]; then
+            if ! read -t $timeout -p "$*" ans; then
+                ans=$default
+            else
+                # Turn off timeout if answer entered.
+                timeout=0
+                if [[ ! "$ans" ]]; then ans=$default; fi
+            fi
+        else
+            read -p "$*" ans
+            if [[ ! "$ans" ]]; then
+                ans=$default
+            else
+                ans=$(echo $ans | tr '[:upper:]' '[:lower:]')
+            fi 
+        fi
+
+        if [[ "$ans" == 'y'  ||  "$ans" == 'yes'  ||  "$ans" == 'n'  ||  "$ans" == 'no' ]]; then
+            ok=1
+        fi
+
+        if [[ $ok -eq 0 ]]; then warning "Valid answers are: yes y no n"; fi
+    done
+    [[ "$ans" = "y" || "$ans" == "yes" ]]
+} 
+ 

@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# UHU - Comprobamos el disco, si solo hay un parametro, disco es 1, por compatibilidad con clientes antiguos
+if [ $# == 1 ]
+then
+	disk=1
+	part=$1
+else
+	disk=$1
+	part=$2
+fi
+
+bootOs $disk $part

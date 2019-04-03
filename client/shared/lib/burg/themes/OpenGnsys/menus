@@ -1,0 +1,188 @@
+tools_menu {
+  panel {
+    class = overlay
+
+    panel {
+      attach_hcenter = 0
+      attach_vcenter = 0
+      width = 30
+
+      panel {
+        class = dialog-title
+        image { image = "$$/images/txt-tools.png" attach_left = 0 }
+      }
+
+      panel {
+        class = dialog-body
+
+        text { class = br }
+
+        text {
+          text = "Toggle Mode"
+          command = "menu_toggle_mode"
+          class = text-menu-item
+        }
+        text {
+          text="Terminal"
+          command = "menu_popup term_window"
+          class = text-menu-item
+        }
+        text {
+          text = "Restart"
+          command = reboot
+          class = text-menu-item
+        }
+        text {
+          text = "Shutdown"
+          command = halt
+          class = text-menu-item
+        }
+        text {
+          text = "Help"
+          command = "menu_popup help"
+          class = text-menu-item
+        }
+        text {
+          text = "About"
+          command = "menu_popup about"
+          class = text-menu-item
+        }
+      }
+    }
+  }
+}
+
+about {
+  panel {
+    class = overlay
+
+    panel {
+      attach_hcenter = 0
+      attach_vcenter = 0
+      margin_left = 2
+      width = 60
+
+      panel {
+        class = dialog-title
+        image { image = "$$/images/txt-about.png" attach_left = 0 }
+      }
+
+      panel {
+        class = dialog-body
+
+        text { class = br }
+        text { text = "Darkness" class = "dialog-text" }
+        text { class = br }
+        text { text = "Designed & Created by LuxieRayku(luksi.reiku@gmail.com)" class = "dialog-text" }
+        text { text = "Darkness theme is designed to feel clean," class = "dialog-text" }
+	text { text = "light, modern & minimal." class = dialog-text }
+        text { class = br }
+
+        panel {
+          halign = center
+          class = button
+          command = true
+
+          text { text = OK class = button-text }
+        }
+      }
+    }
+  }
+}
+
+help {
+  panel {
+    class = overlay
+
+    panel {
+      attach_hcenter = 0
+      attach_vcenter = 0
+      margin_left = 2
+      width = 48
+
+      panel {
+        class = dialog-title
+        image { image = "$$/images/txt-help.png" attach_left = 0 }
+      }
+
+      panel {
+        class = dialog-body
+
+        text { text = "F1/h - Help" class = dialog-text }
+        text { text = "F2/t - Change theme" class = dialog-text }
+        text { text = "F3/r - Change resolution" class = dialog-text }
+        text { text = "F5/ctrl-x - Finish edit" class = dialog-text }
+        text { text = "F6 - Next window" class = dialog-text }
+        text { text = "F7 - Show folded items" class = dialog-text }
+        text { text = "F8 - Toggle between text and graphic mode" class = dialog-text }
+        text { text = "F9 - Shutdown" class = dialog-text }
+        text { text = "F10 - Reboot" class = dialog-text }
+        text { text = "f - Toggle between folded and unfolded mode" class = dialog-text }
+        text { text = "c - Open terminal" class = dialog-text }
+        text { text = "2 - Open two terminals" class = dialog-text }
+        text { text = "e - Edit current command" class = dialog-text }
+        text { text = "q - Quit graphic mode" class = dialog-text }
+        text { text = "i - Show theme information" class = dialog-text }
+        text { text = "n - Next item with the same class" class = dialog-text }
+        text { text = "w - Next windows item" class = dialog-text }
+        text { text = "u - Next ubuntu item" class = dialog-text }
+        text { text = "ESC - Exit from window or menu" class = dialog-text }
+
+        panel {
+          halign = center
+          class = button
+          command = true
+
+          text { text = OK class = button-text }
+        }
+      }
+    }
+  }
+}
+
+term_window {
+  panel {
+    class = terminal
+    width = 100%
+    height = 100%
+    term {
+      width=100%
+      height=100%
+    }
+  }
+}
+
+two_term {
+  panel {
+    width = 100%
+    height = 100%
+    direction = left_to_right
+
+    panel {
+      class = terminal
+      extend = 1
+
+      term {
+        width=100%
+        height=100%
+      }
+    }
+
+    panel {
+      class = terminal
+      extend = 1
+
+      term {
+        width=100%
+        height=100%
+      }
+    }
+  }
+}
+/*menu {
+  Shutdown {
+    class = "shutdown"
+    group = "group_main"
+    command = "halt"
+  }
+}*/

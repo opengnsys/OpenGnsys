@@ -1,0 +1,8 @@
+#sw.filesystem.remote
+#install nfs-common	# Provoca error de instalación en Ubuntu 15.04
+install sshfs 
+install cifs-utils
+install smbclient 
+install open-iscsi 
+install openssh-server 
+install bittornado 

@@ -1,0 +1,55 @@
+# Vagrantfile to install OpenGnsys boot-tools .1 virtual environment using VirtualBox provider.
+
+VAGRANTFILE_API_VERSION = "2"
+# VM provider: Oracle VM VirtualBox.
+ENV['VAGRANT_DEFAULT_PROVIDER'] = "virtualbox"
+# Language.
+LANGUAGE = "es_ES"
+ENV['LC_ALL'] = LANGUAGE + ".UTF-8"
+# Amount of virtual memory.
+VMMEM = 1024
+# OpenGnsys boot-tools environment provisioning script.
+SCRIPT = <<EOT
+# Set language.
+export LANG="#{LANGUAGE}.UTF-8"
+echo "LANG=\"$LANG\"" > /etc/default/locale
+echo "LANG=\"$LANG\"" >> /etc/environment
+locale-gen --lang #{LANGUAGE}
+sed -i "s/XKBLAYOUT=.*/XKBLAYOUT=\"${LANG%_*}\"/" /etc/default/keyboard
+dpkg-reconfigure -fnoninteractive console-setup
+# Install dependencies.
+apt-get update -y
+apt-get install -y subversion
+# Prepare environment.
+groupadd opengnsys
+mkdir -p /opt/opengnsys/client /tmp/opengnsys_installer/opengnsys
+ln -fs /var/lib/tftpboot /opt/opengnsys
+svn export https://github.com/opengnsys/OpenGnsys/branches/devel/client /tmp/opengnsys_installer/opengnsys/client
+echo "Connect to this VM, launch boot-tools generation script and follow instructions:"
+echo "    sudo /tmp/opengnsys_installer/opengnsys/client/boot-tools/boottoolsgenerator.sh"
+echo "Warning: this process may take a long time."
+echo "ogLive ISO file will be located in /opt/opengnsys/tftpboot/ogclient directory."
+EOT
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+
+  # OpenGnsys boot-tools environment VM definition.
+  config.vm.define "ogBootTools" do |bt|
+    # Specific VirtualBox configuration.
+    bt.vm.provider "virtualbox" do |vb|
+      # VM name, memory and CPUs.
+      vb.name = "ogBootTools"
+      vb.memory = VMMEM
+      vb.cpus = 1
+    end
+    # VM base and host name.
+    bt.vm.box = "ubuntu/xenial64"
+    bt.vm.hostname = "ogBootTools"
+    # Comment out to disable synced folder.
+    #bt.vm.synced_folder ".", "/vagrant", disabled: true
+    # Launch provisioning script.
+    bt.vm.provision "shell", inline: SCRIPT
+  end
+
+end
+

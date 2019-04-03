@@ -1,0 +1,17 @@
+#sw.cloning
+install fsarchiver 
+install pv 
+install pxe-kexec
+install mbuffer
+install parted 
+install gdisk
+install chntpw 
+install clonezilla
+install registry-tools
+install reglookup
+install libparse-win32registry-perl
+install libwin-hivex-perl
+install grokevt
+install libhivex0
+install libhivex-bin
+install rsync

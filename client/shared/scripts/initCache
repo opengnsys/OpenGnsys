@@ -1,0 +1,109 @@
+#!/bin/bash
+# Scirpt de iniciación de la caché local de disco.
+# Nota: se usa como base para el programa de configuración de equipos de OpenGnsys Admin).
+# Formato: initCache [int_ndisk [int_npart]] {-1 | 0 | int_size} [NOMOUNT]
+# Versión: 0.9.1, 2009/03/17, - Ramón Gómez, Univ. Sevilla - Versión inicial.
+# Versión: 0.9.2, 2010/07/27, - Ramón Gómez, Univ. Sevilla - redefinir parámetro.
+# Version: 1.0.5, 2012/09/18, - Univ. Huelva - Nuevo parametro para indicar el disco donde se creara la CACHE, si no se indica, se usa 1
+# Version: 1.1.0, 2016/06/16, - Ramón Gómez, Univ. Sevilla - Nuevos parámetros: partición de caché (por defecto, 4) y cadena opcional "NOMOUNT" para dejar la caché sin montar.
+
+TIME1=$SECONDS
+PROG="$(basename $0)"
+EXECFORMAT="$PROG [int_ndisk [int_npart]] {-1 | 0 | int_size} [NOMOUNT]"
+
+# Si el último parámetro es la cadena "NOMOUNT", marcar para no montar y descartarlo.
+if [[ "${*^^}" =~ \ NOMOUNT$ ]]; then
+    MOUNT=0
+    PARAMS=$[$#-1]
+else
+    MOUNT=1
+    PARAMS=$#
+fi
+# Tomar valores según el número de parámetros restantes.
+case $PARAMS in
+    1)  # Por defecto, disco 1 partición 4.
+	NDISK=1
+	NPART=4
+	SIZE=$1
+        ;;
+    2)  # Elegir disco y partición 4 por defecto.
+	NDISK=$1
+	NPART=4
+	SIZE=$2
+        ;;
+    3)  # Elegir disco y partición.
+	NDISK=$1
+	NPART=$2
+	SIZE=$3
+        ;;
+    *)  # Error de formato.
+        ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $EXECFORMAT"
+        exit $?
+        ;;
+esac
+
+# Si disco o partición no son mayores o iguales que 1, error.
+if [ -n "${NDISK//[-0-9]/}${NPART//[-0-9]/}" ] || [ $NDISK -lt 1 ] || [ $NPART -lt 1 ] ; then
+    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $EXECFORMAT"
+    exit $?
+fi
+# Si tamaño no es numérico o tamaño<-1, error.
+if [ -n "${SIZE//[-0-9]/}" ] || [ $SIZE -lt -1 ]; then
+    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $EXECFORMAT"
+    exit $?
+fi
+# Si tamaño=0, no hacer nada.
+if [ $SIZE -eq 0 ]; then
+    echo "No modificar la caché local."
+    exit
+fi
+# Si tamaño=-1, borrar caché.
+if [ $SIZE -eq -1 ]; then
+    echo "[10] Trabajar sin caché local."
+    ogUnmountCache 2>/dev/null
+    ogDeleteCache
+else
+    # Si la caché actual está definida en otro disco y partición, se elimina.
+    if [ -n "$(ogFindCache)" -a "$NDISK $NPART" != "$(ogFindCache)" ]; then
+	echo "[10] Detectada otra caché, eliminarla"
+	ogUnmountCache 2>/dev/null
+	ogDeleteCache
+    fi
+
+    # Error si tamaño definido no es >0.
+    if [ ! $SIZE -gt 0 ]; then
+	ogRaiseError $OG_ERR_FORMAT "$MSG_ERR_FORMAT: !($SIZE>0)"
+	exit $?
+    fi
+    # Si no existe caché o si cambia su tamaño, crearla.
+    CACHESIZE=$(ogGetCacheSize 2>/dev/null)
+    if [ "$SIZE" != "$CACHESIZE" ]; then
+        echo "[10] Crar partición de caché local."
+        ogUnmountCache 2>/dev/null
+        ogCreateCache $NDISK $NPART $SIZE
+        ogUpdatePartitionTable $NDISK
+    fi
+    # Si caché no montada y no formateada, formatear.
+    CACHE=$(ogFindCache) || exit $?
+    if ! ogIsFormated $CACHE; then
+        echo "[50] Formatear caché local."
+        ogFormatCache
+    fi
+    echo "[70] Comprobar montaje de caché local."
+    ogMountCache 2>/dev/null
+    # Si error al montar, chequear sistema de archivos y volver a montar.
+    if [ $? != 0 ]; then
+        echo "[80] Comprobar consistencia y volver a montar caché local."
+        ogCheckFs $CACHE
+        ogMountCache || exit $?
+    fi
+    # Dejar desmontada la caché si se ha solicitado.
+    if [ $MOUNT == 0 ]; then
+        echo "[90] Dejar desmontada la caché local."
+        ogUnmountCache 2>/dev/null
+    fi
+fi
+# Duración del proceso.
+TIME=$[SECONDS-TIME1]
+echo "[100] Duración de la operación $[TIME/60]m $[TIME%60]s"
+

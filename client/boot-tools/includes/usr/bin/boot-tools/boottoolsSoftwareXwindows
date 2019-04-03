@@ -1,0 +1,14 @@
+#!/bin/bash
+
+export LANGUAGE=C
+export LC_ALL=C
+export LANG=C
+
+apt-get clean
+apt-get -y update
+
+apt-get -y --force-yes install xorg-dev xorg lxde roxterm
+
+apt-get clean
+
+history -c

@@ -1,0 +1,11 @@
+Get the source code of this build by using anonymous svn in this way:
+
+svn co -r 68 svn://svn.gna.org/svn/grub4dos/trunk grub4dos
+
+or in this way:
+
+svn co -r 68 http://svn.gna.org/svn/grub4dos/trunk grub4dos
+
+and now you may "cd grub4dos" and do a "make" to compile.
+
+			

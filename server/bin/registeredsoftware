@@ -1,0 +1,72 @@
+#!/bin/bash
+#         registeredsoftware str_image
+#@file    registeredsoftware
+#@brief   Lista el software instalado en una imagen de sistema.
+#@param   str_image     Nombre canónico de la imagen.
+#@return  Líneas con el formato:   programa versión
+#@version 1.0 - Creación del script.
+#@author  Ramón Gómez - Univ. Sevilla
+#@date    2014-02-27
+#@version 1.1.0 - Incluir sistema operativo.
+#@author  Ramón Gómez - Univ. Sevilla
+#@date    2016-06-08
+
+
+# Variables.
+PROG=$(basename $0)
+OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
+SERVERCONF=$OPENGNSYS/etc/ogAdmServer.cfg
+MYCNF=/tmp/.my.cnf.$$
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+	echo "$PROG: Lista el software instalado en una imagen de sistema."
+	echo "Formato: $PROG str_image"
+	exit 0
+fi
+
+# Control básico de errores.
+if [ $# -ne 1 ]; then
+	echo "$PROG Error: Formato: $PROG str_image" >&2
+	exit 1
+fi
+if [ ! -r $SERVERCONF ]; then
+	echo "$PROG: Sin acceso a fichero de configuración"
+	exit 2
+fi
+
+# Sustituir caracteres ' por \' para evitar inyección SQL.
+RESOURCE="${1//\'/\'}"
+
+# Obtener datos de acceso a la base de datos.
+source $SERVERCONF
+
+# Componer fichero con credenciales de conexión a la base de datos.
+touch $MYCNF
+chmod 600 $MYCNF
+cat << EOT > $MYCNF
+[client]
+user=$USUARIO
+password=$PASSWORD
+EOT
+
+# Borrar el fichero temporal si termina el proceso.
+trap "rm -f $MYCNF" 0 1 2 3 6 9 15
+
+# Obtener lista de componentes del perfil de software asociado a la imagen.
+mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -s -N -e \
+	"SELECT descr FROM
+	       ((SELECT 1 AS orden, nombresos.nombreso AS descr
+		   FROM perfilessoft
+		   JOIN imagenes USING(idperfilsoft)
+		   JOIN nombresos USING(idnombreso)
+		  WHERE imagenes.nombreca='$RESOURCE')
+		UNION
+                (SELECT 2, softwares.descripcion
+		   FROM perfilessoft
+		   JOIN perfilessoft_softwares USING(idperfilsoft)
+		   JOIN softwares USING(idsoftware)
+		   JOIN imagenes USING(idperfilsoft)
+		  WHERE imagenes.nombreca='$RESOURCE')) AS unidas
+	  ORDER BY orden ASC, descr ASC;"
+

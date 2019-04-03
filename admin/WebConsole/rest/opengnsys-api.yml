@@ -1,0 +1,1308 @@
+swagger: '2.0'
+
+info:
+  version: "1.1.0"
+  title: OpenGnsys REST API definition
+  description: |
+    Information about the OpenGnsys REST API functions (including Server and
+    Repository Manager).
+  contact:
+    name: OpenGnsys Project
+    url: https://opengnsys.es/
+  license:
+    name: Creative Commons 4.0 International
+    url: http://creativecommons.org/licenses/by/4.0/
+basePath: /opengnsys/rest
+schemes:
+  - https
+consumes:
+  - application/json
+produces:
+  - application/json
+securityDefinitions:
+  apikey:
+    type: apiKey
+    name: Authorization
+    in: header
+# Paths description.
+paths:
+  /login:
+    post:
+      description: Check user login and returns his/her API key.
+      parameters:
+        - in: body
+          name: authdata
+          description: JSON authentication data
+          required: true
+          schema:
+            type: object
+            properties:
+              username:
+                type: string
+              password:
+                type: string
+                format: password
+      responses:
+        "200":
+          description: Successful login
+          schema:
+            type: object
+            properties:
+              userid:
+                type: integer
+                description: user identificator
+                format: int32
+              apikey:
+                description: API key to include in ``Authorization`` header
+                type: string
+        "400":
+          description: Missing parameters
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+        "500":
+          description: Authentication error
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+      tags:
+        - server
+        - user
+  /info:
+    get:
+      description: Gets OpenGnsys Server information
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            type: object
+            properties:
+              project:
+                description: project name (OpenGnsys)
+                type: string
+              version:
+                description: project version
+                type: string
+              codename:
+                description: version codename
+                type: string
+              definition:
+                description: codename definition URL
+                type: string
+              release:
+                description: project release
+                type: string
+              services:
+                description: actived services
+                type: array
+                items:
+                  type: string
+                  enum: [ 'server', 'repository', 'tracker' ]
+              oglive:
+                description: installed ogLive clients
+                type: array
+                items:
+                  type: object
+                  properties:
+                    distribution:
+                      description: base distribution
+                      type: string
+                    kernel:
+                      description: kernel version
+                      type: string
+                    architecture:
+                      description: kernel architecture (32-bit or 64-bit)
+                      type: string
+                      enum: [ "i386", "amd64" ]
+                    revision:
+                      description: OpenGnsys revision
+                      type: string
+                    directory:
+                      description: installation directory
+                      type: string
+                    iso:
+                      description: ISO file
+                      type: string
+                  required: [ distribution, kernel, architecture, revision, directory, iso ]
+            required: [ project, services ]
+      tags:
+        - server
+        - repository 
+  /status:
+    get:
+      description: Gets OpenGnsys Server status information
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            type: object
+            properties:
+              memInfo:
+                description: memory information
+                properties:
+                  total:
+                    description: total amount of memory
+                    type: integer
+                    format: int64
+                  used:
+                    description: amount of used memory
+                    type: integer
+                    format: int64
+                required: [ total, used ]
+              cpu:
+                description: CPU information
+                properties:
+                  model:
+                    description: processor model
+                    type: string
+                  usage:
+                    description: average of processor load
+                    type: number
+                    format: float
+                required: [ model, usage ]
+            required: [ memInfo, cpu ]
+      tags:
+        - server
+  /ous:
+    get:
+      description: Gets all `OU` objects.
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  description: Organization Unit identificator
+                  format: int32
+                  minimum: 1
+                name:
+                  type: string
+                  description: Organization Unit name
+              required: [ id, name ]
+      tags:
+        - server
+        - ou
+  /ous/{ouid}:
+    get:
+      description: Get an `OU` object.
+      parameters:
+        - $ref: "#/parameters/ouParam"
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            type: object
+            properties:
+              id:
+                type: integer
+                description: OU identificator
+              name:
+                type: string
+                description: OU name
+              description:
+                type: string
+                description: OU description
+            required: [ id, name, description ]
+      security:
+        - apikey: []
+      tags:
+        - server
+        - ou
+  /ous/{ouid}/groups:
+    get:
+      description: Get all group of labs defined in an `OU` object.
+      parameters:
+        - $ref: "#/parameters/ouParam"
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                id:
+                  description: group identificator
+                  type: integer
+                  format: int32
+                name:
+                  description: group name
+                  type: string
+                type:
+                  description: group type
+                  type: integer
+                comments:
+                  description: extra comments
+                  type: string
+                parent:
+                  description: parent group
+                  type: object
+                  properties:
+                    id:
+                      description: parent group identificator
+                      type: integer
+                      format: int32
+              required: [ id, name, comments ]
+      security:
+        - apikey: []
+      tags:
+        - server
+        - ou
+  /ous/{ouid}/labs:
+    get:
+      description: Get all `lab` objects defined in an `OU`.
+      parameters:
+        - $ref: "#/parameters/ouParam"
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  description: laboratory identificator
+                  format: int32
+                name:
+                  type: string
+                  description: laboratory name
+                inremotepc:
+                  type: boolean
+                  description: laboratory usable in Remote PC Project flag
+                group:
+                  type: object
+                  properties:
+                    id:
+                      description: group identificator
+                      type: integer
+                      format: int32
+                ou:
+                  type: object
+                  properties:
+                    id:
+                      description: OU identificator
+                      type: integer
+                      format: int32
+              required: [ id, name, inremotepc, ou ]
+      security:
+        - apikey: []
+      tags:
+        - server
+        - lab
+  /ous/{ouid}/labs/{labid}:
+    get:
+      description: Get a `lab` object.
+      parameters:
+        - $ref: "#/parameters/ouParam"
+        - $ref: "#/parameters/labParam"
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            type: object
+            properties:
+              id:
+                description: laboratory identificator
+                type: integer
+                format: int32
+              name:
+                description: laboratory name
+                type: string
+              location:
+                description: laboratory location 
+                type: string
+              description:
+                description: laboratory description
+                type: string
+              inremotepc:
+                description: check if this lab can be included in Remote PC Project
+                type: boolean
+              capacity:
+                description: maximum number of people in the lab
+                type: integer
+                format: int32
+              defclients:
+                description: number of defined clients in the lab
+                type: integer
+                format: int32
+              projector:
+                description: check if this lab has a projector
+                type: boolean
+              board:
+                description: check if this lab has an electronic board
+                type: boolean
+              routerip:
+                description: lab router IP address
+                type: string
+              netmask:
+                description: network mask to use in the lab
+                type: string
+              ntp:
+                description: NTP server IP address
+                type: string
+              dns:
+                description: DNS server IP address
+                type: string
+              proxyurl:
+                description: Proxy server URL
+                type: string
+              mcastmode:
+                description: Multicast protocol mode (full-duplex, half-duplex).
+                type: string
+                enum: [ "full-duplex", "half-duplex" ]
+                default: "full-duplex"
+              mcastip:
+                description: Multicast IP address
+                type: string
+              mcastport:
+                description: Multicast port
+                type: integer
+                format: int32
+              mcastspeed:
+                description: Multicast speed (in Mbps)
+                type: integer
+                format: int32
+              p2pmode:
+                description: Bittorrent connection type ("peer", "leecher". "seeder").
+                type: string
+              p2ptime:
+                description: Bittorrent connection extra time (in s.)
+                type: integer
+                format: int32
+              picture:
+                description: Lab's picture file
+                type: string
+            required: [ id, name, location, description, inremotepc, capacity, defclients, projector, board, routerip, netmask, mcastmode, mcastip, mcastport, mcastspeed, p2pmode, p2ptime, picture ]
+      security:
+        - apikey: []
+      tags:
+        - server
+        - lab
+  /ous/{ouid}/labs/{labid}/clients:
+    get:
+      description: Get all `client` objects defined in an `lab`.
+      parameters:
+        - $ref: "#/parameters/ouParam"
+        - $ref: "#/parameters/labParam"
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/SelectedClientModel"
+      security:
+        - apikey: []
+      tags:
+        - server
+        - client
+  /ous/{ouid}/labs/{labid}/clients/status:
+    get:
+      description: Get execution status of all clients definied in a `lab`
+      parameters:
+        - $ref: "#/parameters/ouParam"
+        - $ref: "#/parameters/labParam"
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/StatusModel"
+      security:
+        - apikey: []
+      tags:
+        - server
+        - client
+  /ous/{ouid}/labs/{labid}/clients/{clientid}:
+    get:
+      description: Get a `client` object.
+      parameters:
+        - $ref: "#/parameters/ouParam"
+        - $ref: "#/parameters/labParam"
+        - $ref: "#/parameters/clientParam"
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            type: object
+            properties:
+              id:
+                description: client id
+                type: integer
+                format: int32
+              name:
+                description: client name
+                type: string
+              serialno:
+                description: client serial number
+                type: string
+              netiface:
+                description: main network interface
+                type: string
+              netdriver:
+                description: client MAC address (kernel module)
+                type: string
+              mac:
+                description: client MAC address
+                type: string
+              ip:
+                description: client IP address
+                type: string
+              netmask:
+                description: subnet mask address
+                type: string
+              routerip:
+                description: network router IP address
+                type: string
+              repo:
+                description: repository identification
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    format: int32
+              validation:
+                description: boot validation flag
+                type: boolean
+              boottype:
+                description: boot template type
+                type: string
+              picture:
+                description: client's picture file
+                type: string
+            required: [ id, name, serialno, netiface, netdriver, mac, ip, netmask, routerip, repo, validation, picture ]
+      security:
+        - apikey: []
+      tags:
+        - server
+        - client
+  /ous/{ouid}/labs/{labid}/clients/{clientid}/hardware:
+    get:
+      description: Get the hardware definition of a `client` object.
+      parameters:
+        - $ref: "#/parameters/ouParam"
+        - $ref: "#/parameters/labParam"
+        - $ref: "#/parameters/clientParam"
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            type: object
+            properties:
+              id:
+                description: client id
+                type: integer
+                format: int32
+              name:
+                description: client name
+                type: string
+              hardware:
+                description: hardware components
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type:
+                      description: hardware component type
+                      type: string
+                    description:
+                      description: hardware component description
+                      type: string
+                  required: [ type, description ]
+            required: [ id, name, hardware ]
+      security:
+        - apikey: []
+      tags:
+        - server
+        - client
+  /ous/{ouid}/labs/{labid}/clients/{clientid}/diskcfg:
+    get:
+      description: Get disks configuration of a `client`
+      parameters:
+        - $ref: "#/parameters/ouParam"
+        - $ref: "#/parameters/labParam"
+        - $ref: "#/parameters/clientParam"
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            type: object
+            properties:
+              id:
+                description: client id
+                type: integer
+                format: int32
+              name:
+                description: client name
+                type: string
+              diskcfg:
+                description: |
+                  array of disk configuration data, including general disk information and
+                  partition/filesystem information (if not specified in paratmeter
+                  description, it is only valid in partition configuration).
+                type: array
+                items:
+                  type: object
+                  properties:
+                    disk:
+                      description: disk number
+                      type: integer
+                      format: int32
+                      minimum: 1
+                    size:
+                      description: disk or partition size
+                      type: integer
+                      format: int64
+                    parttable:
+                      description: partition table type (only in disk configuration)
+                      type: string
+                      enum: [ "MSDOS", "GPT", "LVM", "ZVOL" ]
+                    partition:
+                      description: partition number (only in partition configuration)
+                      type: integer
+                      format: int32
+                      minimum: 1
+                    parttype:
+                      description: partition type (only in partition configuration)
+                      type: string
+                    filesystem:
+                      description: filesystem type (only in partition configuration)
+                      type: string
+                    usage:
+                      description: percentage of data usage in a formated filesystem (only in partition configuration)
+                      type: integer
+                      format: int32
+                    os:
+                      description: installed operating system (only in partition configuration)
+                      type: string
+                    image:
+                      description: restaured image data, if needed (only in partition configuration)
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                          format: int32
+                        deploydate:
+                          description: image restauration/deploying date (only in partition configuration)
+                          type: string
+                          format: date-time
+                        updated:
+                          description: flag to check if the restaured image is updated (only in partition configuration)
+                          type: boolean
+            required: [ id, name, diskcfg ]
+      security:
+        - apikey: []
+      tags:
+        - server
+        - client
+  /ous/{ouid}/labs/{labid}/clients/{clientid}/status:
+    get:
+      description: Get execution status of a `client`
+      parameters:
+        - $ref: "#/parameters/ouParam"
+        - $ref: "#/parameters/labParam"
+        - $ref: "#/parameters/clientParam"
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            $ref: "#/definitions/StatusModel"
+      security:
+        - apikey: []
+      tags:
+        - server
+        - client
+  /ous/{ouid}/labs/{labid}/clients/{clientid}/events:
+    post:
+      description: Store UDS server URLs to resend some events recieved from OGAgent.
+      parameters:
+        - $ref: "#/parameters/ouParam"
+        - $ref: "#/parameters/labParam"
+        - $ref: "#/parameters/clientParam"
+        - name: data
+          in: body
+          description: Operation data
+          required: true
+          schema:
+            type: object
+            properties:
+              urlLogin:
+                description: URL to resend a login event.
+                type: string
+              urlLogout:
+                description: URL to resend a logout event.
+                type: string
+            required: [ urlLogin, urlLogout ]
+      responses:
+        "200":
+          description: Successful response
+        "400":
+          description: Error message
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+      security:
+        - apikey: []
+      tags:
+        - server
+        - client
+        - remotepc
+  /ous/{ouid}/labs/{labid}/clients/{clientid}/session:
+    post:
+      description: Record session data for a client.
+      parameters:
+        - $ref: "#/parameters/ouParam"
+        - $ref: "#/parameters/labParam"
+        - $ref: "#/parameters/clientParam"
+        - name: data
+          in: body
+          description: Session parameters
+          required: true
+          schema:
+            type: object
+            properties:
+              deadLine:
+                description: Maximum session time, in seconds (0 for unlimited)
+                type: integer
+                format: int64
+                minimum: 0
+            required: [ deadLine ]
+      responses:
+        "200":
+          description: Successful response
+      security:
+        - apikey: []
+      tags:
+        - server
+        - client
+        - remotepc
+  /ous/{ouid}/labs/{labid}/clients/{clientid}/unreserve:
+    delete:
+      description: Unreserve a client, clear its session data and send a poweroff operation.
+      parameters:
+        - $ref: "#/parameters/ouParam"
+        - $ref: "#/parameters/labParam"
+        - $ref: "#/parameters/clientParam"
+      responses:
+        "200":
+          description: Successful response
+      security:
+        - apikey: []
+      tags:
+        - server
+        - client
+        - remotepc
+  /ous/{ouid}/repos:
+    get:
+      description: Get all `repo` objects defined in an `OU`.
+      parameters:
+        - $ref: "#/parameters/ouParam"
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  format: int32
+                name:
+                  type: string
+                ou:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      format: int32
+              required: [ id, name, ou ]
+      security:
+        - apikey: []
+      tags:
+        - server
+        - repo
+  /ous/{ouid}/repos/{repoid}:
+    get:
+      description: Get a `repo` object.
+      parameters:
+        - $ref: "#/parameters/ouParam"
+        - $ref: "#/parameters/repoParam"
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            type: object
+            properties:
+              id:
+                description: repository id
+                type: integer
+                format: int32
+              name:
+                description: repository name
+                type: string
+              description:
+                description: repository description
+                type: string
+              ip:
+                description: repository IP address
+                type: string
+            required: [ id, name, description, ip ]
+      security:
+        - apikey: []
+      tags:
+        - server
+        - repo
+  /ous/{ouid}/images:
+    get:
+      description: Get all `image` objects defined in an `OU`.
+      parameters:
+        - $ref: "#/parameters/ouParam"
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            type: array
+            items:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  format: int32
+                name:
+                  type: string
+                inremotepc:
+                  type: boolean
+                ou:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      format: int32
+              required: [ id, name, inremotepc, ou ]
+      security:
+        - apikey: []
+      tags:
+        - server
+        - image
+  /ous/{ouid}/images/{imageid}:
+    get:
+      description: Get an `image` object.
+      parameters:
+        - $ref: "#/parameters/ouParam"
+        - $ref: "#/parameters/imageParam"
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            type: object
+            properties:
+              id:
+                description: image id
+                type: integer
+                format: int32
+              name:
+                description: image name
+                type: string
+              description:
+                description: image description
+                type: string
+              comments:
+                description: extra comments
+                type: string
+              inremotepc:
+                description: image usable in Remote PC Project flag
+                type: boolean
+              repo:
+                description: repository identification
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    format: int32
+              type:
+                description: image type (``monolithic``, ``basic``, ``incremental``)
+                type: string
+                enum: [ "monolithic", "basic", "incremental" ]
+                default: "monolithic"
+              baseimg:
+                description: base image for an incremental image (if ``type`` is ``incremental``)
+                type: string
+              client:
+                description: model client's data
+                type: object
+                properties:
+                  id:
+                    description: model client's id.
+                    type: integer
+                    format: int32
+                  disk:
+                    description: source disk number
+                    type: integer
+                    format: int32
+                  partition:
+                    description: source partition number
+                    type: integer
+                    format: int32
+                required: [ id, disk, partition ]
+              creationdate:
+                description: image creation date
+                type: string
+                format: date-time
+              release:
+                description: image creation release
+                type: string
+              os:
+                description: installed operating system
+                type: string
+            required: [ id, name, description, comments, inremotepc, repo, type ]
+      security:
+        - apikey: []
+      tags:
+        - server
+        - image
+  /ous/{ouid}/images/{imageid}/software:
+    get:
+      description: Get software inventory store into an `image`
+      parameters:
+        - $ref: "#/parameters/ouParam"
+        - $ref: "#/parameters/imageParam"
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            type: object
+            properties:
+              id:
+                description: image id
+                type: integer
+                format: int32
+              name:
+                description: image name
+                type: string
+              software:
+                description: software installed
+                type: object
+                properties:
+                  os:
+                    description: operating system
+                    type: string
+                  applications:
+                    type: array
+                    items:
+                      description: list of applications (name and version)
+                      type: string
+            required: [ id, name, software ]
+      security:
+        - apikey: []
+      tags:
+        - server
+        - image
+  /ous/{ouid}/images/{imageid}/reserve:
+    post:
+      description: |
+        Reserve a client with an installed image and send a boot/reboot operation.
+        If `labid` is specified, then choose a `client` defined in this lab.
+      parameters:
+        - $ref: "#/parameters/ouParam"
+        - $ref: "#/parameters/imageParam"
+        - in: body
+          name: data
+          description: Operation data
+          schema:
+            type: object
+            properties:
+              labid:
+                description: lab id filter (optional)
+                type: integer
+                format: int32
+                minimum: 1
+              maxtime:
+                description: maximum reservation time, in h. (optional, 24 h. by default)
+                type: integer
+                format: int32
+                minimum: 1
+                default: 24
+      responses:
+        "200":
+          description: Reserve a client to boot using an operating system image.
+          schema:
+            $ref: "#/definitions/SelectedClientModel"
+      security:
+        - apikey: []
+      tags:
+        - server
+        - image
+        - remotepc
+  /repository/images:
+    get:
+      description: Get information about images stored in a repository
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            type: object
+            properties:
+              directory:
+                description: repository directory
+                type: string
+              images:
+                description: information about repository-global images
+                type: array
+                items:
+                  $ref: "#/definitions/ImageModel"
+              ous:
+                description: OUs defined
+                type: array
+                items:
+                  type: object
+                  properties:
+                    subdir:
+                      description: OU subdirectory
+                      type: string
+                    images:
+                      description: information about OU-based images
+                      type: array
+                      items:
+                        $ref: "#/definitions/ImageModel"
+              disk:
+                description: repository disk information
+                type: object
+                properties:
+                  total:
+                    description: total disk space
+                    type: string
+                  used:
+                    description: disk space used by files
+                    type: string
+                  free:
+                    description: amount of free disk space
+                    type: string
+                  percent:
+                    description: percentage of used space
+                    type: string
+                required: [ total, used, free, percent ]
+            required: [ directory, images, ous, disk ]
+      security:
+        - apikey: []
+      tags:
+        - repository
+        - image
+  /repository/image/{ouname}/{imagename}:
+    get:
+      description: Get information about an specific image stored in the repository
+      parameters:
+        - in: path
+          name: ouname
+          description: OU name (optional)
+          required: false
+          type: string
+        - in: path
+          name: imagename
+          description: image name
+          required: true
+          type: string
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            $ref: "#/definitions/ImageModel"
+      security:
+        - apikey: []
+      tags:
+        - repository
+        - image
+  /repository/poweron:
+    post:
+      description: send Wake-On-Lan notification to many clients
+      parameters:
+        - in: body
+          name: data
+          description: Operation data
+          required: true
+          schema:
+            type: object
+            properties:
+              macs:
+                type: array
+                items:
+                  description: MAC (Ethernet) address
+                  type: string
+      responses:
+        "200":
+          description: Successful response
+          schema:
+            type: object
+            properties:
+              output:
+                type: string
+      security:
+        - apikey: []
+      tags:
+        - repository
+        - client
+  /ogagent/started:
+    post:
+      description: Process push notification when OGAgent is started
+      parameters:
+        - in: body
+          name: data
+          description: Operation data
+          required: true
+          schema:
+            type: object
+            properties:
+              ip:
+                type: string
+              mac:
+                type: string
+              ostype:
+                type: string
+              osversion:
+                type: string
+              secret:
+                type: string
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: An error has occurred
+      tags:
+        - server
+        - agent
+  /ogagent/stopped:
+    post:
+      description: Process push notification when OGAgent is stopped
+      parameters:
+        - in: body
+          name: data
+          description: Operation data
+          required: true
+          schema:
+            type: object
+            properties:
+              ip:
+                type: string
+              mac:
+                type: string
+              ostype:
+                type: string
+              osversion:
+                type: string
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: An error has occurred
+      tags:
+        - server
+        - agent
+  /ogagent/loggedin:
+    post:
+      description: Process push notification when an user logged in
+      parameters:
+        - in: body
+          name: data
+          description: Operation data
+          required: true
+          schema:
+            type: object
+            properties:
+              ip:
+                type: string
+              user:
+                type: string
+              language:
+                type: string
+              ostype:
+                type: string
+              osversion:
+                type: string
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: An error has occurred
+      tags:
+        - server
+        - agent
+  /ogagent/loggedout:
+    post:
+      description: Process push notification when an user is logged in
+      parameters:
+        - in: body
+          name: data
+          description: Operation data
+          required: true
+          schema:
+            type: object
+            properties:
+              ip:
+                type: string
+              user:
+                type: string
+      responses:
+        "200":
+          description: Successful operation
+        "400":
+          description: An error has occurred
+      tags:
+        - server
+        - agent
+parameters:
+  ouParam:
+    name: ouid
+    in: path
+    description: OU identificator
+    required: true
+    type: integer
+    minimum: 1
+  labParam:
+    name: labid
+    in: path
+    description: Lab identificator
+    required: true
+    type: integer
+    minimum: 1
+  clientParam:
+    name: clientid
+    in: path
+    description: Client identificator
+    required: true
+    type: integer
+    minimum: 1
+  repoParam:
+    name: repoid
+    in: path
+    description: repository identificator
+    required: true
+    type: integer
+    minimum: 1
+  imageParam:
+    name: imageid
+    in: path
+    description: image definition identificator
+    required: true
+    type: integer
+    minimum: 1
+definitions:
+  StatusModel:     
+    type: object
+    properties:
+      id:
+        description: client id
+        type: integer
+        format: int32
+        minimum: 1
+      ip:
+        description: client IP address
+        type: string
+      status:
+        description: execution status
+        type: string
+        enum: [ "off", "oglive", "busy", "linux", "windows", "macos", "unknown" ]
+      loggedin:
+        description: flag to check if an user is logged in
+        type: boolean
+    required: [ id, ip, status ]
+  SelectedClientModel:     
+    type: object
+    properties:
+      id:
+        description: client id
+        type: integer
+        format: int32
+        minimum: 1
+      name:
+        description: client name
+        type: string
+      mac:
+        description: client MAC address
+        type: string
+      ip:
+        description: client IP address
+        type: string
+      lab:
+        description: client's lab
+        type: object
+        properties:
+          id:
+            description: lab id
+            type: integer
+            format: int32
+            minimum: 1
+        required: [ id ]
+      ou:
+        description: client's OU
+        type: object
+        properties:
+          id:
+            description: OU id
+            type: integer
+            format: int32
+            minimum: 1
+        required: [ id ]
+    required: [ id, name, mac, ip, lab, ou ]
+  ImageModel:
+    type: object
+    properties:
+      name:
+        description: image name (file name without extension)
+        type: string
+      type:
+        description: image type (file extension or `dir` for directory image)
+        type: string
+      clientname:
+        description: source client name
+        type: string
+      clonator:
+        description: clonation program
+        type: string
+      compressor:
+        description: compression program
+        type: string
+      filesystem:
+        description: filesystem type
+        type: string
+      datasize:
+        description: data size (bytes)
+        type: integer
+        format: int64
+      size:
+        description: image size (bytes)
+        type: integer
+        format: int64
+      modified:
+        description: image modification date
+        type: string
+        format: date-time
+      mode:
+        description: image access permissions (four octal digits)
+        type: string
+      backedup:
+        description: image backed up flag (check if `.ant` file exists)
+        type: boolean
+        default: false
+      backupsize:
+        description: image backup size (bytes)
+        type: integer
+        format: int64
+      locked:
+        description: image locked flag (check if `.lock` file exists)
+        type: boolean
+        default: false
+    required: [ name, type, clientname, clonator, compressor, filesystem, datasize, size, modified, mode, backedup, locked ]
+

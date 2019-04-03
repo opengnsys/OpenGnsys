@@ -1,0 +1,98 @@
+#!/bin/bash
+#___________________________________________________________________
+#
+#  CREAR IMAGEN INCREMENTAL
+#___________________________________________________________________
+#
+# Parámetros recibidos desde el cliente:
+#
+# $1 Número de disco
+# $2 Número de particion
+# $3 Nombre canónico de la imagen básica (sin extensión)
+# $4 Dirección del repositorio
+# $5 Nombre canónico de la imagen incremental (sin extensión)
+# $6 Es una cadena "nnn" tipo flags que codifica varios parametros.
+#		Tiene el formato "nnn" donde "n" vale 0 ó 1.	
+#		1XX: Gestionar fichero completo en lugar de diferencas
+#		X1X: Eliminar archivos de la imagen que no estén en la partición 
+#		XX1: Comprimir archivos para enviarlos por la red
+#		El valor X indica que no importa el valor que tenga el dato
+# $7 Es una cadena "nnnn" tipo flags que codifica varios parametros.
+#		Tiene el formato "nnnn" donde "n" vale 0 ó 1.	
+#		1XXX: Borrar la imagen incremental del repositorio antes de crearla
+#		X1XX: Copiar imagen incremental también a la cache 
+#		XX1X: Borrar previamente la imagen incremental de la cache antes de copiarla
+#		XXX1: No borrar archivos en destino
+#		El valor X indica que no importa el valor que tenga el dato
+# $8 Método de syncronización 1=Sincronización1  2=Sincronizacion2
+# $9 Ruta de origen de la Imagen (Carpeta)
+
+#___________________________________________________________________
+#
+# Control parámetros
+#___________________________________________________________________
+	PROG="$(basename $0)"
+	if [ $# -lt 8 ]; then
+		usage=" ndisco nparticion nombre_imagen_basica ip_repositorio nombre_imagen_incremental"
+		usage="$usage copiar_a_caché Borrar_cache_previamente Ruta_origen"
+		ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG $usage"
+		exit $?
+	fi
+	
+        #Load engine configurator from engine.cfg file.
+        #Carga el configurador del engine desde el fichero engine.cfg
+        [ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
+
+	# Clear temporary file used as log track by httpdlog
+	# Limpia los ficheros temporales usados como log de seguimiento para httpdlog
+	echo -n "" > $OGLOGSESSION; echo -n  "" > $OGLOGCOMMAND
+
+	# Registro de inicio de ejecución
+	ogEcho log session "$MSG_INTERFACE_START $0 $*"
+
+
+	# Si el destino es REPO y el cliente no está en modo "admin"; activar repositorio para escritura,
+	PATH=$PATH:$(dirname $0)
+	CLIENTIP=$(ogGetIpAddress)
+	[ "$4" == "$CLIENTIP" ] && DEST=CACHE || DEST=REPO
+	if [ "$DEST" == "REPO" -a "$boot" != "admin"  ]; then
+		CambiarAcceso admin &>> $OGLOGFILE
+		RETVAL=$?
+		[ $RETVAL -gt 0 ] && exit $RETVAL
+	fi
+
+	if [ $8 -eq 1 ]; then
+		#sincronizacion1 
+		ogCrearSoftIncremental "$@"
+		RETVAL=$?
+	fi		
+	
+
+	if [ $8 -eq 2 ]; then
+		#sincronizacion 2
+		flag=$6
+                WHOLE=${flag:0:1}
+                DELFILE=${flag:1:1}
+                COMPRESS=${flag:2:1}
+
+                # Nota los valores se pasan como variables de entorno, 
+                #       la idea es que mas adelante vayan en el fichero PXE.
+                [ $WHOLE -eq 1 ] && export ogrsyncw=true || export ogrsyncw=false
+                [ $DELFILE -eq 1 ] && export ogrsyncdel=true || export ogrsyncdel=false
+                [ $COMPRESS -eq 1 ] && export ogrsyncz=true || export ogrsyncz=false
+
+		# REPOSITORIO: Si la ip es la del propio equipo CACHE, si no REPO
+		#CLIENTIP=$(ogGetIpAddress)
+		#[ "$4" == "$CLIENTIP" ] && DEST=CACHE || DEST=REPO
+		createDiffImage $1 $2 $DEST "$3" "$5" 
+		RETVAL=$?
+
+	fi
+
+	# Si estamos en modo user montamos el repositorio en modo lectura.
+	[ "$DEST" == "REPO" -a "$boot" != "admin" ] && CambiarAcceso user
+
+	# Registro de fin de ejecución
+	ogEcho log session "$MSG_INTERFACE_END $RETVAL"
+
+	exit $RETVAL
