@@ -238,19 +238,19 @@ if [ $? -ne 0 ]; then
         errorAndLog " - Server is temporally down, try again later"
         exit 1
 fi
-#getNetworkSettings
-#echoAndLog "Install dependencies"
-#installDependencies
+getNetworkSettings
+echoAndLog "Install dependencies"
+installDependencies
 echoAndLog "Download source files"
 downloadFiles
-#echoAndLog "Configuring apache"
-#configureApache
-#echoAndLog "Configuring opengnsys client"
-#configureClient
+echoAndLog "Configuring apache"
+configureApache
+echoAndLog "Configuring opengnsys client"
+configureClient
 echoAndLog "Configuring backend"
 configureBackend
-#echoAndLog "Configuring frontend"
-#configureFrontend
+echoAndLog "Configuring frontend"
+configureFrontend
 
 
 popd

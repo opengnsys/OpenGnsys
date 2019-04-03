@@ -1,0 +1,19 @@
+services:
+    #globunet_api.manager_orm:
+    #    class: Opengnsys\CoreBundle\Domain\ModelExtendedManager
+    #    arguments: ["@doctrine.orm.entity_manager"]
+
+
+    # FORM TYPE
+    Opengnsys\CoreBundle\Form\Type\UserFormType:
+        arguments: [Opengnsys\CoreBundle\Entity\User]
+        tags: [form.type]
+    Opengnsys\CoreBundle\Form\Type\RegistrationFormType:
+        arguments: [Opengnsys\CoreBundle\Entity\User]
+        tags: [form.type]
+
+
+    # MANAGER
+    opengnsys_core.user_manager:
+        class: Opengnsys\CoreBundle\Domain\ModelExtendedManager
+        arguments: ["@doctrine.orm.entity_manager", "@form.factory", Opengnsys\CoreBundle\Form\Type\UserFormType, Opengnsys\CoreBundle\Entity\User]
