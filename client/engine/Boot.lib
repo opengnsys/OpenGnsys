@@ -1386,7 +1386,7 @@ function ogBootLoaderHidePartitions ()
 
     # Si se solicita, mostrar ayuda.
     if [ "$*" == "help" ]; then
-        ogHelp "$FUNCNAME" "$MSG_SEE ogGrubHidePartitions ogBurgHidePartitions"
+        ogHelp "$FUNCNAME" "$MSG_SEE ogGrubHidePartitions or ogBurgHidePartitions."
         return
     fi
 
@@ -1485,13 +1485,32 @@ function ogBurgDeleteEntry ()
 }
 
 #/**
+# ogRefindDeleteEntry num_disk_delete num_part_delete
+#@brief ver ogBootLoaderDeleteEntry
+#@see ogBootLoaderDeleteEntry
+#*/
+function ogRefindDeleteEntry ()
+{
+    local EFIDISK EFIPART
+    # Si se solicita, mostrar ayuda.
+    if [ "$*" == "help" ]; then
+        ogHelp  "$FUNCNAME" "$FUNCNAME int_disk_delete int_npartition_delete" \
+                "$FUNCNAME 2 1"
+        return
+    fi
+    read EFIDISK EFIPART <<< $(ogGetEsp)
+    ogBootLoaderDeleteEntry $EFIDISK $EFIPART $@
+    return $?
+}
+
+#/**
 # ogBootLoaderDeleteEntry num_disk num_part num_part_delete
 #@brief Borra en el grub las entradas para el inicio en una particion.
 #@param 1 Numero de disco donde esta el grub
 #@param 2 Numero de particion donde esta el grub
 #@param 3 Numero del disco del que borramos las entradas
 #@param 4 Numero de la particion de la que borramos las entradas
-#@note Tiene que ser llamada desde ogGrubDeleteEntry o ogBurgDeleteEntry
+#@note Tiene que ser llamada desde ogGrubDeleteEntry, ogBurgDeleteEntry o ogRefindDeleteEntry
 #@return  (nada)
 #@exception OG_ERR_FORMAT    Use ogGrubDeleteEntry or ogBurgDeleteEntry.
 #@exception OG_ERR_FORMAT    Formato incorrecto.
@@ -1503,11 +1522,11 @@ function ogBurgDeleteEntry ()
 
 function ogBootLoaderDeleteEntry ()
 {
-    local FUNC DIRMOUNT CFGFILE DEVICE MENUENTRY DELETEENTRY ENDENTRY ENTRY
+    local FUNC DIRMOUNT CFGFILE LABEL MENUENTRY DELETEENTRY ENDENTRY ENTRY
 
     # Si se solicita, mostrar ayuda.
     if [ "$*" == "help" ]; then
-        ogHelp  "$FUNCNAME" "$MSG_SEE ogBurgDeleteEntry ogGrubDeleteEntry"
+        ogHelp  "$FUNCNAME" "$MSG_SEE ogBurgDeleteEntry, ogGrubDeleteEntry or ogRefindDeleteEntry"
         return
     fi
 
@@ -1521,7 +1540,7 @@ function ogBootLoaderDeleteEntry ()
 
     # Archivo de configuracion del grub
     DIRMOUNT=$(ogMount $1 $2)
-    # La función debe ser llamanda desde ogGrubDeleteEntry or ogBurgDeleteEntry.
+    # La función debe ser llamanda desde ogGrubDeleteEntry, ogBurgDeleteEntry or ogRefindDeleteEntry.
     case "$FUNC" in
         ogGrubDeleteEntry)
             CFGFILE="$DIRMOUNT/boot/grubMBR/boot/grub/grub.cfg"
@@ -1529,26 +1548,33 @@ function ogBootLoaderDeleteEntry ()
         ogBurgDeleteEntry)
             CFGFILE="$DIRMOUNT/boot/burg/burg.cfg"
             ;;
+	ogRefindDeleteEntry)
+	    CFGFILE="$DIRMOUNT/EFI/refind/refind.conf"
+	    ;;
         *)
-            ogRaiseError $OG_ERR_FORMAT "Use ogGrubDeleteEntry or ogBurgDeleteEntry."
+            ogRaiseError $OG_ERR_FORMAT "Use ogGrubDeleteEntry, ogBurgDeleteEntry or ogRefindDeleteEntry."
             return $?
             ;;
     esac
 
     # Dispositivo
-    DEVICE=$(ogDiskToDev $3 $4)
+    if [ "$(basename $CFGFILE)" == "refind.conf" ]; then
+	LABEL=$(printf "Part-%02d-%02d" $3 $4)
+    else
+	LABEL=$(ogDiskToDev $3 $4)
+    fi
 
-    # Error si no existe archivo del grub)
+    # Error si no existe archivo de configuración
     [ -r $CFGFILE ] || ogRaiseError log session $OG_ERR_NOTFOUND  "$CFGFILE" || return $?
 
     # Numero de linea de cada entrada.
     MENUENTRY="$(grep -n -e menuentry $CFGFILE| cut -d: -f1 | sed '1!G;h;$!d' )"
 
     # Entradas que hay que borrar.
-    DELETEENTRY=$(grep -n menuentry.*$DEVICE $CFGFILE| cut -d: -f1)
+    DELETEENTRY=$(grep -n menuentry.*$LABEL $CFGFILE| cut -d: -f1)
 
     # Si no hay entradas para borrar me salgo con aviso
-    [ "$DELETEENTRY" != "" ] || ogRaiseError log session $OG_ERR_NOTFOUND "Menuentry $DEVICE" || return $?
+    [ "$DELETEENTRY" != "" ] || ogRaiseError log session $OG_ERR_NOTFOUND "Menuentry $LABEL" || return $?
 
     # Recorremos el fichero del final hacia el principio.
     ENDENTRY="$(wc -l $CFGFILE|cut  -d" " -f1)"
@@ -1785,6 +1811,27 @@ function ogBurgDefaultEntry ()
     return $?
 }
 
+
+#/**
+# ogRefindDefaultEntry int_disk_default_entry int_npartition_default_entry
+#@brief ver ogBootLoaderDefaultEntry
+#@see ogBootLoaderDefaultEntry
+#*/ ##
+function ogRefindDefaultEntry ()
+{
+    local EFIDISK EFIPART
+    # Si se solicita, mostrar ayuda.
+    if [ "$*" == "help" ]; then
+        ogHelp "$FUNCNAME" "$FUNCNAME int_disk_default_entry int_npartition_default_entry" \
+               "$FUNCNAME 1 1"
+        return
+    fi
+
+    read EFIDISK EFIPART <<< $(ogGetEsp)
+    ogBootLoaderDefaultEntry $EFIDISK $EFIPART $@
+    return $?
+}
+
 #/**
 # ogBootLoaderDefaultEntry   int_disk_CFG  int_partition_CFG int_disk_default_entry int_npartition_default_entry
 #@brief   Configura la entrada por defecto de Burg
@@ -1808,11 +1855,11 @@ function ogBootLoaderDefaultEntry ()
 {
 
 # Variables locales.
-local PART CFGFILE DEFAULTENTRY MSG
+local PART FUNC DIRMOUNT LABEL CFGFILE DEFAULTENTRY MENUENTRY MSG
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$MSG_SEE ogGrubDefaultEntry ogBurgDefaultEntry"
+    ogHelp "$FUNCNAME" "$MSG_SEE ogGrubDefaultEntry, ogBurgDefaultEntry or ogRefindDefaultEntry."
     return
 fi  
 
@@ -1827,7 +1874,7 @@ FUNC="${FUNC%%\ *}"
 DIRMOUNT=$(ogMount $1 $2) || return $?
 
 # Comprobamos que exista fichero de configuración
-# La función debe ser llamanda desde ogGrubDefaultEntry or ogBurgDefaultEntry.
+# La función debe ser llamanda desde ogGrubDefaultEntry, ogBurgDefaultEntry or ogRefindDefaultEntry.
 case "$FUNC" in
     ogGrubDefaultEntry)
         CFGFILE="$DIRMOUNT/boot/grubMBR/boot/grub/grub.cfg"
@@ -1835,8 +1882,11 @@ case "$FUNC" in
     ogBurgDefaultEntry)
         CFGFILE="$DIRMOUNT/boot/burg/burg.cfg"
         ;;
+    ogRefindDefaultEntry)
+        CFGFILE="$DIRMOUNT/EFI/refind/refind.conf"
+        ;;
     *)
-        ogRaiseError $OG_ERR_FORMAT "Use ogGrubDefaultEntry or ogBurgDefaultEntry."
+        ogRaiseError $OG_ERR_FORMAT "Use ogGrubDefaultEntry, ogBurgDefaultEntry or ogRefindDefaultEntry."
         return $?
         ;;
 esac
@@ -1845,19 +1895,29 @@ esac
 [ -r $CFGFILE ] || ogRaiseError $OG_ERR_NOTFOUND "$CFGFILE" || return $?
 
 # Dispositivo
-DEVICE=$(ogDiskToDev $3 $4)
+if [ "$(basename $CFGFILE)" == "refind.conf" ]; then
+    LABEL=$(printf "Part-%02d-%02d" $3 $4)
+else
+    LABEL=$(ogDiskToDev $3 $4)
+fi
 
 # Número de línea de la entrada por defecto en CFGFILE (primera de la partición).
-DEFAULTENTRY=$(grep -n -m 1 menuentry.*$DEVICE $CFGFILE| cut -d: -f1)
+DEFAULTENTRY=$(grep -n -m 1 menuentry.*$LABEL $CFGFILE| cut -d: -f1)
 
 # Si no hay entradas para borrar me salgo con aviso
-[ "$DEFAULTENTRY" != "" ] || ogRaiseError session log $OG_ERR_NOTFOUND "No menuentry $DEVICE" || return $?
+[ "$DEFAULTENTRY" != "" ] || ogRaiseError session log $OG_ERR_NOTFOUND "No menuentry $LABEL" || return $?
 
 # Número de la de linea por defecto en el menú de usuario
 MENUENTRY="$(grep -n -e menuentry $CFGFILE| cut -d: -f1 | grep -n $DEFAULTENTRY |cut -d: -f1)"
-# Las líneas empiezan a contar desde cero
-let MENUENTRY=$MENUENTRY-1
-sed --regexp-extended -i  s/"set default=\"?[0-9]*\"?"/"set default=\"$MENUENTRY\""/g $CFGFILE
+
+if [ "$(basename $CFGFILE)" == "refind.conf" ]; then
+    sed -i /default_selection.*$/d $CFGFILE
+    sed -i "1 i\default_selection $MENUENTRY" $CFGFILE
+else
+    # En grub y burg las líneas empiezan a contar desde cero
+    let MENUENTRY=$MENUENTRY-1
+    sed --regexp-extended -i  s/"set default=\"?[0-9]*\"?"/"set default=\"$MENUENTRY\""/g $CFGFILE
+fi
 MSG="MSG_HELP_$FUNC"
 echo "${!MSG%%\.}: $@"
 }
@@ -1896,6 +1956,28 @@ function ogBurgOgliveDefaultEntry ()
     return $?
 }
 
+
+#/**
+# ogRefindOgliveDefaultEntry
+#@brief ver ogBootLoaderOgliveDefaultEntry
+#@see ogBootLoaderOgliveDefaultEntry
+#*/ ##
+function ogRefindOgliveDefaultEntry ()
+{
+    local EFIDISK EFIPART
+    # Si se solicita, mostrar ayuda.
+    if [ "$*" == "help" ]; then
+        ogHelp "$FUNCNAME" "$FUNCNAME" \
+               "$FUNCNAME"
+        return
+    fi
+
+    read EFIDISK EFIPART <<< $(ogGetEsp)
+    ogBootLoaderOgliveDefaultEntry $EFIDISK $EFIPART
+    return $?
+}
+
+
 #/**
 # ogBootLoaderOgliveDefaultEntry 
 #@brief   Configura la entrada de ogLive como la entrada por defecto de Burg.
@@ -1921,7 +2003,7 @@ local FUNC PART CFGFILE NUMENTRY MSG
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$MSG_SEE ogGrubOgliveDefaultEntry ogBurgOgliveDefaultEntry" \
+    ogHelp "$FUNCNAME" "$MSG_SEE ogGrubOgliveDefaultEntry, ogBurgOgliveDefaultEntry or ogRefindOgliveDefaultEntry" \
     return
 fi  
 
@@ -1934,7 +2016,7 @@ FUNC="${FUNC%%\ *}"
 
 # Error si no puede montar sistema de archivos.
 PART=$(ogMount $1 $2) || return $?
-# La función debe ser llamanda desde ogGrubOgliveDefaultEntry or ogBurgOgliveDefaultEntry.
+# La función debe ser llamanda desde ogGrubOgliveDefaultEntry, ogBurgOgliveDefaultEntry or ogRefindOgliveDefaultEntry.
 case "$FUNC" in
     ogGrubOgliveDefaultEntry)
         CFGFILE="$PART/boot/grubMBR/boot/grub/grub.cfg"
@@ -1942,8 +2024,11 @@ case "$FUNC" in
     ogBurgOgliveDefaultEntry)
         CFGFILE="$PART/boot/burg/burg.cfg"
         ;;
+    ogRefindOgliveDefaultEntry)
+        CFGFILE="$PART/EFI/refind/refind.conf"
+        ;;
     *)
-        ogRaiseError $OG_ERR_FORMAT "Use ogGrubOgliveDefaultEntry or ogBurgOgliveDefaultEntry."
+        ogRaiseError $OG_ERR_FORMAT "Use ogGrubOgliveDefaultEntry, ogBurgOgliveDefaultEntry or ogRefindOgliveDefaultEntry."
         return $?
         ;;
 esac
@@ -1957,8 +2042,14 @@ NUMENTRY=$(grep ^menuentry $CFGFILE| grep -n "OpenGnsys Live"|cut -d: -f1)
 # Si no existe entrada de ogLive nos salimos
 [ -z "$NUMENTRY" ] && (ogRaiseError $OG_ERR_NOTFOUND "menuentry OpenGnsys Live in $CFGFILE" || return $?)
 
-let NUMENTRY=$NUMENTRY-1
-sed --regexp-extended -i  s/"set default=\"?[0-9]+\"?"/"set default=\"$NUMENTRY\""/g $CFGFILE
+if [ "$(basename $CFGFILE)" == "refind.conf" ]; then
+    sed -i /default_selection.*$/d $CFGFILE
+
+    sed -i "1 i\default_selection $NUMENTRY" $CFGFILE
+else
+    let NUMENTRY=$NUMENTRY-1
+    sed --regexp-extended -i  s/"set default=\"?[0-9]+\"?"/"set default=\"$NUMENTRY\""/g $CFGFILE
+fi
 
 MSG="MSG_HELP_$FUNC"
 echo "${!MSG%%\.}: $@"
@@ -2005,7 +2096,7 @@ function ogBurgSetTheme  ()
 
 
 #/**
-# ogRefindSetTheme int_ndiskESP int_partitionESP str_theme
+# ogRefindSetTheme str_theme
 #@brief ver ogBootLoaderSetTheme
 #@see ogBootLoaderSetTheme
 #*/ ##
@@ -2013,27 +2104,30 @@ function ogRefindSetTheme () {
     local PART DIRTHEME CFGFILE
     # Si se solicita, mostrar ayuda.
     if [ "$*" == "help" ]; then
-        ogHelp "$FUNCNAME" "$FUNCNAME int_ndiskESP int_partitionESP str_themeName" \
-               "$FUNCNAME 1 1 ThemeBasic"
-        echo -e "\nThemes in $OGLIB/refind:\n$(ls $OGLIB/refind/themes/)"
+        ogHelp "$FUNCNAME" "$FUNCNAME str_themeName" \
+               "$FUNCNAME ThemeBasic"
+        echo -e "\nThemes in $OGLIB/refind:\n$(ls $OGLIB/refind/themes/ 2>/dev/null)"
 
         return
     fi
 
-    PART=$(ogMount $1 $2) || return $?
+    # Detectamos partición ESP
+    read EFIDISK EFIPART <<< $(ogGetEsp)
+
+    PART=$(ogMount $EFIDISK $EFIPART) || return $?
     DIRTHEME="$PART/EFI/refind/themes"
     CFGFILE="$PART/EFI/refind/refind.conf"
 
     # Para utilizar ogBootLoaderSetTheme es necesario la entrada set theme_name
     if [ -f $CFGFILE ]; then
-        sed -i '/showtools/i\set theme_name=none' $CFGFILE
+        sed -i '1 i\set theme_name=none' $CFGFILE
     else
         ogRaiseError $OG_ERR_NOTFOUND "$CFGFILE" || return $?
     fi
     # Creamos el directorio para los temas
     [ -d $DIRTHEME ] || mkdir $DIRTHEME
 
-    ogBootLoaderSetTheme $@
+    ogBootLoaderSetTheme $EFIDISK $EFIPART $@
     return $?
 }
 
@@ -2066,7 +2160,7 @@ local FUNC PART CFGFILE THEME NEWTHEME BOOTLOADER MSG NEWTHEMECFG
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$MSG_SEE ogGrubSetTheme ogBurgSetTheme"
+    ogHelp "$FUNCNAME" "$MSG_SEE ogGrubSetTheme, ogBurgSetTheme or ogRefindSetTheme."
     return   
 fi
   
@@ -2084,10 +2178,10 @@ FUNC="${FUNC%%\ *}"
 
 # Error si no puede montar sistema de archivos.
 PART=$(ogMount $1 $2) || return $?
-# La función debe ser llamanda desde ogGrubSetTheme or ogBurgSetTheme.
+# La función debe ser llamanda desde ogGrubSetTheme, ogBurgSetTheme or ogRefindSetTheme.
 case "$FUNC" in
     ogGrubSetTheme)
-    	BOOTLOADER="grug"
+	BOOTLOADER="grub"
 	BOOTLOADERDIR="boot/grubMBR"
         CFGFILE="$PART/boot/grubMBR/boot/grub/grub.cfg"  
         ogRaiseError $OG_ERR_FORMAT "ogGrubSetTheme not sopported" 
@@ -2220,7 +2314,7 @@ PART=$(ogMount $1 $2) || return $?
 # La función debe ser llamanda desde ogGrubSetAdminKeys or ogBurgSetAdminKeys.
 case "$FUNC" in
     ogGrubSetAdminKeys)
-    	BOOTLOADER="grug"
+	BOOTLOADER="grub"
     	BOOTLOADERDIR="grubMBR"
         CFGFILE="$PART/boot/grubMBR/boot/grub/grub.cfg"  
         ogRaiseError $OG_ERR_FORMAT "ogGrubSetAdminKeys not sopported" 
@@ -2295,6 +2389,25 @@ function ogBurgSetTimeOut ()
 }
 
 
+#/**
+# ogRefindSetTimeOut int_timeout_second
+#@brief ver ogBootLoaderSetTimeOut
+#@see ogBootLoaderSetTimeOut
+#*/ ##
+function ogRefindSetTimeOut ()
+{
+    local EFIDISK EFIPART
+    # Si se solicita, mostrar ayuda.
+    if [ "$*" == "help" ]; then
+        ogHelp "$FUNCNAME" "$FUNCNAME int_timeout_seconds" \
+               "$FUNCNAME 50"
+        return
+    fi
+
+    read EFIDISK EFIPART <<< $(ogGetEsp)
+    ogBootLoaderSetTimeOut $EFIDISK $EFIPART $@
+    return $?
+}
 
 #/**
 # ogBootLoaderSetTimeOut
@@ -2319,7 +2432,7 @@ local FUNC PART CFGFILE TIMEOUT BOOTLOADER BOOTLOADERDIR CFGFILE MSG
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$MSG_SEE ogGrubSetTimeOut ogBurgSetTimeOut"
+    ogHelp "$FUNCNAME" "$MSG_SEE ogGrubSetTimeOut, ogBurgSetTimeOut or ogRefindSetTimeOut"
     return   
 fi
   
@@ -2334,20 +2447,25 @@ FUNC="${FUNC%%\ *}"
 
 # Error si no puede montar sistema de archivos.
 PART=$(ogMount $1 $2) || return $?
-# La función debe ser llamanda desde ogGrubSetTimeOut or ogBurgSetTimeOut.
+# La función debe ser llamanda desde ogGrubSetTimeOut, ogBurgSetTimeOut or ogRefindSetTimeOut.
 case "$FUNC" in
     ogGrubSetTimeOut)
-    	BOOTLOADER="grug"
-    	BOOTLOADERDIR="grubMBR"
+	BOOTLOADER="grub"
+	BOOTLOADERDIR="boot/grubMBR"
         CFGFILE="$PART/boot/grubMBR/boot/grub/grub.cfg"     
         ;;
     ogBurgSetTimeOut)
         BOOTLOADER="burg"
-        BOOTLOADERDIR="burg"
+        BOOTLOADERDIR="boot/burg"
         CFGFILE="$PART/boot/burg/burg.cfg"        
         ;;
+    ogRefindSetTimeOut)
+	BOOTLOADER="refind"
+	BOOTLOADERDIR="EFI/refind"
+	CFGFILE="$PART/EFI/refind/refind.conf"
+	;;
     *)
-        ogRaiseError $OG_ERR_FORMAT "Use ogGrubSetTimeOut"
+        ogRaiseError $OG_ERR_FORMAT "Use ogGrubSetTimeOut, ogBurgSetTimeOut or ogRefindSetTimeOut."
         return $?
         ;;
 esac
@@ -2356,7 +2474,11 @@ esac
 [ -f $CFGFILE ] || ogRaiseError $OG_ERR_NOTFOUND "$CFGFILE" || return $?
 
 # Asignamos el timeOut.
-sed -i s/timeout=.*$/timeout=$TIMEOUT/g $CFGFILE
+if [ "$BOOTLOADER" == "refind" ]; then
+    sed -i s/timeout.*$/"timeout $TIMEOUT"/g $CFGFILE
+else
+    sed -i s/timeout=.*$/timeout=$TIMEOUT/g $CFGFILE
+fi
 }
 
 
@@ -2422,7 +2544,7 @@ local FUNC PART CFGFILE RESOLUTION NEWRESOLUTION DEFAULTRESOLUTION BOOTLOADER BO
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$MSG_SEE ogGrubSetResolution ogBurgSetResolution" 
+    ogHelp "$FUNCNAME" "$MSG_SEE ogGrubSetResolution, ogBurgSetResolution or ogRefindSetResolution."
     return   
 fi
 
@@ -2437,10 +2559,10 @@ FUNC="${FUNC%%\ *}"
 
 # Error si no puede montar sistema de archivos.
 PART=$(ogMount $1 $2) || return $?
-# La función debe ser llamanda desde oogGrugSetResolution or ogBurgSetResolution.
+# La función debe ser llamanda desde ogGrugSetResolution, ogBurgSetResolution or ogRefindSetResolution.
 case "$FUNC" in
     ogGrubSetResolution)
-    	BOOTLOADER="grug"
+	BOOTLOADER="grub"
     	BOOTLOADERDIR="grubMBR"
         CFGFILE="$PART/boot/grubMBR/boot/grub/grub.cfg"  
         ogRaiseError $OG_ERR_FORMAT "ogGrubSetResolution not sopported" 
@@ -2452,7 +2574,7 @@ case "$FUNC" in
         CFGFILE="$PART/boot/burg/burg.cfg"        
         ;;
     *)
-        ogRaiseError $OG_ERR_FORMAT "Use ogBootLoaderSetResolution"
+        ogRaiseError $OG_ERR_FORMAT "Use GrugSetResolution, ogBurgSetResolution or ogRefindSetResolution."
         return $?
         ;;
 esac
@@ -2498,6 +2620,45 @@ fi
 sed -i s/gfxmode=.*$/gfxmode=$NEWRESOLUTION/g $CFGFILE
 }
 
+
+
+
+#/**
+# ogBootLoaderSetResolution
+#@brief   Define la resolucion que usuara el thema del gestor de arranque
+#@param   int_resolution1
+#@param   int_resolution2 (Opcional)
+#@return
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_PARTITION Partición errónea o desconocida (ogMount).
+#@exception OG_ERR_NOTFOUND  Fichero de configuración no encontrado: grub.cfg burg.cfg.
+#*/ ##
+function ogRefindSetResolution () {
+local PART CFGFILE
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_resolution1 [int_resolution2]" \
+       "$FUNCNAME 1366 768" \
+       "$FUNCNAME 1"
+    return
+fi
+
+    # Error si no se reciben 2 parametros.
+[ $# -ge 1 ] || ogRaiseError $OG_ERR_FORMAT "$FUNCNAME int_resolution1 [int_resolution2]" || return $?
+
+# Error si no puede montar sistema de archivos.
+PART=$(ogMount $(ogGetEsp)) || return $?
+
+# Comprobamos que exista fichero de configuración
+CFGFILE=$PART/EFI/refind/refind.conf
+[ -f $CFGFILE ] || ogRaiseError $OG_ERR_NOTFOUND "$CFGFILE" || return $?
+
+# Borramos resolucion anterior y configuramos la nueva
+sed -i /^resolution/d $CFGFILE
+
+sed -i "1 i\resolution $1 $2" $CFGFILE
+}
+
 #         ogRefindInstall bool_autoconfig
 #@brief   Instala y actualiza el gestor rEFInd en la particion EFI
 #@param   bolean_Check__auto_config   true | false[default]
@@ -2522,7 +2683,7 @@ local CONFIG EFIDISK EFIPART EFIDEVICE EFIMNT EFIDIR SHIM DIRREFIND CFGFILE DIR 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME boolean_autoconfig " \
-           "$FUNCNAME 1 TRUE"
+           "$FUNCNAME TRUE"
     return
 fi
 
@@ -2556,27 +2717,33 @@ else
 fi
 
 # Configuramos rEFInd si es necesario
-if [ "$CONFIG" == "FALSE" ]; then
+CFGFILE="${EFIDIR}/refind/refind.conf"
+#if [ "$CONFIG" == "TRUE" ]; then
+if [ "$CONFIG" == "TRUE" ]; then
+    echo "dont_scan_dirs /EFI/microsoft, /EFI/ubuntu, /EFI/fedora, /EFI/opensuse" >> $CFGFILE
+else
     # Renombramos la configuración por defecto
-    mv  ${EFIDIR}/refind/refind.conf ${EFIDIR}/refind/refind.conf.auto
+    mv $CFGFILE ${CFGFILE}.auto
 
     # Creamos nueva configuración
-    CFGFILE="${EFIDIR}/refind/refind.conf"
     echo "timeout 20" > $CFGFILE
     echo "showtools reboot, shutdown" >> $CFGFILE
     echo -e "scanfor manual\n" >> $CFGFILE
-    if [ -a ${EFIDIR}/Microsoft ]; then
-        echo "menuentry \"Windows\" {" >> $CFGFILE
-        echo "    loader /EFI/Microsoft/Boot/bootmgfw.efi" >> $CFGFILE
-        echo "    icon /EFI/refind/icons/os_win8.png" >> $CFGFILE
-        echo "}" >> $CFGFILE
-    fi
-    if [ -a ${EFIDIR}/ubuntu ]; then
-        echo "menuentry \"Ubuntu\" {" >> $CFGFILE
-        echo "    loader /EFI/ubuntu/grubx64.efi" >> $CFGFILE
-        echo "    icon /EFI/refind/icons/os_ubuntu.png" >> $CFGFILE
-        echo "}" >> $CFGFILE
-    fi
+    # Configuración para Windows
+    #if [ -a ${EFIDIR}/Microsoft ]; then
+    #    echo "menuentry \"Windows\" {" >> $CFGFILE
+    #    echo "    loader /EFI/Microsoft/Boot/bootmgfw.efi" >> $CFGFILE
+    #    echo "    icon /EFI/refind/icons/os_win8.png" >> $CFGFILE
+    #    echo "}" >> $CFGFILE
+    #fi
+    # Configuración para Ubuntu
+    #if [ -a ${EFIDIR}/ubuntu ]; then
+    #    echo "menuentry \"Ubuntu\" {" >> $CFGFILE
+    #    echo "    loader /EFI/ubuntu/grubx64.efi" >> $CFGFILE
+    #    echo "    icon /EFI/refind/icons/os_ubuntu.png" >> $CFGFILE
+    #    echo "}" >> $CFGFILE
+    #fi
+    # Configuración para sistemas restaurados con OpenGnsys
     for DIR in $(ls -d /mnt/sda1/EFI/Part-*-* 2>/dev/null); do
         echo "menuentry \"${DIR##*/}\" {" >> $CFGFILE
         echo "    loader /EFI/${DIR##*/}/Boot/ogloader.efi" >> $CFGFILE
@@ -2591,7 +2758,7 @@ if [ "$CONFIG" == "FALSE" ]; then
         # Obtenemos parametros del kernel y sustituimos root
         CMDLINE="$(cat /proc/cmdline)"
         CMDLINE="root=$(ogDiskToDev $CACDISK $CACPART) ${CMDLINE#*ogvmlinuz}"
-        echo "menuentry \"OpenGnsys Client\" {" >> $CFGFILE
+        echo "menuentry \"OpenGnsys Live\" {" >> $CFGFILE
         echo "    volume CACHE" >> $CFGFILE
         echo "    ostype Linux" >> $CFGFILE
         echo "    loader /boot/$(basename ${OGLIVE%/*})/ogvmlinuz" >> $CFGFILE
@@ -2601,7 +2768,7 @@ if [ "$CONFIG" == "FALSE" ]; then
         echo "}" >> $CFGFILE
 
         # Ponemos ogLive como la entrada por defecto
-        sed -i '/showtools/i\default_selection "OpenGnsys Client"' $CFGFILE
+        sed -i '1 i\default_selection "OpenGnsys Live"' $CFGFILE
     fi
 fi
 }

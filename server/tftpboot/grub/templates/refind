@@ -1,4 +1,4 @@
 ##NO-TOCAR-ESTA-LINEA refind
 root='hd0,gpt1'
-chainloader /EFI/refind/shimx64.efi
+chainloader /EFI/refind/grubx64.efi
 boot
