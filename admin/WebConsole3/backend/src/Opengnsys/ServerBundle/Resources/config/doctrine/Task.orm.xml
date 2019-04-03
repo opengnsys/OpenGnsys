@@ -2,7 +2,8 @@
 <doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
-    <entity name="Opengnsys\ServerBundle\Entity\Task" table="og_tasks">
+    <entity name="Opengnsys\ServerBundle\Entity\Task" table="og_tasks"
+            repository-class="Opengnsys\ServerBundle\Entity\Repository\TaskRepository">
 
         <id name="id" type="integer" column="id">
             <generator strategy="AUTO"/>

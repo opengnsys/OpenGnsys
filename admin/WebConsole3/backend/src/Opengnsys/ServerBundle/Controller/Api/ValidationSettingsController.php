@@ -23,8 +23,8 @@ use FOS\RestBundle\Request\ParamFetcherInterface;
 
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 
-use Globunet\ApiBundle\Exception\InvalidFormException;
-use Globunet\ApiBundle\Controller\ApiController;
+use Opengnsys\CoreBundle\Exception\InvalidFormException;
+use Opengnsys\CoreBundle\Controller\ApiController;
 
 /**
  * @RouteResource("ValidationSettings")
@@ -44,7 +44,9 @@ class ValidationSettingsController extends ApiController
 	 *
 	 * @return Response
 	 */
-	public function optionsAction(Request $request){
+	public function optionsAction(Request $request)
+    {
+        $request->setRequestFormat($request->get('_format'));
 		$array = array();
 		$array['class'] = "opengnsys_server__api_form_type_validation_settings";
 		$array['options'] = array();
@@ -75,13 +77,14 @@ class ValidationSettingsController extends ApiController
 	 */
 	public function cgetAction(Request $request, ParamFetcherInterface $paramFetcher)
 	{
+        $request->setRequestFormat($request->get('_format'));
 		$offset = $paramFetcher->get('offset');
 		$offset = null == $offset ? 0 : $offset;
 		$limit = $paramFetcher->get('limit');
 		
 		$matching = $this->filterCriteria($paramFetcher);
 		
-		$objects = $this->container->get('opengnsys_server.api_validation_settings_manager')->all($limit, $offset, $matching);
+		$objects = $this->container->get('opengnsys_server.validation_settings_manager')->searchBy($limit, $offset, $matching);
 			
 		return $objects;
 	}
@@ -107,8 +110,9 @@ class ValidationSettingsController extends ApiController
 	 *
 	 * @throws NotFoundHttpException when validationSettings not exist
 	 */
-	public function getAction($slug)
+	public function getAction(Request $request, $slug)
 	{
+        $request->setRequestFormat($request->get('_format'));
 		$object = $this->getOr404($slug);
 	
 		return $object;
@@ -139,8 +143,9 @@ class ValidationSettingsController extends ApiController
 	 */
 	public function cpostAction(Request $request)
 	{
+        $request->setRequestFormat($request->get('_format'));
 		try {
-			$object = $this->container->get('opengnsys_server.api_validation_settings_manager')->post(
+			$object = $this->container->get('opengnsys_server.validation_settings_manager')->post(
 					$request->request->all()
 			);	
 			
@@ -153,56 +158,6 @@ class ValidationSettingsController extends ApiController
 			*/
 	
 			return $object;
-	
-		} catch (InvalidFormException $exception) {
-	
-			return $exception->getForm();
-		}
-	}
-	
-	/**
-	 * Update existing ValidationSettings from the submitted data or create a new ValidationSettings at a specific location.
-	 *
-	 * @ApiDoc(
-	 *   resource = true,
-	 *   input = {"class" = "opengnsys_server__api_form_type_validation_settings", "name" = ""},
-	 *   statusCodes = {
-	 *     201 = "Returned when the Activity is created",
-	 *     204 = "Returned when successful",
-	 *     400 = "Returned when the form has errors"
-	 *   }
-	 * )
-	 *
-	 * @Annotations\View(
-	 *  template = "object",
-	 *  serializerGroups={"opengnsys_server__validation_settings_get"},
-	 *  statusCode = Response::HTTP_OK
-	 * )
-	 *
-	 * @param Request $request the request object
-	 * @param int     $slug      the validationSettings id
-	 *
-	 * @return FormTypeInterface|View
-	 *
-	 * @throws NotFoundHttpException when validationSettings not exist
-	 */
-	public function putAction(Request $request, $slug)
-	{
-		try {
-			if (!($object = $this->container->get('opengnsys_server.api_validation_settings_manager')->get($slug))) {
-				$statusCode = Response::HTTP_CREATED;
-				$object = $this->container->get('opengnsys_server.api_validation_settings_manager')->post(
-						$request->request->all()
-				);
-			} else {
-				$statusCode = Response::HTTP_NO_CONTENT;
-				$object = $this->container->get('opengnsys_server.api_validation_settings_manager')->put(
-						$object,
-						$request->request->all()
-				);
-			}
-			
-			return $this->view($object, $statusCode);		
 	
 		} catch (InvalidFormException $exception) {
 	
@@ -237,8 +192,9 @@ class ValidationSettingsController extends ApiController
 	 */
 	public function patchAction(Request $request, $slug)
 	{
+        $request->setRequestFormat($request->get('_format'));
 		try {
-			$object = $this->container->get('opengnsys_server.api_validation_settings_manager')->patch(
+			$object = $this->container->get('opengnsys_server.validation_settings_manager')->patch(
 					$this->getOr404($slug),
 					$request->request->all()
 			);
@@ -272,11 +228,12 @@ class ValidationSettingsController extends ApiController
 	 *
 	 * @throws NotFoundHttpException when object not exist
 	 */
-	public function deleteAction($slug)
+	public function deleteAction(Request $request, $slug)
 	{
+        $request->setRequestFormat($request->get('_format'));
 		$object = $this->getOr404($slug);
 		
-		$object = $this->container->get('opengnsys_server.api_validation_settings_manager')->delete($object);	
+		$object = $this->container->get('opengnsys_server.validation_settings_manager')->delete($object);
 	
 		return $this->view(null, Response::HTTP_NO_CONTENT);
 	}
@@ -292,7 +249,7 @@ class ValidationSettingsController extends ApiController
 	 */
 	protected function getOr404($slug)
 	{
-		if (!($object = $this->container->get('opengnsys_server.api_validation_settings_manager')->get($slug))) {
+		if (!($object = $this->container->get('opengnsys_server.validation_settings_manager')->get($slug))) {
 			throw new NotFoundHttpException(sprintf('The resource \'%s\' was not found.',$slug));
 		}
 	

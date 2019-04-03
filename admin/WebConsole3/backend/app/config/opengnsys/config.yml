@@ -1,0 +1,10 @@
+parameters:
+    path_client: "/opt/opengnsys/log/clients/"
+    path_images: "/opt/opengnsys/images/"
+    oglivecli: "/opt/opengnsys/bin/oglivecli"
+    pxedir: "/opt/opengnsys/tftpboot/menu.lst"
+
+
+imports:
+    # OpengnsysCore
+    - { resource: "@OpengnsysCoreBundle/Resources/config/config.yml" }

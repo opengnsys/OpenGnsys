@@ -57,7 +57,7 @@
         </many-to-one>
 
         <!--
-        <many-to-many field="user" target-entity="\Opengnsys\ServerBundle\Entity\User" mapped-by="organizationalUnit"/>
+        <many-to-many field="user" target-entity="\Opengnsys\CoreBundle\Entity\User" mapped-by="organizationalUnit"/>
         -->
 
     </entity>

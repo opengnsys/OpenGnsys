@@ -6,12 +6,12 @@ PATH=$PATH:$INSTALL_TARGET/bin
 OPENGNSYS_CLIENTUSER="opengnsys"        # Usuario Samba
 
 
-# SÃ³lo ejecutable por usuario root
+# Solo ejecutable por usuario root
 if [ "$(whoami)" != 'root' ]; then
         echo "ERROR: this program must run under root privileges!!"
         exit 1
 fi
-# Error si OpenGnsys no estÃ¡ instalado (no existe el directorio del proyecto)
+# Error si OpenGnsys no esta instalado (no existe el directorio del proyecto)
 if [ ! -d $INSTALL_TARGET ]; then
         echo "ERROR: OpenGnsys is not installed, cannot update!!"
         exit 1
@@ -82,7 +82,7 @@ function getNetworkSettings()
 
 
 function downloadFiles() {
-    cp -r /root/opengnsys/* $WORKDIR
+    cp -rf /root/opengnsys/* $WORKDIR
 	#git clone gituser@opengnsys.es:/git/opengnsys -b webconsole3 $WORKDIR
 }
 
@@ -125,25 +125,34 @@ function configureBackend() {
 	mkdir -p $INSTALL_TARGET/www3
     INSTALL_BACKEND=$INSTALL_TARGET/www3/backend
     echo $INSTALL_BACKEND
-	cp -r $WORKDIR/admin/WebConsole3/backend $INSTALL_BACKEND
+	cp -rf $WORKDIR/admin/WebConsole3/backend $INSTALL_BACKEND
 	pushd $INSTALL_TARGET/www3/backend
 
-	echo "Configuración de la base de datos MYSQL"
-	echo "Usuario: "
-    read MYSQL_USER
-    sed -i -e "s/database_user:.*/database_user: "$MYSQL_USER"/g" $INSTALL_BACKEND/app/config/parameters.yml
 
-    echo "Password: "
-    read MYSQL_PASSWORD
-    sed -i -e "s/database_password:.*/database_password: "$MYSQL_PASSWORD"/g" $INSTALL_BACKEND/app/config/parameters.yml
-
-    echo "Nombre de la base de datos. (En caso de que el usuario tenga permiso de crear nueva base de datos, dejar este campo vacío)"
-    read MYSQL_DB
-    if [ -z $MYSQL_DB ] || [ $MYSQL_DB = "" ]
-    then
-        MYSQL_DB="opengnsys"
-    fi
-    sed -i -e "s/database_name:.*/database_name: "$MYSQL_DB"/g" $INSTALL_BACKEND/app/config/parameters.yml
+	#echo "Configuración de la base de datos MYSQL"
+	#echo "Usuario: "
+    #read MYSQL_USER
+    #if [ -z $MYSQL_USER ] || [ $MYSQL_USER = "" ]
+    #then
+    #    MYSQL_USER="u1consola1OG"
+    #fi
+    #sed -i -e "s/database_user:.*/database_user: "$MYSQL_USER"/g" $INSTALL_BACKEND/app/config/parameters.yml
+    #
+    #echo "Password: "
+    #read MYSQL_PASSWORD
+    #if [ -z $MYSQL_PASSWORD ] || [ $MYSQL_PASSWORD = "" ]
+    #then
+    #    MYSQL_PASSWORD="c1consola1OG"
+    #fi
+    #sed -i -e "s/database_password:.*/database_password: "$MYSQL_PASSWORD"/g" $INSTALL_BACKEND/app/config/parameters.yml
+    #
+    #echo "Nombre de la base de datos. (En caso de que el usuario tenga permiso de crear nueva base de datos, dejar este campo vacío)"
+    #read MYSQL_DB
+    #if [ -z $MYSQL_DB ] || [ $MYSQL_DB = "" ]
+    #then
+    #    MYSQL_DB="ogAdmBD3"
+    #fi
+    #sed -i -e "s/^database_name:.*/database_name: "$MYSQL_DB"/g" $INSTALL_BACKEND/app/config/parameters.yml
 
 	php composer.phar update
 	chmod 777 -R var/cache
@@ -155,6 +164,10 @@ function configureBackend() {
 	php app/console doctrine:schema:update --force
 	php app/console doctrine:fixtures:load
 	php app/console fos:user:create test test@opengnsys.es test
+
+	# Preguntar si quiere migrar de la versión 1.1 anterior.
+	php app/console opengnsys:migration:execute
+
 	popd
 	## Añadir al fichero de configuracion del cliente "ogAdmClient.cfg" la Url de la nueva API Rest
 	#echo "UrlApi=https://$SERVERIP/opengnsys3/rest/web/app_dev.php/api/" >> $INSTALL_TARGET/client/etc/ogAdmClient.cfg
@@ -178,9 +191,7 @@ function configureFrontend() {
 	popd
 }
 
-
 # Logs
-
 function getDateTime()
 {
         date "+%Y%m%d-%H%M%S"
@@ -230,8 +241,8 @@ fi
 #getNetworkSettings
 #echoAndLog "Install dependencies"
 #installDependencies
-#echoAndLog "Download source files"
-#downloadFiles
+echoAndLog "Download source files"
+downloadFiles
 #echoAndLog "Configuring apache"
 #configureApache
 #echoAndLog "Configuring opengnsys client"

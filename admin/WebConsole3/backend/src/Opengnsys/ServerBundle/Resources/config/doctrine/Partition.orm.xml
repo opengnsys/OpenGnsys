@@ -2,10 +2,11 @@
 <doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
-    <entity name="Opengnsys\ServerBundle\Entity\Partition" table="og_partitions">
+    <entity name="Opengnsys\ServerBundle\Entity\Partition" table="og_partitions"
+            repository-class="Opengnsys\ServerBundle\Entity\Repository\PartitionRepository">
 
         <unique-constraints>
-            <unique-constraint name="unique_Partition_id_numDisk_numPartition" columns="id,num_disk,num_partition"/>
+            <unique-constraint name="unique_Partition_id_numDisk_numPartition" columns="client_id,num_disk,num_partition"/>
         </unique-constraints>
 
         <id name="id" type="integer" column="id">

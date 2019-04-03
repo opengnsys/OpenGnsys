@@ -1,8 +1,8 @@
 imports:
     - { resource: parameters.yml }
 
-    # Globunet Feature Bundles
-    - { resource: globunet/config.yml }
+    # Opengnsys Feature Bundles
+    - { resource: opengnsys/config.yml }
 
     # JMS Feature Bundles
     - { resource: jms/config.yml }
@@ -49,7 +49,7 @@ doctrine:
         connections:
             default:
                 driver:   '%database_driver%'
-                #server_version: '5.5' # your database server version here
+                server_version: '5.5' # your database server version here
                 host:     "%database_host%"
                 port:     "%database_port%"
                 dbname:   "%database_name%"
@@ -61,6 +61,7 @@ doctrine:
                     set: string
             og_1:
                 driver:   '%og_1_database_driver%'
+                server_version: '5.5' # your database server version here
                 host:     '%og_1_database_host%'
                 port:     '%og_1_database_port%'
                 dbname:   '%og_1_database_name%'
@@ -80,7 +81,7 @@ doctrine:
                 mappings:
                     OpengnsysServerBundle: ~
                     OpengnsysRepositoryBundle: ~
-                    GlobunetUserBundle: ~
+                    OpengnsysCoreBundle: ~
                     FOSUserBundle: ~
                     FOSOAuthServerBundle: ~
                     #OpengnsysMigrationBundle: ~
@@ -110,5 +111,3 @@ monolog:
             level:    debug
             path:     '%kernel.logs_dir%/og_migration.log'
             channels: [og_migration]
-nelmio_api_doc:
-    name: Page Opengnsys API

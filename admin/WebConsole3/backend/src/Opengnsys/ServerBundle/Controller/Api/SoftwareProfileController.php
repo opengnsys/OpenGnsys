@@ -25,8 +25,8 @@ use FOS\RestBundle\Request\ParamFetcherInterface;
 
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 
-use Globunet\ApiBundle\Exception\InvalidFormException;
-use Globunet\ApiBundle\Controller\ApiController;
+use Opengnsys\CoreBundle\Exception\InvalidFormException;
+use Opengnsys\CoreBundle\Controller\ApiController;
 
 /**
  * @RouteResource("SoftwareProfile")
@@ -46,7 +46,9 @@ class SoftwareProfileController extends ApiController
 	 *
 	 * @return Response
 	 */
-	public function optionsAction(Request $request){
+	public function optionsAction(Request $request)
+    {
+        $request->setRequestFormat($request->get('_format'));
 		$array = array();
 		$array['class'] = SoftwareProfile::class;
 		$array['options'] = array();
@@ -77,13 +79,14 @@ class SoftwareProfileController extends ApiController
 	 */
 	public function cgetAction(Request $request, ParamFetcherInterface $paramFetcher)
 	{
+        $request->setRequestFormat($request->get('_format'));
 		$offset = $paramFetcher->get('offset');
 		$offset = null == $offset ? 0 : $offset;
 		$limit = $paramFetcher->get('limit');
 		
 		$matching = $this->filterCriteria($paramFetcher);
 		
-		$objects = $this->container->get('opengnsys_server.api_software_profile_manager')->all($limit, $offset, $matching);
+		$objects = $this->container->get('opengnsys_server.software_profile_manager')->searchBy($limit, $offset, $matching);
 			
 		return $objects;
 	}
@@ -109,8 +112,9 @@ class SoftwareProfileController extends ApiController
 	 *
 	 * @throws NotFoundHttpException when softwareProfile not exist
 	 */
-	public function getAction($slug)
+	public function getAction(Request $request, $slug)
 	{
+        $request->setRequestFormat($request->get('_format'));
         $object = $this->getOr404($slug);
 
         $groups = array();
@@ -150,8 +154,9 @@ class SoftwareProfileController extends ApiController
 	 */
 	public function cpostAction(Request $request)
 	{
+        $request->setRequestFormat($request->get('_format'));
 		try {
-			$object = $this->container->get('opengnsys_server.api_software_profile_manager')->post(
+			$object = $this->container->get('opengnsys_server.software_profile_manager')->post(
 					$request->request->all()
 			);	
 			
@@ -164,56 +169,6 @@ class SoftwareProfileController extends ApiController
 			*/
 	
 			return $object;
-	
-		} catch (InvalidFormException $exception) {
-	
-			return $exception->getForm();
-		}
-	}
-	
-	/**
-	 * Update existing SoftwareProfile from the submitted data or create a new SoftwareProfile at a specific location.
-	 *
-	 * @ApiDoc(
-	 *   resource = true,
-	 *   input = {"class" = "opengnsys_server__api_form_type_software_profile", "name" = ""},
-	 *   statusCodes = {
-	 *     201 = "Returned when the Activity is created",
-	 *     204 = "Returned when successful",
-	 *     400 = "Returned when the form has errors"
-	 *   }
-	 * )
-	 *
-	 * @Annotations\View(
-	 *  template = "object",
-	 *  serializerGroups={"opengnsys_server__software_profile_get"},
-	 *  statusCode = Response::HTTP_OK
-	 * )
-	 *
-	 * @param Request $request the request object
-	 * @param int     $slug      the softwareProfile id
-	 *
-	 * @return FormTypeInterface|View
-	 *
-	 * @throws NotFoundHttpException when softwareProfile not exist
-	 */
-	public function putAction(Request $request, $slug)
-	{
-		try {
-			if (!($object = $this->container->get('opengnsys_server.api_software_profile_manager')->get($slug))) {
-				$statusCode = Response::HTTP_CREATED;
-				$object = $this->container->get('opengnsys_server.api_software_profile_manager')->post(
-						$request->request->all()
-				);
-			} else {
-				$statusCode = Response::HTTP_NO_CONTENT;
-				$object = $this->container->get('opengnsys_server.api_software_profile_manager')->put(
-						$object,
-						$request->request->all()
-				);
-			}
-			
-			return $this->view($object, $statusCode);		
 	
 		} catch (InvalidFormException $exception) {
 	
@@ -248,8 +203,9 @@ class SoftwareProfileController extends ApiController
 	 */
 	public function patchAction(Request $request, $slug)
 	{
+        $request->setRequestFormat($request->get('_format'));
 		try {
-			$object = $this->container->get('opengnsys_server.api_software_profile_manager')->patch(
+			$object = $this->container->get('opengnsys_server.software_profile_manager')->patch(
 					$this->getOr404($slug),
 					$request->request->all()
 			);
@@ -283,11 +239,11 @@ class SoftwareProfileController extends ApiController
 	 *
 	 * @throws NotFoundHttpException when object not exist
 	 */
-	public function deleteAction($slug)
+	public function deleteAction(Request $request, $slug)
 	{
+        $request->setRequestFormat($request->get('_format'));
 		$object = $this->getOr404($slug);
-		
-		$object = $this->container->get('opengnsys_server.api_software_profile_manager')->delete($object);	
+		$object = $this->container->get('opengnsys_server.software_profile_manager')->delete($object);
 	
 		return $this->view(null, Response::HTTP_NO_CONTENT);
 	}
@@ -303,7 +259,7 @@ class SoftwareProfileController extends ApiController
 	 */
 	protected function getOr404($slug)
 	{
-		if (!($object = $this->container->get('opengnsys_server.api_software_profile_manager')->get($slug))) {
+		if (!($object = $this->container->get('opengnsys_server.software_profile_manager')->get($slug))) {
 			throw new NotFoundHttpException(sprintf('The resource \'%s\' was not found.',$slug));
 		}
 	

@@ -1,3 +1,0 @@
-opengnsys_migration_homepage:
-    path:     /
-    defaults: { _controller: OpengnsysMigrationBundle:Default:index }

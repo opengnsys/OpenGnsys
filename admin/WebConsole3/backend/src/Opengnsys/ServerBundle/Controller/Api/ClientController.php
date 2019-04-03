@@ -25,8 +25,8 @@ use FOS\RestBundle\Context\Context;
 
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 
-use Globunet\ApiBundle\Exception\InvalidFormException;
-use Globunet\ApiBundle\Controller\ApiController;
+use Opengnsys\CoreBundle\Exception\InvalidFormException;
+use Opengnsys\CoreBundle\Controller\ApiController;
 
 /**
  * @RouteResource("Client")
@@ -46,7 +46,10 @@ class ClientController extends ApiController
 	 *
 	 * @return Response
 	 */
-	public function optionsAction(Request $request){
+	public function optionsAction(Request $request)
+    {
+        $request->setRequestFormat($request->get('_format'));
+
 		$array = array();
 		$array['class'] = ClientType::class;
 		$array['options'] = array();
@@ -77,13 +80,18 @@ class ClientController extends ApiController
 	 */
 	public function cgetAction(Request $request, ParamFetcherInterface $paramFetcher)
 	{
+        $request->setRequestFormat($request->get('_format'));
+
 		$offset = $paramFetcher->get('offset');
 		$offset = null == $offset ? 0 : $offset;
 		$limit = $paramFetcher->get('limit');
 		
 		$matching = $this->filterCriteria($paramFetcher);
-		
-		$objects = $this->container->get('opengnsys_server.api_client_manager')->all($limit, $offset, $matching);
+
+        $clientManager = $this->container->get('opengnsys_server.client_manager');
+
+        //$objects = $clientManager->getRepository()->findAll();
+		$objects = $clientManager->searchBy($limit, $offset, $matching);
 
         $groups = array();
         $groups[] = 'opengnsys_server__client_get';
@@ -121,8 +129,10 @@ class ClientController extends ApiController
 	 *
 	 * @throws NotFoundHttpException when client not exist
 	 */
-	public function getAction($slug)
+	public function getAction(Request $request, $slug)
 	{
+        $request->setRequestFormat($request->get('_format'));
+
 		$object = $this->getOr404($slug);
 
         $groups = array();
@@ -165,75 +175,23 @@ class ClientController extends ApiController
 	 */
 	public function cpostAction(Request $request)
 	{
+        $request->setRequestFormat($request->get('_format'));
 
 	    $parameters = $request->request->all();
 
-        $logger = $this->get('monolog.logger.opengnsys');
+        $logger = $this->get('monolog.logger.og_server');
 	    $logger->info("----------- NEW CLIENT -----------");
 	    foreach ($parameters as $key => $parameter){
             $logger->info($key."=>".$parameter);
         }
 
 		try {
-			$object = $this->container->get('opengnsys_server.api_client_manager')->post($parameters);
+			$object = $this->container->get('opengnsys_server.client_manager')->post($parameters);
 
             $serviceNetboot = $this->get('opengnsys_service.netboot');
             $serviceNetboot->createBootMode($object);
 	
 			return $object;
-	
-		} catch (InvalidFormException $exception) {
-	
-			return $exception->getForm();
-		}
-	}
-	
-	/**
-	 * Update existing Client from the submitted data or create a new Client at a specific location.
-	 *
-	 * @ApiDoc(
-	 *   resource = true,
-	 *   input = {"class" = "Opengnsys\ServerBundle\Form\Type\Api\ClientType", "name" = ""},
-	 *   statusCodes = {
-	 *     201 = "Returned when the Activity is created",
-	 *     204 = "Returned when successful",
-	 *     400 = "Returned when the form has errors"
-	 *   }
-	 * )
-	 *
-	 * @Annotations\View(
-	 *  template = "object",
-	 *  serializerGroups={"opengnsys_server__client_get"},
-	 *  statusCode = Response::HTTP_OK
-	 * )
-	 *
-	 * @param Request $request the request object
-	 * @param int     $slug      the client id
-	 *
-	 * @return FormTypeInterface|View
-	 *
-	 * @throws NotFoundHttpException when client not exist
-	 */
-	public function putAction(Request $request, $slug)
-	{
-		try {
-			if (!($object = $this->container->get('opengnsys_server.api_client_manager')->get($slug))) {
-				$statusCode = Response::HTTP_CREATED;
-				$object = $this->container->get('opengnsys_server.api_client_manager')->post(
-						$request->request->all()
-				);
-			} else {
-				$statusCode = Response::HTTP_NO_CONTENT;
-				$object = $this->container->get('opengnsys_server.api_client_manager')->put(
-						$object,
-						$request->request->all()
-				);
-			}
-
-            $serviceNetboot = $this->get('opengnsys_service.netboot');
-            $serviceNetboot->createBootMode($object);
-			
-			return $this->view($object, $statusCode);		
 	
 		} catch (InvalidFormException $exception) {
 	
@@ -268,8 +226,10 @@ class ClientController extends ApiController
 	 */
 	public function patchAction(Request $request, $slug)
 	{
+        $request->setRequestFormat($request->get('_format'));
+
 		try {
-			$object = $this->container->get('opengnsys_server.api_client_manager')->patch(
+			$object = $this->container->get('opengnsys_server.client_manager')->patch(
 					$this->getOr404($slug),
 					$request->request->all()
 			);
@@ -306,11 +266,13 @@ class ClientController extends ApiController
 	 *
 	 * @throws NotFoundHttpException when object not exist
 	 */
-	public function deleteAction($slug)
+	public function deleteAction(Request $request, $slug)
 	{
+        $request->setRequestFormat($request->get('_format'));
+
 		$object = $this->getOr404($slug);
 		
-		$object = $this->container->get('opengnsys_server.api_client_manager')->delete($object);	
+		$object = $this->container->get('opengnsys_server.client_manager')->delete($object);
 	
 		return $this->view(null, Response::HTTP_NO_CONTENT);
 	}
@@ -337,12 +299,13 @@ class ClientController extends ApiController
      */
     public function statusAction(Request $request, ParamFetcherInterface $paramFetcher)
     {
+        $request->setRequestFormat($request->get('_format'));
+
         $clients = ($paramFetcher->get('clients'))?explode(",",$paramFetcher->get('clients')):null;
         $ou = $paramFetcher->get('ou');
 
-        $em = $this->getDoctrine()->getManager();
-        $clientRepository = $em->getRepository(Client::class);
 
+        $clientRepository = $this->container->get('opengnsys_server.client_manager')->getRepository();
         $clients = $clientRepository->searchStatus($clients, $ou);
 
         return $clients; //$this->view($clients, Response::HTTP_NO_CONTENT);
@@ -364,9 +327,11 @@ class ClientController extends ApiController
      */
     public function postStatusAction(Request $request)
     {
-        $logger = $this->get('monolog.logger.opengnsys');
-        $em = $this->getDoctrine()->getManager();
-        $clientRepository = $em->getRepository(Client::class);
+        $request->setRequestFormat($request->get('_format'));
+
+        $logger = $this->get('monolog.logger.og_server');
+        $clientManager = $this->container->get('opengnsys_server.client_manager');
+        $clientRepository = $clientManager->getRepository();
 
 
         $data = $request->request->all();
@@ -379,7 +344,7 @@ class ClientController extends ApiController
 
         $client = $clientRepository->findOneBy(array("ip"=>$ip));
         $client->setStatus($status);
-        $em->flush();
+        $clientManager->persist($client);
 
         return $this->view($client, Response::HTTP_NO_CONTENT);
     }
@@ -400,7 +365,9 @@ class ClientController extends ApiController
      */
     public function postConfigAction(Request $request)
     {
-        $logger = $this->get('monolog.logger.opengnsys');
+        $request->setRequestFormat($request->get('_format'));
+
+        $logger = $this->get('monolog.logger.og_server');
         $em = $this->getDoctrine()->getManager();
         $clientRepository = $em->getRepository(Client::class);
 
@@ -474,7 +441,7 @@ class ClientController extends ApiController
 	 */
 	protected function getOr404($slug)
 	{
-		if (!($object = $this->container->get('opengnsys_server.api_client_manager')->get($slug))) {
+		if (!($object = $this->container->get('opengnsys_server.client_manager')->get($slug))) {
 			throw new NotFoundHttpException(sprintf('The resource \'%s\' was not found.',$slug));
 		}
 	

@@ -1,0 +1,4 @@
+user:
+    type: rest
+    resource: Opengnsys\CoreBundle\Controller\Api\UserController
+    name_prefix: opengnsys_core__api_

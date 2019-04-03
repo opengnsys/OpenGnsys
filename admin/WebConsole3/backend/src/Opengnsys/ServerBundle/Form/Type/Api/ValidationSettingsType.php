@@ -43,7 +43,7 @@ class ValidationSettingsType extends AbstractType
         $resolver->setDefaults(array(
             'data_class' => $this->objectClass,
         	'cascade_validation' => true,
-        	'csrf_protection' => false
+        	'allow_extra_fields' => true
         ));
     }
 

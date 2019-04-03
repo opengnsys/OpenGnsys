@@ -16,13 +16,10 @@ class AppKernel extends Kernel
             new Doctrine\Bundle\DoctrineBundle\DoctrineBundle(),
             new Sensio\Bundle\FrameworkExtraBundle\SensioFrameworkExtraBundle(),
 
+            new Opengnsys\CoreBundle\OpengnsysCoreBundle('FOSUserBundle'),
+            new Opengnsys\MigrationBundle\OpengnsysMigrationBundle(),
             new Opengnsys\ServerBundle\OpengnsysServerBundle(),
             new Opengnsys\RepositoryBundle\OpengnsysRepositoryBundle(),
-
-            # Globunet
-            #new Globunet\CoreBundle\GlobunetCoreBundle(),
-            new Globunet\ApiBundle\GlobunetApiBundle(),
-            new Globunet\UserBundle\GlobunetUserBundle('FOSUserBundle'),
 
             # FOS
             new FOS\RestBundle\FOSRestBundle(),
@@ -35,7 +32,7 @@ class AppKernel extends Kernel
             # Nelmio
             new Nelmio\ApiDocBundle\NelmioApiDocBundle(),
             new Nelmio\CorsBundle\NelmioCorsBundle(),
-            new Opengnsys\MigrationBundle\OpengnsysMigrationBundle(),
+
         );
 
         if (in_array($this->getEnvironment(), array('dev', 'test'), true)) {

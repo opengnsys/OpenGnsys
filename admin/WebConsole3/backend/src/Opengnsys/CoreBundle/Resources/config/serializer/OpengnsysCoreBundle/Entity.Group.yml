@@ -1,0 +1,6 @@
+Opengnsys\CoreBundle\Entity\Group:
+    exclusion_policy: ALL
+    properties:
+        id:
+            groups: [app__group_cget, app__group_get, app__user_get]
+            expose: true

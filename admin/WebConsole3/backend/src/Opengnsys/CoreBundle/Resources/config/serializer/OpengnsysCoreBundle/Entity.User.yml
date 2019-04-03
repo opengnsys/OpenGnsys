@@ -1,0 +1,96 @@
+Opengnsys\CoreBundle\Entity\User:
+    exclusion_policy: ALL
+    properties:
+        #dateOfBirth:
+        #    groups: [opengnsys_server__user_me, opengnsys_server__user_get, opengnsys_server__user_cget]
+        #    expose: true
+        #    serialized_name: dateOfBirth
+        firstname:
+            groups: [opengnsys_server__user_me, opengnsys_server__user_get, opengnsys_server__user_cget]
+            expose: true
+            serialized_name: firstname
+        lastname:
+            groups: [opengnsys_server__user_me, opengnsys_server__user_get, opengnsys_server__user_cget]
+            expose: true
+            serialized_name: lastname
+        #website:
+        #    groups: [opengnsys_server__user_get, opengnsys_server__user_cget]
+        #    expose: true
+        #    serialized_name: website
+        #biography:
+        #    groups: [opengnsys_server__user_get, opengnsys_server__user_cget]
+        #    expose: true
+        #    serialized_name: biography
+        #gender:
+        #    groups: [opengnsys_server__user_get, opengnsys_server__user_cget]
+        #    expose: true
+        #    serialized_name: gender
+        locale:
+            groups: [opengnsys_server__user_get, opengnsys_server__user_cget]
+            expose: true
+            serialized_name: locale
+        timezone:
+            groups: [opengnsys_server__user_get, opengnsys_server__user_cget]
+            expose: true
+            serialized_name: timezone
+        #phone:
+        #    groups: [opengnsys_server__user_get, opengnsys_server__user_cget]
+        #    expose: true
+        #    serialized_name: phone
+        #facebookUid:
+        #    groups: [opengnsys_server__user_get, opengnsys_server__user_cget]
+        #    expose: true
+        #    serialized_name: facebookUid
+        #facebookName:
+        #    groups: [opengnsys_server__user_get, opengnsys_server__user_cget]
+        #    expose: true
+        #    serialized_name: facebookName
+        #facebookData:
+        #    groups: [opengnsys_server__user_get, opengnsys_server__user_cget]
+        #    expose: true
+        #    serialized_name: facebookData
+        #twitterUid:
+        #    groups: [opengnsys_server__user_get, opengnsys_server__user_cget]
+        #    expose: true
+        #    serialized_name: twitterUid
+        #twitterName:
+        #    groups: [opengnsys_server__user_get, opengnsys_server__user_cget]
+        #    expose: true
+        #    serialized_name: twitterName
+        #twitterData:
+        #    groups: [opengnsys_server__user_get, opengnsys_server__user_cget]
+        #    expose: true
+        #    serialized_name: twitterData
+        #gplusUid:
+        #    groups: [opengnsys_server__user_get, opengnsys_server__user_cget]
+        #    expose: true
+        #    serialized_name: gplusUid
+        #gplusName:
+        #    groups: [opengnsys_server__user_get, opengnsys_server__user_cget]
+        #    expose: true
+        #    serialized_name: gplusName
+        #gplusData:
+        #    groups: [opengnsys_server__user_get, opengnsys_server__user_cget]
+        #    expose: true
+        #    serialized_name: gplusData
+        #token:
+        #    groups: [opengnsys_server__user_get, opengnsys_server__user_cget]
+        #    expose: true
+        #    serialized_name: token
+        #twoStepVerificationCode:
+        #    groups: [opengnsys_server__user_get, opengnsys_server__user_cget]
+        #    expose: true
+        #    serialized_name: twoStepVerificationCode
+
+        name:
+            groups: [opengnsys_server__user_get, opengnsys_server__user_cget]
+            expose: true
+            serialized_name: name
+        profile:
+            groups: [opengnsys_server__user_get, opengnsys_server__user_cget]
+            expose: true
+            serialized_name: profile
+        id:
+            groups: [opengnsys_server__user_get, opengnsys_server__user_cget]
+            expose: true
+            serialized_name: id

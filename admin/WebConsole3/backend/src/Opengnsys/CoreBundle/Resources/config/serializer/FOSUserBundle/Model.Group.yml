@@ -1,0 +1,10 @@
+FOS\CoreBundle\Model\Group:
+    exclusion_policy: ALL
+    properties:
+        name:
+            groups: [app__user_me, app__group_get, app__group_cget, app__user_get, user_app__user_me, app__user_get, app__user_cget]
+            expose: true
+        roles:
+            groups: [app__user_me, app__group_get, app__group_cget, user_app__user_me, app__user_get]
+            expose: true            
+        

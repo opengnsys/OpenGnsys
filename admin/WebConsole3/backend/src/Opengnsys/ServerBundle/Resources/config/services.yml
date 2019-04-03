@@ -19,3 +19,69 @@ services:
     opengnsys_service.netboot:
         class: Opengnsys\ServerBundle\Service\NetbootService
         arguments: ["%pxedir%", '@doctrine.orm.entity_manager']
+
+    # MANAGER
+    opengnsys_server.client_manager:
+        class: Opengnsys\CoreBundle\Domain\ModelExtendedManager
+        arguments: ["@doctrine.orm.entity_manager", "@form.factory", Opengnsys\ServerBundle\Form\Type\Api\ClientType, Opengnsys\ServerBundle\Entity\Client]
+
+    opengnsys_server.command_manager:
+        class: Opengnsys\CoreBundle\Domain\ModelExtendedManager
+        arguments: ["@doctrine.orm.entity_manager", "@form.factory", Opengnsys\ServerBundle\Form\Type\Api\CommandType, Opengnsys\ServerBundle\Entity\Command]
+
+    opengnsys_server.hardware_manager:
+        class: Opengnsys\CoreBundle\Domain\ModelExtendedManager
+        arguments: ["@doctrine.orm.entity_manager", "@form.factory", Opengnsys\ServerBundle\Form\Type\Api\HardwareType, Opengnsys\ServerBundle\Entity\Hardware]
+
+    opengnsys_server.hardware_profile_manager:
+        class: Opengnsys\CoreBundle\Domain\ModelExtendedManager
+        arguments: ["@doctrine.orm.entity_manager", "@form.factory", Opengnsys\ServerBundle\Form\Type\Api\HardwareProfileType, Opengnsys\ServerBundle\Entity\HardwareProfile]
+
+    opengnsys_server.image_manager:
+        class: Opengnsys\CoreBundle\Domain\ModelExtendedManager
+        arguments: ["@doctrine.orm.entity_manager", "@form.factory", Opengnsys\ServerBundle\Form\Type\Api\ImageType, Opengnsys\ServerBundle\Entity\Image]
+
+    opengnsys_server.menu_manager:
+        class: Opengnsys\CoreBundle\Domain\ModelExtendedManager
+        arguments: ["@doctrine.orm.entity_manager", "@form.factory", Opengnsys\ServerBundle\Form\Type\Api\MenuType, Opengnsys\ServerBundle\Entity\Menu]
+
+    opengnsys_server.network_settings_manager:
+        class: Opengnsys\CoreBundle\Domain\ModelExtendedManager
+        arguments: ["@doctrine.orm.entity_manager", "@form.factory", Opengnsys\ServerBundle\Form\Type\Api\NetworkSettingsType, Opengnsys\ServerBundle\Entity\NetworkSettings]
+
+    opengnsys_server.organizational_unit_manager:
+        class: Opengnsys\CoreBundle\Domain\ModelExtendedManager
+        arguments: ["@doctrine.orm.entity_manager", "@form.factory", Opengnsys\ServerBundle\Form\Type\Api\OrganizationalUnitType, Opengnsys\ServerBundle\Entity\OrganizationalUnit]
+
+    opengnsys_server.os_name_manager:
+        class: Opengnsys\CoreBundle\Domain\ModelExtendedManager
+        arguments: ["@doctrine.orm.entity_manager", "@form.factory", Opengnsys\ServerBundle\Form\Type\Api\OsNameType, Opengnsys\ServerBundle\Entity\OsName]
+
+    opengnsys_server.partition_manager:
+        class: Opengnsys\CoreBundle\Domain\ModelExtendedManager
+        arguments: ["@doctrine.orm.entity_manager", "@form.factory", Opengnsys\ServerBundle\Form\Type\Api\PartitionType, Opengnsys\ServerBundle\Entity\Partition]
+
+    opengnsys_server.repository_manager:
+        class: Opengnsys\CoreBundle\Domain\ModelExtendedManager
+        arguments: ["@doctrine.orm.entity_manager", "@form.factory", Opengnsys\ServerBundle\Form\Type\Api\RepositoryType, Opengnsys\ServerBundle\Entity\Repository]
+
+    opengnsys_server.software_manager:
+        class: Opengnsys\CoreBundle\Domain\ModelExtendedManager
+        arguments: ["@doctrine.orm.entity_manager", "@form.factory", Opengnsys\ServerBundle\Form\Type\Api\SoftwareType, Opengnsys\ServerBundle\Entity\Software]
+
+    opengnsys_server.software_profile_manager:
+        class: Opengnsys\CoreBundle\Domain\ModelExtendedManager
+        arguments: ["@doctrine.orm.entity_manager", "@form.factory", Opengnsys\ServerBundle\Form\Type\Api\SoftwareProfileType, Opengnsys\ServerBundle\Entity\SoftwareProfile]
+
+    opengnsys_server.user_type_manager:
+        class: Opengnsys\CoreBundle\Domain\ModelExtendedManager
+        arguments: ["@doctrine.orm.entity_manager", "@form.factory", Opengnsys\ServerBundle\Form\Type\Api\UserTypeType, Opengnsys\ServerBundle\Entity\UserType]
+
+    opengnsys_server.validation_settings_manager:
+        class: Opengnsys\CoreBundle\Domain\ModelExtendedManager
+        arguments: ["@doctrine.orm.entity_manager", "@form.factory", Opengnsys\ServerBundle\Form\Type\Api\ValidationSettingsType, Opengnsys\ServerBundle\Entity\ValidationSettings]
+
+    opengnsys_server.netboot_manager:
+        class: Opengnsys\CoreBundle\Domain\ModelExtendedManager
+        arguments: ["@doctrine.orm.entity_manager", "@form.factory", Opengnsys\ServerBundle\Form\Type\Api\NetbootType, Opengnsys\ServerBundle\Entity\Netboot]
+

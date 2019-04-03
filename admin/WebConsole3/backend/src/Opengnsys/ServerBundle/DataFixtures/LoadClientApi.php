@@ -4,7 +4,7 @@ namespace Opengnsys\ServerBundle\DataFixtures;
 
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\Persistence\ObjectManager;
-use Globunet\UserBundle\Entity\Client;
+use Opengnsys\CoreBundle\Entity\Client;
 use Opengnsys\ServerBundle\Entity\Netboot;
 
 class LoadClientApi extends Fixture

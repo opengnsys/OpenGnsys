@@ -5,12 +5,12 @@ jms_serializer:
             default_timezone: "UTC" # defaults to whatever timezone set in php.ini or via date_default_timezone_set
     metadata:
         directories:
-            #GlobunetUserBundle:
-            #    namespace_prefix: "Globunet\\UserBundle"
-            #    path: "%kernel.root_dir%/../src/Globunet/UserBundle/Resources/config/serializer/GlobunetUserBundle"
-            #FOSUserBundle:
-            #    namespace_prefix: "FOS\\UserBundle"
-            #    path: "%kernel.root_dir%/../src/Globunet/UserBundle/Resources/config/serializer/FOSUserBundle"
+            OpengnsysCoreBundle:
+                namespace_prefix: "Opengnsys\\CoreBundle"
+                path: "%kernel.root_dir%/../src/Opengnsys/CoreBundle/Resources/config/serializer/OpengnsysCoreBundle"
+            FOSUserBundle:
+                namespace_prefix: "FOS\\UserBundle"
+                path: "%kernel.root_dir%/../src/Opengnsys/CoreBundle/Resources/config/serializer/FOSUserBundle"
             OpengnsysServerBundle:
                 namespace_prefix: "Opengnsys\\ServerBundle"
                 path: "%kernel.root_dir%/../src/Opengnsys/ServerBundle/Resources/config/serializer/OpengnsysServerBundle"

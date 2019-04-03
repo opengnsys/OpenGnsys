@@ -40,7 +40,7 @@ class TraceType extends AbstractType
         $resolver->setDefaults(array(
 
         	'cascade_validation' => true,
-        	'csrf_protection' => false
+        	'allow_extra_fields' => true
         ));
     }
 

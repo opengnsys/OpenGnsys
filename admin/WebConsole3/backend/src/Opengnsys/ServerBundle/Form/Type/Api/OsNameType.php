@@ -37,7 +37,7 @@ class OsNameType extends AbstractType
         $resolver->setDefaults(array(
             'data_class' => OsName::class,
         	'cascade_validation' => true,
-        	'csrf_protection' => false
+        	'allow_extra_fields' => true
         ));
     }
 

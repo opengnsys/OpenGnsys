@@ -14,9 +14,10 @@ use FOS\RestBundle\Controller\Annotations;
 use FOS\RestBundle\Controller\Annotations\RouteResource;
 
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
-
-use Globunet\ApiBundle\Controller\ApiController;
 use Opengnsys\ServerBundle\Entity\Enum\CommandType;
+use Symfony\Component\HttpFoundation\Request;
+use Opengnsys\CoreBundle\Controller\ApiController;
+
 
 /**
  * @RouteResource("Core")
@@ -35,8 +36,10 @@ class CoreController extends ApiController
 	 *
 	 * @return JSON object with basic server information (version, services, etc.)
 	 */
-	public function getInfoAction()
+	public function getInfoAction(Request $request)
 	{
+        $request->setRequestFormat($request->get('_format'));
+
         // Reading version file.
         @list($project, $version, $release) = explode(' ', file_get_contents('/opt/opengnsys/doc/VERSION.txt'));
         $response['project'] = trim($project);
@@ -74,8 +77,10 @@ class CoreController extends ApiController
      *
      * @return JSON object with all data collected from server status (RAM, %CPU, etc.).
      */
-    public function getStatusAction()
+    public function getStatusAction(Request $request)
     {
+        $request->setRequestFormat($request->get('_format'));
+
         // Getting memory and CPU information.
         exec("awk '$1~/Mem/ {print $2}' /proc/meminfo",$memInfo);
         $memInfo = array("total" => $memInfo[0], "used" => $memInfo[0]-$memInfo[1]);
@@ -134,9 +139,12 @@ class CoreController extends ApiController
      *
      * @return JSON object with all data collected from server status (RAM, %CPU, etc.).
      */
-    public function getEngineAction()
+    public function getEngineAction(Request $request)
     {
+        $request->setRequestFormat($request->get('_format'));
+
         $appPath = $this->container->getParameter('kernel.root_dir');
+
         $content = file_get_contents($appPath.'/doc/engine.json');
         $json = json_decode($content, true);
 

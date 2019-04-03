@@ -1,0 +1,15 @@
+# FOS OAUTH
+fos_oauth_server:
+    db_driver: orm       # Driver availables: orm, mongodb, or propel
+    client_class:        Opengnsys\CoreBundle\Entity\Client
+    access_token_class:  Opengnsys\CoreBundle\Entity\AccessToken
+    refresh_token_class: Opengnsys\CoreBundle\Entity\RefreshToken
+    auth_code_class:     Opengnsys\CoreBundle\Entity\AuthCode
+    service:
+        user_provider: fos_user.user_provider.username
+        options:
+            # Example
+            supported_scopes: user #string
+            # Changing tokens and authcode lifetime (seconds)
+            access_token_lifetime: 1209600 # 336 horas
+            refresh_token_lifetime: 9209600 # aprox 106 días

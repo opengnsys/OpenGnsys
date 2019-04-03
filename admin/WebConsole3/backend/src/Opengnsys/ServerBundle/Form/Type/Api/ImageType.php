@@ -48,7 +48,7 @@ class ImageType extends AbstractType
         $resolver->setDefaults(array(
             'data_class' => Image::class,
         	'cascade_validation' => true,
-        	'csrf_protection' => false
+        	'allow_extra_fields' => true
         ));
     }
 

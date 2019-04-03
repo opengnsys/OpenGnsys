@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doctrine-mapping 	xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping" xsi="http://www.w3.org/2001/XMLSchema-instance" schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+    
+    <entity
+        name="Opengnsys\CoreBundle\Entity\Client"
+        table="globunet_user__clients"
+        >
+
+        <id name="id" type="integer" column="id">
+            <generator strategy="AUTO"/>
+        </id>
+
+        <field name="name" column="name" type="string" length="64" nullable="true" />
+
+        <field name="description" column="description" type="text" nullable="true" />
+      
+    </entity>
+</doctrine-mapping>
+

@@ -28,8 +28,8 @@ use FOS\RestBundle\Request\ParamFetcherInterface;
 
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 
-use Globunet\ApiBundle\Exception\InvalidFormException;
-use Globunet\ApiBundle\Controller\ApiController;
+use Opengnsys\CoreBundle\Exception\InvalidFormException;
+use Opengnsys\CoreBundle\Controller\ApiController;
 
 /**
  * @RouteResource("Image")
@@ -104,7 +104,7 @@ class ImageController extends ApiController
      *
      * @throws NotFoundHttpException when object not exist
      */
-    public function deleteAction($slug)
+    public function deleteAction(Request $request, $slug)
     {
         $path = $this->getParameter("path_images");
         $finder = new Finder();

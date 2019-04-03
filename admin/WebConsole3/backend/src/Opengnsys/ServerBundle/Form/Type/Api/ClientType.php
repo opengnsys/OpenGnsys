@@ -48,7 +48,6 @@ class ClientType extends AbstractType
         $resolver->setDefaults(array(
             'data_class' => Client::class,
         	'cascade_validation' => true,
-        	'csrf_protection' => false
         ));
     }
 

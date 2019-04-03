@@ -1,10 +1,10 @@
 <?php
 
 /*
- * This file is part of the Globunet Project package.
+ * This file is part of the Opengnsys Project package.
  *
- * Created by Globunet on 06/02/19. <info@globunet.com>
- * Copyright (c) 2019 Globunet Soluciones Tecnológicas, SL. All rights reserved.
+ * Created by Opengnsys on 06/02/19. <info@globunet.com>
+ * Copyright (c) 2019 Opengnsys Soluciones Tecnológicas, SL. All rights reserved.
  *
  */
 

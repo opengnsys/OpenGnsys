@@ -1,6 +1,0 @@
-- Es necesario instalar la extensión de PHP XML
-sudo apt-get install php7.0-xml
-
-
-
-php app/console doctrine:mapping:import --force MigrationBundle xml

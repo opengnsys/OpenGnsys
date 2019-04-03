@@ -1,0 +1,25 @@
+FOS\UserBundle\Model\User:
+    exclusion_policy: ALL
+    properties:
+        id:
+            groups: [opengnsys_server__user_me, opengnsys_server__user_cget, opengnsys_server__user_get]
+            expose: true
+        username:
+            groups: [opengnsys_server__user_me, opengnsys_server__user_cget, opengnsys_server__user_get]
+            expose: true
+        email:
+            groups: [opengnsys_server__user_me, opengnsys_server__user_cget, opengnsys_server__user_get]
+            expose: true
+        locked:
+            groups: [opengnsys_server__user_me, opengnsys_server__user_get]
+            expose: true
+        enabled:
+            groups: [opengnsys_server__user_me, opengnsys_server__user_get]
+            expose: true
+        groups:
+            groups: [opengnsys_server__user_me, opengnsys_server__user_get, opengnsys_server__user_cget]
+            expose: true
+        roles:
+            groups: [opengnsys_server__user_me, opengnsys_server__user_get, opengnsys_server__user_cget]
+            expose: true
+

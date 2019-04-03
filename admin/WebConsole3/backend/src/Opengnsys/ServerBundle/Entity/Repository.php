@@ -58,12 +58,6 @@ class Repository extends BaseEntity
     private $organizationalUnit;
 
     /**
-     * @var \Opengnsys\ServerBundle\Entity\Group
-     */
-    private $group;
-
-
-    /**
      * Set name
      *
      * @param string $name
@@ -287,30 +281,6 @@ class Repository extends BaseEntity
     public function getOrganizationalUnit()
     {
         return $this->organizationalUnit;
-    }
-
-    /**
-     * Set group
-     *
-     * @param \Opengnsys\ServerBundle\Entity\Group $group
-     *
-     * @return Repository
-     */
-    public function setGroup(\Opengnsys\ServerBundle\Entity\Group $group = null)
-    {
-        $this->group = $group;
-
-        return $this;
-    }
-
-    /**
-     * Get group
-     *
-     * @return \Opengnsys\ServerBundle\Entity\Group
-     */
-    public function getGroup()
-    {
-        return $this->group;
     }
 
 }

@@ -39,7 +39,7 @@ class NetbootType extends AbstractType
         $resolver->setDefaults(array(
             'data_class' => Netboot::class,
         	'cascade_validation' => true,
-        	'csrf_protection' => false
+        	'allow_extra_fields' => true
         ));
     }
 

@@ -2,7 +2,8 @@
 <doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
-    <entity name="Opengnsys\ServerBundle\Entity\Image" table="og_images">
+    <entity name="Opengnsys\ServerBundle\Entity\Image" table="og_images"
+            repository-class="Opengnsys\ServerBundle\Entity\Repository\ImageRepository">
 
         <id name="id" type="integer" column="id">
             <generator strategy="AUTO"/>
@@ -13,13 +14,9 @@
 
         <field name="comments" type="text" column="comments" length="65535" nullable="true"/>
         <field name="path" type="string" column="path" length="250" nullable="true"/>
-
         <field name="type" column="type" type="integer" nullable="true"/>
-
         <field name="revision" column="revision" type="integer" nullable="true"/>
-
         <field name="partitionInfo" column="partition_info" type="text" nullable="true"/>
-
         <field name="fileSize" column="file_size" type="string" length="20" nullable="true"/>
 
         <!--

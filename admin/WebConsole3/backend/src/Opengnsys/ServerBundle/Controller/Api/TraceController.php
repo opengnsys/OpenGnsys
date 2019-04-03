@@ -31,8 +31,8 @@ use FOS\RestBundle\Request\ParamFetcherInterface;
 
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 
-use Globunet\ApiBundle\Exception\InvalidFormException;
-use Globunet\ApiBundle\Controller\ApiController;
+use Opengnsys\CoreBundle\Exception\InvalidFormException;
+use Opengnsys\CoreBundle\Controller\ApiController;
 
 /**
  * @RouteResource("Trace")
@@ -52,7 +52,9 @@ class TraceController extends ApiController
 	 *
 	 * @return Response
 	 */
-	public function optionsAction(Request $request){
+	public function optionsAction(Request $request)
+    {
+        $request->setRequestFormat($request->get('_format'));
 		$array = array();
 		$array['class'] = CommandType::class;
 		$array['options'] = array();
@@ -84,6 +86,7 @@ class TraceController extends ApiController
      */
     public function cgetAction(Request $request, ParamFetcherInterface $paramFetcher)
     {
+        $request->setRequestFormat($request->get('_format'));
         $offset = $paramFetcher->get('offset');
         $offset = null == $offset ? 0 : $offset;
         $limit = $paramFetcher->get('limit');
@@ -130,7 +133,8 @@ class TraceController extends ApiController
      */
     public function cpostAction(Request $request)
     {
-        $logger = $this->get('monolog.logger.opengnsys');
+        $request->setRequestFormat($request->get('_format'));
+        $logger = $this->get('monolog.logger.og_server');
 
         $response = null;
         $output = "";
@@ -279,10 +283,6 @@ class TraceController extends ApiController
                             }else{
                                 $logger->info("Not Found Image");
                             }
-
-
-
-
                         }
                         $em->flush();
                     case \Opengnsys\ServerBundle\Entity\Enum\CommandType::SOFTWARE_INVENTORY:
@@ -371,7 +371,7 @@ class TraceController extends ApiController
         // http://172.16.140.210/opengnsys3/rest/web/app_dev.php/api/clients/status
 
 
-        //$objects = $this->container->get('opengnsys_server.api_client_manager')->all($limit, $offset, $matching);
+        //$objects = $this->container->get('opengnsys_server.client_manager')->searchBy($limit, $offset, $matching);
 
         return $this->view($output, Response::HTTP_NO_CONTENT);
     }
@@ -397,8 +397,9 @@ class TraceController extends ApiController
      *
      * @throws NotFoundHttpException when object not exist
      */
-    public function deleteAction($slug)
+    public function deleteAction(Request $request, $slug)
     {
+        $request->setRequestFormat($request->get('_format'));
         $em = $this->getDoctrine()->getManager();
         $traceRepository = $em->getRepository(Trace::class);
 

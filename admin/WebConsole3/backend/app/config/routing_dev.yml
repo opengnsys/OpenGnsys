@@ -13,10 +13,10 @@ _errors:
 _main:
     resource: routing.yml
 
-opengnsys_server:
-    resource: "@OpengnsysServerBundle/Resources/config/routing_dev.yml"
-    prefix:   /
+#opengnsys_server:
+#    resource: "@OpengnsysServerBundle/Resources/config/routing_dev.yml"
+#    prefix:   /
 
-opengnsys_repository:
-    resource: "@OpengnsysRepositoryBundle/Resources/config/routing_dev.yml"
-    prefix:   /
+#opengnsys_repository:
+#    resource: "@OpengnsysRepositoryBundle/Resources/config/routing_dev.yml"
+#    prefix:   /

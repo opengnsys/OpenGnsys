@@ -7,8 +7,6 @@ namespace Opengnsys\ServerBundle\Entity;
  */
 class Hardware extends BaseEntity
 {
-
-
     /**
      * @var string
      */

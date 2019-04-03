@@ -28,8 +28,8 @@ use FOS\RestBundle\Request\ParamFetcherInterface;
 
 use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 
-use Globunet\ApiBundle\Exception\InvalidFormException;
-use Globunet\ApiBundle\Controller\ApiController;
+use Opengnsys\CoreBundle\Exception\InvalidFormException;
+use Opengnsys\CoreBundle\Controller\ApiController;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
@@ -37,7 +37,6 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
  */
 class CommandController extends ApiController
 {
-
 	/**
 	 * Options a Command from the submitted data.
 	 *
@@ -50,7 +49,9 @@ class CommandController extends ApiController
 	 *
 	 * @return Response
 	 */
-	public function optionsAction(Request $request){
+	public function optionsAction(Request $request)
+    {
+        $request->setRequestFormat($request->get('_format'));
 		$array = array();
 		$array['class'] = CommandType::class;
 		$array['options'] = array();
@@ -81,13 +82,14 @@ class CommandController extends ApiController
      */
     public function cgetAction(Request $request, ParamFetcherInterface $paramFetcher)
     {
+        $request->setRequestFormat($request->get('_format'));
         $offset = $paramFetcher->get('offset');
         $offset = null == $offset ? 0 : $offset;
         $limit = $paramFetcher->get('limit');
 
         $matching = $this->filterCriteria($paramFetcher);
 
-        $objects = $this->container->get('opengnsys_server.api_command_manager')->all($limit, $offset, $matching);
+        $objects = $this->container->get('opengnsys_server.command_manager')->searchBy($limit, $offset, $matching);
 
         return $objects;
     }
@@ -113,8 +115,9 @@ class CommandController extends ApiController
 	 *
 	 * @throws NotFoundHttpException when command not exist
 	 */
-	public function getAction($slug)
+	public function getAction(Request $request, $slug)
 	{
+        $request->setRequestFormat($request->get('_format'));
 		$object = $this->getOr404($slug);
 	
 		return $object;
@@ -145,8 +148,9 @@ class CommandController extends ApiController
 	 */
 	public function cpostAction(Request $request)
 	{
+        $request->setRequestFormat($request->get('_format'));
 		try {
-			$object = $this->container->get('opengnsys_server.api_command_manager')->post(
+			$object = $this->container->get('opengnsys_server.command_manager')->post(
 					$request->request->all()
 			);
 			return $object;
@@ -184,8 +188,9 @@ class CommandController extends ApiController
      */
     public function patchAction(Request $request, $slug)
     {
+        $request->setRequestFormat($request->get('_format'));
         try {
-            $object = $this->container->get('opengnsys_server.api_command_manager')->patch(
+            $object = $this->container->get('opengnsys_server.command_manager')->patch(
                 $this->getOr404($slug),
                 $request->request->all()
             );
@@ -220,8 +225,8 @@ class CommandController extends ApiController
      */
     public function postExecuteAction(Request $request)
     {
-
-        $logger = $this->get('monolog.logger.opengnsys');
+        $request->setRequestFormat($request->get('_format'));
+        $logger = $this->get('monolog.logger.og_server');
         $logger->info("----------- COMMAND EXECUTE -----------");
 
         $user = $this->getUser();
@@ -306,7 +311,7 @@ class CommandController extends ApiController
 
     private function sendCurl($client, $script, $trace)
     {
-        $logger = $this->get('monolog.logger.opengnsys');
+        $logger = $this->get('monolog.logger.og_server');
 
         $ip = $client->getIp();
         $url = "http://".$ip."/cgi-bin/api/LogCommand.sh";
@@ -396,11 +401,12 @@ class CommandController extends ApiController
      *
      * @throws NotFoundHttpException when object not exist
      */
-    public function deleteAction($slug)
+    public function deleteAction(Request $request, $slug)
     {
+        $request->setRequestFormat($request->get('_format'));
         $object = $this->getOr404($slug);
 
-        $object = $this->container->get('opengnsys_server.api_command_manager')->delete($object);
+        $object = $this->container->get('opengnsys_server.command_manager')->delete($object);
 
         return $this->view(null, Response::HTTP_NO_CONTENT);
     }
@@ -416,7 +422,7 @@ class CommandController extends ApiController
      */
     protected function getOr404($slug)
     {
-        if (!($object = $this->container->get('opengnsys_server.api_command_manager')->get($slug))) {
+        if (!($object = $this->container->get('opengnsys_server.command_manager')->get($slug))) {
             throw new NotFoundHttpException(sprintf('The resource \'%s\' was not found.',$slug));
         }
 
