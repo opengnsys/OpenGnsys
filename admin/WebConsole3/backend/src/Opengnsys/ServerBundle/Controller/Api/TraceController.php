@@ -90,14 +90,13 @@ class TraceController extends ApiController
         $offset = $paramFetcher->get('offset');
         $offset = null == $offset ? 0 : $offset;
         $limit = $paramFetcher->get('limit');
-        $finished = $paramFetcher->get('finished');
 
         $matching = $this->filterCriteria($paramFetcher);
 
         $em = $this->getDoctrine()->getManager();
         $repository = $em->getRepository(Trace::class);
 
-        $objects = $repository->searchBy($limit , $offset, $finished); //findBy(array("status"=>null), array(), $limit, $offset);
+        $objects = $repository->searchBy($matching, [], $limit, $offset); //findBy(array("status"=>null), array(), $limit, $offset);
 
         $groups = array();
         $groups[] = 'opengnsys_server__client_cget';
