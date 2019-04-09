@@ -1,0 +1,2 @@
+/usr/share/OGAgent/cfg/ogagent.cfg /etc/ogagent/ogagent.cfg
+/usr/share/OGAgent/cfg/ogclient.cfg /etc/ogagent/ogclient.cfg

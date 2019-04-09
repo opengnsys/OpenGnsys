@@ -271,4 +271,39 @@ EOD;
     }
 );
 
+// Processing command results (TESTING).
+$app->post('/ogagent/command_done',
+    // 'validateClient',
+    function() use ($app) {
+        global $cmd;
+
+        try {
+            // Reading parameters.
+            $input = json_decode($app->request()->getBody());
+            $client = htmlspecialchars($input->client);
+            $id = htmlspecialchars($input->trace);
+            $status = htmlspecialchars($input->status);
+            $output = htmlspecialchars($input->output);
+            $error = htmlspecialchars($input->error);
+            $client = $_SERVER['REMOTE_ADDR'];
+            // Check sender agent type.
+            if (empty(preg_match('/^python-requests\//', $_SERVER['HTTP_USER_AGENT'])) or $client !== $_SERVER['REMOTE_ADDR']) {
+                throw new Exception("Bad OGAgent: client=$client, sender=".$_SERVER['REMOTE_ADDR'].", agent=".$_SERVER['HTTP_USER_AGENT']);
+            }
+            // TODO: truncating outputs.
+            if ($status == 0) {
+                writeLog($app->request()->getResourceUri().": Operation OK: client=$client, id=$id, output=$output");
+            } else {
+                writeLog($app->request()->getResourceUri().": Operation ERROR: client=$client, id=$id, status=$status, error=$error");
+            }
+            $response = "";
+            jsonResponse(200, $response);
+        } catch (Exception $e) {
+            // Communication error.
+            $response["message"] = $e->getMessage();
+            writeLog($app->request()->getResourceUri().": ERROR: ".$response["message"]);
+            jsonResponse(400, $response);
+        }
+    }
+);
 

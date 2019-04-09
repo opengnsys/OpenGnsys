@@ -139,5 +139,5 @@ setup(
     description='OpenGnsys Agent',
     author='Adolfo Gomez',
     author_email='agomez@virtualcable.es',
-    zipfile='OGAgent.zip',
+    zipfile='OGAgent.zip', requires=['six']
 )
