@@ -2,12 +2,11 @@
 //________________________________________________________________________________________________________
 //
 //	Fitxer d'idiomes php: perfilcomponente_hard_cat.php 
-//	Idioma: Català 
+//	Idioma: Catalï¿½ 
 //________________________________________________________________________________________________________
 	$TbMsg=array();
 	$TbMsg[0]='Perfils hardware';
-	$TbMsg[1]='Gestió Components hardware';
+	$TbMsg[1]='Gestiï¿½ Components hardware';
 	$TbMsg[2]='Perfil hardware';
 	$TbMsg[3]='Nom del component';
-	$TbMsg[4]='(*)Per incloure algun component en aquest perfil ha de fer click sobre la casella de verificació corresponent.';
-?>
+	$TbMsg[4]='(*)Per incloure algun component en aquest perfil ha de fer click sobre la casella de verificaciï¿½ corresponent.';

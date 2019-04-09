@@ -40,8 +40,8 @@ if  ($opcion!=$op_alta){
 //________________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE>Administración web de aulas</TITLE>
 <HEAD>
+	<TITLE>Administración web de aulas</TITLE>
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../jscripts/propiedades_componentehardwares.js"></SCRIPT>
@@ -49,24 +49,25 @@ if  ($opcion!=$op_alta){
 	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/propiedades_componentehardwares_'.$idioma.'.js"></SCRIPT>'?>
 </HEAD>
 <BODY>
-<FORM  name="fdatos" action="../gestores/gestor_componentehardwares.php" method="post"> 
+<div align="center">
+<FORM  name="fdatos" action="../gestores/gestor_componentehardwares.php" method="post">
 	<INPUT type=hidden name=opcion value="<?php echo $opcion?>">
-	<INPUT type=hidden name=idhardware value=<?php echo $idhardware?>>
-	<INPUT type=hidden name=grupoid value=<?php echo $grupoid?>>
-	<P align=center class=cabeceras><?php echo $TbMsg[4]?><BR>
-	<SPAN align=center class=subcabeceras><?php echo $opciones[$opcion]?></SPAN></P>
+	<INPUT type=hidden name=idhardware value="<?php echo $idhardware?>">
+	<INPUT type=hidden name=grupoid value="<?php echo $grupoid?>">
+    <P align=center class=cabeceras><?php echo $TbMsg[4]?><BR>
+    <SPAN class=subcabeceras><?php echo $opciones[$opcion]?></SPAN></P>
 	<TABLE  align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?php echo $TbMsg[5]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?php echo $TbMsg[5]?>&nbsp;</TH>
 			<?php if ($opcion==$op_eliminacion)
-					echo '<TD style="width:215">'.$descripcion.'</TD>';
+					echo '<TD style="width:215px">'.$descripcion.'</TD>';
 				else
-					echo '<TD><INPUT  class="formulariodatos" name=descripcion style="width:250" type=text value="'.$descripcion.'"></TD>';?>
+					echo '<TD><INPUT  class="formulariodatos" name=descripcion style="width:250px" type=text value="'.$descripcion.'"></TD>';?>
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?php echo $TbMsg[6]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?php echo $TbMsg[6]?>&nbsp;</TH>
 			<?php
 				if ($opcion==$op_eliminacion)
 					echo '<TD>'.TomaDato($cmd,0,'tipohardwares',$idtipohardware,'idtipohardware','descripcion').'</TD>';
@@ -77,7 +78,7 @@ if  ($opcion!=$op_alta){
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 	</TABLE>
 </FORM>
-</DIV>
+</div>
 <?php
 //________________________________________________________________________________________________________
 include_once("../includes/opcionesbotonesop.php");
@@ -109,4 +110,3 @@ function TomaPropiedades($cmd,$id){
 	else
 		return(false);
 }
-?>

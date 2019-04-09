@@ -19,6 +19,9 @@
 #@version 1.1.0 - Se incluye la unidad organizativa como parametro del kernel: ogunit=directorio_unidad (ticket #678).
 #@author  Irina Gomez, ETSII Universidad de Sevilla
 #@date    2015-12-16
+#@version 1.1.0a - El server siempre es el servidor PXE. El segundo parámetro de la IP es el SERVER. La asignación del ogLive siempre es el server. (ticket #859).
+#@author  Antonio J. Doblas Viso, Universidad de Malaga
+#@date    2018-07-11
 #*/ ##
 
 
@@ -94,12 +97,13 @@ for MAC in $ETHERNET; do
 		DATOS=$(mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -s -N -e \
 			"SELECT ' LANG=$LANG',
 				' ip=', CONCAT_WS(':', ordenadores.ip,
-				(@repoip:=repositorios.ip), aulas.router, aulas.netmask,
+				(SELECT (@serverip:=ipserveradm) FROM entornos LIMIT 1),
+				aulas.router, aulas.netmask,
 				ordenadores.nombreordenador, ordenadores.netiface, 'none'),
 				' group=', REPLACE(TRIM(aulas.nombreaula), ' ', '_'),
-				' ogrepo=', @repoip,
-				' oglive=', @repoip,
-				' oglog=', (SELECT (@serverip:=ipserveradm) FROM entornos LIMIT 1),
+				' ogrepo=', (@repoip:=IFNULL(repositorios.ip, '')),
+				' oglive=', @serverip,
+				' oglog=', @serverip,
 				' ogshare=', @serverip,
 				' oglivedir=', ordenadores.oglivedir,
 				IF(perfileshard.descripcion<>'', CONCAT(' hardprofile=', REPLACE(TRIM(perfileshard.descripcion), ' ', '_')), ''),
@@ -117,7 +121,7 @@ for MAC in $ETHERNET; do
 				JOIN aulas USING(idaula)
 				JOIN centros USING(idcentro)
 				JOIN entidades USING(identidad)
-				JOIN repositorios USING(idrepositorio)
+				LEFT JOIN repositorios USING(idrepositorio)
 				LEFT JOIN perfileshard USING(idperfilhard)
 				LEFT JOIN menus USING(idmenu)
 				WHERE ordenadores.mac='$MAC';")

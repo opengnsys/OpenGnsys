@@ -20,7 +20,8 @@ include_once("../idiomas/php/".$idioma."/propiedades_usuarios_".$idioma.".php");
 $opcion=0;
 $opciones=array($TbMsg[0],$TbMsg[1],$TbMsg[2],$TbMsg[3]);
 //________________________________________________________________________________________________________
-$idusuario=0; 
+$litusu="";
+$idusuario=0;
 $usuario="";
 $pasguor="";
 $nombre="";
@@ -64,8 +65,8 @@ switch($idtipousuario){
 //________________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE>Administración web de aulas</TITLE>
 <HEAD>
+    <TITLE>Administración web de aulas</TITLE>
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../jscripts/propiedades_usuarios.js"></SCRIPT>
@@ -73,6 +74,7 @@ switch($idtipousuario){
 	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/propiedades_usuarios_'.$idioma.'.js"></SCRIPT>'?>
 </HEAD>
 <BODY>
+<div align="center">
 <FORM  name="fdatos" action="../gestores/gestor_usuarios.php" method="post"> 
 	<INPUT type=hidden name=opcion value=<?php echo $opcion?>>
 	<INPUT type=hidden name=idusuario value=<?php echo $idusuario?>>
@@ -80,15 +82,15 @@ switch($idtipousuario){
 	<INPUT type=hidden name=idambito value=<?php echo $idambito?>>
 
 	<P align=center class=cabeceras><?php echo $TbMsg[4]." (".$litusu.")"?><BR>
-	<SPAN align=center class=subcabeceras><?php echo $opciones[$opcion]?></SPAN></P>
+	<SPAN class=subcabeceras><?php echo $opciones[$opcion]?></SPAN></P>
 	<TABLE  align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
 <!------------------------------------------------	NOMBRE USUARIO	-------------------------------------------------------------------------------------------------->
 			<TR>
 				<TH>&nbsp;<?php echo $TbMsg[5]?>&nbsp;</TH>
 				<?php if ($opcion==$op_eliminacion || $opcion==$op_modificacion && $idusuario==1){?>
-					<TD><INPUT type=hidden class=cajatexto name="usuario"  style="width:100" value="<?php echo $usuario?>"></INPUT><?php echo $usuario?>&nbsp&nbsp;<IMG src="<?php echo $urlimg ?>"></TD>
+					<TD><INPUT type=hidden class=cajatexto name="usuario"  style="width:100px" value="<?php echo $usuario?>"><?php echo $usuario?>&nbsp&nbsp;<IMG src="<?php echo $urlimg ?>"></TD>
 				<?php }else{?>
-					<TD><INPUT type=text class=cajatexto name="usuario"  style="width:100" value="<?php echo $usuario?>">
+					<TD><INPUT type=text class=cajatexto name="usuario"  style="width:100px" value="<?php echo $usuario?>">
 					<IMG src="<?php echo $urlimg ?>">
 
 				<?php }?>
@@ -98,27 +100,27 @@ switch($idtipousuario){
 			<!-- disables autocomplete --><input type="password" style="display:none">
 				<TH>&nbsp;<?php echo $TbMsg[6]?>&nbsp;</TH>
 				<?php if ($opcion==$op_eliminacion || $opcion==$op_modificacion && $idusuario==1){?>
-					<TD><INPUT type=hidden class=cajatexto  name="pasguor"  style="width:100" value=""></INPUT>****</TD>
+					<TD><INPUT type=hidden class=cajatexto  name="pasguor"  style="width:100px" value="">****</TD>
 				<?php }else{?>
-					<TD><INPUT type=password class=cajatexto  name="pasguor"  style="width:100" value="">
+					<TD><INPUT type=password class=cajatexto  name="pasguor"  style="width:100px" value="">
 				<?php }?>
 			</TR>
 <!----------------------------------------------------	CONFIRMAR PASSWORD	---------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 			<TR>
 				<TH>&nbsp;<?php echo $TbMsg[18]?>&nbsp;</TH>
 				<?php if ($opcion==$op_eliminacion || $opcion==$op_modificacion && $idusuario==1){?>
-					<TD><INPUT type=hidden class=cajatexto  name="confirmarpasguor"  style="width:100" value=""></INPUT>****</TD>
+					<TD><INPUT type=hidden class=cajatexto  name="confirmarpasguor"  style="width:100px" value="">****</TD>
 				<?php }else{?>
-					<TD><INPUT type=password class=cajatexto  name="confirmarpasguor"  style="width:100" value="">
+					<TD><INPUT type=password class=cajatexto  name="confirmarpasguor"  style="width:100px" value="">
 				<?php }?>
 			</TR>
 <!---------------------------------------------------	NOMBRE COMPLETO	----------------------------------------------------------------------------------------------->
 			<TR>
 				<TH>&nbsp;<?php echo $TbMsg[7]?>&nbsp;</TH>
 				<?php if ($opcion==$op_eliminacion || ($opcion==$op_modificacion && $idusuario==1)){?>
-					<TD><INPUT type=hidden class=cajatexto name="nombre"  style="width:250" value="<?php echo $nombre?>"></INPUT><?php echo $nombre?></TD>
+					<TD><INPUT type=hidden class=cajatexto name="nombre"  style="width:250px" value="<?php echo $nombre?>"><?php echo $nombre?></TD>
 				<?php }else{?>
-					<TD><INPUT type=text class=cajatexto name="nombre"  style="width:250" value="<?php echo $nombre?>">
+					<TD><INPUT type=text class=cajatexto name="nombre"  style="width:250px" value="<?php echo $nombre?>">
 				<?php }?>
 			</TR>
 <!-------------------------------------------------------------------------------------------------------------------------------------------------->
@@ -127,7 +129,7 @@ switch($idtipousuario){
 				<?php if ($opcion==$op_eliminacion){?>
 					<TD><?php echo $email?></TD>
 				<?php }else{?>
-					<TD><INPUT type=text class=cajatexto name="email"  style="width:250" value="<?php echo $email?>">
+					<TD><INPUT type=text class=cajatexto name="email"  style="width:250px" value="<?php echo $email?>">
 				<?php }?>
 			</TR>
 <!--------------------------------------------------------------------------------------------------------------------------------------------------->
@@ -157,8 +159,7 @@ switch($idtipousuario){
 
 	</TABLE>
 </FORM>
-</DIV>
-
+</div>
 <?php
 if ($idusuario==1){
 ///*
@@ -216,4 +217,3 @@ function TomaPropiedades($cmd,$id){
 	else
 		return(false);
 }
-?>

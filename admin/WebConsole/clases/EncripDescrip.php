@@ -52,4 +52,3 @@ class EncripDescrip{
 		return( $this->cadena);
 	}
 }
-?>

@@ -15,4 +15,4 @@ $TbMsg[6]='Perfil Software';
 $TbMsg[7]='Ordenadores con esta imagen'; 
 $TbMsg[8]='Partición'; 
 $TbMsg[9]='Comentarios'; 
-?>
+

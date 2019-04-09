@@ -4,7 +4,7 @@
 //	Php language file: particionaryformatear_eng.php (Comandos)
 //	Language: English
 //________________________________________________________________________________________________________
-	$TbMsg=array();
+	if(empty($TbMsg))  $TbMsg=array();
 	$TbMsg[0]='Centers';
 	$TbMsg[1]='Group of labs';
 	$TbMsg[2]='Labs';
@@ -22,4 +22,4 @@
 	$TbMsg[14]='Format';
 	$TbMsg[15]='Hide';
 	$TbMsg[16]='Show';
-	$TbMsg[17]='¡¡ Free  space !!';
+	$TbMsg[17]='Free space !!';

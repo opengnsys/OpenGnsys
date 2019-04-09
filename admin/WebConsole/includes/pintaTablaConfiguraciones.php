@@ -38,10 +38,10 @@ function tablaConfiguracionesIniciarSesion($cmd,$idambito,$ambito){
 	// CONSULTA BD: grupo de equipos con iguales sistemas operativos: idordenadores,configuracion
         $cmd->texto="";
         // agrupamos equipos con igual conf de disco.
-        $cmd->texto="select GROUP_CONCAT(pcconf.idordenador SEPARATOR ',') AS idordenadores, pcconf.configuraciones  FROM  (";
+        $cmd->texto="SELECT GROUP_CONCAT(pcconf.idordenador SEPARATOR ',') AS idordenadores, pcconf.configuraciones FROM (";
 
         // partconf agrupa la configuracion de todas las part: idordenador | configuracionTodasPart
-        $cmd->texto.=" select partconf.idordenador , GROUP_CONCAT(partconf.configuracion  ORDER BY partconf.configuracion ASC SEPARATOR '@'  ) AS configuraciones FROM (";
+        $cmd->texto.=" SELECT partconf.idordenador, GROUP_CONCAT(partconf.configuracion ORDER BY partconf.configuracion ASC SEPARATOR '@') AS configuraciones FROM (";
 
         // particion conf: idordenador, numdisk, configuracion (numdisk;numpar;idnombreso)
         $cmd->texto.="SELECT ordenadores_particiones.idordenador,ordenadores_particiones.numdisk, CONCAT_WS(';',ordenadores_particiones.numdisk, ordenadores_particiones.numpar, ordenadores_particiones.idnombreso) AS configuracion FROM ordenadores_particiones ";
@@ -138,9 +138,7 @@ function tablaConfiguracionesInventarioSoftware($cmd,$idordenador){
 			WHERE ordenadores.idordenador=".$idordenador."
 			  AND nombresos.nombreso!='DATA'
 			ORDER BY ordenadores_particiones.numdisk,ordenadores_particiones.numpar";
-
-	$rs->Comando=&$cmd; 
-	$rs=new Recordset; 
+	$rs=new Recordset;
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) 
 		return($tablaHtml); // Error al abrir recordset

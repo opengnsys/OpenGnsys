@@ -21,4 +21,4 @@ function validate($VARS){
 	return $result;
 }
 
-?>
+

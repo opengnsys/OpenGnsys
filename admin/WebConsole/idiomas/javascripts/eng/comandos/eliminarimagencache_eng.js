@@ -1,7 +1,7 @@
 //________________________________________________________________________________________________________
 //
-//	Fichero de idiomas javascripts: eliminarimagencache_eng.js 
-//	Idioma: Ingles 
+//    Javascript language file: eliminarimagencache_eng.js
+//    Language: English
 //________________________________________________________________________________________________________
 TbMsg=new Array;
 TbMsg[0]="";

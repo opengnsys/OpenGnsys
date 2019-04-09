@@ -232,7 +232,7 @@ const char* tbErrores[]={"Se han generado errores. No se puede continuar la ejec
 		"094-Ha habido algún problerma al procesar la actualización después de crear una imagen",\
 		"095-Ha habido algún problerma al procesar la actualización después de restaurar una imagen",\
 		"096-Ha habido algún problerma al procesar la actualización después de crear un software incremental",\
-
+		"097-Este fichero de log está obsoleto, este proceso usa ahora syslog para gestionar los mensajes de log",\
 };
 // ________________________________________________________________________________________________________
 // Tabla de mensajes
@@ -267,12 +267,12 @@ const char* tbMensajes[]={"",\
 // ________________________________________________________________________________________________________
 // Prototipo de funciones
 // ________________________________________________________________________________________________________
-char *desencriptar(char *,int*);
-char *encriptar(char *,int*);
 struct tm * tomaHora();
 void registraLog(const char *,const char *,int );
 void errorLog(const char *,int ,int);
+#define og_log(err, swe)   errorLog(__FUNCTION__, err, swe)
 void errorInfo(const char *,char *);
+#define og_info(err)  errorInfo(__FUNCTION__, err)
 void infoLog(int);
 void infoDebug(char*);
 BOOLEAN validacionParametros(int,char**,int);
@@ -310,5 +310,10 @@ BOOLEAN escribeArchivo(char *,char*);
 BOOLEAN sendArchivo(SOCKET *,char *);
 BOOLEAN recArchivo(SOCKET *,char *);
 SOCKET TCPConnect(char *,char*);
-int tomaPuerto(SOCKET);
+
+#include <stddef.h> /* for offsetof. */
+
+#define container_of(ptr, type, member) ({			\
+	typeof( ((type *)0)->member ) *__mptr = (ptr);		\
+	(type *)( (char *)__mptr - offsetof(type,member) );})
 

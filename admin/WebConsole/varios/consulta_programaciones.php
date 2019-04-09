@@ -29,4 +29,4 @@ if ($rs->Abrir()){ // Error al abrir recordset
 	echo $cadena_campos;
 }
 $rs->Cerrar();
-?>
+

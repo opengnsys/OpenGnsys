@@ -2,17 +2,17 @@
 //________________________________________________________________________________________________________
 //
 //	Fitxer d'idiomes php: incorporaordenadores_cat.php (Comandos)
-//	Idioma: Català
+//	Idioma: Catalï¿½
 //________________________________________________________________________________________________________
 	$TbMsg=array();
-	$TbMsg[0]='Incorporació d\'Ordinadors';
+	$TbMsg[0]='Incorporaciï¿½ d\'Ordinadors';
 	$TbMsg[1]='Aula';
 	$TbMsg["MSG_DHCPCODE"]='Codi DHCP';
 	$TbMsg["MSG_DHCPHOST"]='(declaracions "host")';
-	$TbMsg[3]='ATENCIÓ: Hi ha hagut algún problema al incorporar ordinadors des del fitxer';
-	$TbMsg[4]='ATENCIÓ: El fitxer está buit';
-	$TbMsg[5]='ATENCIÓ: El fitxer no conté informació amb el format necesari per incorporar ordinadors';
-	$TbMsg[6]='ATENCIÓ: Hi ha algún problema per a salvar el fitxer';
+	$TbMsg[3]='ATENCIï¿½: Hi ha hagut algï¿½n problema al incorporar ordinadors des del fitxer';
+	$TbMsg[4]='ATENCIï¿½: El fitxer estï¿½ buit';
+	$TbMsg[5]='ATENCIï¿½: El fitxer no contï¿½ informaciï¿½ amb el format necesari per incorporar ordinadors';
+	$TbMsg[6]='ATENCIï¿½: Hi ha algï¿½n problema per a salvar el fitxer';
 	$TbMsg[7]='S\'han incorporat correctament ordinadors desde fitxer';
 	$TbMsg[8]='Contingut';
-?>
+

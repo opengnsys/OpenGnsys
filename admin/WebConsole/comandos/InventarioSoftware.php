@@ -26,8 +26,8 @@ if (!$cmd)
 //________________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE>Administración web de aulas</TITLE>
 <HEAD>
+	<TITLE>Administración web de aulas</TITLE>
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="./jscripts/InventarioSoftware.js"></SCRIPT>
@@ -64,12 +64,11 @@ switch($ambito){
 	echo '<IMG src="'.$urlimg.'">&nbsp;&nbsp;<span align=center class=subcabeceras><U>'.$TbMsg[6].': '.$textambito.','.$nombreambito.'</U></span>&nbsp;&nbsp;</span></p>';
 ?>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
-	<P align=center>
-	<SPAN align=center class=subcabeceras><?php echo $TbMsg[7] ?></SPAN>
-	</p>
+	<P align=center><SPAN class=subcabeceras><?php echo $TbMsg[7] ?></SPAN></p>
+
 		<?php echo tablaConfiguracionesInventarioSoftware($cmd,$idambito); ?>
 
-	</BR>
+	<BR>
 <?php
 //________________________________________________________________________________________________________
 	include_once("./includes/formularioacciones.php");

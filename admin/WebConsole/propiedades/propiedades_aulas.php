@@ -81,8 +81,8 @@ if (!$resul)
 //________________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE>Administración web de aulas</TITLE>
 <HEAD>
+	<TITLE>Administración web de aulas</TITLE>
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../jscripts/validators.js"></SCRIPT>
@@ -110,7 +110,7 @@ function abrir_ventana(URL){
 	<input type="hidden" name="oglive" value="<?php echo $oglive ?>">
 	
 	<P align=center class=cabeceras><?php echo $TbMsg[4]?><BR>
-	<SPAN align=center class=subcabeceras><?php  echo $opciones[$opcion]?></SPAN></P>
+	<SPAN class=subcabeceras><?php  echo $opciones[$opcion]?></SPAN></P>
 	<TABLE  align=center border=5 cellPadding=1 cellSpacing=1 class=tabla_datos >	<!-- AGP -->
 <!--------------------------------------------------	AGP	----------------------------------------------------------------->
 		<TR>
@@ -126,7 +126,7 @@ function abrir_ventana(URL){
 							<br />'.$TbMsg[21].': '. $ordenadores.'</td>';
 			}
 			else{
-				echo '<td><input class="formulariodatos" name=nombreaula style="width:215" type=text value="'. $nombreaula.'" /></td>';
+				echo '<td><input class="formulariodatos" name=nombreaula style="width:215px" type=text value="'. $nombreaula.'" /></td>';
 				echo'<td rowspan="5" colspan="2" valign="top" align="left"><img border="3" style="border-color:#63676b" src="../images/fotos/'.$urlfoto.'" /><br />'.$TbMsg[21].': '. $ordenadores.'<br />(150X110)-(jpg - gif - png) ---- '.$TbMsg[5091].'<br /><input name="archivo" type="file" id="archivo" size="16" /></td>';
 			}
 			?>
@@ -175,7 +175,7 @@ function abrir_ventana(URL){
 			<?php	if ($opcion==$op_eliminacion)
 					echo '<td>'.$puestos.'</td>';
 				else
-					echo '<td><input  class="formulariodatos" name=puestos style="width:30" type=text value='.$puestos.'></td>';
+					echo '<td><input  class="formulariodatos" name=puestos style="width:30px" type=text value='.$puestos.'></td>';
 			?>
 		</tr>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
@@ -252,7 +252,7 @@ function abrir_ventana(URL){
 				if ($opcion==$op_eliminacion)
 					echo '<TD colspan=3>'.$router.'</TD>';
 				else
-					echo '<TD colspan=3><INPUT  class="formulariodatos" name=router style="width:100" type=text value='.$router.'></TD>';
+					echo '<TD colspan=3><INPUT  class="formulariodatos" name=router style="width:100px" type=text value='.$router.'></TD>';
 			?>
 		</TR>
 <!---- ADV --------------------------netmask------------------------------------------------------------------------------------------------------------------------------------------->
@@ -261,7 +261,7 @@ function abrir_ventana(URL){
 			<?php	if ($opcion==$op_eliminacion)
 					echo '<TD colspan=3>'.$netmask.'</TD>';
 				else
-					echo '<TD colspan=3><INPUT  class="formulariodatos" name=netmask style="width:100" type=text value='.$netmask.'></TD>';
+					echo '<TD colspan=3><INPUT  class="formulariodatos" name=netmask style="width:100px" type=text value='.$netmask.'></TD>';
 			?>
 		</TR>
 <!---- Ramón ------------------------ntp------------------------------------------------->
@@ -270,7 +270,7 @@ function abrir_ventana(URL){
 			<?php	if ($opcion==$op_eliminacion) {
 					echo '<td colspan="3">'.$ntp.'</td>';
 				} else {
-					echo '<td colspan="3"><input class="formulariodatos" name="ntp" style="width:100" type="text" maxlength="15" value="'.$ntp.'" /> ';
+					echo '<td colspan="3"><input class="formulariodatos" name="ntp" style="width:100px" type="text" maxlength="15" value="'.$ntp.'" /> ';
 					if (exec("timedatectl status | awk -F'[:()]' '/Time.*zone/ {print $2}'", $out, $err)) {
 						echo '<em>('.$TbMsg['COMM_DEFTIMEZONE'].': '.$out[0].')</em>';
 					}
@@ -284,7 +284,7 @@ function abrir_ventana(URL){
 			<?php	if ($opcion==$op_eliminacion)
 					echo '<td colspan="3">'.$dns.'</td>';
 				else
-					echo '<td colspan="3"><input class="formulariodatos" name="dns" style="width:100" type="text" maxlength="15" value="'.$dns.'" /></td>';
+					echo '<td colspan="3"><input class="formulariodatos" name="dns" style="width:100px" type="text" maxlength="15" value="'.$dns.'" /></td>';
 			?>
 		</tr>
 <!---- Ramón ------------------------proxy------------------------------------------------->
@@ -293,7 +293,7 @@ function abrir_ventana(URL){
 			<?php	if ($opcion==$op_eliminacion)
 					echo '<td colspan="3">'.$proxy.'</td>';
 				else
-					echo '<td colspan="3"><input class="formulariodatos" name="proxy" style="width:200" type="text" maxlength="30" value="'.$proxy.'" /></td>';
+					echo '<td colspan="3"><input class="formulariodatos" name="proxy" style="width:200px" type="text" maxlength="30" value="'.$proxy.'" /></td>';
 			?>
 		</tr>
 <!---- ADV --------------------------p2pmodo------------------------------------------------------------------------------------------------------------------------------------------->
@@ -318,7 +318,7 @@ function abrir_ventana(URL){
 			<?php	if ($opcion==$op_eliminacion)
 					echo '<TD colspan=3>'.$timep2p.'</TD>';
 				else
-					echo '<TD colspan=3><INPUT  class="formulariodatos" name=timep2p style="width:100" type=text value='.$timep2p.'></TD>';
+					echo '<TD colspan=3><INPUT  class="formulariodatos" name=timep2p style="width:100px" type=text value='.$timep2p.'></TD>';
 			?>
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
@@ -344,7 +344,7 @@ function abrir_ventana(URL){
 			<?php	if ($opcion==$op_eliminacion)
 					echo '<TD colspan=3>'.$ipmul.'</TD>';
 				else
-					echo '<TD colspan=3><INPUT  class="formulariodatos" name=ipmul style="width:100" type=text value='.$ipmul.'></TD>';
+					echo '<TD colspan=3><INPUT  class="formulariodatos" name=ipmul style="width:100px" type=text value='.$ipmul.'></TD>';
 			?>
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
@@ -368,11 +368,11 @@ function abrir_ventana(URL){
 			<?php	if ($opcion==$op_eliminacion)
 					echo '<TD colspan=3>'.$velmul.'</TD>';
 				else
-					echo '<TD colspan=3><INPUT  class="formulariodatos" name=velmul style="width:100" type=text value='.$velmul.'></TD>';
+					echo '<TD colspan=3><INPUT  class="formulariodatos" name=velmul style="width:100px" type=text value='.$velmul.'></TD>';
 			?>
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
-</TABLE></br>
+</TABLE><p>
 <!-- ###########################################	PROPIEDADES APLICABLES A TODOS LOS ORDENADORES	#################################################################################-->
 
 <TABLE  align=center border=7 cellPadding=3 cellSpacing=1 class=tabla_listados >
@@ -412,7 +412,7 @@ function abrir_ventana(URL){
 					}
 					echo HTMLCTESELECT($ogliveList,"oglive","estilodesple"," ",$cntDiff==0?$oglive:" ",200);
 					if ($cntDiff > 0) {
-						echo '      <font color=red><strong>'.$TbMsg[34]."&nbsp;&nbsp;&nbsp;==> $cntDiff</strong></font>\n";
+						echo '      <div style="color: red; font-weight: bold;">'.$TbMsg[34]."&nbsp;&nbsp;&nbsp;==> $cntDiff</div>\n";
 					}
 					echo "</td>\n";
 				}
@@ -454,7 +454,7 @@ function abrir_ventana(URL){
 			<?php	if ($opcion==$op_eliminacion)
 					echo '<td colspan="3">'.$paginalogin.'</td>';
 				else
-					echo '<td colspan="3"><input class="formulariodatos" name="paginalogin" style="width:200" type="text" value="'.$paginalogin.'"></td>';
+					echo '<td colspan="3"><input class="formulariodatos" name="paginalogin" style="width:200px" type="text" value="'.$paginalogin.'"></td>';
 			?>
 		</tr>
 		<tr>
@@ -462,7 +462,7 @@ function abrir_ventana(URL){
 			<?php	if ($opcion==$op_eliminacion)
 					echo '<td colspan="3">'.$paginavalidacion.'</td>';
 				else
-					echo '<td colspan="3"><input class="formulariodatos" name="paginavalidacion" style="width:200" type="text" value="'.$paginavalidacion.'"></td>';
+					echo '<td colspan="3"><input class="formulariodatos" name="paginavalidacion" style="width:200px" type="text" value="'.$paginavalidacion.'"></td>';
 			?>
 		</tr>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
@@ -675,5 +675,3 @@ function TomaConfiguracion($cmd) {
 	}
 	return(false);
 }
-?>
-

@@ -1,7 +1,6 @@
 //____________________________________________________________________________
 //	
-//	Fichero de idiomas javascript: reservas.js 
-//	Idioma: Ingés 
+//    Javascript language file: reservas_eng.js
+//    Language: English
 //____________________________________________________________________________
 TbMsg=new Array;
-

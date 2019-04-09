@@ -1,10 +1,10 @@
 //____________________________________________________________________________
 //	
-//	Fichero de idiomas javascript: trabajostareas_eng.js 
-//	Idioma: Ingés 
+//    Javascript language file: trabajostareas_eng.js
+//    Language: English
 //____________________________________________________________________________
 TbMsg=new Array;
-TbMsg[0]="This task has been successfully included in this job";
-TbMsg[1]="WARNING: You must introduce an order number";
-TbMsg[2]="This task has been successfully excluded from this job";
-TbMsg[3]="This task has been successfully modified";
+TbMsg[0]="This task has been included successfully in this job";
+TbMsg[1]="WARNING: You must enter a sequence number";
+TbMsg[2]="This task has been excluded successfully from this job";
+TbMsg[3]="This task has been modified successfully";

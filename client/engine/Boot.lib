@@ -625,6 +625,8 @@ ps aux > /dev/null | grep $! | grep -E "T|S" | kill -9 $! > /dev/null
 }
 
 
+
+#/**
 #         ogWindowsRegisterPartition int_ndisk int_partiton str_volume int_disk int_partition
 #@brief   Registra una partición en windows con un determinado volumen.
 #@param   int_ndisk      nº de orden del disco a registrar
@@ -699,7 +701,7 @@ ps aux > /dev/null | grep $! | grep -E "T|S" | kill -9 $! > /dev/null
 
 }
 
-
+#/**
 #         ogGrubInstallMbr  int_disk_GRUBCFG  int_partition_GRUBCFG  
 #@brief   Instala el grub el el MBR del primer disco duro (FIRSTSTAGE). El fichero de configuración grub.cfg ubicado según parametros disk y part(SECONDSTAGE). Admite sistemas Windows.
 #@param   int_disk_SecondStage      
@@ -724,7 +726,8 @@ ps aux > /dev/null | grep $! | grep -E "T|S" | kill -9 $! > /dev/null
 #@date    2018-01-21
 #*/ ##
 
-function ogGrubInstallMbr {
+function ogGrubInstallMbr ()
+{
 
 # Variables locales.
 local PART DISK VERSION FIRSTAGE SECONSTAGE CHECKOS KERNELPARAM BACKUPNAME
@@ -803,7 +806,7 @@ grub-install --force --root-directory=${SECONDSTAGE}${PREFIXSECONDSTAGE} $FIRSTS
 }
 
 
-
+#/**
 #         ogGrubInstallPartition int_disk_SECONDSTAGE  int_partition_SECONDSTAGE bolean_Check_Os_installed_and_Configure_2ndStage
 #@brief   Instala y actualiza el gestor grub en el bootsector de la particion indicada
 #@param   int_disk_SecondStage      
@@ -823,7 +826,8 @@ grub-install --force --root-directory=${SECONDSTAGE}${PREFIXSECONDSTAGE} $FIRSTS
 #@date    2012-03-13
 #*/ ##
 
-function ogGrubInstallPartition {
+function ogGrubInstallPartition ()
+{
 
 # Variables locales.
 local PART DISK VERSION FIRSTAGE SECONSTAGE CHECKOS KERNELPARAM BACKUPNAME
@@ -909,7 +913,8 @@ grub-install --force --root-directory=${SECONDSTAGE}${PREFIXSECONDSTAGE} $FIRSTS
 #@author  Antonio J. Doblas Viso.   Universidad de Malaga.
 #@date    2016-11-03
 #*/ ##
-function ogConfigureFstab {
+function ogConfigureFstab ()
+{
 # Variables locales.
 local FSTAB DEFROOT PARTROOT DEFSWAP PARTSWAP
 
@@ -952,9 +957,7 @@ fi
 }
 
 
-###
-#En pruebas
-##
+
 #/**
 #         ogSetLinuxName int_ndisk int_nfilesys [str_name]
 #@brief   Establece el nombre del equipo en los ficheros hostname y hosts.
@@ -1078,11 +1081,10 @@ MNTDIR=$(ogMount $1 $2) || return $?
 #@author  Antonio J. Doblas Viso.   Universidad de Malaga.
 #@date    2017-06-17
 #*/ ##
-#*/ ##
 
-#*/
 
-function ogGrubAddOgLive () {
+function ogGrubAddOgLive () 
+{
     local TIMEOUT DIRMOUNT GRUBGFC PARTTABLETYPE NUMDISK NUMPART KERNEL STATUS NUMLINE MENUENTRY
 
     # Si se solicita, mostrar ayuda.
@@ -1149,9 +1151,11 @@ MENUENTRY="menuentry "OpenGnsys"  --class opengnsys --class gnu --class os { \n 
 
 #/**
 # ogGrubHidePartitions num_disk num_part
+#@brief ver ogBootLoaderHidePartitions
 #@see ogBootLoaderHidePartitions
-#*/
-function ogGrubHidePartitions {
+#*/ ##
+function ogGrubHidePartitions ()
+{
     # Si se solicita, mostrar ayuda.
     if [ "$*" == "help" ]; then
         ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
@@ -1164,9 +1168,11 @@ function ogGrubHidePartitions {
 
 #/**
 # ogBurgHidePartitions num_disk num_part
+#@brief ver ogBootLoaderHidePartitions
 #@see ogBootLoaderHidePartitions
-#*/
-function ogBurgHidePartitions {
+#*/ ##
+function ogBurgHidePartitions ()
+{
     # Si se solicita, mostrar ayuda.
     if [ "$*" == "help" ]; then
         ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
@@ -1191,8 +1197,13 @@ function ogBurgHidePartitions {
 #@version 1.1 Se generaliza la función para grub y burg
 #@author  Irina Gomez, ETSII Universidad de Sevilla
 #@date    2017-10-20
+#@version 1.1.1 Se incluye comentarios en codigo para autodocuemtnacion con Doxygen
+#@author  Antonio J. Doblas Viso, EVLT Univesidad de Malaga.
+#@date    2018-07-05
 #*/
-function ogBootLoaderHidePartitions {
+
+function ogBootLoaderHidePartitions ()
+{
     local FUNC DIRMOUNT GFCFILE PARTTABLETYPE WINENTRY ENTRY PART TEXT LINE2 PART2 HIDDEN
 
     # Si se solicita, mostrar ayuda.
@@ -1234,9 +1245,10 @@ function ogBootLoaderHidePartitions {
     sed -i '/parttool/d' $CFGFILE
 
     PARTTABLETYPE=$(ogGetPartitionTableType $1 | tr [:upper:] [:lower:])
-
+#   /*  (comentario de bloque para  Doxygen)
     # Entradas de Windows: numero de linea y particion. De mayor a menor.
     WINENTRY=$(awk '/menuentry.*Windows/ {gsub(/\)\"/, "");  print NR":"$6} ' $CFGFILE | sed -e '1!G;h;$!d' -e s/[a-z\/]//g)
+    #*/ (comentario para bloque Doxygen)
     # Particiones de Windows, pueden no estar en el grub.
     WINPART=$(fdisk -l $(ogDiskToDev $1)|awk '/NTFS/ {print substr($1,9,1)}' |sed '1!G;h;$!d')
     # Modifico todas las entradas de Windows.
@@ -1262,9 +1274,11 @@ function ogBootLoaderHidePartitions {
 
 #/**
 # ogGrubDeleteEntry num_disk num_part num_disk_delete num_part_delete
-#@see ogBootLoaderDeleteEntry
+#@brief ver ogBootLoaderDeleteEntry
+#@see ogBootLoaderDeleteEntry 
 #*/
-function ogGrubDeleteEntry {
+function ogGrubDeleteEntry ()
+{
     # Si se solicita, mostrar ayuda.
     if [ "$*" == "help" ]; then
         ogHelp  "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition int_disk_delete int_npartition_delete" \
@@ -1277,9 +1291,11 @@ function ogGrubDeleteEntry {
 
 #/**
 # ogBurgDeleteEntry num_disk num_part num_disk_delete num_part_delete
+#@brief ver ogBootLoaderDeleteEntry
 #@see ogBootLoaderDeleteEntry
 #*/
-function ogBurgDeleteEntry {
+function ogBurgDeleteEntry ()
+{
     # Si se solicita, mostrar ayuda.
     if [ "$*" == "help" ]; then
         ogHelp  "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition int_disk_delete int_npartition_delete" \
@@ -1305,8 +1321,10 @@ function ogBurgDeleteEntry {
 #@version 1.1 Se generaliza la función para grub y burg
 #@author  Irina Gomez, ETSII Universidad de Sevilla
 #@date    2017-10-20
-#*/
-function ogBootLoaderDeleteEntry {
+#*/ ##
+
+function ogBootLoaderDeleteEntry ()
+{
     local FUNC DIRMOUNT CFGFILE DEVICE MENUENTRY DELETEENTRY ENDENTRY ENTRY
 
     # Si se solicita, mostrar ayuda.
@@ -1368,7 +1386,7 @@ function ogBootLoaderDeleteEntry {
     done
 }
 
-
+#/**
 #         ogBurgInstallMbr   int_disk_GRUBCFG  int_partition_GRUBCFG 
 #@param   bolean_Check_Os_installed_and_Configure_2ndStage   true | false[default] 
 #@brief   Instala y actualiza el gestor grub en el MBR del disco duro donde se encuentra el fichero grub.cfg. Admite sistemas Windows.
@@ -1387,9 +1405,13 @@ function ogBootLoaderDeleteEntry {
 #@version 1.1.0 - Refactorizar fichero de configuacion
 #@author  Antonio J. Doblas Viso.   Universidad de Malaga.
 #@date    2018-01-24
+#@version 1.1.1 - Se incluye comentarios en codigo para autodocuemtnacion con Doxygen
+#@author  Antonio J. Doblas Viso.   Universidad de Malaga.
+#@date    2018-07-05
 #*/ ##
 
-function ogBurgInstallMbr {
+function ogBurgInstallMbr ()
+{
  
 # Variables locales.
 local PART DISK FIRSTAGE SECONSTAGE PREFIXSECONDSTAGE CHECKOS KERNELPARAM BACKUPNAME FILECFG
@@ -1422,7 +1444,7 @@ FIRSTSTAGE=$(ogDiskToDev 1)
 SECONDSTAGE=$(ogMount $DISK $PART)
 
 # prepara el directorio principal de la segunda etapa (y copia los binarios)
-[ -d ${SECONDSTAGE}/boot/burg/ ]  || mkdir -p ${SECONDSTAGE}/boot/burg/; cp -prv /boot/burg/*  ${SECONDSTAGE}/boot/burg/ 2>&1>/dev/null; cp -prv $OGLIB/burg/*  ${SECONDSTAGE}/boot/burg/ 2>&1>/dev/null;
+[ -d ${SECONDSTAGE}/boot/burg/ ]  || mkdir -p ${SECONDSTAGE}/boot/burg/; cp -prv /boot/burg/*  ${SECONDSTAGE}/boot/burg/ 2>&1>/dev/null; cp -prv $OGLIB/burg/*  ${SECONDSTAGE}/boot/burg/ 2>&1>/dev/null; #*/ ## (comentario Dogygen) #*/ ## (comentario Dogygen)
 
 #Copiamos el tema 
 mkdir -p  ${SECONDSTAGE}/boot/burg/themes/OpenGnsys
@@ -1459,6 +1481,7 @@ mkdir -p ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot/burg/
 
 FILECFG=${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot/burg/burg.cfg
 
+#/* ## (comentario Dogygen)
 cat > "$FILECFG" << EOF
 
 set theme_name=OpenGnsys
@@ -1541,7 +1564,7 @@ fi
 
 
 EOF
-
+#*/ ## (comentario Dogygen)
 
 #Preparar configuración segunda etapa: crear entrada del sistema operativo
 grubSyntax "$KERNELPARAM" >> "$FILECFG" 
@@ -1553,9 +1576,11 @@ burg-install --force --root-directory=${SECONDSTAGE} $FIRSTSTAGE 2>&1>/dev/null
 
 #/**
 # ogGrubDefaultEntry int_disk_GRUGCFG  int_partition_GRUBCFG int_disk_default_entry int_npartition_default_entry
+#@brief ver ogBootLoaderDefaultEntry
 #@see ogBootLoaderDefaultEntry
-#*/
-function ogGrubDefaultEntry {
+#*/ ##
+function ogGrubDefaultEntry ()
+{
     # Si se solicita, mostrar ayuda.
     if [ "$*" == "help" ]; then
         ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition int_disk_default_entry int_npartition_default_entry" \
@@ -1568,9 +1593,11 @@ function ogGrubDefaultEntry {
 
 #/**
 # ogBurgDefaultEntry int_disk_BURGCFG  int_partition_BURGCFG int_disk_default_entry int_npartition_default_entry
+#@brief ver ogBootLoaderDefaultEntry
 #@see ogBootLoaderDefaultEntry
-#*/
-function ogBurgDefaultEntry {
+#*/ ##
+function ogBurgDefaultEntry ()
+{
     # Si se solicita, mostrar ayuda.
     if [ "$*" == "help" ]; then
         ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition int_disk_default_entry int_npartition_default_entry" \
@@ -1600,7 +1627,8 @@ function ogBurgDefaultEntry {
 #@author  Irina Gomez, ETSII Universidad de Sevilla
 #@date    2018-01-04
 #*/ ##
-function ogBootLoaderDefaultEntry {
+function ogBootLoaderDefaultEntry ()
+{
 
 # Variables locales.
 local PART CFGFILE DEFAULTENTRY MSG
@@ -1652,18 +1680,18 @@ DEFAULTENTRY=$(grep -n -m 1 menuentry.*$DEVICE $CFGFILE| cut -d: -f1)
 MENUENTRY="$(grep -n -e menuentry $CFGFILE| cut -d: -f1 | grep -n $DEFAULTENTRY |cut -d: -f1)"
 # Las líneas empiezan a contar desde cero
 let MENUENTRY=$MENUENTRY-1
-
 sed --regexp-extended -i  s/"set default=\"?[0-9]*\"?"/"set default=\"$MENUENTRY\""/g $CFGFILE
-
 MSG="MSG_HELP_$FUNC"
 echo "${!MSG%%\.}: $@"
 }
 
 #/**
 # ogGrubOgliveDefaultEntry num_disk num_part
+#@brief ver ogBootLoaderOgliveDefaultEntry
 #@see ogBootLoaderOgliveDefaultEntry
-#*/
-function ogGrubOgliveDefaultEntry {
+#*/ ##
+function ogGrubOgliveDefaultEntry ()
+{
     # Si se solicita, mostrar ayuda.
     if [ "$*" == "help" ]; then
         ogHelp "$FUNCNAME" "$FUNCNAME int_ndiskSecondStage int_partitionSecondStage" \
@@ -1676,9 +1704,11 @@ function ogGrubOgliveDefaultEntry {
 
 #/**
 # ogBurgOgliveDefaultEntry num_disk num_part
+#@brief ver ogBootLoaderOgliveDefaultEntry
 #@see ogBootLoaderOgliveDefaultEntry
-#*/
-function ogBurgOgliveDefaultEntry {
+#*/ ##
+function ogBurgOgliveDefaultEntry ()
+{
     # Si se solicita, mostrar ayuda.
     if [ "$*" == "help" ]; then
         ogHelp "$FUNCNAME" "$FUNCNAME int_ndiskSecondStage int_partitionSecondStage" \
@@ -1706,7 +1736,8 @@ function ogBurgOgliveDefaultEntry {
 #@author  Irina Gomez, ETSII Universidad de Sevilla
 #@date    2018-01-04
 #*/ ##
-function  ogBootLoaderOgliveDefaultEntry {
+function  ogBootLoaderOgliveDefaultEntry ()
+{
 
 # Variables locales.
 local FUNC PART CFGFILE NUMENTRY MSG
@@ -1759,9 +1790,11 @@ echo "${!MSG%%\.}: $@"
 
 #/**
 # ogGrubSetTheme num_disk num_part str_theme
+#@brief ver ogBootLoaderSetTheme
 #@see ogBootLoaderSetTheme
-#*/
-function ogGrubSetTheme {
+#*/ ##
+function ogGrubSetTheme ()
+{
     # Si se solicita, mostrar ayuda.
     if [ "$*" == "help" ]; then
         ogHelp "$FUNCNAME" "$FUNCNAME int_ndiskSecondStage int_partitionSecondStage str_themeName" \
@@ -1775,9 +1808,11 @@ function ogGrubSetTheme {
 
 #/**
 # ogBurgSetTheme num_disk num_part str_theme
+#@brief ver ogBootLoaderSetTheme
 #@see ogBootLoaderSetTheme
-#*/
-function ogBurgSetTheme  {
+#*/ ##
+function ogBurgSetTheme  ()
+{
     # Si se solicita, mostrar ayuda.
     if [ "$*" == "help" ]; then
         ogHelp "$FUNCNAME" "$FUNCNAME int_ndiskSecondStage int_partitionSecondStage str_themeName" \
@@ -1808,7 +1843,8 @@ function ogBurgSetTheme  {
 #@author  Antonio J. Doblas Viso. Universidad de Malaga
 #@date    2018-01-24
 #*/ ##
-function  ogBootLoaderSetTheme {
+function  ogBootLoaderSetTheme ()
+{
 
 # Variables locales.
 local FUNC PART CFGFILE THEME NEWTHEME BOOTLOADER MSG
@@ -1880,9 +1916,11 @@ sed --regexp-extended -i  s/"$THEME"/"$NEWTHEME"/g $CFGFILE
 
 #/**
 # ogGrubSetAdminKeys num_disk num_part str_theme
+#@brief ver ogBootLoaderSetTheme
 #@see ogBootLoaderSetTheme
-#*/
-function ogGrubSetAdminKeys {
+#*/ ##
+function ogGrubSetAdminKeys ()
+{
     # Si se solicita, mostrar ayuda.
     if [ "$*" == "help" ]; then
         ogHelp "$FUNCNAME" "$FUNCNAME int_ndiskSecondStage int_partitionSecondStage str_bolean" \
@@ -1896,9 +1934,11 @@ function ogGrubSetAdminKeys {
 
 #/**
 # ogBurgSetAdminKeys num_disk num_part str_bolean
+#@brief ver ogBootLoaderSetAdminKeys
 #@see ogBootLoaderSetAdminKeys
-#*/
-function ogBurgSetAdminKeys  {
+#*/ ##
+function ogBurgSetAdminKeys  ()
+{
     # Si se solicita, mostrar ayuda.
     if [ "$*" == "help" ]; then
         ogHelp "$FUNCNAME" "$FUNCNAME int_ndiskSecondStage int_partitionSecondStage str_bolean" \
@@ -1927,7 +1967,8 @@ function ogBurgSetAdminKeys  {
 #@author  Antonio J. Doblas Viso. Universidad de Malaga
 #@date    2018-01-24
 #*/ ##
-function  ogBootLoaderSetAdminKeys {
+function  ogBootLoaderSetAdminKeys ()
+{
 
 # Variables locales.
 local FUNC PART CFGFILE BOOTLOADER BOOTLOADERDIR CFGFILE MSG
@@ -1992,9 +2033,11 @@ esac
 
 #/**
 # ogGrubSetTimeOut num_disk num_part int_timeout_seconds
+#@brief ver ogBootLoaderSetTimeOut
 #@see ogBootLoaderSetTimeOut
-#*/
-function ogGrubSetTimeOut {
+#*/ ##
+function ogGrubSetTimeOut ()
+{
     # Si se solicita, mostrar ayuda.
     if [ "$*" == "help" ]; then
         ogHelp "$FUNCNAME" "$FUNCNAME int_ndiskSecondStage int_partitionSecondStage int_timeout_seconds" \
@@ -2008,9 +2051,11 @@ function ogGrubSetTimeOut {
 
 #/**
 # ogBurgSetTimeOut num_disk num_part str_bolean
+#@brief ver ogBootLoaderSetTimeOut
 #@see ogBootLoaderSetTimeOut
-#*/
-function ogBurgSetTimeOut  {
+#*/ ##
+function ogBurgSetTimeOut ()
+{
     # Si se solicita, mostrar ayuda.
     if [ "$*" == "help" ]; then
         ogHelp "$FUNCNAME" "$FUNCNAME int_ndiskSecondStage int_partitionSecondStage str_timeout_seconds" \
@@ -2039,7 +2084,8 @@ function ogBurgSetTimeOut  {
 #@author  Antonio J. Doblas Viso. Universidad de Malaga
 #@date    2018-01-24
 #*/ ##
-function  ogBootLoaderSetTimeOut {
+function  ogBootLoaderSetTimeOut ()
+{
 
 # Variables locales.
 local FUNC PART CFGFILE TIMEOUT BOOTLOADER BOOTLOADERDIR CFGFILE MSG
@@ -2089,9 +2135,11 @@ sed -i s/timeout=.*$/timeout=$TIMEOUT/g $CFGFILE
 
 #/**
 # ogGrubSetResolution num_disk num_part int_resolution
+#@brief ver ogBootLoaderSetResolution
 #@see ogBootLoaderSetResolution
-#*/
-function ogGrubSetResolution {
+#*/ ##
+function ogGrubSetResolution ()
+{
     # Si se solicita, mostrar ayuda.
     if [ "$*" == "help" ]; then
         ogHelp "$FUNCNAME" "$FUNCNAME int_ndiskSecondStage int_partitionSecondStage [str_resolution]" \
@@ -2106,9 +2154,11 @@ function ogGrubSetResolution {
 
 #/**
 # ogBurgSetResolution num_disk num_part str_bolean
+#@brief ver ogBootLoaderSetResolution
 #@see ogBootLoaderSetResolution
-#*/
-function ogBurgSetResolution  {
+#*/ ##
+function ogBurgSetResolution ()
+ {
     # Si se solicita, mostrar ayuda.
     if [ "$*" == "help" ]; then
         ogHelp "$FUNCNAME" "$FUNCNAME int_ndiskSecondStage int_partitionSecondStage [str_resolution]" \
@@ -2137,7 +2187,8 @@ function ogBurgSetResolution  {
 #@author  Antonio J. Doblas Viso. Universidad de Malaga
 #@date    2018-01-24
 #*/ ##
-function  ogBootLoaderSetResolution {
+function  ogBootLoaderSetResolution ()
+{
 
 # Variables locales.
 local FUNC PART CFGFILE RESOLUTION NEWRESOLUTION DEFAULTRESOLUTION BOOTLOADER BOOTLOADERDIR CFGFILE MSG
@@ -2220,7 +2271,7 @@ fi
 sed -i s/gfxmode=.*$/gfxmode=$NEWRESOLUTION/g $CFGFILE
 }
 
-
+#/**
 #         ogRefindInstall  int_ndisk bool_autoconfig
 #@brief   Instala y actualiza el gestor rEFInd en la particion EFI
 #@param   int_ndisk
@@ -2231,7 +2282,8 @@ sed -i s/gfxmode=.*$/gfxmode=$NEWRESOLUTION/g $CFGFILE
 #@author  Juan Carlos Garcia.   Universidad de ZAragoza.
 #@date    2017-06-26
 #*/ ##
-function ogRefindInstall {
+function ogRefindInstall ()
+{
 
 # Variables locales.
 local DISK EFIDIR CONFIG EFIPARTITIONID

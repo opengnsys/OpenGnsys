@@ -4,9 +4,9 @@
 //	Pph language file: reserves_eng.php 
 //	Language: English 
 //________________________________________________________________________________________________________
-	$TbMsg=array();
+	if (empty($TbMsg))  $TbMsg=array();
 	$TbMsg[0]='"New reservations group"';
-	$TbMsg[1]='"Define new reservation";
+	$TbMsg[1]='"Define new reservation"';
 	$TbMsg[2]='"Set reserve"';
 	$TbMsg[3]='"Rename"';
 	$TbMsg[4]='"Delete reservations group"';

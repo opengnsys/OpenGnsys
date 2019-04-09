@@ -5,7 +5,7 @@
 // Fecha Creación: Año 2009-2010
 // Fecha Última modificación: Agosto-2010
 // Nombre del fichero: Comando.php
-// Descripción : 
+// Descripción:
 //		Implementación del comando "EjecutarScripts"
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
@@ -26,8 +26,8 @@ if (!$cmd)
 //________________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE>Administración web de aulas</TITLE>
 <HEAD>
+	<TITLE>Administración web de aulas</TITLE>
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="./jscripts/EnviarMensaje.js"></SCRIPT>
@@ -45,10 +45,8 @@ if (!$cmd)
 	include_once("./includes/FiltradoAmbito.php");
 	//________________________________________________________________________________________________________
 ?>			
-	<P align=center>
-	<SPAN align=center class=subcabeceras><?php echo $TbMsg[10] ?></SPAN>
-	<form  align=center name="fdatos"> 				
-		
+	<P align=center><SPAN class=subcabeceras><?php echo $TbMsg[10] ?></SPAN></P>
+	<form name="fdatos">
 		<table align=center  class=tabla_datos border="0" cellpadding="0" cellspacing="1">
 			<tr> 
 				<th>&nbsp;<?php echo $TbMsg[7]?>&nbsp;</th>
@@ -67,7 +65,7 @@ if (!$cmd)
 	//  Sólo permite ejecutar inmediantemente como opción de ejecución 
 	// include_once("./includes/opcionesacciones.php")
 	?>
-	<P align=center><span align=center class=subcabeceras>Opciones de Ejecución</span></P>
+	<P align=center><span class=subcabeceras>Opciones de Ejecución</span></P>
 	<table align=center>
 		<tr>
 			<td><img border=0 style="cursor:pointer" src="../images/boton_aceptar_esp.gif" onclick="confirmar()" ></td>
@@ -89,7 +87,7 @@ if (!$cmd)
 	    </tr>
 	</table>
 
-	</FORM>
+	</form>
 <SCRIPT language="javascript">
 	Sondeo();
 </SCRIPT>

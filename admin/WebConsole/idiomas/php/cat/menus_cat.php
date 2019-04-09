@@ -2,19 +2,19 @@
 //________________________________________________________________________________________________________
 //
 //	Fitxer d'idiomes php: menus_cat.php 
-//	Idioma: Català 
+//	Idioma: Catalï¿½ 
 //________________________________________________________________________________________________________
 	$TbMsg=array();
-	$TbMsg[0]='"Nou grup de menús"';
-	$TbMsg[1]='"Definir nou menú"';
-	$TbMsg[2]='"Col·locar menú"';
+	$TbMsg[0]='"Nou grup de menï¿½s"';
+	$TbMsg[1]='"Definir nou menï¿½"';
+	$TbMsg[2]='"Colï¿½locar menï¿½"';
 	$TbMsg[3]='"Renombrar"';
-	$TbMsg[4]='"Eliminar grup de menús"';
-	$TbMsg[5]='"Informació Menú"';
-	$TbMsg[6]='"Moure menú"';
+	$TbMsg[4]='"Eliminar grup de menï¿½s"';
+	$TbMsg[5]='"Informaciï¿½ Menï¿½"';
+	$TbMsg[6]='"Moure menï¿½"';
 	$TbMsg[7]='"Propietats"';
-	$TbMsg[8]='"Eliminar menú"';
-	$TbMsg[9]='"Menús"';
+	$TbMsg[8]='"Eliminar menï¿½"';
+	$TbMsg[9]='"Menï¿½s"';
     $TbMsg[10]='"Gestionar Items"';
 
-?>
+

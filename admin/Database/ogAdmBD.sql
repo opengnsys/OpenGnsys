@@ -807,17 +807,15 @@ CREATE TABLE `repositorios` (
   `idrepositorio` int(11) NOT NULL AUTO_INCREMENT,
   `nombrerepositorio` varchar(250) NOT NULL DEFAULT '',
   `ip` varchar(15) NOT NULL DEFAULT '',
-  `passguor` varchar(50) NOT NULL DEFAULT '',
   `idcentro` int(11) DEFAULT NULL,
   `grupoid` int(11) DEFAULT NULL,
   `comentarios` text,
-  `puertorepo` int(11) NOT NULL DEFAULT '0',
   `apikey` varchar(32) NOT NULL DEFAULT '',
   PRIMARY KEY (`idrepositorio`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
-INSERT INTO `repositorios` (`idrepositorio`,`nombrerepositorio`,`ip`,`passguor`,`idcentro`,`grupoid`,`comentarios`,`puertorepo`,`apikey`) VALUES 
- (1,'Repositorio (Default)','SERVERIP','',1,0,'',2002,'REPOKEY');
+INSERT INTO `repositorios` (`idrepositorio`,`nombrerepositorio`,`ip`,`idcentro`,`grupoid`,`comentarios`,`apikey`) VALUES
+ (1,'Repositorio (Default)','SERVERIP',1,0,'','REPOKEY');
 
 
 -- --------------------------------------------------------

@@ -18,4 +18,3 @@
 	$TbMsgAux[10]='Guardar como una tarea nueva' ;
 	$TbMsgAux[11]='Incluir en una tarea existente' ;
 	$TbMsgAux[12]='Orden de ejecución';
-?>

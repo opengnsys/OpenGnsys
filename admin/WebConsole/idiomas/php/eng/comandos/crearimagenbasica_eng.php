@@ -4,13 +4,13 @@
 //	Php image file: crearimagenbasica_eng.php (Comandos)
 //	Language: English
 //________________________________________________________________________________________________________
-	$TbMsg=array();
+	if (empty($TbMsg))  $TbMsg=array();
 	$TbMsg[0]='Generation of base image  <br> (experimental)' ;
 	$TbMsg[1]='Computer features';
-        $TbMsg[2]='Name';
-        $TbMsg[3]='IP Address';
-        $TbMsg[4]='MAC Address';
-        $TbMsg[5]='Hardware profile';
+	$TbMsg[2]='Name';
+	$TbMsg[3]='IP Address';
+	$TbMsg[4]='MAC Address';
+	$TbMsg[5]='Hardware profile';
 	$TbMsg[6]='Data to supply';
 	$TbMsg[7]='Disk';
 	$TbMsg[8]='Par';
@@ -20,5 +20,5 @@
 	$TbMsg[12]='Additional Options';
 	$TbMsg[13]='Delete image previously';
 	$TbMsg[14]='Copy image to cache';
-	$TbMsg[15]='Delete image previously from cache';
+	$TbMsg[15]='Deleting image previously from cache';
 	$TbMsg[16]='Do not delete files from target';

@@ -15,4 +15,4 @@
 	$TbMsg[7]='(*)Para excluir algún comando de esta tarea debe hacer click sobre la casilla de verificación correspondiente';
 	$TbMsg[8]='Ámbito';
 	$TbMsg[9]='Nombre';
-?>
+

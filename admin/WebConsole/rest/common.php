@@ -248,6 +248,7 @@ $app->hook('slim.after', function() use ($app) {
  * @return   JSON object with basic server information (version, services, etc.)
  */
 $app->get('/info', function() {
+      $hasOglive = false;
       $response = new \stdClass;
       // Reading version file.
       $data = json_decode(@file_get_contents(VERSION_FILE));
@@ -293,4 +294,4 @@ $app->get('/status', function() {
       jsonResponse(200, $response);
    } 
 );
-?>
+

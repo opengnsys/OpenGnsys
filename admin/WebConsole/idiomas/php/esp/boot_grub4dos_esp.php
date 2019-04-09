@@ -1,10 +1,10 @@
 <?php
 //____________________________________________________________
 //
-//	Fichero de idiomas php: aulas_esp.php 
-//	Idioma: Español 
+//	Fichero de idiomas php: boot_grub4dos_esp.php
+//	Idioma: EspaÃ±ol
 //_____________________________________________________________
-	$TbMsg=array();
+	if (!empty($TbMsg))  $TbMsg=array();
 	$TbMsg[0]='Nuevo';
 	$TbMsg[1]='Modificar';
 	$TbMsg[2]='Eliminar';
@@ -29,9 +29,9 @@
 	$TbMsg[21]='Fichero';
 	$TbMsg[22]='##NO-TOCAR-ESTA-LINEA ';
 	$TbMsg[23]='NO HAY COLUMNA NUEVA';
-	$TbMsg[24]='Ámbito: Centros';
-	$TbMsg[25]='Ámbito: Grupo de aulas';
-	$TbMsg[26]='Ámbito: Grupo de ordenadores';
+	$TbMsg[24]='Ãmbito: Centros';
+	$TbMsg[25]='Ãmbito: Grupo de aulas';
+	$TbMsg[26]='Ãmbito: Grupo de ordenadores';
 	$TbMsg[27]='"Incorporar ordenadores"';
 	$TbMsg[28]='"Procedimientos"';
 	$TbMsg[29]='"Reservas de aulas"';
@@ -39,10 +39,10 @@
 	$TbMsg[31]='"Pendientes"';
 	$TbMsg[32]='"Denegadas"';
 	$TbMsg[33]='"Consola remota"';
-	$TbMsg[34]='"Programación reservas"';
+	$TbMsg[34]='"ProgramaciÃ³n reservas"';
 	$TbMsg[35]='"Operadores"';
 	$TbMsg[36]='"Eliminar Operador"';
-	$TbMsg[37]='"Añadir nuevo Operador"';
+	$TbMsg[37]='"AÃ±adir nuevo Operador"';
 	$TbMsg[38]='"Asistentes"';
 	$TbMsg[39]='"Eco de Consola"';
 	$TbMsg[40]='"NetBoot avanzado"';
@@ -50,4 +50,4 @@
 	$TbMsg[42]='Gesti&oacute;n Arranque Avanzado';
 	$TbMsg[43]='"Guardar"';
 	$TbMsg[44]='Ubicador Ordenadores';
-	$TbMsg[45]='Nombre ámbito';
+	$TbMsg[45]='Nombre Ã¡mbito';

@@ -16,4 +16,4 @@
 	$TbMsg[8]='Par';
 	$TbMsg[9]='Nombre S.O.';
 	$TbMsg[10]='Nombre de la Imagen ';
-?>
+

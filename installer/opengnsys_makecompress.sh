@@ -20,13 +20,13 @@ for PROG in jq unzip; do
     fi
 done
 
-# Variables
+# Variables.
 BRANCH="devel"
 CODE_URL="https://codeload.github.com/opengnsys/OpenGnsys/zip/$BRANCH"
 API_URL="https://api.github.com/repos/opengnsys/OpenGnsys/branches/$BRANCH"
-REVISION=$(curl -s "$API_URL" | jq '"r" + (.commit.commit.committer.date | gsub("-"; "")[:8]) + "." + (.commit.sha[:7])')
+REVISION=$(curl -s "$API_URL" | jq '"r" + (.commit.commit.committer.date | split("-") | join("")[:8]) + "." + (.commit.sha[:7])')
 
-# Descargar repositorio SVN
+# Descargar del repositorio de código.
 cd /tmp
 rm -fr opengnsys
 curl "$CODE_URL" -o opengnsys.zip && unzip opengnsys.zip && mv "OpenGnsys-$BRANCH" opengnsys

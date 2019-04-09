@@ -19,4 +19,4 @@
 	$TbMsg[11]='"Usuarios"';
 	$TbMsg[12]='"Asignar Adminstradores"';
 	$TbMsg[13]='"Asignar Unidades Organizativas"';
-?>
+

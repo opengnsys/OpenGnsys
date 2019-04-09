@@ -1,7 +1,7 @@
 //________________________________________________________________________________________________________
 //	
-//	Fichero de idiomas javascript: propiedades_universidades_eng.js 
-//	Idioma: Ingés 
+//    Javascript language file: propiedades_universidades_eng.js
+//    Language: English
 //________________________________________________________________________________________________________
 TbMsg=new Array;
-TbMsg[0]="You must introduce a name for this University";
+TbMsg[0]="You must enter a name for this University";

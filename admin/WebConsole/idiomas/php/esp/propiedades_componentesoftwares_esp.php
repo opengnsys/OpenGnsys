@@ -13,4 +13,3 @@ $TbMsg[4]="Gestión Componentes Software";
 $TbMsg[5]="Nombre";
 $TbMsg[6]="Tipo de Software";
 $TbMsg[7]="Tipo de S.O.";
-?>

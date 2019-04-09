@@ -10,4 +10,3 @@
 	$TbMsg[3]='"ATENCIÓN: El fichero no tiene la extensión .rbc"';
 	$TbMsg[4]='"ATENCIÓN: El fichero no contiene código Rembo-C para ejecutar"';
 	$TbMsg[5]='"ATENCIÓN: Hay algún problema para salvar el fichero de script"';
-?>

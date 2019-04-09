@@ -17,5 +17,5 @@ $TbMsg["CHANGE"]='Cambios en: ';
 $TbMsg["MANUAL"]='Manual OpenGnsys ';
 
 
-?>
+
 

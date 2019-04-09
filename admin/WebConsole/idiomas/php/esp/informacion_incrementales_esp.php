@@ -12,4 +12,3 @@
 	$TbMsg[4]='Componentes software';
 	$TbMsg[5]='Perfiles Combinables';
 	$TbMsg[6]='Perfiles Hardware soportados';
-?>

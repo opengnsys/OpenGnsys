@@ -3,17 +3,84 @@ LISTA DE CAMBIOS	CHANGELOG.es.txt
 
 
 
-Lista de cambios incluidos en OpenGnsys 1.1.1 Espeto
-----------------------------------------------------
+Lista de cambios incluidos en OpenGnsys 1.1.1 (Espeto)
+------------------------------------------------------
+
+Tickets resueltos en módulo OpenGnsys Cloning Engine:
+#853	Revisar autodocumentación con doxygen
+#863	smartPartition: incluir scritps de ejemplo de particionado personalizado para múltiples d
+iscos duros
+#864	FirstRunOnceWindows: scripts de ejemplo para installMiniSetup con ratón y teclado desacti
+vado
+#866	Si al restaurar usando la cache no hay espacio en la misma se finalizará la acción
+
+Tickets resueltos en módulo OpenGnsys Client:
+#847	La ISO del ogLive debe de utilzar la revisión de Git y no de SVN
+#887	Browser: mostrar aviso si falla la ejecución de un comando
+
+Tickets resueltos en módulo OpenGnsys Server:
+#580	Correcciones del Core de OpenGnsys: ogAdmServer (corrección)
+#856	Mejoras en setserveraddr
+#881	Personalizar prioridad de ejecución de proceso de torrents
+#883	Añadir soporte para syslog a ogAdmServer (mejora)
+#884	No ejecutar strip al compilar ogAdmserver
+#885	Eliminar ogAdmBoot
+
+Tickets resueltos en módulo OpenGnsys Repository Server:
+#873	Script para importar imagen de otro repositorio
+#875	Eliminar el servicio inactivo ogAdmRepo
 
 Tickets resueltos en módulo OpenGnsys Web Admin Console:
 #772	Módulo de administración web para dispositivos smartphones y tablets (no se resolverá)
+#804	Conversión de todo el código php de la consola web de administración a Php7 y Mysqli (tarea)
 #816	Marcar ordenador de profesor
 #824	Iniciar sistema restaurado (no integrado)
-#835	Problemas al listar plantillas en Nerboot Avanzado
+#842	Internacionalización de la consola web
+
+Tickets resueltos en módulo OpenGnsys Installer:
+#784	Mejorar rendimiento de PHP sobre Apache
+#869	Compatibilidad de servidor con Ubuntu 18.04 LTS y CentOS 7.x
 
 Tickets genéricos resueltos:
 #843	Incluir nombre de versión
+
+
+Lista de cambios incluidos en OpenGnsys 1.1.0a (versión de mantenimiento)
+----------------------------------------------
+
+Tickets resueltos en módulo OpenGnsys Cloning Engine:
+#851	Ampliar parámetros de una sesión multicast para los clientes (corrección)
+#868	ConfiguraOs: error al desinstalar el agente de sistema operativo antiguo (corrección)
+#871	Error al crear particiones lógicas en discos con sectores de 4 KB (corrección)
+
+Tickets resueltos en módulo OpenGnsys Client:
+#852	Apagado del cliente si tiempo de espera cambia de día (corrección)
+
+Tickets resueltos en módulo OpenGnsys Server:
+#846	Configuración de logrotate para que incluya todos los servicios de OpenGnsys (corrección)
+#859	Gestor de los ficheros PXE duplicado
+
+Tickets resueltos en módulo OpenGnsys Repository Server:
+#850	Problema con repositorio recién instalado (corrección)
+#882	deleteimage no borra directorio (corrección)
+
+Tickets resueltos en módulo OpenGnsys Web Admin Console:
+#835	Problemas al listar plantillas en Nerboot Avanzado (corrección)
+#849	Incorporar ordenadores de dhcp no admite comentarios tras la declarción de un host (corrección)
+#867	La ayuda en la consola incluirá más información
+#870	Netboot avanzado no crea la plantilla de arranque si el equipo no tiene asignado un repositorio (corrección)
+
+Tickets resueltos en módulo OpenGnsys Installer:
+#876	Problemas al actualizar desde Subversion a Git (corrección)
+#879	Función checkVersion de opengnsys_update.sh del tar.gz da error si se ejecuta sobre la misma versión de OpenGnsys (corrección)
+#880	openGnsys_update.sh no deja la revisión, solo deja 1.1.0a (corrección)
+#886	Actualización de la 1.0.6b a la 1.1.0 da errores a la hora de agregar ordenadores/aulas (no válido)
+
+Tickets genéricos resueltos:
+#839	Errores detectado en API REST para Remote PC (corrección)
+#840	Usar Git como repositorio de código
+#865	Problemas con Trac (corrección)
+#872	Liberar versión de mantenimiento OpenGnsys 1.1.0a
 
 
 Lista de cambios incluidos en OpenGnsys 1.1.0
@@ -27,7 +94,7 @@ Tickets resueltos en módulo OpenGnsys Cloning Engine:
 #678	Unidades organizativas con directorio de imágenes separado (mejora)
 #716	Revisión ogCleanLinuxDevices
 #722	Multicast entre subredes (mejora)
-#726	Reducir el registro de errores y avisos en algunas operaciones 
+#726	Reducir el registro de errores y avisos en algunas operaciones
 #727	ogGrubHidePartitions comprueba tipo de partición con blkid en vez revisar las entradas del Grub
 #731	Soporte para cualquier versión de Windows
 #740	Clonar disco completo en modo "raw"
@@ -60,6 +127,7 @@ Tickets resueltos en módulo OpenGnsys Client:
 #774	Soportar clientes ogLive de 64 bits
 #783	Browser registra salida de comandos ejecutados al pulsar enlace (mejora)
 #786	Adaptar el ogLive-precise-3.2.0-23-generic-r4820.iso como ogLive de 32 bits
+#788	grubSyntax compatible con grub_probe version 1.99
 #813	Restaurar Imagen no muestra el error en la cola de acciones
 
 Tickets resueltos en módulo OpenGnsys Server:
@@ -74,8 +142,8 @@ Tickets resueltos en módulo OpenGnsys Repository Server:
 #379	Usar identificador de operación para el ogAdmRepoAux (no se resolverá)
 #701	torrent-creator falla si el fichero de imagen a procesar no es válido
 #743	Funcion en el webservice API REST para wakeonlan (mejora)
-#810	API REST de respositorio para listado de imágenes 
-#820	checkperms da error al cambiar permisos sobre el directorio de agrupamiento de imágenes en el repo 
+#810	API REST de respositorio para listado de imágenes
+#820	checkperms da error al cambiar permisos sobre el directorio de agrupamiento de imágenes en el repo
 
 Tickets resueltos en módulo OpenGnsys Web Admin Console:
 #372	Comandos y asistentes deberían limitar equipos de operación dentro de ámbito
@@ -95,18 +163,18 @@ Tickets resueltos en módulo OpenGnsys Web Admin Console:
 #778	Codificar claves de usuarios (mejora)
 #779	Crear comando "Enviar mensaje"
 #782	Crear registro de acciones para realizar informes
-#789	Actualizar plantilla PXE al mover ordenador 
+#789	Actualizar plantilla PXE al mover ordenador
 #792	Incluir en los html personalizados de ejemplo los enlaces al acceso privado
 #797	Revisar log en los procesos de restauración
 #798	Mostrar imágenes en orden alfabético
-#799	Consola web: estado de los equipos tarda en mostar 
+#799	Consola web: estado de los equipos tarda en mostar
 #806	Comando Particionar y Formatear: controlar que no se exceda el tamaño del disco
 #807	Consola Web: Incorporar ordenadores da error de time-out
 #814	Sustituir las etiquetas cortas de php por el formato largo
 #817	Correcciones al formulario propiedades del aula
-#818	Actualización ficheros PXE tras modificar propiedad de IP del repositorio 
-#819	Eliminar un objeto ordenador no elimina fichero PXE 
-#821	Comando Particionar sólo funciona correctamente en al ámbito de tipo ordenador 
+#818	Actualización ficheros PXE tras modificar propiedad de IP del repositorio
+#819	Eliminar un objeto ordenador no elimina fichero PXE
+#821	Comando Particionar sólo funciona correctamente en al ámbito de tipo ordenador
 #822	Llamar al updateBootCache desde el particionado de la cache
 #828	Identificador de perfil hardware disponible desde el ogLive y eliminación de winboot
 
@@ -864,7 +932,7 @@ Tickets resueltos en módulo OpenGnSys Cloning Engine:
 #61	ogListPartitions muestra el tipo de sistemas de archivos de la particion y no el tipo de partición en cuestión
 #71	ogListPartitions falla con partición extendida
 #73	Mensajes de error en particiones vacías
-#75	Arrancar sistemas Linux en partición distinta a la original 
+#75	Arrancar sistemas Linux en partición distinta a la original
 #85	ogCreateImage no crea los subdirectorios del path indicado
 #86	ogRestoreImage siempre añade a la imagen pasada como parámetro la subcadena ".img"
 #87	Engine no se adapta a la sintaxis Doxygen

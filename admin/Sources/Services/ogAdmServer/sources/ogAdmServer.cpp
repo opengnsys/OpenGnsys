@@ -8,6 +8,17 @@
 // *******************************************************************************************************
 #include "ogAdmServer.h"
 #include "ogAdmLib.c"
+#include <ev.h>
+#include <syslog.h>
+#include <sys/ioctl.h>
+#include <ifaddrs.h>
+
+static char usuario[LONPRM]; // Usuario de acceso a la base de datos
+static char pasguor[LONPRM]; // Password del usuario
+static char datasource[LONPRM]; // Dirección IP del gestor de base de datos
+static char catalog[LONPRM]; // Nombre de la base de datos
+static char interface[LONPRM]; // Interface name
+
 //________________________________________________________________________________________________________
 //	Función: tomaConfiguracion
 //
@@ -16,161 +27,112 @@
 //	Parámetros:
 //		filecfg : Ruta completa al fichero de configuración
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error 
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error 
 //________________________________________________________________________________________________________
-BOOLEAN tomaConfiguracion(char* filecfg) {
-	char modulo[] = "tomaConfiguracion()";
+static bool tomaConfiguracion(const char *filecfg)
+{
+	char buf[1024], *line;
+	char *key, *value;
+	FILE *fcfg;
 
 	if (filecfg == NULL || strlen(filecfg) == 0) {
-		errorLog(modulo, 1, FALSE); // Fichero de configuración del servicio vacío
-		return (FALSE);
+		syslog(LOG_ERR, "No configuration file has been specified\n");
+		return false;
 	}
-	FILE *fcfg;
-	long lSize;
-	char * buffer, *lineas[MAXPRM], *dualparametro[2];
-	int i, numlin, resul;
 
 	fcfg = fopen(filecfg, "rt");
 	if (fcfg == NULL) {
-		errorLog(modulo, 2, FALSE); // No existe fichero de configuración del servicio
-		return (FALSE);
+		syslog(LOG_ERR, "Cannot open configuration file `%s'\n",
+		       filecfg);
+		return false;
 	}
-
-	fseek(fcfg, 0, SEEK_END);
-	lSize = ftell(fcfg); // Obtiene tamaño del fichero.
-	rewind(fcfg);
-	buffer = (char*) reservaMemoria(lSize + 1); // Toma memoria para el buffer de lectura.
-	if (buffer == NULL) { // No hay memoria suficiente para el buffer
-		errorLog(modulo, 3, FALSE);
-		return (FALSE);
-	}
-	fread(buffer, 1, lSize, fcfg); // Lee contenido del fichero
-	buffer[lSize] = (char) NULL;
-	fclose(fcfg);
 
 	servidoradm[0] = (char) NULL; //inicializar variables globales
-	usuario[0] = (char) NULL;
-	pasguor[0] = (char) NULL;
-	datasource[0] = (char) NULL;
-	catalog[0] = (char) NULL;
-	aulaup[0] = (char) NULL;
 
-	numlin = splitCadena(lineas, buffer, '\n');
-	for (i = 0; i < numlin; i++) {
-		splitCadena(dualparametro, lineas[i], '=');
-		resul = strcmp(StrToUpper(dualparametro[0]), "SERVIDORADM");
-		if (resul == 0)
-			strcpy(servidoradm, dualparametro[1]);
-		resul = strcmp(StrToUpper(dualparametro[0]), "PUERTO");
-		if (resul == 0)
-			strcpy(puerto, dualparametro[1]);
-		resul = strcmp(StrToUpper(dualparametro[0]), "USUARIO");
-		if (resul == 0)
-			strcpy(usuario, dualparametro[1]);
-		resul = strcmp(StrToUpper(dualparametro[0]), "PASSWORD");
-		if (resul == 0)
-			strcpy(pasguor, dualparametro[1]);
-		resul = strcmp(StrToUpper(dualparametro[0]), "DATASOURCE");
-		if (resul == 0)
-			strcpy(datasource, dualparametro[1]);
-		resul = strcmp(StrToUpper(dualparametro[0]), "CATALOG");
-		if (resul == 0)
-			strcpy(catalog, dualparametro[1]);
-		resul = strcmp(StrToUpper(dualparametro[0]), "AULAUP");
-		if (resul == 0)
-			strcpy(catalog, dualparametro[1]);
-	}
-	if (servidoradm[0] == (char) NULL) {
-		liberaMemoria(buffer);
-		errorLog(modulo, 4, FALSE); // Falta parámetro SERVIDORADM
-		return (FALSE);
-	}
-	if (puerto[0] == (char) NULL) {
-		liberaMemoria(buffer);
-		errorLog(modulo, 5, FALSE); // Falta parámetro PUERTO
-		return (FALSE);
-	}
-	if (usuario[0] == (char) NULL) {
-		liberaMemoria(buffer);
-		errorLog(modulo, 6, FALSE); // Falta parámetro USUARIO
-		return (FALSE);
-	}
-	if (pasguor[0] == (char) NULL) {
-		liberaMemoria(buffer);
-		errorLog(modulo, 7, FALSE); // Falta parámetro PASSWORD
-		return (FALSE);
-	}
-	if (datasource[0] == (char) NULL) {
-		liberaMemoria(buffer);
-		errorLog(modulo, 8, FALSE); // Falta parámetro DATASOURCE
-		return (FALSE);
-	}
-	if (catalog[0] == (char) NULL) {
-		liberaMemoria(buffer);
-		errorLog(modulo, 9, FALSE); // Falta parámetro CATALOG
-		return (FALSE);
-	}
-	if (aulaup[0] == (char) NULL) {
-		strcpy(aulaup, "0"); // Por defecto el conmutador de registro automático esta en off
+	line = fgets(buf, sizeof(buf), fcfg);
+	while (line != NULL) {
+		const char *delim = "=";
 
+		line[strlen(line) - 1] = '\0';
+
+		key = strtok(line, delim);
+		value = strtok(NULL, delim);
+
+		if (!strcmp(StrToUpper(key), "SERVIDORADM"))
+			snprintf(servidoradm, sizeof(servidoradm), "%s", value);
+		else if (!strcmp(StrToUpper(key), "PUERTO"))
+			snprintf(puerto, sizeof(puerto), "%s", value);
+		else if (!strcmp(StrToUpper(key), "USUARIO"))
+			snprintf(usuario, sizeof(usuario), "%s", value);
+		else if (!strcmp(StrToUpper(key), "PASSWORD"))
+			snprintf(pasguor, sizeof(pasguor), "%s", value);
+		else if (!strcmp(StrToUpper(key), "DATASOURCE"))
+			snprintf(datasource, sizeof(datasource), "%s", value);
+		else if (!strcmp(StrToUpper(key), "CATALOG"))
+			snprintf(catalog, sizeof(catalog), "%s", value);
+		else if (!strcmp(StrToUpper(key), "INTERFACE"))
+			snprintf(interface, sizeof(interface), "%s", value);
+
+
+		line = fgets(buf, sizeof(buf), fcfg);
 	}
-	liberaMemoria(buffer);
-	return (TRUE);
+
+	if (!servidoradm[0]) {
+		syslog(LOG_ERR, "Missing SERVIDORADM in configuration file\n");
+		return false;
+	}
+	if (!puerto[0]) {
+		syslog(LOG_ERR, "Missing PUERTO in configuration file\n");
+		return false;
+	}
+	if (!usuario[0]) {
+		syslog(LOG_ERR, "Missing USUARIO in configuration file\n");
+		return false;
+	}
+	if (!pasguor[0]) {
+		syslog(LOG_ERR, "Missing PASSWORD in configuration file\n");
+		return false;
+	}
+	if (!datasource[0]) {
+		syslog(LOG_ERR, "Missing DATASOURCE in configuration file\n");
+		return false;
+	}
+	if (!catalog[0]) {
+		syslog(LOG_ERR, "Missing CATALOG in configuration file\n");
+		return false;
+	}
+	if (!interface[0])
+		syslog(LOG_ERR, "Missing INTERFACE in configuration file\n");
+
+	return true;
 }
-// ________________________________________________________________________________________________________
-// Función: gestionaTrama
-//
-//		Descripción:
-//			Procesa las tramas recibidas .
-//		Parametros:
-//			- s : Socket usado para comunicaciones
-//	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
-// ________________________________________________________________________________________________________
-BOOLEAN gestionaTrama(SOCKET *socket_c)
+
+enum og_client_state {
+	OG_CLIENT_RECEIVING_HEADER	= 0,
+	OG_CLIENT_RECEIVING_PAYLOAD,
+	OG_CLIENT_PROCESSING_REQUEST,
+};
+
+/* Shut down connection if there is no complete message after 10 seconds. */
+#define OG_CLIENT_TIMEOUT	10
+
+struct og_client {
+	struct ev_io		io;
+	struct ev_timer		timer;
+	struct sockaddr_in	addr;
+	enum og_client_state	state;
+	char			buf[4096];
+	unsigned int		buf_len;
+	unsigned int		msg_len;
+	int			keepalive_idx;
+};
+
+static inline int og_client_socket(const struct og_client *cli)
 {
-	TRAMA* ptrTrama;
-	int i, res;
-	char *nfn;
-	char modulo[] = "gestionaTrama()";
-
-	ptrTrama=recibeTrama(socket_c);
-	
-	if (ptrTrama){
-		INTROaFINCAD(ptrTrama);
-		nfn = copiaParametro("nfn",ptrTrama); // Toma nombre de la función
-
-		for (i = 0; i < MAXIMAS_FUNCIONES; i++) { // Recorre funciones que procesan las tramas
-			res = strcmp(tbfuncionesServer[i].nf, nfn);
-			if (res == 0) { // Encontrada la función que procesa el mensaje
-				liberaMemoria(nfn);
-				res=tbfuncionesServer[i].fptr(socket_c, ptrTrama); // Invoca la función
-				liberaMemoria(ptrTrama->parametros);
-				liberaMemoria(ptrTrama);
-				return(res);
-			}
-		}
-		liberaMemoria(nfn);
-		liberaMemoria(ptrTrama->parametros);
-		liberaMemoria(ptrTrama);
-		/*
-		 Sólo puede ser un comando personalizado o su notificación
-		if (ptrTrama->tipo == MSG_COMANDO)
-			return (Comando(socket_c, ptrTrama));
-		else {
-			if (ptrTrama->tipo == MSG_NOTIFICACION)
-				return (RESPUESTA_Comando(socket_c, ptrTrama));
-			else
-				errorLog(modulo, 18, FALSE); // No se reconoce el mensaje
-		}
-		*/
-	}
-	else
-		errorLog(modulo, 17, FALSE); // Error en la recepción
-	return (TRUE);
+	return cli->io.fd;
 }
+
 // ________________________________________________________________________________________________________
 // Función: Sondeo
 //
@@ -180,21 +142,17 @@ BOOLEAN gestionaTrama(SOCKET *socket_c)
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros del mensaje
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN Sondeo(SOCKET *socket_c, TRAMA* ptrTrama) {
-	char msglog[LONSTD];
-	char modulo[] = "Sondeo()";
-
+static bool Sondeo(TRAMA* ptrTrama, struct og_client *cli)
+{
 	if (!enviaComando(ptrTrama, CLIENTE_APAGADO)) {
-		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
-		errorInfo(modulo, msglog);
-		respuestaConsola(socket_c, ptrTrama, FALSE);
-		return (FALSE);
+		respuestaConsola(og_client_socket(cli), ptrTrama, false);
+		return false;
 	}
-	respuestaConsola(socket_c, ptrTrama, TRUE);
-	return (TRUE);
+	respuestaConsola(og_client_socket(cli), ptrTrama, true);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: respuestaSondeo
@@ -205,22 +163,23 @@ BOOLEAN Sondeo(SOCKET *socket_c, TRAMA* ptrTrama) {
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros del mensaje
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN respuestaSondeo(SOCKET *socket_c, TRAMA* ptrTrama) {
+static bool respuestaSondeo(TRAMA* ptrTrama, struct og_client *cli)
+{
+	int socket_c = og_client_socket(cli);
 	int i;
 	long lSize;
 	char *iph, *Ipes;
-	char modulo[] = "respuestaSondeo()";
 
 	iph = copiaParametro("iph",ptrTrama); // Toma dirección/es IP
 	lSize = strlen(iph); // Calcula longitud de la cadena de direccion/es IPE/S
 	Ipes = (char*) reservaMemoria(lSize + 1);
 	if (Ipes == NULL) {
 		liberaMemoria(iph);
-		errorLog(modulo, 3, FALSE);
-		return (FALSE);
+		syslog(LOG_ERR, "%s:%d OOM\n", __FILE__, __LINE__);
+		return false;
 	}
 	strcpy(Ipes, iph); // Copia cadena de IPES
 	liberaMemoria(iph);
@@ -238,11 +197,13 @@ BOOLEAN respuestaSondeo(SOCKET *socket_c, TRAMA* ptrTrama) {
 	}
 	strcat(ptrTrama->parametros, "\r");
 	liberaMemoria(Ipes);
-	if (!mandaTrama(socket_c, ptrTrama)) {
-		errorLog(modulo, 26, FALSE);
-		return (FALSE);
+	if (!mandaTrama(&socket_c, ptrTrama)) {
+		syslog(LOG_ERR, "failed to send response to %s:%hu reason=%s\n",
+		       inet_ntoa(cli->addr.sin_addr), ntohs(cli->addr.sin_port),
+		       strerror(errno));
+		return false;
 	}
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: Actualizar
@@ -253,20 +214,16 @@ BOOLEAN respuestaSondeo(SOCKET *socket_c, TRAMA* ptrTrama) {
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros del mensaje
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN Actualizar(SOCKET *socket_c, TRAMA* ptrTrama) {
-	char msglog[LONSTD];
-	char modulo[] = "Actualizar()";
+static bool Actualizar(TRAMA* ptrTrama, struct og_client *cli)
+{
+	if (!enviaComando(ptrTrama, CLIENTE_APAGADO))
+		return false;
 
-	if (!enviaComando(ptrTrama, CLIENTE_APAGADO)) {
-		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
-		errorInfo(modulo, msglog);
-		return (FALSE);
-	}
-	respuestaConsola(socket_c, ptrTrama, TRUE);
-	return (TRUE);
+	respuestaConsola(og_client_socket(cli), ptrTrama, true);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: Purgar
@@ -277,20 +234,16 @@ BOOLEAN Actualizar(SOCKET *socket_c, TRAMA* ptrTrama) {
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros del mensaje
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN Purgar(SOCKET *socket_c, TRAMA* ptrTrama) {
-	char msglog[LONSTD];
-	char modulo[] = "Purgar()";
+static bool Purgar(TRAMA* ptrTrama, struct og_client *cli)
+{
+	if (!enviaComando(ptrTrama, CLIENTE_APAGADO))
+		return false;
 
-	if (!enviaComando(ptrTrama, CLIENTE_APAGADO)) {
-		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
-		errorInfo(modulo, msglog);
-		return (FALSE);
-	}
-	respuestaConsola(socket_c, ptrTrama, TRUE);
-	return (TRUE);
+	respuestaConsola(og_client_socket(cli), ptrTrama, true);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: ConsolaRemota
@@ -301,21 +254,18 @@ BOOLEAN Purgar(SOCKET *socket_c, TRAMA* ptrTrama) {
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros del mensaje
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN ConsolaRemota(SOCKET *socket_c, TRAMA* ptrTrama)
+static bool ConsolaRemota(TRAMA* ptrTrama, struct og_client *cli)
 {
-	char *iph,fileco[LONPRM],msglog[LONSTD],*ptrIpes[MAXIMOS_CLIENTES];;
+	char *iph, fileco[LONPRM], *ptrIpes[MAXIMOS_CLIENTES];;
 	FILE* f;
 	int i,lon;
-	char modulo[] = "ConsolaRemota()";
 
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
-		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
-		errorInfo(modulo, msglog);
-		respuestaConsola(socket_c, ptrTrama, FALSE);
-		return (FALSE);
+		respuestaConsola(og_client_socket(cli), ptrTrama, false);
+		return false;
 	}
 	INTROaFINCAD(ptrTrama);
 	/* Destruye contenido del fichero de eco anterior */
@@ -327,8 +277,8 @@ BOOLEAN ConsolaRemota(SOCKET *socket_c, TRAMA* ptrTrama)
 		fclose(f);
 	}
 	liberaMemoria(iph);
-	respuestaConsola(socket_c, ptrTrama, TRUE);
-	return (TRUE);
+	respuestaConsola(og_client_socket(cli), ptrTrama, true);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: EcoConsola
@@ -339,14 +289,14 @@ BOOLEAN ConsolaRemota(SOCKET *socket_c, TRAMA* ptrTrama)
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros del mensaje
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN EcoConsola(SOCKET *socket_c, TRAMA* ptrTrama)
+static bool EcoConsola(TRAMA* ptrTrama, struct og_client *cli)
 {
+	int socket_c = og_client_socket(cli);
 	char *iph,fileco[LONPRM],*buffer;
 	int lSize;
-	char modulo[] = "EcoConsola()";
 
 	INTROaFINCAD(ptrTrama);
 	// Lee archivo de eco de consola
@@ -365,11 +315,13 @@ BOOLEAN EcoConsola(SOCKET *socket_c, TRAMA* ptrTrama)
 		sprintf(ptrTrama->parametros,"res=\r");
 	}
 	ptrTrama->tipo=MSG_RESPUESTA; // Tipo de mensaje
-	if (!mandaTrama(socket_c, ptrTrama)) {
-		errorLog(modulo, 26, FALSE);
-		return (FALSE);
+	if (!mandaTrama(&socket_c, ptrTrama)) {
+		syslog(LOG_ERR, "failed to send response to %s:%hu reason=%s\n",
+		       inet_ntoa(cli->addr.sin_addr), ntohs(cli->addr.sin_port),
+		       strerror(errno));
+		return false;
 	}
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: clienteDisponible
@@ -380,28 +332,29 @@ BOOLEAN EcoConsola(SOCKET *socket_c, TRAMA* ptrTrama)
 //		- ip : La ip del cliente a buscar
 //		- idx: (Salida)  Indice que ocupa el cliente, de estar ya registrado
 //	Devuelve:
-//		TRUE: Si el cliente está disponible
-//		FALSE: En caso contrario
+//		true: Si el cliente está disponible
+//		false: En caso contrario
 // ________________________________________________________________________________________________________
-BOOLEAN clienteDisponible(char *ip, int* idx) {
+bool clienteDisponible(char *ip, int* idx)
+{
 	int estado;
 
 	if (clienteExistente(ip, idx)) {
 		estado = strcmp(tbsockets[*idx].estado, CLIENTE_OCUPADO); // Cliente ocupado
 		if (estado == 0)
-			return (FALSE);
+			return false;
 
 		estado = strcmp(tbsockets[*idx].estado, CLIENTE_APAGADO); // Cliente apagado
 		if (estado == 0)
-			return (FALSE);
+			return false;
 
 		estado = strcmp(tbsockets[*idx].estado, CLIENTE_INICIANDO); // Cliente en proceso de inclusión
 		if (estado == 0)
-			return (FALSE);
+			return false;
 
-		return (TRUE); // En caso contrario el cliente está disponible
+		return true; // En caso contrario el cliente está disponible
 	}
-	return (FALSE); // Cliente no está registrado en el sistema
+	return false; // Cliente no está registrado en el sistema
 }
 // ________________________________________________________________________________________________________
 // Función: clienteExistente
@@ -412,40 +365,42 @@ BOOLEAN clienteDisponible(char *ip, int* idx) {
 //		- ip : La ip del cliente a buscar
 //		- idx:(Salida)  Indice que ocupa el cliente, de estar ya registrado
 //	Devuelve:
-//		TRUE: Si el cliente está registrado
-//		FALSE: En caso contrario
+//		true: Si el cliente está registrado
+//		false: En caso contrario
 // ________________________________________________________________________________________________________
-BOOLEAN clienteExistente(char *ip, int* idx) {
+bool clienteExistente(char *ip, int* idx)
+{
 	int i;
 	for (i = 0; i < MAXIMOS_CLIENTES; i++) {
 		if (contieneIP(ip, tbsockets[i].ip)) { // Si existe la IP en la cadena
 			*idx = i;
-			return (TRUE);
+			return true;
 		}
 	}
-	return (FALSE);
+	return false;
 }
 // ________________________________________________________________________________________________________
 // Función: hayHueco
 // 
 // 	Descripción:
-// 		Esta función devuelve TRUE o FALSE dependiendo de que haya hueco en la tabla de sockets para un nuevo cliente.
+// 		Esta función devuelve true o false dependiendo de que haya hueco en la tabla de sockets para un nuevo cliente.
 // 	Parametros:
 // 		- idx:   Primer indice libre que se podrn utilizar
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN hayHueco(int *idx) {
+static bool hayHueco(int *idx)
+{
 	int i;
 
 	for (i = 0; i < MAXIMOS_CLIENTES; i++) {
 		if (strncmp(tbsockets[i].ip, "\0", 1) == 0) { // Hay un hueco
 			*idx = i;
-			return (TRUE);
+			return true;
 		}
 	}
-	return (FALSE);
+	return false;
 }
 // ________________________________________________________________________________________________________
 // Función: InclusionClienteWin
@@ -456,17 +411,18 @@ BOOLEAN hayHueco(int *idx) {
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN InclusionClienteWinLnx(SOCKET *socket_c, TRAMA *ptrTrama)
- {
-	char modulo[] = "InclusionClienteWinLnx()";
+static bool InclusionClienteWinLnx(TRAMA *ptrTrama, struct og_client *cli)
+{
+	int socket_c = og_client_socket(cli);
 	int res,idordenador,lon;
 	char nombreordenador[LONFIL];
-		
-	res=procesoInclusionClienteWinLnx(socket_c, ptrTrama,&idordenador,nombreordenador);
-	
+
+	res = procesoInclusionClienteWinLnx(socket_c, ptrTrama, &idordenador,
+					    nombreordenador);
+
 	// Prepara la trama de respuesta
 
 	initParametros(ptrTrama,0);
@@ -475,12 +431,14 @@ BOOLEAN InclusionClienteWinLnx(SOCKET *socket_c, TRAMA *ptrTrama)
 	lon += sprintf(ptrTrama->parametros + lon, "ido=%d\r", idordenador);
 	lon += sprintf(ptrTrama->parametros + lon, "npc=%s\r", nombreordenador);	
 	lon += sprintf(ptrTrama->parametros + lon, "res=%d\r", res);	
-	
-	if (!mandaTrama(socket_c, ptrTrama)) {
-		errorLog(modulo, 26, FALSE);
-		return (FALSE);
+
+	if (!mandaTrama(&socket_c, ptrTrama)) {
+		syslog(LOG_ERR, "failed to send response to %s:%hu reason=%s\n",
+		       inet_ntoa(cli->addr.sin_addr), ntohs(cli->addr.sin_port),
+		       strerror(errno));
+		return false;
 	}
-	return (TRUE);	
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: procesoInclusionClienteWinLnx
@@ -496,24 +454,22 @@ BOOLEAN InclusionClienteWinLnx(SOCKET *socket_c, TRAMA *ptrTrama)
 //	Devuelve:
 //		Código del error producido en caso de ocurrir algún error, 0 si el proceso es correcto
 // ________________________________________________________________________________________________________
-BOOLEAN procesoInclusionClienteWinLnx(SOCKET *socket_c, TRAMA *ptrTrama,int *idordenador,char* nombreordenador)
+bool procesoInclusionClienteWinLnx(int socket_c, TRAMA *ptrTrama, int *idordenador, char *nombreordenador)
  {
 	char msglog[LONSTD], sqlstr[LONSQL];
 	Database db;
 	Table tbl;
-
 	char *iph;
-	char modulo[] = "procesoInclusionClienteWinLnx()";
-	
+
 	// Toma parámetros
 	iph = copiaParametro("iph",ptrTrama); // Toma ip
 
-	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexión con la BD
+	if (!db.Open(usuario, pasguor, datasource, catalog)) {
 		liberaMemoria(iph);
-		errorLog(modulo, 20, FALSE);
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
-		return (20);
+		syslog(LOG_ERR, "cannot open connection database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
+		return false;
 	}
 
 	// Recupera los datos del cliente
@@ -521,53 +477,52 @@ BOOLEAN procesoInclusionClienteWinLnx(SOCKET *socket_c, TRAMA *ptrTrama,int *ido
 			"SELECT idordenador,nombreordenador FROM ordenadores "
 				" WHERE ordenadores.ip = '%s'", iph);
 
-	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
+	if (!db.Execute(sqlstr, tbl)) {
 		liberaMemoria(iph);
-		errorLog(modulo, 21, FALSE);
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
 		db.Close();
-		return (21);
+		return false;
 	}
 
-	if (tbl.ISEOF()) { // Si no existe el cliente
+	if (tbl.ISEOF()) {
 		liberaMemoria(iph);
-		errorLog(modulo, 22, FALSE);
+		syslog(LOG_ERR, "client does not exist in database (%s:%d)\n",
+		       __func__, __LINE__);
 		db.liberaResult(tbl);
 		db.Close();
-		return (22);
+		return false;
 	}
 
-	if (ndebug == DEBUG_ALTO) {
-		sprintf(msglog, "%s IP:%s", tbMensajes[2], iph);
-		infoDebug(msglog);
-	}
+	syslog(LOG_DEBUG, "Client %s requesting inclusion\n", iph);
+
 	if (!tbl.Get("idordenador", *idordenador)) {
 		liberaMemoria(iph);
 		db.liberaResult(tbl);
 		tbl.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		db.Close();
-		return (FALSE);
+		return false;
 	}
 	if (!tbl.Get("nombreordenador", nombreordenador)) {
 		liberaMemoria(iph);
 		db.liberaResult(tbl);
 		tbl.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		db.Close();
-		return (FALSE);
+		return false;
 	}
 	db.liberaResult(tbl);
 	db.Close();
-	
+
 	if (!registraCliente(iph)) { // Incluyendo al cliente en la tabla de sokets
 		liberaMemoria(iph);
-		errorLog(modulo, 25, FALSE);
-		return (25);
+		syslog(LOG_ERR, "client table is full\n");
+		return false;
 	}
 	liberaMemoria(iph);
-	return(0);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: InclusionCliente
@@ -579,22 +534,25 @@ BOOLEAN procesoInclusionClienteWinLnx(SOCKET *socket_c, TRAMA *ptrTrama,int *ido
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN InclusionCliente(SOCKET *socket_c, TRAMA *ptrTrama) {
-	char modulo[] = "InclusionCliente()";
+static bool InclusionCliente(TRAMA *ptrTrama, struct og_client *cli)
+{
+	int socket_c = og_client_socket(cli);
 
-	if (!procesoInclusionCliente(socket_c, ptrTrama)) { // Ha habido algún error...
+	if (!procesoInclusionCliente(cli, ptrTrama)) {
 		initParametros(ptrTrama,0);
 		strcpy(ptrTrama->parametros, "nfn=RESPUESTA_InclusionCliente\rres=0\r");
-		if (!mandaTrama(socket_c, ptrTrama)) {
-			errorLog(modulo, 26, FALSE);
-			return (FALSE);
+		if (!mandaTrama(&socket_c, ptrTrama)) {
+			syslog(LOG_ERR, "failed to send response to %s:%hu reason=%s\n",
+			       inet_ntoa(cli->addr.sin_addr), ntohs(cli->addr.sin_port),
+			       strerror(errno));
+			return false;
 		}
 	}
-	return (TRUE);
-}	
+	return true;
+}
 // ________________________________________________________________________________________________________
 // Función: procesoInclusionCliente
 //
@@ -604,10 +562,12 @@ BOOLEAN InclusionCliente(SOCKET *socket_c, TRAMA *ptrTrama) {
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN procesoInclusionCliente(SOCKET *socket_c, TRAMA *ptrTrama) {
+bool procesoInclusionCliente(struct og_client *cli, TRAMA *ptrTrama)
+{
+	int socket_c = og_client_socket(cli);
 	char msglog[LONSTD], sqlstr[LONSQL];
 	Database db;
 	Table tbl;
@@ -615,19 +575,18 @@ BOOLEAN procesoInclusionCliente(SOCKET *socket_c, TRAMA *ptrTrama) {
 	char *iph, *cfg;
 	char nombreordenador[LONFIL];
 	int lon, resul, idordenador, idmenu, cache, idproautoexec, idaula, idcentro;
-	char modulo[] = "procesoInclusionCliente()";
 
 	// Toma parámetros
 	iph = copiaParametro("iph",ptrTrama); // Toma ip
 	cfg = copiaParametro("cfg",ptrTrama); // Toma configuracion
 
-	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexión con la BD
+	if (!db.Open(usuario, pasguor, datasource, catalog)) {
 		liberaMemoria(iph);
 		liberaMemoria(cfg);
-		errorLog(modulo, 20, FALSE);
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
-		return (FALSE);
+		syslog(LOG_ERR, "cannot open connection database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
+		return false;
 	}
 
 	// Recupera los datos del cliente
@@ -637,56 +596,55 @@ BOOLEAN procesoInclusionCliente(SOCKET *socket_c, TRAMA *ptrTrama) {
 				" INNER JOIN centros ON centros.idcentro=aulas.idcentro"
 				" WHERE ordenadores.ip = '%s'", iph);
 
-	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
-		errorLog(modulo, 21, FALSE);
+	if (!db.Execute(sqlstr, tbl)) {
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
-		return (FALSE);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
+		return false;
 	}
 
-	if (tbl.ISEOF()) { // Si no existe el cliente
-		errorLog(modulo, 22, FALSE);
-		return (FALSE);
+	if (tbl.ISEOF()) {
+		syslog(LOG_ERR, "client does not exist in database (%s:%d)\n",
+		       __func__, __LINE__);
+		return false;
 	}
 
-	if (ndebug == DEBUG_ALTO) {
-		sprintf(msglog, "%s IP:%s", tbMensajes[2], iph);
-		infoDebug(msglog);
-	}
+	syslog(LOG_DEBUG, "Client %s requesting inclusion\n", iph);
+
 	if (!tbl.Get("idordenador", idordenador)) {
 		tbl.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
-		return (FALSE);
+		og_info(msglog);
+		return false;
 	}
 	if (!tbl.Get("nombreordenador", nombreordenador)) {
 		tbl.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
-		return (FALSE);
+		og_info(msglog);
+		return false;
 	}
 	if (!tbl.Get("idmenu", idmenu)) {
 		tbl.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
-		return (FALSE);
+		og_info(msglog);
+		return false;
 	}
 	if (!tbl.Get("cache", cache)) {
 		tbl.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
-		return (FALSE);
+		og_info(msglog);
+		return false;
 	}
 	if (!tbl.Get("idproautoexec", idproautoexec)) {
 		tbl.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
-		return (FALSE);
+		og_info(msglog);
+		return false;
 	}
 	if (!tbl.Get("idaula", idaula)) {
 		tbl.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
-		return (FALSE);
+		og_info(msglog);
+		return false;
 	}
 	if (!tbl.Get("idcentro", idcentro)) {
 		tbl.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
-		return (FALSE);
+		og_info(msglog);
+		return false;
 	}
 
 	resul = actualizaConfiguracion(db, tbl, cfg, idordenador); // Actualiza la configuración del ordenador
@@ -695,14 +653,14 @@ BOOLEAN procesoInclusionCliente(SOCKET *socket_c, TRAMA *ptrTrama) {
 
 	if (!resul) {
 		liberaMemoria(iph);
-		errorLog(modulo, 29, FALSE);
-		return (FALSE);
+		syslog(LOG_ERR, "Cannot add client to database\n");
+		return false;
 	}
 
 	if (!registraCliente(iph)) { // Incluyendo al cliente en la tabla de sokets
 		liberaMemoria(iph);
-		errorLog(modulo, 25, FALSE);
-		return (FALSE);
+		syslog(LOG_ERR, "client table is full\n");
+		return false;
 	}
 
 	/*------------------------------------------------------------------------------------------------------------------------------
@@ -719,12 +677,14 @@ BOOLEAN procesoInclusionCliente(SOCKET *socket_c, TRAMA *ptrTrama) {
 	lon += sprintf(ptrTrama->parametros + lon, "idc=%d\r", idcentro);
 	lon += sprintf(ptrTrama->parametros + lon, "res=%d\r", 1); // Confirmación proceso correcto
 
-	if (!mandaTrama(socket_c, ptrTrama)) {
-		errorLog(modulo, 26, FALSE);
-		return (FALSE);
+	if (!mandaTrama(&socket_c, ptrTrama)) {
+		syslog(LOG_ERR, "failed to send response to %s:%hu reason=%s\n",
+		       inet_ntoa(cli->addr.sin_addr), ntohs(cli->addr.sin_port),
+		       strerror(errno));
+		return false;
 	}
 	liberaMemoria(iph);
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: actualizaConfiguracion
@@ -737,8 +697,8 @@ BOOLEAN procesoInclusionCliente(SOCKET *socket_c, TRAMA *ptrTrama) {
 //		- cfg: cadena con una Configuración
 //		- ido: Identificador del ordenador cliente
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 //	Especificaciones:
 //		Los parametros de la configuración son:
 //			par= Número de partición
@@ -747,13 +707,12 @@ BOOLEAN procesoInclusionCliente(SOCKET *socket_c, TRAMA *ptrTrama) {
 //			soi= Nombre del sistema de ficheros instalado en la partición
 //			tam= Tamaño de la partición
 // ________________________________________________________________________________________________________
-BOOLEAN actualizaConfiguracion(Database db, Table tbl, char* cfg, int ido)
+bool actualizaConfiguracion(Database db, Table tbl, char *cfg, int ido)
 {
 	char msglog[LONSTD], sqlstr[LONSQL];
 	int lon, p, c,i, dato, swu, idsoi, idsfi,k;
 	char *ptrPar[MAXPAR], *ptrCfg[6], *ptrDual[2], tbPar[LONSTD];
 	char *ser, *disk, *par, *cpt, *sfi, *soi, *tam, *uso; // Parametros de configuración.
-	char modulo[] = "actualizaConfiguracion()";
 
 	lon = 0;
 	p = splitCadena(ptrPar, cfg, '\n');
@@ -771,8 +730,8 @@ BOOLEAN actualizaConfiguracion(Database db, Table tbl, char* cfg, int ido)
 						ser, ido);
 				if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 					db.GetErrorErrStr(msglog);
-					errorInfo(modulo, msglog);
-					return (FALSE);
+					og_info(msglog);
+					return false;
 				}
 			}
 			continue;
@@ -826,11 +785,11 @@ BOOLEAN actualizaConfiguracion(Database db, Table tbl, char* cfg, int ido)
 				ido, disk, par);
 
 
-		if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
-			errorLog(modulo, 21, FALSE);
+		if (!db.Execute(sqlstr, tbl)) {
 			db.GetErrorErrStr(msglog);
-			errorInfo(modulo, msglog);
-			return (FALSE);
+			syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+			       __func__, __LINE__, msglog);
+			return false;
 		}
 		if (tbl.ISEOF()) { // Si no existe el registro
 			sprintf(sqlstr, "INSERT INTO ordenadores_particiones(idordenador,numdisk,numpar,codpar,tamano,uso,idsistemafichero,idnombreso,idimagen)"
@@ -840,36 +799,36 @@ BOOLEAN actualizaConfiguracion(Database db, Table tbl, char* cfg, int ido)
 
 			if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 				db.GetErrorErrStr(msglog);
-				errorInfo(modulo, msglog);
-				return (FALSE);
+				og_info(msglog);
+				return false;
 			}
 		} else { // Existe el registro
-			swu = TRUE; // Se supone que algún dato ha cambiado
+			swu = true; // Se supone que algún dato ha cambiado
 			if (!tbl.Get("codpar", dato)) { // Toma dato
 				tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-				errorInfo(modulo, msglog);
-				return (FALSE);
+				og_info(msglog);
+				return false;
 			}
 			if (strtol(cpt, NULL, 16) == dato) {// Parámetro tipo de partición (hexadecimal) igual al almacenado (decimal)
 				if (!tbl.Get("tamano", dato)) { // Toma dato
 					tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-					errorInfo(modulo, msglog);
-					return (FALSE);
+					og_info(msglog);
+					return false;
 				}
 				if (atoi(tam) == dato) {// Parámetro tamaño igual al almacenado
 					if (!tbl.Get("idsistemafichero", dato)) { // Toma dato
 						tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-						errorInfo(modulo, msglog);
-						return (FALSE);
+						og_info(msglog);
+						return false;
 					}
 					if (idsfi == dato) {// Parámetro sistema de fichero igual al almacenado
 						if (!tbl.Get("idnombreso", dato)) { // Toma dato
 							tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-							errorInfo(modulo, msglog);
-							return (FALSE);
+							og_info(msglog);
+							return false;
 						}
 						if (idsoi == dato) {// Parámetro sistema de fichero distinto al almacenado
-							swu = FALSE; // Todos los parámetros de la partición son iguales, no se actualiza
+							swu = false; // Todos los parámetros de la partición son iguales, no se actualiza
 						}
 					}
 				}
@@ -892,11 +851,11 @@ BOOLEAN actualizaConfiguracion(Database db, Table tbl, char* cfg, int ido)
 					" WHERE idordenador=%d AND numdisk=%s AND numpar=%s",
 					uso, ido, disk, par);
 			}
-			if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
-				errorLog(modulo, 21, FALSE);
+			if (!db.Execute(sqlstr, tbl)) {
 				db.GetErrorErrStr(msglog);
-				errorInfo(modulo, msglog);
-				return (FALSE);
+				syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+				       __func__, __LINE__, msglog);
+				return false;
 			}
 		}
 	}
@@ -904,13 +863,13 @@ BOOLEAN actualizaConfiguracion(Database db, Table tbl, char* cfg, int ido)
 	// Eliminar particiones almacenadas que ya no existen
 	sprintf(sqlstr, "DELETE FROM ordenadores_particiones WHERE idordenador=%d AND (numdisk, numpar) NOT IN (%s)",
 			ido, tbPar);
-	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
-		errorLog(modulo, 21, FALSE);
+	if (!db.Execute(sqlstr, tbl)) {
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
-		return (FALSE);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
+		return false;
 	}
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: checkDato
@@ -932,10 +891,10 @@ BOOLEAN actualizaConfiguracion(Database db, Table tbl, char* cfg, int ido)
 //		En caso de producirse algún error se devuelve el valor 0
 // ________________________________________________________________________________________________________
 
-int checkDato(Database db, Table tbl, char *dato, const char*tabla,
-		const char* nomdato, const char *nomidentificador) {
+int checkDato(Database db, Table tbl, char *dato, const char *tabla,
+		     const char *nomdato, const char *nomidentificador)
+{
 	char msglog[LONSTD], sqlstr[LONSQL];
-	char modulo[] = "checkDato()";
 	int identificador;
 
 	if (strlen(dato) == 0)
@@ -944,37 +903,37 @@ int checkDato(Database db, Table tbl, char *dato, const char*tabla,
 			tabla, nomdato, dato);
 
 	// Ejecuta consulta
-	if (!db.Execute(sqlstr, tbl)) { // Error al leer
-		errorLog(modulo, 21, FALSE);
+	if (!db.Execute(sqlstr, tbl)) {
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
 		return (0);
 	}
 	if (tbl.ISEOF()) { //  Software NO existente
 		sprintf(sqlstr, "INSERT INTO %s (%s) VALUES('%s')", tabla, nomdato, dato);
 		if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 			db.GetErrorErrStr(msglog); // Error al acceder al registro
-			errorInfo(modulo, msglog);
+			og_info(msglog);
 			return (0);
 		}
 		// Recupera el identificador del software
 		sprintf(sqlstr, "SELECT LAST_INSERT_ID() as identificador");
 		if (!db.Execute(sqlstr, tbl)) { // Error al leer
 			db.GetErrorErrStr(msglog); // Error al acceder al registro
-			errorInfo(modulo, msglog);
+			og_info(msglog);
 			return (0);
 		}
 		if (!tbl.ISEOF()) { // Si existe registro
 			if (!tbl.Get("identificador", identificador)) {
 				tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-				errorInfo(modulo, msglog);
+				og_info(msglog);
 				return (0);
 			}
 		}
 	} else {
 		if (!tbl.Get(nomidentificador, identificador)) { // Toma dato
 			tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-			errorInfo(modulo, msglog);
+			og_info(msglog);
 			return (0);
 		}
 	}
@@ -988,20 +947,21 @@ int checkDato(Database db, Table tbl, char *dato, const char*tabla,
 //	Parámetros:
 //		- iph: Dirección ip del cliente
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN registraCliente(char *iph) {
+bool registraCliente(char *iph)
+{
 	int idx;
 
 	if (!clienteExistente(iph, &idx)) { // Si no existe la IP ...
 		if (!hayHueco(&idx)) { // Busca hueco para el nuevo cliente
-			return (FALSE); // No hay huecos
+			return false; // No hay huecos
 		}
 	}
 	strcpy(tbsockets[idx].ip, iph); // Copia IP
 	strcpy(tbsockets[idx].estado, CLIENTE_INICIANDO); // Actualiza el estado del cliente
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: AutoexecCliente
@@ -1012,17 +972,18 @@ BOOLEAN registraCliente(char *iph) {
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN AutoexecCliente(SOCKET *socket_c, TRAMA *ptrTrama) {
+static bool AutoexecCliente(TRAMA *ptrTrama, struct og_client *cli)
+{
+	int socket_c = og_client_socket(cli);
 	int lon;
 	char *iph, *exe, msglog[LONSTD];
 	Database db;
 	FILE *fileexe;
 	char fileautoexec[LONPRM];
 	char parametros[LONGITUD_PARAMETROS];
-	char modulo[] = "AutoexecCliente()";
 
 	iph = copiaParametro("iph",ptrTrama); // Toma dirección IP del cliente
 	exe = copiaParametro("exe",ptrTrama); // Toma identificador del procedimiento inicial
@@ -1031,15 +992,15 @@ BOOLEAN AutoexecCliente(SOCKET *socket_c, TRAMA *ptrTrama) {
 	liberaMemoria(iph);
 	fileexe = fopen(fileautoexec, "wb"); // Abre fichero de script
 	if (fileexe == NULL) {
-		errorLog(modulo, 52, FALSE);
-		return (FALSE);
+		syslog(LOG_ERR, "cannot create temporary file\n");
+		return false;
 	}
 
-	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexión con la BD
-		errorLog(modulo, 20, FALSE);
+	if (!db.Open(usuario, pasguor, datasource, catalog)) {
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
-		return (FALSE);
+		syslog(LOG_ERR, "cannot open connection database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
+		return false;
 	}
 	initParametros(ptrTrama,0);
 	if (recorreProcedimientos(db, parametros, fileexe, exe)) {
@@ -1054,13 +1015,15 @@ BOOLEAN AutoexecCliente(SOCKET *socket_c, TRAMA *ptrTrama) {
 	db.Close();
 	fclose(fileexe);
 
-	if (!mandaTrama(socket_c, ptrTrama)) {
+	if (!mandaTrama(&socket_c, ptrTrama)) {
 		liberaMemoria(exe);
-		errorLog(modulo, 26, FALSE);
-		return (FALSE);
+		syslog(LOG_ERR, "failed to send response to %s:%hu reason=%s\n",
+		       inet_ntoa(cli->addr.sin_addr), ntohs(cli->addr.sin_port),
+		       strerror(errno));
+		return false;
 	}
 	liberaMemoria(exe);
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: recorreProcedimientos
@@ -1070,43 +1033,42 @@ BOOLEAN AutoexecCliente(SOCKET *socket_c, TRAMA *ptrTrama) {
 //	Parámetros:
 //		Database db,char* parametros,FILE* fileexe,char* idp
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN recorreProcedimientos(Database db, char* parametros, FILE* fileexe,
-		char* idp) {
+bool recorreProcedimientos(Database db, char *parametros, FILE *fileexe, char *idp)
+{
 	int procedimientoid, lsize;
 	char idprocedimiento[LONPRM], msglog[LONSTD], sqlstr[LONSQL];
 	Table tbl;
-	char modulo[] = "recorreProcedimientos()";
 
 	/* Busca procedimiento */
 	sprintf(sqlstr,
 			"SELECT procedimientoid,parametros FROM procedimientos_acciones"
 				" WHERE idprocedimiento=%s ORDER BY orden", idp);
 	// Ejecuta consulta
-	if (!db.Execute(sqlstr, tbl)) { // Error al leer
-		errorLog(modulo, 21, FALSE);
+	if (!db.Execute(sqlstr, tbl)) {
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
-		return (FALSE);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
+		return false;
 	}
 	while (!tbl.ISEOF()) { // Recorre procedimientos
 		if (!tbl.Get("procedimientoid", procedimientoid)) { // Toma dato
 			tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-			errorInfo(modulo, msglog);
-			return (FALSE);
+			og_info(msglog);
+			return false;
 		}
 		if (procedimientoid > 0) { // Procedimiento recursivo
 			sprintf(idprocedimiento, "%d", procedimientoid);
 			if (!recorreProcedimientos(db, parametros, fileexe, idprocedimiento)) {
-				return (FALSE);
+				return false;
 			}
 		} else {
 			if (!tbl.Get("parametros", parametros)) { // Toma dato
 				tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-				errorInfo(modulo, msglog);
-				return (FALSE);
+				og_info(msglog);
+				return false;
 			}
 			strcat(parametros, "@");
 			lsize = strlen(parametros);
@@ -1114,7 +1076,7 @@ BOOLEAN recorreProcedimientos(Database db, char* parametros, FILE* fileexe,
 		}
 		tbl.MoveNext();
 	}
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: ComandosPendientes
@@ -1125,14 +1087,14 @@ BOOLEAN recorreProcedimientos(Database db, char* parametros, FILE* fileexe,
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN ComandosPendientes(SOCKET *socket_c, TRAMA *ptrTrama) 
+static bool ComandosPendientes(TRAMA *ptrTrama, struct og_client *cli)
 {
+	int socket_c = og_client_socket(cli);
 	char *ido,*iph,pids[LONPRM];
 	int ids, idx;
-	char modulo[] = "ComandosPendientes()";
 
 	iph = copiaParametro("iph",ptrTrama); // Toma dirección IP
 	ido = copiaParametro("ido",ptrTrama); // Toma identificador del ordenador
@@ -1140,8 +1102,8 @@ BOOLEAN ComandosPendientes(SOCKET *socket_c, TRAMA *ptrTrama)
 	if (!clienteExistente(iph, &idx)) { // Busca índice del cliente
 		liberaMemoria(iph);
 		liberaMemoria(ido);
-		errorLog(modulo, 47, FALSE);
-		return (FALSE);
+		syslog(LOG_ERR, "client does not exist\n");
+		return false;
 	}
 	if (buscaComandos(ido, ptrTrama, &ids)) { // Existen comandos pendientes
 		ptrTrama->tipo = MSG_COMANDO;
@@ -1152,15 +1114,17 @@ BOOLEAN ComandosPendientes(SOCKET *socket_c, TRAMA *ptrTrama)
 		initParametros(ptrTrama,0);
 		strcpy(ptrTrama->parametros, "nfn=NoComandosPtes\r");
 	}
-	if (!mandaTrama(socket_c, ptrTrama)) {
+	if (!mandaTrama(&socket_c, ptrTrama)) {
 		liberaMemoria(iph);
-		liberaMemoria(ido);	
-		errorLog(modulo, 26, FALSE);
-		return (FALSE);
+		liberaMemoria(ido);
+		syslog(LOG_ERR, "failed to send response to %s:%hu reason=%s\n",
+		       inet_ntoa(cli->addr.sin_addr), ntohs(cli->addr.sin_port),
+		       strerror(errno));
+		return false;
 	}
 	liberaMemoria(iph);
 	liberaMemoria(ido);	
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: buscaComandos
@@ -1172,59 +1136,57 @@ BOOLEAN ComandosPendientes(SOCKET *socket_c, TRAMA *ptrTrama)
 //		- cmd: Parámetros del comando (Salida)
 //		- ids: Identificador de la sesion(Salida)
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN buscaComandos(char *ido, TRAMA *ptrTrama, int *ids)
+bool buscaComandos(char *ido, TRAMA *ptrTrama, int *ids)
 {
 	char msglog[LONSTD], sqlstr[LONSQL];
 	Database db;
 	Table tbl;
 	int lonprm;
 
-	char modulo[] = "buscaComandos()";
-
-	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexión con la BD
-		errorLog(modulo, 20, FALSE);
+	if (!db.Open(usuario, pasguor, datasource, catalog)) {
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
-		return (FALSE);
+		syslog(LOG_ERR, "cannot open connection database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
+		return false;
 	}
 	sprintf(sqlstr,"SELECT sesion,parametros,length( parametros) as lonprm"\
 			" FROM acciones WHERE idordenador=%s AND estado='%d' ORDER BY idaccion", ido, ACCION_INICIADA);
-	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
-		errorLog(modulo, 21, FALSE);
+	if (!db.Execute(sqlstr, tbl)) {
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
-		return (FALSE);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
+		return false;
 	}
 	if (tbl.ISEOF()) {
 		db.Close();
-		return (FALSE); // No hay comandos pendientes
+		return false; // No hay comandos pendientes
 	} else { // Busca entre todas las acciones de diversos ambitos
 		if (!tbl.Get("sesion", *ids)) { // Toma identificador de la sesion
 			tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-			errorInfo(modulo, msglog);
-			return (FALSE);
+			og_info(msglog);
+			return false;
 		}
 		if (!tbl.Get("lonprm", lonprm)) { // Toma parámetros del comando
 			tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-			errorInfo(modulo, msglog);
-			return (FALSE);
+			og_info(msglog);
+			return false;
 		}
 		if(!initParametros(ptrTrama,lonprm+LONGITUD_PARAMETROS)){
 			db.Close();
-			errorLog(modulo, 3, FALSE);
-			return (FALSE);
+			syslog(LOG_ERR, "%s:%d OOM\n", __FILE__, __LINE__);
+			return false;
 		}
 		if (!tbl.Get("parametros", ptrTrama->parametros)) { // Toma parámetros del comando
 			tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-			errorInfo(modulo, msglog);
-			return (FALSE);
+			og_info(msglog);
+			return false;
 		}
 	}
 	db.Close();
-	return (TRUE); // Hay comandos pendientes, se toma el primero de la cola
+	return true; // Hay comandos pendientes, se toma el primero de la cola
 }
 // ________________________________________________________________________________________________________
 // Función: DisponibilidadComandos
@@ -1235,41 +1197,27 @@ BOOLEAN buscaComandos(char *ido, TRAMA *ptrTrama, int *ids)
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 //
-BOOLEAN DisponibilidadComandos(SOCKET *socket_c, TRAMA *ptrTrama) 
+static bool DisponibilidadComandos(TRAMA *ptrTrama, struct og_client *cli)
 {
 	char *iph, *tpc;
-	int idx,port_old=0,port_new;
-	char modulo[] = "DisponibilidadComandos()";
-	
-
+	int idx;
 
 	iph = copiaParametro("iph",ptrTrama); // Toma ip
 	if (!clienteExistente(iph, &idx)) { // Busca índice del cliente
 		liberaMemoria(iph);
-		errorLog(modulo, 47, FALSE);
-		return (FALSE);
+		syslog(LOG_ERR, "client does not exist\n");
+		return false;
 	}
 	tpc = copiaParametro("tpc",ptrTrama); // Tipo de cliente (Plataforma y S.O.)
 	strcpy(tbsockets[idx].estado, tpc);
-
-	port_new=tomaPuerto(*socket_c);
-
-	if(tbsockets[idx].sock!=INVALID_SOCKET){
-		port_old=tomaPuerto(tbsockets[idx].sock);
-		if(port_old!=port_new){
-			close(tbsockets[idx].sock); // Cierra el socket si ya existia uno
-		}
-	}
-
-	tbsockets[idx].sock = *socket_c;
-	swcSocket = TRUE; // El socket permanece abierto para recibir comandos desde el servidor
+	cli->keepalive_idx = idx;
 	liberaMemoria(iph);
 	liberaMemoria(tpc);		
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: respuestaEstandar
@@ -1285,26 +1233,26 @@ BOOLEAN DisponibilidadComandos(SOCKET *socket_c, TRAMA *ptrTrama)
 //		- db: Objeto base de datos (operativo)
 //		- tbl: Objeto tabla
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN respuestaEstandar(TRAMA *ptrTrama, char *iph, char *ido, Database db,
-		Table tbl) {
+static bool respuestaEstandar(TRAMA *ptrTrama, char *iph, char *ido, Database db,
+		Table tbl)
+{
 	char msglog[LONSTD], sqlstr[LONSQL];
 	char *res, *ids, *der;
 	char fechafin[LONPRM];
 	struct tm* st;
 	int idaccion;
-	char modulo[] = "respuestaEstandar()";
 
 	ids = copiaParametro("ids",ptrTrama); // Toma identificador de la sesión
 
 	if (ids == NULL) // No existe seguimiento de la acción
-		return (TRUE);
-		
+		return true;
+
 	if (atoi(ids) == 0){ // No existe seguimiento de la acción
 		liberaMemoria(ids);
-		return (TRUE);
+		return true;
 	}
 
 	sprintf(sqlstr,
@@ -1313,20 +1261,20 @@ BOOLEAN respuestaEstandar(TRAMA *ptrTrama, char *iph, char *ido, Database db,
 
 	liberaMemoria(ids);
 
-	if (!db.Execute(sqlstr, tbl)) { // Error al consultar
-		errorLog(modulo, 21, FALSE);
+	if (!db.Execute(sqlstr, tbl)) {
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
-		return (FALSE);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
+		return false;
 	}
-	if (tbl.ISEOF()) { // No existe registro de acciones
-		errorLog(modulo, 31, FALSE);
-		return (TRUE);
+	if (tbl.ISEOF()) {
+		syslog(LOG_ERR, "no actions available\n");
+		return true;
 	}
 	if (!tbl.Get("idaccion", idaccion)) { // Toma identificador de la accion
 		tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-		errorInfo(modulo, msglog);
-		return (FALSE);
+		og_info(msglog);
+		return false;
 	}
 	st = tomaHora();
 	sprintf(fechafin, "%d/%d/%d %d:%d:%d", st->tm_year + 1900, st->tm_mon + 1,
@@ -1345,19 +1293,19 @@ BOOLEAN respuestaEstandar(TRAMA *ptrTrama, char *iph, char *ido, Database db,
 		liberaMemoria(res);
 		liberaMemoria(der);
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
-		return (FALSE);
+		og_info(msglog);
+		return false;
 	}
 	
 	liberaMemoria(der);
 	
 	if (atoi(res) == ACCION_FALLIDA) {
 		liberaMemoria(res);
-		return (FALSE); // Error en la ejecución del comando
+		return false; // Error en la ejecución del comando
 	}
 
 	liberaMemoria(res);
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: enviaComando
@@ -1368,21 +1316,20 @@ BOOLEAN respuestaEstandar(TRAMA *ptrTrama, char *iph, char *ido, Database db,
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //		- estado: Estado en el se deja al cliente mientras se ejecuta el comando
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN enviaComando(TRAMA* ptrTrama, const char *estado)
- {
+bool enviaComando(TRAMA* ptrTrama, const char *estado)
+{
 	char *iph, *Ipes, *ptrIpes[MAXIMOS_CLIENTES];
 	int i, idx, lon;
-	char modulo[] = "enviaComando()";
 
 	iph = copiaParametro("iph",ptrTrama); // Toma dirección/es IP
 	lon = strlen(iph); // Calcula longitud de la cadena de direccion/es IPE/S
 	Ipes = (char*) reservaMemoria(lon + 1);
 	if (Ipes == NULL) {
-		errorLog(modulo, 3, FALSE);
-		return (FALSE);
+		syslog(LOG_ERR, "%s:%d OOM\n", __FILE__, __LINE__);
+		return false;
 	}
 	
 	strcpy(Ipes, iph); // Copia cadena de IPES
@@ -1392,16 +1339,19 @@ BOOLEAN enviaComando(TRAMA* ptrTrama, const char *estado)
 	FINCADaINTRO(ptrTrama);
 	for (i = 0; i < lon; i++) {
 		if (clienteDisponible(ptrIpes[i], &idx)) { // Si el cliente puede recibir comandos
+			int sock = tbsockets[idx].cli ? tbsockets[idx].cli->io.fd : -1;
+
 			strcpy(tbsockets[idx].estado, estado); // Actualiza el estado del cliente
-			if (!mandaTrama(&tbsockets[idx].sock, ptrTrama)) {
-				errorLog(modulo, 26, FALSE);
-				return (FALSE);
+			if (!mandaTrama(&sock, ptrTrama)) {
+				syslog(LOG_ERR, "failed to send response to %s:%s\n",
+				       ptrIpes[i], strerror(errno));
+				return false;
 			}
 			//close(tbsockets[idx].sock); // Cierra el socket del cliente hasta nueva disponibilidad
 		}
 	}
 	liberaMemoria(Ipes);
-	return (TRUE);
+	return true;
 }
 //______________________________________________________________________________________________________
 // Función: respuestaConsola
@@ -1412,18 +1362,19 @@ BOOLEAN enviaComando(TRAMA* ptrTrama, const char *estado)
 //		- socket_c: (Salida) Socket utilizado para el envío
 //		- res: Resultado del envío del comando
 // 	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN respuestaConsola(SOCKET *socket_c, TRAMA *ptrTrama, int res) {
-	char modulo[] = "respuestaConsola()";
+bool respuestaConsola(int socket_c, TRAMA *ptrTrama, int res)
+{
 	initParametros(ptrTrama,0);
 	sprintf(ptrTrama->parametros, "res=%d\r", res);
-	if (!mandaTrama(socket_c, ptrTrama)) {
-		errorLog(modulo, 26, FALSE);
-		return (FALSE);
+	if (!mandaTrama(&socket_c, ptrTrama)) {
+		syslog(LOG_ERR, "%s:%d failed to send response: %s\n",
+		       __func__, __LINE__, strerror(errno));
+		return false;
 	}
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: Arrancar
@@ -1434,13 +1385,13 @@ BOOLEAN respuestaConsola(SOCKET *socket_c, TRAMA *ptrTrama, int res) {
 //		- socket_c: Socket de la consola al envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN Arrancar(SOCKET *socket_c, TRAMA* ptrTrama) {
-	char *iph,*mac,*mar, msglog[LONSTD];
-	BOOLEAN res;
-	char modulo[] = "Arrancar()";
+static bool Arrancar(TRAMA* ptrTrama, struct og_client *cli)
+{
+	char *iph,*mac,*mar;
+	bool res;
 
 	iph = copiaParametro("iph",ptrTrama); // Toma dirección/es IP
 	mac = copiaParametro("mac",ptrTrama); // Toma dirección/es MAC
@@ -1453,20 +1404,16 @@ BOOLEAN Arrancar(SOCKET *socket_c, TRAMA* ptrTrama) {
 	liberaMemoria(mar);
 
 	if(!res){
-		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
-		errorInfo(modulo, msglog);
-		respuestaConsola(socket_c, ptrTrama, FALSE);
-		return (FALSE);
+		respuestaConsola(og_client_socket(cli), ptrTrama, false);
+		return false;
 	}
 
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
-		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
-		errorInfo(modulo, msglog);
-		respuestaConsola(socket_c, ptrTrama, FALSE);
-		return (FALSE);
+		respuestaConsola(og_client_socket(cli), ptrTrama, false);
+		return false;
 	}
-	respuestaConsola(socket_c, ptrTrama, TRUE);
-	return (TRUE);
+	respuestaConsola(og_client_socket(cli), ptrTrama, true);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: Levanta
@@ -1478,50 +1425,116 @@ BOOLEAN Arrancar(SOCKET *socket_c, TRAMA* ptrTrama) {
 //		- mac: Cadena de direcciones mac separadas por ";"
 //		- mar: Método de arranque (1=Broadcast, 2=Unicast)
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN Levanta(char* iph,char *mac, char* mar)
+bool Levanta(char *iph, char *mac, char *mar)
 {
 	char *ptrIP[MAXIMOS_CLIENTES],*ptrMacs[MAXIMOS_CLIENTES];
-	int i, lon, res;
-	SOCKET s;
-	BOOLEAN bOpt;
+	unsigned int on = 1;
 	sockaddr_in local;
-	char modulo[] = "Levanta()";
+	int i, lon, res;
+	int s;
 
 	/* Creación de socket para envío de magig packet */
 	s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-	if (s == SOCKET_ERROR) { // Error al crear el socket del servicio
-		errorLog(modulo, 13, TRUE);
-		return (FALSE);
+	if (s < 0) {
+		syslog(LOG_ERR, "cannot create socket for magic packet\n");
+		return false;
 	}
-	bOpt = TRUE; // Pone el socket en modo Broadcast
-	res = setsockopt(s, SOL_SOCKET, SO_BROADCAST, (char *) &bOpt, sizeof(bOpt));
-	if (res == SOCKET_ERROR) {
-		errorLog(modulo, 48, TRUE);
-		return (FALSE);
+	res = setsockopt(s, SOL_SOCKET, SO_BROADCAST, (unsigned int *) &on,
+			 sizeof(on));
+	if (res < 0) {
+		syslog(LOG_ERR, "cannot set broadcast socket\n");
+		return false;
 	}
+	memset(&local, 0, sizeof(local));
 	local.sin_family = AF_INET;
-	local.sin_port = htons((short) PUERTO_WAKEUP);
-	local.sin_addr.s_addr = htonl(INADDR_ANY); // cualquier interface
-	if (bind(s, (sockaddr *) &local, sizeof(local)) == SOCKET_ERROR) {
-		errorLog(modulo, 14, TRUE);
-		exit(EXIT_FAILURE);
-	}
-	/* fin creación de socket */
+	local.sin_port = htons(PUERTO_WAKEUP);
+	local.sin_addr.s_addr = htonl(INADDR_ANY);
+
 	lon = splitCadena(ptrIP, iph, ';');
 	lon = splitCadena(ptrMacs, mac, ';');
 	for (i = 0; i < lon; i++) {
-		if (!WakeUp(&s,ptrIP[i],ptrMacs[i],mar)) {
-			errorLog(modulo, 49, TRUE);
+		if (!WakeUp(s, ptrIP[i], ptrMacs[i], mar)) {
+			syslog(LOG_ERR, "problem sending magic packet\n");
 			close(s);
-			return (FALSE);
+			return false;
 		}
 	}
 	close(s);
-	return (TRUE);
+	return true;
 }
+
+#define OG_WOL_SEQUENCE		6
+#define OG_WOL_MACADDR_LEN	6
+#define OG_WOL_REPEAT		16
+
+struct wol_msg {
+	char secuencia_FF[OG_WOL_SEQUENCE];
+	char macbin[OG_WOL_REPEAT][OG_WOL_MACADDR_LEN];
+};
+
+static bool wake_up_broadcast(int sd, struct sockaddr_in *client,
+			      const struct wol_msg *msg)
+{
+	struct sockaddr_in *broadcast_addr;
+	struct ifaddrs *ifaddr, *ifa;
+	int ret;
+
+	if (getifaddrs(&ifaddr) < 0) {
+		syslog(LOG_ERR, "cannot get list of addresses\n");
+		return false;
+	}
+
+	client->sin_addr.s_addr = htonl(INADDR_BROADCAST);
+
+	for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) {
+		if (ifa->ifa_addr == NULL ||
+		    ifa->ifa_addr->sa_family != AF_INET ||
+		    strcmp(ifa->ifa_name, interface) != 0)
+			continue;
+
+		broadcast_addr =
+			(struct sockaddr_in *)ifa->ifa_ifu.ifu_broadaddr;
+		client->sin_addr.s_addr = broadcast_addr->sin_addr.s_addr;
+		break;
+	}
+	free(ifaddr);
+
+	ret = sendto(sd, msg, sizeof(*msg), 0,
+		     (sockaddr *)client, sizeof(*client));
+	if (ret < 0) {
+		syslog(LOG_ERR, "failed to send broadcast wol\n");
+		return false;
+	}
+
+	return true;
+}
+
+static bool wake_up_unicast(int sd, struct sockaddr_in *client,
+			    const struct wol_msg *msg,
+			    const struct in_addr *addr)
+{
+	int ret;
+
+	client->sin_addr.s_addr = addr->s_addr;
+
+	ret = sendto(sd, msg, sizeof(*msg), 0,
+		     (sockaddr *)client, sizeof(*client));
+	if (ret < 0) {
+		syslog(LOG_ERR, "failed to send unicast wol\n");
+		return false;
+	}
+
+	return true;
+}
+
+enum wol_delivery_type {
+	OG_WOL_BROADCAST = 1,
+	OG_WOL_UNICAST = 2
+};
+
 //_____________________________________________________________________________________________________________
 // Función: WakeUp
 //
@@ -1533,25 +1546,29 @@ BOOLEAN Levanta(char* iph,char *mac, char* mar)
 //		- mac : Cadena con la dirección mac en formato XXXXXXXXXXXX
 //		- mar: Método de arranque (1=Broadcast, 2=Unicast)
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 //_____________________________________________________________________________________________________________
 //
-BOOLEAN WakeUp(SOCKET *s, char* iph,char *mac,char* mar)
+bool WakeUp(int s, char* iph, char *mac, char *mar)
 {
-	int i, res;
-	char HDaddress_bin[6];
-	struct {
-		BYTE secuencia_FF[6];
-		char macbin[16][6];
-	} Trama_WakeUp;
-	sockaddr_in WakeUpCliente;
-	char modulo[] = "WakeUp()";
+	char HDaddress_bin[OG_WOL_MACADDR_LEN];
+	struct sockaddr_in WakeUpCliente;
+	struct wol_msg Trama_WakeUp;
+	struct in_addr addr;
+	bool ret;
+	int i;
 
 	for (i = 0; i < 6; i++) // Primera secuencia de la trama Wake Up (0xFFFFFFFFFFFF)
 		Trama_WakeUp.secuencia_FF[i] = 0xFF;
 
-	PasaHexBin(mac, HDaddress_bin); // Pasa a binario la MAC
+	sscanf(mac, "%02x%02x%02x%02x%02x%02x",
+	       (unsigned int *)&HDaddress_bin[0],
+	       (unsigned int *)&HDaddress_bin[1],
+	       (unsigned int *)&HDaddress_bin[2],
+	       (unsigned int *)&HDaddress_bin[3],
+	       (unsigned int *)&HDaddress_bin[4],
+	       (unsigned int *)&HDaddress_bin[5]);
 
 	for (i = 0; i < 16; i++) // Segunda secuencia de la trama Wake Up , repetir 16 veces su la MAC
 		memcpy(&Trama_WakeUp.macbin[i][0], &HDaddress_bin, 6);
@@ -1559,52 +1576,25 @@ BOOLEAN WakeUp(SOCKET *s, char* iph,char *mac,char* mar)
 	/* Creación de socket del cliente que recibe la trama magic packet */
 	WakeUpCliente.sin_family = AF_INET;
 	WakeUpCliente.sin_port = htons((short) PUERTO_WAKEUP);
-	if(atoi(mar)==2)
-		WakeUpCliente.sin_addr.s_addr = inet_addr(iph); //  Para hacerlo con IP
-	else
-		WakeUpCliente.sin_addr.s_addr = htonl(INADDR_BROADCAST); //  Para hacerlo con broadcast
 
-	res = sendto(*s, (char *) &Trama_WakeUp, sizeof(Trama_WakeUp), 0,
-			(sockaddr *) &WakeUpCliente, sizeof(WakeUpCliente));
-	if (res == SOCKET_ERROR) {
-		errorLog(modulo, 26, FALSE);
-		return (FALSE);
-	}
-	return (TRUE);
-}
-//_____________________________________________________________________________________________________________
-// Función: PasaHexBin
-//
-//	Descripción:
-//		Convierte a binario una dirección mac desde una cadena con formato XXXXXXXXXXXX
-//
-//	Parámetros de entrada:
-//		- cadena : Cadena con el contenido de la mac
-//		- numero : la dirección mac convertida a binario (6 bytes)
-//_____________________________________________________________________________________________________________
-void PasaHexBin(char *cadena, char *numero) {
-	int i, j, p;
-	char matrizHex[] = "0123456789ABCDEF";
-	char Ucadena[12], aux;
-
-	for (i = 0; i < 12; i++)
-		Ucadena[i] = toupper(cadena[i]);
-	p = 0;
-	for (i = 0; i < 12; i++) {
-		for (j = 0; j < 16; j++) {
-			if (Ucadena[i] == matrizHex[j]) {
-				if (i % 2) {
-					aux = numero[p];
-					aux = (aux << 4);
-					numero[p] = j;
-					numero[p] = numero[p] | aux;
-					p++;
-				} else
-					numero[p] = j;
-				break;
-			}
+	switch (atoi(mar)) {
+	case OG_WOL_BROADCAST:
+		ret = wake_up_broadcast(s, &WakeUpCliente, &Trama_WakeUp);
+		break;
+	case OG_WOL_UNICAST:
+		if (inet_aton(iph, &addr) < 0) {
+			syslog(LOG_ERR, "bad IP address for unicast wol\n");
+			ret = false;
+			break;
 		}
+		ret = wake_up_unicast(s, &WakeUpCliente, &Trama_WakeUp, &addr);
+		break;
+	default:
+		syslog(LOG_ERR, "unknown wol type\n");
+		ret = false;
+		break;
 	}
+	return ret;
 }
 // ________________________________________________________________________________________________________
 // Función: RESPUESTA_Arrancar
@@ -1615,23 +1605,23 @@ void PasaHexBin(char *cadena, char *numero) {
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN RESPUESTA_Arrancar(SOCKET *socket_c, TRAMA* ptrTrama) {
+static bool RESPUESTA_Arrancar(TRAMA* ptrTrama, struct og_client *cli)
+{
 	char msglog[LONSTD];
 	Database db;
 	Table tbl;
 	int i;
 	char *iph, *ido;
 	char *tpc;
-	char modulo[] = "RESPUESTA_Arrancar()";
 
-	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
-		errorLog(modulo, 20, FALSE);
+	if (!db.Open(usuario, pasguor, datasource, catalog)) {
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
-		return (FALSE);
+		syslog(LOG_ERR, "cannot open connection database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
+		return false;
 	}
 
 	iph = copiaParametro("iph",ptrTrama); // Toma dirección ip
@@ -1640,8 +1630,8 @@ BOOLEAN RESPUESTA_Arrancar(SOCKET *socket_c, TRAMA* ptrTrama) {
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
 		liberaMemoria(iph);
 		liberaMemoria(ido);
-		errorLog(modulo, 30, FALSE);
-		return (FALSE); // Error al registrar notificacion
+		syslog(LOG_ERR, "failed to register notification\n");
+		return false;
 	}
 
 	tpc = copiaParametro("tpc",ptrTrama); // Tipo de cliente (Plataforma y S.O.)
@@ -1653,73 +1643,7 @@ BOOLEAN RESPUESTA_Arrancar(SOCKET *socket_c, TRAMA* ptrTrama) {
 	liberaMemoria(tpc);
 	
 	db.Close(); // Cierra conexión
-	return (TRUE);
-}
-// ________________________________________________________________________________________________________
-// Función: Comando
-//
-//	Descripción:
-//		Procesa un comando personalizado
-//	Parámetros:
-//		- socket_c: Socket de la consola al envió el mensaje
-//		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
-//	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
-// ________________________________________________________________________________________________________
-BOOLEAN Comando(SOCKET *socket_c, TRAMA* ptrTrama) {
-	char msglog[LONSTD];
-	char modulo[] = "Comando()";
-
-	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
-		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
-		errorInfo(modulo, msglog);
-		respuestaConsola(socket_c, ptrTrama, FALSE);
-		return (FALSE);
-	}
-	respuestaConsola(socket_c, ptrTrama, TRUE);
-	return (TRUE);
-}
-// ________________________________________________________________________________________________________
-// Función: RESPUESTA_Comando
-//
-//	Descripción:
-//		Respuesta del cliente al un comando personalizado
-//	Parámetros:
-//		- socket_c: Socket del cliente que envió el mensaje
-//		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
-//	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
-// ________________________________________________________________________________________________________
-BOOLEAN RESPUESTA_Comando(SOCKET *socket_c, TRAMA* ptrTrama)
- {
-	char msglog[LONSTD];
-	Database db;
-	Table tbl;
-	char *iph, *ido;
-	char modulo[] = "RESPUESTA_Comando()";
-
-	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
-		errorLog(modulo, 20, FALSE);
-		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
-		return (FALSE);
-	}
-
-	iph = copiaParametro("iph",ptrTrama); // Toma dirección ip
-	ido = copiaParametro("ido",ptrTrama); // Toma identificador del ordenador
-
-	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
-		liberaMemoria(iph);
-		liberaMemoria(ido);
-		errorLog(modulo, 30, FALSE);
-		return (FALSE); // Error al registrar notificacion
-	}
-	liberaMemoria(iph);
-	liberaMemoria(ido);
-	db.Close(); // Cierra conexión
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: Apagar
@@ -1730,21 +1654,17 @@ BOOLEAN RESPUESTA_Comando(SOCKET *socket_c, TRAMA* ptrTrama)
 //		- socket_c: Socket de la consola al envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN Apagar(SOCKET *socket_c, TRAMA* ptrTrama) {
-	char msglog[LONSTD];
-	char modulo[] = "Apagar()";
-
+static bool Apagar(TRAMA* ptrTrama, struct og_client *cli)
+{
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
-		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
-		errorInfo(modulo, msglog);
-		respuestaConsola(socket_c, ptrTrama, FALSE);
-		return (FALSE);
+		respuestaConsola(og_client_socket(cli), ptrTrama, false);
+		return false;
 	}
-	respuestaConsola(socket_c, ptrTrama, TRUE);
-	return (TRUE);
+	respuestaConsola(og_client_socket(cli), ptrTrama, true);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: RESPUESTA_Apagar
@@ -1755,22 +1675,22 @@ BOOLEAN Apagar(SOCKET *socket_c, TRAMA* ptrTrama) {
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN RESPUESTA_Apagar(SOCKET *socket_c, TRAMA* ptrTrama) {
+static bool RESPUESTA_Apagar(TRAMA* ptrTrama, struct og_client *cli)
+{
 	char msglog[LONSTD];
 	Database db;
 	Table tbl;
 	int i;
 	char *iph, *ido;
-	char modulo[] = "RESPUESTA_Apagar()";
 
-	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
-		errorLog(modulo, 20, FALSE);
+	if (!db.Open(usuario, pasguor, datasource, catalog)) {
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
-		return (FALSE);
+		syslog(LOG_ERR, "cannot open connection database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
+		return false;
 	}
 
 	iph = copiaParametro("iph",ptrTrama); // Toma dirección ip
@@ -1779,8 +1699,8 @@ BOOLEAN RESPUESTA_Apagar(SOCKET *socket_c, TRAMA* ptrTrama) {
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
 		liberaMemoria(iph);
 		liberaMemoria(ido);
-		errorLog(modulo, 30, FALSE);
-		return (FALSE); // Error al registrar notificacion
+		syslog(LOG_ERR, "failed to register notification\n");
+		return false; // Error al registrar notificacion
 	}
 
 	if (clienteExistente(iph, &i)) // Actualiza estado
@@ -1790,7 +1710,7 @@ BOOLEAN RESPUESTA_Apagar(SOCKET *socket_c, TRAMA* ptrTrama) {
 	liberaMemoria(ido);
 	
 	db.Close(); // Cierra conexión
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: Reiniciar
@@ -1801,21 +1721,17 @@ BOOLEAN RESPUESTA_Apagar(SOCKET *socket_c, TRAMA* ptrTrama) {
 //		- socket_c: Socket de la consola al envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN Reiniciar(SOCKET *socket_c, TRAMA* ptrTrama) {
-	char msglog[LONSTD];
-	char modulo[] = "Reiniciar()";
-
+static bool Reiniciar(TRAMA* ptrTrama, struct og_client *cli)
+{
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
-		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
-		errorInfo(modulo, msglog);
-		respuestaConsola(socket_c, ptrTrama, FALSE);
-		return (FALSE);
+		respuestaConsola(og_client_socket(cli), ptrTrama, false);
+		return false;
 	}
-	respuestaConsola(socket_c, ptrTrama, TRUE);
-	return (TRUE);
+	respuestaConsola(og_client_socket(cli), ptrTrama, true);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: RESPUESTA_Reiniciar
@@ -1826,22 +1742,22 @@ BOOLEAN Reiniciar(SOCKET *socket_c, TRAMA* ptrTrama) {
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN RESPUESTA_Reiniciar(SOCKET *socket_c, TRAMA* ptrTrama) {
+static bool RESPUESTA_Reiniciar(TRAMA* ptrTrama, struct og_client *cli)
+{
 	char msglog[LONSTD];
 	Database db;
 	Table tbl;
 	int i;
 	char *iph, *ido;
-	char modulo[] = "RESPUESTA_Reiniciar()";
 
-	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
-		errorLog(modulo, 20, FALSE);
+	if (!db.Open(usuario, pasguor, datasource, catalog)) {
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
-		return (FALSE);
+		syslog(LOG_ERR, "cannot open connection database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
+		return false;
 	}
 
 	iph = copiaParametro("iph",ptrTrama); // Toma dirección ip
@@ -1850,8 +1766,8 @@ BOOLEAN RESPUESTA_Reiniciar(SOCKET *socket_c, TRAMA* ptrTrama) {
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
 		liberaMemoria(iph);
 		liberaMemoria(ido);
-		errorLog(modulo, 30, FALSE);
-		return (FALSE); // Error al registrar notificacion
+		syslog(LOG_ERR, "failed to register notification\n");
+		return false; // Error al registrar notificacion
 	}
 
 	if (clienteExistente(iph, &i)) // Actualiza estado
@@ -1861,7 +1777,7 @@ BOOLEAN RESPUESTA_Reiniciar(SOCKET *socket_c, TRAMA* ptrTrama) {
 	liberaMemoria(ido);
 
 	db.Close(); // Cierra conexión
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: IniciarSesion
@@ -1872,21 +1788,17 @@ BOOLEAN RESPUESTA_Reiniciar(SOCKET *socket_c, TRAMA* ptrTrama) {
 //		- socket_c: Socket de la consola al envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN IniciarSesion(SOCKET *socket_c, TRAMA* ptrTrama) {
-	char msglog[LONSTD];
-	char modulo[] = "IniciarSesion()";
-
+static bool IniciarSesion(TRAMA* ptrTrama, struct og_client *cli)
+{
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
-		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
-		errorInfo(modulo, msglog);
-		respuestaConsola(socket_c, ptrTrama, FALSE);
-		return (FALSE);
+		respuestaConsola(og_client_socket(cli), ptrTrama, false);
+		return false;
 	}
-	respuestaConsola(socket_c, ptrTrama, TRUE);
-	return (TRUE);
+	respuestaConsola(og_client_socket(cli), ptrTrama, true);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: RESPUESTA_IniciarSesion
@@ -1897,22 +1809,22 @@ BOOLEAN IniciarSesion(SOCKET *socket_c, TRAMA* ptrTrama) {
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN RESPUESTA_IniciarSesion(SOCKET *socket_c, TRAMA* ptrTrama) {
+static bool RESPUESTA_IniciarSesion(TRAMA* ptrTrama, struct og_client *cli)
+{
 	char msglog[LONSTD];
 	Database db;
 	Table tbl;
 	int i;
 	char *iph, *ido;
-	char modulo[] = "RESPUESTA_IniciarSesion()";
 
-	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
-		errorLog(modulo, 20, FALSE);
+	if (!db.Open(usuario, pasguor, datasource, catalog)) {
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
-		return (FALSE);
+		syslog(LOG_ERR, "cannot open connection database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
+		return false;
 	}
 
 	iph = copiaParametro("iph",ptrTrama); // Toma dirección ip
@@ -1921,8 +1833,8 @@ BOOLEAN RESPUESTA_IniciarSesion(SOCKET *socket_c, TRAMA* ptrTrama) {
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
 		liberaMemoria(iph);
 		liberaMemoria(ido);
-		errorLog(modulo, 30, FALSE);
-		return (FALSE); // Error al registrar notificacion
+		syslog(LOG_ERR, "failed to register notification\n");
+		return false; // Error al registrar notificacion
 	}
 
 	if (clienteExistente(iph, &i)) // Actualiza estado
@@ -1932,7 +1844,7 @@ BOOLEAN RESPUESTA_IniciarSesion(SOCKET *socket_c, TRAMA* ptrTrama) {
 	liberaMemoria(ido);
 		
 	db.Close(); // Cierra conexión
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: CrearImagen
@@ -1943,21 +1855,17 @@ BOOLEAN RESPUESTA_IniciarSesion(SOCKET *socket_c, TRAMA* ptrTrama) {
 //		- socket_c: Socket de la consola al envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN CrearImagen(SOCKET *socket_c, TRAMA* ptrTrama) {
-	char msglog[LONSTD];
-	char modulo[] = "CrearImagen()";
-
+static bool CrearImagen(TRAMA* ptrTrama, struct og_client *cli)
+{
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
-		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
-		errorInfo(modulo, msglog);
-		respuestaConsola(socket_c, ptrTrama, FALSE);
-		return (FALSE);
+		respuestaConsola(og_client_socket(cli), ptrTrama, false);
+		return false;
 	}
-	respuestaConsola(socket_c, ptrTrama, TRUE);
-	return (TRUE);
+	respuestaConsola(og_client_socket(cli), ptrTrama, true);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: RESPUESTA_CrearImagen
@@ -1968,24 +1876,23 @@ BOOLEAN CrearImagen(SOCKET *socket_c, TRAMA* ptrTrama) {
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN RESPUESTA_CrearImagen(SOCKET *socket_c, TRAMA* ptrTrama) 
+static bool RESPUESTA_CrearImagen(TRAMA* ptrTrama, struct og_client *cli)
 {
 	char msglog[LONSTD];
 	Database db;
 	Table tbl;
 	char *iph, *dsk, *par, *cpt, *ipr, *ido;
 	char *idi;
-	BOOLEAN res;
-	char modulo[] = "RESPUESTA_CrearImagen()";
+	bool res;
 
-	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
-		errorLog(modulo, 20, FALSE);
+	if (!db.Open(usuario, pasguor, datasource, catalog)) {
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
-		return (FALSE);
+		syslog(LOG_ERR, "cannot open connection database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
+		return false;
 	}
 
 	iph = copiaParametro("iph",ptrTrama); // Toma dirección ip
@@ -1994,8 +1901,8 @@ BOOLEAN RESPUESTA_CrearImagen(SOCKET *socket_c, TRAMA* ptrTrama)
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
 		liberaMemoria(iph);
 		liberaMemoria(ido);
-		errorLog(modulo, 30, FALSE);
-		return (FALSE); // Error al registrar notificacion
+		syslog(LOG_ERR, "failed to register notification\n");
+		return false; // Error al registrar notificacion
 	}
 
 	// Acciones posteriores
@@ -2011,15 +1918,15 @@ BOOLEAN RESPUESTA_CrearImagen(SOCKET *socket_c, TRAMA* ptrTrama)
 	liberaMemoria(par);
 	liberaMemoria(cpt);
 	liberaMemoria(ipr);
-	
+
 	if(!res){
-		errorLog(modulo, 94, FALSE);
-		db.Close(); // Cierra conexión
-		return (FALSE);
+		syslog(LOG_ERR, "Problem processing update\n");
+		db.Close();
+		return false;
 	}
 
 	db.Close(); // Cierra conexión
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: actualizaCreacionImagen
@@ -2036,13 +1943,13 @@ BOOLEAN RESPUESTA_CrearImagen(SOCKET *socket_c, TRAMA* ptrTrama)
 //		- ipr: Ip del repositorio
 //		- ido: Identificador del ordenador modelo
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN actualizaCreacionImagen(Database db, Table tbl, char* idi, char* dsk,
-	char* par, char* cpt, char* ipr, char *ido) {
+bool actualizaCreacionImagen(Database db, Table tbl, char *idi, char *dsk,
+			     char *par, char *cpt, char *ipr, char *ido)
+{
 	char msglog[LONSTD], sqlstr[LONSQL];
-	char modulo[] = "actualizaCreacionImagen()";
 	int idr,ifs;
 
 	/* Toma identificador del repositorio correspondiente al ordenador modelo */
@@ -2052,16 +1959,16 @@ BOOLEAN actualizaCreacionImagen(Database db, Table tbl, char* idi, char* dsk,
 			"  LEFT JOIN ordenadores USING (idrepositorio)"
 			" WHERE repositorios.ip='%s' AND ordenadores.idordenador=%s", ipr, ido);
 
-	if (!db.Execute(sqlstr, tbl)) { // Error al leer
-		errorLog(modulo, 21, FALSE);
+	if (!db.Execute(sqlstr, tbl)) {
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
-		return (FALSE);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
+		return false;
 	}
 	if (!tbl.Get("idrepositorio", idr)) { // Toma dato
 		tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-		errorInfo(modulo, msglog);
-		return (FALSE);
+		og_info(msglog);
+		return false;
 	}
 
 	/* Toma identificador del perfilsoftware */
@@ -2070,16 +1977,16 @@ BOOLEAN actualizaCreacionImagen(Database db, Table tbl, char* idi, char* dsk,
 			"  FROM ordenadores_particiones"
 			" WHERE idordenador=%s AND numdisk=%s AND numpar=%s", ido, dsk, par);
 
-	if (!db.Execute(sqlstr, tbl)) { // Error al leer
-		errorLog(modulo, 21, FALSE);
+	if (!db.Execute(sqlstr, tbl)) {
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
-		return (FALSE);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
+		return false;
 	}
 	if (!tbl.Get("idperfilsoft", ifs)) { // Toma dato
 		tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-		errorInfo(modulo, msglog);
-		return (FALSE);
+		og_info(msglog);
+		return false;
 	}
 
 	/* Actualizar los datos de la imagen */
@@ -2090,11 +1997,11 @@ BOOLEAN actualizaCreacionImagen(Database db, Table tbl, char* idi, char* dsk,
 		"       fechacreacion=NOW(), revision=revision+1"
 		" WHERE idimagen=%s", ido, dsk, par, cpt, ifs, idr, idi);
 
-	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
-		errorLog(modulo, 21, FALSE);
+	if (!db.Execute(sqlstr, tbl)) {
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
-		return (FALSE);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
+		return false;
 	}
 	/* Actualizar los datos en el cliente */
 	snprintf(sqlstr, LONSQL,
@@ -2103,13 +2010,13 @@ BOOLEAN actualizaCreacionImagen(Database db, Table tbl, char* idi, char* dsk,
 		"       fechadespliegue=NOW()"
 		" WHERE idordenador=%s AND numdisk=%s AND numpar=%s",
 		idi, idi, ido, dsk, par);
-	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
-		errorLog(modulo, 21, FALSE);
+	if (!db.Execute(sqlstr, tbl)) {
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
-		return (FALSE);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
+		return false;
 	}
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: CrearImagenBasica
@@ -2120,21 +2027,17 @@ BOOLEAN actualizaCreacionImagen(Database db, Table tbl, char* idi, char* dsk,
 //		- socket_c: Socket de la consola al envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN CrearImagenBasica(SOCKET *socket_c, TRAMA* ptrTrama) {
-	char msglog[LONSTD];
-	char modulo[] = "CrearImagenBasica()";
-
+static bool CrearImagenBasica(TRAMA* ptrTrama, struct og_client *cli)
+{
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
-		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
-		errorInfo(modulo, msglog);
-		respuestaConsola(socket_c, ptrTrama, FALSE);
-		return (FALSE);
+		respuestaConsola(og_client_socket(cli), ptrTrama, false);
+		return false;
 	}
-	respuestaConsola(socket_c, ptrTrama, TRUE);
-	return (TRUE);
+	respuestaConsola(og_client_socket(cli), ptrTrama, true);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: RESPUESTA_CrearImagenBasica
@@ -2145,11 +2048,13 @@ BOOLEAN CrearImagenBasica(SOCKET *socket_c, TRAMA* ptrTrama) {
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN RESPUESTA_CrearImagenBasica(SOCKET *socket_c, TRAMA* ptrTrama) {
-	return(RESPUESTA_CrearImagen(socket_c,ptrTrama)); // La misma respuesta que la creación de imagen monolítica
+static bool RESPUESTA_CrearImagenBasica(TRAMA* ptrTrama, struct og_client *cli)
+{
+	// La misma respuesta que la creación de imagen monolítica
+	return RESPUESTA_CrearImagen(ptrTrama, cli);
 }
 // ________________________________________________________________________________________________________
 // Función: CrearSoftIncremental
@@ -2161,21 +2066,17 @@ BOOLEAN RESPUESTA_CrearImagenBasica(SOCKET *socket_c, TRAMA* ptrTrama) {
 //		- socket_c: Socket de la consola al envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN CrearSoftIncremental(SOCKET *socket_c, TRAMA* ptrTrama) {
-	char msglog[LONSTD];
-	char modulo[] = "CrearSoftIncremental()";
-
+static bool CrearSoftIncremental(TRAMA* ptrTrama, struct og_client *cli)
+{
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
-		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
-		errorInfo(modulo, msglog);
-		respuestaConsola(socket_c, ptrTrama, FALSE);
-		return (FALSE);
+		respuestaConsola(og_client_socket(cli), ptrTrama, false);
+		return false;
 	}
-	respuestaConsola(socket_c, ptrTrama, TRUE);
-	return (TRUE);
+	respuestaConsola(og_client_socket(cli), ptrTrama, true);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: RESPUESTA_CrearSoftIncremental
@@ -2186,23 +2087,22 @@ BOOLEAN CrearSoftIncremental(SOCKET *socket_c, TRAMA* ptrTrama) {
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN RESPUESTA_CrearSoftIncremental(SOCKET *socket_c, TRAMA* ptrTrama)
+static bool RESPUESTA_CrearSoftIncremental(TRAMA* ptrTrama, struct og_client *cli)
 {
 	Database db;
 	Table tbl;
 	char *iph,*par,*ido,*idf;
 	int ifs;
 	char msglog[LONSTD],sqlstr[LONSQL];
-	char modulo[] = "RESPUESTA_CrearSoftIncremental()";
 
-	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
-		errorLog(modulo, 20, FALSE);
+	if (!db.Open(usuario, pasguor, datasource, catalog)) {
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
-		return (FALSE);
+		syslog(LOG_ERR, "cannot open connection database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
+		return false;
 	}
 
 	iph = copiaParametro("iph",ptrTrama); // Toma dirección ip
@@ -2210,9 +2110,9 @@ BOOLEAN RESPUESTA_CrearSoftIncremental(SOCKET *socket_c, TRAMA* ptrTrama)
 
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
 		liberaMemoria(iph);
-		liberaMemoria(ido);	
-		errorLog(modulo, 30, FALSE);
-		return (FALSE); // Error al registrar notificacion
+		liberaMemoria(ido);
+		syslog(LOG_ERR, "failed to register notification\n");
+		return false;
 	}
 
 	par = copiaParametro("par",ptrTrama);
@@ -2223,75 +2123,32 @@ BOOLEAN RESPUESTA_CrearSoftIncremental(SOCKET *socket_c, TRAMA* ptrTrama)
 	liberaMemoria(iph);
 	liberaMemoria(ido);	
 	liberaMemoria(par);	
-		
-	if (!db.Execute(sqlstr, tbl)) { // Error al leer
-		errorLog(modulo, 21, FALSE);
+
+	if (!db.Execute(sqlstr, tbl)) {
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
-		return (FALSE);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
+		return false;
 	}
 	if (!tbl.Get("idperfilsoft", ifs)) { // Toma dato
 		tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-		errorInfo(modulo, msglog);
-		return (FALSE);
+		og_info(msglog);
+		return false;
 	}
 
 	/* Actualizar los datos de la imagen */
 	idf = copiaParametro("idf",ptrTrama);
 	sprintf(sqlstr,"UPDATE imagenes SET idperfilsoft=%d WHERE idimagen=%s",ifs,idf);
 	liberaMemoria(idf);	
-	
-	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
-		errorLog(modulo, 21, FALSE);
+
+	if (!db.Execute(sqlstr, tbl)) {
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
-		return (FALSE);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
+		return false;
 	}
 	db.Close(); // Cierra conexión
-	return (TRUE);
-}
-// ________________________________________________________________________________________________________
-// Función: actualizaCreacionSoftIncremental
-//
-//	Descripción:
-//		Esta función actualiza la base de datos con el resultado de la creación de software incremental
-//	Parámetros:
-//		- db: Objeto base de datos (ya operativo)
-//		- tbl: Objeto tabla
-//		- idi: Identificador de la imagen
-//		- idf: Identificador del software incremental
-//	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
-// ________________________________________________________________________________________________________
-BOOLEAN actualizaCreacionSoftIncremental(Database db, Table tbl, char* idi,char* idf)
-{
-	char msglog[LONSTD], sqlstr[LONSQL];
-	char modulo[] = "actualizaCreacionSoftIncremental()";
-
-
-	/* Comprueba si existe ya relación entre la imagen y el software incremental */
-	sprintf(sqlstr, "SELECT * FROM imagenes_softincremental"
-					" WHERE idimagen=%s AND idsoftincremental=%s", idi,idf);
-
-	if (!db.Execute(sqlstr, tbl)) { // Error al leer
-		errorLog(modulo, 21, FALSE);
-		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
-		return (FALSE);
-	}
-	if (!tbl.ISEOF())
-		return (TRUE); // Ya existe relación
-
-	// Crea relación entre la imagen y el software incremental
-	sprintf(sqlstr,"INSERT INTO imagenes_softincremental (idimagen,idsoftincremental) VALUES (%s,%s)",idi,idf);
-	if (!db.Execute(sqlstr, tbl)) { // Error al ejecutar la sentencia
-		errorLog(modulo, 21, FALSE);
-		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
-		return (FALSE);
-	}
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: RestaurarImagen
@@ -2302,21 +2159,17 @@ BOOLEAN actualizaCreacionSoftIncremental(Database db, Table tbl, char* idi,char*
 //		- socket_c: Socket de la consola al envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN RestaurarImagen(SOCKET *socket_c, TRAMA* ptrTrama) {
-	char msglog[LONSTD];
-	char modulo[] = "RestaurarImagen()";
-
+static bool RestaurarImagen(TRAMA* ptrTrama, struct og_client *cli)
+{
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
-		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
-		errorInfo(modulo, msglog);
-		respuestaConsola(socket_c, ptrTrama, FALSE);
-		return (FALSE);
+		respuestaConsola(og_client_socket(cli), ptrTrama, false);
+		return false;
 	}
-	respuestaConsola(socket_c, ptrTrama, TRUE);
-	return (TRUE);
+	respuestaConsola(og_client_socket(cli), ptrTrama, true);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: RestaurarImagenBasica
@@ -2327,21 +2180,17 @@ BOOLEAN RestaurarImagen(SOCKET *socket_c, TRAMA* ptrTrama) {
 //		- socket_c: Socket de la consola al envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN RestaurarImagenBasica(SOCKET *socket_c, TRAMA* ptrTrama) {
-	char msglog[LONSTD];
-	char modulo[] = "RestaurarImagenBasica()";
-
+static bool RestaurarImagenBasica(TRAMA* ptrTrama, struct og_client *cli)
+{
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
-		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
-		errorInfo(modulo, msglog);
-		respuestaConsola(socket_c, ptrTrama, FALSE);
-		return (FALSE);
+		respuestaConsola(og_client_socket(cli), ptrTrama, false);
+		return false;
 	}
-	respuestaConsola(socket_c, ptrTrama, TRUE);
-	return (TRUE);
+	respuestaConsola(og_client_socket(cli), ptrTrama, true);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: RestaurarSoftIncremental
@@ -2352,21 +2201,17 @@ BOOLEAN RestaurarImagenBasica(SOCKET *socket_c, TRAMA* ptrTrama) {
 //		- socket_c: Socket de la consola al envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN RestaurarSoftIncremental(SOCKET *socket_c, TRAMA* ptrTrama) {
-	char msglog[LONSTD];
-	char modulo[] = "RestaurarSoftIncremental()";
-
+static bool RestaurarSoftIncremental(TRAMA* ptrTrama, struct og_client *cli)
+{
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
-		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
-		errorInfo(modulo, msglog);
-		respuestaConsola(socket_c, ptrTrama, FALSE);
-		return (FALSE);
+		respuestaConsola(og_client_socket(cli), ptrTrama, false);
+		return false;
 	}
-	respuestaConsola(socket_c, ptrTrama, TRUE);
-	return (TRUE);
+	respuestaConsola(og_client_socket(cli), ptrTrama, true);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: RESPUESTA_RestaurarImagen
@@ -2377,24 +2222,23 @@ BOOLEAN RestaurarSoftIncremental(SOCKET *socket_c, TRAMA* ptrTrama) {
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 //
-BOOLEAN RESPUESTA_RestaurarImagen(SOCKET *socket_c, TRAMA* ptrTrama) 
+static bool RESPUESTA_RestaurarImagen(TRAMA* ptrTrama, struct og_client *cli)
 {
 	char msglog[LONSTD];
 	Database db;
 	Table tbl;
-	BOOLEAN res;
+	bool res;
 	char *iph, *ido, *idi, *dsk, *par, *ifs, *cfg;
-	char modulo[] = "RESPUESTA_RestaurarImagen()";
 
-	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
-		errorLog(modulo, 20, FALSE);
+	if (!db.Open(usuario, pasguor, datasource, catalog)) {
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
-		return (FALSE);
+		syslog(LOG_ERR, "cannot open connection database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
+		return false;
 	}
 
 	iph = copiaParametro("iph",ptrTrama); // Toma dirección ip
@@ -2402,9 +2246,9 @@ BOOLEAN RESPUESTA_RestaurarImagen(SOCKET *socket_c, TRAMA* ptrTrama)
 
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
 		liberaMemoria(iph);
-		liberaMemoria(ido);	
-		errorLog(modulo, 30, FALSE);
-		return (FALSE); // Error al registrar notificacion
+		liberaMemoria(ido);
+		syslog(LOG_ERR, "failed to register notification\n");
+		return false;
 	}
 
 	// Acciones posteriores
@@ -2426,13 +2270,13 @@ BOOLEAN RESPUESTA_RestaurarImagen(SOCKET *socket_c, TRAMA* ptrTrama)
 	liberaMemoria(ifs);
 
 	if(!res){
-		errorLog(modulo, 95, FALSE);
-		db.Close(); // Cierra conexión
-		return (FALSE);
+		syslog(LOG_ERR, "Problem after restoring image\n");
+		db.Close();
+		return false;
 	}
 
 	db.Close(); // Cierra conexión
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 //
@@ -2444,12 +2288,13 @@ BOOLEAN RESPUESTA_RestaurarImagen(SOCKET *socket_c, TRAMA* ptrTrama)
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 //
-BOOLEAN RESPUESTA_RestaurarImagenBasica(SOCKET *socket_c, TRAMA* ptrTrama) {
-	return(RESPUESTA_RestaurarImagen(socket_c,ptrTrama));
+static bool RESPUESTA_RestaurarImagenBasica(TRAMA* ptrTrama, struct og_client *cli)
+{
+	return RESPUESTA_RestaurarImagen(ptrTrama, cli);
 }
 // ________________________________________________________________________________________________________
 // Función: RESPUESTA_RestaurarSoftIncremental
@@ -2460,11 +2305,12 @@ BOOLEAN RESPUESTA_RestaurarImagenBasica(SOCKET *socket_c, TRAMA* ptrTrama) {
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN RESPUESTA_RestaurarSoftIncremental(SOCKET *socket_c, TRAMA* ptrTrama) {
-	return(RESPUESTA_RestaurarImagen(socket_c,ptrTrama));
+static bool RESPUESTA_RestaurarSoftIncremental(TRAMA* ptrTrama, struct og_client *cli)
+{
+	return RESPUESTA_RestaurarImagen(ptrTrama, cli);
 }
 // ________________________________________________________________________________________________________
 // Función: actualizaRestauracionImagen
@@ -2480,13 +2326,13 @@ BOOLEAN RESPUESTA_RestaurarSoftIncremental(SOCKET *socket_c, TRAMA* ptrTrama) {
 //		- ido: Identificador del cliente donde se restauró
 //		- ifs: Identificador del perfil software contenido	en la imagen
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN actualizaRestauracionImagen(Database db, Table tbl, char* idi,
-	char* dsk, char* par, char* ido, char* ifs) {
+bool actualizaRestauracionImagen(Database db, Table tbl, char *idi,
+				 char *dsk, char *par, char *ido, char *ifs)
+{
 	char msglog[LONSTD], sqlstr[LONSQL];
-	char modulo[] = "actualizaRestauracionImagen()";
 
 	/* Actualizar los datos de la imagen */
 	snprintf(sqlstr, LONSQL,
@@ -2496,13 +2342,13 @@ BOOLEAN actualizaRestauracionImagen(Database db, Table tbl, char* idi,
 			"       idnombreso=IFNULL((SELECT idnombreso FROM perfilessoft WHERE idperfilsoft=%s),0)"
 			" WHERE idordenador=%s AND numdisk=%s AND numpar=%s", idi, ifs, idi, ifs, ido, dsk, par);
 
-	if (!db.Execute(sqlstr, tbl)) { // Error al recuperar los datos
-		errorLog(modulo, 21, FALSE);
+	if (!db.Execute(sqlstr, tbl)) {
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
-		return (FALSE);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
+		return false;
 	}
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: Configurar
@@ -2513,21 +2359,17 @@ BOOLEAN actualizaRestauracionImagen(Database db, Table tbl, char* idi,
 //		- socket_c: Socket de la consola al envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN Configurar(SOCKET *socket_c, TRAMA* ptrTrama) {
-	char msglog[LONSTD];
-	char modulo[] = "Configurar()";
-
+static bool Configurar(TRAMA* ptrTrama, struct og_client *cli)
+{
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
-		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
-		errorInfo(modulo, msglog);
-		respuestaConsola(socket_c, ptrTrama, FALSE);
-		return (FALSE);
+		respuestaConsola(og_client_socket(cli), ptrTrama, false);
+		return false;
 	}
-	respuestaConsola(socket_c, ptrTrama, TRUE);
-	return (TRUE);
+	respuestaConsola(og_client_socket(cli), ptrTrama, true);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: RESPUESTA_Configurar
@@ -2538,24 +2380,23 @@ BOOLEAN Configurar(SOCKET *socket_c, TRAMA* ptrTrama) {
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
 //
-BOOLEAN RESPUESTA_Configurar(SOCKET *socket_c, TRAMA* ptrTrama) 
+static bool RESPUESTA_Configurar(TRAMA* ptrTrama, struct og_client *ci)
 {
 	char msglog[LONSTD];
 	Database db;
 	Table tbl;
-	BOOLEAN res;
+	bool res;
 	char *iph, *ido,*cfg;
-	char modulo[] = "RESPUESTA_Configurar()";
 
-	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
-		errorLog(modulo, 20, FALSE);
+	if (!db.Open(usuario, pasguor, datasource, catalog)) {
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
-		return (FALSE);
+		syslog(LOG_ERR, "cannot open connection database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
+		return false;
 	}
 
 	iph = copiaParametro("iph",ptrTrama); // Toma dirección ip
@@ -2563,9 +2404,9 @@ BOOLEAN RESPUESTA_Configurar(SOCKET *socket_c, TRAMA* ptrTrama)
 
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
 		liberaMemoria(iph);
-		liberaMemoria(ido);	
-		errorLog(modulo, 30, FALSE);
-		return (FALSE); // Error al registrar notificacion
+		liberaMemoria(ido);
+		syslog(LOG_ERR, "failed to register notification\n");
+		return false;
 	}
 
 	cfg = copiaParametro("cfg",ptrTrama); // Toma configuración de particiones
@@ -2574,14 +2415,14 @@ BOOLEAN RESPUESTA_Configurar(SOCKET *socket_c, TRAMA* ptrTrama)
 	liberaMemoria(iph);
 	liberaMemoria(ido);	
 	liberaMemoria(cfg);	
-		
-	if(!res){	
-		errorLog(modulo, 24, FALSE);
-		return (FALSE); // Error al registrar notificacion
+
+	if(!res){
+		syslog(LOG_ERR, "Problem updating client configuration\n");
+		return false;
 	}
-	
+
 	db.Close(); // Cierra conexión
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: EjecutarScript
@@ -2592,21 +2433,17 @@ BOOLEAN RESPUESTA_Configurar(SOCKET *socket_c, TRAMA* ptrTrama)
 //		- socket_c: Socket de la consola al envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN EjecutarScript(SOCKET *socket_c, TRAMA* ptrTrama) {
-	char msglog[LONSTD];
-	char modulo[] = "EjecutarScript()";
-
+static bool EjecutarScript(TRAMA* ptrTrama, struct og_client *cli)
+{
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
-		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
-		errorInfo(modulo, msglog);
-		respuestaConsola(socket_c, ptrTrama, FALSE);
-		return (FALSE);
+		respuestaConsola(og_client_socket(cli), ptrTrama, false);
+		return false;
 	}
-	respuestaConsola(socket_c, ptrTrama, TRUE);
-	return (TRUE);
+	respuestaConsola(og_client_socket(cli), ptrTrama, true);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: RESPUESTA_EjecutarScript
@@ -2617,23 +2454,21 @@ BOOLEAN EjecutarScript(SOCKET *socket_c, TRAMA* ptrTrama) {
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN RESPUESTA_EjecutarScript(SOCKET *socket_c, TRAMA* ptrTrama)
+static bool RESPUESTA_EjecutarScript(TRAMA* ptrTrama, struct og_client *cli)
 {
 	char msglog[LONSTD];
 	Database db;
 	Table tbl;
 	char *iph, *ido,*cfg;
 
-	char modulo[] = "RESPUESTA_EjecutarScript()";
-
-	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
-		errorLog(modulo, 20, FALSE);
+	if (!db.Open(usuario, pasguor, datasource, catalog)) {
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
-		return (FALSE);
+		syslog(LOG_ERR, "cannot open connection database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
+		return false;
 	}
 
 	iph = copiaParametro("iph",ptrTrama); // Toma dirección ip
@@ -2641,9 +2476,9 @@ BOOLEAN RESPUESTA_EjecutarScript(SOCKET *socket_c, TRAMA* ptrTrama)
 
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
 		liberaMemoria(iph);
-		liberaMemoria(ido);	
-		errorLog(modulo, 30, FALSE);
-		return (FALSE); // Error al registrar notificacion
+		liberaMemoria(ido);
+		syslog(LOG_ERR, "failed to register notification\n");
+		return false;
 	}
 	
 	cfg = copiaParametro("cfg",ptrTrama); // Toma configuración de particiones
@@ -2657,7 +2492,7 @@ BOOLEAN RESPUESTA_EjecutarScript(SOCKET *socket_c, TRAMA* ptrTrama)
 
 	
 	db.Close(); // Cierra conexión
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: InventarioHardware
@@ -2668,21 +2503,17 @@ BOOLEAN RESPUESTA_EjecutarScript(SOCKET *socket_c, TRAMA* ptrTrama)
 //		- socket_c: Socket de la consola al envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN InventarioHardware(SOCKET *socket_c, TRAMA* ptrTrama) {
-	char msglog[LONSTD];
-	char modulo[] = "InventarioHardware()";
-
+static bool InventarioHardware(TRAMA* ptrTrama, struct og_client *cli)
+{
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
-		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
-		errorInfo(modulo, msglog);
-		respuestaConsola(socket_c, ptrTrama, FALSE);
-		return (FALSE);
+		respuestaConsola(og_client_socket(cli), ptrTrama, false);
+		return false;
 	}
-	respuestaConsola(socket_c, ptrTrama, TRUE);
-	return (TRUE);
+	respuestaConsola(og_client_socket(cli), ptrTrama, true);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: RESPUESTA_InventarioHardware
@@ -2693,22 +2524,22 @@ BOOLEAN InventarioHardware(SOCKET *socket_c, TRAMA* ptrTrama) {
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN RESPUESTA_InventarioHardware(SOCKET *socket_c, TRAMA* ptrTrama) {
+static bool RESPUESTA_InventarioHardware(TRAMA* ptrTrama, struct og_client *cli)
+{
 	char msglog[LONSTD];
 	Database db;
 	Table tbl;
-	BOOLEAN res;
+	bool res;
 	char *iph, *ido, *idc, *npc, *hrd, *buffer;
-	char modulo[] = "RESPUESTA_InventarioHardware()";
 
-	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
-		errorLog(modulo, 20, FALSE);
+	if (!db.Open(usuario, pasguor, datasource, catalog)) {
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
-		return (FALSE);
+		syslog(LOG_ERR, "cannot open connection database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
+		return false;
 	}
 
 	iph = copiaParametro("iph",ptrTrama); // Toma dirección ip del cliente
@@ -2716,9 +2547,9 @@ BOOLEAN RESPUESTA_InventarioHardware(SOCKET *socket_c, TRAMA* ptrTrama) {
 
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
 		liberaMemoria(iph);
-		liberaMemoria(ido);	
-		errorLog(modulo, 30, FALSE);
-		return (FALSE); // Error al registrar notificacion
+		liberaMemoria(ido);
+		syslog(LOG_ERR, "failed to register notification\n");
+		return false;
 	}
 	// Lee archivo de inventario enviado anteriormente
 	hrd = copiaParametro("hrd",ptrTrama);
@@ -2737,12 +2568,12 @@ BOOLEAN RESPUESTA_InventarioHardware(SOCKET *socket_c, TRAMA* ptrTrama) {
 	liberaMemoria(buffer);		
 	
 	if(!res){
-		errorLog(modulo, 53, FALSE);
-		return (FALSE);
+		syslog(LOG_ERR, "Problem updating client configuration\n");
+		return false;
 	}
 		
 	db.Close(); // Cierra conexión
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: actualizaHardware
@@ -2758,7 +2589,8 @@ BOOLEAN RESPUESTA_InventarioHardware(SOCKET *socket_c, TRAMA* ptrTrama) {
 //			- idc: Identificador del centro o Unidad organizativa
 // ________________________________________________________________________________________________________
 //
-BOOLEAN actualizaHardware(Database db, Table tbl, char* hrd, char*ido,char* npc, char *idc) 
+bool actualizaHardware(Database db, Table tbl, char *hrd, char *ido, char *npc,
+		       char *idc)
 {
 	char msglog[LONSTD], sqlstr[LONSQL];
 	int idtipohardware, idperfilhard;
@@ -2767,25 +2599,24 @@ BOOLEAN actualizaHardware(Database db, Table tbl, char* hrd, char*ido,char* npc,
 	char *whard;
 	int tbidhardware[MAXHARDWARE];
 	char *tbHardware[MAXHARDWARE],*dualHardware[2], descripcion[250], strInt[LONINT], *idhardwares;
-	char modulo[] = "actualizaHardware()";
 
 	/* Toma Centro (Unidad Organizativa) */
 	sprintf(sqlstr, "SELECT * FROM ordenadores WHERE idordenador=%s", ido);
 
-	if (!db.Execute(sqlstr, tbl)) { // Error al leer
-		errorLog(modulo, 21, FALSE);
+	if (!db.Execute(sqlstr, tbl)) {
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
-		return (FALSE);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
+		return false;
 	}
 	if (!tbl.Get("idperfilhard", idperfilhard)) { // Toma dato
 		tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-		errorInfo(modulo, msglog);
-		return (FALSE);
+		og_info(msglog);
+		return false;
 	}
 	whard=escaparCadena(hrd); // Codificar comillas simples
 	if(!whard)
-		return (FALSE);
+		return false;
 	/* Recorre componentes hardware*/
 	lon = splitCadena(tbHardware, whard, '\n');
 	if (lon > MAXHARDWARE)
@@ -2793,49 +2624,48 @@ BOOLEAN actualizaHardware(Database db, Table tbl, char* hrd, char*ido,char* npc,
 	/*
 	 for (i=0;i<lon;i++){
 	 sprintf(msglog,"Linea de inventario: %s",tbHardware[i]);
-	 RegistraLog(msglog,FALSE);
+	 RegistraLog(msglog,false);
 	 }
 	 */
 	for (i = 0; i < lon; i++) {
 		splitCadena(dualHardware, rTrim(tbHardware[i]), '=');
 		//sprintf(msglog,"nemonico: %s",dualHardware[0]);
-		//RegistraLog(msglog,FALSE);
+		//RegistraLog(msglog,false);
 		//sprintf(msglog,"valor: %s",dualHardware[1]);
-		//RegistraLog(msglog,FALSE);
+		//RegistraLog(msglog,false);
 		sprintf(sqlstr, "SELECT idtipohardware,descripcion FROM tipohardwares "
 			" WHERE nemonico='%s'", dualHardware[0]);
-		if (!db.Execute(sqlstr, tbl)) { // Error al leer
-			errorLog(modulo, 21, FALSE);
+		if (!db.Execute(sqlstr, tbl)) {
 			db.GetErrorErrStr(msglog);
-			errorInfo(modulo, msglog);
-			return (FALSE);
+			syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+			       __func__, __LINE__, msglog);
+			return false;
 		}
 		if (tbl.ISEOF()) { //  Tipo de Hardware NO existente
 			sprintf(msglog, "%s: %s)", tbErrores[54], dualHardware[0]);
-			errorInfo(modulo, msglog);
-			return (FALSE);
+			og_info(msglog);
+			return false;
 		} else { //  Tipo de Hardware Existe
 			if (!tbl.Get("idtipohardware", idtipohardware)) { // Toma dato
 				tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-				errorInfo(modulo, msglog);
-				return (FALSE);
+				og_info(msglog);
+				return false;
 			}
 			if (!tbl.Get("descripcion", descripcion)) { // Toma dato
 				tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-				errorInfo(modulo, msglog);
-				return (FALSE);
+				og_info(msglog);
+				return false;
 			}
 
 			sprintf(sqlstr, "SELECT idhardware FROM hardwares "
 				" WHERE idtipohardware=%d AND descripcion='%s'",
 					idtipohardware, dualHardware[1]);
 
-			// Ejecuta consulta
-			if (!db.Execute(sqlstr, tbl)) { // Error al leer
-				errorLog(modulo, 21, FALSE);
+			if (!db.Execute(sqlstr, tbl)) {
 				db.GetErrorErrStr(msglog);
-				errorInfo(modulo, msglog);
-				return (FALSE);
+				syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+				       __func__, __LINE__, msglog);
+				return false;
 			}
 
 			if (tbl.ISEOF()) { //  Hardware NO existente
@@ -2844,29 +2674,29 @@ BOOLEAN actualizaHardware(Database db, Table tbl, char* hrd, char*ido,char* npc,
 						dualHardware[1], idc);
 				if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 					db.GetErrorErrStr(msglog); // Error al acceder al registro
-					errorInfo(modulo, msglog);
-					return (FALSE);
+					og_info(msglog);
+					return false;
 				}
 				// Recupera el identificador del hardware
 				sprintf(sqlstr, "SELECT LAST_INSERT_ID() as identificador");
-				if (!db.Execute(sqlstr, tbl)) { // Error al leer
-					errorLog(modulo, 21, FALSE);
+				if (!db.Execute(sqlstr, tbl)) {
 					db.GetErrorErrStr(msglog);
-					errorInfo(modulo, msglog);
-					return (FALSE);
+					syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+					       __func__, __LINE__, msglog);
+					return false;
 				}
 				if (!tbl.ISEOF()) { // Si existe registro
 					if (!tbl.Get("identificador", tbidhardware[i])) {
 						tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-						errorInfo(modulo, msglog);
-						return (FALSE);
+						og_info(msglog);
+						return false;
 					}
 				}
 			} else {
 				if (!tbl.Get("idhardware", tbidhardware[i])) { // Toma dato
 					tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-					errorInfo(modulo, msglog);
-					return (FALSE);
+					og_info(msglog);
+					return false;
 				}
 			}
 		}
@@ -2887,8 +2717,8 @@ BOOLEAN actualizaHardware(Database db, Table tbl, char* hrd, char*ido,char* npc,
 	aux = strlen(strInt); // Calcula longitud de cadena para reservar espacio a todos los perfiles
 	idhardwares = reservaMemoria(sizeof(aux) * lon + lon);
 	if (idhardwares == NULL) {
-		errorLog(modulo, 3, FALSE);
-		return (FALSE);
+		syslog(LOG_ERR, "%s:%d OOM\n", __FILE__, __LINE__);
+		return false;
 	}
 	aux = sprintf(idhardwares, "%d", tbidhardware[0]);
 	for (i = 1; i < lon; i++)
@@ -2896,12 +2726,11 @@ BOOLEAN actualizaHardware(Database db, Table tbl, char* hrd, char*ido,char* npc,
 
 	if (!cuestionPerfilHardware(db, tbl, idc, ido, idperfilhard, idhardwares,
 			npc, tbidhardware, lon)) {
-		errorLog(modulo, 55, FALSE);
-		errorInfo(modulo, msglog);
-		retval=FALSE;
+		syslog(LOG_ERR, "Problem updating client hardware\n");
+		retval=false;
 	}
 	else {
-		retval=TRUE;
+		retval=true;
 	}
 	liberaMemoria(whard);
 	liberaMemoria(idhardwares);
@@ -2921,19 +2750,18 @@ BOOLEAN actualizaHardware(Database db, Table tbl, char* hrd, char*ido,char* npc,
 //			- con: Número de componentes detectados para configurar un el perfil hardware
 //			- npc: Nombre del cliente
 // ________________________________________________________________________________________________________
-BOOLEAN cuestionPerfilHardware(Database db, Table tbl, char* idc, char* ido,
-		int idperfilhardware, char*idhardwares, char *npc, int *tbidhardware,
+bool cuestionPerfilHardware(Database db, Table tbl, char *idc, char *ido,
+		int idperfilhardware, char *idhardwares, char *npc, int *tbidhardware,
 		int lon)
 {
 	char msglog[LONSTD], *sqlstr;
 	int i;
 	int nwidperfilhard;
-	char modulo[] = "cuestionPerfilHardware()";
 
 	sqlstr = reservaMemoria(strlen(idhardwares)+LONSQL); // Reserva para escribir sentencia SQL
 	if (sqlstr == NULL) {
-		errorLog(modulo, 3, FALSE);
-		return (FALSE);
+		syslog(LOG_ERR, "%s:%d OOM\n", __FILE__, __LINE__);
+		return false;
 	}
 	// Busca perfil hard del ordenador que contenga todos los componentes hardware encontrados
 	sprintf(sqlstr, "SELECT idperfilhard FROM"
@@ -2943,37 +2771,37 @@ BOOLEAN cuestionPerfilHardware(Database db, Table tbl, char* idc, char* ido,
 		" FROM	perfileshard_hardwares"
 		" GROUP BY perfileshard_hardwares.idperfilhard) AS temp"
 		" WHERE idhardwares LIKE '%s'", idhardwares);
-	// Ejecuta consulta
-	if (!db.Execute(sqlstr, tbl)) { // Error al leer
-		errorLog(modulo, 21, FALSE);
+
+	if (!db.Execute(sqlstr, tbl)) {
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
 		liberaMemoria(sqlstr);
-		return (false);
+		return false;
 	}
 	if (tbl.ISEOF()) { // No existe un perfil hardware con esos componentes de componentes hardware, lo crea
 		sprintf(sqlstr, "INSERT perfileshard  (descripcion,idcentro,grupoid)"
 				" VALUES('Perfil hardware (%s) ',%s,0)", npc, idc);
 		if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 			db.GetErrorErrStr(msglog);
-			errorInfo(modulo, msglog);
+			og_info(msglog);
 			liberaMemoria(sqlstr);
-			return (false);
+			return false;
 		}
 		// Recupera el identificador del nuevo perfil hardware
 		sprintf(sqlstr, "SELECT LAST_INSERT_ID() as identificador");
 		if (!db.Execute(sqlstr, tbl)) { // Error al leer
 			db.GetErrorErrStr(msglog);
-			errorInfo(modulo, msglog);
+			og_info(msglog);
 			liberaMemoria(sqlstr);
-			return (false);
+			return false;
 		}
 		if (!tbl.ISEOF()) { // Si existe registro
 			if (!tbl.Get("identificador", nwidperfilhard)) {
 				tbl.GetErrorErrStr(msglog);
-				errorInfo(modulo, msglog);
+				og_info(msglog);
 				liberaMemoria(sqlstr);
-				return (false);
+				return false;
 			}
 		}
 		// Crea la relación entre perfiles y componenetes hardware
@@ -2982,17 +2810,17 @@ BOOLEAN cuestionPerfilHardware(Database db, Table tbl, char* idc, char* ido,
 						" VALUES(%d,%d)", nwidperfilhard, tbidhardware[i]);
 			if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 				db.GetErrorErrStr(msglog);
-				errorInfo(modulo, msglog);
+				og_info(msglog);
 				liberaMemoria(sqlstr);
-				return (false);
+				return false;
 			}
 		}
 	} else { // Existe un perfil con todos esos componentes
 		if (!tbl.Get("idperfilhard", nwidperfilhard)) {
 			tbl.GetErrorErrStr(msglog);
-			errorInfo(modulo, msglog);
+			og_info(msglog);
 			liberaMemoria(sqlstr);
-			return (false);
+			return false;
 		}
 	}
 	if (idperfilhardware != nwidperfilhard) { // No coinciden los perfiles
@@ -3001,9 +2829,9 @@ BOOLEAN cuestionPerfilHardware(Database db, Table tbl, char* idc, char* ido,
 			" WHERE idordenador=%s", nwidperfilhard, ido);
 		if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 			db.GetErrorErrStr(msglog);
-			errorInfo(modulo, msglog);
+			og_info(msglog);
 			liberaMemoria(sqlstr);
-			return (false);
+			return false;
 		}
 	}
 	/* Eliminar Relación de hardwares con Perfiles hardware que quedan húerfanos */
@@ -3012,9 +2840,9 @@ BOOLEAN cuestionPerfilHardware(Database db, Table tbl, char* idc, char* ido,
 		" (SELECT DISTINCT idperfilhard from ordenadores))");
 	if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		liberaMemoria(sqlstr);
-		return (false);
+		return false;
 	}
 
 	/* Eliminar Perfiles hardware que quedan húerfanos */
@@ -3022,21 +2850,21 @@ BOOLEAN cuestionPerfilHardware(Database db, Table tbl, char* idc, char* ido,
 			" (SELECT DISTINCT idperfilhard FROM ordenadores)");
 	if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		liberaMemoria(sqlstr);
-		return (false);
+		return false;
 	}
 	/* Eliminar Relación de hardwares con Perfiles hardware que quedan húerfanos */
 	sprintf(sqlstr, "DELETE FROM perfileshard_hardwares WHERE idperfilhard NOT IN"
 			" (SELECT idperfilhard FROM perfileshard)");
 	if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		liberaMemoria(sqlstr);
-		return (false);
+		return false;
 	}
 	liberaMemoria(sqlstr);
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: InventarioSoftware
@@ -3047,21 +2875,17 @@ BOOLEAN cuestionPerfilHardware(Database db, Table tbl, char* idc, char* ido,
 //		- socket_c: Socket de la consola al envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN InventarioSoftware(SOCKET *socket_c, TRAMA* ptrTrama) {
-	char msglog[LONSTD];
-	char modulo[] = "InventarioSoftware()";
-
+static bool InventarioSoftware(TRAMA* ptrTrama, struct og_client *cli)
+{
 	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
-		sprintf(msglog, "%s:%s", tbErrores[32], modulo);
-		errorInfo(modulo, msglog);
-		respuestaConsola(socket_c, ptrTrama, FALSE);
-		return (FALSE);
+		respuestaConsola(og_client_socket(cli), ptrTrama, false);
+		return false;
 	}
-	respuestaConsola(socket_c, ptrTrama, TRUE);
-	return (TRUE);
+	respuestaConsola(og_client_socket(cli), ptrTrama, true);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: RESPUESTA_InventarioSoftware
@@ -3072,22 +2896,22 @@ BOOLEAN InventarioSoftware(SOCKET *socket_c, TRAMA* ptrTrama) {
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN RESPUESTA_InventarioSoftware(SOCKET *socket_c, TRAMA* ptrTrama) {
+static bool RESPUESTA_InventarioSoftware(TRAMA* ptrTrama, struct og_client *cli)
+{
 	char msglog[LONSTD];
 	Database db;
 	Table tbl;
-	BOOLEAN res;
+	bool res;
 	char *iph, *ido, *npc, *idc, *par, *sft, *buffer;
-	char modulo[] = "RESPUESTA_InventarioSoftware()";
 
-	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
-		errorLog(modulo, 20, FALSE);
+	if (!db.Open(usuario, pasguor, datasource, catalog)) {
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
-		return (FALSE);
+		syslog(LOG_ERR, "cannot open connection database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
+		return false;
 	}
 
 	iph = copiaParametro("iph",ptrTrama); // Toma dirección ip
@@ -3095,11 +2919,11 @@ BOOLEAN RESPUESTA_InventarioSoftware(SOCKET *socket_c, TRAMA* ptrTrama) {
 
 	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
 		liberaMemoria(iph);
-		liberaMemoria(ido);	
-		errorLog(modulo, 30, FALSE);
-		return (FALSE); // Error al registrar notificacion
+		liberaMemoria(ido);
+		syslog(LOG_ERR, "failed to register notification\n");
+		return false;
 	}
-	
+
 	npc = copiaParametro("npc",ptrTrama); 
 	idc = copiaParametro("idc",ptrTrama); // Toma identificador del Centro	
 	par = copiaParametro("par",ptrTrama);
@@ -3117,12 +2941,12 @@ BOOLEAN RESPUESTA_InventarioSoftware(SOCKET *socket_c, TRAMA* ptrTrama) {
 	liberaMemoria(sft);	
 
 	if(!res){
-		errorLog(modulo, 82, FALSE);
-		return (FALSE);
-	}	
-	
+		syslog(LOG_ERR, "cannot update software\n");
+		return false;
+	}
+
 	db.Close(); // Cierra conexión
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: actualizaSoftware
@@ -3138,43 +2962,43 @@ BOOLEAN RESPUESTA_InventarioSoftware(SOCKET *socket_c, TRAMA* ptrTrama) {
 //		- npc: Nombre del ordenador
 //		- idc: Identificador del centro o Unidad organizativa
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 //
 //	Versión 1.1.0: Se incluye el sistema operativo. Autora: Irina Gómez - ETSII Universidad Sevilla
 // ________________________________________________________________________________________________________
-BOOLEAN actualizaSoftware(Database db, Table tbl, char* sft, char* par,char* ido, char* npc, char* idc) 
+bool actualizaSoftware(Database db, Table tbl, char *sft, char *par,char *ido,
+		       char *npc, char *idc)
 {
 	int i, j, lon, aux, idperfilsoft, idnombreso;
 	bool retval;
 	char *wsft;
 	int tbidsoftware[MAXSOFTWARE];
 	char *tbSoftware[MAXSOFTWARE],msglog[LONSTD], sqlstr[LONSQL], strInt[LONINT], *idsoftwares;
-	char modulo[] = "actualizaSoftware()";
 
 	/* Toma Centro (Unidad Organizativa) y perfil software */
 	sprintf(sqlstr, "SELECT idperfilsoft,numpar"
 		" FROM ordenadores_particiones"
 		" WHERE idordenador=%s", ido);
 
-	if (!db.Execute(sqlstr, tbl)) { // Error al leer
-		errorLog(modulo, 21, FALSE);
+	if (!db.Execute(sqlstr, tbl)) {
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
-		return (FALSE);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
+		return false;
 	}
 	idperfilsoft = 0; // Por defecto se supone que el ordenador no tiene aún detectado el perfil software
 	while (!tbl.ISEOF()) { // Recorre particiones
 		if (!tbl.Get("numpar", aux)) {
 			tbl.GetErrorErrStr(msglog);
-			errorInfo(modulo, msglog);
-			return (FALSE);
+			og_info(msglog);
+			return false;
 		}
 		if (aux == atoi(par)) { // Se encuentra la partición
 			if (!tbl.Get("idperfilsoft", idperfilsoft)) {
 				tbl.GetErrorErrStr(msglog);
-				errorInfo(modulo, msglog);
-				return (FALSE);
+				og_info(msglog);
+				return false;
 			}
 			break;
 		}
@@ -3182,13 +3006,13 @@ BOOLEAN actualizaSoftware(Database db, Table tbl, char* sft, char* par,char* ido
 	}
 	wsft=escaparCadena(sft); // Codificar comillas simples
 	if(!wsft)
-		return (FALSE);
+		return false;
 
 	/* Recorre componentes software*/
 	lon = splitCadena(tbSoftware, wsft, '\n');
 
 	if (lon == 0)
-		return (true); // No hay lineas que procesar
+		return true; // No hay lineas que procesar
 	if (lon > MAXSOFTWARE)
 		lon = MAXSOFTWARE; // Limita el número de componentes software
 
@@ -3203,12 +3027,11 @@ BOOLEAN actualizaSoftware(Database db, Table tbl, char* sft, char* par,char* ido
 				"SELECT idsoftware FROM softwares WHERE descripcion ='%s'",
 				rTrim(tbSoftware[i]));
 
-		// Ejecuta consulta
-		if (!db.Execute(sqlstr, tbl)) { // Error al leer
-			errorLog(modulo, 21, FALSE);
+		if (!db.Execute(sqlstr, tbl)) {
 			db.GetErrorErrStr(msglog);
-			errorInfo(modulo, msglog);
-			return (FALSE);
+			syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+			       __func__, __LINE__, msglog);
+			return false;
 		}
 
 		if (tbl.ISEOF()) { //  Software NO existente
@@ -3217,28 +3040,28 @@ BOOLEAN actualizaSoftware(Database db, Table tbl, char* sft, char* par,char* ido
 
 			if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 				db.GetErrorErrStr(msglog); // Error al acceder al registro
-				errorInfo(modulo, msglog);
-				return (FALSE);
+				og_info(msglog);
+				return false;
 			}
 			// Recupera el identificador del software
 			sprintf(sqlstr, "SELECT LAST_INSERT_ID() as identificador");
 			if (!db.Execute(sqlstr, tbl)) { // Error al leer
 				db.GetErrorErrStr(msglog); // Error al acceder al registro
-				errorInfo(modulo, msglog);
-				return (FALSE);
+				og_info(msglog);
+				return false;
 			}
 			if (!tbl.ISEOF()) { // Si existe registro
 				if (!tbl.Get("identificador", tbidsoftware[i])) {
 					tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-					errorInfo(modulo, msglog);
-					return (FALSE);
+					og_info(msglog);
+					return false;
 				}
 			}
 		} else {
 			if (!tbl.Get("idsoftware", tbidsoftware[i])) { // Toma dato
 				tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-				errorInfo(modulo, msglog);
-				return (FALSE);
+				og_info(msglog);
+				return false;
 			}
 		}
 	}
@@ -3259,8 +3082,8 @@ BOOLEAN actualizaSoftware(Database db, Table tbl, char* sft, char* par,char* ido
 	aux = strlen(strInt); // Calcula longitud de cadena para reservar espacio a todos los perfiles
 	idsoftwares = reservaMemoria((sizeof(aux)+1) * lon + lon);
 	if (idsoftwares == NULL) {
-		errorLog(modulo, 3, FALSE);
-		return (FALSE);
+		syslog(LOG_ERR, "%s:%d OOM\n", __FILE__, __LINE__);
+		return false;
 	}
 	aux = sprintf(idsoftwares, "%d", tbidsoftware[0]);
 	for (i = 1; i < lon; i++)
@@ -3269,12 +3092,12 @@ BOOLEAN actualizaSoftware(Database db, Table tbl, char* sft, char* par,char* ido
 	// Comprueba existencia de perfil software y actualización de éste para el ordenador
 	if (!cuestionPerfilSoftware(db, tbl, idc, ido, idperfilsoft, idnombreso, idsoftwares, 
 			npc, par, tbidsoftware, lon)) {
-		errorLog(modulo, 83, FALSE);
-		errorInfo(modulo, msglog);
-		retval=FALSE;
+		syslog(LOG_ERR, "cannot update software\n");
+		og_info(msglog);
+		retval=false;
 	}
 	else {
-		retval=TRUE;
+		retval=true;
 	}
 	liberaMemoria(wsft);
 	liberaMemoria(idsoftwares);
@@ -3295,22 +3118,23 @@ BOOLEAN actualizaSoftware(Database db, Table tbl, char* sft, char* par,char* ido
 //		- tbidsoftware: Array con los identificadores de componentes software
 //		- lon: Número de componentes
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 //
 //	Versión 1.1.0: Se incluye el sistema operativo. Autora: Irina Gómez - ETSII Universidad Sevilla
 //_________________________________________________________________________________________________________
-BOOLEAN cuestionPerfilSoftware(Database db, Table tbl, char* idc, char* ido,
-		int idperfilsoftware, int idnombreso, char *idsoftwares, char *npc, char *par,
-		int *tbidsoftware, int lon) {
+bool cuestionPerfilSoftware(Database db, Table tbl, char *idc, char *ido,
+			    int idperfilsoftware, int idnombreso,
+			    char *idsoftwares, char *npc, char *par,
+			    int *tbidsoftware, int lon)
+{
 	char *sqlstr, msglog[LONSTD];
 	int i, nwidperfilsoft;
-	char modulo[] = "cuestionPerfilSoftware()";
 
 	sqlstr = reservaMemoria(strlen(idsoftwares)+LONSQL); // Reserva para escribir sentencia SQL
 	if (sqlstr == NULL) {
-		errorLog(modulo, 3, FALSE);
-		return (FALSE);
+		syslog(LOG_ERR, "%s:%d OOM\n", __FILE__, __LINE__);
+		return false;
 	}
 	// Busca perfil soft del ordenador que contenga todos los componentes software encontrados
 	sprintf(sqlstr, "SELECT idperfilsoft FROM"
@@ -3320,36 +3144,36 @@ BOOLEAN cuestionPerfilSoftware(Database db, Table tbl, char* idc, char* ido,
 		" FROM	perfilessoft_softwares"
 		" GROUP BY perfilessoft_softwares.idperfilsoft) AS temp"
 		" WHERE idsoftwares LIKE '%s'", idsoftwares);
-	// Ejecuta consulta
-	if (!db.Execute(sqlstr, tbl)) { // Error al leer
-		errorLog(modulo, 21, FALSE);
+
+	if (!db.Execute(sqlstr, tbl)) {
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
 		liberaMemoria(sqlstr);
-		return (false);
+		return false;
 	}
 	if (tbl.ISEOF()) { // No existe un perfil software con esos componentes de componentes software, lo crea
 		sprintf(sqlstr, "INSERT perfilessoft  (descripcion, idcentro, grupoid, idnombreso)"
 				" VALUES('Perfil Software (%s, Part:%s) ',%s,0,%i)", npc, par, idc,idnombreso);
 		if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 			db.GetErrorErrStr(msglog);
-			errorInfo(modulo, msglog);
-			return (false);
+			og_info(msglog);
+			return false;
 		}
 		// Recupera el identificador del nuevo perfil software
 		sprintf(sqlstr, "SELECT LAST_INSERT_ID() as identificador");
 		if (!db.Execute(sqlstr, tbl)) { // Error al leer
 			tbl.GetErrorErrStr(msglog);
-			errorInfo(modulo, msglog);
+			og_info(msglog);
 			liberaMemoria(sqlstr);
-			return (false);
+			return false;
 		}
 		if (!tbl.ISEOF()) { // Si existe registro
 			if (!tbl.Get("identificador", nwidperfilsoft)) {
 				tbl.GetErrorErrStr(msglog);
-				errorInfo(modulo, msglog);
+				og_info(msglog);
 				liberaMemoria(sqlstr);
-				return (false);
+				return false;
 			}
 		}
 		// Crea la relación entre perfiles y componenetes software
@@ -3358,17 +3182,17 @@ BOOLEAN cuestionPerfilSoftware(Database db, Table tbl, char* idc, char* ido,
 						" VALUES(%d,%d)", nwidperfilsoft, tbidsoftware[i]);
 			if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 				db.GetErrorErrStr(msglog);
-				errorInfo(modulo, msglog);
+				og_info(msglog);
 				liberaMemoria(sqlstr);
-				return (false);
+				return false;
 			}
 		}
 	} else { // Existe un perfil con todos esos componentes
 		if (!tbl.Get("idperfilsoft", nwidperfilsoft)) {
 			tbl.GetErrorErrStr(msglog);
-			errorInfo(modulo, msglog);
+			og_info(msglog);
 			liberaMemoria(sqlstr);
-			return (false);
+			return false;
 		}
 	}
 
@@ -3378,9 +3202,9 @@ BOOLEAN cuestionPerfilSoftware(Database db, Table tbl, char* idc, char* ido,
 				" WHERE idordenador=%s AND numpar=%s", nwidperfilsoft, ido, par);
 		if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 			db.GetErrorErrStr(msglog);
-			errorInfo(modulo, msglog);
+			og_info(msglog);
 			liberaMemoria(sqlstr);
-			return (false);
+			return false;
 		}
 	}
 
@@ -3393,9 +3217,9 @@ BOOLEAN cuestionPerfilSoftware(Database db, Table tbl, char* idc, char* ido,
 		" (SELECT DISTINCT idperfilsoft from imagenes))");
 	if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		liberaMemoria(sqlstr);
-		return (false);
+		return false;
 	}
 	/* Eliminar Perfiles software que quedan húerfanos */
 	sprintf(sqlstr, "DELETE FROM perfilessoft WHERE idperfilsoft NOT IN"
@@ -3404,21 +3228,21 @@ BOOLEAN cuestionPerfilSoftware(Database db, Table tbl, char* idc, char* ido,
 		" (SELECT DISTINCT idperfilsoft from imagenes)");
 	if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		liberaMemoria(sqlstr);
-		return (false);
+		return false;
 	}
 	/* Eliminar Relación de softwares con Perfiles software que quedan húerfanos */
 	sprintf(sqlstr, "DELETE FROM perfilessoft_softwares WHERE idperfilsoft NOT IN"
 			" (SELECT idperfilsoft from perfilessoft)");
 	if (!db.Execute(sqlstr, tbl)) { // Error al insertar
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
+		og_info(msglog);
 		liberaMemoria(sqlstr);
-		return (false);
+		return false;
 	}
 	liberaMemoria(sqlstr);
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: enviaArchivo
@@ -3429,22 +3253,23 @@ BOOLEAN cuestionPerfilSoftware(Database db, Table tbl, char* idc, char* ido,
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN enviaArchivo(SOCKET *socket_c, TRAMA *ptrTrama) {
+static bool enviaArchivo(TRAMA *ptrTrama, struct og_client *cli)
+{
+	int socket_c = og_client_socket(cli);
 	char *nfl;
-	char modulo[] = "enviaArchivo()";
 
 	// Toma parámetros
 	nfl = copiaParametro("nfl",ptrTrama); // Toma nombre completo del archivo
-	if (!sendArchivo(socket_c, nfl)) {
+	if (!sendArchivo(&socket_c, nfl)) {
 		liberaMemoria(nfl);
-		errorLog(modulo, 57, FALSE);
-		return (FALSE);
+		syslog(LOG_ERR, "Problem sending file\n");
+		return false;
 	}
 	liberaMemoria(nfl);
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: enviaArchivo
@@ -3455,24 +3280,25 @@ BOOLEAN enviaArchivo(SOCKET *socket_c, TRAMA *ptrTrama) {
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN recibeArchivo(SOCKET *socket_c, TRAMA *ptrTrama) {
+static bool recibeArchivo(TRAMA *ptrTrama, struct og_client *cli)
+{
+	int socket_c = og_client_socket(cli);
 	char *nfl;
-	char modulo[] = "recibeArchivo()";
 
 	// Toma parámetros
 	nfl = copiaParametro("nfl",ptrTrama); // Toma nombre completo del archivo
 	ptrTrama->tipo = MSG_NOTIFICACION;
-	enviaFlag(socket_c, ptrTrama);
-	if (!recArchivo(socket_c, nfl)) {
+	enviaFlag(&socket_c, ptrTrama);
+	if (!recArchivo(&socket_c, nfl)) {
 		liberaMemoria(nfl);
-		errorLog(modulo, 58, FALSE);
-		return (FALSE);
+		syslog(LOG_ERR, "Problem receiving file\n");
+		return false;
 	}
 	liberaMemoria(nfl);
-	return (TRUE);
+	return true;
 }
 // ________________________________________________________________________________________________________
 // Función: envioProgramacion
@@ -3484,23 +3310,22 @@ BOOLEAN recibeArchivo(SOCKET *socket_c, TRAMA *ptrTrama) {
 //		- socket_c: Socket del cliente que envió el mensaje
 //		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
 //	Devuelve:
-//		TRUE: Si el proceso es correcto
-//		FALSE: En caso de ocurrir algún error
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-BOOLEAN envioProgramacion(SOCKET *socket_c, TRAMA *ptrTrama)
+static bool envioProgramacion(TRAMA *ptrTrama, struct og_client *cli)
 {
 	char sqlstr[LONSQL], msglog[LONSTD];
 	char *idp,iph[LONIP],mac[LONMAC];
 	Database db;
 	Table tbl;
 	int idx,idcomando;
-	char modulo[] = "envioProgramacion()";
 
-	if (!db.Open(usuario, pasguor, datasource, catalog)) { // Error de conexion
-		errorLog(modulo, 20, FALSE);
+	if (!db.Open(usuario, pasguor, datasource, catalog)) {
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
-		return (FALSE);
+		syslog(LOG_ERR, "cannot open connection database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
+		return false;
 	}
 
 	idp = copiaParametro("idp",ptrTrama); // Toma identificador de la programación de la tabla acciones
@@ -3510,16 +3335,16 @@ BOOLEAN envioProgramacion(SOCKET *socket_c, TRAMA *ptrTrama)
 			" WHERE acciones.idprogramacion=%s",idp);
 	
 	liberaMemoria(idp);
-			
-	if (!db.Execute(sqlstr, tbl)) { // Error al leer
-		errorLog(modulo, 21, FALSE);
+
+	if (!db.Execute(sqlstr, tbl)) {
 		db.GetErrorErrStr(msglog);
-		errorInfo(modulo, msglog);
-		return (FALSE);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
+		return false;
 	}
 	db.Close();
 	if(tbl.ISEOF())
-		return (TRUE); // No existen registros
+		return true; // No existen registros
 
 	/* Prepara la trama de actualizacion */
 
@@ -3530,58 +3355,361 @@ BOOLEAN envioProgramacion(SOCKET *socket_c, TRAMA *ptrTrama)
 	while (!tbl.ISEOF()) { // Recorre particiones
 		if (!tbl.Get("ip", iph)) {
 			tbl.GetErrorErrStr(msglog);
-			errorInfo(modulo, msglog);
-			return (FALSE);
+			syslog(LOG_ERR, "cannot find ip column in table: %s\n",
+			       msglog);
+			return false;
 		}
 		if (!tbl.Get("idcomando", idcomando)) {
 			tbl.GetErrorErrStr(msglog);
-			errorInfo(modulo, msglog);
-			return (FALSE);
+			syslog(LOG_ERR, "cannot find idcomando column in table: %s\n",
+			       msglog);
+			return false;
 		}
 		if(idcomando==1){ // Arrancar
 			if (!tbl.Get("mac", mac)) {
 				tbl.GetErrorErrStr(msglog);
-				errorInfo(modulo, msglog);
-				return (FALSE);
+				syslog(LOG_ERR, "cannot find mac column in table: %s\n",
+				       msglog);
+				return false;
 			}
 
 			// Se manda por broadcast y por unicast
-			if (!Levanta(iph, mac, (char*)"1")) {
-				sprintf(msglog, "%s:%s", tbErrores[32], modulo);
-				errorInfo(modulo, msglog);
-				return (FALSE);
-			}
+			if (!Levanta(iph, mac, (char*)"1"))
+				return false;
 
-			if (!Levanta(iph, mac, (char*)"2")) {
-				sprintf(msglog, "%s:%s", tbErrores[32], modulo);
-				errorInfo(modulo, msglog);
-				return (FALSE);
-			}
+			if (!Levanta(iph, mac, (char*)"2"))
+				return false;
 
 		}
 		if (clienteDisponible(iph, &idx)) { // Si el cliente puede recibir comandos
+			int sock = tbsockets[idx].cli ? tbsockets[idx].cli->io.fd : -1;
+
 			strcpy(tbsockets[idx].estado, CLIENTE_OCUPADO); // Actualiza el estado del cliente
-			if (!mandaTrama(&tbsockets[idx].sock, ptrTrama)) {
-				errorLog(modulo, 26, FALSE);
-				return (FALSE);
+			if (!mandaTrama(&sock, ptrTrama)) {
+				syslog(LOG_ERR, "failed to send response: %s\n",
+				       strerror(errno));
+				return false;
 			}
 			//close(tbsockets[idx].sock); // Cierra el socket del cliente hasta nueva disponibilidad
 		}
 		tbl.MoveNext();
 	}
-	return (TRUE); // No existen registros
+	return true; // No existen registros
 }
-// ********************************************************************************************************
-// PROGRAMA PRINCIPAL (SERVICIO)
-// ********************************************************************************************************
-int main(int argc, char *argv[]) {
-	int i;
-	SOCKET socket_s; // Socket donde escucha el servidor
-	SOCKET socket_c; // Socket de los clientes que se conectan
-	socklen_t iAddrSize;
-	struct sockaddr_in local, cliente;
-	char modulo[] = "main()";
+
+// This object stores function handler for messages
+static struct {
+	const char *nf; // Nombre de la función
+	bool (*fcn)(TRAMA *, struct og_client *cli);
+} tbfuncionesServer[] = {
+	{ "Sondeo",				Sondeo,			},
+	{ "respuestaSondeo",			respuestaSondeo,	},
+	{ "ConsolaRemota",			ConsolaRemota,		},
+	{ "EcoConsola",				EcoConsola,		},
+	{ "Actualizar",				Actualizar,		},
+	{ "Purgar",				Purgar,			},
+	{ "InclusionCliente",			InclusionCliente,	},
+	{ "InclusionClienteWinLnx",		InclusionClienteWinLnx, },
+	{ "AutoexecCliente",			AutoexecCliente,	},
+	{ "ComandosPendientes",			ComandosPendientes,	},
+	{ "DisponibilidadComandos",		DisponibilidadComandos, },
+	{ "Arrancar",				Arrancar, 		},
+	{ "RESPUESTA_Arrancar",			RESPUESTA_Arrancar,	},
+	{ "Apagar",				Apagar,			},
+	{ "RESPUESTA_Apagar",			RESPUESTA_Apagar,	},
+	{ "Reiniciar",				Reiniciar,		},
+	{ "RESPUESTA_Reiniciar",		RESPUESTA_Reiniciar,	},
+	{ "IniciarSesion",			IniciarSesion,		},
+	{ "RESPUESTA_IniciarSesion",		RESPUESTA_IniciarSesion, },
+	{ "CrearImagen",			CrearImagen,		},
+	{ "RESPUESTA_CrearImagen",		RESPUESTA_CrearImagen,	},
+	{ "CrearImagenBasica",			CrearImagenBasica,	},
+	{ "RESPUESTA_CrearImagenBasica",	RESPUESTA_CrearImagenBasica, },
+	{ "CrearSoftIncremental",		CrearSoftIncremental,	},
+	{ "RESPUESTA_CrearSoftIncremental",	RESPUESTA_CrearSoftIncremental, },
+	{ "RestaurarImagen",			RestaurarImagen,	},
+	{ "RESPUESTA_RestaurarImagen",		RESPUESTA_RestaurarImagen },
+	{ "RestaurarImagenBasica",		RestaurarImagenBasica, },
+	{ "RESPUESTA_RestaurarImagenBasica",	RESPUESTA_RestaurarImagenBasica, },
+	{ "RestaurarSoftIncremental",		RestaurarSoftIncremental, },
+	{ "RESPUESTA_RestaurarSoftIncremental",	RESPUESTA_RestaurarSoftIncremental, },
+	{ "Configurar",				Configurar,		},
+	{ "RESPUESTA_Configurar",		RESPUESTA_Configurar,	},
+	{ "EjecutarScript",			EjecutarScript,		},
+	{ "RESPUESTA_EjecutarScript",		RESPUESTA_EjecutarScript, },
+	{ "InventarioHardware",			InventarioHardware, 	},
+	{ "RESPUESTA_InventarioHardware",	RESPUESTA_InventarioHardware, },
+	{ "InventarioSoftware",			InventarioSoftware	},
+	{ "RESPUESTA_InventarioSoftware",	RESPUESTA_InventarioSoftware, },
+	{ "enviaArchivo",			enviaArchivo,		},
+	{ "recibeArchivo",			recibeArchivo, 		},
+	{ "envioProgramacion",			envioProgramacion,	},
+	{ NULL,					NULL,			},
+};
+
+// ________________________________________________________________________________________________________
+// Función: gestionaTrama
+//
+//		Descripción:
+//			Procesa las tramas recibidas .
+//		Parametros:
+//			- s : Socket usado para comunicaciones
+//	Devuelve:
+//		true: Si el proceso es correcto
+//		false: En caso de ocurrir algún error
+// ________________________________________________________________________________________________________
+static void gestionaTrama(TRAMA *ptrTrama, struct og_client *cli)
+{
+	int i, res;
+	char *nfn;
+
+	if (ptrTrama){
+		INTROaFINCAD(ptrTrama);
+		nfn = copiaParametro("nfn",ptrTrama); // Toma nombre de la función
+
+		for (i = 0; tbfuncionesServer[i].fcn; i++) {
+			if (!strncmp(tbfuncionesServer[i].nf, nfn,
+				     strlen(tbfuncionesServer[i].nf))) {
+				res = tbfuncionesServer[i].fcn(ptrTrama, cli);
+				if (!res) {
+					syslog(LOG_ERR, "Failed handling of %s for client %s:%hu\n",
+					       tbfuncionesServer[i].nf,
+					       inet_ntoa(cli->addr.sin_addr),
+					       ntohs(cli->addr.sin_port));
+				} else {
+					syslog(LOG_DEBUG, "Successful handling of %s for client %s:%hu\n",
+					       tbfuncionesServer[i].nf,
+					       inet_ntoa(cli->addr.sin_addr),
+					       ntohs(cli->addr.sin_port));
+				}
+				break;
+			}
+		}
+		if (!tbfuncionesServer[i].fcn)
+			syslog(LOG_ERR, "unknown request %s from client %s:%hu\n",
+			       nfn, inet_ntoa(cli->addr.sin_addr),
+			       ntohs(cli->addr.sin_port));
+
+		liberaMemoria(nfn);
+	}
+}
+
+static void og_client_release(struct ev_loop *loop, struct og_client *cli)
+{
+	if (cli->keepalive_idx >= 0) {
+		syslog(LOG_DEBUG, "closing keepalive connection for %s:%hu in slot %d\n",
+		       inet_ntoa(cli->addr.sin_addr),
+		       ntohs(cli->addr.sin_port), cli->keepalive_idx);
+		tbsockets[cli->keepalive_idx].cli = NULL;
+	}
+
+	ev_io_stop(loop, &cli->io);
+	close(cli->io.fd);
+	free(cli);
+}
+
+static void og_client_keepalive(struct ev_loop *loop, struct og_client *cli)
+{
+	struct og_client *old_cli;
+
+	old_cli = tbsockets[cli->keepalive_idx].cli;
+	if (old_cli && old_cli != cli) {
+		syslog(LOG_DEBUG, "closing old keepalive connection for %s:%hu\n",
+		       inet_ntoa(old_cli->addr.sin_addr),
+		       ntohs(old_cli->addr.sin_port));
+
+		og_client_release(loop, old_cli);
+	}
+	tbsockets[cli->keepalive_idx].cli = cli;
+}
+
+static void og_client_reset_state(struct og_client *cli)
+{
+	cli->state = OG_CLIENT_RECEIVING_HEADER;
+	cli->buf_len = 0;
+}
+
+static void og_client_read_cb(struct ev_loop *loop, struct ev_io *io, int events)
+{
+	char hdrlen[LONHEXPRM];
+	struct og_client *cli;
+	TRAMA *ptrTrama;
+	int ret, len;
+	char *data;
+
+	cli = container_of(io, struct og_client, io);
+
+	if (events & EV_ERROR) {
+		syslog(LOG_ERR, "unexpected error event from client %s:%hu\n",
+			       inet_ntoa(cli->addr.sin_addr),
+			       ntohs(cli->addr.sin_port));
+		goto close;
+	}
+
+	ret = recv(io->fd, cli->buf + cli->buf_len,
+		   sizeof(cli->buf) - cli->buf_len, 0);
+	if (ret <= 0) {
+		if (ret < 0) {
+			syslog(LOG_ERR, "error reading from client %s:%hu (%s)\n",
+			       inet_ntoa(cli->addr.sin_addr), ntohs(cli->addr.sin_port),
+			       strerror(errno));
+		} else {
+			syslog(LOG_DEBUG, "closed connection by %s:%hu\n",
+			       inet_ntoa(cli->addr.sin_addr), ntohs(cli->addr.sin_port));
+		}
+		goto close;
+	}
+
+	if (cli->keepalive_idx >= 0)
+		return;
+
+	ev_timer_again(loop, &cli->timer);
+
+	cli->buf_len += ret;
+
+	switch (cli->state) {
+	case OG_CLIENT_RECEIVING_HEADER:
+		/* Still too short to validate protocol fingerprint and message
+		 * length.
+		 */
+		if (cli->buf_len < 15 + LONHEXPRM)
+			return;
+
+		if (strncmp(cli->buf, "@JMMLCAMDJ_MCDJ", 15)) {
+			syslog(LOG_ERR, "bad fingerprint from client %s:%hu, closing\n",
+			       inet_ntoa(cli->addr.sin_addr),
+			       ntohs(cli->addr.sin_port));
+			goto close;
+		}
+
+		memcpy(hdrlen, &cli->buf[LONGITUD_CABECERATRAMA], LONHEXPRM);
+		cli->msg_len = strtol(hdrlen, NULL, 16);
+
+		/* Header announces more that we can fit into buffer. */
+		if (cli->msg_len >= sizeof(cli->buf)) {
+			syslog(LOG_ERR, "too large message %u bytes from %s:%hu\n",
+			       cli->msg_len, inet_ntoa(cli->addr.sin_addr),
+			       ntohs(cli->addr.sin_port));
+			goto close;
+		}
+
+		cli->state = OG_CLIENT_RECEIVING_PAYLOAD;
+		/* Fall through. */
+	case OG_CLIENT_RECEIVING_PAYLOAD:
+		/* Still not enough data to process request. */
+		if (cli->buf_len < cli->msg_len)
+			return;
+
+		cli->state = OG_CLIENT_PROCESSING_REQUEST;
+		/* fall through. */
+	case OG_CLIENT_PROCESSING_REQUEST:
+		syslog(LOG_DEBUG, "processing request from %s:%hu\n",
+		       inet_ntoa(cli->addr.sin_addr),
+		       ntohs(cli->addr.sin_port));
+
+		len = cli->msg_len - (LONGITUD_CABECERATRAMA + LONHEXPRM);
+		data = &cli->buf[LONGITUD_CABECERATRAMA + LONHEXPRM];
+
+		ptrTrama = (TRAMA *)reservaMemoria(sizeof(TRAMA));
+		if (!ptrTrama) {
+			syslog(LOG_ERR, "OOM\n");
+			goto close;
+		}
+
+		initParametros(ptrTrama, len);
+		memcpy(ptrTrama, cli->buf, LONGITUD_CABECERATRAMA);
+		memcpy(ptrTrama->parametros, data, len);
+		ptrTrama->lonprm = len;
+
+		gestionaTrama(ptrTrama, cli);
+
+		liberaMemoria(ptrTrama->parametros);
+		liberaMemoria(ptrTrama);
+
+		if (cli->keepalive_idx < 0) {
+			syslog(LOG_DEBUG, "server closing connection to %s:%hu\n",
+			       inet_ntoa(cli->addr.sin_addr), ntohs(cli->addr.sin_port));
+			goto close;
+		} else {
+			syslog(LOG_DEBUG, "leaving client %s:%hu in keepalive mode\n",
+			       inet_ntoa(cli->addr.sin_addr),
+			       ntohs(cli->addr.sin_port));
+			og_client_keepalive(loop, cli);
+			og_client_reset_state(cli);
+		}
+		break;
+	default:
+		syslog(LOG_ERR, "unknown state, critical internal error\n");
+		goto close;
+	}
+	return;
+close:
+	ev_timer_stop(loop, &cli->timer);
+	og_client_release(loop, cli);
+}
+
+static void og_client_timer_cb(struct ev_loop *loop, ev_timer *timer, int events)
+{
+	struct og_client *cli;
+
+	cli = container_of(timer, struct og_client, timer);
+	if (cli->keepalive_idx >= 0) {
+		ev_timer_again(loop, &cli->timer);
+		return;
+	}
+	syslog(LOG_ERR, "timeout request for client %s:%hu\n",
+	       inet_ntoa(cli->addr.sin_addr), ntohs(cli->addr.sin_port));
+
+	og_client_release(loop, cli);
+}
+
+static void og_server_accept_cb(struct ev_loop *loop, struct ev_io *io,
+				int events)
+{
+	struct sockaddr_in client_addr;
+	socklen_t addrlen = sizeof(client_addr);
+	struct og_client *cli;
+	int client_sd;
+
+	if (events & EV_ERROR)
+		return;
+
+	client_sd = accept(io->fd, (struct sockaddr *)&client_addr, &addrlen);
+	if (client_sd < 0) {
+		syslog(LOG_ERR, "cannot accept client connection\n");
+		return;
+	}
+
+	cli = (struct og_client *)calloc(1, sizeof(struct og_client));
+	if (!cli) {
+		close(client_sd);
+		return;
+	}
+	memcpy(&cli->addr, &client_addr, sizeof(client_addr));
+	cli->keepalive_idx = -1;
+
+	syslog(LOG_DEBUG, "connection from client %s:%hu\n",
+	       inet_ntoa(cli->addr.sin_addr), ntohs(cli->addr.sin_port));
+
+	ev_io_init(&cli->io, og_client_read_cb, client_sd, EV_READ);
+	ev_io_start(loop, &cli->io);
+	ev_timer_init(&cli->timer, og_client_timer_cb, OG_CLIENT_TIMEOUT, 0.);
+	ev_timer_start(loop, &cli->timer);
+}
+
+int main(int argc, char *argv[])
+{
+	struct ev_loop *loop = ev_default_loop(0);
+	struct ev_io ev_io_server;
+	struct sockaddr_in local;
+	int socket_s;
 	int activo=1;
+	int i;
+
+	if (signal(SIGPIPE, SIG_IGN) == SIG_ERR)
+		exit(EXIT_FAILURE);
+
+	openlog("ogAdmServer", LOG_PID, LOG_DAEMON);
 
 	/*--------------------------------------------------------------------------------------------------------
 	 Validación de parámetros de ejecución y lectura del fichero de configuración del servicio
@@ -3592,136 +3720,21 @@ int main(int argc, char *argv[]) {
 	if (!tomaConfiguracion(szPathFileCfg)) { // Toma parametros de configuracion
 		exit(EXIT_FAILURE);
 	}
-	/*--------------------------------------------------------------------------------------------------------
-	 Carga del catálogo de funciones que procesan las tramas (referencia directa por puntero a función)
-	 ---------------------------------------------------------------------------------------------------------*/
-	int cf = 0;
-
-	strcpy(tbfuncionesServer[cf].nf, "Sondeo");
-	tbfuncionesServer[cf++].fptr = &Sondeo;
-	strcpy(tbfuncionesServer[cf].nf, "respuestaSondeo");
-	tbfuncionesServer[cf++].fptr = &respuestaSondeo;
-
-	strcpy(tbfuncionesServer[cf].nf, "ConsolaRemota");
-	tbfuncionesServer[cf++].fptr = &ConsolaRemota;
-
-	strcpy(tbfuncionesServer[cf].nf, "EcoConsola");
-	tbfuncionesServer[cf++].fptr = &EcoConsola;
-
-	strcpy(tbfuncionesServer[cf].nf, "Actualizar");
-	tbfuncionesServer[cf++].fptr = &Actualizar;
-
-	strcpy(tbfuncionesServer[cf].nf, "Purgar");
-	tbfuncionesServer[cf++].fptr = &Purgar;
-
-	strcpy(tbfuncionesServer[cf].nf, "InclusionCliente");
-	tbfuncionesServer[cf++].fptr = &InclusionCliente;
-
-	strcpy(tbfuncionesServer[cf].nf, "InclusionClienteWinLnx");
-	tbfuncionesServer[cf++].fptr = &InclusionClienteWinLnx;
-
-	strcpy(tbfuncionesServer[cf].nf, "AutoexecCliente");
-	tbfuncionesServer[cf++].fptr = &AutoexecCliente;
-
-	strcpy(tbfuncionesServer[cf].nf, "ComandosPendientes");
-	tbfuncionesServer[cf++].fptr = &ComandosPendientes;
-
-	strcpy(tbfuncionesServer[cf].nf, "DisponibilidadComandos");
-	tbfuncionesServer[cf++].fptr = &DisponibilidadComandos;
-
-	strcpy(tbfuncionesServer[cf].nf, "Arrancar");
-	tbfuncionesServer[cf++].fptr = &Arrancar;
-	strcpy(tbfuncionesServer[cf].nf, "RESPUESTA_Arrancar");
-	tbfuncionesServer[cf++].fptr = &RESPUESTA_Arrancar;
-
-	strcpy(tbfuncionesServer[cf].nf, "Apagar");
-	tbfuncionesServer[cf++].fptr = &Apagar;
-	strcpy(tbfuncionesServer[cf].nf, "RESPUESTA_Apagar");
-	tbfuncionesServer[cf++].fptr = &RESPUESTA_Apagar;
-
-	strcpy(tbfuncionesServer[cf].nf, "Reiniciar");
-	tbfuncionesServer[cf++].fptr = &Reiniciar;
-	strcpy(tbfuncionesServer[cf].nf, "RESPUESTA_Reiniciar");
-	tbfuncionesServer[cf++].fptr = &RESPUESTA_Reiniciar;
-
-	strcpy(tbfuncionesServer[cf].nf, "IniciarSesion");
-	tbfuncionesServer[cf++].fptr = &IniciarSesion;
-	strcpy(tbfuncionesServer[cf].nf, "RESPUESTA_IniciarSesion");
-	tbfuncionesServer[cf++].fptr = &RESPUESTA_IniciarSesion;
-
-	strcpy(tbfuncionesServer[cf].nf, "CrearImagen");
-	tbfuncionesServer[cf++].fptr = &CrearImagen;
-	strcpy(tbfuncionesServer[cf].nf, "RESPUESTA_CrearImagen");
-	tbfuncionesServer[cf++].fptr = &RESPUESTA_CrearImagen;
-
-	strcpy(tbfuncionesServer[cf].nf, "CrearImagenBasica");
-	tbfuncionesServer[cf++].fptr = &CrearImagenBasica;
-	strcpy(tbfuncionesServer[cf].nf, "RESPUESTA_CrearImagenBasica");
-	tbfuncionesServer[cf++].fptr = &RESPUESTA_CrearImagenBasica;
-
-	strcpy(tbfuncionesServer[cf].nf, "CrearSoftIncremental");
-	tbfuncionesServer[cf++].fptr = &CrearSoftIncremental;
-	strcpy(tbfuncionesServer[cf].nf, "RESPUESTA_CrearSoftIncremental");
-	tbfuncionesServer[cf++].fptr = &RESPUESTA_CrearSoftIncremental;
-
-	strcpy(tbfuncionesServer[cf].nf, "RestaurarImagen");
-	tbfuncionesServer[cf++].fptr = &RestaurarImagen;
-	strcpy(tbfuncionesServer[cf].nf, "RESPUESTA_RestaurarImagen");
-	tbfuncionesServer[cf++].fptr = &RESPUESTA_RestaurarImagen;
-
-	strcpy(tbfuncionesServer[cf].nf, "RestaurarImagenBasica");
-	tbfuncionesServer[cf++].fptr = &RestaurarImagenBasica;
-	strcpy(tbfuncionesServer[cf].nf, "RESPUESTA_RestaurarImagenBasica");
-	tbfuncionesServer[cf++].fptr = &RESPUESTA_RestaurarImagenBasica;
-
-	strcpy(tbfuncionesServer[cf].nf, "RestaurarSoftIncremental");
-	tbfuncionesServer[cf++].fptr = &RestaurarSoftIncremental;
-	strcpy(tbfuncionesServer[cf].nf, "RESPUESTA_RestaurarSoftIncremental");
-	tbfuncionesServer[cf++].fptr = &RESPUESTA_RestaurarSoftIncremental;
-
-	strcpy(tbfuncionesServer[cf].nf, "Configurar");
-	tbfuncionesServer[cf++].fptr = &Configurar;
-	strcpy(tbfuncionesServer[cf].nf, "RESPUESTA_Configurar");
-	tbfuncionesServer[cf++].fptr = &RESPUESTA_Configurar;
-
-	strcpy(tbfuncionesServer[cf].nf, "EjecutarScript");
-	tbfuncionesServer[cf++].fptr = &EjecutarScript;
-	strcpy(tbfuncionesServer[cf].nf, "RESPUESTA_EjecutarScript");
-	tbfuncionesServer[cf++].fptr = &RESPUESTA_EjecutarScript;
-
-	strcpy(tbfuncionesServer[cf].nf, "InventarioHardware");
-	tbfuncionesServer[cf++].fptr = &InventarioHardware;
-	strcpy(tbfuncionesServer[cf].nf, "RESPUESTA_InventarioHardware");
-	tbfuncionesServer[cf++].fptr = &RESPUESTA_InventarioHardware;
-
-	strcpy(tbfuncionesServer[cf].nf, "InventarioSoftware");
-	tbfuncionesServer[cf++].fptr = &InventarioSoftware;
-	strcpy(tbfuncionesServer[cf].nf, "RESPUESTA_InventarioSoftware");
-	tbfuncionesServer[cf++].fptr = &RESPUESTA_InventarioSoftware;
-
-	strcpy(tbfuncionesServer[cf].nf, "enviaArchivo");
-	tbfuncionesServer[cf++].fptr = &enviaArchivo;
-
-	strcpy(tbfuncionesServer[cf].nf, "recibeArchivo");
-	tbfuncionesServer[cf++].fptr = &recibeArchivo;
-
-	strcpy(tbfuncionesServer[cf].nf, "envioProgramacion");
-	tbfuncionesServer[cf++].fptr = &envioProgramacion;
 
 	/*--------------------------------------------------------------------------------------------------------
 	 // Inicializa array de información de los clientes
 	 ---------------------------------------------------------------------------------------------------------*/
 	for (i = 0; i < MAXIMOS_CLIENTES; i++) {
 		tbsockets[i].ip[0] = '\0';
-		tbsockets[i].sock = INVALID_SOCKET;
+		tbsockets[i].cli = NULL;
 	}
 	/*--------------------------------------------------------------------------------------------------------
 	 Creación y configuración del socket del servicio
 	 ---------------------------------------------------------------------------------------------------------*/
 	socket_s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP); // Crea socket del servicio
 	setsockopt(socket_s, SOL_SOCKET, SO_REUSEPORT, &activo, sizeof(int));
-	if (socket_s == SOCKET_ERROR) { // Error al crear el socket del servicio
-		errorLog(modulo, 13, TRUE);
+	if (socket_s < 0) {
+		syslog(LOG_ERR, "cannot create main socket\n");
 		exit(EXIT_FAILURE);
 	}
 
@@ -3729,36 +3742,25 @@ int main(int argc, char *argv[]) {
 	local.sin_family = AF_INET;
 	local.sin_port = htons(atoi(puerto));
 
-	if (bind(socket_s, (struct sockaddr *) &local, sizeof(local))
-			== SOCKET_ERROR) { // Enlaza socket
-		errorLog(modulo, 14, TRUE);
+	if (bind(socket_s, (struct sockaddr *) &local, sizeof(local)) < 0) {
+		syslog(LOG_ERR, "cannot bind socket\n");
 		exit(EXIT_FAILURE);
 	}
 
 	listen(socket_s, 250); // Pone a escuchar al socket
-	iAddrSize = sizeof(cliente);
-	/*--------------------------------------------------------------------------------------------------------
-	 Bucle para acceptar conexiones
-	 ---------------------------------------------------------------------------------------------------------*/
+
+	ev_io_init(&ev_io_server, og_server_accept_cb, socket_s, EV_READ);
+	ev_io_start(loop, &ev_io_server);
+
 	infoLog(1); // Inicio de sesión
-	while (TRUE) {
-		socket_c = accept(socket_s, (struct sockaddr *) &cliente, &iAddrSize);
-		if (socket_c == INVALID_SOCKET) {
-			errorLog(modulo, 15, TRUE);
-			exit(EXIT_FAILURE);
-		}
-		swcSocket = FALSE; // Por defecto se cerrara el socket de cliente después del anális de la trama
-		if (!gestionaTrama(&socket_c)) {
-			errorLog(modulo, 39, TRUE);
-			//close(socket_c);/tmp/
-			//break;
-		}
-		if (!swcSocket) // Sólo se cierra cuando el cliente NO espera comandos ineractivos
-			close(socket_c);
-	}
-	/*--------------------------------------------------------------------------------------------------------
-	 Fin del servicio
-	 ---------------------------------------------------------------------------------------------------------*/
-	close(socket_s);
+
+	/* old log file has been deprecated. */
+	og_log(97, false);
+
+	syslog(LOG_INFO, "Waiting for connections\n");
+
+	while (1)
+		ev_loop(loop, 0);
+
 	exit(EXIT_SUCCESS);
 }

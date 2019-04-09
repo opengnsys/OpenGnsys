@@ -41,8 +41,8 @@ else
 //________________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE>Administración web de universidades</TITLE>
 <HEAD>
+	<TITLE>Administración web de universidades</TITLE>
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../jscripts/propiedades_universidades.js"></SCRIPT>
@@ -55,16 +55,16 @@ else
 	<INPUT type=hidden name=opcion value=<?php echo $opcion?>>
 	<INPUT type=hidden name=iduniversidad value=<?php echo $iduniversidad?>>
 	<P align=center class=cabeceras><?php echo $TbMsg[4]?><BR>
-	<SPAN align=center class=subcabeceras><?php echo $opciones[$opcion]?></SPAN></P>
+	<SPAN class=subcabeceras><?php echo $opciones[$opcion]?></SPAN></P>
 	<TABLE  align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center&nbsp;><?php echo $TbMsg[5]?>&nbsp;</TD>
+			<TH align=center&nbsp;><?php echo $TbMsg[5]?>&nbsp;</TH>
 			<?php echo '<TD colspan=3><INPUT  class="formulariodatos" name=nombreuniversidad style="width:350" type=text value="'.$nombreuniversidad.'"></TD>';?>
 		</TR>
 	<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?php echo $TbMsg[6]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?php echo $TbMsg[6]?>&nbsp;</TH>
 			<?php if ($opcion==$op_eliminacion)
 					echo '<TD>'.$comentarios.'</TD>';
 				else
@@ -106,4 +106,3 @@ function TomaPropiedades($cmd,$id){
 	$rs->Cerrar();
 	return(true);
 }
-?>

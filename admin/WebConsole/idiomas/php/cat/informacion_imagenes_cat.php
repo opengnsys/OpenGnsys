@@ -2,17 +2,16 @@
 //________________________________________________________________________________________________________
 //
 //	Fitxer d'idiomes php: informacion_imagenes_cat.php 
-//	Idioma: Català 
+//	Idioma: Catalï¿½ 
 //________________________________________________________________________________________________________
 	$TbMsg=array();
 	$TbMsg[0]='Imatges';
-	$TbMsg[1]='Informació sobre imatges';
+	$TbMsg[1]='Informaciï¿½ sobre imatges';
 	$TbMsg[2]='Imatge';
-	$TbMsg[3]='Informació de la Imatge';
+	$TbMsg[3]='Informaciï¿½ de la Imatge';
 	$TbMsg[4]='Components software';
 	$TbMsg[5]='Software incremental';
 	$TbMsg[6]='Perfil Software';
 	$TbMsg[7]='Ordinadors amb aquesta imatge';
-	$TbMsg[8]='Partició';
+	$TbMsg[8]='Particiï¿½';
 	$TbMsg[9]='Comentaris';
-?>

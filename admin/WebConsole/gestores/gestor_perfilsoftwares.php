@@ -156,4 +156,4 @@ function SubarbolXML_perfilessoft($idperfilsoft,$descripcion){
 		$cadenaXML.='</PERFILESSOFTWARES>';
 		return($cadenaXML);
 }
-?>
+

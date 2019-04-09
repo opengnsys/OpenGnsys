@@ -2,9 +2,8 @@
 //________________________________________________________________________________________________________
 //
 //	Fitxer d'idiomes php: actualizar_cat.php 
-//	Idioma: Català 
+//	Idioma: Catalï¿½ 
 //________________________________________________________________________________________________________
 	$TbMsg=array();
-	$TbMsg[0]='Aquest àmbit ha estat purgat correctament';
-	$TbMsg[1]='ATENCIÓ: Ha ocorregut algún problema al purgar l\'àmbit';
-?>
+	$TbMsg[0]='Aquest ï¿½mbit ha estat purgat correctament';
+	$TbMsg[1]='ATENCIï¿½: Ha ocorregut algï¿½n problema al purgar l\'ï¿½mbit';

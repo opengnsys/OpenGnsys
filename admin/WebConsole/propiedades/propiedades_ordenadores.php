@@ -61,8 +61,8 @@ if  ($opcion!=$op_alta){
 //________________________________________________________________________________________________________
 ?>
 <html>
-<title>Administración web de aulas</title>
 <head>
+    <title>Administración web de aulas</title>
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
 	<link rel="stylesheet" type="text/css" href="../estilos.css" />
 	<SCRIPT language="javascript" src="../jscripts/validators.js"></SCRIPT>
@@ -156,7 +156,7 @@ function abrir_ventana(URL){
 						echo '<option value="'.$fotomenu.'">'.$fotomenu.'</option>';}
 						if ($handle = opendir("../images/fotos")) {
 						while (false !== ($entry = readdir($handle))) {
-			    			if ($entry != "." && $entry != "..") {?>
+						if ($entry != "." && $entry != "..") {?>
 						<option value="<?php echo $entry ?>"><?php echo $entry ?></option>
 						<?php }
 						}
@@ -165,7 +165,7 @@ function abrir_ventana(URL){
 						?>
 					</SELECT>
 <a href="javascript:abrir_ventana('../images/ver.php')" onclick="MM_openBrWindow('../images/ver.php','Imagenes','scrollbars=yes,resizable=yes,width=950,height=640')"><?php echo $TbMsg[5092] ?></a>
-            				</TD>
+					</TD>
 					<?php
 					}
 					?>
@@ -181,19 +181,22 @@ function abrir_ventana(URL){
 			?>
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
-		<TR>
-			<th align=center>&nbsp;<?php echo $TbMsg[10]?>&nbsp;</th>
+		<tr>
+			<th align="center">&nbsp;<?php echo $TbMsg[10]?>&nbsp;</th>
 			<?php
-				if ($opcion==$op_eliminacion)
-					echo '<TD colspan=3>'.TomaDato($cmd,$idcentro,'repositorios',$idrepositorio,'idrepositorio','nombrerepositorio').'</TD>';
-				else
-					echo '<TD colspan=3>'.HTMLSELECT($cmd,$idcentro,'repositorios',$idrepositorio,'idrepositorio','nombrerepositorio',250).'</TD>';
+				if ($opcion==$op_eliminacion) {
+					echo '<td colspan="3">'.TomaDato($cmd,$idcentro,'repositorios',$idrepositorio,'idrepositorio','nombrerepositorio').'</td>';
+				} else {
+					echo '<td colspan="3">'.HTMLSELECT($cmd,$idcentro,'repositorios',$idrepositorio,'idrepositorio','nombrerepositorio',250);
+					echo ($idrepositorio==0?$TbMsg["WARN_NOREPO"]:'').'</td>';
+				}
 			?>
-		</TR>
+		</tr>
 <!----	AGP	--------------------------------------------------------------------	OGLIVE	--------------------------------------------------------------------------------------------------------->
 		<TR>
 			<th align=center>&nbsp;<?php echo $TbMsg[18]?>&nbsp;</th>
 <?php
+$bdogLive="";
 $cmd->texto="SELECT * FROM ordenadores WHERE idordenador=".$idordenador;
 $rs=new Recordset;
 $rs->Comando=&$cmd;
@@ -208,14 +211,14 @@ if ($opcion==$op_eliminacion){
 	echo '<td colspan="3">'.$bdogLive.'</td>';
 }else{
 	exec("bash /opt/opengnsys/bin/oglivecli list", $listogcli);
-	echo '<TD colspan=3><select class="formulariodatos" name="seleoglive" style=width:250>'."\n";
+	echo '<TD colspan=3><select class="formulariodatos" name="seleoglive" style=width:250px>'."\n";
 	echo '<option value="ogLive">'.$TbMsg['COMM_DEFOGLIVE'].'</option>';
 	foreach ($listogcli as $oglive) {
 		if (preg_match("/ogLive/",$oglive)){
 			$oglive=substr($oglive,1);
 			$oglive=trim($oglive);
 			$Selectcli = '<option value="'.$oglive.'"';
-			If ($bdogLive==$oglive)  $Selectcli.= ' selected ' ;
+			if ($bdogLive==$oglive)  $Selectcli.= ' selected ' ;
 			$Selectcli.= '>'.$oglive.'</OPTION>';
 			echo $Selectcli;
 		}
@@ -403,4 +406,3 @@ EOD;
 	}
 	return(false);
 }
-?>

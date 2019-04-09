@@ -4,7 +4,7 @@
 //	Php language file: propiedades_aulas_eng.php
 //	Language: English
 //________________________________________________________
-$TbMsg=array();
+if (empty($TbMsg))  $TbMsg=array();
 $TbMsg[0]="No Option";
 $TbMsg[1]="Insert";
 $TbMsg[2]="Modify";
@@ -58,4 +58,4 @@ $TbMsg['PROP_REMOTEACCESS']="Remote access";
 $TbMsg['COMM_REMOTEACCESS']="allow remote access management to computers";
 $TbMsg['COMM_DEFOGLIVE']="Assigned by administrator";
 // Ticket-816 PCprofesor
-$TbMsg['PROP_PROFCOMPUTER']="Professor's computer";
+$TbMsg['PROP_PROFCOMPUTER']="Teacher‘s computer";

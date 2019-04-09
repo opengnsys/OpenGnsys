@@ -65,4 +65,4 @@ function sendFile($file) {
 }
 
 // Warning: Don't left any character outside PHP code.
-?>
+

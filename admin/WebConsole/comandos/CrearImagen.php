@@ -7,6 +7,9 @@
 // Nombre del fichero: CrearImagen.php
 // Descripción : 
 //		Implementación del comando "CrearImagen.php"
+// Version 1.1.1: Si no existe repositorio asignado al ordenador se muestra un mensaje informativo (ticket-870).
+//     Autora: Irina Gomez, ETSII Universidad de Sevilla
+//     Fecha: 2018-11-08
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
 include_once("../clases/AdoPhp.php");
@@ -35,7 +38,7 @@ if (!$resul){
 <HTML>
 <HEAD>
 <TITLE>Administración web de aulas</TITLE>
-	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 <LINK rel="stylesheet" type="text/css" href="../estilos.css">
 <SCRIPT language="javascript" src="./jscripts/CrearImagen.js"></SCRIPT>
 <SCRIPT language="javascript" src="../clases/jscripts/HttpLib.js"></SCRIPT>
@@ -48,17 +51,25 @@ if (!$resul){
 	$urlimg='../images/iconos/ordenador.gif';
 	$textambito=$TbMsg[15];
 
-	echo '<p align=center><span class=cabeceras>'.$TbMsg[0].'&nbsp;</span><br>';
-	echo '<IMG src="'.$urlimg.'">&nbsp;&nbsp;<span align=center class=subcabeceras>
-			<U>'.$TbMsg[14].': '.$textambito.','.$nombreambito.'</U></span>&nbsp;&nbsp;</span></p>';
-?>	
-<P align=center><SPAN align=center class=subcabeceras><?php echo $TbMsg[6] ?></SPAN></P>
+	echo '<p align="center"><span class="cabeceras">'.$TbMsg[0].'&nbsp;</span><br>';
+	echo '<img src="'.$urlimg.'" alt="*">&nbsp;&nbsp;<span align=center class=subcabeceras>
+			<u>'.$TbMsg[14].': '.$textambito.','.$nombreambito.'</u></span>&nbsp;&nbsp;</p>';
 
-<FORM  align=center name="fdatos">
-	<?php echo tablaConfiguracionesCrearImagen($cmd,$idambito,$idrepositorio); ?>
-</FORM>		
+	echo '<p align="center"><SPAN class="subcabeceras">'.$TbMsg[6].'</span></p>'."\n";
 
-<?php
+	if (tiene_repo($idambito)) {
+		echo '<FORM  align=center name="fdatos">'."\n".
+		     tablaConfiguracionesCrearImagen($cmd,$idambito,$idrepositorio).
+		     '</FORM>'."\n";
+
+	} else {
+		echo '<TABLE  align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>'."\n".
+		     '	  <TR>'."\n".
+		     '        <TH align=center>'.$TbMsg["CREATE_NOREPO"].'</TH>'."\n".
+		     '    </TR>'."\n".
+		     '</TABLE>'."\n";
+	}
+
 	//________________________________________________________________________________________________________
 	include_once("./includes/formularioacciones.php");
 	//________________________________________________________________________________________________________
@@ -71,8 +82,8 @@ if (!$resul){
 <?php
 /**************************************************************************************************************************************************
 	Recupera los datos de un ordenador
-		Parametros: 
-		- cmd: Una comando ya operativo (con conexiónabierta)  
+		Parámetros:
+		- cmd: Una comando ya operativo (con conexiónabierta)
 		- ido: El identificador del ordenador
 ________________________________________________________________________________________________________*/
 function tomaPropiedades($cmd,$ido){
@@ -81,11 +92,11 @@ function tomaPropiedades($cmd,$ido){
 	global $mac;
 	global $idperfilhard;
 	global $idrepositorio;
-	$rs=new Recordset; 
+	$rs=new Recordset;
 	$cmd->texto="SELECT nombreordenador,ip,mac,idperfilhard,idrepositorio FROM ordenadores WHERE idordenador='".$ido."'";
-	$rs->Comando=&$cmd; 
+	$rs->Comando=&$cmd;
 	if (!$rs->Abrir()) return(false); // Error al abrir recordset
-	$rs->Primero(); 
+	$rs->Primero();
 	if (!$rs->EOF){
 		$nombreordenador=$rs->campos["nombreordenador"];
 		$ip=$rs->campos["ip"];
@@ -114,12 +125,12 @@ function HTMLSELECT_imagenes($cmd,$idrepositorio,$idperfilsoft,$disk,$particion,
 		WHERE repositorios.idrepositorio = (SELECT idrepositorio FROM ordenadores WHERE ordenadores.ip='".$masterip."')
 		OR repositorios.ip='".$masterip."' ORDER BY imagenes.descripcion";
 
-	$rs=new Recordset; 
-	$rs->Comando=&$cmd; 
+	$rs=new Recordset;
+	$rs->Comando=&$cmd;
 	$SelectHtml.= '<SELECT class="formulariodatos" id="despleimagen_'.$disk."_".$particion.'" style="WIDTH: 300">';
 	$SelectHtml.= '    <OPTION value="0"></OPTION>';
 	if ($rs->Abrir()){
-		$rs->Primero(); 
+		$rs->Primero();
 		while (!$rs->EOF){
 			$SelectHtml.='<OPTION value="'.$rs->campos["idimagen"]."_".$rs->campos["nombreca"]."_".$rs->campos["ip"].'"';
 			if($idperfilsoft==$rs->campos["idperfilsoft"]) $SelectHtml.=" selected ";
@@ -131,5 +142,29 @@ function HTMLSELECT_imagenes($cmd,$idrepositorio,$idperfilsoft,$disk,$particion,
 	}
 	$SelectHtml.= '</SELECT>';
 	return($SelectHtml);
+}
+
+//____________________________________________________________________________________________________
+//	Devuelve si tiene repositorio asignado o no (true o false)
+//	Param:
+//	  - idordenador: identificador del ordenador
+//____________________________________________________________________________________________________
+function tiene_repo ($idordenador) {
+	global $cmd;
+
+	$idrepositorio = 0;
+	$rs=new Recordset;
+	$cmd->texto="SELECT idrepositorio from ordenadores WHERE idordenador=$idordenador";
+	$rs->Comando=&$cmd;
+	if ($rs->Abrir()) {
+		$rs->Primero();
+		$idrepositorio = $rs->campos["idrepositorio"];
+	}
+	$rs->Cerrar();
+	if ($idrepositorio == 0) {
+		return false;
+	} else {
+		return true;
+	}
 }
 ?>

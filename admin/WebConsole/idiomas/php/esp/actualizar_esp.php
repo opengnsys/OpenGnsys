@@ -7,4 +7,3 @@
 	$TbMsg=array();
 	$TbMsg[0]='Este ámbito se ha refrescado correctamente';
 	$TbMsg[1]='ATENCIÓN: Ha habido algún problema al refrescar el ámbito';
-?>

@@ -15,5 +15,5 @@
 	$TbMsg["IMGTYPE2"]='sincronizada b&iacute;sica';		
 	$TbMsg["IMGTYPE3"]='sincronizada incremental';		
 	$TbMsg[6]='Ordenadores asigandos';		
-?>
+
 

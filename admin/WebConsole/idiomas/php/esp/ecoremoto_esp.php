@@ -18,4 +18,4 @@
 	$TbMsg[10]='ATENCIÓN: Ha habido algún problema al enviar una petición de eco consola remota a este ámbito';
 	$TbMsg[11]='... espere por favor.';
 
-?>
+

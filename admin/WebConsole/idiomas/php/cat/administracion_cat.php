@@ -1,11 +1,11 @@
 <?php
 //________________________________________________________________________________________________________
 //
-//	Fitxer d'idiomes php: administració_cat.php 
-//	Idioma: Català 
+//	Fitxer d'idiomes php: administraciï¿½_cat.php 
+//	Idioma: Catalï¿½ 
 //________________________________________________________________________________________________________
 	$TbMsg=array();
-	$TbMsg[0]='"Administració"';
+	$TbMsg[0]='"Administraciï¿½"';
 	$TbMsg[1]='"Nou grup d\'Entitats"';
 	$TbMsg[2]='"Nova Entitat"';
 	$TbMsg[3]='"Nou Superadministrador"';
@@ -16,4 +16,3 @@
 	$TbMsg[8]='"Nova unitat organitzativa"';
 	$TbMsg[9]='"Nou Administrador"';
 	
-?>

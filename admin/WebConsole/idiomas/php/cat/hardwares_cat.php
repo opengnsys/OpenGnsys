@@ -2,7 +2,7 @@
 //________________________________________________________________________________________________________
 //
 //	Fitxer d'idiomes php: hardwares_cat.php 
-//	Idioma: Català
+//	Idioma: Catalï¿½
 //________________________________________________________________________________________________________
 	$TbMsg=array();
 	$TbMsg[0]='"Definir nou tipus de hardware"';	
@@ -17,14 +17,14 @@
 	$TbMsg[9]='"Eliminar component"';
 	$TbMsg[10]='"Nou grup de perfils"';
 	$TbMsg[11]='"Definir nou perfil"';
-	$TbMsg[12]='"Col·locar perfil"';
+	$TbMsg[12]='"Colï¿½locar perfil"';
 	$TbMsg[13]='"Eliminar grup de perfils"';
-	$TbMsg[14]='"Gestió Components"';
-	$TbMsg[15]='"Informació Perfil"';
+	$TbMsg[14]='"Gestiï¿½ Components"';
+	$TbMsg[15]='"Informaciï¿½ Perfil"';
 	$TbMsg[16]='"Moure perfil"';
 	$TbMsg[17]='"Eliminar perfil hardware"';
 	$TbMsg[18]='"Tipus de hardware"';
 	$TbMsg[19]='"Components hardware"';
 	$TbMsg[20]='"Perfils hardware"';
-?>
+
 

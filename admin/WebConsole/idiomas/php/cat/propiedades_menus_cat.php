@@ -2,25 +2,25 @@
 //________________________________________________________________________________________________________
 //
 //	Fitxer d'idioms php: propiedades_menus_cat.php 
-//	Idioma: Català 
+//	Idioma: Catalï¿½ 
 //________________________________________________________________________________________________________
 $TbMsg=array();
-$TbMsg[0]="Sense Opció";
+$TbMsg[0]="Sense Opciï¿½";
 $TbMsg[1]="Afegir";
 $TbMsg[2]="Modificar";
 $TbMsg[3]="Eliminar";
-$TbMsg[4]="Gestió Menus";
-$TbMsg[5]="Nom del Menú";
-$TbMsg[6]="Títol";
+$TbMsg[4]="Gestiï¿½ Menus";
+$TbMsg[5]="Nom del Menï¿½";
+$TbMsg[6]="Tï¿½tol";
 $TbMsg[7]="Comentaris";
-$TbMsg[8]="Items de Menú Público";
+$TbMsg[8]="Items de Menï¿½ Pï¿½blico";
 $TbMsg[9]="Coordenada x";
 $TbMsg[10]="Coordenada y";
-$TbMsg[11]="Columnas menú automático";
-$TbMsg[13]="Menú simple";
-$TbMsg[14]="Menú doble";
-$TbMsg[15]="URL menú personalizado";
-$TbMsg[17]="Resolució de pantalla";
+$TbMsg[11]="Columnas menï¿½ automï¿½tico";
+$TbMsg[13]="Menï¿½ simple";
+$TbMsg[14]="Menï¿½ doble";
+$TbMsg[15]="URL menï¿½ personalizado";
+$TbMsg[17]="Resoluciï¿½ de pantalla";
 $TbMsg[18]="Imagen de fondo";
 $TbMsg["PROP_DEFAULT"]="Detectada por defecto";
-?>
+

@@ -1,7 +1,6 @@
 //____________________________________________________________________________
 //	
-//	Fichero de idiomas javascript: hardwares.js 
-//	Idioma: Ingés 
+//    Javascript language file: hardwares.js
+//    Language: English
 //____________________________________________________________________________
 TbMsg=new Array;
-

@@ -50,7 +50,7 @@ if  ($opcion!=$op_alta){
 ?>
 <HTML>
 <HEAD>
-<TITLE>Administración web de aulas</TITLE>
+	<TITLE>Administración web de aulas</TITLE>
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../jscripts/propiedades_centros.js"></SCRIPT>
@@ -65,18 +65,18 @@ if  ($opcion!=$op_alta){
 	<INPUT type=hidden name=idcentro value=<?php echo $idcentro?>>
 	<INPUT type=hidden name=identidad value=<?php echo $identidad?>>
 	<P align=center class=cabeceras><?php echo $TbMsg[4]?><BR>
-	<SPAN align=center class=subcabeceras><?php echo $opciones[$opcion]?></SPAN></P>
+	<SPAN class=subcabeceras><?php echo $opciones[$opcion]?></SPAN></P>
 	<TABLE  align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
-<!-------------------------------------------------------------------------------------------------------------------------------------------------->
+<!-- -------------------------------------------------------------------------------------------------------------------------------------------- -->
 			<TR>
 				<TH>&nbsp;<?php echo $TbMsg[5]?>&nbsp;</TH>
 				<?php if ($opcion==$op_eliminacion){?>
 					<TD><?php echo $nombrecentro?></TD>
 				<?php }else{?>
-					<TD><INPUT type=text class=cajatexto  name="nombrecentro"  style="width:350" value="<?php echo $nombrecentro?>">
+					<TD><INPUT type=text class=cajatexto  name="nombrecentro"  style="width:350px" value="<?php echo $nombrecentro?>">
 				<?php }?>
 			</TR>
-<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+<!-- -------------------------------------------------------------------------------------------------------------------------------------------- -->
 		<TR>
 			<TH align=center>&nbsp;<?php echo $TbMsg[6]?>&nbsp;</TH>
 			<?php if ($opcion==$op_eliminacion)
@@ -85,8 +85,7 @@ if  ($opcion!=$op_alta){
 					echo '<TD><TEXTAREA   class="formulariodatos" name=comentarios rows=3 cols=66>'.$comentarios.'</TEXTAREA></TD>';
 			?>
 		</TR>	
-<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
-<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+<!-- -------------------------------------------------------------------------------------------------------------------------------------------- -->
                <?php  if ($opcion!=$op_eliminacion) {
 echo "			<TR>\n".
      "				<TH align=center>&nbsp;".$TbMsg['DIR']."&nbsp;</TH>\n".
@@ -97,7 +96,7 @@ echo "			<TR>\n".
      "			</TR>\n";
 		}
 		?>
-<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+<!-- -------------------------------------------------------------------------------------------------------------------------------------------- -->
 	</TABLE>
 </FORM>
 <?php

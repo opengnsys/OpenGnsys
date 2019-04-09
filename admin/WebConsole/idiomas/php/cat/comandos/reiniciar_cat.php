@@ -13,4 +13,3 @@
 	$TbMsg[5]='Reiniciar ordinadors';
 	$TbMsg[6]='Àmbit';
 
-?>

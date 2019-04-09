@@ -10,4 +10,3 @@
 	$TbMsg[2]='Perfil software';
 	$TbMsg[3]='Nombre del componente';
 	$TbMsg[4]='(*)Para incluir algún componente en este perfil debe hacer click sobre la casilla de verificación correspondiente.';
-?>

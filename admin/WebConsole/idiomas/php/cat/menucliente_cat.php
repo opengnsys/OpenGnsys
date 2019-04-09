@@ -9,4 +9,4 @@
 	$TbMsg[1]='"Direcció IP"';
 	$TbMsg[2]='NO S\'HA DETECTAT CAP MENÚ PER AQUEST CLIENT';
 	$TbMsg[3]='Apagar l\'equip';
-?>
+

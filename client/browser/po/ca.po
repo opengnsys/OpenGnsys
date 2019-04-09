@@ -7,8 +7,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: OpenGnsys Client Browser 1.1.0\n"
-"Report-Msgid-Bugs-To: https://opengnsys.es\n"
-"POT-Creation-Date: 2017-05-11 11:51+0000\n"
+"Report-Msgid-Bugs-To: https://opengnsys.es/\n"
+"POT-Creation-Date: 2018-12-18 09:53+0100\n"
 "PO-Revision-Date: 2016-05-03 10:25+0200\n"
 "Last-Translator: Ramón M. Gómez <ramongomez@us.es>\n"
 "Language-Team: CATALAN <LL@li.org>\n"
@@ -22,89 +22,93 @@ msgstr ""
 msgid "Uso: %s -qws http://sitioweb.com/\n"
 msgstr "Ús: %s -qws http://web.com/\n"
 
-#: ../src/mainwindow.cpp:55
+#: ../src/mainwindow.cpp:47
+msgid "El fichero de log no ha podido ser abierto: "
+msgstr "Log file could not be opened: "
+
+#: ../src/mainwindow.cpp:67
 msgid "&Nueva Terminal"
 msgstr "&Nova Terminal"
 
-#: ../src/mainwindow.cpp:60
+#: ../src/mainwindow.cpp:71
 msgid "Salida"
 msgstr "Sortida"
 
-#: ../src/mainwindow.cpp:97
+#: ../src/mainwindow.cpp:103
 msgid "Proyecto OpenGnsys"
 msgstr "Projecte OpenGnsys"
 
-#: ../src/mainwindow.cpp:145
-msgid "El fichero de log no ha podido ser abierto: "
-msgstr ""
-
-#: ../src/mainwindow.cpp:174
+#: ../src/mainwindow.cpp:166
 msgid "Hay otro proceso en ejecución. Por favor espere."
 msgstr ""
 
-#: ../src/mainwindow.cpp:189 ../src/mainwindow.cpp:228
+#: ../src/mainwindow.cpp:180 ../src/mainwindow.cpp:220
 msgid "AVISO"
 msgstr "AVIS"
 
-#: ../src/mainwindow.cpp:191
+#: ../src/mainwindow.cpp:183
 msgid ""
 "La siguiente acci&oacute;n puede modificar datos o tardar varios minutos. El "
 "equipo no podr&aacute; ser utilizado durante su ejecuci&oacute;n."
 msgstr ""
 
-#: ../src/mainwindow.cpp:192
+#: ../src/mainwindow.cpp:184
 msgid "Ejecutar"
 msgstr "Executar"
 
-#: ../src/mainwindow.cpp:193
+#: ../src/mainwindow.cpp:185
 msgid "Cancelar"
 msgstr "Cancel-lar"
 
-#: ../src/mainwindow.cpp:211
+#: ../src/mainwindow.cpp:203
 #, c-format
 msgid "%p% Cargando"
 msgstr "%p% Carregat"
 
-#: ../src/mainwindow.cpp:230
+#: ../src/mainwindow.cpp:223
 msgid "La p&aacute;gina no se puede cargar."
 msgstr ""
 
-#: ../src/mainwindow.cpp:232
+#: ../src/mainwindow.cpp:225
 msgid "Recargar"
 msgstr "Recarregar"
 
-#: ../src/mainwindow.cpp:233
+#: ../src/mainwindow.cpp:226
 msgid "Abortar"
 msgstr "Avortar"
 
-#: ../src/mainwindow.cpp:264
-msgid "Lanzado satisfactoriamente."
+#: ../src/mainwindow.cpp:289
+msgid "Fin del proceso. Valor de retorno: "
 msgstr ""
 
-#: ../src/mainwindow.cpp:298
-msgid "Proceso acabado correctamente. Valor de retorno: "
-msgstr ""
-
-#: ../src/mainwindow.cpp:302
+#: ../src/mainwindow.cpp:293
 msgid "El proceso ha fallado inesperadamente. Salida: "
 msgstr ""
 
-#: ../src/mainwindow.cpp:313
+#: ../src/mainwindow.cpp:297
+msgid "Código de salida: "
+msgstr ""
+
+#: ../src/mainwindow.cpp:307
 msgid "Imposible lanzar el proceso."
 msgstr ""
 
-#: ../src/mainwindow.cpp:316
+#: ../src/mainwindow.cpp:310
 msgid "Error de escritura en el proceso."
 msgstr ""
 
-#: ../src/mainwindow.cpp:319
+#: ../src/mainwindow.cpp:313
 msgid "Error de lectura del proceso."
 msgstr ""
 
-#: ../src/mainwindow.cpp:327
+#: ../src/mainwindow.cpp:321
 msgid "Error desconocido."
 msgstr ""
 
-#: ../src/mainwindow.cpp:460
+#: ../src/mainwindow.cpp:459
 msgid "Lanzando el comando: "
 msgstr ""
+
+#: ../src/mainwindow.cpp:487
+msgid "ERROR"
+msgstr "ERROR"

@@ -26,4 +26,4 @@ $TbMsg[17]="https://opengnsys.es/trac/wiki/ModificarUsuarios";
 $TbMsg[18]="Confirmar password";
 $TbMsg['APIKEY']="API key";
 $TbMsg['NEWAPIKEY']="La API key se generará automáticamente al insertar el usuario.";
-?>
+

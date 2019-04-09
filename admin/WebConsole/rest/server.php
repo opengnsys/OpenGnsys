@@ -878,7 +878,6 @@ EOD;
 		$response['name'] = $rs->campos["nombrerepositorio"];
 		$response['description'] = $rs->campos["comentarios"];
 		$response['ip'] = $rs->campos["ip"];
-		//$response['port'] = $rs->campos["puertorepo"];
 		jsonResponse(200, $response);
 	}
 	$rs->Cerrar(); 

@@ -16,5 +16,6 @@ $TbMsg["SEARCH_DUPLICATES"]="Duplicats";
 $TbMsg["SEARCH_NOMATCHES"]="No es troben resultats";
 $TbMsg["SEARCH_NOVALUE"]="Ha d\'introduir un valor pel criteri de cerca";
 $TbMsg["SEARCH_PROFESSOR"]="Ordenadores de profesor";
-?>
+$TbMsg["SEARCH_NOREPO"]="Ordenadores sin repositorio";
+
 

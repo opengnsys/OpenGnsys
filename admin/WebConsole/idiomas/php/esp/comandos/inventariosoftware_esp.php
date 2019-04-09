@@ -15,4 +15,4 @@
 	$TbMsg[7]='Datos a suministrar';
 	$TbMsg[8]='Par';
 	$TbMsg[9]='Nombre S.O.';
-?>
+

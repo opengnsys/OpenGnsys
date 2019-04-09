@@ -16,12 +16,9 @@ include_once("../idiomas/php/".$idioma."/comandos/opcionesacciones_".$idioma.".p
 
 include_once("../gestores/relaciones/imagenes_eliminacion.php");
 
-if (isset($_POST["opcion"])) {$opcion=$_POST["opcion"];}else{$opcion;} // Recoge parametros
-//$opcion=$_POST["opcion"]; // Recoge parametros
-if (isset($_POST["idrepositorio"])) {$idrepositorio=$_POST["idrepositorio"];}else{$idrepositorio;}
-//$idrepositorio=$_POST["idrepositorio"]; 
+if (isset($_POST["opcion"])) {$opcion=$_POST["opcion"];}else{$opcion='';} // Recoge parametros
+if (isset($_POST["idrepositorio"])) {$idrepositorio=$_POST["idrepositorio"];}else{$idrepositorio=0;}
 if (isset($_POST["grupoid"])) {$grupoid=$_POST["grupoid"];}else{$grupoid='';}
-//$grupoid=$_POST["grupoid"]; 
 $idcentro=$_SESSION["widcentro"];
 if (isset($_GET["opcion"])) $opcion=$_GET["opcion"]; // Recoge parametros
 if (isset($_GET["idrepositorio"])) $idrepositorio=$_GET["idrepositorio"]; 
@@ -32,13 +29,12 @@ if (isset($_POST["modov"])) {$modov=$_POST["modov"];}else{$modov=0;}
 //________________________________________________________________________________________________________
 $idcomando=10;
 $descricomando="Ejecutar Script";
-//echo $ambito."<br>";
-//echo $idambito."<br>";
 $funcion="EjecutarScript";
-//echo $atributos."<br>";
-//echo $gestor;
 $gestor="../comandos/gestores/gestor_Comandos.php";
 //$gestor="./ElimininarImagenRepositorio.php";
+$espaciorepos=array();
+$separarogunit=0;
+$iprepositorio='';
 //________________________________________________________________________________________________________
 $cmd=CreaComando($cadenaconexion);
 if (!$cmd)
@@ -145,8 +141,7 @@ $repolocal="si";
 
 	sort($imarepo); // Ordenamos el Array
 
-	if (isset($_POST["contar"])) {$cuantos=$_POST["contar"];}else{$cuantos=0;$contar;}
-	//$cuantos=$_POST["contar"];
+	if (isset($_POST["contar"])) {$cuantos=$_POST["contar"];}else{$cuantos=0;}
 	for ($i=1;$i<=$cuantos;$i++)
 	{
 		//#########################################################################
@@ -242,8 +237,8 @@ $repolocal="no";
 ?>
 
 <HTML>
-<TITLE>Administración web de aulas</TITLE>
 <HEAD>
+    <TITLE>Administración web de aulas</TITLE>
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 <LINK rel="stylesheet" type="text/css" href="../estilos.css">
 <SCRIPT language="javascript" src="../clases/jscripts/HttpLib.js"></SCRIPT>
@@ -268,10 +263,10 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<?php if ($espaciorepo != ""){?>
 			<TR>
-			<TH align=center>&nbsp;<?php echo $TbMsg[18]?>&nbsp;</TD>
-			<TH align=center>&nbsp;<?php echo $TbMsg[19]?>&nbsp;</TD>
-			<TH align=center>&nbsp;<?php echo $TbMsg[20]?>&nbsp;</TD>
-			<TH align=center>&nbsp;<?php echo $TbMsg[21]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?php echo $TbMsg[18]?>&nbsp;</TH>
+			<TH align=center>&nbsp;<?php echo $TbMsg[19]?>&nbsp;</TH>
+			<TH align=center>&nbsp;<?php echo $TbMsg[20]?>&nbsp;</TH>
+			<TH align=center>&nbsp;<?php echo $TbMsg[21]?>&nbsp;</TH>
 		</TR>
                 <TR>
 			<TD align=center width=110>&nbsp;<?php echo $totalrepo?>&nbsp;</TD>
@@ -281,7 +276,7 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
                 </TR>
 		<?php }else {?>
         			<TR>
-            <TH align=center width=485>&nbsp;<?php echo $TbMsg[22]?>&nbsp;</TD>
+            <TH align=center width=485>&nbsp;<?php echo $TbMsg[22]?>&nbsp;</TH>
 
 					</TR>
         <?php } ?>
@@ -292,7 +287,7 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 	<div align=center class=subcabeceras><?php echo $TbMsg[7] ?>
 
 		
-			<form  align="center" name="modoadmin" action="./EliminarImagenRepositorio.php" method="post">
+			<form name="modoadmin" action="./EliminarImagenRepositorio.php" method="post">
 			<INPUT type="hidden" name="opcion" value="<?php echo $opcion?>">
 			<INPUT type="hidden" name="idrepositorio" value="<?php echo $idrepositorio?>">
 			<INPUT type="hidden" name="grupoid" value="<?php echo $grupoid ?>">
@@ -517,11 +512,11 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 
 		if ($bustor<>"") 
 			{
-			echo '<TD align=center><font color=red><strong>&nbsp;'.$TbMsg[14].'</strong></TD>'.chr(13);
+			echo '<TD align=center><div style="color: red; font-weight: bold;">&nbsp;'.$TbMsg[14].'</div></TD>'.chr(13);
 			}
 			elseif (file_exists($ficherodelete))
 				{
-					echo '<TD align=center><font color=red><strong>&nbsp;'.$TbMsg[15].'</strong></TD>'.chr(13);}
+					echo '<TD align=center><div style="color: red; font-weight: bold;"><div>&nbsp;'.$TbMsg[15].'</div></TD>'.chr(13);}
 				else
 				{
 					echo '<TD align=center ><input type="checkbox" name="checkbox'.$contar.'"  value="si"></TD>'.chr(13);
@@ -530,11 +525,11 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 		// ########## Tipo ####################################################################
 		if ($tipo[$contandotipo]=="D")
 		{
-			echo '<TD align=center ><font color=blue>'.$tipo[$contandotipo].'</TD>'.chr(13);
+			echo '<TD align=center ><div style="color: blue;">'.$tipo[$contandotipo].'</div></TD>'.chr(13);
 		}
 		elseif ($tipo[$contandotipo]=="B")
 		{
-			echo '<TD align=center><font color=red>&nbsp;'.$tipo[$contandotipo].'&nbsp;</TD>'.chr(13);
+			echo '<TD align=center><div style="color: red;">&nbsp;'.$tipo[$contandotipo].'&nbsp;</div></TD>'.chr(13);
 			}else{
 			echo '<TD align=center >'.$tipo[$contandotipo].'</TD>'.chr(13);
 		}
@@ -548,8 +543,8 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 		// ########## Aviso si directorio distinto al del centro - en vista repositorio ##########
 		$aviso='';
 		if ($separarogunit == 1) {
- 		    if ( $nombrecaidcentro != 0 and  "/".$imgdir != $dircentros[$nombrecaidcentro]){
- 			$aviso="<font color=red> * </font>";
+		    if ( $nombrecaidcentro != 0 and  "/".$imgdir != $dircentros[$nombrecaidcentro]){
+			$aviso="<style=\"color: red;\"> * </div>";
 			$textoaviso="<tr>\n	<th colspan='7' align='center'>".
 				"&nbsp;<sup>*</sup> $TbMsg[33] &nbsp;</th>\n".
 				"</tr>\n";
@@ -559,7 +554,7 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 		// ########## Nombre de Imagen ########################################################
 		if ($tipo[$contandotipo]=="D")
 		{
-			echo '<TD align=center><font color=blue>&nbsp;'.str_replace(":"," / ",$value).' '.$aviso.'&nbsp;</TD>'.chr(13);
+			echo '<TD align=center><div style="color: blue;">&nbsp;'.str_replace(":"," / ",$value).' '.$aviso.'&nbsp;</div></TD>'.chr(13);
 		}
 		else
 		{
@@ -579,9 +574,9 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 		}
 		elseif (preg_match("/.ant/",$nombrefichero))
 			{
-				echo '<TD align=center><font color=red>&nbsp;------</strong></TD>'.chr(13);
+				echo '<TD align=center><div style="color: red;">&nbsp;------</div></TD>'.chr(13);
 			}else{
-				echo '<TD align=center><font color=red>&nbsp;'.$TbMsg[25].'</strong></TD>'.chr(13);
+				echo '<TD align=center><div style="color: red;">&nbsp;'.$TbMsg[25].'</div></TD>'.chr(13);
 		}
 		// VISTA REPOSITORIO COMPLETO
 		if ($modov == 1){
@@ -609,7 +604,7 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 	<INPUT type="hidden" name="grupoid" value="<?php echo $grupoid ?>">
 	<INPUT type="hidden" name="modov" value="<?php echo $modov; ?>">
 
-	</TABLE><BR/>
+	</TABLE><P>
 	<TABLE align=center>
 		<TR>
 			<TD></TD>
@@ -627,4 +622,3 @@ function confirmeliminar() {var mensaje="<?php echo $TbMsg[17];?>";if(confirm(me
 </HTML>
 
 <?php } ?>
-

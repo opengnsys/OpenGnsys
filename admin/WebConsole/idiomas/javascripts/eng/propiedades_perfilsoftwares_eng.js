@@ -1,8 +1,8 @@
 //________________________________________________________________________________________________________
 //	
-//	Fichero de idiomas javascript: propiedades_perfilsoftwares_eng.js 
-//	Idioma: Ingés 
+//    Javascript language file: propiedades_perfilsoftwares_eng.js
+//    Language: English
 //________________________________________________________________________________________________________
 TbMsg=new Array;
-TbMsg[0]="You must introduce a name for this software profile";
-TbMsg[1]="WARNING: There are images with this profile. You can't remove them until you change software profile to this images";
+TbMsg[0]="You must enter a name for this software profile";
+TbMsg[1]="WARNING: Some computers contain this software profile. You can't delete it until you change software profile in those computers";

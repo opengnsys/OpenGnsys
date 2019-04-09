@@ -2,7 +2,7 @@
 //________________________________________________________________________________________________________
 //
 //	Fitxer d'idiomes php: softwares_cat.php 
-//	Idioma: Català 
+//	Idioma: Catalï¿½ 
 //________________________________________________________________________________________________________
 	$TbMsg=array();
 	$TbMsg[0]='""';	
@@ -10,17 +10,17 @@
 	$TbMsg[2]='""';
 	$TbMsg[3]='"Nou grup de components"';
 	$TbMsg[4]='"Definir nou component"';
-	$TbMsg[5]='"Col·locar component"';
+	$TbMsg[5]='"Colï¿½locar component"';
 	$TbMsg[6]='"Renombrar"';
 	$TbMsg[7]='"Eliminar grup de components"';
 	$TbMsg[8]='"Moure component"';
 	$TbMsg[9]='"Eliminar component"';
 	$TbMsg[10]='"Nou grup de perfils"';
 	$TbMsg[11]='"Definir nou perfil"';
-	$TbMsg[12]='"Col·locar perfil"';
+	$TbMsg[12]='"Colï¿½locar perfil"';
 	$TbMsg[13]='"Eliminar grup de perfils"';
-	$TbMsg[14]='"Gestió components"';
-	$TbMsg[15]='"Informació Perfil"';
+	$TbMsg[14]='"Gestiï¿½ components"';
+	$TbMsg[15]='"Informaciï¿½ Perfil"';
 	$TbMsg[16]='"Moure perfil"';
 	$TbMsg[17]='"Eliminar perfil software"';
 	$TbMsg[18]='"Tipus de software"';
@@ -29,9 +29,8 @@
 	$TbMsg[21]='"Software Incremental"';
 	$TbMsg[22]='"Nou grup d\'incrementals"';
 	$TbMsg[23]='"Definir nova incremental"';
-	$TbMsg[24]='"Col·locar incremental"';
+	$TbMsg[24]='"Colï¿½locar incremental"';
 	$TbMsg[25]='"Eliminar grup d\'incrementals"';
-	$TbMsg[26]='"Informació incremental"';
+	$TbMsg[26]='"Informaciï¿½ incremental"';
 	$TbMsg[27]='"Moure incremental"';
 	$TbMsg[28]='"Eliminar  incremental"';
-?>

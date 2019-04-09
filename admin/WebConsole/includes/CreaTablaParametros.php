@@ -6,22 +6,22 @@
 // Fecha Última modificación: Agosto-2010
 // Nombre del fichero: CreaTablaParametros.php
 // Descripción :
-//		Crea una tabla en memoria con especificaciones sobre los parámetros de cada comando 
-//	Parametros: 
-//		- cmd: Un comando ya operativo (con conexión abierta)  
+//		Crea una tabla en memoria con especificaciones sobre los parámetros de cada comando
+//	Parametros:
+//		- cmd: Un comando ya operativo (con conexión abierta)
 //		- tabla_parametros: Referencia a la tabla donde se guardarán las especificaciones
 //		- cont_parametros: Referencia a la variable que contendrá el número de elementos totales de la tabla
 // *************************************************************************************************************************************************
 function CreaTablaParametros($cmd,$tabla_parametros,$cont_parametros){
-	$rs=new Recordset; 
+	$rs=new Recordset;
 	$cmd->texto="SELECT * FROM parametros";
-	$rs->Comando=&$cmd; 
+	$rs->Comando=&$cmd;
 	if (!$rs->Abrir()) return; // Error al abrir recordset
-	$rs->Primero(); 
+	$rs->Primero();
 	$cont=0;
 	while (!$rs->EOF){
 echo "<br>".$rs->campos["nemonico"];
-		$auxtabla_parametros="";
+		$auxtabla_parametros=array();
 		$auxtabla_parametros["nemonico"]=$rs->campos["nemonico"];
 		$auxtabla_parametros["descripcion"]=$rs->campos["descripcion"];
 		$auxtabla_parametros["nomidentificador"]=$rs->campos["nomidentificador"];
@@ -48,4 +48,4 @@ echo "<br>".$rs->campos["nemonico"];
 	}
 	$cont_parametros=$cont;
 }
-?>
+

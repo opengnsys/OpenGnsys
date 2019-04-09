@@ -15,6 +15,10 @@ PATH=$PATH:$OPENGNSYS/bin
 OGIMG="$OPENGNSYS/images"
 REPOCFG="$OPENGNSYS/etc/ogAdmRepo.cfg"
 LOGFILE="$OPENGNSYS/log/$PROG.log"
+DEFAULTFILE=/etc/default/opengnsys
+source $DEFAULTFILE
+# No hacer nada si no está definido como repositorio.
+[ "$RUN_OGADMREPO" == "yes" ] || exit 0
 # Error si no está bien configurado el repositorio de imágenes.
 [ -d $OGIMG -a -f $REPOCFG ] || exit 1
 source $REPOCFG
@@ -52,7 +56,7 @@ for IMG in *.{img,pgz,diff,dsk} */*.{img,pgz,diff,dsk} ; do
 	# Datasum completo para transferencias torrent
 	DATAFULLSUM=$(md5sum -b "$IMG"| cut -f1 -d" ")
 	echo $DATAFULLSUM > "$SUMFULLFILE"
-	nice -8 ctorrent -t "$IMG" -u $TRACKERURL -s "$TORRENT" -c $DATAFULLSUM -l 4194304 2>/dev/null
+	nice -n ${BTSEEDER_PRIORITY:-0} ctorrent -t "$IMG" -u $TRACKERURL -s "$TORRENT" -c $DATAFULLSUM -l 4194304 2>/dev/null
 	rm -f "$LOCKFILE"
 	if [ -f "$TORRENT"  ]; then
 		echo "`date` : Fin creación de fichero $TORRENT" >> $LOGFILE

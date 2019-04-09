@@ -1,10 +1,10 @@
 // *************************************************************************************************************************************************
 //	Libreria de scripts de Javascript
-// Copyright 2003-2005 Jos� Manuel Alonso. Todos los derechos reservados.
-// Fecha Creaci�n:2003-2004
-// Fecha �ltima modificaci�n: Marzo-2005
+// Copyright 2003-2005 José Manuel Alonso. Todos los derechos reservados.
+// Fecha Creación:2003-2004
+// Fecha última modificación: Marzo-2005
 // Nombre del fichero: CrearImagenBasica.js
-// Descripci�n : 
+// Descripción:
 //		Este fichero implementa las funciones javascript del fichero CrearImagenBasica.php (Comandos)
 // *************************************************************************************************************************************************
 	var RC="@";
@@ -12,7 +12,7 @@
  function confirmar()
  {
  	var prm=comprobar_datos();
- 	if(prm=="") return; // Ha habido alg�n error
+	if(prm==="") return; // Ha habido algún error
  	
 	var disco=1; // Siempre disco 1
 	document.fdatosejecucion.atributos.value="dsk="+disco+RC+prm;
@@ -21,7 +21,7 @@
 }
 //________________________________________________________________________________________________________
 //	
-//	Cancela la edici�n 
+//	Cancela la edición
 //________________________________________________________________________________________________________
 
 function cancelar(){
@@ -35,75 +35,72 @@ function cancelar(){
 
 function comprobar_datos()
 {
-	var prm=""; // Retorno par�metros
+	var prm=""; // Retorno parámetros
 	var cadPar=document.getElementById("cadPar").getAttribute("value");
 	var tbPar=cadPar.split(";");
 	for(var i=0;i<tbPar.length;i++){
-		var par=tbPar[i]; // Numero de partici�n
+		var par=tbPar[i]; // Numero de partición
 		if(par>0){ 
 			var trObj=document.getElementById('trPar-'+par); // Recupera objeto fila
 			var obRDO=trObj.childNodes[0].childNodes[0]; // Recupera Radio buton de la fila
-			if(obRDO.checked){ // Si est� seleccionado ...
+			if(obRDO.checked){ // Si está seleccionado ...
 				var cpt=obRDO.getAttribute("value");
-				var obSel=trObj.childNodes[3].childNodes[0]; // Recupera  objeto select de la Imagen	
+				var obSel=trObj.childNodes[3].childNodes[0]; // Recupera  objeto select de la Imagen
 				var idx=obSel.selectedIndex;
-				if(idx==0){ // No ha seleccionado indice en el desplegable imagen
+				if(idx===0){ // No ha seleccionado indice en el desplegable imagen
 					alert(TbMsg[1]);
-					return(false);	
-				}			
-				// Compone parametros	
+					return(false);
+				}
+				// Compone parametros
 				var tbIMG=obSel.options[idx].value.split(";");
 				var idi=tbIMG[0]; // Identificador de la imagen
-				var nci=tbIMG[1]; // Nombre can�nico de la imagen			
-				var ipr=tbIMG[2]; // Ip del repositorio de la imagen							
-				var rti=tbIMG[3]; // Ruta de origen de la imagen							
+				var nci=tbIMG[1]; // Nombre canónico de la imagen
+				var ipr=tbIMG[2]; // Ip del repositorio de la imagen
+				var rti=tbIMG[3]; // Ruta de origen de la imagen
 
 				prm+="par="+par+RC;
-				prm+="cpt="+cpt+RC;				
+				prm+="cpt="+cpt+RC;
 				prm+="idi="+idi+RC;
 				prm+="nci="+nci+RC;
-				prm+="ipr="+ipr+RC;	
-				prm+="rti="+rti+RC;	
+				prm+="ipr="+ipr+RC;
+				prm+="rti="+rti+RC;
 
-				
-				var desplemet=document.getElementById("desplesync_"+par); // Desplegable metodo de syncronizaci�n
-				var  p=desplemet.selectedIndex; // Toma �ndice seleccionado
-				
-				// No ha elegido ninguna partici�n
-				if(p==0){
+				var desplemet=document.getElementById("desplesync_"+par); // Desplegable metodo de syncronización
+				var p=desplemet.selectedIndex; // Toma índice seleccionado
+
+				// No ha elegido ninguna partición
+				if(p===0){
 					alert(TbMsg[3]);
 					return("");
 				}
-				prm+="msy="+p+RC;	// M�todo de syncronizaci�n 1=Sincronizaci�n1 2=Sincronizacion2					
-	
-								
+				prm+="msy="+p+RC;	// Método de syncronización 1=Sincronización1 2=Sincronización2
+
 				var chrChk=document.getElementById('whl-'+par); // Recupera objeto fila de la tabla opciones adicionales
 				if(chrChk.checked)	prm+="whl=1"+RC; else prm+="whl=0"+RC;
 				chrChk=document.getElementById('eli-'+par); // Recupera objeto fila de la tabla opciones adicionales
 				if(chrChk.checked)	prm+="eli=1"+RC;	 else prm+="eli=0"+RC;
 				chrChk=document.getElementById('cmp-'+par); // Recupera objeto fila de la tabla opciones adicionales
 				if(chrChk.checked)	prm+="cmp=1"+RC; else prm+="cmp=0"+RC;
-				
-				var trObj=document.getElementById('trOpc'); // Recupera objeto fila de la tabla opciones adicionales
-				var obChk=trObj.childNodes[3].childNodes[0]; // Recupera  objeto checkbox borrar de la Imagen	
+
+				trObj=document.getElementById('trOpc'); // Recupera objeto fila de la tabla opciones adicionales
+				var obChk=trObj.childNodes[3].childNodes[0]; // Recupera  objeto checkbox borrar de la Imagen
 				if(obChk.checked)	prm+="bpi=1"+RC; else prm+="bpi=0"+RC;
-				var obChk=trObj.childNodes[7].childNodes[0]; // Recupera  objeto checkbox copiar en cache	
+				obChk=trObj.childNodes[7].childNodes[0]; // Recupera  objeto checkbox copiar en caché
 				if(obChk.checked)	prm+="cpc=1"+RC; else prm+="cpc=0"+RC;
-				var obChk=trObj.childNodes[11].childNodes[0]; // Recupera  objeto checkbox borrar la cache	
+				obChk=trObj.childNodes[11].childNodes[0]; // Recupera  objeto checkbox borrar la caché
 				if(obChk.checked)	prm+="bpc=1"+RC; else prm+="bpc=0"+RC;
-				var obChk=trObj.childNodes[15].childNodes[0]; // Recupera  objeto checkbox no borrar archivos en destino	
+				obChk=trObj.childNodes[15].childNodes[0]; // Recupera  objeto checkbox no borrar archivos en destino
 				if(obChk.checked)	prm+="nba=1"+RC; else prm+="nba=0"+RC;				
 
-				if(comprobar_datosejecucion()) // Comprueba opciones de ejecuci�n
+				if(comprobar_datosejecucion()) // Comprueba opciones de ejecución
 					return(prm);
 				else
 					return("");
 			}
 		}
 	}	
-	// No ha elegido ninguna partici�n
+	// No ha elegido ninguna partición
 	alert(TbMsg[2]);
 	return("");
 }
-
 

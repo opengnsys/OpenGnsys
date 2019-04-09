@@ -19,5 +19,5 @@
 
 	$TbMsg["OGAGENT"]="AVISO: Sólo se puede utilizar en los equipos que se haya iniciado la sesión <br>y tengan instalado en nuevo agente de OpenGnsys.";
 	$TbMsg["OPTION"]="AVISO: El nuevo agente, en esta versión, no permite utilizar la cola de acciones.";
-?>
+
 

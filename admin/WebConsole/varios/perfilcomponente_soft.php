@@ -25,7 +25,8 @@ if (!$cmd)
 ?>
 <HTML>
 <HEAD>
-	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<TITLE>Administración web de aulas</TITLE>
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 <LINK rel="stylesheet" type="text/css" href="../estilos.css">
 <SCRIPT language="javascript" src="../jscripts/perfilcomponente_soft.js"></SCRIPT>
 <SCRIPT language="javascript" src="../jscripts/opciones.js"></SCRIPT>
@@ -40,7 +41,7 @@ if (!$cmd)
 	<SPAN align=center class=subcabeceras><?php echo $TbMsg[1]?></SPAN>&nbsp;<IMG src="../images/iconos/confisoft.gif"></P>
 	<BR>
 	<DIV align=center id="Layer_componentes">
-		<SPAN align=center class=presentaciones><B><U><?php echo $TbMsg[2]?></U>:&nbsp;<?php echo $descripcionperfil?></B></SPAN></P>
+		<P align=center><SPAN class=presentaciones><B><U><?php echo $TbMsg[2]?></U>:&nbsp;<?php echo $descripcionperfil?></B></SPAN></P>
 		<TABLE width="100%" class="tabla_listados" cellspacing=1 cellpadding=0 >
 			 <TR>
 				<TH>&nbsp</TH>

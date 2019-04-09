@@ -244,7 +244,7 @@
     BACKGROUND-COLOR: #EEEECC;
     COLOR: #000000;
     FONT-FAMILY: Arial, Helvetica, sans-serif;
-    FONT-SIZE: 11;
+    FONT-SIZE: 11px;
 }
 A.tabla_listados_sin:visited{
     COLOR: #000000;
@@ -431,4 +431,10 @@ A.tabla_listados_sin:link{
     FONT-SIZE: 14px;
     FONT-WEIGHT: 300;
 }
-
+/* Ayuda enlaces sin subrayado */
+.help_menu
+{
+    text-decoration: none;
+    color: #6b6363;
+    font-weight: bold;
+}

@@ -147,4 +147,4 @@ function SubarbolXML_tipohardwares($idtipohardware,$descripcion,$urlimg){
 		$cadenaXML.='</TIPOHARDWARES>';
 		return($cadenaXML);
 }
-?>
+

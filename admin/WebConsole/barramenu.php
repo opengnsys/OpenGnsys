@@ -60,7 +60,7 @@ if (!$cmd)
 				var 	href2="nada.php";
 				var 	href3="./api/tree.html";
 				var 	href4="./api/main.html";
-				var 	href5="./api/index.html";
+				var 	href5="./principal/ayuda.php";
 				var	device="<?php echo $device;?>";
 				var	version="<?php echo $version;?>";
 
@@ -160,9 +160,6 @@ if (!$cmd)
 							case 22: 		
 									opadre.frames["frame_contenidos"].document.location.href=href5;
 									break;
-							case 23:                
-                                                                        opadre.frames["frame_contenidos"].document.location.href="./principal/acercade.php";
-                                                                        break;
 						}
 				}
 		}
@@ -234,12 +231,6 @@ if (!$cmd)
 											&nbsp;<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/ayuda.gif">&nbsp;<SPAN class=menupral ><?php echo  $TbMsg[11] ?></SPAN></A>&nbsp;</TD>
  											<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
 
-
-											<TD onclick=eleccion(this,23); onmouseout=desresaltar(this); onmouseover=resaltar(this); align=middle>
-											&nbsp;<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/logocirculos.png">&nbsp;<SPAN class=menupral ><?php echo  $TbMsg[17] ?></SPAN></A>&nbsp;</TD>
-											<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
-
-
 											<TD onclick=eleccion(this,21); onmouseout=desresaltar(this); onmouseover=resaltar(this); align=middle>
 											&nbsp;<A href="#" style="text-decoration: none"><IMG border=0 src="./images/iconos/usuarioslog.gif">&nbsp;<SPAN class=menupral ><?php echo  $TbMsg[10] ?></SPAN></A>&nbsp;</TD>
 											<TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
@@ -285,19 +276,13 @@ for ($i=0;$i<count($numidcentro);$i++)
 
 </select>
 <TD width=4 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
-<TD width=4 align=middle><input name="submit" type="submit" value="Cambiar" ></input></TD>
+<TD width=4 align=middle><input name="submit" type="submit" value="Cambiar"></TD>
 
 </form>
 <TD width=0 align=middle><IMG src="./images/iconos/separitem.gif"></TD>
 <TD><?php echo "Usuario.:.".ucwords($_SESSION["wusuario"]); ?></TD>
 
-</TD>
 <?php } }?>
-
-
-
-
-
 
 						   </TR>
 						 </TABLE>

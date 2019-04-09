@@ -1,9 +1,9 @@
 //________________________________________________________________________________________________________
 //
-//	Fichero de idiomas javascripts: enviarmensaje_eng.js 
-//	Idioma: Inglés 
+//    Javascript language file: enviarmensaje_eng.js
+//    Language: English
 //________________________________________________________________________________________________________
 TbMsg=new Array;
 TbMsg[0]="";
-TbMsg[1]="El mensaje debe tener un título.";
-TbMsg[2]="El mensaje debe tener algún contenido.";
+TbMsg[1]="The message needs a title.";
+TbMsg[2]="The message cannot be empty.";

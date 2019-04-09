@@ -13,4 +13,3 @@
 	$TbMsg[5]='Parámetro';
 	$TbMsg[6]='Valor';
 	$TbMsg[7]='(*)Para excluir algún comando de este procedimiento debe hacer click sobre la casilla de verificación correspondiente';
-?>

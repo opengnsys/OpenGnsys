@@ -8,12 +8,11 @@ INSTALL_DIR := /opt/opengnsys
 
 # Opciones de compilacion
 CFLAGS := $(shell mysql_config --cflags)
-CFLAGS += -O0 -g -Wall -I../../Includes	# Depuracion
-#CFLAGS += -O3 -I../../Includes		# Optimizacion
+CFLAGS += -g -Wall -I../../Includes
 CPPFLAGS := $(CFLAGS)
 
 # Opciones de linkado
-LDFLAGS := -Wl,--no-as-needed $(shell mysql_config --libs) -lpthread
+LDFLAGS := -Wl,--no-as-needed $(shell mysql_config --libs) -lev
 
 # Ficheros objetos
 OBJS := ../../Includes/Database.o sources/ogAdmServer.o 
@@ -23,7 +22,6 @@ all: $(PROYECTO)
 
 $(PROYECTO): $(OBJS)
 	g++ $(LDFLAGS) $(OBJS) -o $(PROYECTO)
-#	strip $(PROYECTO)		# Optimizacion
 
 install: $(PROYECTO)
 	cp $(PROYECTO) $(INSTALL_DIR)/sbin

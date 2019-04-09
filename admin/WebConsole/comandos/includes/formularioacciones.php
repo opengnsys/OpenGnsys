@@ -9,7 +9,7 @@
 //		Formulario para paso de parametros comunes para la ejecución de comandos
 // *************************************************************************************************************************************************
 ?>
-<FORM  align=center name="fdatosejecucion" action="<?php echo $gestor?>" method="post"> 
+<FORM name="fdatosejecucion" action="<?php echo $gestor?>" method="post">
 	<INPUT type="hidden" name="idcomando" value="<?php echo $idcomando?>">
 	<INPUT type="hidden" name="descricomando" value="<?php echo $descricomando?>">
 	<INPUT type="hidden" name="ambito" value="<?php echo $ambito?>">

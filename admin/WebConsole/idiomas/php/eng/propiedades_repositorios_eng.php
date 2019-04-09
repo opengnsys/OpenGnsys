@@ -4,7 +4,7 @@
 //	Php language file: propiedades_repositorios_eng.php
 //	Language: English
 //________________________________________________________________________________________________________
-$TbMsg=array();
+if (empty ($TbMsg)) $TbMsg=array();
 $TbMsg[0]="No Option";
 $TbMsg[1]="Insert";
 $TbMsg[2]="Change";
@@ -13,7 +13,7 @@ $TbMsg[4]="Repository management";
 $TbMsg[5]="Repository name";
 $TbMsg[6]="IP address";
 $TbMsg[7]="Comments";
-$TbMsg[8]="Port";
+
 $TbMsg[9]="Base Directory";
 $TbMsg[10]="PXE Directory";
 $TbMsg[11]="TOTAL space";

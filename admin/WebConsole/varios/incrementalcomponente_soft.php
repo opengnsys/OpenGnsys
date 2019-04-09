@@ -25,7 +25,8 @@ if (!$cmd)
 ?>
 <HTML>
 <HEAD>
-	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<TITLE>Administración web de aulas</TITLE>
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 <LINK rel="stylesheet" type="text/css" href="../estilos.css">
 <SCRIPT language="javascript" src="../jscripts/incrementalcomponente_soft.js"></SCRIPT>
 <SCRIPT language="javascript" src="../jscripts/opciones.js"></SCRIPT>
@@ -36,10 +37,10 @@ if (!$cmd)
 	<INPUT type=hidden value="<?php echo $idcentro?>" id=idcentro>	 
 	<INPUT type=hidden value="<?php echo $idsoftincremental?>" id=idsoftincremental>	 
 	<P align=center class=cabeceras><?php echo $TbMsg[0]?><BR>
-	<SPAN align=center class=subcabeceras><?php echo $TbMsg[1]?></SPAN>&nbsp;<IMG src="../images/iconos/confisoft.gif"></P>
+	<SPAN class=subcabeceras><?php echo $TbMsg[1]?></SPAN>&nbsp;<IMG src="../images/iconos/confisoft.gif"></P>
 	<BR>
 	<DIV align=center id="Layer_componentes">
-		<SPAN align=center class=presentaciones><B><U><?php echo $TbMsg[2]?></U>:&nbsp;<?php echo $descripcionincremental?></B></SPAN></P>
+		<SPAN class=presentaciones><B><U><?php echo $TbMsg[2]?></U>:&nbsp;<?php echo $descripcionincremental?></B></SPAN></P>
 		<TABLE width="100%" class="tabla_listados" cellspacing=1 cellpadding=0 >
 			 <TR>
 				<TH>&nbsp</TH>
@@ -57,7 +58,7 @@ if (!$cmd)
 				while (!$rs->EOF){
 						 echo '<TR>';
 						 echo '<TD align=center width="10%" ><INPUT type=checkbox onclick="gestion_componente('.$rs->campos["idsoftware"].',this)" checked ></INPUT></TD>';
-						 echo '<TD align=center width="10%" ><img alt="'. $rs->campos["hdescripcion"].'"src="'.$rs->campos["urlimg"].'"></TD>';
+						 echo '<TD align=center width="10%" ><img alt="'. $rs->campos["hdescripcion"].'" src="'.$rs->campos["urlimg"].'"></TD>';
 						 echo '<TD  width="80%" >&nbsp;'.$rs->campos["descripcion"].'</TD>';
 						 echo '</TR>';
 						 $strex.= $A_W."softwares.idsoftware<>".$rs->campos["idsoftware"];

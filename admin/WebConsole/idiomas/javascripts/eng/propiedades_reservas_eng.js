@@ -1,11 +1,11 @@
 //________________________________________________________________________________________________________
 //	
-//	Fichero de idiomas javascript: propiedades_imagenes_eng.js 
-//	Idioma: Inglés 
+//    Javascript language file: propiedades_reservas_eng.js
+//    Language: English
 //________________________________________________________________________________________________________
 TbMsg=new Array;
-TbMsg[0]="You must introduce a name for this reserva";
-TbMsg[1]="The image must contain at least  some of a petitioner";
-TbMsg[2]="You must reserve at least a Lab";
-TbMsg[3]="You must to specify  some state from this reserve";
-TbMsg[4]="WARNING.- You has specified time for previous action from this reserve. Are you sure?";
+TbMsg[0]="You must enter a name for this reservation";
+TbMsg[1]="The image must contain at least one petitioner";
+TbMsg[2]="You must choose one lab for this reservation";
+TbMsg[3]="You must specify state for this reservation";
+TbMsg[4]="WARNING: You have specified some time for previous actions to this reservation. Are you sure?"

@@ -10,4 +10,3 @@
 	$TbMsg[2]='Valor';
 	$TbMsg[3]='Ámbito';
 	$TbMsg[4]='Nombre';
-?>

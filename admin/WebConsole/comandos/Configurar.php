@@ -53,9 +53,9 @@ if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 //________________________________________________________________________________________________________ 
 ?>
 <HTML>
-<TITLE>Administración web de aulas</TITLE>
 <HEAD>
-	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<TITLE>Administración web de aulas</TITLE>
 <LINK rel="stylesheet" type="text/css" href="../estilos.css">
 <STYLE TYPE="text/css"></STYLE>
 <SCRIPT language="javascript" src="./jscripts/Configurar.js"></SCRIPT>
@@ -126,7 +126,7 @@ if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 	echo '<TD align=center>'.HTMLSELECT_particiones(0).'</TD>';
 	echo '<TD align=center>'.HTMLSELECT_tipospar($cmd,"").'</TD>';
 	echo '<TD align=center>'.HTMLSELECT_sistemasficheros($cmd,"").'</TD>';
-	echo '<TD align=center><INPUT type="text" style="width:100" value="0"></TD>';
+	echo '<TD align=center><INPUT type="text" style="width:100px" value="0"></TD>';
 	echo '<TD align=center>&nbsp;</TD>';
 	echo '<TD align=center>'.opeFormatear().'</TD></TR></TABlE>';
 	//________________________________________________________________________________________________________

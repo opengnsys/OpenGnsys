@@ -60,5 +60,5 @@ $TbMsg[44]='Equipo sin perfil de hardware';
 $TbMsg[45]='Agregue perfil para obtener datos';
 $TbMsg[495]='Fecha/Cach&eacute;';
 $TbMsg[4951]='Cach&eacute; libre';
-?>
+
 

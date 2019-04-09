@@ -421,15 +421,18 @@ BOOLEAN ejecutarProcedimiento(Database db,int idprocedimiento,int ambito,int ida
 				liberaMemoria(parametros);
 				return (FALSE);
 			}
-			liberaMemoria(parametros);
 			if(!tbl.Get("idcomando",idcomando)){
 				tbl.GetErrorErrStr(msglog);
 				errorInfo(modulo, msglog);
 				return (FALSE);
 			}
 
-			if(!insertaComando(db,idcomando,parametros,idprocedimiento,ambito,idambito,restrambito))
+			if(!insertaComando(db,idcomando,parametros,idprocedimiento,ambito,idambito,restrambito)) {
+
+				liberaMemoria(parametros);
 				return(false);
+			}
+			liberaMemoria(parametros);
 		}
 		tbl.MoveNext();
 	}		

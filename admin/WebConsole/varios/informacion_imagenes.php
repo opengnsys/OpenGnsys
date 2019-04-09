@@ -49,12 +49,11 @@ $arbol=new ArbolVistaXml($arbolXML,0,$baseurlimg,$clasedefault,1,20,130,1,$titul
 </BODY>
 </HTML>
 <?php
-/**************************************************************************************************************************************************
-	Devuelve una cadena con formato XML de toda la información de las imagenes
-	Parametros: 
-		- cmd:Una comando ya operativo ( con conexiónabierta)  
-		- idimagen: El identificador del perfil hardware
-________________________________________________________________________________________________________*/
+/**
+ * @param Comando $cmd      Comando ya operativo (con conexión abierta)
+ * @param integer $idimagen Identificador del perfil hardware
+ * @return string           Cadena en formato XML con toda la información de las imágenes_____
+ */
 function CreaArbol($cmd,$idimagen){
 	$cadenaXML=SubarbolXML_Imagenes($cmd,$idimagen);
 	return($cadenaXML);
