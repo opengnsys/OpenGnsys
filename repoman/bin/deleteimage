@@ -15,7 +15,7 @@
 #@version 1.0.6 - Detección automática del tipo de imagen.
 #@date    2014-10-29
 #@author  Ramón Gómez, ETSII Univ. Sevilla
-#@version 1.1.0 - Aunque no exista imagen permite recuperar la copia. 
+#@version 1.1.0 - Aunque no exista imagen permite recuperar la copia.
 #@date    2016-10-14
 #@author  Irina Gómez, ETSII Univ. Sevilla
 #*/ ##
@@ -60,7 +60,7 @@ for IMG in "$OGIMG/$1.$IMGEXT" "$OGIMG/$1.$IMGEXT.$DIFFEXT" "$OGIMG/$1"; do
     if [ -r $IMG ] ; then
         IMGPATH=$IMG
         echo "Borrando imagen $IMGPATH"
-        rm -f $IMGPATH{,.sum,.full.sum,.torrent} 
+        rm -fr $IMGPATH{,.sum,.full.sum,.torrent}
         break
     fi
     # Compruebo si existe copia de seguridad

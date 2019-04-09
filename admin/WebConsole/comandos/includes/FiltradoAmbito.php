@@ -5,7 +5,7 @@
 // Fecha Creación: Año 2012
 // Fecha última modificación: Febrero-2012
 // Nombre del fichero: FiltradoAmbito.php
-// Descripción : 
+// Descripción:
 //		Colección de funciones en php y javascript que implementan la posibilidad de aplicar filtro de selección
 //		a un determinado grupo de ordenadores dentro de un aula para aplicarles comandos.
 //
@@ -41,21 +41,21 @@ function RecorriendoCentro($cmd)
 {
 	global $AMBITO_GRUPOSAULAS;
 	global $TbMsg;
-		
-	$rs=new Recordset; 
-	$rs->Comando=&$cmd; 
+
+	$rs=new Recordset;
+	$rs->Comando=&$cmd;
 	if (!$rs->Abrir()) return; // Error al abrir recordset
-	$rs->Primero(); 
+	$rs->Primero();
 	if(!$rs->EOF){
 		$idcentro=$rs->campos["idcentro"];
 		$nombrecentro=$rs->campos["nombrecentro"];
-		
+
 		$urlimg='../images/iconos/centros.gif';
 		$ambito=$TbMsg[0];
 		echo '<p align=center><IMG src="'.$urlimg.'">&nbsp;&nbsp;
-		<span align=center class=subcabeceras><U>'.$ambito.':'.$nombrecentro.'</U></span></p>';
-	
-		$cmd->texto="SELECT idgrupo,nombregrupo FROM grupos WHERE idcentro=".$idcentro." AND grupoid=0 
+		<span class=subcabeceras><U>'.$ambito.':'.$nombrecentro.'</U></span></p>';
+
+		$cmd->texto="SELECT idgrupo,nombregrupo FROM grupos WHERE idcentro=".$idcentro." AND grupoid=0
 						AND tipo=".$AMBITO_GRUPOSAULAS." ORDER BY nombregrupo ";
 		RecorriendoGruposAulas($cmd);
 		$cmd->texto="SELECT idaula,nombreaula FROM aulas WHERE idcentro=".$idcentro." AND grupoid=0 ORDER BY nombreaula";
@@ -69,20 +69,20 @@ function RecorriendoGruposAulas($cmd)
 {
 	global $AMBITO_GRUPOSAULAS;
 	global $TbMsg;
-	
-	$rs=new Recordset; 
-	$rs->Comando=&$cmd; 
+
+	$rs=new Recordset;
+	$rs->Comando=&$cmd;
 	if (!$rs->Abrir()) return; // Error al abrir recordset
-	$rs->Primero(); 
+	$rs->Primero();
 	while (!$rs->EOF){
 		$idgrupo=$rs->campos["idgrupo"];
 		$nombregrupo=$rs->campos["nombregrupo"];
-		
+
 		$urlimg='../images/iconos/carpeta.gif';
 		$ambito=$TbMsg[1];
 		echo '<p align=center><IMG src="'.$urlimg.'">&nbsp;&nbsp;
-		<span align=center class=subcabeceras><U>'.$ambito.':'.$nombregrupo.'</U></span></p>';		
-		
+		<span class=subcabeceras><U>'.$ambito.':'.$nombregrupo.'</U></span></p>';
+
 		$cmd->texto="SELECT idgrupo,nombregrupo FROM grupos WHERE grupoid=".$idgrupo." 
 						AND tipo=".$AMBITO_GRUPOSAULAS." ORDER BY nombregrupo";
 		RecorriendoGruposAulas($cmd);
@@ -98,19 +98,19 @@ function RecorriendoAulas($cmd)
 {
 	global $TbMsg;
 
-	$rs=new Recordset; 
-	$rs->Comando=&$cmd; 
+	$rs=new Recordset;
+	$rs->Comando=&$cmd;
 	if (!$rs->Abrir()) return; // Error al abrir recordset
-	$rs->Primero(); 
+	$rs->Primero();
 	while (!$rs->EOF){
 		$idaula=$rs->campos["idaula"];
 		$nombreaula=$rs->campos["nombreaula"];
-		
+
 		$urlimg='../images/iconos/aula.gif';
 		$ambito=$TbMsg[2];
 		echo '<p align=center><IMG src="'.$urlimg.'">&nbsp;&nbsp;
-		<span align=center class=subcabeceras><U>'.$ambito.':'.$nombreaula.'</U></span></p>';		
-				
+		<span class=subcabeceras><U>'.$ambito.':'.$nombreaula.'</U></span></p>';
+
 		$cmd->texto="SELECT idordenador,nombreordenador,ip,mac FROM ordenadores WHERE  idaula=".$idaula;
 		RecorriendoOrdenadores($cmd);
 		$rs->Siguiente();
@@ -122,20 +122,20 @@ function RecorriendoAulas($cmd)
 function RecorriendoGruposOrdenadores($cmd)
 {
 	global $TbMsg;
-	
-	$rs=new Recordset; 
-	$rs->Comando=&$cmd; 
+
+	$rs=new Recordset;
+	$rs->Comando=&$cmd;
 	if (!$rs->Abrir()) return; // Error al abrir recordset
-	$rs->Primero(); 
+	$rs->Primero();
 	while (!$rs->EOF){
 		$idgrupo=$rs->campos["idgrupo"];
 		$nombregrupo=$rs->campos["nombregrupo"];
-		
+
 		$urlimg='../images/iconos/carpeta.gif';
 		$ambito=$TbMsg[3];
 		echo '<p align=center><IMG src="'.$urlimg.'">&nbsp;&nbsp;
-		<span align=center class=subcabeceras><U>'.$ambito.':'.$nombregrupo.'</U></span></p>';	
-		
+		<span class=subcabeceras><U>'.$ambito.':'.$nombregrupo.'</U></span></p>';
+
 		$cmd->texto="SELECT idgrupo,nombregrupoordenador FROM gruposOrdenadores WHERE grupoid=".$idgrupo." ORDER BY nombregrupoordenador";
 		RecorriendoGruposOrdenadores($cmd);
 		$cmd->texto="SELECT idordenador,nombreordenador,ip,mac FROM ordenadores WHERE  grupoid=".$idgrupo;
@@ -150,14 +150,14 @@ function RecorriendoOrdenadores($cmd)
 {
 	global $TbMsg;
 	global $cadenaip;
-	global $cid;		
-			
-	$cid++;		
+	global $cid;
+
+	$cid++;
 	$cmd->texto.= " ORDER BY nombreordenador";
-	$rs=new Recordset; 
-	$rs->Comando=&$cmd; 
+	$rs=new Recordset;
+	$rs->Comando=&$cmd;
 	if (!$rs->Abrir()) return; // Error al abrir recordset
-	$rs->Primero(); 
+	$rs->Primero();
 	$htmlCode="";
 	$con=0;
 
@@ -167,7 +167,7 @@ function RecorriendoOrdenadores($cmd)
 
 <TD align="center">'.$TbMsg["STATUS_OFF"].'</TD>
 <TD><INPUT  type="checkbox" checked onclick="selector(this,1,'.$cid.')"></TD>
-		
+
 <TD align="center">'.$TbMsg["STATUS_BSY"].'</TD>
 <TD><INPUT   type="checkbox" checked onclick="selector(this,2,'.$cid.')"></TD>
 
@@ -193,11 +193,11 @@ function RecorriendoOrdenadores($cmd)
 
 </TR>
 </TABLE>';
-	
-	$htmlCode.='<BR>';					
+
+	$htmlCode.='<BR>';
 	$htmlCode.='<TABLE id="tbo-'.$cid.'" border=0 align=center>';
 	$htmlCode.='<TR>';
-		
+
 	while (!$rs->EOF){
 		$htmlCode.= '<TD style="border: 1px solid #999999;">';
 		$nombreordenador=$rs->campos["nombreordenador"];
@@ -205,9 +205,9 @@ function RecorriendoOrdenadores($cmd)
 		$cadenaip.=$ip.";";
 		$htmlCode.='<TABLE  cellspacing=1 cellpadding=0>';
 		$htmlCode.='	<TR><TD align="center"><img sondeo="ordenador_OFF.png" id="img-'.$ip.'" width=24 src="../images/ordenador_OFF.png"></TD></TR>';
-		$htmlCode.='	<TR><TD align="center"><SPAN style="FONT-SIZE:9px;	COLOR: #4f4f4f;">'.$nombreordenador.'</SPAN></TD></TR>';			
-		$htmlCode.='	<TR><TD align="center"><SPAN style="FONT-SIZE:8px;	COLOR: #4f4f4f;">'.$ip.'</SPAN></TD></TR>';			
-		$htmlCode.='	<TR><TD align="center"><INPUT id="chk-'.$ip.'" type="checkbox" checked></TD></TR>';	
+		$htmlCode.='	<TR><TD align="center"><SPAN style="FONT-SIZE:9px;	COLOR: #4f4f4f;">'.$nombreordenador.'</SPAN></TD></TR>';
+		$htmlCode.='	<TR><TD align="center"><SPAN style="FONT-SIZE:8px;	COLOR: #4f4f4f;">'.$ip.'</SPAN></TD></TR>';
+		$htmlCode.='	<TR><TD align="center"><INPUT id="chk-'.$ip.'" type="checkbox" checked></TD></TR>';
 		$htmlCode.='</TABLE>';
 		$htmlCode.='</TD>';
 		$con++;
@@ -235,7 +235,7 @@ function Sondeo(){
 	var wurl="../principal/sondeo.php";
 	var prm="ambito="+ambito+"&idambito="+idambito+"&sw=1";
 	CallPage(wurl,prm,"retornoSondeo","POST");
-	setTimeout("respuestaSondeo();",100); 	
+	setTimeout("respuestaSondeo();",100);
 }
 //______________________________________________________________________________________________________
 //
@@ -249,9 +249,9 @@ function respuestaSondeo(){
 	var ambito=<?php echo $ambito?>;
 	var idambito=<?php echo $idambito?>;
 	var wurl="../principal/sondeo.php";
-	var prm="ambito="+ambito+"&idambito="+idambito+"&sw=2"; 
+	var prm="ambito="+ambito+"&idambito="+idambito+"&sw=2";
 	CallPage(wurl,prm,"retornorespuestaSondeo","POST");
-	setTimeout("respuestaSondeo();",5000); 	
+	setTimeout("respuestaSondeo();",5000);
 }
 //______________________________________________________________________________________________________
 //
@@ -270,14 +270,14 @@ function retornorespuestaSondeo(resul)
 			objOrd=document.getElementById("img-"+ip);
 			if(objOrd){ 
 					imgOrd=soIMG(so);
-					if(objOrd.getAttribute("sondeo")!=imgOrd){ 
+					if(objOrd.getAttribute("sondeo")!=imgOrd){
 						objOrd.setAttribute("src", "../images/"+imgOrd);
 						objOrd.setAttribute("sondeo",imgOrd);
 						var objChk=document.getElementById("chk-"+ip);
 						if(objChk)
 							objChk.checked=true;
 					}
-			}		
+			}
 		}
 	}
 }
@@ -313,7 +313,7 @@ function soIMG(so)
 			MimgOrdenador="ordenador_OSX.png";  // macOS
 			break;
 		default:
-			MimgOrdenador="ordenador_OFF.png";	// Apagado
+			MimgOrdenador="ordenador_OFF.png";  // Apagado
 			break;
 	}
 	return(MimgOrdenador);
@@ -324,13 +324,12 @@ function selector(oSLCT,op,id)
 {
 	var sw=oSLCT.checked;
 	var objTB=document.getElementById("tbo-"+id);
-	
-		if(objTB){ 
+
+		if(objTB){
 			var imagenes = objTB.getElementsByTagName('img');
 			for(var i=0;i<imagenes.length;i++){
 				var ip=imagenes[i].id.split("-")[1];
 				var estado=imagenes[i].getAttribute("sondeo");
-				
 				var oCHK = document.getElementById('chk-'+ip); // Recupera checkbox
 
 				switch(parseInt(op)){
@@ -376,14 +375,14 @@ function selector(oSLCT,op,id)
 function filtrado()
 {
 	var ipes="";
-	for(j=1;j<=cid;j++){
+	for(var j=1; j<=cid; j++){
 
 		var objTB=document.getElementById("tbo-"+j);
-		if(objTB){ 
+		if(objTB){
 			var imagenes = objTB.getElementsByTagName('img');
 			for(var i=0;i<imagenes.length;i++){
 				var ip=imagenes[i].id.split("-")[1];
-				var oCHK = document.getElementById('chk-'+ip); // Recupera checkbox			
+				var oCHK = document.getElementById('chk-'+ip); // Recupera checkbox
 				if(oCHK.checked){
 					ipes+=ip+";";
 				}

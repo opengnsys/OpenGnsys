@@ -141,8 +141,8 @@ function Gestiona(){
 	global	$op_eliminacion;
 	global	$op_movida;
 	global	$op_ejecucion;
-
 	global	$tablanodo;
+	$resul=false;
 
 	$cmd->CreaParametro("@idcentro",$idcentro,1);
 	$cmd->CreaParametro("@idtarea",$idtarea,1);
@@ -171,7 +171,6 @@ function Gestiona(){
 							ambito=@ambito,idambito=@idambito
 							WHERE idtarea=@idtarea";
 			$resul=$cmd->Ejecutar();
-			//echo $cmd->texto;
 			break;
 		case $op_eliminacion :
 			$resul=EliminaTareas($cmd,$idtarea,"idtarea");	
@@ -181,7 +180,7 @@ function Gestiona(){
 			$resul=$cmd->Ejecutar();
 			break;
 		case $op_ejecucion :
-					$resul=EjecutandoTareas();
+			$resul=EjecutandoTareas();
 			break;
 		default:
 			break;
@@ -213,7 +212,7 @@ function EjecutandoTareas(){
 	global $EJECUCION_TAREA;
 	global $PROCESOS;
 	global $ACCION_INICIADA;
-	global $ACCION_SINERRORES; 
+	global $ACCION_SINRESULTADO;
 	global $idcentro;
 	global $servidorhidra;
 	global $hidraport;
@@ -309,4 +308,4 @@ function EjecutandoTareas(){
 	}
 	return(true);
 }
-?>
+

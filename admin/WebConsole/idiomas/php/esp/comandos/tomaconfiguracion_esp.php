@@ -13,4 +13,3 @@
 	$TbMsg[5]='Tomar  configuración';
 	$TbMsg[6]='Ámbito';
 
-?>

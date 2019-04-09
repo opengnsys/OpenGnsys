@@ -5,11 +5,12 @@
 //      Idioma: Español
 // __________________________________________________
 // Mensajes.
-$TbMsg=array();
+if (empty ($TbMsg)) $TbMsg=array();
 $TbMsg["HELP_TITLE"]='Ayuda';
 $TbMsg["MANUAL"]='Manual de usuario';
-$TbMsg["API"]='Documentación de la API';
+$TbMsg["API"]='Documentación de la API del Motor de Clonaci&oacute;n';
 $TbMsg["CFG"]='Configuración de los clientes';
+$TbMsg["REST"]='Documentación de la API REST';
 $TbMsg["CHANGELOG"]='Cambios en la versión:';
 $TbMsg["USERMAIL"]='Lista de correos de usuarios';
 $TbMsg["WEB"]='Web del proyecto: opengnsys.es';

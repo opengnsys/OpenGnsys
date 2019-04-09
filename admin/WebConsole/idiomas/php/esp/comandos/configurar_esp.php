@@ -46,4 +46,4 @@
 	$TbMsg[34]='Perfil software';
 
 	$TbMsg["HD"]='Disco';
-?>
+

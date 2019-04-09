@@ -16,9 +16,15 @@ vado
 
 Tickets resueltos en módulo OpenGnsys Client:
 #847	La ISO del ogLive debe de utilzar la revisión de Git y no de SVN
+#887	Browser: mostrar aviso si falla la ejecución de un comando
 
 Tickets resueltos en módulo OpenGnsys Server:
+#580	Correcciones del Core de OpenGnsys: ogAdmServer (corrección)
 #856	Mejoras en setserveraddr
+#881	Personalizar prioridad de ejecución de proceso de torrents
+#883	Añadir soporte para syslog a ogAdmServer (mejora)
+#884	No ejecutar strip al compilar ogAdmserver
+#885	Eliminar ogAdmBoot
 
 Tickets resueltos en módulo OpenGnsys Repository Server:
 #873	Script para importar imagen de otro repositorio
@@ -56,6 +62,7 @@ Tickets resueltos en módulo OpenGnsys Server:
 
 Tickets resueltos en módulo OpenGnsys Repository Server:
 #850	Problema con repositorio recién instalado (corrección)
+#882	deleteimage no borra directorio (corrección)
 
 Tickets resueltos en módulo OpenGnsys Web Admin Console:
 #835	Problemas al listar plantillas en Nerboot Avanzado (corrección)
@@ -65,6 +72,9 @@ Tickets resueltos en módulo OpenGnsys Web Admin Console:
 
 Tickets resueltos en módulo OpenGnsys Installer:
 #876	Problemas al actualizar desde Subversion a Git (corrección)
+#879	Función checkVersion de opengnsys_update.sh del tar.gz da error si se ejecuta sobre la misma versión de OpenGnsys (corrección)
+#880	openGnsys_update.sh no deja la revisión, solo deja 1.1.0a (corrección)
+#886	Actualización de la 1.0.6b a la 1.1.0 da errores a la hora de agregar ordenadores/aulas (no válido)
 
 Tickets genéricos resueltos:
 #839	Errores detectado en API REST para Remote PC (corrección)

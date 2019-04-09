@@ -32,6 +32,7 @@ function writeLog($message = "") {
 $app->post('/ogagent/started',
     function() use ($app) {
 	global $cmd;
+	$secret = "";
 	$osType = $osVersion = "none";
 	try {
 		// Reading POST parameters in JSON format.
@@ -131,6 +132,7 @@ $app->post('/ogagent/stopped',
 $app->post('/ogagent/loggedin',
     function() use ($app) {
 	global $cmd;
+	$osType = $osVersion = "none";
 	$redirto = Array();
 	$result = Array();
 

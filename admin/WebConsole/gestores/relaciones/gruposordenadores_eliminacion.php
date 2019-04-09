@@ -41,4 +41,4 @@ function	EliminaGruposOrdenadores($cmd,$identificador,$nombreid,$swid=1){
 	$resul=$cmd->Ejecutar();
 	return($resul);
 }
-?>
+

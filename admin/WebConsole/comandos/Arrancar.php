@@ -27,8 +27,8 @@ if (!$cmd)
 //________________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE>Administración web de aulas</TITLE>
 <HEAD>
+    <TITLE>Administración web de aulas</TITLE>
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="./jscripts/Arrancar.js"></SCRIPT>
@@ -43,8 +43,7 @@ if (!$cmd)
 	//
 	include_once("./includes/FiltradoAmbito.php");
 ?>
-	<P align=center><SPAN align=center class=subcabeceras><?php echo $TbMsg[7] ?></SPAN></p>
-	</BR>
+	<P align=center><SPAN class=subcabeceras><?php echo $TbMsg[7] ?></SPAN></p>
 	<TABLE id="tabla_conf" align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
 		<TR>
 			<TH align=center>&nbsp;&nbsp;</Th>

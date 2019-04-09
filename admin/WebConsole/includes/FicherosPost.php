@@ -48,5 +48,5 @@ function TomaPathFisico($UrlPagina,$NombreFichero){
 	$PathFisicoFichero=$PathFisicoCarpetaPagina."/iconos/".$NombreFichero;
 	return($PathFisicoFichero);
 }
-?>
+
 

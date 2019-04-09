@@ -164,4 +164,4 @@ function SubarbolXML_entidades($identidad,$nombreentidad){
 		$cadenaXML.='></ENTIDAD>';
 		return($cadenaXML);
 } 
-?>
+

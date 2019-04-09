@@ -2,7 +2,7 @@
 //________________________________________________________________________________________________________
 //
 //	Fitxer d'idiomes php: colasreservas_cat.php 
-//	Idioma: Català 
+//	Idioma: Catalï¿½ 
 //________________________________________________________________________________________________________
 
 // Literals dels tipus de reserves
@@ -10,14 +10,14 @@ $LITRESERVA_PENDENT="Pendents";
 $LITRESERVA_CONFIRMADA="Confirmades";
 $LITRESERVA_DENEGADA="Denegades";
 
-$RESERVA_PARADA=1;  // reserva momentàniament aturada
+$RESERVA_PARADA=1;  // reserva momentï¿½niament aturada
 $RESERVA_ACTIVA=0; // Reserva activa
-$LITRESERVA_PARADA='Suspesa';  // Literal reserva momentàniament aturada
+$LITRESERVA_PARADA='Suspesa';  // Literal reserva momentï¿½niament aturada
 $LITRESERVA_ACTIVA='Activa'; // Literal reserva activa
 
 $TbMsg=array();
 	$TbMsg[0]='Reserves d\'aules';
-	$TbMsg[1]='Opcions de búsqueda';
+	$TbMsg[1]='Opcions de bï¿½squeda';
 	$TbMsg[2]='Tipus';
 	$TbMsg[3]='';
 	$TbMsg[4]='Estats';
@@ -27,7 +27,7 @@ $TbMsg=array();
 	$TbMsg[8]='Data final';
 	$TbMsg[9]='Hora inici';
 	$TbMsg[10]='Hora final';
-	$TbMsg[11]='Àmbit';
+	$TbMsg[11]='ï¿½mbit';
 
 	$TbMsg[12]='Centres';
 	$TbMsg[13]='Grup d\'aules';
@@ -35,19 +35,18 @@ $TbMsg=array();
 
 	$TbMsg[15]='Any';
 	$TbMsg[16]='Mes';
-	$TbMsg[17]='Día';
+	$TbMsg[17]='Dï¿½a';
 	$TbMsg[18]='Aula';
-	$TbMsg[19]='Ocupació';
+	$TbMsg[19]='Ocupaciï¿½';
 	$TbMsg[20]='Imatge associada';
-	$TbMsg[21]='Descripció';
+	$TbMsg[21]='Descripciï¿½';
 
-	$TbMsg[22]='Programació reserves';
+	$TbMsg[22]='Programaciï¿½ reserves';
 	$TbMsg[23]='(Sense especificar)';
 	$TbMsg[24]='Aula';
-	$TbMsg[25]='Sol·licitant';
-	$TbMsg[26]="Anticipació previa";
-	$TbMsg[27]="(Sense acció previa)";
+	$TbMsg[25]='Solï¿½licitant';
+	$TbMsg[26]="Anticipaciï¿½ previa";
+	$TbMsg[27]="(Sense acciï¿½ previa)";
 	$TbMsg[28]="Tasca previa";
 	$TbMsg[29]="Treball previ";
 
-?>

@@ -12,4 +12,3 @@ $TbMsg[3]="Eliminar";
 $TbMsg[4]="Gestión Universidades";
 $TbMsg[5]="Nombre";
 $TbMsg[6]="Comentarios";
-?>

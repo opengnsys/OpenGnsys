@@ -10,4 +10,3 @@
 	$TbMsg[2]='Perfil hardware';
 	$TbMsg[3]='Nombre del component e';
 	$TbMsg[4]='(*)Para incluir algún componente en este perfil debe hacer click sobre la casilla de verificación correspondiente.';
-?>

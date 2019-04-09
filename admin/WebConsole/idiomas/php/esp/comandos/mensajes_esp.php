@@ -25,5 +25,5 @@ $TbMsg["COMMAND_RestaurarSoftIncremental"]="Restaurar Imagen Incremental";
 $TbMsg["WIZARD_Asistente Particionado"]="Asistente de particionado";
 $TbMsg["WIZARD_Asistente Clonacion Particiones Remotas"]="Clonar particiones remotas";
 $TbMsg["WIZARD_Asistente Deploy de Imagenes"]="Deploy de imagenes";
-?>
+
 

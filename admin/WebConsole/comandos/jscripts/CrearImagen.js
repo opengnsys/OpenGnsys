@@ -45,7 +45,7 @@
 //________________________________________________________________________________________________________
   function comprobar_datos()
 {
-		tb_conf=document.getElementById("tabla_conf");
+		var tb_conf=document.getElementById("tabla_conf");
 		var ochecks=tb_conf.getElementsByTagName('INPUT');
 		var op=0;
 		for(var i=0;i<ochecks.length;i++){
@@ -55,16 +55,16 @@
 				var disco=ochecks[i].value.split("_")[0];
 				var particion=ochecks[i].value.split("_")[1];
 				// El desplegable de imagen ahora indica disco y particion en su nombre
-				despleimagen=document.getElementById("despleimagen_"+disco+"_"+particion);
-				var  p=despleimagen.selectedIndex;
-				if (p==0){  
+				var despleimagen=document.getElementById("despleimagen_"+disco+"_"+particion);
+				var p=despleimagen.selectedIndex;
+				if (p===0){
 					alert(TbMsg[0]);
 				 	despleimagen.focus();
 					return(false)
 				}
 			}
 		}
-		if(op==0){
+		if(op===0){
 			   alert(TbMsg[1]);
 			 return(false);
 		}

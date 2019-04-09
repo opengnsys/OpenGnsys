@@ -82,8 +82,8 @@ $mialmanaque= new Almanaque("tabla_meses");
 //________________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE>Administración web de aulas</TITLE>
 <HEAD>
+	<TITLE>Administración web de aulas</TITLE>
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../jscripts/constantes.js"></SCRIPT>
@@ -96,7 +96,6 @@ $mialmanaque= new Almanaque("tabla_meses");
 <IMG src=<?php echo $urlimg?>>&nbsp;<SPAN align=center class=subcabeceras><?php echo $descripcion?></SPAN>&nbsp;</p>
 <FORM name="fprogramaciones" method="post">
 <INPUT type=hidden name=tipoaccion value="<?php echo $tipoaccion?>">
-<CENTER>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 <!-- Tabla Tabla con los tiempos y los bloques de programación  -->
 <TABLE align=center border=0 cellPadding=0 cellSpacing=0>
@@ -199,7 +198,7 @@ $mialmanaque= new Almanaque("tabla_meses");
 										</TR>
 										<TR>
 											<TD><input type=text  class="cajatexto" id="nombrebloque"
-											style="width: 350; height: 20" size="20" ></TD>
+											style="width: 350px; height: 20px" size="20" ></TD>
 										</TR>
 									</TABLE>
 								</TD>
@@ -209,7 +208,7 @@ $mialmanaque= new Almanaque("tabla_meses");
 									<?php
 										$HTMLSELECT="";
 										$HTMLSELECT.='<SELECT onclick="consulta_programacion();" 
-										class="estilodesple" id="lista_programaciones" size=2 style="height:100; width: 350">' ;
+										class="estilodesple" id="lista_programaciones" size=2 style="height:100px; width: 350px">' ;
 										if ($numreg>0){
 											while (!$rs->EOF){
 												$HTMLSELECT.='<OPTION value="'.$rs->campos["idprogramacion"].'"';
@@ -241,7 +240,7 @@ $mialmanaque= new Almanaque("tabla_meses");
 									onmouseover="sobreboton(this)" 	onmouseout="fueraboton(this)"
 									onclick="modifica_programacion(<?php echo $identificador?>,<?php echo $tipoaccion?>,<?php echo $sesion?>)" align=center height="17" width="83">Modificar</SPAN></TD>
 							</TR>
-
+							<TR>
 								<TD align=center class=botonprogramacion >
 									<SPAN id=bt_duplicar style="cursor:pointer;visibility:visible;color:#bbbcb9" 
 									onmouseover="sobreboton(this)" 	onmouseout="fueraboton(this)"

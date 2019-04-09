@@ -18,14 +18,12 @@ $config=(file_exists ($cfgfile)) ? file_get_contents($cfgfile, TRUE) : "No hay a
 
     <body>
 
-        <div><p align=center class=cabeceras><img  border=0 nod="aulas-1" value="Sala Virtual" style="cursor:pointer" src="../images/iconos/aula.gif" >&nbsp;&nbsp;<?php echo $TbMsg["ENGINE_TITLE"] ?><br>
-        <span id="aulas-1" class=subcabeceras><?php echo $TbMsg["ENGINE_SUBTITLE"] ?></span></p>
+        <div><p align="center" class="cabeceras"><img border="0" src="../images/iconos/aula.gif" >&nbsp;&nbsp;<?php echo $TbMsg["ENGINE_TITLE"] ?><br>
+        <span id="aulas-1" class="subcabeceras"><?php echo $TbMsg["ENGINE_SUBTITLE"] ?></span></p>
         </div>
 
-        <div style="margin: 0 3em 0 3em">
-        <pre>
-        <?php echo $config; ?>
-        <pre>
+        <div style="margin: 3em">
+        <pre><?php echo $config; ?><pre>
         </div>
     </body>
 </html>

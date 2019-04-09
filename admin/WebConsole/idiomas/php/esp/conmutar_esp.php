@@ -7,4 +7,3 @@
 	$TbMsg=array();
 	$TbMsg[0]='Este ámbito ha conmutado correctamente';
 	$TbMsg[1]='ATENCIÓN: Ha habido algún problema al conmutar el ámbito';
-?>

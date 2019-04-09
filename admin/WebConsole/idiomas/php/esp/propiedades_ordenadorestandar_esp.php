@@ -18,4 +18,4 @@ $TbMsg[9]='(*) Para modificar un ordenador con cierto dato, en esta aula, debe i
 $TbMsg[10]="(**)Si se trata de ordenadores nuevos con una configuración por defecto, pero no quiere modificar los ordenadores ya existentes debe introducir un valor mayor que cero.";
 $TbMsg[11]="Tamaño Caché";
 
-?>
+

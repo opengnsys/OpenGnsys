@@ -34,6 +34,7 @@ $modelo="";
 $numdisk=0;
 $numpar=0;
 $codpar=0;
+$tipopar="";
 $idperfilsoft=0;
 $perfilsoft="";
 $comentarios="";
@@ -45,6 +46,7 @@ $tipoimg=0;
 $idrepositorio=0;
 $repoip="";
 $repokey="";
+$sistoperativo="";
 $fechacreacion="";
 $revision=0;
 $imagenid=0;
@@ -116,8 +118,8 @@ if  ($opcion!=$op_alta and isset($repokey)) {
 //________________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE>Administración web de aulas</TITLE>
 <HEAD>
+    <TITLE>Administración web de aulas</TITLE>
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../jscripts/validators.js"></SCRIPT>
@@ -155,35 +157,37 @@ if  ($opcion!=$op_alta and isset($repokey)) {
 		
 	?>
 	<P align=center class=cabeceras><?php echo $lit?><BR>
-		<SPAN align=center class=subcabeceras><?php echo $opciones[$opcion]?></SPAN>
+		<SPAN class=subcabeceras><?php echo $opciones[$opcion]?></SPAN>
 	</P>
 
 	<TABLE  align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
-	<!-------------------------------------------------------------------------------------->
+	<!-- -------------------------------------------------------------------------------- -->
 		<TR>
-			<TH align=center>&nbsp;<?php echo $TbMsg[11]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?php echo $TbMsg[11]?>&nbsp;</TH>
 			<?php	if ($opcion==$op_eliminacion || !empty($idperfilsoft) || $opcion == 2)
-	echo '<TD style="width:150">'.$nombreca.'
+					echo '<TD style="width:150px">'.$nombreca.'
 					&nbsp;<INPUT type="hidden" name="nombreca" value="'.$nombreca.'"></TD>';
 				else
-	echo '<TD><INPUT  class="formulariodatos" name=nombreca style="width:150" type=text value="'.$nombreca.'"></TH>';if ($validnombreca == 1){echo '<font color=red><strong>&nbsp;'.$TbMsg[18].'</strong>';}?>
+					echo '<TD><INPUT  class="formulariodatos" name=nombreca style="width:150px" type=text value="'.$nombreca.'">';
+				if ($validnombreca == 1){echo '<div style="color: red; font-weight: bold;">&nbsp;'.$TbMsg[18].'</div>';}
+				echo '</TD>';?>
 		</TR>
-	<!-------------------------------------------------------------------------------------->
+	<!-- -------------------------------------------------------------------------------- -->
 		<TR>
-			<TH align=center>&nbsp;<?php echo $TbMsg[5]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?php echo $TbMsg[5]?>&nbsp;</TH>
 			<?php	if ($opcion==$op_eliminacion) {
-					echo '<TD style="width:300">'.$descripcion.'
+					echo '<TD style="width:300px">'.$descripcion.'
 					&nbsp;<INPUT type="hidden" name="descripcion" value="'.$descripcion.'"></TD>';
 				} else {
-					echo '<TD><INPUT  class="formulariodatos" name=descripcion style="width:350" type=text value="'.$descripcion.'">';
-					if ($validnombreca == 0 && $validdescripcion == 1){echo '<font color=red><strong>&nbsp;'.$TbMsg[22].'</strong>';}
+					echo '<TD><INPUT  class="formulariodatos" name=descripcion style="width:350px" type=text value="'.$descripcion.'">';
+					if ($validnombreca == 0 && $validdescripcion == 1){echo '<div style="color: red; font-weight: bold;">&nbsp;'.$TbMsg[22].'</div>';}
 					echo '</TD>';
 				} ?>
 		</TR>
-	<!-------------------------------------------------------------------------------------->
+	<!-- -------------------------------------------------------------------------------- -->
 	<?php if($tipoimg==$IMAGENES_INCREMENTALES){?>
 		<TR>
-			<TH align=center>&nbsp;<?php echo $TbMsg[14]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?php echo $TbMsg[14]?>&nbsp;</TH>
 			<?php	if ($opcion==$op_eliminacion || !empty($idperfilsoft))
 					echo '<TD>'.TomaDato($cmd,$idcentro,'imagenes',$imagenid,'imagenid','descripcion').'
 					&nbsp;<INPUT type="hidden" name="imagenid" value="'.$imagenid.'"></TD>';
@@ -194,9 +198,9 @@ if  ($opcion!=$op_alta and isset($repokey)) {
 		</TR>	
 	<?php } ?>
 	<?php if($tipoimg!=$IMAGENES_INCREMENTALES){?>
-	<!-------------------------------------------------------------------------------------->
+	<!-- -------------------------------------------------------------------------------- -->
 		<TR>
-			<TH align=center>&nbsp;<?php echo $TbMsg[10]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?php echo $TbMsg[10]?>&nbsp;</TH>
 			<?php	if ($opcion==$op_eliminacion || !empty($idperfilsoft))
 					echo '<TD>'.$nombrerepositorio.'
 					&nbsp;<INPUT type="hidden" name="idrepositorio" value="'.$idrepositorio.'"></TD>';
@@ -204,20 +208,20 @@ if  ($opcion!=$op_alta and isset($repokey)) {
 					echo '<TD>'.HTMLSELECT($cmd,$idcentro,'repositorios',$idrepositorio,'idrepositorio','nombrerepositorio',300).'</TD>';
 			?>
 		</TR>				
-	<!-------------------------------------------------------------------------------------->
+	<!-- -------------------------------------------------------------------------------- -->
 	<?php if($tipoimg==$IMAGENES_BASICAS){?>	
 		<TR>
-			<TH align=center>&nbsp;<?php echo $TbMsg[16]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?php echo $TbMsg[16]?>&nbsp;</TH>
 			<?php	if ($opcion==$op_eliminacion || !empty($idperfilsoft))
 					echo '<TD>'.$ruta.'
 					&nbsp;<INPUT type="hidden" name="ruta" value="'.$ruta.'"></TD>';
 				else
-					echo '<TD><INPUT  class="formulariodatos" name=ruta style="width:350" type=text value="'.$ruta.'"></TH>';?>
+					echo '<TD><INPUT  class="formulariodatos" name=ruta style="width:350px" type=text value="'.$ruta.'"></TH>';?>
 		</TR>	
 	<?php }?>				
-	<!-------------------------------------------------------------------------------------->
+	<!-- -------------------------------------------------------------------------------- -->
 		<TR>
-			<TH align=center>&nbsp;<?php echo $TbMsg[7]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?php echo $TbMsg[7]?>&nbsp;</TH>
 			<?php	if ($opcion==$op_eliminacion)
 					echo '<TD>'.$comentarios.'</TD>';
 				else
@@ -264,7 +268,7 @@ if  ($opcion!=$op_alta and isset($repokey)) {
 		</tr>
 		<!-- Perfil de software -->
 		<TR>
-			<TH align=center>&nbsp;<?php echo $TbMsg[6]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?php echo $TbMsg[6]?>&nbsp;</TH>
 			<?php
 				if (isset($modelo)) {
 					echo '<TD>&nbsp;'.$perfilsoft.'
@@ -319,7 +323,7 @@ EOT;
 		echo '<tr><th colspan="14">'.$TbMsg["WARN_SOURCE_PATH"].'</th></tr>';
 	    }
 	}?>	
-	<!-------------------------------------------------------------------------------------->
+	<!-- -------------------------------------------------------------------------------- -->
 	</TABLE>
 </FORM>
 
@@ -327,7 +331,7 @@ EOT;
 if (!empty($idperfilsoft)){ // Nota a pie de página indicando que cuando la imagen tiene perfilsoft no pueden modificarse ciertos campos
 	echo '
 		<DIV id="Layer_nota" align=center >
-			<SPAN align=center class=notas><I>'.$TbMsg[15].'</I></SPAN>
+			<SPAN class=notas><em>'.$TbMsg[15].'</em></SPAN>
 		</DIV><br>';
 }
 //________________________________________________________________________________________________________
@@ -503,4 +507,3 @@ function ValidaDescripcion($cmd,$nombreca,$descripcion){
 	}
 	$rs->Cerrar();
 }
-?>

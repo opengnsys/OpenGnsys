@@ -20,4 +20,4 @@ if (isset($_POST["nwdescritarea"]))	$nwdescritarea=$_POST["nwdescritarea"];
 if (isset($_POST["sw_mkprocedimiento"]))	$sw_mkprocedimiento=$_POST["sw_mkprocedimiento"]; 
 if (isset($_POST["nwidprocedimiento"]))	$nwidprocedimiento=$_POST["nwidprocedimiento"]; 
 if (isset($_POST["nwdescriprocedimiento"]))	$nwdescriprocedimiento=$_POST["nwdescriprocedimiento"]; 
-?>
+

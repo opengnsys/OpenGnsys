@@ -26,5 +26,5 @@
 	$TbMsg[18]='"Tipos de hardware"';
 	$TbMsg[19]='"Componentes hardware"';
 	$TbMsg[20]='"Perfiles hardware"';
-?>
+
 

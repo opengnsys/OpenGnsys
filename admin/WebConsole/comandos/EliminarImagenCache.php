@@ -28,9 +28,9 @@ if (!$cmd)
 //___________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE>Administraci??n web de aulas</TITLE>
 <HEAD>
-        <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<TITLE>Administración web de aulas</TITLE>
 <LINK rel="stylesheet" type="text/css" href="../estilos.css">
 <SCRIPT language="javascript" src="./jscripts/EliminarImagenCache.js"></SCRIPT>
 <SCRIPT language="javascript" src="../clases/jscripts/HttpLib.js"></SCRIPT>
@@ -159,9 +159,7 @@ switch($ambito){
 <?php }?>
 <!-- //#agp-->
 
-        <P align=center>
-        <SPAN align=center class=subcabeceras><?php echo $TbMsg[7] ?></SPAN>
-	</P>
+        <P align=center><SPAN class=subcabeceras><?php echo $TbMsg[7] ?></SPAN></P>
 
 <form  align=center name="fdatos"> 
      <?php echo tabla_configuraciones($cmd,$idambito); ?>
@@ -330,8 +328,7 @@ switch($ambito){
 
         $tablaHtml="";
 
-        $rs->Comando=&$cmd;  
-        $rs=new Recordset; 
+        $rs=new Recordset;
         $rs->Comando=&$cmd; 
         if (!$rs->Abrir()) return($tablaHtml); // Error al abrir recordset
         $rs->Primero(); 
@@ -415,9 +412,9 @@ switch($ambito){
 					if ($esdir[$numdir] == "d"){$ruta[$numdir]='rm%20-r%20/opt/opengnsys/cache/opt/opengnsys/images/'.$value;}else{$ruta[$numdir]='rm%20-r%20/opt/opengnsys/cache/opt/opengnsys/images/'.$value.$todo;}
 					echo '<TR>'.chr(13);
 					echo '<TD align=center>&nbsp;'.$contar.'&nbsp;</TD>'.chr(13);
-					if ($esdir[$numdir]=="d"){echo '<TD align=center><font color=blue>&nbsp;D&nbsp;</font></TD>'.chr(13);}else{echo '<TD align=center>&nbsp;F&nbsp;</TD>'.chr(13);}
+					if ($esdir[$numdir]=="d"){echo '<TD align=center><div style="color: blue">&nbsp;D&nbsp;</div></TD>'.chr(13);}else{echo '<TD align=center>&nbsp;F&nbsp;</TD>'.chr(13);}
 					echo '<TD align=center ><input type="radio" name="codigo"  value='.$ruta[$numdir].'></TD>'.chr(13);
-					if ($esdir[$numdir]=="d"){echo '<TD align=center><font color=blue>&nbsp;'.$value.'&nbsp;</font></TD>'.chr(13);}else{echo '<TD align=center>&nbsp;'.$value.'&nbsp;</TD>'.chr(13);}
+					if ($esdir[$numdir]=="d"){echo '<TD align=center><div style="color: blue">&nbsp;'.$value.'&nbsp;</div></TD>'.chr(13);}else{echo '<TD align=center>&nbsp;'.$value.'&nbsp;</TD>'.chr(13);}
 					if ($cuentarepos==1){echo '<TD align=center>&nbsp;'.$tamanofich[0].'</TD>'.chr(13);}
 					echo '</TR>'.chr(13);
 					$contar++;$numdir++;

@@ -17,4 +17,4 @@
 	$TbMsg[9]='Nombre S.O.';
 	$TbMsg[10]='Descripción de la Imagen ';
 	$TbMsg[11]='Repositorio de destino';
-?>
+

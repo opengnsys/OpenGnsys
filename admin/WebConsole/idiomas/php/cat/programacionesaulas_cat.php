@@ -2,7 +2,7 @@
 //________________________________________________________________________________________________________
 //
 //	Fitxer d'idiomes php: colasreservas_cat.php 
-//	Idioma: Català 
+//	Idioma: Catalï¿½ 
 //________________________________________________________________________________________________________
 
 // Literals dels tipus de reserves
@@ -27,7 +27,7 @@ $TbMsg=array();
 	$TbMsg[8]='Data final';
 	$TbMsg[9]='Hora inici';
 	$TbMsg[10]='Hora final';
-	$TbMsg[11]='Àmbit';
+	$TbMsg[11]='ï¿½mbit';
 
 	$TbMsg[12]='Centres';
 	$TbMsg[13]='Grup d\'aules';
@@ -37,18 +37,17 @@ $TbMsg=array();
 	$TbMsg[16]='Mes';
 	$TbMsg[17]='Dia';
 	$TbMsg[18]='Aula';
-	$TbMsg[19]='Ocupació';
+	$TbMsg[19]='Ocupaciï¿½';
 	$TbMsg[20]='Imatge associada';
-	$TbMsg[21]='Descripció';
+	$TbMsg[21]='Descripciï¿½';
 
-	$TbMsg[22]='Programació reserves';
+	$TbMsg[22]='Programaciï¿½ reserves';
 	$TbMsg[23]='(Sense especificar)';
 	$TbMsg[24]='Aula';
-	$TbMsg[25]='Sol·licitant';
-	$TbMsg[26]="Anticipació prèvia";
-	$TbMsg[27]="(Sense acció prèvia)";
-	$TbMsg[28]="Tasca prèvia";
+	$TbMsg[25]='Solï¿½licitant';
+	$TbMsg[26]="Anticipaciï¿½ prï¿½via";
+	$TbMsg[27]="(Sense acciï¿½ prï¿½via)";
+	$TbMsg[28]="Tasca prï¿½via";
 	$TbMsg[29]="Treball previ";
 	$TbMsg[30]='Grup de reserves';
 
-?>

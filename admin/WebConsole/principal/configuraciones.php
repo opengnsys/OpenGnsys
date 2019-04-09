@@ -280,7 +280,7 @@ function datosGruposOrdenadores($cmd,$idgrupo)
 		}
 		$rs->Cerrar();
 	}
-		if ($numordenadores==0)
+		if ($ordenadores==0)
 		{
 		$cmd->texto="SELECT *, COUNT(*) AS numordenadores
 			 FROM gruposordenadores

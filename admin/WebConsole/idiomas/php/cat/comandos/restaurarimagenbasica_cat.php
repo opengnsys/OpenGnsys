@@ -50,4 +50,4 @@
 	$TbMsg[39]='Método';	
 	$TbMsg[40]='Unicast';						
 	$TbMsg[41]='Multicast';	
-?>	
+

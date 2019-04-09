@@ -20,6 +20,10 @@ include_once("../../includes/RecopilaIpesMacs.php");
 //________________________________________________________________________________________________________
 include_once("../includes/capturaacciones.php");
 //________________________________________________________________________________________________________
+
+define("IDCOMANDWAKEUP", 1);
+define("IDCOMANDSENDMESSAGE", 16);
+
 // Recoge parametros de seguimiento
 $sw_ejya="";
 $sw_seguimiento="";
@@ -73,7 +77,6 @@ $atributos=str_replace('$',chr(9),$atributos);
 <HTML>
 <HEAD>
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
-<BODY>
 	<SCRIPT language="javascript" src="../jscripts/comunescomandos.js"></SCRIPT>
 	<?php echo '<SCRIPT language="javascript" src="../../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>
 
@@ -174,9 +177,8 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 		$ValorParametros=extrae_parametros($parametros,chr(13),'=');
 		$script=@urldecode($ValorParametros["scp"]);
 		if($sw_ejya=='on'){ 	
-			// comando 16 sólo agente nuevo
-			if ($idcomando != 16){
-			    // Envio al servidor 
+			if ($idcomando != IDCOMANDSENDMESSAGE && $idcomando != IDCOMANDWAKEUP) {
+			    // Envío al servidor
 			    $shidra=new SockHidra($servidorhidra,$hidraport); 
 			    if ($shidra->conectar()){ // Se ha establecido la conexión con el servidor hidra
 				$parametros.=$aplicacion;
@@ -199,7 +201,7 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 			    $resulhidra = 1;
 			}
 
-	                // Comprobamos si el comando es soportado por el nuevo ogAgent
+			// Comprobamos si el comando es soportado por el nuevo ogAgent
 			$numip=0;
 			$ogAgentNuevo = false;
 			switch ($idcomando) {
@@ -228,7 +230,7 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 					break;
 			}
 
-	                // Se envía acción al nuevo ogAgent
+			// Se envía acción al nuevo ogAgent
 			if ( $ogAgentNuevo ) {
 				// Send REST requests to new OGAgent clients.
 				$urls = array();
@@ -241,7 +243,6 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 					$urls[$ip]['url'] = "https://$ip:8000/opengnsys/$urlcomando";
 					if (isset($auxKey[$i]))  $urls[$ip]['header'] = Array("Authorization: ".$auxKey[$i]);
 					if (isset($paramsPost))  $urls[$ip]['post'] = $paramsPost;
-
 					$i++;
 				}
 				// Launch concurrent requests.
@@ -384,6 +385,8 @@ if ($resul){
 	}
 }
 ?>
+</HEAD>
+<BODY>
 </BODY>
 </HTML>	
 

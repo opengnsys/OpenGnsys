@@ -16,4 +16,4 @@
 	$TbMsg[8]='"Eliminar menú"';
 	$TbMsg[9]='"Menús"';
 	$TbMsg[10]='"Gestionar Items"';	
-?>
+

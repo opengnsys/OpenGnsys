@@ -1,12 +1,12 @@
 <?php
 // *************************************************************************************************************************************************
-// Aplicaci�n WEB: ogAdmWebCon
-// Autor: Jos� Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creaci�n: A�o 2012
-// Fecha �ltima modificaci�n: Noviembre-2012
+// Aplicación WEB: ogAdmWebCon
+// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha Creación: Año 2012
+// Fecha última modificación: Noviembre-2012
 // Nombre del fichero: CrearImagenBas.php
-// Descripci�n : 
-//		Implementaci�n del comando "CrearImagenBas.php"
+// Descripción :
+//		Implementación del comando "CrearImagenBas.php"
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
 include_once("../clases/AdoPhp.php");
@@ -35,9 +35,9 @@ if (!$resul){
 //________________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE>Administraci�n web de aulas</TITLE>
 <HEAD>
-	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<TITLE>Administración web de aulas</TITLE>
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 <LINK rel="stylesheet" type="text/css" href="../estilos.css">
 <SCRIPT language="javascript" src="./jscripts/CrearImagenBasica.js"></SCRIPT>
 <SCRIPT language="javascript" src="../clases/jscripts/HttpLib.js"></SCRIPT>
@@ -50,29 +50,27 @@ if (!$resul){
  Cabecera 
 ------------------------------------------------------------------------------------------->
 	<P align=center class=cabeceras><?php echo $TbMsg[0] ?><P>
-	<P align=center>
-	<SPAN align=center class=subcabeceras><?php echo $TbMsg[1] ?></SPAN>
-	</BR>
+	<P align=center><SPAN class=subcabeceras><?php echo $TbMsg[1] ?></SPAN></P>
+	<BR>
 	<TABLE  align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
 		<TR>
-			<TH align=center>&nbsp;<?php echo $TbMsg[2] ?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?php echo $TbMsg[2] ?>&nbsp;</TH>
 			<?php echo '<TD>'.$nombreordenador.'</TD>';?>
 			<TD colspan=2 valign=top align=left rowspan=3><IMG border=2 style="border-color:#63676b" src="../images/fotoordenador.gif"></TD>
 		</TR>	
 		<TR>
-			<TH align=center>&nbsp;<?php echo $TbMsg[3] ?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?php echo $TbMsg[3] ?>&nbsp;</TH>
 			<?php echo '<TD>'.$ip.'</TD>';?>
 		</TR>
 		<TR>
-			<TH align=center>&nbsp;<?php echo $TbMsg[4] ?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?php echo $TbMsg[4] ?>&nbsp;</TH>
 			<?php echo '<TD>'.$mac.'</TD>';?>
 		</TR>	
 	</TABLE>
-	</P>
 <!------------------------------------------------------------------------------------------
  Subcabecera 
 -------------------------------------------------------------------------------------------> 	
-	<P align=center><SPAN align=center class=subcabeceras><?php echo $TbMsg[6] ?></SPAN></p>
+	<P align=center><SPAN class=subcabeceras><?php echo $TbMsg[6] ?></SPAN></p>
 	<FORM  align=center name="fdatos"> 
 		<TABLE  width=90% align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
 		<TR>
@@ -114,7 +112,7 @@ if (!$resul){
 
 /*----------------------------------------------------------------------------------------------
 	Recupera los datos de un ordenador
-		Parametros: 
+		Parámetros:
 		- ido: El identificador del ordenador
 ----------------------------------------------------------------------------------------------*/
 function tomaPropiedades($cmd,$ido)
@@ -126,8 +124,8 @@ function tomaPropiedades($cmd,$ido)
 	
 	$rs=new Recordset; 
 	$cmd->texto="SELECT nombreordenador,ip,mac,idperfilhard,idrepositorio 
-							FROM ordenadores 
-							WHERE idordenador='".$ido."'";
+			FROM ordenadores
+			WHERE idordenador='".$ido."'";
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) return(false); // Error al abrir recordset
 	$rs->Primero(); 
@@ -184,13 +182,11 @@ function HTMLSELECT_imagenes($idimagen)
 	
 	$SelectHtml="";
 	$cmd->texto="SELECT imagenes.idimagen,imagenes.descripcion,imagenes.nombreca,imagenes.ruta,
-				repositorios.ip,repositorios.nombrerepositorio
-				FROM  imagenes
-				INNER JOIN repositorios on imagenes.idrepositorio = repositorios.idrepositorio
-				WHERE tipo=".$IMAGENES_BASICAS." 
-				AND imagenes.idcentro=".$idcentro;
-				
-	//echo $cmd->texto;
+			    repositorios.ip,repositorios.nombrerepositorio
+			FROM imagenes
+			INNER JOIN repositorios on imagenes.idrepositorio = repositorios.idrepositorio
+			WHERE tipo=".$IMAGENES_BASICAS."
+			  AND imagenes.idcentro=".$idcentro;
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) return("");
@@ -209,5 +205,4 @@ function HTMLSELECT_imagenes($idimagen)
 	$SelectHtml.= '</SELECT>';
 	return($SelectHtml);
 }
-?>
 

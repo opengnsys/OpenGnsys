@@ -21,5 +21,5 @@
 	$TbMsg[14]='Buscar';
 	$TbMsg[15]='Netboot Avanzado';
 	$TbMsg[16]='Unidad Organizativa';
-?>
+
 

@@ -18,13 +18,13 @@ class Conexion{
 	var $controlador;				// Controlador
 	var $estado;					// Estado de la conexion
 	var $proveedor;					// Proveedor de BD
-	var $error;						// Colecci� de errores ocurridos durante el proceso (C�igo de error)
-	var $ultimoerror;				// Ultimo error detectado
-	var $inderror;					// Nmero de errores ocurridos durante el proceso
+	var $error;					// Colección de errores ocurridos durante el proceso (Código de error)
+	var $ultimoerror;				// Último error detectado
+	var $inderror;					// Número de errores ocurridos durante el proceso
 	var $msgerrores=array(
 		"No se ha producido ningn error",
-		"001 : conexiónError - La conexion no se pudo establecer",
-		"002 : conexiónError - Se estableció la conexióncon el servidor pero la base de datos no responde",
+		"001 : conexiónError - La conexión no se pudo establecer",
+		"002 : conexiónError - Se estableció la conexión con el servidor pero la base de datos no responde",
 		"003 : conexiónError - No se ha podido cerrar la actual conexión",
 		"004 : conexiónError - El objeto está ocupado intentando establecer una conexiónanterior",
 		"005 : conexiónError - La conexiónya está cerrada",
@@ -653,7 +653,6 @@ class Recordset{
 				$this->campos=mysqli_fetch_array($this->filas);
 		}
 	}
-}	
 	/* -------------------------------------------------------------------------------------------
 		Esta función devuelve una matriz asociativa con el nombre de los campos del recordset
 	---------------------------------------------------------------------------------------------*/
@@ -676,4 +675,5 @@ class Recordset{
 		}
 		return($infocampos);
 	}
+}
 

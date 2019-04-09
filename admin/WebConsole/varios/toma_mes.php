@@ -23,4 +23,3 @@ if (isset($_POST["idanno"])) $pidanno=$_POST["idanno"];
 $mialmanaque= new Almanaque("tabla_meses");
 $retorno=$mialmanaque->MesAnno($pidmes,$pidanno);
 echo $retorno;
-?>

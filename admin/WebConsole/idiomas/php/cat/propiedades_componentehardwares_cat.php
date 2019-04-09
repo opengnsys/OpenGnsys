@@ -2,14 +2,13 @@
 //________________________________________________________________________________________________________
 //
 //	Fitxer d'idiomes php: propiedades_componentehardwares_cat.php 
-//	Idioma: Català 
+//	Idioma: Catalï¿½ 
 //________________________________________________________________________________________________________
 $TbMsg=array();
-$TbMsg[0]="Sense Opció";
+$TbMsg[0]="Sense Opciï¿½";
 $TbMsg[1]="Afegir";
 $TbMsg[2]="Modificar";
 $TbMsg[3]="Eliminar";
-$TbMsg[4]="Gestió Components Hardware";
+$TbMsg[4]="Gestiï¿½ Components Hardware";
 $TbMsg[5]="Nom";
 $TbMsg[6]="Tipus de hardware";
-?>

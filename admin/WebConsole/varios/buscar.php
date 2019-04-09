@@ -142,8 +142,8 @@ if (!empty ($valor) or $criterio == "duplic" or $criterio == "profe" or $criteri
 //_________________________________
 ?>
 <html>
-<title>Administración web de aulas</title>
 <head>
+	<title>Administración web de aulas</title>
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 	<link rel="stylesheet" type="text/css" href="../estilos.css">
 	<script languaje="javascript">
@@ -154,7 +154,7 @@ function confirmar(){
 }
 //_________________________________
 function comprobar_datos(){
-	if (document.fdatos.valor.value=="" && document.fdatos.criterio.value!="duplic" && document.fdatos.criterio.value!="profe" && document.fdatos.criterio.value!="norepo") {
+	if (document.fdatos.valor.value==="" && document.fdatos.criterio.value!=="duplic" && document.fdatos.criterio.value!="profe" && document.fdatos.criterio.value!=="norepo") {
 		alert("<?php echo $TbMsg["SEARCH_NOVALUE"] ?>");
 		document.fdatos.valor.focus();
 		return(false)
@@ -172,7 +172,7 @@ function PulsaEnter(oEvento){
 	else 
 		return false; 
 	}
-    if (iAscii == 13)  confirmar();
+    if (iAscii === 13)  confirmar();
 	return true; 
 } 
 	</script>
@@ -186,7 +186,7 @@ if (!empty ($valor) or $criterio == "duplic" or $criterio == "profe" or $criteri
 		echo '<p class="subcabeceras" align="center">'.$TbMsg["SEARCH_NOMATCHES"].'</p>';
 	} else {
 ?>
-<div align="center" style="margin:20;">
+<div align="center" style="margin: 20px;">
 <table class="tabla_listados">
   <caption><?php echo $TbMsg["SEARCH_RESULTS"];?></caption>
   <tr>
@@ -210,10 +210,10 @@ if (!empty ($valor) or $criterio == "duplic" or $criterio == "profe" or $criteri
 <hr width="50%">
 <?php } ?>
 
-<div align="center" style="margin:20;">
+<div align="center" style="margin: 20px;">
 	<form action="#" class="formulariodatos" name="fdatos" method="post">
 		<?php echo $TbMsg["SEARCH_CRITERIA"] ?>:
-		<select name="criterio" id="criterio" onchange="if (document.fdatos.criterio.value=='duplic' || document.fdatos.criterio.value=='profe' || document.fdatos.criterio.value=='norepo') document.fdatos.valor.disabled=true; else document.fdatos.valor.disabled=false">
+		<select name="criterio" id="criterio" onchange="document.fdatos.valor.disabled=document.fdatos.criterio.value==='duplic' || document.fdatos.criterio.value=='profe' || document.fdatos.criterio.value==='norepo';">
 			<option value="nombre"> <?php echo $TbMsg["SEARCH_NAME"] ?> </option>
 			<option value="ip"> <?php echo $TbMsg["SEARCH_IP"] ?> </option>
 			<option value="mac"> <?php echo $TbMsg["SEARCH_MAC"] ?> </option>
@@ -223,10 +223,9 @@ if (!empty ($valor) or $criterio == "duplic" or $criterio == "profe" or $criteri
 		</select>
 		<input type="text" name="valor" id="valor" size="20" />
 		<div align="center">
-			<img onclick="confirmar()" src="../images/botonok.png" style="margin:20;cursor: hand" />
+			<img onclick="confirmar()" src="../images/botonok.png" style="margin: 20px; cursor: hand" />
 		</div>
 	</form>
 </div>
 </body>
 </html>
-

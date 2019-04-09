@@ -51,4 +51,3 @@ $TbMsg=array();
 	$TbMsg[29]="Trabajo previo";
 	$TbMsg[30]='Grupo de reservas';
 
-?>

@@ -95,5 +95,5 @@
 		}
 	}
 	echo $trama_notificacion;
-?>
+
 

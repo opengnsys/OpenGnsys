@@ -10,4 +10,3 @@ function RedireccionaError($herror){
 	$wurl="../seguridad/logerror.php?herror=".$urlerror;
 	Header('Location: '.$wurl);
 }
-?>

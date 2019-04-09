@@ -29,5 +29,5 @@ if (isset($_POST["funcion"])) $funcion=$_POST["funcion"];
 if (isset($_POST["atributos"])) $atributos=$_POST["atributos"]; 
 if (isset($_POST["gestor"])) $gestor=$_POST["gestor"]; 
 if (isset($_POST["filtro"])) $filtro=$_POST["filtro"]; 
-?>
+
 

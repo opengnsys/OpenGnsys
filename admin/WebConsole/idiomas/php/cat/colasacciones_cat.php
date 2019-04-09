@@ -2,7 +2,7 @@
 //________________________________________________________________________________________________________
 //
 //	Fitxer d'idiomes php: colasacciones_cat.php 
-//	Idioma: Català 
+//	Idioma: Catalï¿½ 
 //________________________________________________________________________________________________________
 
 // Literals dels tipus d'accions
@@ -13,14 +13,14 @@ $LITEJECUCION_TRABAJO="Treballs";
 
 $LITACCION_EXITOSA='Finalitzada correctament'; // Literal  Finalitzada exitosament
 $LITACCION_FALLIDA='Finalitzada amb errors'; // Literal  Finalitzada amb errors
-$LITACCION_TERMINADA='Finalitzada manualment'; //Literal   Finalitzada manualment amb indicació d'exit 
-$LITACCION_ABORTADA='Cancel·lada manualment'; // Literal  Finalitzada manualment amb indicació d'errors 
+$LITACCION_TERMINADA='Finalitzada manualment'; //Literal   Finalitzada manualment amb indicaciï¿½ d'exit 
+$LITACCION_ABORTADA='Cancelï¿½lada manualment'; // Literal  Finalitzada manualment amb indicaciï¿½ d'errors 
 $LITACCION_SINERRORES='Activa sense errors'; // Literal  Activa i sense cap error
-$LITACCION_CONERRORES='Activa amb errors'; // Literal  Activa i amb algún error
+$LITACCION_CONERRORES='Activa amb errors'; // Literal  Activa i amb algï¿½n error
 
-$LITACCION_DETENIDA='Parada'; // Literal acció momentàniament parada
-$LITACCION_INICIADA='Activa'; // Literal acció activa
-$LITACCION_FINALIZADA='Finalitzada'; // Literal acció finalitzada
+$LITACCION_DETENIDA='Parada'; // Literal acciï¿½ momentï¿½niament parada
+$LITACCION_INICIADA='Activa'; // Literal acciï¿½ activa
+$LITACCION_FINALIZADA='Finalitzada'; // Literal acciï¿½ finalitzada
 
 $TbMsg=array();
 	$TbMsg[0]='Cua d\'accions';
@@ -34,15 +34,15 @@ $TbMsg=array();
 	$TbMsg[8]='Data final';
 	$TbMsg[9]='Hora inici';
 	$TbMsg[10]='Hora final';
-	$TbMsg[11]='Àmbit';
+	$TbMsg[11]='ï¿½mbit';
 	$TbMsg[12]='Eliminar';
 	$TbMsg[13]='Reiniciar';
 	$TbMsg[14]='Parar';
 	$TbMsg[15]='Continuar';
-	$TbMsg[16]='Cancel·lar';
+	$TbMsg[16]='Cancelï¿½lar';
 	$TbMsg[17]='Finalitzar';
 
-	$TbMsg[18]='Acció';
+	$TbMsg[18]='Acciï¿½';
 	$TbMsg[19]='Data final';
 	$TbMsg[20]='Hora final';
 	$TbMsg[21]='Data inici';
@@ -59,10 +59,10 @@ $TbMsg=array();
 	$TbMsg[31]='Tasques';
 	$TbMsg[32]='Treballs';
 
-	$TbMsg[41]='"Filtre Acció"';
-	$TbMsg[42]='"Filtre àmbit"';
+	$TbMsg[41]='"Filtre Acciï¿½"';
+	$TbMsg[42]='"Filtre ï¿½mbit"';
 	$TbMsg[43]='"Eliminar filtre"';
-	$TbMsg[44]='"Modificar Acció"';
+	$TbMsg[44]='"Modificar Acciï¿½"';
 	$TbMsg[45]='"Reiniciar"';
 	$TbMsg[46]='"Eliminar"';
 	$TbMsg[47]='"Tasca pare"';
@@ -71,9 +71,8 @@ $TbMsg=array();
 	$TbMsg[50]='"Veure tasques"';
 	$TbMsg[51]='"Parar"';
 	$TbMsg[52]='"Continuar"';
-	$TbMsg[53]='"Cancel·lar"';
+	$TbMsg[53]='"Cancelï¿½lar"';
 	$TbMsg[54]='"Finalitzar"';
 	$TbMsg[55]='"Finalitzar sense errors"';
 	$TbMsg[56]='"Finalitzar amb errors"';
-	$TbMsg[57]='Informació';
-?>
+	$TbMsg[57]='Informaciï¿½';

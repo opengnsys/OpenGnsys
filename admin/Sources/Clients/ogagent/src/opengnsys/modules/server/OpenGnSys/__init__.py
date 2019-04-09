@@ -46,6 +46,7 @@ from opengnsys.workers import ServerWorker
 from six.moves.urllib import parse
 
 
+
 # Error handler decorator.
 def catch_background_error(fnc):
     def wrapper(*args, **kwargs):
@@ -85,7 +86,7 @@ def check_locked_partition(sync=False):
 
 class OpenGnSysWorker(ServerWorker):
     name = 'opengnsys'
-    interface = None  # Binded interface for OpenGnsys
+    interface = None  # Bound interface for OpenGnsys
     REST = None       # REST object
     loggedin = False  # User session flag
     locked = {}       # Locked partitions
@@ -138,7 +139,7 @@ class OpenGnSysWorker(ServerWorker):
             except OSError:
                 pass
         # Copy file "HostsFile.FirstOctetOfIPAddress" to "HostsFile", if it exists
-        # (used in "exam mode" of the University of Seville)
+        # (used in "exam mode" from the University of Seville)
         hostsFile = os.path.join(operations.get_etc_path(), 'hosts')
         newHostsFile = hostsFile + '.' + self.interface.ip.split('.')[0]
         if os.path.isfile(newHostsFile):
@@ -146,17 +147,41 @@ class OpenGnSysWorker(ServerWorker):
         # Generate random secret to send on activation
         self.random = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(self.length))
         # Send initialization message
-        self.REST.sendMessage('ogagent/started', {'mac': self.interface.mac, 'ip': self.interface.ip,
-                                                  'secret': self.random, 'ostype': operations.os_type,
-                                                  'osversion': operations.os_version})
+        try:
+            try:
+                self.REST.sendMessage('ogagent/started', {'mac': self.interface.mac, 'ip': self.interface.ip,
+                                                          'secret': self.random, 'ostype': operations.os_type,
+                                                          'osversion': operations.os_version})
+                # New web compatibility.
+                #self.REST.sendMessage('clients/statuses', {'mac': self.interface.mac, 'ip': self.interface.ip,
+                #                                           'secret': self.random, 'ostype': operations.os_type,
+                #                                           'osversion': operations.os_version,
+                #                                           'status': operations.os_type.lower()})
+            except:
+                # Trying to initialize on alternative server, if defined
+                # (used in "exam mode" from the University of Seville)
+                self.REST = REST(self.service.config.get('opengnsys', 'altremote'))
+                self.REST.sendMessage('ogagent/started', {'mac': self.interface.mac, 'ip': self.interface.ip,
+                                                          'secret': self.random, 'ostype': operations.osType,
+                                                          'osversion': operations.osVersion, 'alt_url': True})
+                # New web compatibility.
+                #self.REST.sendMessage('clients/statuses', {'mac': self.interface.mac, 'ip': self.interface.ip,
+                #                                           'secret': self.random, 'ostype': operations.os_type,
+                #                                           'osversion': operations.os_version,
+                #                                           'status': operations.os_type.lower()})
+        except:
+            logger.error('Initialization error')
 
     def onDeactivation(self):
         """
         Sends OGAgent stopping notification to OpenGnsys server
         """
         logger.debug('onDeactivation')
-        self.REST.sendMessage('ogagent/stopped', {'mac': self.interface.mac, 'ip': self.interface.ip,
-                                                  'ostype': operations.os_type, 'osversion': operations.os_version})
+        #self.REST.sendMessage('ogagent/stopped', {'mac': self.interface.mac, 'ip': self.interface.ip,
+        #                                          'ostype': operations.os_type, 'osversion': operations.os_version})
+        self.REST.sendMessage('clients/statuses', {'mac': self.interface.mac, 'ip': self.interface.ip,
+                                                   'ostype': operations.os_type, 'osversion': operations.os_version
+                                                   'status': 'off'})
 
     def processClientMessage(self, message, data):
         logger.debug('Got OpenGnsys message from client: {}, data {}'.format(message, data))

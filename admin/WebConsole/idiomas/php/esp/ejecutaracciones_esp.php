@@ -16,4 +16,4 @@
 	$TbMsg[8]='Procedimientos';
 	$TbMsg[9]='"Ejecutar procedimiento"';
 	$TbMsg[10]='"Incluir como autoexec"';
-	?>
+

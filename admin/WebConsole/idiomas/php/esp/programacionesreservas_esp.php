@@ -50,4 +50,3 @@ $TbMsg=array();
 	$TbMsg[29]="Trabajo previo";
 	$TbMsg[30]="Datos Reserva";
 
-?>

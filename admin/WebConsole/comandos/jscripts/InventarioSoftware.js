@@ -8,10 +8,10 @@
 //		Este fichero implementa las funciones javascript del fichero InventarioHardware.php (Comandos)
 // *************************************************************************************************************************************************
  function confirmar(){
+	var diskPart=[];
 	if (comprobar_datos()){
-		tb_conf=document.getElementById("tabla_conf");
+		var tb_conf=document.getElementById("tabla_conf");
 		var ochecks=tb_conf.getElementsByTagName('INPUT');
-		var particion;
 		for(var i=0;i<ochecks.length;i++){
 			if(ochecks[i].checked){
 				diskPart=ochecks[i].value.split(";");
@@ -32,14 +32,14 @@
   }
 //________________________________________________________________________________________________________
   function comprobar_datos(){
-		tb_conf=document.getElementById("tabla_conf");
+		var tb_conf=document.getElementById("tabla_conf");
 		var ochecks=tb_conf.getElementsByTagName('INPUT');
 		var op=0;
 		for(var i=0;i<ochecks.length;i++){
 			if(ochecks[i].checked)
 				op++;
 		}
-		if(op==0){
+		if(op===0){
 			   alert(TbMsg[1]);
 			 return(false);
 		}

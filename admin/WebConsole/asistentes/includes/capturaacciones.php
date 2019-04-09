@@ -27,5 +27,5 @@ if (isset($_POST["nombreambito"])) $nombreambito=$_POST["nombreambito"];
 if (isset($_POST["funcion"])) $funcion=$_POST["funcion"]; 
 if (isset($_POST["atributos"])) $atributos=$_POST["atributos"]; 
 if (isset($_POST["gestor"])) $gestor=$_POST["gestor"]; 
-?>
+
 

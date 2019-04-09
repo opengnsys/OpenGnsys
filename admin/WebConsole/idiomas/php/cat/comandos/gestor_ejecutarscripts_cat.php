@@ -10,4 +10,3 @@
 	$TbMsg[3]='"ATENCIÓ: El fitxer no te la extensió .rbc"';
 	$TbMsg[4]='"ATENCIÓ: El fitxer no conté codi Rembo-C per executar"';
 	$TbMsg[5]='"ATENCIÓ: Hi ha algun problema per salvar el fitxer de script"';
-?>

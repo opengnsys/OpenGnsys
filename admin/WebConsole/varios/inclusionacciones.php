@@ -1,11 +1,11 @@
 <?php
 //// ******************************************************************************************************
-// Aplicación WEB: ogAdmWebCon
-// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creación: Año 2009-2010
-// Fecha Última modificación: Agosto-2010
+// AplicaciÃ³n WEB: ogAdmWebCon
+// Autor: JosÃ© Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha CreaciÃ³n: AÃ±o 2009-2010
+// Fecha Ãºltima modificaciÃ³n: Agosto-2010
 // Nombre del fichero: inclusionacciones.php
-// Descripción : 
+// DescripciÃ³n:
 //		Permite incorporar procedimientos y comandos a tareas y tareas ya existentes
 // *******************************************************************************************************
 include_once("../includes/ctrlacc.php");
@@ -31,13 +31,14 @@ if (isset($_GET["ambito"])) $ambito=$_GET["ambito"];
 
 $cmd=CreaComando($cadenaconexion); // Crea objeto comando
 if (!$cmd)
-	Header('Location: '.$pagerror.'?herror=2'); // Error de conexión con servidor B.D.
+	Header('Location: '.$pagerror.'?herror=2'); // Error de conexiï¿½n con servidor B.D.
 
 $tbParametros=CreaTablaParametros($cmd); // Crea tabla en memmoria para acceder a detalles de comandos 	
 //________________________________________________________________________________________________________
 ?>
 <HTML>
 	<HEAD>
+		<TITLE>AdministraciÃ³n web de aulas</TITLE>
 		<META http-equiv="Content-Type" content="text/html;charset=UTF-8">
 		<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 		<SCRIPT language="javascript" src="../clases/jscripts/MenuContextual.js"></SCRIPT>		
@@ -62,12 +63,12 @@ $tbParametros=CreaTablaParametros($cmd); // Crea tabla en memmoria para acceder 
 			}	
 		?>
 		<P align=center class=cabeceras><IMG src="../images/iconos/acciones.gif">&nbsp;<?php echo $literal?><BR>		
-		<SPAN align=center class=subcabeceras><?php echo $descripcionaccion?></SPAN>&nbsp;<IMG src="<?php echo $urlimg?>"></P>
+		<SPAN class=subcabeceras><?php echo $descripcionaccion?></SPAN>&nbsp;<IMG src="<?php echo $urlimg?>"></P>
 	
 		<TABLE align=center border=0>
 			<TR>
 		<?php
-			$conTR=0; // Contador de lineas (Identificadores de las filas)
+			$conTR=0; // Contador de lÃ­neas (Identificadores de las filas)
 			switch($tipoaccion){
 				case $AMBITO_PROCEDIMIENTOS:
 					$litmsg=$TbMsg[5];				
@@ -109,7 +110,7 @@ $tbParametros=CreaTablaParametros($cmd); // Crea tabla en memmoria para acceder 
 				
 		$idprocedimientos=escribeAcciones($cmd,$AMBITO_PROCEDIMIENTOS,true,7);
 		
-		$idprocedimientos=$idprocedimiento; // Excluye  sólo a él para evitar dead-lock
+		$idprocedimientos=$idprocedimiento; // Excluye  sÃ³lo a Ã©l para evitar dead-lock
 		$cmd->texto="SELECT idprocedimiento AS identificador, 0 AS orden, 0 AS idcomando, descripcion AS procedimiento
 					FROM procedimientos
 					WHERE idprocedimiento NOT IN (".$idprocedimientos.") 
@@ -149,7 +150,7 @@ $tbParametros=CreaTablaParametros($cmd); // Crea tabla en memmoria para acceder 
 		}
 		
 		/* Tareas disponibles */ 
-		$idtareas=$idtarea; // Excluye  sólo a ella para evitar dead-lock
+		$idtareas=$idtarea; // Excluye  sï¿½lo a ella para evitar dead-lock
 		$cmd->texto="SELECT idtarea AS identificador, 0 AS orden, 0 AS idprocedimiento,	descripcion AS tarea
 					FROM tareas
 					WHERE idtarea NOT IN (".$idtareas.") 
@@ -186,14 +187,14 @@ $tbParametros=CreaTablaParametros($cmd); // Crea tabla en memmoria para acceder 
 			$conTR++;
 			echo '<TD align=center><INPUT type=checkbox';
 			if($sw)
-				echo ' value="1" checked '; // Lo marca como seleccionado (1ª. ronda)
+				echo ' value="1" checked '; // Lo marca como seleccionado (1ï¿½. ronda)
 			else
 				echo ' value="0"';
 			echo '></TD>';
 			echo '<TD align=center ><INPUT class="formulariodatos" style="WIDTH:30px" 
 					type="text" value="'.$rs->campos["orden"].'" id="'.$rs->campos["orden"].'"></TD>';
 
-			// Descripcion de la acción
+			// Descripcion de la acciï¿½n
 			switch($tipoaccion){
 				case $AMBITO_PROCEDIMIENTOS:
 					if(!empty($rs->campos["idcomando"])){
@@ -225,9 +226,9 @@ $tbParametros=CreaTablaParametros($cmd); // Crea tabla en memmoria para acceder 
 			// Orden del item del item
 			echo '</TR>';
 			
-			/* Muestra parámetros de los comandos (Se hace en Información)
+			/* Muestra parÃ¡metros de los comandos (Se hace en InformaciÃ³n)
 				if($tipoaccion==$AMBITO_PROCEDIMIENTOS){
-				if(!empty($rs->campos["idcomando"])){ // Se trata de un comando, se muestran parámetros)
+				if(!empty($rs->campos["idcomando"])){ // Se trata de un comando, se muestran parï¿½metros)
 					$htmlprm=escribeParametros($rs->campos["parametros"]);
 					if(!empty($htmlprm)){
 						echo '<TR>';
@@ -243,7 +244,7 @@ $tbParametros=CreaTablaParametros($cmd); // Crea tabla en memmoria para acceder 
 		if($sw) escribePie();
 		echo '</P></TD>';		
 		$rs->Cerrar();	
-		$idacciones.="0"; // Para evitar el último ";"		
+		$idacciones.="0"; // Para evitar el Ãºltimo ";"
 		return($idacciones);
 	}
 //________________________________________________________________________________________________________
@@ -278,5 +279,3 @@ $tbParametros=CreaTablaParametros($cmd); // Crea tabla en memmoria para acceder 
 				<SPAN align=center class=notas><I>'.$litmsg.'</I></SPAN>
 			</DIV>';
 	}	
-?>
-

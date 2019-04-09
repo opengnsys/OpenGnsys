@@ -58,4 +58,4 @@ switch($tipoaccion){
 		break;
 }
 die("HA HABIDO ALGÚN ERROR AL PROCESAR EL ITEM");
-?>
+

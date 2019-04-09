@@ -20,13 +20,13 @@ function confirmar(){
 		filtrado();
 		var ipfiltro=document.fdatosejecucion.filtro.value;
 	 	// Compone atributos del comando
-		tb_conf=document.getElementById("tabla_conf");
+		var tb_conf=document.getElementById("tabla_conf");
 		var ochecks=tb_conf.getElementsByTagName('INPUT');
 		for(var i=0;i<ochecks.length;i++){
 			if(ochecks[i].checked){
 				var diskPart = ochecks[i].value.split(";");
 				var disco = diskPart[0];
-                                var numpar= diskPart[1];
+				var numpar= diskPart[1];
 				atributos+="dsk="+disco+RC;
 				atributos+="par="+numpar+RC;
 				// Datos bloque de configuracion: ip equipos.
@@ -35,12 +35,12 @@ function confirmar(){
 				var iptabla=tbOrd.getAttribute('value'); 
 					
 				// Elimino los ordenadores del filtro que no estén en la tabla.
-				if (ipfiltro!=''){
+				if (ipfiltro!==''){
 					var arraytabla = iptabla.split(",");
 					var arrayfiltro =ipfiltro.split(";");
 					arrayfiltro = array_interset (arrayfiltro.sort(), arraytabla.sort());
 					ipfiltro = arrayfiltro.join(";");
-					if (ipfiltro ==''){
+					if (ipfiltro===''){
 			   			alert(TbMsg["FILTER"]);
 			 			return(false);
 					}
@@ -68,13 +68,13 @@ function confirmar(){
 //________________________________________________________________________________________________________
   function comprobar_datos()
 {
-		tb_conf=document.getElementById("tabla_conf");
+		var tb_conf=document.getElementById("tabla_conf");
 		var ochecks=tb_conf.getElementsByTagName('INPUT');
 		var op=0;
 		for(var i=0;i<ochecks.length;i++){
 			if(ochecks[i].checked)		op++;
 		}
-		if(op==0){
+		if(op===0){
 			   alert(TbMsg[1]);
 			 return(false);
 		}

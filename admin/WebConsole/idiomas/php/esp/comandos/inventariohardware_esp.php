@@ -13,4 +13,4 @@
 	$TbMsg[5]='Inventario Hardware';
 	$TbMsg[6]='Ámbito';
 
-?>
+

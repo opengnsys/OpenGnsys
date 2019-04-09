@@ -11,4 +11,4 @@
 	$TbMsg[3]='Nombre del adminsitrador';
 	$TbMsg[4]='(*)Para incluir algún adminsitrador en esta Unidad Organizativa debe hacer click sobre la casilla de verificación correspondiente.';
 	$TbMsg[5]='Administradores disponibles';
-?>
+

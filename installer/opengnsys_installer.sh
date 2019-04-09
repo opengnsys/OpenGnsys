@@ -145,7 +145,6 @@ OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/${OPENGNSYS_DATABASE}.sql
 # - APACHEENABLEOG, APACHEOGSITE, - habilitar sitio web de OpenGnsys
 # - PHPFPMSERV - servicio PHP FastCGI Process Manager para Apache
 # - INETDSERV - servicio Inetd
-# - FIREWALLSERV - servicio de cortabuegos IPTables/FirewallD
 # - DHCPSERV, DHCPCFGDIR - servicio y configuración de DHCP
 # - MYSQLSERV, TMPMYCNF - servicio MySQL y fichero temporal con credenciales de acceso
 # - MARIADBSERV - servicio MariaDB (sustituto de MySQL en algunas distribuciones)
@@ -170,7 +169,7 @@ OSVERSION="${OSVERSION%%.*}"
 # Configuración según la distribución GNU/Linux (usar minúsculas).
 case "$OSDISTRIB" in
 	ubuntu|debian|linuxmint)
-		DEPENDENCIES=( subversion apache2 php php-ldap php-fpm mysql-server php-mysql isc-dhcp-server bittorrent tftp-hpa tftpd-hpa xinetd build-essential g++-multilib libmysqlclient-dev wget curl doxygen graphviz bittornado ctorrent samba rsync unzip netpipes debootstrap schroot squashfs-tools btrfs-tools procps arp-scan realpath php-curl gettext moreutils jq wakeonlan udpcast shim-signed grub-efi-amd64-signed )
+		DEPENDENCIES=( subversion apache2 php php-ldap php-fpm mysql-server php-mysql isc-dhcp-server bittorrent tftp-hpa tftpd-hpa xinetd build-essential g++-multilib libmysqlclient-dev wget curl doxygen graphviz bittornado ctorrent samba rsync unzip netpipes debootstrap schroot squashfs-tools btrfs-tools procps arp-scan realpath php-curl gettext moreutils jq udpcast libev-dev shim-signed grub-efi-amd64-signed )
 		UPDATEPKGLIST="apt-get update"
 		INSTALLPKG="apt-get -y install --force-yes"
 		CHECKPKG="dpkg -s \$package 2>/dev/null | grep Status | grep -qw install"
@@ -207,7 +206,7 @@ case "$OSDISTRIB" in
 		TFTPCFGDIR=/var/lib/tftpboot
 		;;
 	fedora|centos)
-		DEPENDENCIES=( subversion httpd mod_ssl php-ldap php-fpm mysql-server mysql-devel mysql-devel.i686 php-mysql dhcp tftp-server tftp xinetd binutils gcc gcc-c++ glibc-devel glibc-devel.i686 glibc-static glibc-static.i686 libstdc++-devel.i686 make wget curl doxygen graphviz ctorrent samba samba-client rsync unzip debootstrap schroot squashfs-tools python-crypto arp-scan procps-ng gettext moreutils jq net-tools udpcast shim-x64 grub2-efi-x64 grub2-efi-x64-modules http://ftp.altlinux.org/pub/distributions/ALTLinux/5.1/branch/$(arch)/RPMS.classic/netpipes-4.2-alt1.$(arch).rpm )
+		DEPENDENCIES=( subversion httpd mod_ssl php-ldap php-fpm mysql-server mysql-devel mysql-devel.i686 php-mysql dhcp tftp-server tftp xinetd binutils gcc gcc-c++ glibc-devel glibc-devel.i686 glibc-static glibc-static.i686 libstdc++-devel.i686 make wget curl doxygen graphviz ctorrent samba samba-client rsync unzip debootstrap schroot squashfs-tools python-crypto arp-scan procps-ng gettext moreutils jq net-tools udpcast libev-devel shim-x64 grub2-efi-x64 grub2-efi-x64-modules http://ftp.altlinux.org/pub/distributions/ALTLinux/5.1/branch/$(arch)/RPMS.classic/netpipes-4.2-alt1.$(arch).rpm )
 		[ "$OSDISTRIB" == "centos" ] && UPDATEPKGLIST="yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-$OSVERSION.noarch.rpm http://rpms.remirepo.net/enterprise/remi-release-$OSVERSION.rpm"
 		INSTALLEXTRADEPS=( 'pushd /tmp; wget -t3 http://ftp.acc.umu.se/mirror/bittornado/BitTornado-0.3.18.tar.gz && tar xvzf BitTornado-0.3.18.tar.gz && cd BitTornado-CVS && python setup.py install && ln -fs btlaunchmany.py /usr/bin/btlaunchmany && ln -fs bttrack.py /usr/bin/bttrack; popd' )
 		INSTALLPKG="yum install -y libstdc++ libstdc++.i686"
@@ -232,11 +231,6 @@ case "$OSDISTRIB" in
 		APACHEREWRITEMOD="sed -i '/rewrite/s/^#//' $APACHECFGDIR/../*.conf"
 		DHCPSERV=dhcpd
 		DHCPCFGDIR=/etc/dhcp
-		if firewall-cmd --state &>/dev/null; then
-			FIREWALLSERV=firewalld
-		else
-			FIREWALLSERV=iptables
-		fi
 		INETDSERV=xinetd
 		INETDCFGDIR=/etc/xinetd.d
 		MYSQLSERV=mysqld
@@ -268,13 +262,6 @@ local f
 # Configuraciones específicas para Samba y TFTP en Debian 6.
 [ -z "$SYSTEMD" -a ! -e /etc/init.d/$SAMBASERV ] && SAMBASERV=samba
 [ ! -e $TFTPCFGDIR ] && TFTPCFGDIR=/srv/tftp
-
-# Configuraciones específicas para SELinux permisivo en distintas versiones.
-[ -f /selinux/enforce ] && echo 0 > /selinux/enforce
-for f in /etc/sysconfig/selinux /etc/selinux/config; do
-	[ -f $f ] && perl -pi -e 's/SELINUX=enforcing/SELINUX=permissive/g' $f
-done
-selinuxenabled 2>/dev/null && setenforce 0 2>/dev/null
 }
 
 
@@ -823,13 +810,7 @@ function downloadCode()
 # Comprobar si existe conexión.
 function checkNetworkConnection()
 {
-	echoAndLog "${FUNCNAME}(): Disabling Firewall: $FIREWALLSERV."
-	if [ -n "$FIREWALLSERV" ]; then
-		service=$FIREWALLSERV
-		$STOPSERVICE; $DISABLESERVICE
-	fi
-
-	echoAndLog "${FUNCNAME}(): Checking OpenGnsys server conectivity."
+	echoAndLog "${FUNCNAME}(): Checking OpenGnsys server connectivity."
 	OPENGNSYS_SERVER=${OPENGNSYS_SERVER:-"opengnsys.es"}
 	if which wget &>/dev/null; then
 		wget --spider -q $OPENGNSYS_SERVER
@@ -1151,7 +1132,7 @@ function installWebConsoleApacheConf()
 	echoAndLog "${FUNCNAME}(): configuring PHP-FPM"
 	service=$PHPFPMSERV
 	$ENABLESERVICE; $STARTSERVICE
-	sockfile=$(find /run/php -name "php*.sock" -type s -print 2>/dev/null)
+	sockfile=$(find /run/php -name "php*.sock" -type s -print 2>/dev/null | tail -1)
 
 	# Activar módulos de Apache.
 	$APACHEENABLEMODS
@@ -1558,7 +1539,7 @@ function installationSummary()
 	# de código o si no está incluida en el fichero de versión.
 	if [ $REMOTE -eq 1 ] || [ -z "$(jq -r '.release' $VERSIONFILE)" ]; then
 		# Revisión: rAñoMesDía.Gitcommit (8 caracteres de fecha y 7 primeros de commit).
-		REVISION=$(curl -s "$API_URL" | jq '"r" + (.commit.commit.committer.date | gsub("-"; "")[:8]) + "." + (.commit.sha[:7])')
+		REVISION=$(curl -s "$API_URL" | jq '"r" + (.commit.commit.committer.date | split("-") | join("")[:8]) + "." + (.commit.sha[:7])')
 		jq ".release=$REVISION" $VERSIONFILE | sponge $VERSIONFILE
 	fi
 	VERSION="$(jq -r '[.project, .version, .codename, .release] | join(" ")' $VERSIONFILE 2>/dev/null)"
@@ -1576,16 +1557,15 @@ function installationSummary()
 	echoAndLog "Installed ogLive client(s):       $(oglivecli list | awk '{print $2}')"
 	echoAndLog "Samba configuration directory:    $SAMBACFGDIR"
 	echoAndLog "Web Console URL:                  $OPENGNSYS_CONSOLEURL"
-	echoAndLog "Web Console access data:          specified in installer script"
+	echoAndLog "Web Console access data:          entered by the user"
 	if grep -q "^RUN_BTTRACK.*no" /etc/default/opengnsys; then
 		echoAndLog "BitTorrent service is disabled."
 	fi
 	echo
 	echoAndLog "Post-Installation Instructions:"
 	echo       "==============================="
-	echoAndLog "Firewall service has been disabled and SELinux mode set to"
-	echoAndLog "   permissive during OpenGnsys installation. Please check"
-	echoAndLog "   ${FIREWALLSERV:-firewall} and SELinux configuration, if needed."
+	echoAndLog "You can improve server security by configuring firewall and SELinux,"
+	echoAndLog "   running \"$INSTALL_TARGET/lib/security-config\" script as root."
 	echoAndLog "It's strongly recommended to synchronize this server with an NTP server."
 	echoAndLog "Review or edit all configuration files."
 	echoAndLog "Insert DHCP configuration data and restart service."

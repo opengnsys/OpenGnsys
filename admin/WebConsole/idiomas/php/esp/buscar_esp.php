@@ -17,5 +17,5 @@ $TbMsg["SEARCH_NOMATCHES"]="No se encuentran resultados";
 $TbMsg["SEARCH_NOVALUE"]="Debe introducir un valor para el criterio de búsqueda";
 $TbMsg["SEARCH_PROFESSOR"]="Ordenadores de profesor";
 $TbMsg["SEARCH_NOREPO"]="Ordenadores sin repositorio";
-?>
+
 

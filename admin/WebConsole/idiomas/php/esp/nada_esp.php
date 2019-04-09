@@ -13,4 +13,3 @@
 	$TbMsg[5]="Navegador";
 	$TbMsg[6]="Versi&oacute;n Navegador";
 
-?>

@@ -26,4 +26,4 @@
 	$TbMsg[18]='Tama&ntilde;o de la imagen disponible si Repositorio y Servidor Web alojados en el mismo Servidor';
 	$TbMsg[19]='Tipo';
 	$TbMsg["CONFIG_NOCONFIG"]='Sin configuraci&oacute;n: cliente no conectado al servidor.';
-?>
+

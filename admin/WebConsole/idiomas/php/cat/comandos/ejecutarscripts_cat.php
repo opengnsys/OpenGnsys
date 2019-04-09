@@ -58,5 +58,5 @@
 	$TbMsg["WCRP35"]='Escull el mètode de transferència';
 	$TbMsg["WCRP36"]='Escull eina de clonaci&oacute;:';
 	$TbMsg["WCRP37"]='Escull compressor per l\'eina de clonaci&oacute;:';
-?>
+
 

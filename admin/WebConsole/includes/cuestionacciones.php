@@ -76,4 +76,4 @@ function CuestionAcciones($cmd,$shidra,$parametros){
 	}
 	return(true);
 }
-	?>
+

@@ -282,4 +282,4 @@ class XmlPhp{
 		return($info);
 	}
 } // Fin de la clase 
-?>
+

@@ -48,4 +48,4 @@
 	$TbMsg[37]='Borrarla previamente de la cache';	
 	$TbMsg[38]='Software Incremental';	
 	$TbMsg[39]='No borrar archivos en destino';
-?>	
+

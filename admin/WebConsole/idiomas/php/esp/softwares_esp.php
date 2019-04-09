@@ -34,4 +34,3 @@
 	$TbMsg[26]='"Información Incremental"';
 	$TbMsg[27]='"Mover incremental"';
 	$TbMsg[28]='"Eliminar  incremental"';
-?>

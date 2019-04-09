@@ -183,11 +183,9 @@ class ArbolVistaXML{
 		else
 			$arbol='<TABLE style="BORDER-BOTTOM:#000000 1px solid;" border=0 cellspacing=0 cellpadding=0>';
 		$arbol.='<TR height="16px">';
-		$atributosHTML=" ";
 		$atributosHTML=$this->gXML->Atributos($nodo);
 		$colornodo="";
 		$fondonodo="";
-		$estilo="";
 		$atributosHTML=$this->gXML->TomaAtributoEspecial("colornodo",$colornodo,$atributosHTML);
 		$atributosHTML=$this->gXML->TomaAtributoEspecial("fondonodo",$fondonodo,$atributosHTML);
 		if ($colornodo!="" ) $colornodo=' COLOR:'.$colornodo.";";
@@ -196,7 +194,7 @@ class ArbolVistaXML{
 		if ($estilo!="" )	$estilo='style="'.$colornodo.$fondonodo.'"';
 
 		for ($i=0;$i<$nivel;$i++){ // Niveles previos
-			$arbol.='<TD  '.$estilo.'width="3px"></TD>';
+			$arbol.='<TD  '.$estilo.' width="3px"></TD>';
 			$arbol.='<TD  '.$estilo.' width="16px"><IMG src="'.$this->c_imgnivel[$i].'" width="16px" height="16px" ></TD>';
 		}
 		$arbol.='<TD  '.$estilo.' width="3px"></TD>'; // Desplazamiento de la imagen

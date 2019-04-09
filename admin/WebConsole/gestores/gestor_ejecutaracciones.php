@@ -306,5 +306,5 @@ function enviaComando($parametros,$sesion)
 	}
 	return(true);
 }
-?>
+
 
