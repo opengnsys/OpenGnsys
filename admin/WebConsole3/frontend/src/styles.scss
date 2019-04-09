@@ -1,0 +1,304 @@
+/* You can add global styles to this file, and also import other style files */
+.capitalize {
+  text-transform: capitalize;
+}
+
+table td input.has-error {
+  border: 1px solid red;
+}
+
+table td input.has-success {
+  border: 1px solid green;
+}
+
+table.table-no-border {
+  border: none;
+}
+
+#loading-bar .bar {
+  background: white;
+}
+
+#loading-bar-spinner {
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+}
+
+#loading-bar-spinner .spinner-icon {
+  width: 2em;
+  height: 2em;
+
+  border-top-color:  white;
+  border-left-color: white;
+
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.info-box.client .info-box-icon {
+  line-height: 75px;
+  background-color:rgba(192,192,192,0.1);
+}
+.info-box.client .info-box-icon .info-box-text {
+  margin-top: -40px;
+  text-transform: capitalize;
+}
+.info-box.client .info-box-icon small{
+  display: block;
+  margin-top: -10px;
+  font-size: 12px;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.info-box.client input[type=checkbox].selection-checkbox {
+  position: absolute;
+  margin-left: 5px;
+}
+
+i.client {
+  font-size: 2em;
+  text-align: center;
+}
+
+.client-color-off {
+  background-color: gray;
+}
+
+.client-color-initializing {
+  background-color: #ffdb00;
+  color: black;
+}
+
+.client-color-oglive {
+  background-color: #ffdb00;
+  color: black;
+}
+
+.client-color-busy {
+  background-color: red;
+}
+
+.client-color-linux {
+  background-color: #605ca8;
+}
+
+.client-color-macos {
+  background-color: purple;
+}
+.client-color-windows {
+  background-color: #00c0ef;
+}
+
+.client-color-unknown {
+  background-color: black;
+}
+
+.bg-lab{
+  background-color: #d7dbef;
+  padding: 10px 10px 0 10px;
+}
+
+tr.odd {
+  background-color: #ededf2;
+}
+tr.even{
+  background-color: #ffffff;
+}
+
+.box-body.folders{
+  border-left: 1px dashed;
+}
+
+.padding-10 {
+  padding-right: 10px;
+  padding-left: 10px;
+}
+
+.padding-5 {
+  padding-right: 5px;
+  padding-left: 5px;
+}
+
+.toolboxbar {
+  padding-top: 10px;
+  min-height: 40px;
+}
+
+body .toolboxbar.fixed {
+  position: fixed;
+  padding: 10px 0;
+  top: 0;
+  background: white;
+  z-index: 1059;
+  right: 0;
+  left: 230px;
+}
+
+/* Para dispositivos moviles */
+@media (max-width: 767px) {
+  body .toolboxbar.fixed {
+    left: 0;
+  }
+
+  .toolboxbar {
+    margin-bottom: 20px;
+  }
+
+  .main-header .sidebar-toggle:hover {
+    color: #72afd2;
+  }
+}
+
+
+body.sidebar-collapse .toolboxbar.fixed {
+  left: 0;
+  right: 0;
+}
+
+.box-tools.pull-right .dropdown-menu {
+  right: 0;
+  left: auto;
+}
+
+
+ul.dropdown-menu li.delete-option a {
+  color: red;
+}
+
+table.disk-partitions {
+  width: 100%;
+  border: 1px solid;
+  margin: 15px 0;
+}
+
+table.disk-partitions td {
+  border-right: 1px solid;
+}
+
+table.disk-partitions td span {
+  padding: 5px 10px;
+  font-weight: bold;
+}
+
+table.partitions tbody.extended-partition tr:nth-child(2) td {
+  border-top: 2px solid #808080;
+}
+table.partitions tbody.extended-partition tr:last-child td {
+  border-bottom: 2px solid #808080;
+}
+
+table.partitions tbody.extended-partition tr.extended td:first-child {
+  text-align: center;
+}
+
+table.partitions select[disabled="disabled"] {
+  background: rgb(229,229,229);
+}
+
+span.og-command {
+  font-weight: bold;
+  color: #2e4458;
+}
+
+span.og-string {
+  color: #58a500;
+}
+
+textarea.og-instructions {
+  width: 100%;
+  height: 300px;
+}
+
+.JCLRgrip .JColResizer {
+  top: 15px !important;
+}
+
+ul.dropdown-menu.fit {
+  width: auto !important;
+}
+
+.service.info span {
+  display: block;
+}
+
+.service.info a {
+  text-decoration: none;
+  font-size: 11px;
+}
+
+.disable-links {
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+.disable-links a{
+  color: rgba(130,130,130,0.5)!important;
+}
+
+.og-floating-script {
+  position: relative;
+}
+.og-floating-script pre {
+  position: absolute;
+  padding: 10px;
+  border: 1px solid;
+  z-index: 99;
+  scroll-behavior: auto;
+  max-height: 300px;
+}
+.og-floating-script.right pre {
+  right: 0;
+}
+
+.client-cache-info {
+  border-bottom: 2px solid #ddd;
+  background-color: #ededf2;
+}
+
+.client-cache-info td, .client-cache-info th  {
+  background-color: #ededf2;
+}
+
+.logo img {
+  width: 40px;
+  float: left;
+  margin: 5px;
+}
+
+.sidebar-collapse .logo img {
+  margin-left: -10px!important;
+}
+
+.login-full-height {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.panel-heading img {
+  width: 40px;
+}
+
+.panel-heading h3 {
+  display: inline;
+}
+
+.netboot-template .form-control {
+  min-height: 300px;
+}
+
+.table.netboot select {
+  width: 100%;
+  min-height: 300px;
+}
+
+.traces-filters {
+  margin-bottom: 10px;
+}
+
+ng2-smart-table {
+  font-size: initial !important;
+}

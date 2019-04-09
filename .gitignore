@@ -1,8 +1,3 @@
+.DS_Store
+.editorconfig
 .idea
-/admin/WebConsole3/backend/app/config/parameters.yml
-/admin/WebConsole3/backend/build/
-/admin/WebConsole3/backend/phpunit.xml
-/admin/WebConsole3/backend/var/*
-/admin/WebConsole3/backend/vendor/
-/admin/WebConsole3/backend/web/bundles/
-/admin/WebConsole3/backend/web/uploads/

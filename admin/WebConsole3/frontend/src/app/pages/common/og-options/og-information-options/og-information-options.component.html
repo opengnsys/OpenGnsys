@@ -1,0 +1,20 @@
+<mk-dropdown class="btn-group">
+  <mk-dropdown-toggle>
+    <span translate="info"></span><span class="caret"></span>
+  </mk-dropdown-toggle>
+  <mk-dropdown-menu>
+    <li role="presentation" class="{{ogCommonService.getSelectionSize() < 1 ?'disable-links':''}}">
+      <a role="menuitem" tabindex="-1" href="javascript:void(0)" (click)="ogCommandsService.execute('REFRESH_INFO')" translate="refresh_info"></a>
+    </li>
+    <li role="presentation" class="divider"></li>
+    <li role="presentation" class="{{ogCommonService.getSelectionSize() != 1 ?'disable-links':''}}" [routerLink]="'/app/traces'">
+      <a role="menuitem" tabindex="-1" href="javascript:void(0)" translate="actions_queue"></a>
+    </li>
+    <li role="presentation" class="{{ogCommonService.getSelectionSize() != 1 ?'disable-links':''}}">
+      <a role="menuitem" tabindex="-1" href="javascript:void(0)" (click)="ogCommandsService.execute('HISTORY_LOG')" translate="history_log"></a>
+    </li>
+    <li role="presentation" class="{{ogCommonService.getSelectionSize() != 1 ?'disable-links':''}}">
+      <a role="menuitem" tabindex="-1" href="javascript:void(0)" (click)="ogCommandsService.execute('REALTIME_LOG')" translate="realtime_log"></a>
+    </li>
+  </mk-dropdown-menu>
+</mk-dropdown>

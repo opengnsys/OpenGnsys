@@ -1,0 +1,150 @@
+<div id="wrapper">
+
+  <!-- Navigation -->
+
+  <header></header>
+  <!-- /.navbar-top-links -->
+
+
+  <!-- /.navbar-static-side -->
+
+  <div id="page-wrapper" style="min-height: 561px;">
+
+    <div ui-view>
+      <section class="content">
+        <div class="row">
+          <div class="col-md-3">
+            <div class="info-box bg-green">
+              <span class="info-box-icon"><i class="ion ion-speedometer"></i></span>
+
+              <div class="info-box-content">
+                <span class="info-box-text">CPU</span>
+                <span class="info-box-number">{{info.cpu.usage}}%</span>
+
+                <div class="progress">
+                  <div class="progress-bar" style="width: {{info.cpu.usage}}%"></div>
+                </div>
+                <span class="progress-description">
+						                    {{info.cpu.model}}
+						               </span>
+              </div>
+              <!-- /.info-box-content -->
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="info-box bg-aqua">
+              <span class="info-box-icon"><i class="ion ion-stats-bars"></i></span>
+
+              <div class="info-box-content">
+                <span class="info-box-text" translate="memory"></span>
+                <span class="info-box-number">{{info.ram.used + " " + info.ram.units}}</span>
+
+                <div class="progress">
+                  <div class="progress-bar" style="width: {{(info.ram.used/info.ram.total)*100}}%"></div>
+                </div>
+                <span class="progress-description">
+						                     {{info.ram.total + " " + info.ram.units}}
+						               </span>
+              </div>
+              <!-- /.info-box-content -->
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="info-box bg-orange" ng-click="changeDiskIndex()">
+              <span class="info-box-icon"><i class="ion ion-pie-graph"></i></span>
+
+              <div class="info-box-content" *ngIf="info.disk[diskIndex]">
+                <span class="info-box-text"><span translate="disk_info"></span> <span class="pull-right">{{info.disk[diskIndex].partition}}</span></span>
+                <span class="info-box-number">{{info.disk[diskIndex].used + " / " + info.disk[diskIndex].total}} - {{info.disk[diskIndex].free}} <span translate="free"></span></span>
+
+                <div class="progress">
+                  <div class="progress-bar" style="width: {{info.disk[diskIndex].percent}}"></div>
+                </div>
+                <span class="progress-description">
+						                     {{info.disk[diskIndex].mountPoint}}
+						               </span>
+              </div>
+              <!-- /.info-box-content -->
+            </div>
+          </div>
+          <div class="col-md-3">
+            <div class="info-box bg-blue">
+              <span class="info-box-icon"><i class="ion ion-network"></i></span>
+
+              <div class="info-box-content">
+                <span class="info-box-text" translate="network_in_out_bytes"></span>
+                <span class="info-box-number">{{info.network.card}}</span>
+                <div class="progress">
+                  <div class="progress-bar" style="width: 50%"></div>
+                </div>
+                <span class="progress-description">
+						                     <i class="ion-arrow-up-b"></i> {{info.network.inBytes}} - <i class="ion-arrow-down-b"></i> {{info.network.outBytes}}
+                </span>
+              </div>
+              <!-- /.info-box-content -->
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12">
+            <div class="box box-primary">
+              <div class="box-header with-border">
+                <h3 class="box-title" translate="server_status"></h3>
+                <div class="row">
+                  <div class="col-md-3">
+                    <h4 translate="CPU_model"></h4>{{info.cpu.model}}
+                  </div>
+                  <div class="col-md-3">
+                    <h4 translate="RAM"></h4>{{info.ram.total + " " + info.ram.units}}
+                  </div>
+                  <div class="col-md-4">
+                    <h4 translate="og_services"></h4>
+                    <div>
+                      <table class="table table-responsive">
+                        <tr>
+                          <th translate="status"></th>
+                          <th translate="name"></th>
+                          <th translate="cpu"></th>
+                          <th translate="etime"></th>
+                          <th translate="memory"></th>
+                        </tr>
+                        <tr *ngFor="let service of info.ogServices">
+                          <td>
+                            <div class="service info">
+                              <a href="javascript:void(0)">
+                                <i class="fa fa-circle" ng-class="{'text-success': service.status === 'online','text-danger': service.status === 'offline'}"></i> {{service.status}}
+                              </a>
+                            </div>
+                          </td>
+                          <td>
+                            {{service.name}}
+                          </td>
+                          <td>
+                            {{service.cpu}}
+                          </td>
+                          <td>
+                            {{service.etime}}
+                          </td>
+                          <td>
+                            {{service.memory/1024|number:'1.2-2'}} MB
+                          </td>
+                        </tr>
+                      </table>
+                    </div>
+                </div>
+              </div>
+                <div class="box-body">
+                  <div>
+                    <canvas id="canvas" height="300px">{{ chart }}</canvas>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+  </div>
+  <!-- /#page-wrapper -->
+</div>

@@ -1,0 +1,45 @@
+<mk-box [boxColor]="'warning'" [isRemovable]="false">
+  <mk-box-header class="box-header with-border">
+    <i class="fa fa-folder-open-o"></i>
+    <h3 class="box-title">
+      <div mk-dropdown class="btn-group" *ngIf="!content.$$editing">
+          <mk-dropdown-toggle>
+            <button #toggleElement type="button" class="btn btn-default dropdown-toggle" >
+              {{content.name}}
+              <span class="fa fa-caret-down"></span>
+            </button>
+          </mk-dropdown-toggle>
+          <mk-dropdown-menu>
+            <li role="presentation">
+              <a role="menuitem" tabindex="-1" href="#" translate="add_group"></a>
+            </li>
+            <li role="presentation">
+              <a role="menuitem" tabindex="-1" href="#" translate="add_hardware_component"></a>
+            </li>
+            <li role="presentation" class="divider"></li>
+            <li>
+              <a class="" href="javascript:void(0)" translate="edit" (click)="content.$$tmpDescription = content.description; content.$$editing = true"></a>
+            </li>
+            <li role="presentation" class="divider"></li>
+            <li role="presentation" class="delete-option">
+              <a class="" href="javascript:void(0)" translate="delete" (click)="vm.deleteGroup(content.id)"></a>
+            </li>
+          </mk-dropdown-menu>
+      </div>
+      <div *ngIf="content.$$editing" class="col-xs-6">
+        <input type="text" class="form-control" [(ngModel)]="content.$$tmpDescription">
+        <span class="input-group-btn">
+          <button type="button" class="btn btn-default btn-flat" translate="done" (click)="changeGroupName(content)"></button>
+          <button type="button" class="btn btn-info btn-flat" translate="cancel" (click)="content.$$editing = false"></button>
+        </span>
+      </div>
+    </h3>
+    <!-- /.box-tools -->
+  </mk-box-header>
+  <!-- /.box-header -->
+  <mk-box-content class="box-body folders" style="display: block;">
+    <app-hardware-component-group *ngFor="let content of content.groups" [content]="content" [hardwareTypes]="hardwareTypes">
+    </app-hardware-component-group>
+    <app-hardware-components-table *ngIf="content.components" [components]="content.components" [hardwareTypes]="hardwareTypes"></app-hardware-components-table>
+  </mk-box-content>
+</mk-box>

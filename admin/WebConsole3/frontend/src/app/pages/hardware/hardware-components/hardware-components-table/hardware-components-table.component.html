@@ -1,0 +1,43 @@
+<table class="table table-hover">
+  <tbody>
+  <tr>
+    <th translate="description"></th>
+    <th translate="type"></th>
+    <!--th translate="imageUrl"></th-->
+    <th translate="options"></th>
+  </tr>
+    <tr  *ngFor="let hardwareComponent of components; let index = index" class="{{(index%2 == 0)?'odd':'even'}}">
+      <td>
+                  <span *ngIf="hardwareComponent.$$editing">
+                    <input type="text" class="form-control" [(ngModel)]="hardwareComponent.$$tmpDescription">
+                  </span>
+        <span *ngIf="!hardwareComponent.$$editing">
+                    {{hardwareComponent.description}}
+                  </span>
+      </td>
+      <td>
+                  <span *ngIf="hardwareComponent.$$editing">
+                    <select class="form-control" [(ngModel)]="hardwareComponent.$$tmpType">
+                      <option [value]="hardwareType.nemonic" *ngFor="let hardwareType of hardwareTypes">{{hardwareType.name}}</option>
+                    </select>
+                  </span>
+        <span *ngIf="!hardwareComponent.$$editing">
+            <select disabled="disabled" class="form-control" [(ngModel)]="hardwareComponent.type">
+              <option [value]="hardwareType.nemonic" *ngFor="let hardwareType of hardwareTypes">{{hardwareType.name}}</option>
+            </select>
+          </span>
+      </td>
+      <td class="right">
+        <span *ngIf="hardwareComponent.$$editing">
+          <div class="btn-group ">
+            <button class="btn btn-primary " translate="ok" (click)="saveHardwareComponent(hardwareComponent)"></button>
+            <button class="btn btn-default " translate="cancel" (click)="hardwareComponent.$$editing = false"></button>
+          </div>
+        </span>
+        <span *ngIf="!hardwareComponent.$$editing">
+          <app-table-action [rowData]="hardwareComponent" [options]="tableOptions" (edit)="editHardwareComponent($event)" (delete)="deleteHardwareComponent($event)"></app-table-action>
+        </span>
+      </td>
+    </tr>
+  </tbody>
+</table>

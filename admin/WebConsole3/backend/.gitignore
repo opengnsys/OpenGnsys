@@ -1,4 +1,3 @@
-/web/bundles/
 /app/bootstrap.php.cache
 /app/cache/*
 /app/config/parameters.yml
@@ -6,7 +5,10 @@
 !app/cache/.gitkeep
 !app/logs/.gitkeep
 /app/phpunit.xml
-/build/
-/vendor/
 /bin/
+/build/
 /composer.phar
+/var/*
+/vendor/
+/web/bundles/
+/web/uploads/

@@ -1,0 +1,100 @@
+<section class="content-header">
+  <h1 translate="repositories">
+  </h1>
+  <ol class="breadcrumb">
+    <li><a [routerLink]="'/app/dashboard'"><i class="fa fa-dashboard"></i> {{'dashboard'|translate}}</a></li>
+    <li class="active" translate="repositories"></li>
+  </ol>
+</section>
+<section fixed-toolboxbar class="toolboxbar">
+  <div >
+    <div class="col-md-12">
+      <div class="input-group">
+        <input type="text" name="q" class="form-control" placeholder="Search..." ng-model="searchText">
+        <span class="input-group-btn">
+		            <button type="button" name="search" id="search-btn" class="btn btn-flat"><i class="fa fa-search"></i>
+		            </button>
+		          </span>
+      </div>
+    </div>
+    <div class="col-md-12" style="margin-top: 5px;margin-bottom: 5px;">
+      <div class="box-tools pull-right">
+        <button class="btn btn-default" (click)="newRepository()" translate="new_repo"></button>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="content">
+  <div class="row">
+    <mk-box [header]="repository.name"  [isLoading]="isRepositoryLoading()" [isCollapsable]="true" [isRemovable]="false" boxColor="primary" *ngFor="let repository of repositories"  class="col-md-6">
+      <div class="box-body">
+        <form #form>
+          <app-form-input [formType]="formType" [model]="repository" [cols]="2"></app-form-input>
+        </form>
+        <div class="box-footer">
+
+            <button type="button" class="btn btn-primary" translate="save" (click)="saveRepository(Form, repository)"></button>
+          <button type="button" class="btn btn-danger  pull-right"  (click)="deleteRepository(repository)" translate="delete">
+          </button>
+        </div>
+      </div>
+      <div class="box-footer">
+        <mk-box header="{{'filesystem_info'|translate}}" [isCollapsable]="true" [isRemovable]="false" contentClasses="table-responsive">
+          <button type="button" [disabled]="repository.password.length == 0" class="btn btn-primary pull-right"  (click)="refreshRepoInfo(repository)">
+            <i class="fa fa-refresh"></i> <span translate="refresh_info"></span>
+          </button>
+          <div class="box-body no-padding" >
+
+            <div translate="connection_not_available" *ngIf="!repository.info"></div>
+            <table class="table table-condensed table-striped" *ngIf="repository.info">
+              <tbody>
+              <tr>
+                <th colspan="5" translate="disk_info"></th>
+              </tr>
+              <tr>
+                <th translate="partition"></th>
+                <th translate="total_disk"></th>
+                <th translate="used_disk"></th>
+                <th translate="free_disk"></th>
+                <th translate="busy_percent_disk"></th>
+              </tr>
+              <tr>
+                <td>{{repository.info.disk[0].partition}}</td>
+                <td>{{repository.info.disk[0].total}}</td>
+                <td>{{repository.info.disk[0].used}}</td>
+                <td>
+                  {{repository.info.disk[0].free}}
+                </td>
+                <td>
+                    <span class="badge" ng-class="{'bg-green': repository.info.disk[0].percent.split('%')[0] < 60, 'bg-red': repository.info.disk[0].percent.split('%')[0] > 85, 'bg-yellow': repository.info.disk[0].percent.split('%')[0] >= 60 && repository.info.disk[0].percent.split('%')[0] <= 85}">{{repository.info.disk[0].percent}}
+                    </span>
+                </td>
+              </tr>
+              </tbody>
+              <tbody>
+              <tr>
+                <th colspan="2" translate="images_info"></th>
+              </tr>
+              <tr>
+                <th translate="name"></th>
+                <th translate="size"></th>
+                <th translate="delete"></th>
+              </tr>
+              </tbody>
+              <tbody ng-repeat="fileGroup in repository.info.files">
+              <tr ng-repeat="file in fileGroup | orderBy: 'name'">
+                <td>{{file.name}}</td>
+                <td>{{OGCommonService.getUnits(file.size)}}</td>
+                <td>
+                  <a *ngIf="isImageFile(file)" class="btn btn-danger" href="javascript:void(0)" translate="delete" (click)="deleteImageFile(file)"></a>
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </mk-box>
+      </div>
+      <!-- /.box-body -->
+    </mk-box>
+  </div>
+</section>

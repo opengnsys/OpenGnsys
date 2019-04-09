@@ -1,0 +1,51 @@
+<button *ngIf="(ogCommonService.movingOu != null && ogCommonService.movingOu != content && !content.selectedForMove)" class="btn btn-box-tool" (click)="doMove()">
+  <i class="fa fa-level-down"></i>
+</button>
+<mk-box class="box box-default {{(ogCommonService.movingOu == content)?'bg-info':''}}"  [isRemovable]="false" >
+  <mk-box-header class="box-header with-border">
+    <h3 class="box-title bg-og">
+      <div class="btn-group ou-options">
+        <div class="ou-selector">
+          <input icheck checkbox-class="icheckbox_square-blue" radio-class="iradio_square-blue" type="checkbox" class="selection-checkbox" [(ngModel)]="content.selected" (change)="selectOu(content)"/>
+        </div>
+        <mk-dropdown>
+          <mk-dropdown-toggle>
+            <a href="javascript:void(0)" class="btn-flat" >{{content.name}}</a>
+          </mk-dropdown-toggle>
+          <mk-dropdown-menu>
+              <li role="presentation">
+                <a role="menuitem" tabindex="-1" [routerLink]="'app/ous.new({parent: content.id})'" translate="add_ou"></a>
+              </li>
+              <li role="presentation">
+                <a role="menuitem" tabindex="-1" [routerLink]="'app/client.new({ou: content.id})'" translate="add_client"></a>
+              </li>
+              <li role="presentation">
+                <a role="menuitem" tabindex="-1" [routerLink]="'app/client.dhcp({ou: content.id})'" translate="add_clients_from_dhcp"></a>
+              </li>
+              <li role="presentation" class="divider"></li>
+              <li>
+                <a class="" href="javascript:void(0)" translate="edit" [routerLink]="'app/ous.edit({ou: content.id})'"></a>
+              </li>
+              <li role="presentation" class="divider"></li>
+              <li role="presentation" class="delete-option">
+                <a class="" href="javascript:void(0)" translate="delete" (click)="deleteOu(content)"></a>
+              </li>
+          </mk-dropdown-menu>
+        </mk-dropdown>
+      </div>
+      <button *ngIf="(ogCommonService.movingOu != null && ogCommonService.movingOu != content && !content.selectedForMove)||(ogCommonService.movingClients == true)" class="btn btn-box-tool" (click)="doMove(content)">
+        <i class="fa fa-level-down"></i>
+      </button>
+      <div class="box-tools pull-right">
+        <button type="button" class="btn btn-box-tool" (click)="selectForMove(content)"><i class="fa fa-arrows"></i></button>
+      </div>
+    </h3>
+    <!-- /.box-tools -->
+  </mk-box-header>
+  <!-- /.box-header -->
+  <mk-box-content class="box-body folders" style="display: block;">
+    <app-ou-group-component *ngFor="let child of content.children" [content]="child" [ous]="ous" [clientStatus]="clientStatus" [selectedStatus]="selectedStatus" [showGrid]="showGrid"  ></app-ou-group-component>
+    <app-ou-client-component *ngIf="content.clients" [ou]="content" [clientStatus]="clientStatus" [showGrid]="showGrid" [selectedStatus]="selectedStatus"></app-ou-client-component>
+  </mk-box-content>
+  <!-- /.box-body -->
+</mk-box>

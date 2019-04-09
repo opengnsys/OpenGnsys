@@ -1,0 +1,49 @@
+<div ui-view>
+  <section class="content-header">
+    <h1 translate="commands">
+    </h1>
+    <ol class="breadcrumb">
+      <li><a [routerLink]="'/app/dashboard'"><i class="fa fa-dashboard"></i> {{'dashboard'|translate}}</a></li>
+      <li class="active" translate="commands"></li>
+    </ol>
+  </section>
+  <section fixed-toolboxbar class="toolboxbar">
+    <div >
+      <div class="col-md-12">
+        <div class="input-group">
+          <input type="text" name="q" class="form-control" placeholder="Search..." ng-model="searchText">
+          <span class="input-group-btn">
+		            <button type="button" name="search" id="search-btn" class="btn btn-flat"><i class="fa fa-search"></i>
+		            </button>
+		          </span>
+        </div>
+      </div>
+      <div class="col-md-12" style="margin-top: 5px;margin-bottom: 5px;">
+        <div class="box-tools pull-right">
+          <button class="btn btn-default" [routerLink]="'/app/commands/create'" translate="new_command"></button>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="content">
+    <div class="row">
+      <div class="col-md-12">
+        <table class="table table-hover">
+          <tbody><tr>
+            <th translate="title"></th>
+            <th translate="options"></th>
+          </tr>
+          <tr *ngFor="let command of commands; let index = index" class="{{(index%2 == 0)?'odd':'even'}}">
+            <td>
+              <span >{{command.title}}</span>
+            </td>
+            <td class="right">
+              <app-table-action (delete)="deleteCommand(command)" (edit)="goToEdit(command)"></app-table-action>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</div>

@@ -1,0 +1,58 @@
+<div ui-view>
+  <section class="content-header">
+    <h1 translate="ous">
+    </h1>
+    <ol class="breadcrumb">
+      <li><a [routerLink]="'/app/dashboard'"><i class="fa fa-dashboard"></i> {{'dashboard'|translate}}</a></li>
+      <li class="active" translate="ous"></li>
+    </ol>
+  </section>
+  <section fixed-toolboxbar class="toolboxbar">
+    <div >
+      <div class="col-md-12">
+        <div class="input-group">
+          <input type="text" name="q" class="form-control" placeholder="{{'search'|translate}}..." [(ngModel)]="searchText">
+          <span class="input-group-btn">
+			            <button type="button" name="search" id="search-btn" class="btn btn-flat"><i class="fa fa-search"></i>
+			            </button>
+			          </span>
+        </div>
+      </div>
+      <div class="col-md-12" style="margin-top: 5px;margin-bottom: 5px;">
+        <span translate="display"></span>
+        <div class="btn-group">
+          <button type="button" class="btn btn-default" class="{{user.preferences.ous.showGrid == true?'btn-primary':''}}" (click)="showGrid(true)"><i class="fa fa-th"></i></button>
+          <button type="button" class="btn btn-default" class="{{user.preferences.ous.showGrid == false?'btn-primary':''}}" (click)="showGrid(false)"><i class="fa fa-list"></i></button>
+        </div>
+        <mk-dropdown class="btn-group">
+          <mk-dropdown-toggle>
+            <span translate="status_filter"></span><span class="caret"></span>
+          </mk-dropdown-toggle>
+          <mk-dropdown-menu >
+            <li role="presentation" *ngFor="let status of config.constants.clientstatus">
+              <label>
+                {{status.name|translate}}
+              </label>
+              <input icheck value="{{status.id}}" name="{{status.name}}" checkbox-class="icheckbox_square-blue" radio-class="iradio_square-blue" type="checkbox" class="selection-checkbox" [(ngModel)]="selectedStatus[status.id]" />
+            </li>
+          </mk-dropdown-menu>
+        </mk-dropdown>
+        <div class="box-tools pull-right">
+          <app-og-ou-general-options></app-og-ou-general-options>
+          <app-og-information-options></app-og-information-options>
+          <app-og-commands-options></app-og-commands-options>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- Main content -->
+  <section class="content">
+    <!-- /.row -->
+    <div class="row">
+      <div class="col-md-12">
+        <!-- Nested node template -->
+        <app-ou-group-component *ngFor="let content of ous" [content]="content" [ous]="ous" [clientStatus]="clientStatus" [selectedStatus]="selectedStatus" [showGrid]="user.preferences.ous.showGrid" (selectedForMove)="selectOuForMove($event)" ></app-ou-group-component>
+      </div>
+    </div>
+  </section>
+</div>

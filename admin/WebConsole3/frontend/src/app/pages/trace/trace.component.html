@@ -1,0 +1,120 @@
+<div ui-view>
+  <section class="content-header">
+    <h1 translate="traces">
+    </h1>
+    <ol class="breadcrumb">
+      <li><a [routerLink]="'app/dashboard'"><i class="fa fa-dashboard"></i> {{'dashboard'|translate}}</a></li>
+      <li class="active" translate="traces"></li>
+    </ol>
+  </section>
+  <section fixed-toolboxbar class="toolboxbar">
+    <div >
+      <div class="col-md-12">
+        <div class="input-group">
+          <input type="text" name="q" class="form-control" placeholder="Search..." [(ngModel)]="filters.searchText">
+          <span class="input-group-btn">
+		            <button type="button" name="search" id="search-btn" class="btn btn-flat"><i class="fa fa-search"></i>
+		            </button>
+		          </span>
+        </div>
+      </div>
+      <div class="col-md-12" style="margin-top: 5px;margin-bottom: 5px;">
+        <div class="box-tools pull-left row traces-filters">
+          <mk-dropdown class="btn-group col-md-1">
+            <mk-dropdown-toggle>
+              <span translate="status_filter"></span><span class="caret"></span>
+            </mk-dropdown-toggle>
+            <mk-dropdown-menu>
+              <li role="presentation" *ngFor="let status of filters.status | keyvalue">
+                <label role="menuitem">
+                  {{status.value.name|translate}}
+                </label>
+                <input icheck name="{{status.value.name}}" checkbox-class="icheckbox_square-blue" radio-class="iradio_square-blue" type="checkbox" class="selection-checkbox" [(ngModel)]="status.value.selected" />
+              </li>
+            </mk-dropdown-menu>
+          </mk-dropdown>
+          <mk-dropdown class="btn-group col-md-1">
+            <mk-dropdown-toggle>
+              <span translate="finished_status"></span><span class="caret"></span>
+            </mk-dropdown-toggle>
+            <mk-dropdown-menu >
+              <li role="presentation" *ngFor="let finishedStatus of filters.finishedStatus | keyvalue">
+                <label role="menuitem">
+                  {{finishedStatus.value.name|translate}}
+                </label>
+                <input icheck name="{{finishedStatus.value.name}}" checkbox-class="icheckbox_square-blue" radio-class="iradio_square-blue" type="checkbox" class="selection-checkbox" [(ngModel)]="finishedStatus.value.selected" />
+
+              </li>
+            </mk-dropdown-menu>
+          </mk-dropdown>
+          <div class="form-group col-md-10">
+            <div class="input-group">
+              <div class="input-group-addon">
+                <i class="fa fa-clock-o"></i>
+              </div>
+              <input date-range-picker placeholder="{{'executed_at_range'|translate}}" type="text" class="form-control pull-right" [(ngModel)]="filters.dateRange" options="datePickerOptions">
+            </div>
+            <!-- /.input group -->
+          </div>
+        </div>
+        <div class="box-tools pull-right">
+          <button class="btn btn-default " [disabled]="selection.length < 1" translate="relaunch" [routerLink]="relaunchTraces()"></button>
+          <button class="btn btn-danger " [disabled]="selection.length < 1" translate="delete" (click)="deleteTraces()"></button>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="content">
+    <div class="row">
+      <table class="table table-hover">
+        <tbody>
+        <tr>
+          <th>
+            <div class="checkbox clip-check check-primary checkbox-inline" style="margin-top: 0">
+              <input name="format" icheck checkbox-class="icheckbox_square-blue" radio-class="iradio_square-blue" type="checkbox" class="selection-checkbox" [(ngModel)]="selectAll" (change)="selectAllTraces()"/>
+            </div>
+            <span translate="select"></span>
+          </th>
+          <th translate="command"></th>
+          <th translate="client"></th>
+          <th translate="executed_at"></th>
+          <th translate="finished_at"></th>
+          <th translate="status"></th>
+        </tr>
+        <tr *ngFor="let trace of filteredTraces(); let index = index" class="{{ index%2 == 0 ?'odd':'even'}}">
+          <td>
+            <div class="checkbox clip-check check-primary checkbox-inline" style="margin-top: 0">
+              <input name="format" icheck checkbox-class="icheckbox_square-blue" radio-class="iradio_square-blue" type="checkbox" class="selection-checkbox" value="true" [(ngModel)]="trace.selected" (change)="selectTrace(trace)"/>
+            </div>
+          </td>
+          <td>
+            <a href="javascript:void(0)" (click)="(showInfo == 'script_'+trace.id)?showInfo='':(showInfo = 'script_'+trace.id)">{{trace.commandType|translate}}</a>
+            <div *ngIf="showInfo == 'script_'+trace.id" class="og-floating-script">
+              <pre [innerHTML]="trace.script | ogCommands"></pre>
+            </div>
+          </td>
+          <td>
+            {{trace.client.name}}
+            <br>
+            ({{trace.client.ip}})
+          </td>
+          <td>
+            {{trace.executedAt | date: "dd/MM/yyy HH:mm"}}
+          </td>
+          <td>
+            {{trace.finishedAt | date: "dd/MM/yy HH:mm"}}
+          </td>
+          <td>
+            <a href="javascript:void(0)" (click)="(showInfo == 'output_'+trace.id)?showInfo='':(showInfo = 'output_'+trace.id)">
+              <span class="fa" class="fa {{getTraceCssClass(trace)}}"></span>
+            </a>
+            <div *ngIf="showInfo == 'output_'+trace.id" class="og-floating-script right">
+              <pre [innerHTML]="'Status: '+trace.status+'\n'+ (trace.status == 0?trace.output:trace.error)"></pre>
+            </div>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>

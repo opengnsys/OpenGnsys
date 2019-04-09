@@ -1,0 +1,80 @@
+<table *ngIf="showGrid == false && clients.length > 0" class="table table-hover table-no-border">
+  <thead>
+  <tr>
+    <th translate="select"></th>
+    <th translate="name"></th>
+    <th translate="ip"></th>
+    <th translate="mac"></th>
+    <th translate="status"></th>
+    <th translate="options"></th>
+  </tr>
+  </thead>
+  <tbody>
+  <!-- *ngIf="selectedStatus[client.status] == true" -->
+  <ng-container *ngFor="let client of clients; let index = index" >
+    <tr *ngIf='mustShow(client)' class="{{(index%2 == 0)?'odd':'even'}}">
+      <td>
+        <input icheck checkbox-class="icheckbox_square-blue" radio-class="iradio_square-blue" type="checkbox" class="selection-checkbox" [(ngModel)]="client.selected" (change)="selectClient(client)" />
+      </td>
+      <td>{{client.name}}</td>
+      <td>{{client.ip}}</td>
+      <td>{{client.mac}}</td>
+      <td>
+        <span class="badge client-color-{{clientStatus[client.id]}}">{{clientStatus[client.id] | translate}}</span>
+      </td>
+      <td class="right">
+        <div class="btn-group visible-md visible-lg hidden-sm hidden-xs">
+          <button class="btn btn-default " translate="edit" [routerLink]="'app/client.edit({ou: content.id, clientId: client.id})'"></button>
+          <button class="btn btn-danger " translate="delete" (click)="deleteClient(client)"></button>
+        </div>
+        <div class="btn-group hidden-md hidden-lg">
+          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+            <i class="fa fa-gear"></i>
+            <span class="caret"></span>
+            <span class="sr-only">Toggle Dropdown</span>
+          </button>
+          <ul class="dropdown-menu" role="menu">
+            <li class="btn-group-vertical">
+              <button class="btn btn-default" href="javascript:void(0)" translate="edit" [routerLink]="'app/client.edit({ou: content.id, clientId: client.id})'"></button>
+              <button class="btn btn-danger" href="javascript:void(0)" translate="delete" (click)="deleteClient(client)"></button>
+            </li>
+          </ul>
+        </div>
+      </td>
+    </tr>
+  </ng-container>
+  </tbody>
+</table>
+<div *ngIf="showGrid == true" class="box-body bg-lab">
+  <!-- *ngIf="selectedStatus[client.status] == true" -->
+  <div class="row">
+    <ng-container *ngFor="let client of ou.clients">
+      <div class="col-md-2 col-xs-6 padding-5">
+        <div class="info-box client " *ngIf="mustShow(client)">
+              <span style="position: absolute;">
+                <input icheck checkbox-class="icheckbox_square-blue" radio-class="iradio_square-blue" type="checkbox" class="selection-checkbox" [(ngModel)]="client.selected" (change)="selectClient(client)" />
+              </span>
+      <span class="info-box-icon">
+                      <i class="fa fa-desktop">
+                      </i>
+                      <small class="label client-color-{{clientStatus[client.id]}}">{{clientStatus[client.id] | translate}}</small>
+                    </span>
+      <div class="info-box-content">
+        <a href="javascript:void(0)" (click)="deleteClient(client)" class="small-box-footer pull-right">
+          <i class="fa fa-times"></i>
+        </a>
+        <span class="info-box-text">{{client.name}}</span>
+        <span class="info-box-text">{{client.ip}}</span>
+        <span class="info-box-text">{{client.mac}}</span>
+        <div class="btn-group pull-right">
+          <a href="javascript:void(0)" [routerLink]="'/app/clients/'+client.id+'/edita'" class="btn btn-xs small-box-footer">
+            <span translate="edit"></span> <i class="fa fa-arrow-circle-right"></i>
+          </a>
+        </div>
+      </div>
+      <!-- /.info-box-content -->
+    </div>
+      </div>
+    </ng-container>
+  </div>
+</div>

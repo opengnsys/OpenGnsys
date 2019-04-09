@@ -1,0 +1,53 @@
+<div ui-view>
+  <section class="content-header">
+    <h1 translate="netboot">
+    </h1>
+    <ol class="breadcrumb">
+      <li><a [routerLink]="'app/dashboard'"><i class="fa fa-dashboard"></i> {{'dashboard'|translate}}</a></li>
+      <li class="active" translate="netboot_templates"></li>
+    </ol>
+  </section>
+  <section fixed-toolboxbar class="toolboxbar">
+    <div >
+      <div class="col-md-12">
+        <div class="input-group">
+          <input type="text" name="q" class="form-control" placeholder="Search..." [(ngModel)]="searchText">
+          <span class="input-group-btn">
+            <button type="button" name="search" id="search-btn" class="btn btn-flat"><i class="fa fa-search"></i>
+            </button>
+          </span>
+        </div>
+      </div>
+      <div class="col-md-12" style="margin-top: 5px;margin-bottom: 5px;">
+        <div class="box-tools pull-right">
+          <button class="btn btn-default" [routerLink]="'/app/netboots/create'" translate="new_netboot"></button>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="content">
+    <div class="row">
+      <div class="col-md-12">
+        <table class="table table-hover">
+          <tbody><tr>
+            <th translate="name"></th>
+            <th translate="filename"></th>
+            <th translate="options"></th>
+          </tr>
+          <tr *ngFor="let netboot of netboots; let index = index" class="{{index%2 == 0?'odd':'even'}}">
+            <td>
+              <span >{{netboot.name}}</span>
+            </td>
+            <td>
+              <span >{{netboot.filename}}</span>
+            </td>
+            <td class="right">
+              <app-table-action [rowData]="netboot" [options]="tableOptions" (edit)="goToNetbootEdit($event.id)" (delete)="deleteNetboot($event.id)"></app-table-action>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</div>

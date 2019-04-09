@@ -1,0 +1,14 @@
+
+.ou-options mk-dropdown {
+  float: left;
+}
+
+.ou-options .ou-selector {
+  float: left;
+}
+
+
+::ng-deep .bg-info .box .box-header {
+  background-color: #d9edf7 !important;
+}
+

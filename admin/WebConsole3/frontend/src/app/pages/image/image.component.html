@@ -1,0 +1,56 @@
+<ng-container>
+  <section class="content-header">
+    <h1 translate="images">
+    </h1>
+    <ol class="breadcrumb">
+      <li><a [routerLink]="'app/dashboard'"><i class="fa fa-dashboard"></i> {{'dashboard'|translate}}</a></li>
+      <li class="active" translate="images"></li>
+    </ol>
+  </section>
+  <section fixed-toolboxbar class="toolboxbar">
+    <div class="row">
+      <div class="col-10">
+        <div class="input-group">
+          <input type="text" name="q" class="form-control" placeholder="{{'search'|translate}}..." ng-model="vm.ngTableSearch.text">
+          <span class="input-group-btn">
+            <button type="button" name="search" id="search-btn" class="btn btn-flat btn-default"><i class="fa fa-search"></i>
+            </button>
+          </span>
+        </div>
+      </div>
+      <div class="col-2" style="margin-top: 5px;margin-bottom: 5px;">
+        <div class="box-tools">
+          <mk-dropdown class="btn-group" [isWrapper]="false" >
+            <mk-dropdown-toggle>
+                <span translate="new"></span><span class="caret"></span>
+            </mk-dropdown-toggle>
+            <mk-dropdown-menu>
+              <li role="presentation"><a role="menuitem" tabindex="-1" [routerLink]="'app/images/create/monolithic'" translate="monolithic_image"></a></li>
+              <li role="presentation"><a role="menuitem" tabindex="-1" [routerLink]="'app/images/create/basic'"  translate="basic_image"></a></li>
+            </mk-dropdown-menu>
+          </mk-dropdown>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- Main content -->
+  <section class="content">
+    <div class="row">
+      <div class="col-md-12">
+        <!-- Info boxes -->
+        <div class="box box-primary">
+          <div class="box-header with-border">
+            <h3 class="box-title" translate="image_list"></h3>
+          </div>
+          <div class="box-body">
+            <ng2-smart-table [source]="images" [settings]="tableSettings"></ng2-smart-table>
+          </div>
+          <div class="box-footer">
+          </div>
+          <!-- /.col -->
+        </div>
+      </div>
+    </div>
+    <!-- /.row -->
+  </section>
+</ng-container>

@@ -1,0 +1,15 @@
+<div class="btn-group d-none d-md-block hidden-xs hidden-sm">
+  <button *ngFor="let option of options.buttons" class="btn {{option.classes}}" (click)="option.handler(rowData)">{{option.label|translate}}</button>
+</div>
+<div mk-dropdown class="btn-group d-md-none hidden-md hidden-lg">
+  <mk-dropdown-toggle>
+    <button #toggleElement type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+      <i class="fa fa-gear"></i>
+    </button>
+  </mk-dropdown-toggle>
+  <mk-dropdown-menu>
+    <li class="btn-group-vertical">
+      <button *ngFor="let option of options.buttons" class="btn {{option.classes}}" (click)="option.handler(rowData)">{{option.label|translate}}</button>
+    </li>
+  </mk-dropdown-menu>
+</div>
