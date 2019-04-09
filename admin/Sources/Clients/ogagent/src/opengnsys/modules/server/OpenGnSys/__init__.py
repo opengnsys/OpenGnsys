@@ -93,6 +93,7 @@ class OpenGnSysWorker(ServerWorker):
     commands = []     # Running commands
     random = None     # Random string for secure connections
     length = 32       # Random string length
+    access_token = refresh_token = None # Server authorization tokens
 
     def checkSecret(self, server):
         """
@@ -111,6 +112,8 @@ class OpenGnSysWorker(ServerWorker):
         """
         # Ensure cfg has required configuration variables or an exception will be thrown
         url = self.service.config.get('opengnsys', 'remote')
+        server_client = self.service.config.get('opengnsys', 'client')
+        server_secret = self.service.config.get('opengnsys', 'secret')
         if operations.os_type == 'ogLive' and 'oglive' in os.environ:
             # Replacing server IP if its running on ogLive clinet
             logger.debug('Activating on ogLive client, new server is {}'.format(os.environ['oglive']))
@@ -140,37 +143,35 @@ class OpenGnSysWorker(ServerWorker):
                 pass
         # Copy file "HostsFile.FirstOctetOfIPAddress" to "HostsFile", if it exists
         # (used in "exam mode" from the University of Seville)
-        hostsFile = os.path.join(operations.get_etc_path(), 'hosts')
-        newHostsFile = hostsFile + '.' + self.interface.ip.split('.')[0]
-        if os.path.isfile(newHostsFile):
-            shutil.copyfile(newHostsFile, hostsFile)
+        #hostsFile = os.path.join(operations.get_etc_path(), 'hosts')
+        #newHostsFile = hostsFile + '.' + self.interface.ip.split('.')[0]
+        #if os.path.isfile(newHostsFile):
+        #    shutil.copyfile(newHostsFile, hostsFile)
         # Generate random secret to send on activation
         self.random = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(self.length))
-        # Send initialization message
+        # Compose login route
+        login_route = '/oauth/v2/token?client_id=' + server_client + '&client_secret=' + server_secret + \
+            '&grant_type=password&username=' + self.interface.ip + '&password=' + self.interface.mac + \
+            '&token=' + self.random
+        # Send initialization login message
         try:
             try:
-                self.REST.sendMessage('ogagent/started', {'mac': self.interface.mac, 'ip': self.interface.ip,
-                                                          'secret': self.random, 'ostype': operations.os_type,
-                                                          'osversion': operations.os_version})
                 # New web compatibility.
-                #self.REST.sendMessage('clients/statuses', {'mac': self.interface.mac, 'ip': self.interface.ip,
-                #                                           'secret': self.random, 'ostype': operations.os_type,
-                #                                           'osversion': operations.os_version,
-                #                                           'status': operations.os_type.lower()})
+                self.REST.sendMessage(login_route)
             except:
                 # Trying to initialize on alternative server, if defined
                 # (used in "exam mode" from the University of Seville)
                 self.REST = REST(self.service.config.get('opengnsys', 'altremote'))
-                self.REST.sendMessage('ogagent/started', {'mac': self.interface.mac, 'ip': self.interface.ip,
-                                                          'secret': self.random, 'ostype': operations.osType,
-                                                          'osversion': operations.osVersion, 'alt_url': True})
-                # New web compatibility.
-                #self.REST.sendMessage('clients/statuses', {'mac': self.interface.mac, 'ip': self.interface.ip,
-                #                                           'secret': self.random, 'ostype': operations.os_type,
-                #                                           'osversion': operations.os_version,
-                #                                           'status': operations.os_type.lower()})
+                self.REST.sendMessage(login_route)
         except:
             logger.error('Initialization error')
+        finally:
+            # TODO: procesing server access token (get access_token and refresh_token
+            #self.access_token = ....
+            #self.refresh_token = ....
+            # TODO: launch browser
+            # TODO: send configuration and status
+            pass
 
     def onDeactivation(self):
         """
