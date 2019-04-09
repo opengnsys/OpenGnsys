@@ -1,13 +1,8 @@
 # OpenGnsys Web Admin Console 3 template configuration for Apache.
 
-Alias /opengnsys3 CONSOLEDIR
+Alias /opengnsys/v3 CONSOLEDIR3
 
 RewriteEngine On
-
-# Overrides default CentOS php.ini configuration.
-<IfModule mod_php5.c>
-        php_value short_open_tag on
-</IfModule>
 
 # Redirect HTTP to HTTPS and default configuration.
 <Directory CONSOLEDIR>
@@ -20,7 +15,7 @@ RewriteEngine On
 </Directory>
 
 # Redirect HTTP to HTTPS and RESTful configuration.
-<Directory CONSOLEDIR/rest/web>
+<Directory CONSOLEDIR3/backend/web>
         #RewriteBase /opengnsys3/rest/web
         #RewriteRule .? - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
         #RewriteCond %{HTTPS} !=on

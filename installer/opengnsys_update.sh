@@ -118,7 +118,7 @@ function autoConfigure()
 	# Configuración según la distribución de Linux.
 	if [ -f /etc/debian_version ]; then
 		# Distribución basada en paquetes Deb.
-		DEPENDENCIES=( curl rsync btrfs-tools procps arp-scan realpath php-curl gettext moreutils jq udpcast libev-dev shim-signed grub-efi-amd64-signed php-fpm )
+		DEPENDENCIES=( curl rsync btrfs-tools procps arp-scan realpath php-curl gettext moreutils jq udpcast libev-dev shim-signed grub-efi-amd64-signed php-fpm git libcurl3 nodejs npm php-mbstring php-xml )
 		# Paquete correcto para realpath.
 		[ -z "$(apt-cache pkgnames realpath)" ] && DEPENDENCIES=( ${DEPENDENCIES[@]//realpath/coreutils} )
 		UPDATEPKGLIST="add-apt-repository -y ppa:ondrej/php; apt-get update"
@@ -143,7 +143,7 @@ function autoConfigure()
 		INETDCFGDIR=/etc/xinetd.d
 	elif [ -f /etc/redhat-release ]; then
 		# Distribución basada en paquetes rpm.
-		DEPENDENCIES=( curl rsync btrfs-progs procps-ng arp-scan gettext moreutils jq net-tools udpcast libev-devel shim-x64 grub2-efi-x64 grub2-efi-x64-modules )
+		DEPENDENCIES=( curl rsync btrfs-progs procps-ng arp-scan gettext moreutils jq net-tools udpcast libev-devel shim-x64 grub2-efi-x64 grub2-efi-x64-modules git libcurl3 nodejs npm php-mbstring php-xml )
 		# Repositorios para PHP 7 en CentOS.
 		[ "$OSDISTRIB" == "centos" ] && UPDATEPKGLIST="yum update -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-$OSVERSION.noarch.rpm http://rpms.remirepo.net/enterprise/remi-release-$OSVERSION.rpm"
 		INSTALLPKGS="yum install -y"
@@ -565,6 +565,12 @@ function apacheConfiguration ()
 		echoAndLog "${FUNCNAME}(): Configuring Apache modules"
 		sed -i '/rewrite/s/^#//' $APACHECFGDIR/*.conf
 	fi
+	# Habilitar nueva web.
+	if [ ! -e $APACHECFGDIR/sites-available/opengnsys3.conf ]; then
+		sed -e "s,CONSOLEDIR,$CONSOLEDIR,g" \
+			$WORKDIR/opengnsys/server/etc/apache-console3.conf.tmpl > $APACHECFGDIR/sites-available/opengnsys3.conf
+		a2ensite opengnsys3
+	fi
 	# Elegir plantilla según versión de Apache.
 	if [ -n "$(apachectl -v | grep "2\.[0-2]")" ]; then
 	       template=$WORKDIR/opengnsys/server/etc/apache-prev2.4.conf.tmpl > $config
@@ -676,6 +682,41 @@ function updateWebFiles()
 	touch $INSTALL_TARGET/log/{ogagent,rest,remotepc}.log
 
 	echoAndLog "${FUNCNAME}(): Web files successfully updated"
+}
+
+# Instalar dependencias y copiar ficheros de la nueva web de OpenGnsys 3.
+function updateWeb3()
+{
+	# Copiar ficheros.
+	mkdir -p $INSTALL_TARGET/www3
+	cp -a $WORKDIR/admin/WebConsole3/{frontend,backend} $INSTALL_TARGET/www3
+
+	# Instalar Composer.
+	if [ ! -f /usr/local/bin/composer.phar ]; then
+		php -r "copy('https://getcomposer.org/installer', '/tmp/composer-setup.php');"
+		php /tmp/composer-setup.php --install-dir=/usr/local/bin
+		rm -f /tmp/composer-setup.php
+	fi
+	# Instalar dependencias y migrar la BD para el backend.
+	pushd $INSTALL_TARGET/www3/backend
+	composer.phar update
+	chmod 777 -R var/cache var/logs
+	php app/console doctrine:database:create --if-not-exists
+	php app/console doctrine:schema:update --force
+	php app/console doctrine:fixtures:load
+	php app/console fos:user:create admin admin@localhost.localdomain admin
+	php app/console opengnsys:migration:execute
+	popd
+
+	# Instalar NG.
+	[ -L /usr/bin/node ] || ln -s /usr/bin/nodejs /usr/bin/node
+	npm install -g @angular/cli@6.2.3
+	# Instalar el frontend.
+	pushd $INSTALL_TARGET/www3/frontend
+	npm install
+	sed -i "s/SERVERIP/$SERVERIP/" src/environments/environment.ts
+	ng build
+	popd
 }
 
 # Copiar ficheros en la zona de descargas de OpenGnsys Web Console.
@@ -1212,13 +1253,16 @@ rsyncConfigure
 updateClientFiles
 updateInterfaceAdm
 
-# Actualizar páqinas web
+# Actualizar antigua páqina web
 apacheConfiguration
 updateWebFiles
 if [ $? -ne 0 ]; then
 	errorAndLog "Error updating OpenGnsys Web Admin files"
 	exit 1
 fi
+# Actualizar nueva página web
+updateWeb3
+
 # Actaulizar ficheros descargables.
 updateDownloadableFiles
 # Generar páginas Doxygen para instalar en el web
