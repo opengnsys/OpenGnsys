@@ -9,7 +9,8 @@ install console-data
 install locales
 install lshw 
 install gawk 
-install subversion
+#install subversion	# ogLive anterior a Ubuntu 18.04
+install git		# ogLive a partir de Ubuntu 18.04
 install python-openssl 
 install python 
 #install php5-cli	# ogLive anterior a Ubuntu 16.04
