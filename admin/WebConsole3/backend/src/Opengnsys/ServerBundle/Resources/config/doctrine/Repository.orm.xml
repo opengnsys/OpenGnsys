@@ -15,7 +15,7 @@
         <field name="configurationpath" type="string" column="configurationpath" length="250" nullable="false"/>
         <field name="adminpath" type="string" column="adminpath" length="250" nullable="false"/>
         <field name="pxepath" type="string" column="pxepath" length="250" nullable="false"/>
-        <field name="port" type="integer" column="port" nullable="false"/>
+        <field name="port" type="integer" column="port" nullable="true"/>
 
         <field name="description" type="text" column="description" nullable="true"/>
 

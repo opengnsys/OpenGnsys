@@ -376,7 +376,7 @@ function installDependencies()
 	eval $UPDATEPKGLIST
 	if [ -f /etc/debian_version ]; then
 		# Basado en paquetes Deb.
-		PHP7VERSION=$(apt-cache pkgnames php7 2>/dev/null | sort | head -1)
+		PHP7VERSION=$(apt-cache pkgnames php7 2>/dev/null | grep -v -- - | sort | tail -1)
 		PHPFPMSERV="${PHP7VERSION}-fpm"
 		PHP5PKGS=( $(dpkg -l | awk '$2~/^php5/ {print $2}') )
 		if [ -n "$PHP5PKGS" ]; then
@@ -567,8 +567,9 @@ function apacheConfiguration ()
 	fi
 	# Habilitar nueva web.
 	if [ ! -e $APACHECFGDIR/sites-available/opengnsys3.conf ]; then
-		sed -e "s,CONSOLEDIR,$CONSOLEDIR,g" \
+		sed -e "s,CONSOLEDIR3,$INSTALL_TARGET/www3,g" \
 			$WORKDIR/opengnsys/server/etc/apache-console3.conf.tmpl > $APACHECFGDIR/sites-available/opengnsys3.conf
+		a2dissite opengnsys
 		a2ensite opengnsys3
 	fi
 	# Elegir plantilla según versión de Apache.
@@ -687,9 +688,10 @@ function updateWebFiles()
 # Instalar dependencias y copiar ficheros de la nueva web de OpenGnsys 3.
 function updateWeb3()
 {
+	echoAndLog "${FUNCNAME}(): Installing OpenGnsys 3 Web Console..."
 	# Copiar ficheros.
 	mkdir -p $INSTALL_TARGET/www3
-	cp -a $WORKDIR/admin/WebConsole3/{frontend,backend} $INSTALL_TARGET/www3
+	cp -a $WORKDIR/opengnsys/admin/WebConsole3/{frontend,backend} $INSTALL_TARGET/www3
 
 	# Instalar Composer.
 	if [ ! -f /usr/local/bin/composer.phar ]; then
@@ -701,6 +703,11 @@ function updateWeb3()
 	pushd $INSTALL_TARGET/www3/backend
 	composer.phar update
 	chmod 777 -R var/cache var/logs
+	echo "Enter MySQL root password: "
+	mysql -u root -p <<< "
+	CREATE DATABASE IF NOT EXISTS ${OPENGNSYS_DATABASE}3;
+	GRANT ALL PRIVILEGES ON ${OPENGNSYS_DATABASE}3.* TO $OPENGNSYS_DBUSER IDENTIFIED BY '$OPENGNSYS_DBPASSWORD';
+"
 	php app/console doctrine:database:create --if-not-exists
 	php app/console doctrine:schema:update --force
 	php app/console doctrine:fixtures:load

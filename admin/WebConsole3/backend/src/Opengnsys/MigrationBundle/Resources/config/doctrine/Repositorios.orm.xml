@@ -15,12 +15,6 @@
         <option name="default"/>
       </options>
     </field>
-    <field name="passguor" type="string" column="passguor" length="50" nullable="false">
-      <options>
-        <option name="fixed"/>
-        <option name="default"/>
-      </options>
-    </field>
     <field name="idcentro" type="integer" column="idcentro" nullable="true">
       <options>
         <option name="unsigned"/>
@@ -34,11 +28,6 @@
     <field name="comentarios" type="text" column="comentarios" length="65535" nullable="true">
       <options>
         <option name="fixed"/>
-      </options>
-    </field>
-    <field name="puertorepo" type="integer" column="puertorepo" nullable="false">
-      <options>
-        <option name="unsigned"/>
       </options>
     </field>
     <field name="apikey" type="string" column="apikey" length="32" nullable="false">
