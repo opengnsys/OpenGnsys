@@ -141,3 +141,4 @@ export OG_ERR_DONTUNMOUNT_IMAGE=72 # Error al desmontar la imagen
 export OG_ERR_NOTDIFFERENT=73	# No se detectan diferencias entre la imagen basica y la particion.
 export OG_ERR_SYNCHRONIZING=74  # Error al sincronizar, puede afectar la creacion/restauracion de la imagen
 
+export OG_ERR_NOTUEFI=80	# La interfaz UEFI no está activa
