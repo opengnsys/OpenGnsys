@@ -1,0 +1,19 @@
+##NO-TOCAR-ESTA-LINEA 1hd
+set timeout=0
+
+# Compruebo si existe rEFInd
+set root=''
+search --file --set root /EFI/refind/grubx64.efi
+if [ "$root" == "" ]; then
+    set label="rEFInd no está instalado" 
+    set chain=""
+else
+    set label="rEFInd"
+    set chain="chainloader /EFI/refind/grubx64.efi"
+fi
+
+menuentry "$label" {
+    root='hd0,gpt1'
+    eval "$chain"
+    boot
+}
