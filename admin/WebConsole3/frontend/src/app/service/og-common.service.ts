@@ -5,6 +5,9 @@ import {TranslateService} from '@ngx-translate/core';
 import {AuthModule} from 'globunet-angular/core';
 import {HardwareProfile} from '../model/hardware-profile';
 import {HardwareComponent} from '../model/hardware-component';
+import {environment} from '../../environments/environment';
+import {LayoutStore} from 'angular-admin-lte';
+import {AdminLteConf} from '../admin-lte.conf';
 
 @Injectable({
   providedIn: 'root'
@@ -21,7 +24,7 @@ export class OgCommonService {
   public movingOu: any;
   public movingClients: boolean;
 
-  constructor(private engineService: EngineService, private translate: TranslateService, private authModule: AuthModule) {
+  constructor(private layoutStore: LayoutStore, private adminLteConfig: AdminLteConf, private engineService: EngineService, private translate: TranslateService, private authModule: AuthModule) {
     this.app = {};
     this.selectedClients = [];
     this.selectedOu = null;
@@ -35,7 +38,11 @@ export class OgCommonService {
       if (this.constants === null || this.timers === null) {
         this.engineService.list().subscribe(
           data => {
-            this.constants = {};
+            this.constants = {
+              themes: environment.themes,
+              menus: environment.menus,
+              languages: environment.languages
+            };
             this.constants = Object.assign(this.constants, data[0]);
             // inicializar timers generales para refresco de información
             this.timers = {
@@ -78,9 +85,23 @@ export class OgCommonService {
     this.app.theme = this.user.preferences.theme;
   }
 
+  saveUserPreferences() {
+    this.user = this.authModule.getLoggedUser();
+    // si no existen las preferencias de usuario se crean
+    if (!this.user.preferences) {
+      this.user.preferences = this.constants.user.preferences;
+    }
+    if (this.user.preferences.language) {
+      this.translate.use(this.user.preferences.language);
+    }
+    this.app.theme = this.user.preferences.theme;
+    localStorage.setItem('ogUser', JSON.stringify(this.user));
+  }
+
 
   changeLanguage(langKey) {
     this.translate.use(langKey);
+    this.layoutStore.setSidebarLeftMenu(this.adminLteConfig.get().sidebarLeftMenu);
   }
 
   createGroups(array, property) {
@@ -181,7 +202,7 @@ export class OgCommonService {
   selectForMove(ou, select?) {
     // si existe una operacion de movimiento de clientes se cancela
     this.movingClients = false;
-    if(typeof select === 'undefined') {
+    if (typeof select === 'undefined') {
       this.movingOu = (this.movingOu === ou) ? null : ou;
       select = select || (this.movingOu === ou);
     }

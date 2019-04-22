@@ -1,0 +1,86 @@
+<section class="content-header">
+    <h1 translate="{{user.username}}">
+    </h1>
+    <ol class="breadcrumb">
+        <li><a ui-sref="app.dashboard"><i class="fa fa-dashboard"></i> {{'dashboard'|translate}}</a></li>
+        <li class="active" translate="profile"></li>
+    </ol>
+</section>
+<section fixed-toolboxbar class="toolboxbar">
+    <div>
+        <div class="col-md-12">
+            <div class="box-tools pull-right">
+                <button class="btn btn-primary" translate="save" (click)="save()"></button>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title" translate="user_data"></h3>
+                </div>
+                <div class="box-body">
+                    <form role="form">
+                        <div class="form-group col-md-2">
+                            <label translate="username"></label>
+                            <input class="form-control" readonly="readonly" type="text" [(ngModel)]="user.username" name="username">
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label translate="password"></label>
+                            <input type="password" class="form-control" name="password" >
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label translate="retype_password"></label>
+                            <input type="password" class="form-control" name="retypePassword" >
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12">
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title" translate="user_preferences"></h3>
+                </div>
+                <div class="box-body">
+                    <div class="form-group">
+                        <fieldset>
+                            <legend translate="ous"></legend>
+                            <label class="help-block" translate="display_as"></label>
+                            <div class="row">
+                                <div class="form-group col-md-1">
+                                    <input icheck type="radio" name="displayGrid" checkbox-class="icheckbox_square-blue" radio-class="iradio_square-blue" class="selection-checkbox" [(ngModel)]="user.preferences.ous.showGrid" value="true" />
+                                    <label translate="grid"></label>
+                                </div>
+                                <div class="form-group col-md-1">
+                                    <input icheck type="radio" name="displayTable" checkbox-class="icheckbox_square-blue" radio-class="iradio_square-blue" class="selection-checkbox" [(ngModel)]="user.preferences.ous.showGrid" value="false" />
+                                    <label translate="table"></label>
+                                </div>
+                            </div>
+                        </fieldset>
+                        <fieldset>
+                            <legend translate="app"></legend>
+                            <div class="row">
+                                <div class="form-group col-md-2">
+                                    <label translate="language"></label>
+                                    <select class="form-control" name="language" [(ngModel)]="user.preferences.language" (change)="ogCommonService.changeLanguage($event)">
+                                        <option *ngFor="let lang of constants.languages" [ngValue]="lang.id" >{{lang.name}}</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-2">
+                                    <label translate="theme"></label>
+                                    <select class="form-control" name="theme" [(ngModel)]="user.preferences.theme" (change)="changeTheme($event)">
+                                        <option *ngFor="let theme of constants.themes"  >{{theme}}</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

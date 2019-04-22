@@ -14,15 +14,22 @@ import {NetbootComponent} from './pages/netboot/netboot.component';
 import {NetbootEditComponent} from './pages/netboot/edit/netboot-edit.component';
 import {HardwareComponentComponent} from './pages/hardware-component/hardware-component.component';
 import {ImageEditComponent} from './pages/image/edit/image-edit.component';
+import {ProfileComponent} from './pages/profile/profile.component';
 
 
 const routes: Routes = [
   { path: '',   redirectTo: '/login', pathMatch: 'full' },
   {
     path: 'login',
-    component: LoginComponent
+    component: LoginComponent,
+    data: {
+      customLayout: true
+    }
   },
   { path: 'app',
+    data: {
+      customLayout: false
+    },
     children: [
       {
         path: 'dashboard',
@@ -91,6 +98,10 @@ const routes: Routes = [
       {
         path: 'netboots/create',
         component: NetbootEditComponent
+      },
+      {
+        path: 'user/profile',
+        component: ProfileComponent
       }
 
     ]

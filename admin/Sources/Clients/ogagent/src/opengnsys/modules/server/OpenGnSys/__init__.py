@@ -34,6 +34,7 @@ import os
 import random
 import shutil
 import string
+import subprocess
 import threading
 import time
 import urllib
@@ -94,6 +95,7 @@ class OpenGnSysWorker(ServerWorker):
     random = None     # Random string for secure connections
     length = 32       # Random string length
     access_token = refresh_token = None # Server authorization tokens
+    grant_type = 'http://opengnsys.es/grants/og_client'
 
     def checkSecret(self, server):
         """
@@ -115,7 +117,7 @@ class OpenGnSysWorker(ServerWorker):
         server_client = self.service.config.get('opengnsys', 'client')
         server_secret = self.service.config.get('opengnsys', 'secret')
         if operations.os_type == 'ogLive' and 'oglive' in os.environ:
-            # Replacing server IP if its running on ogLive clinet
+            # Replacing server IP if its running on ogLive client
             logger.debug('Activating on ogLive client, new server is {}'.format(os.environ['oglive']))
             url = parse.urlsplit(url)._replace(netloc=os.environ['oglive']).geturl()
         self.REST = REST(url)
@@ -150,27 +152,34 @@ class OpenGnSysWorker(ServerWorker):
         # Generate random secret to send on activation
         self.random = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(self.length))
         # Compose login route
-        login_route = '/oauth/v2/token?client_id=' + server_client + '&client_secret=' + server_secret + \
-            '&grant_type=password&username=' + self.interface.ip + '&password=' + self.interface.mac + \
+
+        login_route = 'oauth/v2/token?client_id=' + server_client + '&client_secret=' + server_secret + \
+            '&grant_type=' + self.grant_type + '&ip=' + self.interface.ip + '&mac=' + self.interface.mac + \
             '&token=' + self.random
         # Send initialization login message
+        response = None
         try:
             try:
                 # New web compatibility.
-                self.REST.sendMessage(login_route)
+                response = self.REST.sendMessage(login_route)
             except:
                 # Trying to initialize on alternative server, if defined
                 # (used in "exam mode" from the University of Seville)
                 self.REST = REST(self.service.config.get('opengnsys', 'altremote'))
-                self.REST.sendMessage(login_route)
+                response = self.REST.sendMessage(login_route)
         except:
             logger.error('Initialization error')
         finally:
-            # TODO: procesing server access token (get access_token and refresh_token
-            #self.access_token = ....
-            #self.refresh_token = ....
-            # TODO: launch browser
-            # TODO: send configuration and status
+            if response.access_token is not None:
+                self.access_token = response.access_token
+                self.refresh_token = response.refresh_token
+                # Set authorization tokens in the REST object, so in each request this token will be used
+                self.REST.set_authorization_headers(self.access_token, self.refresh_token)
+                # TODO: launch browser
+                subprocess.run(["bowser", ""])
+                # TODO: send configuration and status
+            else:
+                logger.error("Initialization error: Can't obtain access token")
             pass
 
     def onDeactivation(self):
@@ -181,7 +190,7 @@ class OpenGnSysWorker(ServerWorker):
         #self.REST.sendMessage('ogagent/stopped', {'mac': self.interface.mac, 'ip': self.interface.ip,
         #                                          'ostype': operations.os_type, 'osversion': operations.os_version})
         self.REST.sendMessage('clients/statuses', {'mac': self.interface.mac, 'ip': self.interface.ip,
-                                                   'ostype': operations.os_type, 'osversion': operations.os_version
+                                                   'ostype': operations.os_type, 'osversion': operations.os_version,
                                                    'status': 'off'})
 
     def processClientMessage(self, message, data):

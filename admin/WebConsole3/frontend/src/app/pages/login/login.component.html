@@ -1,22 +1,4 @@
 <div ui-view>
-  <div class="input-group">
-    <div mk-dropdown class="input-group-btn" [isWrapper]="false">
-      <mk-dropdown-toggle>
-        <button #toggleElement type="button" class="btn btn-default dropdown-toggle">
-          Input Toggle
-          <span class="fa fa-caret-down"></span>
-        </button>
-      </mk-dropdown-toggle>
-      <mk-dropdown-menu>
-        <li><a href="#">Action</a></li>
-        <li><a href="#">Another action</a></li>
-        <li><a href="#">Something else here</a></li>
-        <li class="divider"></li>
-        <li><a href="#">Separated link</a></li>
-      </mk-dropdown-menu>
-    </div>
-    <input type="text" class="form-control">
-  </div>
 <div class="hold-transition login-page">
   <div class="login-box">
     <div class="login-logo">
@@ -37,9 +19,10 @@
         </div>
         <div class="row">
           <div class="col-xs-8">
+            <input type="checkbox" icheck class="icheckbox_square-blue">
             <div class="checkbox icheck">
               <label>
-                <div class="icheckbox_square-blue" aria-checked="false" aria-disabled="false" style="position: relative;"><input type="checkbox" style="position: absolute; top: -20%; left: -20%; display: block; width: 140%; height: 140%; margin: 0; padding: 0; background: rgb(255, 255, 255); border: 0; opacity: 0;"><ins class="iCheck-helper" style="position: absolute; top: -20%; left: -20%; display: block; width: 140%; height: 140%; margin: 0; padding: 0; background: rgb(255, 255, 255); border: 0; opacity: 0;"></ins></div> Remember Me
+                Remember Me
               </label>
             </div>
           </div>
@@ -50,16 +33,6 @@
           <!-- /.col -->
         </div>
       </form>
-
-      <div class="social-auth-links text-center">
-        <p>- OR -</p>
-        <a href="#" class="btn btn-block btn-social btn-facebook btn-flat"><i class="fa fa-facebook"></i> Sign in using
-          Facebook</a>
-        <a href="#" class="btn btn-block btn-social btn-google btn-flat"><i class="fa fa-google-plus"></i> Sign in using
-          Google+</a>
-      </div>
-      <!-- /.social-auth-links -->
-
       <a href="#">I forgot my password</a><br>
       <a routerLink="/register" class="text-center">Register a new membership</a>
 

@@ -12,6 +12,7 @@
   user-select: none;
 }
 
+
 /* Hide the browser's default checkbox */
 .icheck input {
   position: absolute;
@@ -30,14 +31,25 @@
   border: 1px solid lightgray;
 }
 
+.checkmark.iradio {
+  border-radius: 50%;
+  background-color: white;
+}
+
 /* On mouse-over, add a grey background color */
 .icheck:hover input ~ .checkmark {
   background-color: #ccc;
 }
 
+
 /* When the checkbox is checked, add a blue background */
 .icheck input:checked ~ .checkmark {
   background-color: #2196F3;
+}
+
+.icheck.iradio input:checked ~ .checkmark {
+  background-color: white;
+  border: 2px solid #2196F3;
 }
 
 /* Create the checkmark/indicator (hidden when not checked) */
@@ -53,7 +65,7 @@
 }
 
 /* Style the checkmark/indicator */
-.icheck .checkmark:after {
+.icheck .checkmark.icheckbox:after {
   left: 9px;
   top: 5px;
   width: 5px;
@@ -63,4 +75,14 @@
   -webkit-transform: rotate(45deg);
   -ms-transform: rotate(45deg);
   transform: rotate(45deg);
+}
+
+.icheck .checkmark.iradio:after {
+  left: 4px;
+  top: 4px;
+  border-radius: 50%;
+  width: 13px;
+  height: 13px;
+  border: 1px solid #2196F3;
+  background-color: #2196FF;
 }

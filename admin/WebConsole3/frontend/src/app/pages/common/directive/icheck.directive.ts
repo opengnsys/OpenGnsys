@@ -12,15 +12,28 @@ export class IcheckDirective implements OnInit {
   }
 
   ngOnInit(): void {
+    const type = this.el.nativeElement.getAttribute('type');
     const checkboxClass = this.el.nativeElement.getAttribute('checkbox-class') || 'icheckbox_square-aero';
     const radioClass = this.el.nativeElement.getAttribute('radio-class') || 'iradio_square-aero';
     const parent = this.el.nativeElement.parentElement;
     const container = document.createElement('div');
     container.classList.add('icheck');
+    if (type === 'radio') {
+      container.classList.add('iradio');
+    }
+    else{
+      container.classList.add('icheckbox');
+    }
     parent.removeChild(this.el.nativeElement);
     container.appendChild(this.el.nativeElement);
     const span = document.createElement('span');
     span.classList.add('checkmark');
+    if (type === 'radio') {
+      span.classList.add('iradio');
+    }
+    else{
+      span.classList.add('icheckbox');
+    }
     const self = this;
     span.onclick = function() {
       self.el.nativeElement.click();

@@ -83,6 +83,8 @@ class REST(object):
          body {'name': 'mario' }, and also returns
          the deserialized JSON result or raises an exception in case of error 
     """
+    access_token = None
+    refresh_token = None
 
     def __init__(self, url):
         """
@@ -119,7 +121,7 @@ class REST(object):
 
         return url
 
-    def _request(self, url, data=None):
+    def _request(self, url, data=None, patch=False):
         """
         Launches the request
         @param url: The url to obtain
@@ -127,6 +129,11 @@ class REST(object):
         with data serialized as JSON in the body.
         """
         try:
+            # Prepare the header content
+            headers = {'content-type': 'application/json'}
+            if self.access_token is not None:
+                headers['Authorization'] = 'Bearer ' + self.access_token
+
             if data is None:
                 logger.debug('Requesting using GET (no data provided) {}'.format(url))
                 # Old requests version does not support verify, but it do not checks ssl certificate by default
@@ -134,13 +141,22 @@ class REST(object):
                     r = requests.get(url, verify=VERIFY_CERT, timeout=TIMEOUT)
                 else:
                     r = requests.get(url)
-            else:  # POST
-                logger.debug('Requesting using POST {}, data: {}'.format(url, data))
-                if self.newerRequestLib:
-                    r = requests.post(url, data=data, headers={'content-type': 'application/json'},
-                                      verify=VERIFY_CERT, timeout=TIMEOUT)
+            else:  # POST / PATCH
+                if patch is False:
+                    logger.debug('Requesting using POST {}, data: {}'.format(url, data))
+                    if self.newerRequestLib:
+                        r = requests.post(url, data=data, headers=headers,
+                                          verify=VERIFY_CERT, timeout=TIMEOUT)
+                    else:
+                        r = requests.post(url, data=data, headers=headers)
                 else:
-                    r = requests.post(url, data=data, headers={'content-type': 'application/json'})
+                    logger.debug('Requesting using PATCH {}, data: {}'.format(url, data))
+                    if self.newerRequestLib:
+                        r = requests.patch(url, data=data, headers=headers,
+                                          verify=VERIFY_CERT, timeout=TIMEOUT)
+                    else:
+                        r = requests.patch(url, data=data, headers=headers)
+
 
             r = json.loads(r.content)  # Using instead of r.json() to make compatible with old requests lib versions
         except requests.exceptions.RequestException as e:
@@ -150,7 +166,7 @@ class REST(object):
 
         return r
 
-    def sendMessage(self, msg, data=None, processData=True):
+    def sendMessage(self, msg, data=None, processData=True, patch=False):
         """
         Sends a message to remote REST server
         @param data: if None or omitted, message will be a GET, else it will send a POST
@@ -164,4 +180,13 @@ class REST(object):
         url = self._getUrl(msg)
         logger.debug('Requesting {}'.format(url))
 
-        return self._request(url, data)
+        return self._request(url, data, patch)
+
+    def set_authorization_headers(self, access_token = None, refresh_token = None):
+        """
+        Set access token and refresh token for use in REST Api with authorization headers
+        @param access_token: if None, no authorization headers will be sent in each request, else, and authorization header will be sent
+        @param refresh_token: if not None, when access_token expires, it will be used to obtain new access token
+        """
+        self.access_token = access_token
+        self.refresh_token = refresh_token
