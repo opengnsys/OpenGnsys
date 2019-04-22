@@ -2,10 +2,17 @@
 
 Alias /opengnsys/v3 CONSOLEDIR3
 
+# PHP-FPM configuration
+<IfModule proxy_fcgi_module>
+	<FilesMatch ".+\.ph(p[3457]?|t|tml)$">
+		SetHandler "proxy:fcgi://127.0.0.1:9000"
+	</FilesMatch>
+</IfModule>
+
 RewriteEngine On
 
 # Redirect HTTP to HTTPS and default configuration.
-<Directory CONSOLEDIR>
+<Directory CONSOLEDIR3>
         RewriteCond %{HTTPS} !=on
         RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R]
         Require all granted
