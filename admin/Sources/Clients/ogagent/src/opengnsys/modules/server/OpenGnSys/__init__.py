@@ -47,7 +47,6 @@ from opengnsys.workers import ServerWorker
 from six.moves.urllib import parse
 
 
-
 # Error handler decorator.
 def catch_background_error(fnc):
     def wrapper(*args, **kwargs):
@@ -56,6 +55,7 @@ def catch_background_error(fnc):
             fnc(*args, **kwargs)
         except Exception as e:
             this.REST.sendMessage('error?id={}'.format(kwargs.get('requestId', 'error')), {'error': '{}'.format(e)})
+
     return wrapper
 
 
@@ -63,6 +63,7 @@ def check_locked_partition(sync=False):
     """
     Decorator to check if a partition is locked
     """
+
     def outer(fnc):
         def wrapper(*args, **kwargs):
             part_id = 'None'
@@ -81,20 +82,22 @@ def check_locked_partition(sync=False):
                 if sync is True:
                     this.locked[part_id] = False
             logger.debug('Lock status: {} {}'.format(fnc, this.locked))
+
         return wrapper
+
     return outer
 
 
 class OpenGnSysWorker(ServerWorker):
     name = 'opengnsys'
     interface = None  # Bound interface for OpenGnsys
-    REST = None       # REST object
+    REST = None  # REST object
     loggedin = False  # User session flag
-    locked = {}       # Locked partitions
-    commands = []     # Running commands
-    random = None     # Random string for secure connections
-    length = 32       # Random string length
-    access_token = refresh_token = None # Server authorization tokens
+    locked = {}  # Locked partitions
+    commands = []  # Running commands
+    random = None  # Random string for secure connections
+    length = 32  # Random string length
+    access_token = refresh_token = None  # Server authorization tokens
     grant_type = 'http://opengnsys.es/grants/og_client'
 
     def checkSecret(self, server):
@@ -145,17 +148,16 @@ class OpenGnSysWorker(ServerWorker):
                 pass
         # Copy file "HostsFile.FirstOctetOfIPAddress" to "HostsFile", if it exists
         # (used in "exam mode" from the University of Seville)
-        #hostsFile = os.path.join(operations.get_etc_path(), 'hosts')
-        #newHostsFile = hostsFile + '.' + self.interface.ip.split('.')[0]
-        #if os.path.isfile(newHostsFile):
+        # hostsFile = os.path.join(operations.get_etc_path(), 'hosts')
+        # newHostsFile = hostsFile + '.' + self.interface.ip.split('.')[0]
+        # if os.path.isfile(newHostsFile):
         #    shutil.copyfile(newHostsFile, hostsFile)
         # Generate random secret to send on activation
         self.random = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(self.length))
         # Compose login route
-
         login_route = 'oauth/v2/token?client_id=' + server_client + '&client_secret=' + server_secret + \
-            '&grant_type=' + self.grant_type + '&ip=' + self.interface.ip + '&mac=' + self.interface.mac + \
-            '&token=' + self.random
+                      '&grant_type=' + self.grant_type + '&ip=' + self.interface.ip + '&mac=' + self.interface.mac + \
+                      '&token=' + self.random
         # Send initialization login message
         response = None
         try:
@@ -175,19 +177,44 @@ class OpenGnSysWorker(ServerWorker):
                 self.refresh_token = response.refresh_token
                 # Set authorization tokens in the REST object, so in each request this token will be used
                 self.REST.set_authorization_headers(self.access_token, self.refresh_token)
-                # TODO: launch browser
-                subprocess.run(["bowser", ""])
-                # TODO: send configuration and status
+                # Create HTML file (TEMPORARY)
+                message = """
+<html>
+<head></head>
+<body>
+<h1>Initializing...</h1>
+</body>
+</html>
+"""
+                f = open('/tmp/init.html', 'w')
+                f.write(message)
+                f.close()
+                # Launch browser
+                subprocess.Popen(['browser', '-qws', '/tmp/init.html'])
+                self.REST.sendMessage('clients/statuses', {'mac': self.interface.mac, 'ip': self.interface.ip,
+                                                           'status': 'initializing'})
+
+                def cfg():
+                    """
+                    Subprocess to send configuration and status
+                    """
+                    config = self.process_config()  # TODO: create function
+                    config['mac'] = self.interface.mac
+                    config['ip'] = self.interface.ip
+                    self.REST.sendMessage('clients/configurations', config)
+                    self.REST.sendMessage('clients/statuses', {'mac': self.interface.mac, 'ip': self.interface.ip,
+                                                               'status': 'oglive'})
+
+                threading.Thread(target=cfg()).start()
             else:
                 logger.error("Initialization error: Can't obtain access token")
-            pass
 
     def onDeactivation(self):
         """
         Sends OGAgent stopping notification to OpenGnsys server
         """
         logger.debug('onDeactivation')
-        #self.REST.sendMessage('ogagent/stopped', {'mac': self.interface.mac, 'ip': self.interface.ip,
+        # self.REST.sendMessage('ogagent/stopped', {'mac': self.interface.mac, 'ip': self.interface.ip,
         #                                          'ostype': operations.os_type, 'osversion': operations.os_version})
         self.REST.sendMessage('clients/statuses', {'mac': self.interface.mac, 'ip': self.interface.ip,
                                                    'ostype': operations.os_type, 'osversion': operations.os_version,
@@ -266,6 +293,7 @@ class OpenGnSysWorker(ServerWorker):
         # Rebooting thread.
         def rebt():
             operations.reboot()
+
         threading.Thread(target=rebt).start()
         return {'op': 'launched'}
 
@@ -280,6 +308,7 @@ class OpenGnSysWorker(ServerWorker):
         def pwoff():
             time.sleep(2)
             operations.poweroff()
+
         threading.Thread(target=pwoff).start()
         return {'op': 'launched'}
 
@@ -332,11 +361,11 @@ class OpenGnSysWorker(ServerWorker):
         :param server:
         :return: object
         """
-        serialno = ''   # Serial number
-        storage = []    # Storage configuration
-        warnings = 0    # Number of warnings
+        serialno = ''  # Serial number
+        storage = []  # Storage configuration
+        warnings = 0  # Number of warnings
         logger.debug('Received getconfig operation')
-        self.checkSecret(server)
+        # self.checkSecret(server)
         # Processing data
         for row in operations.get_configuration().split(';'):
             cols = row.split(':')
