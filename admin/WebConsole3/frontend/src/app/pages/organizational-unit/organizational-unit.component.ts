@@ -107,6 +107,7 @@ export class OrganizationalUnitComponent implements OnInit, OnDestroy {
     forkJoin(promises).subscribe(
       response => {
         for (let p = 0; p < response.length; p++) {
+          // @ts-ignore
           for (let elem = 0; elem < response[p].length; elem++) {
             this.clientStatus[response[p][elem].id] = response[p][elem].status;
           }

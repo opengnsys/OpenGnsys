@@ -691,7 +691,7 @@ function updateWeb3()
 	echoAndLog "${FUNCNAME}(): Installing OpenGnsys 3 Web Console..."
 	# Copiar ficheros.
 	mkdir -p $INSTALL_TARGET/www3
-	cp -a $WORKDIR/opengnsys/admin/WebConsole3/{frontend,backend} $INSTALL_TARGET/www3
+	cp -a $WORKDIR/opengnsys/admin/WebConsole3/backend $INSTALL_TARGET/www3
 
 	# Instalar Composer.
 	if [ ! -f /usr/local/bin/composer.phar ]; then
@@ -715,14 +715,18 @@ function updateWeb3()
 	php app/console opengnsys:migration:execute
 	popd
 
-	# Instalar NG.
+	# Instalar NodeJs y NG.
+	curl -sL https://deb.nodesource.com/setup_10.x | bash -
+	apt install nodejs
 	[ -L /usr/bin/node ] || ln -s /usr/bin/nodejs /usr/bin/node
 	npm install -g @angular/cli@6.2.3
 	# Instalar el frontend.
-	pushd $INSTALL_TARGET/www3/frontend
+	pushd $WORKDIR/opengnsys/admin/WebConsole3/frontend
 	npm install
 	sed -i "s/SERVERIP/$SERVERIP/" src/environments/environment.ts
+	sed -i 's,base href=.*,base href="/opengnsys3/frontend/">,' src/index.html
 	ng build
+	rsync -irplt dist/opengnsysAngular6 $INSTALL_TARGET/www3/frontend
 	popd
 }
 

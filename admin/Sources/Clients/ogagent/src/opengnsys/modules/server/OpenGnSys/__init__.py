@@ -198,10 +198,9 @@ class OpenGnSysWorker(ServerWorker):
                     """
                     Subprocess to send configuration and status
                     """
-                    config = self.process_config()  # TODO: create function
-                    config['mac'] = self.interface.mac
-                    config['ip'] = self.interface.ip
-                    self.REST.sendMessage('clients/configurations', config)
+                    config = operations.get_configuration()
+                    self.REST.sendMessage('clients/configs', {'mac': self.interface.mac, 'ip': self.interface.ip,
+                                                              'config': config})
                     self.REST.sendMessage('clients/statuses', {'mac': self.interface.mac, 'ip': self.interface.ip,
                                                                'status': 'oglive'})
 
