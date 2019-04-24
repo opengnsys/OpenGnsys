@@ -172,9 +172,11 @@ class OpenGnSysWorker(ServerWorker):
         except:
             logger.error('Initialization error')
         finally:
-            if response.access_token is not None:
-                self.access_token = response.access_token
-                self.refresh_token = response.refresh_token
+            if response['access_token'] is not None:
+                self.access_token = response['access_token']
+                self.refresh_token = response['refresh_token']
+                # Once authenticated with the server, change the API URL for private request
+                self.REST = REST(url + '/api/private')
                 # Set authorization tokens in the REST object, so in each request this token will be used
                 self.REST.set_authorization_headers(self.access_token, self.refresh_token)
                 # Create HTML file (TEMPORARY)

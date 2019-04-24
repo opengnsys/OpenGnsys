@@ -135,7 +135,7 @@ class REST(object):
                 headers['Authorization'] = 'Bearer ' + self.access_token
 
             if data is None:
-                logger.debug('Requesting using GET (no data provided) {}'.format(url))
+                logger.debug('REST - Requesting using GET (no data provided) {}'.format(url))
                 # Old requests version does not support verify, but it do not checks ssl certificate by default
                 if self.newerRequestLib:
                     r = requests.get(url, verify=VERIFY_CERT, timeout=TIMEOUT)
@@ -143,22 +143,26 @@ class REST(object):
                     r = requests.get(url)
             else:  # POST / PATCH
                 if patch is False:
-                    logger.debug('Requesting using POST {}, data: {}'.format(url, data))
+                    logger.debug('REST - Requesting using POST {}, data: {}'.format(url, data))
                     if self.newerRequestLib:
                         r = requests.post(url, data=data, headers=headers,
                                           verify=VERIFY_CERT, timeout=TIMEOUT)
                     else:
                         r = requests.post(url, data=data, headers=headers)
                 else:
-                    logger.debug('Requesting using PATCH {}, data: {}'.format(url, data))
+                    logger.debug('REST - Requesting using PATCH {}, data: {}'.format(url, data))
                     if self.newerRequestLib:
                         r = requests.patch(url, data=data, headers=headers,
                                           verify=VERIFY_CERT, timeout=TIMEOUT)
                     else:
                         r = requests.patch(url, data=data, headers=headers)
 
-
-            r = json.loads(r.content)  # Using instead of r.json() to make compatible with old requests lib versions
+            # la respuesta puede venir sin contenido, para ello miramos el codigo devuelto
+            if r.status_code == 204:
+                r = json.loads('{"response": "OK"}')
+            else:
+                r = json.loads(r.content)  # Using instead of r.json() to make compatible with old requests lib versions
+                logger.debug("REST - response - " + json.dumps(r))
         except requests.exceptions.RequestException as e:
             raise ConnectionError(e)
         except Exception as e:
