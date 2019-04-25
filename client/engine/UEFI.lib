@@ -3,15 +3,15 @@
 # Las funciones se incluirán las librerías ya existentes
 
 #/**
-#         ogActiveNvramEntry
-#@brief   Borra entrada de la NVRAM identificada por la etiqueta o el orden
+#         ogNvramActiveEntry
+#@brief   Activa entrada de la NVRAM identificada por la etiqueta o el orden
 #@param    Num_order_entry | Label_entry Número de orden o la etiqueta de la entrada a borrar.
 #@return  (nada)
 #@exception OG_ERR_FORMAT    formato incorrecto.
 #@exception OG_ERR_NOTUEFI   UEFI no activa.
 #@exception OG_ERR_NOTFOUND  fichero o dispositivo no encontrado.
 #*/ ##
-function ogActiveNvramEntry () {
+function ogNvramActiveEntry () {
 local NUMENTRY
 
 # Si se solicita, mostrar ayuda.
@@ -29,7 +29,7 @@ fi
 ogIsEfiActive || ogRaiseError $OG_ERR_NOTUEFI || return $?
 
 # Distingo si es número de orden o etiqueta
-if [[ $1 =~ ^([0-9a-FA-F]+)*$ ]]; then
+if [[ $1 =~ ^([0-9a-fA-F]+)$ ]]; then
     NUMENTRY=$( efibootmgr |awk  -v NUM="$(printf %04x 0x$1|tr '[:lower:]' '[:upper:]')" '{ if($1~NUM) print substr($1,5,4)}')
 else
     NUMENTRY=$(efibootmgr |awk  -v LABEL="$1" '{ if(substr($0, index($0,$2))==LABEL) print substr($1,5,4)}')
@@ -38,6 +38,53 @@ fi
 [ "$NUMENTRY" == "" ] && return $(ogRaiseError $OG_ERR_NOTFOUND "NVRAM entry '$1'")
 
 efibootmgr -a -b $NUMENTRY &>/dev/null
+}
+
+#/**
+#         ogNvramAddEntry
+#@brief   Crea nueva entrada en el gestor de arranque (NVRAM), opcionalmente la incluye al final del orden de arranque.
+#@param    Str_Label_entry Etiqueta de la entrada a crear.
+#@param    Str_BootLoader  Cargador de arranque.
+#@param    Bool_Incluir_Arranque  Incluir en el orden de arranque (por defecto FALSE) (opcional)
+#@return  (nada)
+#@exception OG_ERR_FORMAT    formato incorrecto.
+#@exception OG_ERR_NOTUEFI   UEFI no activa.
+#@exception OG_ERR_NOTFOUND  fichero o dispositivo no encontrado.
+#*/ ##
+function ogNvramAddEntry () {
+local EFIDISK EFIPART BOOTLABEL BOOTLOADER ADDORDER
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME Str_label_entry Str_boot_loader [ Bool_add_bootorder ]" \
+           "$FUNCNAME grub /EFI/grub/grubx64.efi TRUE" \
+           "$FUNCNAME Windows /EFI/Microsoft/Boot/bootmgfw.efi"
+    return
+fi
+
+# Error si no se recibe 1 parámetro.
+[ $# -ge 2 ] || ogRaiseError $OG_ERR_FORMAT "$FUNCNAME Str_label_entry Str_boot_locader" || return $?
+
+# Si no es equipo UEFI salir con error
+ogIsEfiActive || ogRaiseError $OG_ERR_NOTUEFI || return $?
+
+read -e EFIDISK EFIPART <<<"$(ogGetEsp)"
+[ -n "$EFIPART" ] || ogRaiseError $OG_ERR_NOTFOUND "ESP" || return $?
+
+# Recogemos parámetros
+BOOTLABEL="$1"
+BOOTLOADER="$2"
+
+# Si existe entrada con la misma etiqueta la borramos
+ogNvramDeleteEntry "$BOOTLABEL" 2>/dev/null
+
+efibootmgr -C -d $(ogDiskToDev $EFIDISK) -p $EFIPART -L "$BOOTLABEL" -l "$BOOTLOADER" &>/dev/null
+
+# Incluimos la entrada en el orden de arranque (opcional)
+if [ "${3^^}" == "TRUE" ]; then
+    NUMENTRY=$(efibootmgr |awk  -v LABEL="$BOOTLABEL" '{ if(substr($0, index($0,$2))==LABEL) print substr($1,5,4)}')
+    ogNvramSetOrder $(ogNvramGetOrder |tr , " ") $NUMENTRY
+fi
 }
 
 
@@ -88,7 +135,7 @@ esac
 
 
 #/**
-#         ogDeleteNvramEntry
+#         ogNvramDeleteEntry
 #@brief   Borra entrada de la NVRAM identificada por la etiqueta o el orden
 #@param    Num_order_entry | Label_entry Número de orden o la etiqueta de la entrada a borrar.
 #@return  (nada)
@@ -96,8 +143,8 @@ esac
 #@exception OG_ERR_NOTUEFI   UEFI no activa.
 #@exception OG_ERR_NOTFOUND  fichero o dispositivo no encontrado (entrada en NVRAM).
 #*/ ##
-function ogDeleteNvramEntry () {
-local NUMENTRY
+function ogNvramDeleteEntry () {
+local NUMENTRY n
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -114,7 +161,7 @@ fi
 ogIsEfiActive || ogRaiseError $OG_ERR_NOTUEFI || return $?
 
 # Distingo si es número de orden o etiqueta
-if [[ $1 =~ ^([0-9a-FA-F]+)*$ ]]; then
+if [[ $1 =~ ^([0-9a-fA-F]+)$ ]]; then
     NUMENTRY=$( efibootmgr |awk  -v NUM="$(printf %04x 0x$1|tr '[:lower:]' '[:upper:]')" '{ if($1~NUM) print substr($1,5,4)}')
 else
     NUMENTRY=$(efibootmgr |awk  -v LABEL="$1" '{ if(substr($0, index($0,$2))==LABEL) print substr($1,5,4)}')
@@ -122,17 +169,19 @@ fi
 
 [ "$NUMENTRY" == "" ] && return $(ogRaiseError $OG_ERR_NOTFOUND "NVRAM entry '$1'")
 
-efibootmgr -B -b $NUMENTRY &>/dev/null
+for n in $NUMENTRY; do
+    efibootmgr -B -b $n &>/dev/null
+done
 }
 
 
 #/**
-#         ogGetNvramCurrentEntry
-#@brief   Muestra la entrada del gestor de arranque (NVRAM) que ha inciado el equipo.
-#@return  Orden de las entradas
+#         ogNvramGetCurrent
+#@brief   Muestra la entrada del gestor de arranque (NVRAM) que ha iniciado el equipo.
+#@return  Entrada con la que se ha iniciado el equipo
 #@exception OG_ERR_NOTUEFI   UEFI no activa.
 #*/ ##
-function ogGetNvramCurrentEntry () {
+function ogNvramGetCurrent () {
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -144,16 +193,36 @@ fi
 # Si no es equipo UEFI salir con error
 ogIsEfiActive || ogRaiseError $OG_ERR_NOTUEFI || return $?
 
-efibootmgr| awk '{if ($1~/BootCurrent/) bootentry=$2; if ($1~bootentry) printf  "%s %s %s\n", gensub(/^0{1,3}/,"",1,substr($1,5,4))," ", substr($0, index($0,$2))}'
+efibootmgr| awk -v bootentry=99999 '{if ($1~/BootCurrent/) bootentry=$2; if ($1~bootentry) printf  "%s %s %s\n", gensub(/^0{1,3}/,"",1,substr($1,5,4))," ", substr($0, index($0,$2))}'
 }
 
 
-#         ogGetNvramOrder
-#@brief   Muestra el orden de las entradas de la NVRAM
+#         ogNvramGetNext
+#@brief   Muestra la entrada del gestor de arranque (NVRAM) que se utilizará en el próximo arranque.
+#@return  Entrada que se utilizará en el próximo arranque
+#@exception OG_ERR_NOTUEFI   UEFI no activa.
+#*/ ##
+function ogNvramGetNext () {
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME" \
+           "$FUNCNAME"
+    return
+fi
+
+# Si no es equipo UEFI salir con error
+ogIsEfiActive || ogRaiseError $OG_ERR_NOTUEFI || return $?
+
+efibootmgr|awk '{ if ($1 == "BootNext:") print $2}'
+}
+
+
+#         ogNvramGetOrder
+#@brief   Muestra el orden de las entradas del gestor de arranque (NVRAM)
 #@return  Orden de las entradas
 #@exception OG_ERR_NOTUEFI   UEFI no activa.
 #*/ ##
-function ogGetNvramOrder (){
+function ogNvramGetOrder () {
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME" \
@@ -169,12 +238,12 @@ efibootmgr|awk '{ if ($1 == "BootOrder:") print $2}'
 
 
 #/**
-#         ogGetNvramTimeout
+#         ogNvramGetTimeout
 #@brief   Muestra el tiempo de espera del gestor de arranque (NVRAM)
 #@return  Timeout de la NVRAM
 #@exception OG_ERR_NOTUEFI   UEFI no activa.
 #*/ ##
-function ogGetNvramTimeout (){
+function ogNvramGetTimeout () {
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME" \
@@ -238,7 +307,7 @@ EOT
 
 
 #/**
-#         ogInactiveNvramEntry
+#         ogNvramInactiveEntry
 #@brief   Inactiva entrada de la NVRAM identificada por la etiqueta o el orden
 #@param    Num_order_entry | Label_entry Número de orden o la etiqueta de la entrada a borrar.
 #@return  (nada)
@@ -246,7 +315,7 @@ EOT
 #@exception OG_ERR_NOTFOUND  fichero o dispositivo no encontrado.
 #@exception OG_ERR_NOTUEFI   UEFI no activa.
 #*/ ##
-function ogInactiveNvramEntry () {
+function ogNvramInactiveEntry () {
 local NUMENTRY
 
 # Si se solicita, mostrar ayuda.
@@ -264,7 +333,7 @@ fi
 ogIsEfiActive || ogRaiseError $OG_ERR_NOTUEFI || return $?
 
 # Distingo si es número de orden o etiqueta
-if [[ $1 =~ ^([0-9a-FA-F]+)*$ ]]; then
+if [[ $1 =~ ^([0-9a-fA-F]+)$ ]]; then
     NUMENTRY=$( efibootmgr |awk  -v NUM="$(printf %04x 0x$1|tr '[:lower:]' '[:upper:]')" '{ if($1~NUM) print substr($1,5,4)}')
 else
     NUMENTRY=$(efibootmgr |awk  -v LABEL="$1" '{ if(substr($0, index($0,$2))==LABEL) print substr($1,5,4)}')
@@ -277,12 +346,12 @@ efibootmgr -A -b $NUMENTRY &>/dev/null
 
 
 #/**
-#         ogListNvramEntry
+#         ogNvramList
 #@brief   Lista las entradas de la NVRAN (sólo equipos UEFI)
 #@return  Entradas de la NVRAM con el formato: orden etiqueta [* (si está activa) ]
 #@exception OG_ERR_NOTUEFI  UEFI no activa.
 #*/ ##
-function ogListNvramEntry () {
+function ogNvramList () {
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -355,6 +424,7 @@ esac
 #@param   int_nfilesys   nº de orden del sistema de archivos
 #@param   REPO|CACHE     repositorio
 #@param   str_imgname    nombre de la imagen
+#@return  (nada)
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception OG_ERR_NOTFOUND  No encontrado fichero de información de la imagen (con uuid)
 #*/ ##
@@ -423,6 +493,7 @@ fi
 #@param   int_nfilesys   nº de orden del sistema de archivos
 #@param   REPO|CACHE     repositorio
 #@param   str_imgname    nombre de la imagen
+#@return  (nada)
 #@exception OG_ERR_FORMAT    formato incorrecto.
 #@exception OG_ERR_NOTFOUND  fichero o dispositivo no encontrado.
 #*/ ##
@@ -485,7 +556,45 @@ EOT
 
 
 #/**
-#         ogSetNvramOrder
+#         ogNvramSetNext
+#@brief   Configura el próximo arranque con la entrada del gestor de arranque (NVRAM) identificada por la etiqueta o el orden.
+#@param    Num_order_entry | Label_entry Número de orden o la etiqueta de la entrada a borrar.
+#@return  (nada)
+#@exception OG_ERR_FORMAT    formato incorrecto.
+#@exception OG_ERR_NOTUEFI   UEFI no activa.
+#@exception OG_ERR_NOTFOUND  fichero o dispositivo no encontrado.
+#*/ ##
+function ogNvramSetNext () {
+local NUMENTRY
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME [ Num_order_entry | Label_entry ] " \
+           "$FUNCNAME 2" \
+	   "$FUNCNAME \"Windows Boot Manager\""
+    return
+fi
+
+# Error si no se recibe 1 parámetro.
+[ $# -eq 1 ] || ogRaiseError $OG_ERR_FORMAT "$FUNCNAME [ Num_order_entry | Label_entry ]" || return $?
+
+# Si no es equipo UEFI salir con error
+ogIsEfiActive || ogRaiseError $OG_ERR_NOTUEFI || return $?
+
+# Distingo si es número de orden o etiqueta
+if [[ $1 =~ ^([0-9a-fA-F]+)$ ]]; then
+    NUMENTRY=$( efibootmgr |awk  -v NUM="$(printf %04x 0x$1|tr '[:lower:]' '[:upper:]')" '{ if($1~NUM) print substr($1,5,4)}')
+else
+    NUMENTRY=$(efibootmgr |awk  -v LABEL="$1" '{ if(substr($0, index($0,$2))==LABEL) print substr($1,5,4)}')
+fi
+
+[ "$NUMENTRY" == "" ] && return $(ogRaiseError $OG_ERR_NOTFOUND "NVRAM entry '$1'")
+
+efibootmgr -n $NUMENTRY &>/dev/null
+}
+
+#/**
+#         ogNvramSetOrder
 #@brief   Configura el orden de las entradas de la NVRAM
 #@param   Orden de las entradas separadas por espacios
 #@return  (nada)
@@ -493,7 +602,7 @@ EOT
 #@exception OG_ERR_NOTUEFI   UEFI no activa.
 #@exception OG_ERR_NOTFOUND  fichero o dispositivo no encontrado (entrada NVRAM).
 #*/ ##
-function ogSetNvramOrder (){
+function ogNvramSetOrder () {
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME Num_order1 [ Num_order2 ] ... " \
@@ -508,7 +617,7 @@ fi
 ogIsEfiActive || ogRaiseError $OG_ERR_NOTUEFI || return $?
 
 # Comprobamos que sean números
-[[ "$@" =~ ^([0-9a-fA-F ]+)*$ ]] || ogRaiseError $OG_ERR_FORMAT "$FUNCNAME Num_order1 [ Num_order2 ] ..." || return $?
+[[ "$@" =~ ^([0-9a-fA-F ]+)$ ]] || ogRaiseError $OG_ERR_FORMAT "$FUNCNAME Num_order1 [ Num_order2 ] ..." || return $?
 
 # Entradas de la NVRAM actuales
 NUMENTRYS=$(efibootmgr|awk '{ if ($1~/Boot[0-9a-fA-F]+/) printf "0%s ", substr($1,5,4)}')
@@ -527,7 +636,7 @@ efibootmgr -o ${ORDER#,} &>/dev/null
 
 
 #/**
-#         ogSetNvramTimeout
+#         ogNvramSetTimeout
 #@brief   Configura el tiempo de espera de la NVRAM
 #@param   Orden de las entradas separadas por espacios
 #@return  (nada)
@@ -535,7 +644,7 @@ efibootmgr -o ${ORDER#,} &>/dev/null
 #@exception OG_ERR_FORMAT    formato incorrecto.
 #@exception OG_ERR_NOTFOUND  fichero o dispositivo no encontrado.
 #*/ ##
-function ogSetNvramTimeout (){
+function ogNvramSetTimeout () {
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME int_Timeout (seg)" \
