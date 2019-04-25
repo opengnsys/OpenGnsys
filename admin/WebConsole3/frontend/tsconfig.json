@@ -19,7 +19,10 @@
     ],
     "paths": {
       "angular-admin-lte": [
-        "library/angular-admin-lte/src"
+        "./library/angular-admin-lte/src"
+      ],
+      "globunet-angular/*": [
+        "./library/globunet-angular/*"
       ]
     }
   }

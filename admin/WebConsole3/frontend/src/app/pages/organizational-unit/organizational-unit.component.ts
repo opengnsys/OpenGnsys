@@ -38,7 +38,14 @@ export class OrganizationalUnitComponent implements OnInit, OnDestroy {
               private translate: TranslateService,
               private ogSweetAlert: OgSweetAlertService,
               private toaster: ToasterService) {
+    this.user = this.authModule.getLoggedUser();
+    this.user.preferences = this.user.preferences || environment.user.preferences;
     this.clientStatus = [];
+    this.config = {
+      constants: {
+        clientstatus: []
+      }
+    };
   }
 
   ngOnDestroy(): void {
@@ -51,8 +58,6 @@ export class OrganizationalUnitComponent implements OnInit, OnDestroy {
     this.ogCommonService.loadEngineConfig().subscribe(
         data => {
           this.config = data;
-          this.user = this.authModule.getLoggedUser();
-          this.user.preferences = this.user.preferences || environment.user.preferences;
 
           for (let index = 0; index < this.config.constants.clientstatus.length; index++) {
             this.selectedStatus[this.config.constants.clientstatus[index].id] = true;
@@ -105,7 +110,7 @@ export class OrganizationalUnitComponent implements OnInit, OnDestroy {
     }
 
     forkJoin(promises).subscribe(
-      response => {
+        (response: any[]) => {
         for (let p = 0; p < response.length; p++) {
           for (let elem = 0; elem < response[p].length; elem++) {
             this.clientStatus[response[p][elem].id] = response[p][elem].status;

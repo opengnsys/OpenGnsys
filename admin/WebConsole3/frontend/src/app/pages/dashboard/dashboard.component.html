@@ -135,7 +135,7 @@
               </div>
                 <div class="box-body">
                   <div>
-                    <canvas id="canvas" height="300px">{{ chart }}</canvas>
+                    <canvas id="canvas" width="1000" height="300" baseChart [chartType]="'line'" [options]="status.options" [datasets]="status.datasets" [labels]="status.xData"></canvas>
                   </div>
                 </div>
               </div>

@@ -10,7 +10,8 @@
       "prefix": "app",
       "schematics": {
         "@schematics/angular:component": {
-          "styleext": "scss"
+          "styleext": "scss",
+          "viewEncapsulation": "None"
         }
       },
       "architect": {
@@ -184,7 +185,8 @@
   "defaultProject": "opengnsysAngular6",
   "schematics": {
     "@schematics/angular:component": {
-      "styleext": "scss"
+      "styleext": "scss",
+      "viewEncapsulation": "None"
     }
   }
 }

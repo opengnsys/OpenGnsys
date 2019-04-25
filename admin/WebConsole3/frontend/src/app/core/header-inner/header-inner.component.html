@@ -1,236 +1,94 @@
 <div class="navbar-custom-menu">
   <ul class="nav navbar-nav">
-    <!-- Messages: style can be found in dropdown.less -->
-    <li mk-dropdown type="list" [isWrapper]="false" class="messages-menu">
-      <mk-dropdown-toggle>
-        <a #toggleElement>
-          <i class="fa fa-envelope-o"></i>
-          <span class="label label-success">4</span>
-        </a>
-      </mk-dropdown-toggle>
-      <mk-dropdown-menu>
-        <li class="header">You have 4 messages</li>
-        <li>
-          <div class="slimScrollDiv" style="position: relative; overflow: hidden; width: auto; height: 200px;">
-            <ul class="menu" style="overflow: hidden; width: 100%; height: 200px;">
-              <li>
-                <a href="#">
-                  <div class="pull-left">
-                    <img src="assets/img/user2-160x160.jpg" class="img-circle" alt="User Image">
-                  </div>
-                  <h4>
-                    Support Team
-                    <small><i class="fa fa-clock-o"></i> 5 mins</small>
-                  </h4>
-                  <p>Why not buy a new awesome theme?</p>
-                </a>
-              </li>
-              <li>
-                <a href="#">
-                  <div class="pull-left">
-                    <img src="assets/img/user3-128x128.jpg" class="img-circle" alt="User Image">
-                  </div>
-                  <h4>
-                    AdminLTE Design Team
-                    <small><i class="fa fa-clock-o"></i> 2 hours</small>
-                  </h4>
-                  <p>Why not buy a new awesome theme?</p>
-                </a>
-              </li>
-              <li>
-                <a href="#">
-                  <div class="pull-left">
-                    <img src="assets/img/user4-128x128.jpg" class="img-circle" alt="User Image">
-                  </div>
-                  <h4>
-                    Developers
-                    <small><i class="fa fa-clock-o"></i> Today</small>
-                  </h4>
-                  <p>Why not buy a new awesome theme?</p>
-                </a>
-              </li>
-              <li>
-                <a href="#">
-                  <div class="pull-left">
-                    <img src="assets/img/user3-128x128.jpg" class="img-circle" alt="User Image">
-                  </div>
-                  <h4>
-                    Sales Department
-                    <small><i class="fa fa-clock-o"></i> Yesterday</small>
-                  </h4>
-                  <p>Why not buy a new awesome theme?</p>
-                </a>
-              </li>
-              <li>
-                <a href="#">
-                  <div class="pull-left">
-                    <img src="assets/img/user4-128x128.jpg" class="img-circle" alt="User Image">
-                  </div>
-                  <h4>
-                    Reviewers
-                    <small><i class="fa fa-clock-o"></i> 2 days</small>
-                  </h4>
-                  <p>Why not buy a new awesome theme?</p>
-                </a>
-              </li>
-            </ul>
-            <div class="slimScrollBar" style="width: 3px; position: absolute; top: 0; opacity: 0.4; display: block; border-radius: 7px; z-index: 99; right: 1px; background: rgb(0, 0, 0);"></div>
-            <div class="slimScrollRail" style="width: 3px; height: 100%; position: absolute; top: 0; display: none; border-radius: 7px; opacity: 0.2; z-index: 90; right: 1px; background: rgb(51, 51, 51);"></div>
-          </div>
-        </li>
-        <li class="footer"><a href="#">See All Messages</a></li>
-      </mk-dropdown-menu>
-    </li>
-
     <li mk-dropdown type="list" [isWrapper]="false" class="notifications-menu">
       <mk-dropdown-toggle>
-        <a #toggleElement>
+        <a [routerLink]="'/app/traces'" *ngIf="executionTasks.length == 0" #toggleElement>
           <i class="fa fa-bell-o"></i>
-          <span class="label label-warning">10</span>
+        </a>
+        <a *ngIf="executionTasks.length > 0" #toggleElement>
+          <i class="fa fa-bell-o"></i>
+          <span class="label label-warning" *ngIf="executionTasks.length > 0">{{executionTasks.length}}</span>
         </a>
       </mk-dropdown-toggle>
-      <mk-dropdown-menu>
+      <mk-dropdown-menu *ngIf="executionTasks.length > 0">
         <li class="header">You have 10 notifications</li>
-        <li>
-          <div class="slimScrollDiv" style="position: relative; overflow: hidden; width: auto; height: 200px;"><ul class="menu" style="overflow: hidden; width: 100%; height: 200px;">
-            <li>
-              <a href="#">
-                <i class="fa fa-users text-aqua"></i> 5 new members joined today
-              </a>
-            </li>
-            <li>
-              <a href="#">
-                <i class="fa fa-warning text-yellow"></i> Very long description here that may not fit into the
-                page and may cause design problems
-              </a>
-            </li>
-            <li>
-              <a href="#">
-                <i class="fa fa-users text-red"></i> 5 new members joined
-              </a>
-            </li>
-            <li>
-              <a href="#">
-                <i class="fa fa-shopping-cart text-green"></i> 25 sales made
-              </a>
-            </li>
-            <li>
-              <a href="#">
-                <i class="fa fa-user text-light-blue"></i> You changed your username
-              </a>
-            </li>
-          </ul><div class="slimScrollBar" style="width: 3px; position: absolute; top: 0; opacity: 0.4; display: block; border-radius: 7px; z-index: 99; right: 1px; background: rgb(0, 0, 0);"></div><div class="slimScrollRail" style="width: 3px; height: 100%; position: absolute; top: 0; display: none; border-radius: 7px; opacity: 0.2; z-index: 90; right: 1px; background: rgb(51, 51, 51);"></div></div>
+        <li class="header">
+          <span translate="you_have_x_exectution_taks" translate-values="{values: executionTasks.length}"></span>
         </li>
-        <li class="footer"><a href="#">View all</a></li>
+        <li>
+          <!-- inner menu: contains the actual data -->
+          <ul class="menu" *ngFor="let task of executionTasks">
+            <li>
+              <div href="javascript:void(0)" class="pull-right btn-group-vertical">
+                <a href="javascript:void(0)" (click)="deleteExecutionTace(task)" class="btn btn-sm pull-right small-box-footer">
+                  <i class="fa fa-times"></i>
+                </a>
+                <a href="javascript:void(0)" (click)="relaunchExecutionTask(task)" class="btn btn-sm pull-right small-box-footer">
+                  <i class="fa fa-refresh"></i>
+                </a>
+              </div>
+              <a href="javascript:void(0)" (click)="ogCommandsService.execute('REALTIME_LOG', {clientIp: task.client.ip})">
+                <i class="fa fa-warning text-yellow"></i> {{task.client.name}} ({{task.client.ip}})<br>{{task.commandType|translate}}
+              </a>
+            </li>
+          </ul>
+        </li>
+        <li class="footer">
+          <a href="javascript:void(0)" translate="view_all" [routerLink]="['/app/traces']"></a>
+        </li>
       </mk-dropdown-menu>
     </li>
-
+    <!-- Tasks: style can be found in dropdown.less -->
     <li mk-dropdown type="list" [isWrapper]="false" class="tasks-menu">
       <mk-dropdown-toggle>
         <a #toggleElement>
-          <i class="fa fa-flag-o"></i>
-          <span class="label label-danger">9</span>
+          <i class="fa fa-language"></i>
         </a>
       </mk-dropdown-toggle>
       <mk-dropdown-menu>
-        <li class="header">You have 9 tasks</li>
-        <li>
-          <div class="slimScrollDiv" style="position: relative; overflow: hidden; width: auto; height: 200px;"><ul class="menu" style="overflow: hidden; width: 100%; height: 200px;">
-            <li>
-              <a href="#">
-                <h3>
-                  Design some buttons
-                  <small class="pull-right">20%</small>
-                </h3>
-                <div class="progress xs">
-                  <div class="progress-bar progress-bar-aqua" style="width: 20%" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100">
-                    <span class="sr-only">20% Complete</span>
-                  </div>
-                </div>
-              </a>
-            </li>
-
-            <li>
-              <a href="#">
-                <h3>
-                  Create a nice theme
-                  <small class="pull-right">40%</small>
-                </h3>
-                <div class="progress xs">
-                  <div class="progress-bar progress-bar-green" style="width: 40%" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100">
-                    <span class="sr-only">40% Complete</span>
-                  </div>
-                </div>
-              </a>
-            </li>
-            <li>
-              <a href="#">
-                <h3>
-                  Some task I need to do
-                  <small class="pull-right">60%</small>
-                </h3>
-                <div class="progress xs">
-                  <div class="progress-bar progress-bar-red" style="width: 60%" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100">
-                    <span class="sr-only">60% Complete</span>
-                  </div>
-                </div>
-              </a>
-            </li>
-            <li>
-              <a href="#">
-                <h3>
-                  Make beautiful transitions
-                  <small class="pull-right">80%</small>
-                </h3>
-                <div class="progress xs">
-                  <div class="progress-bar progress-bar-yellow" style="width: 80%" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100">
-                    <span class="sr-only">80% Complete</span>
-                  </div>
-                </div>
-              </a>
-            </li>
-          </ul><div class="slimScrollBar" style="width: 3px; position: absolute; top: 0; opacity: 0.4; display: block; border-radius: 7px; z-index: 99; right: 1px; background: rgb(0, 0, 0);"></div><div class="slimScrollRail" style="width: 3px; height: 100%; position: absolute; top: 0; display: none; border-radius: 7px; opacity: 0.2; z-index: 90; right: 1px; background: rgb(51, 51, 51);"></div></div>
-        </li>
-        <li class="footer">
-          <a href="#">View all tasks</a>
+        <li *ngFor="let lang of constants.languages" >
+            <a href="javascript:void(0)" (click)="ogCommonService.changeLanguage(lang.id)">{{lang.name}}</a>
         </li>
       </mk-dropdown-menu>
     </li>
     <li mk-dropdown type="list" [isWrapper]="false" class="user user-menu">
       <mk-dropdown-toggle>
         <a #toggleElement>
-          <img src="assets/img/user2-160x160.jpg" class="user-image" alt="User Image">
-          <span class="hidden-xs">Alexander Pierce</span>
+          <img src="assets/img/no-image.png" class="user-image" alt="User Image">
+          <span class="hidden-xs">{{user.username}}</span>
         </a>
       </mk-dropdown-toggle>
       <mk-dropdown-menu>
         <li class="user-header">
-          <img src="assets/img/user2-160x160.jpg" class="img-circle" alt="User Image">
+          <img src="assets/img/no-image.png" class="img-circle" alt="User Image">
 
           <p>
-            Alexander Pierce - Web Developer
+            {{user.username}} - Web Admin
             <small>Member since Nov. 2012</small>
           </p>
         </li>
+        <!-- Menu Body -->
         <li class="user-body">
           <div class="row">
             <div class="col-xs-4 text-center">
-              <a href="#">Followers</a>
+              <span></span>
             </div>
             <div class="col-xs-4 text-center">
-              <a href="#">Sales</a>
+              <span></span>
             </div>
             <div class="col-xs-4 text-center">
-              <a href="#">Friends</a>
+              <a ui-sref="app.users">Users</a>
             </div>
           </div>
+          <!-- /.row -->
         </li>
+        <!-- Menu Footer-->
         <li class="user-footer">
           <div class="pull-left">
-            <a href="#" class="btn btn-default btn-flat">Profile</a>
+            <a href="javascript:void(0)" class="btn btn-default btn-flat" translate="profile" [routerLink]="'app/user/profile'"></a>
           </div>
           <div class="pull-right">
-            <a href="#" class="btn btn-default btn-flat">Sign out</a>
+            <a href="javascript:void(0)" (click)="logout()" class="btn btn-default btn-flat">Sign out</a>
           </div>
         </li>
       </mk-dropdown-menu>

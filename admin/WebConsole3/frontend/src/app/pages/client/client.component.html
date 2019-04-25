@@ -1,1 +1,122 @@
-<div>Html template for class Client</div>
+<section class="content-header">
+    <h1 translate="{{client.name||'new_client'}}">
+    </h1>
+    <ol class="breadcrumb">
+        <li><a [routerLink]="'/app/dashboard'"><i class="fa fa-dashboard"></i> {{'dashboard'|translate}}</a></li>
+        <li><a [routerLink]="'/app/ous'" ><i class="fa fa-th"></i> {{'ous'|translate}}</a></li>
+        <li class="active" translate="client"></li>
+    </ol>
+</section>
+<section fixed-toolboxbar class="toolboxbar">
+    <div>
+        <div class="col-md-12">
+            <div class="box-tools pull-right">
+                <button class="btn btn-primary" translate="save" (click)="save()"></button>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <mk-box class="box box-primary" [isRemovable]="false" [isCollapsable]="false">
+                <mk-box-header class="box-header with-border">
+                    <h3 class="box-title" translate="client_data"></h3>
+                    <div class="box-tools pull-right">
+                        <div class="btn-group" *ngIf="client.id !== 0">
+                            <app-og-information-options ></app-og-information-options>
+                            <app-og-commands-options></app-og-commands-options>
+                        </div>
+                    </div>
+                </mk-box-header>
+                <mk-box-content>
+                    <form role="form" name="Form">
+                        <app-form-input [formType]="form" [cols]="2" [model]="client" ></app-form-input>
+                    </form>
+                </mk-box-content>
+                <mk-box-footer >
+                    <mk-box class="box box-default box-solid" *ngFor="let diskConfig of client.diskConfig">
+                        <mk-box-header class="box-header with-border">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <span translate="num_disk"></span>: <b>{{diskConfig.disk}}</b>
+                                </div>
+                                <div class="col-md-4">
+                                    <span translate="part_table"></span>: <b>{{diskConfig.parttable}}</b>
+                                </div>
+                                <div class="col-md-4">
+                                    <span translate="size"></span>: <b>{{getSizeInGB(diskConfig.size)}} GB</b>
+                                </div>
+                            </div>
+                            <div class="box-tools pull-right">
+                                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                                </button>
+                            </div>
+                            <!-- /.box-tools -->
+                        </mk-box-header>
+                        <!-- /.box-header -->
+                        <mk-box-content class="box-body">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <table class="table table-condensed table-striped">
+                                        <tbody>
+                                        <tr>
+                                            <th translate="partition"></th>
+                                            <th translate="part_type"></th>
+                                            <th translate="filesystem"></th>
+                                            <th translate="size"></th>
+                                            <th translate="usage"></th>
+                                            <th translate="os"></th>
+                                        </tr>
+                                        </tbody>
+                                        <ng-template *ngIf="partition.size > 0">
+                                            <tbody *ngFor="let partition of diskConfig.partitions" >
+                                        <tr ng-class="{'odd': $index%2 == 0, 'even': $index%2 != 0}">
+                                            <td>{{partition.numPartition}}</td>
+                                            <td>{{partition.parttype}}</td>
+                                            <td>{{partition.filesystem}}</td>
+                                            <td>{{getSizeInGB(partition.size)}} GB</td>
+                                            <td><span class="badge" ng-class="{'bg-green': partition.usage < 60, 'bg-yellow': partition.usage >= 60 && partition.usage < 80, 'bg-red': partition.usage >= 80}">{{partition.usage}}%</span></td>
+                                            <td>{{partition.osName}}</td>
+                                        </tr>
+                                        <tr *ngIf="partition.partitionCode == 'ca' && partition.cacheContent.files.length > 0" class="client-cache-info" ng-class="{'odd': $index%2 == 0, 'even': $index%2 != 0}">
+                                            <td colspan="6">
+                                                <span style="font-weight: bold" translate="cache_content"></span>
+                                                <table class="table">
+                                                    <thead>
+                                                    <tr>
+                                                        <th translate="type"></th>
+                                                        <th translate="name"></th>
+                                                        <th translate="size"></th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    <tr *ngFor="let file of partition.cacheContent.files">
+                                                        <td>{{file.type}}</td>
+                                                        <td>{{file.name}}</td>
+                                                        <td>{{file.size}}</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td style="font-weight: bold" translate="free_space" colspan="2"></td>
+                                                        <td>{{partition.cacheContent.freeSpace}}</td>
+                                                    </tr>
+                                                    </tbody>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                        </ng-template>
+                                    </table>
+                                </div>
+                                <div class="col-md-4">
+                                    <!--flot dataset="diskConfig.diskChartData" options="diskConfig.diskChartOptions" height="200px"></flot-->
+                                </div>
+                            </div>
+                        </mk-box-content>
+                        <!-- /.box-body -->
+                    </mk-box>
+                </mk-box-footer>
+            </mk-box>
+        </div>
+    </div>
+</section>

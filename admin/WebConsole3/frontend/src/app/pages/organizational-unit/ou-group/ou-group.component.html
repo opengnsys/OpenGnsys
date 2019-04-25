@@ -14,17 +14,17 @@
           </mk-dropdown-toggle>
           <mk-dropdown-menu>
               <li role="presentation">
-                <a role="menuitem" tabindex="-1" [routerLink]="'app/ous.new({parent: content.id})'" translate="add_ou"></a>
+                <a role="menuitem" tabindex="-1" [routerLink]="['/app/ous/create']" [queryParams]="{'parent': content.id}" translate="add_ou"></a>
               </li>
               <li role="presentation">
-                <a role="menuitem" tabindex="-1" [routerLink]="'app/client.new({ou: content.id})'" translate="add_client"></a>
+                <a role="menuitem" tabindex="-1" [routerLink]="['/app/clients/create']" [queryParams]="{'ou': content.id}" translate="add_client"></a>
               </li>
               <li role="presentation">
-                <a role="menuitem" tabindex="-1" [routerLink]="'app/client.dhcp({ou: content.id})'" translate="add_clients_from_dhcp"></a>
+                <a role="menuitem" tabindex="-1" [routerLink]="['/app/clients/dhcp']" [queryParams]="{'ou': content.id}" translate="add_clients_from_dhcp"></a>
               </li>
               <li role="presentation" class="divider"></li>
               <li>
-                <a class="" href="javascript:void(0)" translate="edit" [routerLink]="'app/ous.edit({ou: content.id})'"></a>
+                <a class="" href="javascript:void(0)" translate="edit" [routerLink]="['/app/ous/edit',content.id]"></a>
               </li>
               <li role="presentation" class="divider"></li>
               <li role="presentation" class="delete-option">

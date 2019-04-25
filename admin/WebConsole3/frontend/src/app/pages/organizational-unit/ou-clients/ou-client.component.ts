@@ -77,12 +77,10 @@ export class OuClientComponent {
 
   mustShow(client) {
     let result = true;
-    /*
     const status = this.clientStatus[client.id];
     if (status) {
       result = this.selectedStatus[status];
     }
-    /**/
 
     return result;
   }

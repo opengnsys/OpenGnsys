@@ -1,10 +1,10 @@
 import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
-import { adminLteConf } from './admin-lte.conf';
+import {NgModule, ViewEncapsulation} from '@angular/core';
+import {AdminLteConf } from './admin-lte.conf';
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 import { CoreModule } from './core/core.module';
-import {DropdownModule, LayoutModule} from '../../library/angular-admin-lte/src';
+import {DropdownModule, LayoutModule, LayoutService, LayoutState, LayoutStore} from 'library/angular-admin-lte/src';
 import {environment} from '../environments/environment';
 import {AuthModule, TokenInterceptorService} from 'globunet-angular/core';
 import {HTTP_INTERCEPTORS, HttpClient, HttpClientModule} from '@angular/common/http';
@@ -13,7 +13,7 @@ import {ImageComponent} from './pages/image/image.component';
 import { LoadingPageModule, MaterialBarModule } from 'angular-loading-page';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import {TranslateHttpLoader} from '@ngx-translate/http-loader';
-import {TranslateLoader, TranslateModule} from '@ngx-translate/core';
+import {TranslateLoader, TranslateModule, TranslateService} from '@ngx-translate/core';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ToastrModule } from 'ng6-toastr-notifications';
 import { Ng2SmartTableModule } from 'ng2-smart-table';
@@ -52,12 +52,14 @@ import {OgCommandsPipe} from './pages/common/pipes/og-commands.pipe';
 import {NetbootComponent} from './pages/netboot/netboot.component';
 import {NetbootEditComponent} from './pages/netboot/edit/netboot-edit.component';
 import {ImageEditComponent} from './pages/image/edit/image-edit.component';
+import {ProfileComponent} from './pages/profile/profile.component';
+import {layoutProvider} from '../../library/angular-admin-lte/src/lib/layout/layout.provider';
+import {OrganizationalUnitEditComponent} from './pages/organizational-unit/edit/organizational-unit-edit.component';
+import {platformBrowserDynamic} from '@angular/platform-browser-dynamic';
+import {ClientComponent} from './pages/client/client.component';
+import {ChartsModule} from 'ng2-charts';
 
 
-
-export function createTranslateLoader(http: HttpClient) {
-  return new TranslateHttpLoader(http, './assets/i18n/', '.json');
-}
 
 @NgModule({
   declarations: [
@@ -68,6 +70,7 @@ export function createTranslateLoader(http: HttpClient) {
     DashboardComponent,
     RepositoryComponent,
     OrganizationalUnitComponent,
+    OrganizationalUnitEditComponent,
     Ng2TableActionComponent,
     FormInputComponent,
     HardwareComponentComponent,
@@ -82,6 +85,7 @@ export function createTranslateLoader(http: HttpClient) {
     HardwareComponentsGroupComponent,
     OuGroupComponent,
     OuClientComponent,
+    ClientComponent,
     CommandComponent,
     EditCommandComponent,
     IcheckDirective,
@@ -98,6 +102,7 @@ export function createTranslateLoader(http: HttpClient) {
     TraceComponent,
     NetbootComponent,
     NetbootEditComponent,
+    ProfileComponent,
     OgCommandsPipe
   ],
   entryComponents: [
@@ -106,6 +111,7 @@ export function createTranslateLoader(http: HttpClient) {
     ImageComponent,
     ImageEditComponent,
     OrganizationalUnitComponent,
+    OrganizationalUnitEditComponent,
     Ng2TableActionComponent,
     ProfilesTableComponent,
     ProfilesGroupComponent,
@@ -113,19 +119,21 @@ export function createTranslateLoader(http: HttpClient) {
     HardwareComponentsGroupComponent,
     OuGroupComponent,
     OuClientComponent,
+    ClientComponent,
     CommandComponent,
     EditCommandComponent,
     OgOuGeneralOptionsComponent,
     TraceComponent,
     NetbootComponent,
-    NetbootEditComponent
+    NetbootEditComponent,
+    ProfileComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     CoreModule,
     DropdownModule,
-    LayoutModule.forRoot(adminLteConf),
+    LayoutModule.forRoot(AdminLteConf.staticConf),
     LoadingPageModule, MaterialBarModule,
     BrowserAnimationsModule,
     HttpClientModule,
@@ -139,11 +147,22 @@ export function createTranslateLoader(http: HttpClient) {
     }),
     ToastrModule.forRoot(),
     Ng2SmartTableModule,
-    FormsModule
+    FormsModule,
+    ChartsModule
   ],
   providers: [
     {provide: HTTP_INTERCEPTORS, useClass: TokenInterceptorService, multi: true}
   ],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {}
+
+platformBrowserDynamic().bootstrapModule(AppModule, [
+  {
+    defaultEncapsulation: ViewEncapsulation.None
+  }
+]);
+
+export function createTranslateLoader(http: HttpClient) {
+  return new TranslateHttpLoader(http, './assets/i18n/', '.json');
+}

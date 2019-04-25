@@ -41,7 +41,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   constructor(private authModule: AuthModule, private translate: TranslateService, private ogCommonService: OgCommonService, private statusService: StatusService) {
     this.status = {
-      data: [
+      datasets: [
         {
           label: translate.instant('memory'),
           data: [],
@@ -53,6 +53,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
           color: '#00FF00'
         }
       ],
+      xData: [],
       options: {
         grid: {
           borderColor: '#f3f3f3',
@@ -134,14 +135,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
         // Calcular porcentaje de memoria
         const mem = Math.round(((response.memInfo.used * 100) / response.memInfo.total) * 100) / 100;
         let index = 0;
-        if (this.status.data[0].data.length > 0) {
-          index = this.status.data[0].data[this.status.data[0].data.length - 1][0] + 1;
+        if (this.status.datasets[0].data.length > 0) {
+          index = this.status.xData[this.status.datasets[0].data.length - 1] + 1;
         }
-        this.status.data[0].data.push([index, mem]);
-        this.status.data[1].data.push([index, response.cpu.usage]);
-        if (this.status.data[0].data.length > this.maxLength) {
-          this.status.data[0].data.shift();
-          this.status.data[1].data.shift();
+        this.status.datasets[0].data.push(mem);
+        this.status.datasets[1].data.push(response.cpu.usage);
+        this.status.xData.push(index);
+        if (this.status.datasets[0].data.length > this.maxLength) {
+          this.status.datasets[0].data.shift();
+          this.status.datasets[1].data.shift();
         }
       },
       (error) => {

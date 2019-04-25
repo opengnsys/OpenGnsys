@@ -8,6 +8,8 @@ import {ToasterService} from '../../../service/toaster.service';
 import {ClientService} from '../../../api/client.service';
 import {TranslateService} from '@ngx-translate/core';
 import {OgCommonService} from '../../../service/og-common.service';
+import {AuthModule, tr} from 'globunet-angular/core';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-ou-group-component',
@@ -30,7 +32,9 @@ export class OuGroupComponent {
               private clientService: ClientService,
               private ogSweetAlert: OgSweetAlertService,
               private toaster: ToasterService,
-              private translate: TranslateService) {
+              private translate: TranslateService,
+              private authModule: AuthModule,
+              private router: Router) {
   }
 
   doMove(ou) {
@@ -132,7 +136,7 @@ export class OuGroupComponent {
 
   selectOu(ou) {
     // seleccionar/deseleccionar todos los elementos dentro de ou
-    for (let i = 0; i < ou.children.length; i++){
+    for (let i = 0; i < ou.children.length; i++) {
       ou.children[i].selected = ou.selected;
       this.selectOu(ou.children[i]);
     }
@@ -144,6 +148,7 @@ export class OuGroupComponent {
 
 
   deleteOu(ou) {
+    const self = this;
     this.ogSweetAlert.swal(
       {
         title: this.translate.instant('sure_to_delete') + '?',
@@ -164,27 +169,35 @@ export class OuGroupComponent {
             // Se eligió mover los clientes
             if (answer.value === 1) {
               // Obtener la ou para saber el id de su padre
-              this.organizationalUnitService.read(ou.id + '?parent= 1').subscribe(
+                // @ts-ignore
+                self.organizationalUnitService.read(ou.id + '?parent= 1').subscribe(
                 (response) => {
-                  // Mover todos los hijos al nivel superior de la ou actual
-                  const parentId = response.parent.id;
-                  for (let i = 0; i < ou.children.length; i++) {
-                    ou.children[i].parent = parentId;
-                    promises.push(this.organizationalUnitService.update({id: ou.children[i].id, parent: parentId}));
-                  }
-                  ou.clients = ou.clients || [];
-                  for (let i = 0; i < ou.clients.length; i++) {
-                    ou.clients[i].organizationalUnit = parentId;
-                    promises.push(this.clientService.update({id: ou.clients[i].id, organizationalUnit: parentId}));
-                  }
-                  forkJoin(promises).subscribe(
-                    (success) => {
-                      observer.next(true);
-                    },
-                    (error) => {
-                      observer.error(error);
+                  // Mover todos los hijos al nivel superior de la ou actual si tiene un nivel superior, sino no será posible realizar la acción
+                    if (response.parent && response.parent.id || ou.clients.length === 0) {
+                        const parentId = response.parent ? response.parent.id : null;
+                        for (let i = 0; i < ou.children.length; i++) {
+                            ou.children[i].parent = parentId;
+                            // @ts-ignore
+                            promises.push(self.organizationalUnitService.update({id: ou.children[i].id, parent: parentId}));
+                        }
+                        ou.clients = ou.clients || [];
+                        for (let i = 0; i < ou.clients.length; i++) {
+                            ou.clients[i].organizationalUnit = parentId;
+                            // @ts-ignore
+                            promises.push(self.clientService.update({id: ou.clients[i].id, organizationalUnit: parentId}));
+                        }
+                        forkJoin(promises).subscribe(
+                            (success) => {
+                                observer.next(true);
+                            },
+                            (error) => {
+                                observer.error(error);
+                            }
+                        );
+                    } else {
+                        observer.error(self.translate.instant(tr('SUPERIOR_LEVEL_NOT_EXIST_CHILDREN_NOT_MOVED')));
                     }
-                  );
+
                 },
                 (error) => {
                   observer.error(error);
@@ -195,26 +208,28 @@ export class OuGroupComponent {
             }
           }).subscribe(
             (response) => {
-              this.organizationalUnitService.delete(ou.id).subscribe(
+                self.organizationalUnitService.delete(ou.id).subscribe(
                 (success) => {
-                  // Si la unidad organizativa es un nivel superior, se recarga la lista y se borra la unidad organizativa del usuario
-                  if (ou.parent == null) {
-                    delete this.config.ous;
-                    this.user.ou = null;
-                  }
+                    /**
+                        // Si la unidad organizativa es un nivel superior, se recarga la lista y se borra la unidad organizativa del usuario
+                        if (ou.parent == null) {
+                            delete self.config.ous;
+                            self.authModule.getLoggedUser().ou = null;
+                        }
+                    /**/
+                    window.setTimeout(function() {
+                        self.deleteOuFromModel(self.ous, self.content);
+                        self.toaster.pop({type: 'success', title: 'success', body: 'Successfully deleted'});
+                    }, 0);
 
-                  this.toaster.pop({type: 'success', title: 'success', body: 'Successfully deleted'});
-                  window.setTimeout(function() {
-                    this.router.navigate(['app.ous']);
-                  }, 500);
                 },
                 (error) => {
-                  this.toaster.pop({type: 'error', title: 'error', body: error});
+                    self.toaster.pop({type: 'error', title: 'error', body: error});
                 }
               );
             },
             (error) => {
-              this.toaster.pop({type: 'error', title: 'error', body: error});
+                self.toaster.pop({type: 'error', title: 'error', body: error});
             }
           );
         }

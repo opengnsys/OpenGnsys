@@ -1,8 +1,8 @@
-<ng-container *ngIf="userIsLogged() && customLayout; else noCustomLayout">
-  <router-outlet></router-outlet>
+<ng-container *ngIf="!userIsLogged() && isCustomLayout else layoutEnabled">
+  <app-login></app-login>
 </ng-container>
-<ng-template #noCustomLayout>
-  <mk-layout-wrapper *ngIf="userIsLogged();else login">
+<ng-template #layoutEnabled>
+  <mk-layout-wrapper>
     <mk-layout-header logoLink="/">
       <mk-layout-header-logo><b>Angular </b>AdminLTE</mk-layout-header-logo>
       <mk-layout-header-logo-mini><b>A</b>LTE</mk-layout-header-logo-mini>
@@ -31,8 +31,4 @@
       </mk-layout-footer-right>
     </mk-layout-footer>
   </mk-layout-wrapper>
-  <ng-template #login>
-    <app-login></app-login>
-  </ng-template>
 </ng-template>
-

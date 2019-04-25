@@ -3,7 +3,7 @@
     <h1 translate="images">
     </h1>
     <ol class="breadcrumb">
-      <li><a [routerLink]="'app/dashboard'"><i class="fa fa-dashboard"></i> {{'dashboard'|translate}}</a></li>
+      <li><a [routerLink]="'/app/dashboard'"><i class="fa fa-dashboard"></i> {{'dashboard'|translate}}</a></li>
       <li class="active" translate="images"></li>
     </ol>
   </section>
@@ -25,8 +25,8 @@
                 <span translate="new"></span><span class="caret"></span>
             </mk-dropdown-toggle>
             <mk-dropdown-menu>
-              <li role="presentation"><a role="menuitem" tabindex="-1" [routerLink]="'app/images/create/monolithic'" translate="monolithic_image"></a></li>
-              <li role="presentation"><a role="menuitem" tabindex="-1" [routerLink]="'app/images/create/basic'"  translate="basic_image"></a></li>
+              <li role="presentation"><a role="menuitem" tabindex="-1" [routerLink]="'/app/images/create/monolithic'" translate="monolithic_image"></a></li>
+              <li role="presentation"><a role="menuitem" tabindex="-1" [routerLink]="'/app/images/create/basic'"  translate="basic_image"></a></li>
             </mk-dropdown-menu>
           </mk-dropdown>
         </div>

@@ -3,7 +3,7 @@
       <span translate="options"></span><span class="caret"></span>
   </mk-dropdown-toggle>
   <mk-dropdown-menu>
-    <li role="presentation"><a role="menuitem" tabindex="-1" [routerLink]="'/app/ous/new'" translate="add_ou"></a></li>
+    <li role="presentation"><a role="menuitem" tabindex="-1" [routerLink]="'/app/ous/create'" translate="add_ou"></a></li>
     <li role="presentation" class="{{ogCommonService.getSelectionSize() == 0?'disable-links':''}}">
       <a role="menuitem" tabindex="-1" href="javascript:void(0)" (click)="moveClientsToOu()">
         <span *ngIf="!ogCommonService.isMovingClients()" translate="move_clients_to_ou"></span>
