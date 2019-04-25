@@ -6,8 +6,10 @@ set ISODIR=ogLive
 
 # Si existe ogLive en CACHE lo inicio, si no el de la red
 set root=''
+echo "OgLive CACHE"
 search --file --set root /boot/$ISODIR/ogvmlinuz
 if [ "$root" == "" ]; then
+    echo "OgLive $ISODIR"
     set default=1;
 else
     set default=0;
@@ -25,6 +27,8 @@ menuentry "OgLive $ISODIR" {
 	if linux (tftp)/$DIR/ogvmlinuz ro boot=oginit quiet splash vga=788 irqpoll acpi=on og2nd=sqfs ogprotocol=smb ogactiveadmin=false ogdebug=false ogtmpfs=15 oglivedir=$ISODIR INFOHOST ; then
 	    set DIR=$DIR
 	    break
+        else
+	    echo "OgLive default"
 	fi
     done
 

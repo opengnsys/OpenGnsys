@@ -9,6 +9,7 @@ set chain=""
 
 # Compruebo si existen distintos cargadores.
 set root=''
+echo "Searching rEFInd"
 search --file --set root /EFI/refind/grubx64.efi
 if [ "$root" != "" ]; then
     set label="rEFInd"
@@ -16,6 +17,7 @@ if [ "$root" != "" ]; then
 fi
   
 if [ "$root" == "" ]; then
+    echo "Searching Microsoft"
     search --file --set root /EFI/Microsoft/Boot/bootmgfw.efi
     if [ "$root" != "" ]; then
 	set label="Microsoft"
@@ -24,6 +26,7 @@ if [ "$root" == "" ]; then
 fi
 
 if [ "$root" == "" ]; then
+    echo "Searching Ubuntu"
     search --file --set root /EFI/ubuntu/grubx64.efi
     if [ "$root" != "" ]; then
 	set label="Ubuntu"
@@ -32,6 +35,7 @@ if [ "$root" == "" ]; then
 fi
 
 if [ "$root" == "" ]; then
+    echo "Searching Part-01-02"
     search --file --set root /EFI/Part-01-02/Boot/ogloader.efi
     if [ "$root" != "" ]; then
 	set label="Part-01-02"
@@ -40,6 +44,7 @@ if [ "$root" == "" ]; then
 fi
 
 if [ "$root" == "" ]; then
+    echo "Searching Part-01-03"
     search --file --set root /EFI/Part-01-03/Boot/ogloader.efi
     if [ "$root" != "" ]; then
 	set label="Part-01-03"

@@ -3,6 +3,7 @@ set timeout=0
 
 # Compruebo si existe rEFInd
 set root=''
+echo "rEFInd"
 search --file --set root /EFI/refind/grubx64.efi
 if [ "$root" == "" ]; then
     set label="rEFInd no está instalado" 
