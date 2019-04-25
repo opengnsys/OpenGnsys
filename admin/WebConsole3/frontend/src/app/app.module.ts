@@ -1,12 +1,12 @@
 import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
+import {NgModule, ViewEncapsulation} from '@angular/core';
 import {AdminLteConf } from './admin-lte.conf';
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 import { CoreModule } from './core/core.module';
 import {DropdownModule, LayoutModule, LayoutService, LayoutState, LayoutStore} from 'library/angular-admin-lte/src';
 import {environment} from '../environments/environment';
-import {AuthModule, TokenInterceptorService} from 'library/globunet-angular/core';
+import {AuthModule, TokenInterceptorService} from 'globunet-angular/core';
 import {HTTP_INTERCEPTORS, HttpClient, HttpClientModule} from '@angular/common/http';
 import {LoginComponent} from './pages/login/login.component';
 import {ImageComponent} from './pages/image/image.component';
@@ -54,6 +54,10 @@ import {NetbootEditComponent} from './pages/netboot/edit/netboot-edit.component'
 import {ImageEditComponent} from './pages/image/edit/image-edit.component';
 import {ProfileComponent} from './pages/profile/profile.component';
 import {layoutProvider} from '../../library/angular-admin-lte/src/lib/layout/layout.provider';
+import {OrganizationalUnitEditComponent} from './pages/organizational-unit/edit/organizational-unit-edit.component';
+import {platformBrowserDynamic} from '@angular/platform-browser-dynamic';
+import {ClientComponent} from './pages/client/client.component';
+import {ChartsModule} from 'ng2-charts';
 
 
 
@@ -66,6 +70,7 @@ import {layoutProvider} from '../../library/angular-admin-lte/src/lib/layout/lay
     DashboardComponent,
     RepositoryComponent,
     OrganizationalUnitComponent,
+    OrganizationalUnitEditComponent,
     Ng2TableActionComponent,
     FormInputComponent,
     HardwareComponentComponent,
@@ -80,6 +85,7 @@ import {layoutProvider} from '../../library/angular-admin-lte/src/lib/layout/lay
     HardwareComponentsGroupComponent,
     OuGroupComponent,
     OuClientComponent,
+    ClientComponent,
     CommandComponent,
     EditCommandComponent,
     IcheckDirective,
@@ -105,6 +111,7 @@ import {layoutProvider} from '../../library/angular-admin-lte/src/lib/layout/lay
     ImageComponent,
     ImageEditComponent,
     OrganizationalUnitComponent,
+    OrganizationalUnitEditComponent,
     Ng2TableActionComponent,
     ProfilesTableComponent,
     ProfilesGroupComponent,
@@ -112,6 +119,7 @@ import {layoutProvider} from '../../library/angular-admin-lte/src/lib/layout/lay
     HardwareComponentsGroupComponent,
     OuGroupComponent,
     OuClientComponent,
+    ClientComponent,
     CommandComponent,
     EditCommandComponent,
     OgOuGeneralOptionsComponent,
@@ -139,7 +147,8 @@ import {layoutProvider} from '../../library/angular-admin-lte/src/lib/layout/lay
     }),
     ToastrModule.forRoot(),
     Ng2SmartTableModule,
-    FormsModule
+    FormsModule,
+    ChartsModule
   ],
   providers: [
     {provide: HTTP_INTERCEPTORS, useClass: TokenInterceptorService, multi: true}
@@ -148,6 +157,11 @@ import {layoutProvider} from '../../library/angular-admin-lte/src/lib/layout/lay
 })
 export class AppModule {}
 
+platformBrowserDynamic().bootstrapModule(AppModule, [
+  {
+    defaultEncapsulation: ViewEncapsulation.None
+  }
+]);
 
 export function createTranslateLoader(http: HttpClient) {
   return new TranslateHttpLoader(http, './assets/i18n/', '.json');

@@ -38,8 +38,8 @@ export class FormInputComponent {
 
   getValue(field: any, option: any) {
     let result = option;
-    if (field.value) {
-      result = option[field.value];
+    if (field.options.value) {
+      result = option[field.options.value];
     }
     return result;
   }

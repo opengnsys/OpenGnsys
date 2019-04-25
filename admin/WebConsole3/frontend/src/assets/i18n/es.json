@@ -285,5 +285,6 @@
 	"yes": "Sí",
 	"yes_delete": "Sí borrar",
 	"you_have_x_exectution_taks": "Tienes {{values}} tareas en ejecución",
-	"you_must_to_select_any_clients": "Debes seleccionar al menos un cliente"
+	"you_must_to_select_any_clients": "Debes seleccionar al menos un cliente",
+	"REMEMBER_ME": "Remember me"
 }

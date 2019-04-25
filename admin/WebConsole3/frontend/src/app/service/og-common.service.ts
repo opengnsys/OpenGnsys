@@ -39,6 +39,7 @@ export class OgCommonService {
         this.engineService.list().subscribe(
           data => {
             this.constants = {
+              ou: environment.ou,
               themes: environment.themes,
               menus: environment.menus,
               languages: environment.languages

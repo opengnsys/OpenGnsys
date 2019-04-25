@@ -1,6 +1,17 @@
-login {
+app-login {
   .login-page {
     overflow: hidden;
     min-height: 100%;
+    position: absolute;
+    width: 100%;
+    background: white;
+  }
+
+  .login-box {
+    border: 1px solid;
+  }
+
+  .login-logo {
+    background: #d2d6de;
   }
 }

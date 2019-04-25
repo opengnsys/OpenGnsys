@@ -1,6 +1,7 @@
-import {Component, NgZone} from '@angular/core';
+import {Component, NgZone, ViewEncapsulation} from '@angular/core';
 import {AuthModule, GlobunetUser} from 'globunet-angular/core';
 import {Router} from '@angular/router';
+import {User} from '../../model/user';
 
 
 @Component({
@@ -18,6 +19,9 @@ export class LoginComponent {
   // should be each tab's root Page
   constructor(public authModule: AuthModule, private router: Router) {
     this.user = new GlobunetUser();
+    if (this.authModule.getLoggedUser(new User()).id !== 0) {
+      this.goToDashboard();
+    }
   }
 
   goToDashboard() {

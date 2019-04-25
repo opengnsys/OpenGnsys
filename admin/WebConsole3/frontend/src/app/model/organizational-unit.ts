@@ -1,6 +1,20 @@
 import { Resource } from 'globunet-angular/core/models/api/resource';
 import {Client} from './client';
 
+export class NetworkSettings {
+  router = '';
+  netmask = '';
+  proxy = '';
+  dns = '';
+  ntp = '';
+  mcastMode = '';
+  mcastIp = '';
+  mcastSpeed = 100;
+  mcastPort = 9000;
+  p2pMode = '';
+  p2pTime = 60;
+}
+
 export class OrganizationalUnit extends Resource {
   name: string;
   capacity: number;
@@ -22,4 +36,5 @@ export class OrganizationalUnit extends Resource {
   p2ptime: number;
   parent: string;
   clients?: Client[];
+  networkSettings?: NetworkSettings;
 }

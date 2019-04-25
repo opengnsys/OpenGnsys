@@ -5,10 +5,10 @@ const url = 'https://SERVERIP/opengnsys3';
 export const environment = {
   production: false,
   BASE_URL: url,
-  API_URL: url + '/frontend/web/app_dev.php/api/private',
+  API_URL: url + '/backend/web/app_dev.php/api/private',
   API_PUBLIC_URL: url + '/api',
-  API_BASE_URL: '/frontend/web/app_dev.php/api',
-  OAUTH_DOMAIN: '/frontend/web/app_dev.php/oauth/v2/token',
+  API_BASE_URL: '/backend/web/app_dev.php/api',
+  OAUTH_DOMAIN: '/backend/web/app_dev.php/oauth/v2/token',
   OAUTH_CLIENT_ID: '1_23amzbdp4kskg80444oscko4w0w8wokocs88k0g8w88o4oggs4',
   OAUTH_CLIENT_SECRET: '46rttt2trwo4gocgoc4w80k4s8ok48sg8s84kk0cw48csks8o8',
   BASE_DIR: 'opengnsys3',

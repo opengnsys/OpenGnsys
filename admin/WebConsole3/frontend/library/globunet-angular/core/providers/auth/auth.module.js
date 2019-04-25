@@ -21,9 +21,19 @@ const globunet_user_1 = require("../../models/globunet-user");
 let AuthModule = AuthModule_1 = class AuthModule {
     constructor(authService, parentModule) {
         this.authService = authService;
+        this.storageKey = '';
         this.loggedUser = new globunet_user_1.GlobunetUser();
         if (parentModule) {
             throw new Error('AuthModule is already loaded. Import it in the AppModule only');
+        }
+        // Comprobar sesion anterior
+        if (localStorage.getItem("AuthModule.storageKey")) {
+            this.storageKey = localStorage.getItem("AuthModule.storageKey") || '';
+            let userSession = JSON.parse(localStorage.getItem(this.storageKey) || '');
+            if (userSession) {
+                this.authService.setAuthorizationToken(userSession.data);
+                this.loggedUser = userSession.user;
+            }
         }
     }
     static forRoot(config) {
@@ -37,9 +47,17 @@ let AuthModule = AuthModule_1 = class AuthModule {
     login(username, password, user) {
         return new rxjs_1.Observable((observer) => {
             this.authService.getAccessToken(username, password).subscribe(data => {
+                this.storageKey = username + "_" + btoa(password);
+                localStorage.setItem("AuthModule.storageKey", this.storageKey);
                 // Obtener los datos del usuario
-                this.authService.me().subscribe(data => {
-                    this.loggedUser = Object.assign(user, data);
+                this.authService.me().subscribe(userMe => {
+                    this.loggedUser = Object.assign(user, userMe);
+                    // Guardar todo en sesion
+                    let userSession = {
+                        data: data,
+                        user: this.loggedUser
+                    };
+                    localStorage.setItem(this.storageKey, JSON.stringify(userSession));
                     observer.next(this.loggedUser);
                 });
             }, error => {
@@ -49,9 +67,14 @@ let AuthModule = AuthModule_1 = class AuthModule {
     }
     logout() {
         delete this.loggedUser;
+        localStorage.removeItem(this.storageKey);
+        localStorage.removeItem("AuthModule.storageKey");
         this.authService.logout();
     }
-    getLoggedUser() {
+    getLoggedUser(user) {
+        if (user) {
+            this.loggedUser = Object.assign(user, this.loggedUser);
+        }
         return this.loggedUser;
     }
 };
