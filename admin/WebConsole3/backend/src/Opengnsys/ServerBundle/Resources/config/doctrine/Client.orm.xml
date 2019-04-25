@@ -3,7 +3,7 @@
                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
 
-    <entity name="Opengnsys\ServerBundle\Entity\Client" table="og_clients"
+    <entity name="Opengnsys\ServerBundle\Entity\Client" table="og_server__clients"
             repository-class="Opengnsys\ServerBundle\Entity\Repository\ClientRepository">
 
         <id name="id" type="integer" column="id">
@@ -20,8 +20,14 @@
         <field name="status" type="string" column="status" length="50" nullable="true"/>
 
         <field name="cache" type="integer" column="cache" nullable="true"/>
-        <field name="idproautoexec" type="integer" column="idproautoexec" nullable="false"/>
+        <field name="idproautoexec" type="integer" column="idproautoexec" nullable="true"/>
         <field name="oglive" type="string" length="255" column="oglive" nullable="true"/>
+
+        <field name="agentToken" type="string" column="agent_token" length="32" nullable="true">
+            <options>
+                <option name="fixed"/>
+            </options>
+        </field>
 
         <one-to-many field="partitions" target-entity="\Opengnsys\ServerBundle\Entity\Partition" mapped-by="client">
             <cascade>

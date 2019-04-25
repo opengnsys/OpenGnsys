@@ -1,10 +1,10 @@
 <?php
 
 /*
- * This file is part of the Globunet Project package.
+ * This file is part of the Opengnsys Project package.
  *
- * Created by Globunet on 16/04/16. <info@globunet.com>
- * Copyright (c) 2015 Globunet Soluciones Tecnológicas, SL. All rights reserved.
+ * Created by Miguel Angel de Vega Alcantara on 16/04/16. <miguelangel.devega@sic.uhu.es>
+ * Copyright (c) 2015 Opengnsys. All rights reserved.
  *
  */
 namespace Opengnsys\CoreBundle\Domain;

@@ -4,8 +4,8 @@
 /*
  * This file is part of the Opengnsys Project package.
  *
- * Created by Opengnsys on 20/10/15. <info@globunet.com>
- * Copyright (c) 2015 Opengnsys Soluciones Tecnológicas, SL. All rights reserved.
+ * Created by Miguel Angel de Vega Alcantara on 20/10/15. <miguelangel.devega@sic.uhu.es>
+ * Copyright (c) 2015 Opengnsys. All rights reserved.
  *
  */
 

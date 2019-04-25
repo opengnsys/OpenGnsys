@@ -46,7 +46,7 @@
         <option name="fixed"/>
       </options>
     </field>
-    <field name="uso" type="boolean" column="uso" nullable="false">
+    <field name="uso" type="integer" column="uso" nullable="false">
       <options>
         <option name="default">0</option>
       </options>

@@ -3,7 +3,7 @@
     
     <entity
         name="Opengnsys\CoreBundle\Entity\AuthCode"
-        table="globunet_user__auth_codes"
+        table="og_core__auth_codes"
         >
 
         <id name="id" type="integer" column="id">

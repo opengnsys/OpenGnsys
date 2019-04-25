@@ -14,6 +14,7 @@ use Opengnsys\ServerBundle\Entity\Client;
 use Opengnsys\ServerBundle\Form\Type\Api\ClientType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Form\FormTypeInterface;
 
@@ -374,13 +375,18 @@ class ClientController extends ApiController
 
         $data = $request->request->all();
         $ip = $data['ip'];
+        $mac = $data['mac'];
         $config = $data['config'];
 
         $logger->info("----------- CLIENT CONFIG -----------");
-        $logger->info("ip: " . $ip);
-        $logger->info("config: " . $config);
+        $logger->info("ip: " . $ip. " - mac: ". $mac." - config: " . $config );
 
-        $client = $clientRepository->findOneBy(array("ip"=>$ip));
+        $client = $clientRepository->findOneBy(array("ip"=>$ip, "mac"=>$mac));
+
+        if (!$client) {
+            throw new AccessDeniedHttpException();
+        }
+
         $config = explode(';', $config);
 
         $serialno = $config[0];
@@ -403,7 +409,7 @@ class ClientController extends ApiController
 
             // Si el Filesystem / PartitionCode es Cache leer la información del contenido de la cache.
             if($partition->getFilesystem() === "CACHE"){
-                $path = $this->getParameter('path_client');
+                $path = $this->container->getParameter('path_client');
                 $file = $ip.".cache.txt";
                 $filePath = $path.$file;
                 if(file_exists($filePath)) {

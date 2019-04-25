@@ -29,14 +29,6 @@ Opengnsys\ServerBundle\Entity\Image:
             groups: [opengnsys_server__image_get, opengnsys_server__image_cget]
             expose: true
             serialized_name: fileSize
-        createdAt:
-            groups: [opengnsys_server__image_get, opengnsys_server__image_cget]
-            expose: true
-            serialized_name: createdAt
-        updatedAt:
-            groups: [opengnsys_server__image_get, opengnsys_server__image_cget]
-            expose: true
-            serialized_name: updatedAt
         id:
             groups: [opengnsys_server__image_get, opengnsys_server__image_cget]
             expose: true

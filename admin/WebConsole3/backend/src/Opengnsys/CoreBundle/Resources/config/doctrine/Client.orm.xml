@@ -3,7 +3,7 @@
     
     <entity
         name="Opengnsys\CoreBundle\Entity\Client"
-        table="globunet_user__clients"
+        table="og_core__clients"
         >
 
         <id name="id" type="integer" column="id">

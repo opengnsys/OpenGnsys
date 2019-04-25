@@ -5,7 +5,7 @@
 
     <entity
             name="Opengnsys\CoreBundle\Entity\RefreshToken"
-            table="globunet_user__refresh_tokens"
+            table="og_core__refresh_tokens"
     >
 
         <id name="id" type="integer" column="id">

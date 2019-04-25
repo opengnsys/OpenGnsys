@@ -389,6 +389,7 @@ class MigrateCommand extends ContainerAwareCommand
             $partition->setPartitionCode($particion->getCodpar());
             $partition->setSize($particion->getTamano());
             $partition->setCacheContent($particion->getCache());
+            //$output->writeln(sprintf($particion->getUso()));
             $partition->setUsage($particion->getUso());
 
             //$logger->warning("Find FylesSystema ID: ". $particion->getIdsistemafichero());

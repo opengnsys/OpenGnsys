@@ -3,8 +3,8 @@
 /*
  * This file is part of the Opengnsys Project package.
  *
- * Created by Opengnsys on 06/02/19. <info@globunet.com>
- * Copyright (c) 2019 Opengnsys Soluciones Tecnológicas, SL. All rights reserved.
+ * Created by Miguel Angel de Vega Alcantara on 06/02/19. <miguelangel.devega@sic.uhu.es>
+ * Copyright (c) 2019 Opengnsys. All rights reserved.
  *
  */
 

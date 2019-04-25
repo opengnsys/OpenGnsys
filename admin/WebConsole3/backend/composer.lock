@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "bb47c989d783013292749204f43c64f6",
+    "content-hash": "fd8853d766e80655e63261c9d6e86ab3",
     "packages": [
         {
             "name": "composer/ca-bundle",
@@ -1474,146 +1474,6 @@
                 "User management"
             ],
             "time": "2018-03-08T08:59:27+00:00"
-        },
-        {
-            "name": "globunet/api-bundle",
-            "version": "dev-master",
-            "source": {
-                "type": "git",
-                "url": "https://gitlab.globunet.com/globunet/symfony-bundle/api.git",
-                "reference": "5a587fbf997c04572aed6e99f7976212dd16e0b9"
-            },
-            "require": {
-                "friendsofsymfony/rest-bundle": "~2.0",
-                "globunet/core-bundle": "dev-master",
-                "jms/serializer-bundle": "~2.0",
-                "nelmio/api-doc-bundle": "~2.12.0",
-                "nelmio/cors-bundle": "~1.5.0",
-                "php": ">=7.0.0"
-            },
-            "type": "symfony-bundle",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "2.4-dev"
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Globunet\\ApiBundle\\": ""
-                }
-            },
-            "license": [
-                "proprietary"
-            ],
-            "authors": [
-                {
-                    "name": "Miguel Angel",
-                    "email": "ma.devega@globunet.com",
-                    "homepage": "http://globunet.com"
-                },
-                {
-                    "name": "Juan Manuel",
-                    "email": "jm.bardallo@globunet.com",
-                    "homepage": "http://globunet.com"
-                }
-            ],
-            "description": "Symfony GlobunetApiBundle",
-            "homepage": "http://globunet.com",
-            "keywords": [
-                "globunet api"
-            ],
-            "time": "2019-04-02T17:36:46+00:00"
-        },
-        {
-            "name": "globunet/core-bundle",
-            "version": "dev-master",
-            "source": {
-                "type": "git",
-                "url": "https://gitlab.globunet.com/globunet/symfony-bundle/core.git",
-                "reference": "2b1f07e9feef6222dfcc0c520716b069c8290af9"
-            },
-            "require": {
-                "php": ">=5.5.9"
-            },
-            "type": "symfony-bundle",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "2.4-dev"
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Globunet\\CoreBundle\\": ""
-                }
-            },
-            "license": [
-                "proprietary"
-            ],
-            "authors": [
-                {
-                    "name": "Miguel Angel",
-                    "email": "ma.devega@globunet.com",
-                    "homepage": "http://globunet.com"
-                },
-                {
-                    "name": "Juan Manuel",
-                    "email": "jm.bardallo@globunet.com",
-                    "homepage": "http://globunet.com"
-                }
-            ],
-            "description": "Symfony GlobunetCoreBundle",
-            "homepage": "http://globunet.com",
-            "keywords": [
-                "globunet core"
-            ],
-            "time": "2019-03-26T20:25:25+00:00"
-        },
-        {
-            "name": "globunet/user-bundle",
-            "version": "dev-master",
-            "source": {
-                "type": "git",
-                "url": "https://gitlab.globunet.com/globunet/symfony-bundle/user.git",
-                "reference": "8c7ff1fcfc4567daa31f06a2cf21e0d0f6999cc5"
-            },
-            "require": {
-                "friendsofsymfony/oauth-server-bundle": ">=1.5.2",
-                "friendsofsymfony/user-bundle": ">=1.3.3",
-                "globunet/core-bundle": "dev-master",
-                "php": ">=7.0.0"
-            },
-            "type": "symfony-bundle",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "2.4-dev"
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Globunet\\UserBundle\\": ""
-                }
-            },
-            "license": [
-                "proprietary"
-            ],
-            "authors": [
-                {
-                    "name": "Miguel Angel",
-                    "email": "ma.devega@globunet.com",
-                    "homepage": "http://globunet.com"
-                },
-                {
-                    "name": "Juan Manuel",
-                    "email": "jm.bardallo@globunet.com",
-                    "homepage": "http://globunet.com"
-                }
-            ],
-            "description": "Symfony GlobunetUserBundle",
-            "homepage": "http://globunet.com",
-            "keywords": [
-                "globunet user"
-            ],
-            "time": "2019-03-31T00:10:08+00:00"
         },
         {
             "name": "incenteev/composer-parameter-handler",
@@ -3913,11 +3773,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "globunet/core-bundle": 20,
-        "globunet/api-bundle": 20,
-        "globunet/user-bundle": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

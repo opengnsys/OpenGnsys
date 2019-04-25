@@ -99,11 +99,32 @@ class Client extends BaseEntity
     private $netboot;
 
     /**
+     * @var string|null
+     */
+    private $agentToken;
+
+    /**
      * Constructor
      */
     public function __construct()
     {
         $this->partitions = new \Doctrine\Common\Collections\ArrayCollection();
+    }
+
+    /**
+     * Get partitions
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getPartition($key)
+    {
+        $partition = null;
+        if(!$partition = $this->partitions->get($key)){
+            $partition = new Partition();
+            $partition->setClient($this);
+            $this->partitions[$key] = $partition;
+        }
+        return $partition;
     }
 
     /**
@@ -534,5 +555,29 @@ class Client extends BaseEntity
     public function getNetboot()
     {
         return $this->netboot;
+    }
+
+    /**
+     * Set agentToken.
+     *
+     * @param string|null $agentToken
+     *
+     * @return Client
+     */
+    public function setAgentToken($agentToken = null)
+    {
+        $this->agentToken = $agentToken;
+
+        return $this;
+    }
+
+    /**
+     * Get agentToken.
+     *
+     * @return string|null
+     */
+    public function getAgentToken()
+    {
+        return $this->agentToken;
     }
 }

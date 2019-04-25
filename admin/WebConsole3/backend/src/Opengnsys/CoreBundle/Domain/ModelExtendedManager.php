@@ -1,10 +1,10 @@
 <?php
 
 /*
- * This file is part of the Globunet Project package.
+ * This file is part of the Opengnsys Project package.
  *
- * Created by Globunet on 15/03/19. <info@globunet.com>
- * Copyright (c) 2015 Globunet Soluciones Tecnológicas, SL. All rights reserved.
+ * Created by Miguel Angel de Vega Alcantara on 15/03/19. <miguelangel.devega@sic.uhu.es>
+ * Copyright (c) 2015 Opengnsys. All rights reserved.
  *
  */
 namespace Opengnsys\CoreBundle\Domain;
@@ -94,7 +94,7 @@ class ModelExtendedManager extends ModelManager
      *
      * @return object
      *
-     * @throws \Globunet\UserBundle\Exception\InvalidFormException
+     * @throws \Opengnsys\CoreBundle\Exception\InvalidFormException
      */
     public function persistForm($object, array $parameters, $method = "PUT", $flush = true, $validationGroup = null)
     {
@@ -136,7 +136,7 @@ class ModelExtendedManager extends ModelManager
      *
      * @return object
      *
-     * @throws \Globunet\UserBundle\Exception\InvalidFormException
+     * @throws \Opengnsys\CoreBundle\Exception\InvalidFormException
      */
     public function processForm($object, array $parameters, $method = "PUT", $validationGroup = "")
     {

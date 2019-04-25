@@ -3,7 +3,7 @@
     
     <entity
         name="Opengnsys\CoreBundle\Entity\AccessToken"
-        table="globunet_user__access_tokens"
+        table="og_core__access_tokens"
         >
 
         <id name="id" type="integer" column="id">

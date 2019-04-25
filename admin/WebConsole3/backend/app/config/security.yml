@@ -44,7 +44,7 @@ security:
                 secret:      "%secret%"
                 lifetime: 31536000 # 365 days in seconds
                 path:     /
-                name: REMEMBERME_MAIN
+                name: REMEMBERME_OG_MAIN
     access_control:
         # Auth login
         - { path: ^/oauth/v2/auth_login$, role: IS_AUTHENTICATED_ANONYMOUSLY }

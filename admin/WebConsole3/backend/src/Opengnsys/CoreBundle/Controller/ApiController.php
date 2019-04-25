@@ -2,13 +2,13 @@
  
 namespace Opengnsys\CoreBundle\Controller;
 
-use FOS\RestBundle\Controller\FOSRestController;
+use FOS\RestBundle\Controller\AbstractFOSRestController;
 use FOS\RestBundle\Routing\ClassResourceInterface;
 use FOS\RestBundle\Request\ParamFetcherInterface;
 
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-class ApiController extends FOSRestController implements ClassResourceInterface
+class ApiController extends AbstractFOSRestController implements ClassResourceInterface
 {
 	/**
      * Constructor

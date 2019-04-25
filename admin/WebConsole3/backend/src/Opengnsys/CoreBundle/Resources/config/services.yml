@@ -17,3 +17,10 @@ services:
     opengnsys_core.user_manager:
         class: Opengnsys\CoreBundle\Domain\ModelExtendedManager
         arguments: ["@doctrine.orm.entity_manager", "@form.factory", Opengnsys\CoreBundle\Form\Type\UserFormType, Opengnsys\CoreBundle\Entity\User]
+
+    # OAuth
+    opengnsys_core.oauth.ogclient_extension:
+        class: Opengnsys\CoreBundle\OAuth\OgClientGrantExtension
+        arguments: ["@opengnsys_server.client_manager"]
+        tags:
+            - { name: fos_oauth_server.grant_extension, uri: 'http://opengnsys.es/grants/og_client' }

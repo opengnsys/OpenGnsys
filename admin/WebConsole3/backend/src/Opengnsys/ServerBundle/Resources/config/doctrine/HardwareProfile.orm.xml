@@ -2,7 +2,7 @@
 <doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
-    <entity name="Opengnsys\ServerBundle\Entity\HardwareProfile" table="og_hardware_profiles"
+    <entity name="Opengnsys\ServerBundle\Entity\HardwareProfile" table="og_server__hardware_profiles"
             repository-class="Opengnsys\ServerBundle\Entity\Repository\HardwareProfileRepository">
 
         <id name="id" type="integer" column="id">
@@ -23,7 +23,7 @@
                 <cascade-all/>
             </cascade>
 
-            <join-table name="og_hardware_profiles_hardwares">
+            <join-table name="og_server__hardware_profiles_hardwares">
                 <join-columns>
                     <join-column name="hardware_profile_id" referenced-column-name="id"/>
                 </join-columns>

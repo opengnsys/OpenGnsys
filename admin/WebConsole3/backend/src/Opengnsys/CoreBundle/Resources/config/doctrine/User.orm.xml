@@ -3,7 +3,7 @@
                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
 
-    <entity name="Opengnsys\CoreBundle\Entity\User" table="og_users"
+    <entity name="Opengnsys\CoreBundle\Entity\User" table="og_core__users"
             repository-class="Opengnsys\CoreBundle\Entity\Repository\UserRepository">
 
         <lifecycle-callbacks>
@@ -28,7 +28,7 @@
         <field name="updatedAt" type="datetime" column="updated_at"/>
 
         <many-to-many field="groups" target-entity="Opengnsys\CoreBundle\Entity\Group">
-            <join-table name="globunet_user__users_groups">
+            <join-table name="og_core__users_groups">
                 <join-columns>
                     <join-column name="user_id" referenced-column-name="id" nullable="false" unique="false"/>
                 </join-columns>
@@ -40,7 +40,7 @@
 
         <many-to-many field="organizationalUnits" target-entity="\Opengnsys\ServerBundle\Entity\OrganizationalUnit"
                       inversed-by="users">
-            <join-table name="og_users__organizational_units">
+            <join-table name="og_core__organizational_units">
                 <join-columns>
                     <join-column name="user_id" referenced-column-name="id"/>
                 </join-columns>

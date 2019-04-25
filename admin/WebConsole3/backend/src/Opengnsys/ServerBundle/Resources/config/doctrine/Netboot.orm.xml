@@ -2,7 +2,7 @@
 <doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
-    <entity name="Opengnsys\ServerBundle\Entity\Netboot" table="og_netboots"
+    <entity name="Opengnsys\ServerBundle\Entity\Netboot" table="og_server__netboots"
             repository-class="Opengnsys\ServerBundle\Entity\Repository\NetbootRepository">
 
         <id name="id" type="integer" column="id">
