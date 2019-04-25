@@ -15,24 +15,6 @@ if [ "$root" != "" ]; then
     set label="rEFInd"
     set chain="chainloader /EFI/refind/grubx64.efi" 
 fi
-  
-if [ "$root" == "" ]; then
-    echo "Searching Microsoft"
-    search --file --set root /EFI/Microsoft/Boot/bootmgfw.efi
-    if [ "$root" != "" ]; then
-	set label="Microsoft"
-	set chain="chainloader /EFI/Microsoft/Boot/bootmgfw.efi"
-    fi
-fi
-
-if [ "$root" == "" ]; then
-    echo "Searching Ubuntu"
-    search --file --set root /EFI/ubuntu/grubx64.efi
-    if [ "$root" != "" ]; then
-	set label="Ubuntu"
-	set chain="chainloader /EFI/ubuntu/grubx64.efi"
-    fi
-fi
 
 if [ "$root" == "" ]; then
     echo "Searching Part-01-02"
@@ -52,9 +34,25 @@ if [ "$root" == "" ]; then
     fi
 fi
 
-# Timeout
+if [ "$root" == "" ]; then
+    echo "Searching Microsoft"
+    search --file --set root /EFI/Microsoft/Boot/bootmgfw.efi
+    if [ "$root" != "" ]; then
+	set label="Microsoft"
+	set chain="chainloader /EFI/Microsoft/Boot/bootmgfw.efi"
+    fi
+fi
+
+if [ "$root" == "" ]; then
+    echo "Searching Ubuntu"
+    search --file --set root /EFI/ubuntu/grubx64.efi
+    if [ "$root" != "" ]; then
+	set label="Ubuntu"
+	set chain="chainloader /EFI/ubuntu/grubx64.efi"
+    fi
+fi
+
 if [ "$root" != "" ]; then
-    set timeout=5
     set label="OpenGnsys ha detectado: $label"
 else
     # para evitar mensajes de error.
