@@ -726,7 +726,7 @@ function updateWeb3()
 	sed -i "s/SERVERIP/$SERVERIP/" src/environments/environment.ts
 	sed -i 's,base href=.*,base href="/opengnsys3/frontend/">,' src/index.html
 	ng build
-	rsync -irplt dist/opengnsysAngular6 $INSTALL_TARGET/www3/frontend
+	rsync -irplt dist/opengnsysAngular6/* $INSTALL_TARGET/www3/frontend
 	popd
 }
 

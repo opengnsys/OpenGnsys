@@ -3,30 +3,31 @@
 
 # Fichero de registro de incidencias (en el servidor; si no, en local).
 OPENGNSYS=${OPENGNSYS:-/opt/opengnsys}
-OGLOGFILE=${OGLOGFILE:-$OPENGNSYS/log/$(ogGetIpAddress).log}
+OGLOGFILE=${OGLOGFILE:-$OPENGNSYS/log/$(ogGetIpAdderss).log}
 if ! touch $OGLOGFILE 2>/dev/null; then
     OGLOGFILE=/var/log/opengnsys.log
 fi
 LOGLEVEL=5
 
-# TODO - PRUEBA
-AGENT_FILE="/var/tmp/ogAdmClient"
-touch $AGENT_FILE
-chmod a+wxs $AGENT_FILE
-chown root:root $AGENT_FILE
-# Exportar funciones para comunicacion con el servidor
-sendConfigToServer
-sendStatusToServer "initializing"
-
 # Matando plymount para inicir browser o shell
 pkill -9 plymouthd
 
-# Arranque de OpenGnsys Client daemon (socket).
+# Cargar idioma.
 echo "${MSG_LAUNCHCLIENT:-.}"
 # Indicar fichero de teclado de Qt para el idioma especificado (tipo "es.qmap").
 [ -f /usr/local/etc/${LANG%_*}.qmap ] && export QWS_KEYBOARD="TTY:keymap=/usr/local/etc/${LANG%_*}.qmap"
 
-if [ -x "$OPENGNSYS/bin/ogAdmClient" -a "$ogstatus" != "offline"  ]; then
+VERSION="1.1.1"    # TEMPORAL
+if [ -f "$OPENGNSYS/images/ogagent-oglive_${VERSION}_all.deb" -a "$ogstatus" != "offline"  ]; then
+    # Instalar, configurar e iniciar agente.
+    dpkg -i "$OPENGNSYS/images/ogagent-oglive_${VERSION}_all.deb"
+    sed -i -e "s,remote=.*,remote=https://$(ogGetServerIp)/opengnsys3/backend/web/app_dev.php/," \
+           -e "s,client=.*,client=CLIENTID," \
+           -e "s,secret=.*,secret=CLIENTSECRET," \
+           /usr/share/OGAgent/cfg/ogagent.cfg
+    ogagent start
+    sleep 10
+elif [ -x "$OPENGNSYS/bin/ogAdmClient" -a "$ogstatus" != "offline"  ]; then
     # Ejecutar servicio cliente.
     $OPENGNSYS/bin/ogAdmClient -f $OPENGNSYS/etc/ogAdmClient.cfg -l $OGLOGFILE -d $LOGLEVEL
 else
@@ -41,4 +42,5 @@ fi
 if [ "$ogactiveadmin" == "true" ]; then
     bash
 fi
+
 
