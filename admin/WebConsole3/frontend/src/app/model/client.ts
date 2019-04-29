@@ -2,6 +2,20 @@ import { Resource } from 'globunet-angular/core/models/api/resource';
 import {Repository} from './repository';
 import {HardwareProfile} from './hardware-profile';
 import {Netboot} from './netboot';
+import {PartitionInfo} from './image';
+
+export class Partition {
+  cacheContent: string;
+  filesystem: string;
+  id: number;
+  image: any;
+  numDisk: number;
+  numPartition: number;
+  osName: string;
+  partitionCode: string;
+  size: number;
+  usage: number;
+}
 
 export class Client extends Resource {
   public name = '';
@@ -15,8 +29,10 @@ export class Client extends Resource {
   public oglive = null;
   public netboot: Netboot = null;
   public organizationalUnit: number;
+  public partitions?: PartitionInfo[]
   // Variables temporales para la vista, no vienen del servidor
   public status?: string;
   public selected?: boolean;
+  public disksConfig?: any[];
 
 }

@@ -1,7 +1,7 @@
 // This file can be replaced during build by using the `fileReplacements` array.
 // `ng build --prod` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
-const url = 'https://SERVERIP/opengnsys3';
+const url = 'https://172.16.140.210/opengnsys3';
 export const environment = {
   production: false,
   BASE_URL: url,

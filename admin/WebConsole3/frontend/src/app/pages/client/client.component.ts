@@ -12,7 +12,8 @@ import {Repository} from '../../model/repository';
 import {HardwareProfile} from '../../model/hardware-profile';
 import {OgCommonService} from '../../service/og-common.service';
 import {ClientFormType} from '../../form-type/client.form-type';
-import {GlobunetFormType} from '../../form-type/globunet.form-type';
+import * as pluginDataLabels from 'chartjs-plugin-datalabels';
+import {ChartOptions} from 'chart.js';
 
 @Component({
     selector: 'app-client',
@@ -27,6 +28,7 @@ export class ClientComponent implements OnInit {
     public oglives: any[] = [];
     private formType: ClientFormType;
     public form;
+    public pluginDataLabels;
 
     // this tells the tabs component which Pages
     // should be each tab's root Page
@@ -39,6 +41,7 @@ export class ClientComponent implements OnInit {
                 private hardwareProfileService: HardwareProfileService,
                 private ogCommonService: OgCommonService) {
         this.client = new Client();
+        this.client.disksConfig = [];
         this.formType = new ClientFormType();
         this.form = this.formType.getForm();
     }
@@ -57,6 +60,17 @@ export class ClientComponent implements OnInit {
                     this.clientService.read(id).subscribe(
                         client => {
                             this.client = client;
+                            this.client.disksConfig = this.ogCommonService.getDisksConfigFromPartitions(this.client.partitions);
+
+                            const self = this;
+                            this.client.disksConfig.forEach(function(diskConfig) {
+                                const chartData = self.getChartData(diskConfig);
+                                diskConfig.diskChartData = chartData.diskChartData;
+                                diskConfig.diskChartLabels = chartData.diskChartLabels;
+                                diskConfig.diskPieChartColors = chartData.diskPieChartColors;
+                                diskConfig.diskChartOptions = chartData.diskChartOptions;
+                            });
+
                         }
                     );
                 }
@@ -122,6 +136,75 @@ export class ClientComponent implements OnInit {
         );
     }
 
+    getChartData(diskConfig) {
+        const diskChartData = [];
+        const diskChartLabels = [];
+        const diskPieChartColors = [{
+            backgroundColor: []
+        }];
+        const self = this;
+        diskConfig.partitions.forEach(function(partition) {
+            if (partition.size > 0) {
+                self.setPartitionPercentOfDisk(diskConfig, partition);
+                diskChartData.push(partition.percentOfDisk);
+                diskChartLabels.push([
+                    (partition.os || partition.filesystem),
+                    partition.percentOfDisk + '%'
+                ]);
+                diskPieChartColors[0].backgroundColor.push(self.getPartitionColor(partition));
+            }
+        });
+        const diskChartOptions: ChartOptions = {
+            responsive: true,
+            legend: {
+                position: 'bottom'
+            },
+            plugins: {
+                datalabels: {
+                    formatter: (value, ctx) => {
+                        const label = ctx.chart.data.labels[ctx.dataIndex];
+                        return label;
+                    },
+                },
+            }
+        };
+
+        return {
+            diskChartData: diskChartData,
+            diskChartLabels: diskChartLabels,
+            diskChartOptions: diskChartOptions,
+            diskPieChartColors: diskPieChartColors
+        };
+    }
+
+    setPartitionPercentOfDisk(diskConfig, partition) {
+        partition.percentOfDisk = Math.round(((partition.size * 100) / diskConfig.size) * 100) / 100;
+    }
+
+    labelFormatter(label, series) {
+        return '<div style="font-size:13px; text-align:center; padding:2px; color: #000; font-weight: 600;">'
+            + '<br>'
+            + series.percentOfDisk + '%</div>';
+    }
+
+    getPartitionColor(partition) {
+        let color = 'rgb(252, 90, 90)';
+
+        // Para la partición de datos se usa un color específico
+        if (partition.osName === 'DATA') {
+            color = 'rgb(237,194,64)';
+        } else if (partition.filesystem === 'NTFS') {
+            color = 'rgb(0,192, 239)';
+        } else if (partition.filesystem.match('EXT')) {
+            color = 'rgb(96, 92, 168)';
+        } else if (partition.filesystem.match('LINUX-SWAP')) {
+            color = 'rgb(84, 84, 84)';
+        } else if (partition.filesystem.match('CACHE')) {
+            color = 'rgb(252, 90, 90)';
+        }
+        return color;
+    }
+
     save() {
         let request: Observable<Client>;
         if (this.client.id !== 0) {
@@ -146,5 +229,16 @@ export class ClientComponent implements OnInit {
     }
 
 
+    getPartitionUsageClass(usage: number | string | number) {
+        let result = '';
 
+        if (usage < 60) {
+            result = 'bg-green';
+        } else if (usage >= 60 && usage < 80) {
+            result = 'bg-yellow';
+        } else if (usage >= 80) {
+            result = 'bg-red';
+        }
+        return result;
+    }
 }
