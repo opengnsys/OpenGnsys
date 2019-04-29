@@ -123,6 +123,8 @@ class OpenGnSysWorker(ServerWorker):
             # Replacing server IP if its running on ogLive client
             logger.debug('Activating on ogLive client, new server is {}'.format(os.environ['oglive']))
             url = parse.urlsplit(url)._replace(netloc=os.environ['oglive']).geturl()
+        if not url.endswith(os.path.sep):
+            url += os.path.sep
         self.REST = REST(url)
         # Get network interfaces until they are active or timeout (5 minutes)
         for t in range(0, 300):
@@ -176,7 +178,7 @@ class OpenGnSysWorker(ServerWorker):
                 self.access_token = response['access_token']
                 self.refresh_token = response['refresh_token']
                 # Once authenticated with the server, change the API URL for private request
-                self.REST = REST(url + '/api/private')
+                self.REST = REST(url + 'api/private')
                 # Set authorization tokens in the REST object, so in each request this token will be used
                 self.REST.set_authorization_headers(self.access_token, self.refresh_token)
                 # Create HTML file (TEMPORARY)
