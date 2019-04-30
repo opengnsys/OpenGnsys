@@ -33,6 +33,7 @@ from __future__ import unicode_literals
 
 import socket
 import platform
+import os
 import fcntl
 import subprocess
 import struct
@@ -172,6 +173,13 @@ def poweroff():
         threading._DummyThread._Thread__stop = lambda x: 42
 
     _exec_ogcommand('/opt/opengnsys/scripts/poweroff')
+
+
+def get_etc_path():
+    """
+    Returns etc directory path.
+    """
+    return os.sep + 'etc'
 
 
 def get_configuration():

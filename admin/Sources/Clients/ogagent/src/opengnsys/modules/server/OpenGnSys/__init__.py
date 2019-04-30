@@ -150,10 +150,10 @@ class OpenGnSysWorker(ServerWorker):
                 pass
         # Copy file "HostsFile.FirstOctetOfIPAddress" to "HostsFile", if it exists
         # (used in "exam mode" from the University of Seville)
-        # hostsFile = os.path.join(operations.get_etc_path(), 'hosts')
-        # newHostsFile = hostsFile + '.' + self.interface.ip.split('.')[0]
-        # if os.path.isfile(newHostsFile):
-        #    shutil.copyfile(newHostsFile, hostsFile)
+        hosts_file = os.path.join(operations.get_etc_path(), 'hosts')
+        new_file = hosts_file + '.' + self.interface.ip.split('.')[0]
+        if os.path.isfile(new_file):
+            shutil.copy2(new_file, hosts_file)
         # Generate random secret to send on activation
         self.random = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(self.length))
         # Compose login route
@@ -172,53 +172,51 @@ class OpenGnSysWorker(ServerWorker):
                 self.REST = REST(self.service.config.get('opengnsys', 'altremote'))
                 response = self.REST.sendMessage(login_route)
         except:
-            logger.error('Initialization error')
+            raise Exception('Initialization error: Cannot connect to the server')
         finally:
-            if response['access_token'] is not None:
-                self.access_token = response['access_token']
-                self.refresh_token = response['refresh_token']
-                # Once authenticated with the server, change the API URL for private request
-                self.REST = REST(url + 'api/private')
-                # Set authorization tokens in the REST object, so in each request this token will be used
-                self.REST.set_authorization_headers(self.access_token, self.refresh_token)
-                # Create HTML file (TEMPORARY)
-                message = """
+            if response['access_token'] is None:
+                raise Exception('Initialization error: Cannot obtain access token')
+        self.access_token = response['access_token']
+        self.refresh_token = response['refresh_token']
+        # Once authenticated with the server, change the API URL for private request
+        self.REST = REST(url + 'api/private')
+        # Set authorization tokens in the REST object, so in each request this token will be used
+        self.REST.set_authorization_headers(self.access_token, self.refresh_token)
+        # Completing ogLive initialization process
+        os_type = operations.os_type.lower()
+        if os_type == 'oglive':
+            # Create HTML file (TEMPORARY)
+            message = """
 <html>
 <head></head>
 <body>
 <h1>Initializing...</h1>
 </body>
-</html>
-"""
-                f = open('/tmp/init.html', 'w')
-                f.write(message)
-                f.close()
-                # Launch browser
-                subprocess.Popen(['browser', '-qws', '/tmp/init.html'])
-                self.REST.sendMessage('clients/statuses', {'mac': self.interface.mac, 'ip': self.interface.ip,
-                                                           'status': 'initializing'})
-
-                def cfg():
-                    """
-                    Subprocess to send configuration and status
-                    """
-                    config = operations.get_configuration()
-                    self.REST.sendMessage('clients/configs', {'mac': self.interface.mac, 'ip': self.interface.ip,
-                                                              'config': config})
-                    self.REST.sendMessage('clients/statuses', {'mac': self.interface.mac, 'ip': self.interface.ip,
-                                                               'status': 'oglive'})
-
-                threading.Thread(target=cfg()).start()
-            else:
-                logger.error("Initialization error: Can't obtain access token")
+</html>"""
+            f = open('/tmp/init.html', 'w')
+            f.write(message)
+            f.close()
+            # Launching Browser
+            pid = subprocess.Popen(['browser', '-qws', '/tmp/init.html'])
+            self.REST.sendMessage('clients/statuses', {'mac': self.interface.mac, 'ip': self.interface.ip,
+                                                       'status': 'initializing'})
+            # Send configuration message
+            self.REST.sendMessage('clients/configs', {'mac': self.interface.mac, 'ip': self.interface.ip,
+                                                      'config': operations.get_configuration()})
+            # Launching new Browser with client's menu
+            pid.kill()
+            # menu_url = self.REST.sendMessage('menus?mac' + self.interface.mac + '&ip=' + self.interface.ip)
+            menu_url = '/opt/opengnsys/log/' + self.interface.ip + '.info.html'  # TEMPORARY menu
+            subprocess.Popen(['browser', '-qws', menu_url])
+        # Return status message
+        self.REST.sendMessage('clients/statuses', {'mac': self.interface.mac, 'ip': self.interface.ip,
+                                                   'status': os_type})
 
     def onDeactivation(self):
         """
         Sends OGAgent stopping notification to OpenGnsys server
         """
         logger.debug('onDeactivation')
-        # self.REST.sendMessage('ogagent/stopped', {'mac': self.interface.mac, 'ip': self.interface.ip,
-        #                                          'ostype': operations.os_type, 'osversion': operations.os_version})
         self.REST.sendMessage('clients/statuses', {'mac': self.interface.mac, 'ip': self.interface.ip,
                                                    'ostype': operations.os_type, 'osversion': operations.os_version,
                                                    'status': 'off'})
