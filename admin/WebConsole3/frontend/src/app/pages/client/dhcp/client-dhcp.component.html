@@ -1,0 +1,139 @@
+<section class="content-header">
+    <h1 translate="dhcp_clients">
+    </h1>
+    <ol class="breadcrumb">
+        <li><a [routerLink]="'app/dashboard'"><i class="fa fa-dashboard"></i> {{'dashboard'|translate}}</a></li>
+        <li><a [routerLink]="'app/ous'" ><i class="fa fa-th"></i> {{'ous'|translate}}</a></li>
+        <li class="active" translate="dhcp_clients"></li>
+    </ol>
+</section>
+<section fixed-toolboxbar class="toolboxbar">
+    <div>
+        <div class="col-md-12">
+            <div class="box-tools pull-right">
+                <button class="btn btn-primary" translate="save" (click)="save()"></button>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 class="box-title" translate="load_clients_from_dhcp"></h3>
+                    <div *ngIf="clients.length == 0" class="btn-group pull-right">
+                        <button type="button" name="search" id="search-btn" class="btn btn-flat" (click)="downloadFromServer()">
+                            <i class="fa fa-download"></i>
+                            <span translate="download_from_server"></span>
+                        </button>
+                        <button class="btn btn-primary" (click)="proccessDhcp()" translate="proccess_dhcp"></button>
+                    </div>
+                    <div *ngIf="clients.length > 0" class="pull-right">
+                        <button class="btn btn-danger" (click)="clients = []" translate="back"></button>
+                    </div>
+                </div>
+                <div *ngIf="clients.length == 0" class="box-body">
+                    <div class="row">
+                        <div class="col-md-12">
+			            	<textarea [(ngModel)]="dhcpText" class="og-instructions">
+			            		
+			            	</textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="box-body" *ngIf="clients.length > 0">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="box box-default">
+                                <div class="box-header with-border">
+                                    <h3 class="box-title" translate="common_options"></h3>
+                                </div>
+                                <div class="box-body">
+                                    <div class="row">
+                                        <div class="col-xs-2">
+                                            <div class="form-group">
+                                                <label class="control-label" for="repository" translate="repository"></label>
+                                                <select name="repository"  class="form-control" [(ngModel)]="commonProperties.repository">
+                                                    <option *ngFor="let repository of repositories" [value]="repository.id">{{repository.name}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-xs-2">
+                                            <div class="form-group">
+                                                <label class="control-label" for="hardwareProfile" translate="hardware_profile"></label>
+                                                <select name="hardwareProfile" class="form-control" [(ngModel)]="commonProperties.hardwareProfile">
+                                                    <option *ngFor="let profile of hardwareProfiles" [value]="profile.id">
+                                                        {{profile.description}}
+                                                    </option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-xs-1">
+                                            <div class="form-group">
+                                                <label class="control-label" for="netiface" translate="netiface"></label>
+                                                <input type="text" name="netiface" class="form-control" [(ngModel)]="commonProperties.netiface" />
+                                            </div>
+                                        </div>
+                                        <div class="col-xs-2">
+                                            <div class="form-group">
+                                                <label class="control-label" for="netdriver" translate="netdriver"></label>
+                                                <input type="text" name="netdriver" class="form-control" [(ngModel)]="commonProperties.netdriver" />
+                                            </div>
+                                        </div>
+                                        <div class="form-group col-md-3">
+                                            <label for="oglive" translate="oglive">
+                                                <span class="symbol required ng-scope"></span>
+                                            </label>
+                                            <select class="form-control" required="true" [(ngModel)]="commonProperties.oglive" name="oglive">
+                                                <option *ngFor="let item of constants.ogliveinfo" [value]="item.directory">
+                                                    {{item.directory}}
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group col-md-2">
+                                            <label for="netboot" translate="netboot">
+                                                <span class="symbol required ng-scope"></span>
+                                            </label>
+                                            <select class="form-control" required="true" [(ngModel)]="commonProperties.netboot" name="netboot">
+                                                <option *ngFor="let item of netboots" [value]="item.id">{{item.name}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- /.box-body -->
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <table class="table table-striped">
+                                <thead>
+                                <tr>
+                                    <th>
+                                        <input icheck checkbox-class="icheckbox_square-blue" radio-class="iradio_square-blue" type="checkbox" class="selection-checkbox" (change)="selectedUnselectAll()" [(ngModel)]="selectAll" />
+                                        <span translate="select"></span>
+                                    </th>
+                                    <th translate="name"></th>
+                                    <th translate="ip"></th>
+                                    <th translate="mac"></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr *ngFor="let client of clients">
+                                    <td>
+                                        <input icheck checkbox-class="icheckbox_square-blue" radio-class="iradio_square-blue" type="checkbox" class="selection-checkbox" [(ngModel)]="client.$$selected" />
+                                    </td>
+                                    <td>{{client.name}}</td>
+                                    <td>{{client.ip}}</td>
+                                    <td>{{client.mac}}</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="box-footer">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

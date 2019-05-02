@@ -17,6 +17,16 @@ import {ImageEditComponent} from './pages/image/edit/image-edit.component';
 import {ProfileComponent} from './pages/profile/profile.component';
 import {OrganizationalUnitEditComponent} from './pages/organizational-unit/edit/organizational-unit-edit.component';
 import {ClientComponent} from './pages/client/client.component';
+import {ClientDhcpComponent} from './pages/client/dhcp/client-dhcp.component';
+import {DeployImageCommandComponent} from './pages/command/deploy-image-command/deploy-image-command.component';
+import {MenuComponent} from './pages/menu/menu.component';
+import {MenuEditComponent} from './pages/menu/edit/menu-edit.component';
+import {SoftwareProfileComponent} from './pages/software-profile/software-profile.component';
+import {SoftwareComponentComponent} from './pages/software-component/software-component.component';
+import {SoftwareComponent} from './pages/software/software.component';
+import {LoginCommandComponent} from './pages/command/login-command/login-command.component';
+import {ExecuteCommandComponent} from './pages/command/execute-command/execute-command.component';
+import {CreateImageCommandComponent} from './pages/command/create-image-command/create-image-command.component';
 
 
 const routes: Routes = [
@@ -59,14 +69,18 @@ const routes: Routes = [
       },
       {
         path: 'clients/dhcp',
-        component: ClientComponent
+        component: ClientDhcpComponent
       },
       {
         path: 'images',
         component: ImageComponent
       },
       {
-        path: 'images/create',
+        path: 'images/create/monolithic',
+        component: ImageEditComponent
+      },
+      {
+        path: 'images/create/basic',
         component: ImageEditComponent
       },
       {
@@ -94,8 +108,48 @@ const routes: Routes = [
         component: HardwareProfileComponent
       },
       {
+        path: 'software',
+        component: SoftwareComponent,
+      },
+      {
+        path: 'software/profile/create',
+        component: SoftwareProfileComponent
+      },
+      {
+        path: 'software/component/create',
+        component: SoftwareComponentComponent
+      },
+      {
+        path: 'software/profile/:id',
+        component: SoftwareProfileComponent
+      },
+      {
+        path: 'menus',
+        component: MenuComponent
+      },
+      {
+        path: 'menus/create',
+        component: MenuEditComponent
+      },
+      {
         path: 'commands',
         component: CommandComponent
+      },
+      {
+        path: 'commands/deploy_image',
+        component: DeployImageCommandComponent
+      },
+      {
+        path: 'commands/login',
+        component: LoginCommandComponent
+      },
+      {
+        path: 'commands/execute',
+        component: ExecuteCommandComponent
+      },
+      {
+        path: 'commands/create_image',
+        component: CreateImageCommandComponent
       },
       {
         path: 'commands/:id',

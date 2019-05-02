@@ -1,3 +1,8 @@
-<p>
-  og-execute-command-options works!
-</p>
+<div class="btn-group">
+  <button class="btn btn-default"(click)="ogCommandsService.execute('RUN_SCRIPT',{script: ogCommandsService.ogInstructions})">
+    <span translate="execute"></span>
+  </button>
+  <button class="btn btn-primary"(click)="ogCommandsService.execute('RUN_SCRIPT',{script: ogCommandsService.ogInstructions, save: true})">
+    <span translate="save"></span>
+  </button>
+</div>

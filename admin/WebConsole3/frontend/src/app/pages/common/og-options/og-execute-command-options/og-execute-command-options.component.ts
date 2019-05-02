@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import {OGCommandsService} from '../../../../service/og-commands.service';
 
 @Component({
   selector: 'app-og-execute-command-options',
@@ -7,7 +8,7 @@ import { Component, OnInit } from '@angular/core';
 })
 export class OgExecuteCommandOptionsComponent implements OnInit {
 
-  constructor() { }
+  constructor(public ogCommandsService: OGCommandsService) { }
 
   ngOnInit() {
   }

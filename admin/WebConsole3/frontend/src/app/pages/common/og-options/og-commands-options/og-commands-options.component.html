@@ -6,14 +6,14 @@
     <li role="presentation" class="{{ogCommonService.getSelectionSize() < 1?'disable-links':''}}"><a role="menuitem" tabindex="-1" href="javascript:void(0)"(click)="ogCommandsService.execute('POWER_OFF')" translate="power_off"></a></li>
     <li role="presentation" class="{{ogCommonService.getSelectionSize() < 1?'disable-links':''}}"><a role="menuitem" tabindex="-1" href="javascript:void(0)"(click)="ogCommandsService.execute('POWER_ON')" translate="power_on"></a></li>
     <li role="presentation" class="{{ogCommonService.getSelectionSize() < 1?'disable-links':''}}"><a role="menuitem" tabindex="-1" href="javascript:void(0)"(click)="ogCommandsService.execute('REBOOT')" translate="reboot"></a></li>
-    <li role="presentation" class="{{ogCommonService.getSelectionSize() < 1?'disable-links':''}}"><a role="menuitem" tabindex="-1" [routerLink]="'app/commands/login'" translate="login_command"></a></li>
+    <li role="presentation" class="{{ogCommonService.getSelectionSize() < 1?'disable-links':''}}"><a role="menuitem" tabindex="-1" [routerLink]="'/app/commands/login'" translate="login_command"></a></li>
     <li role="presentation" class="divider"></li>
-    <li role="presentation" class="{{ogCommonService.getSelectionSize() < 1?'disable-links':''}}"><a role="menuitem" tabindex="-1" [routerLink]="'app/commands/execute'" translate="execute_command"></a></li>
-    <li role="presentation" class="{{ogCommonService.getSelectionSize() != 1?'disable-links':''}}"><a  role="menuitem" tabindex="-1" [routerLink]="'app/commands/create_image'" translate="create_image"></a></li>
-    <li role="presentation" class="{{ogCommonService.getSelectionSize() < 1?'disable-links':''}}"><a role="menuitem" tabindex="-1" href="javascript:void(0)" [routerLink]="'app/commands/deploy_image'" translate="deploy_image"></a></li>
-    <li role="presentation" class="{{ogCommonService.getSelectionSize() < 1?'disable-links':''}}"><a role="menuitem" tabindex="-1" href="javascript:void(0)" [routerLink]="'app/commands/delete_cache_image'" translate="delete_cache_image"></a></li>
-    <li role="presentation" class="{{ogCommonService.getSelectionSize() < 1?'disable-links':''}}"><a role="menuitem" tabindex="-1" [routerLink]="'app/commands/partition_format'" translate="partition_format"></a></li>
-    <li role="presentation" class="{{ogCommonService.getSelectionSize() < 1?'disable-links':''}}"><a role="menuitem" tabindex="-1" [routerLink]="'app/commands/format'" translate="format"></a></li>
+    <li role="presentation" class="{{ogCommonService.getSelectionSize() < 1?'disable-links':''}}"><a role="menuitem" tabindex="-1" [routerLink]="'/app/commands/execute'" translate="execute_command"></a></li>
+    <li role="presentation" class="{{ogCommonService.getSelectionSize() != 1?'disable-links':''}}"><a  role="menuitem" tabindex="-1" [routerLink]="'/app/commands/create_image'" translate="create_image"></a></li>
+    <li role="presentation" class="{{ogCommonService.getSelectionSize() < 1?'disable-links':''}}"><a role="menuitem" tabindex="-1" href="javascript:void(0)" [routerLink]="'/app/commands/deploy_image'" translate="deploy_image"></a></li>
+    <li role="presentation" class="{{ogCommonService.getSelectionSize() < 1?'disable-links':''}}"><a role="menuitem" tabindex="-1" href="javascript:void(0)" [routerLink]="'/app/commands/delete_cache_image'" translate="delete_cache_image"></a></li>
+    <li role="presentation" class="{{ogCommonService.getSelectionSize() < 1?'disable-links':''}}"><a role="menuitem" tabindex="-1" [routerLink]="'/app/commands/partition_format'" translate="partition_format"></a></li>
+    <li role="presentation" class="{{ogCommonService.getSelectionSize() < 1?'disable-links':''}}"><a role="menuitem" tabindex="-1" [routerLink]="'/app/commands/format'" translate="format"></a></li>
     <li role="presentation" class="divider"></li>
     <li role="presentation" class="{{ogCommonService.getSelectionSize() != 1?'disable-links':''}}"><a role="menuitem" tabindex="-1" href="javascript:void(0)"(click)="ogCommandsService.execute('SOFTWARE_INVENTORY')" translate="software_inventary"></a></li>
     <li role="presentation" class="{{ogCommonService.getSelectionSize() != 1?'disable-links':''}}"><a role="menuitem" tabindex="-1" href="javascript:void(0)"(click)="ogCommandsService.execute('HARDWARE_INVENTORY')" translate="hardware_inventary"></a></li>

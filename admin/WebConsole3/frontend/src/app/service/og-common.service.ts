@@ -42,7 +42,8 @@ export class OgCommonService {
               ou: environment.ou,
               themes: environment.themes,
               menus: environment.menus,
-              languages: environment.languages
+              languages: environment.languages,
+              deployMethods: environment.deployMethods
             };
             this.constants = Object.assign(this.constants, data[0]);
             // inicializar timers generales para refresco de información

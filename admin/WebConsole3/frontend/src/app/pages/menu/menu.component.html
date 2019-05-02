@@ -1,1 +1,51 @@
-<div>Html template for class Menu</div>
+<div ui-view>
+    <section class="content-header">
+        <h1 translate="menus">
+        </h1>
+        <ol class="breadcrumb">
+            <li><a [routerLink]="'app/dashboard'"><i class="fa fa-dashboard"></i> {{'dashboard'|translate}}</a></li>
+            <li class="active" translate="menus"></li>
+        </ol>
+    </section>
+    <section fixed-toolboxbar class="toolboxbar">
+        <div >
+            <div class="col-md-12">
+                <div class="input-group">
+                    <input type="text" name="q" class="form-control" placeholder="{{'search'|translate}}..." ng-model="vm.ngTableSearch.text">
+                    <span class="input-group-btn">
+                  <button type="button" name="search" id="search-btn" class="btn btn-flat"><i class="fa fa-search"></i>
+                  </button>
+                </span>
+                </div>
+            </div>
+            <div class="col-md-12" style="margin-top: 5px;margin-bottom: 5px;">
+
+                <div class="box-tools pull-right">
+                    <a [routerLink]="'/app/menus/create'" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                        <span translate="new"></span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- Main content -->
+    <section class="content">
+        <div class="row">
+            <div class="col-md-12">
+                <!-- Info boxes -->
+                <div class="box box-primary">
+                    <div class="box-header with-border">
+                        <h3 class="box-title" translate="image_list"></h3>
+                    </div>
+                    <div class="box-body">
+                        <ng2-smart-table [source]="menus" [settings]="tableSettings"></ng2-smart-table>
+                    </div>
+                    <div class="box-footer">
+                    </div>
+                    <!-- /.col -->
+                </div>
+            </div>
+        </div>
+        <!-- /.row -->
+    </section>
+</div>

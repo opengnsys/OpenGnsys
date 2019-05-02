@@ -26,8 +26,8 @@ import { HardwareComponent } from './pages/hardware/hardware.component';
 import { HardwareComponentsComponent } from './pages/hardware/hardware-components/hardware-components.component';
 import { HardwareProfilesComponent } from './pages/hardware/hardware-profiles/hardware-profiles.component';
 import { HardwareTypesComponent } from './pages/hardware/hardware-types/hardware-types.component';
-import {ProfilesTableComponent} from './pages/hardware/hardware-profiles/profiles-table/profiles-table.component';
-import {ProfilesGroupComponent} from './pages/hardware/hardware-profiles/profiles-group/profiles-group.component';
+import {HardwareProfilesTableComponent} from './pages/hardware/hardware-profiles/profiles-table/hardware-profiles-table.component';
+import {HardwareProfilesGroupComponent} from './pages/hardware/hardware-profiles/profiles-group/hardware-profiles-group.component';
 import {HardwareComponentsTableComponent} from './pages/hardware/hardware-components/hardware-components-table/hardware-components-table.component';
 import {HardwareComponentsGroupComponent} from './pages/hardware/hardware-components/hardware-components-group/hardware-components-group.component';
 import {HardwareProfileComponent} from './pages/hardware-profile/hardware-profile.component';
@@ -58,6 +58,23 @@ import {OrganizationalUnitEditComponent} from './pages/organizational-unit/edit/
 import {platformBrowserDynamic} from '@angular/platform-browser-dynamic';
 import {ClientComponent} from './pages/client/client.component';
 import {ChartsModule} from 'ng2-charts';
+import {ClientDhcpComponent} from './pages/client/dhcp/client-dhcp.component';
+import {DeployImageCommandComponent} from './pages/command/deploy-image-command/deploy-image-command.component';
+import {MenuComponent} from './pages/menu/menu.component';
+import {MenuEditComponent} from './pages/menu/edit/menu-edit.component';
+import {SoftwareComponentComponent} from './pages/software-component/software-component.component';
+import {SoftwareComponent} from './pages/software/software.component';
+import {SoftwareComponentsComponent} from './pages/software/software-components/software-components.component';
+import {SoftwareProfilesComponent} from './pages/software/software-profiles/software-profiles.component';
+import {SoftwareProfileComponent} from './pages/software-profile/software-profile.component';
+import {SoftwareTypesComponent} from './pages/software/software-types/software-types.component';
+import {SoftwareProfilesTableComponent} from './pages/software/software-profiles/software-profiles-table/software-profiles-table.component';
+import {SoftwareProfilesGroupComponent} from './pages/software/software-profiles/software-profiles-group/software-profiles-group.component';
+import {SoftwareComponentsTableComponent} from './pages/software/software-components/software-components-table/software-components-table.component';
+import {SoftwareComponentsGroupComponent} from './pages/software/software-components/software-components-group/software-components-group.component';
+import {LoginCommandComponent} from './pages/command/login-command/login-command.component';
+import {ExecuteCommandComponent} from './pages/command/execute-command/execute-command.component';
+import {CreateImageCommandComponent} from './pages/command/create-image-command/create-image-command.component';
 
 
 
@@ -67,6 +84,8 @@ import {ChartsModule} from 'ng2-charts';
     LoginComponent,
     ImageComponent,
     ImageEditComponent,
+    MenuComponent,
+    MenuEditComponent,
     DashboardComponent,
     RepositoryComponent,
     OrganizationalUnitComponent,
@@ -79,14 +98,29 @@ import {ChartsModule} from 'ng2-charts';
     HardwareProfilesComponent,
     HardwareProfileComponent,
     HardwareTypesComponent,
-    ProfilesTableComponent,
-    ProfilesGroupComponent,
+    HardwareProfilesTableComponent,
+    HardwareProfilesGroupComponent,
     HardwareComponentsTableComponent,
     HardwareComponentsGroupComponent,
+    SoftwareComponentComponent,
+    SoftwareComponent,
+    SoftwareComponentsComponent,
+    SoftwareProfilesComponent,
+    SoftwareProfileComponent,
+    SoftwareTypesComponent,
+    SoftwareProfilesTableComponent,
+    SoftwareProfilesGroupComponent,
+    SoftwareComponentsTableComponent,
+    SoftwareComponentsGroupComponent,
     OuGroupComponent,
     OuClientComponent,
     ClientComponent,
+    ClientDhcpComponent,
     CommandComponent,
+    DeployImageCommandComponent,
+    LoginCommandComponent,
+    ExecuteCommandComponent,
+    CreateImageCommandComponent,
     EditCommandComponent,
     IcheckDirective,
     FixedToolboxBarDirective,
@@ -110,17 +144,28 @@ import {ChartsModule} from 'ng2-charts';
     LoginComponent,
     ImageComponent,
     ImageEditComponent,
+    MenuComponent,
+    MenuEditComponent,
     OrganizationalUnitComponent,
     OrganizationalUnitEditComponent,
     Ng2TableActionComponent,
-    ProfilesTableComponent,
-    ProfilesGroupComponent,
+    HardwareProfilesTableComponent,
+    HardwareProfilesGroupComponent,
     HardwareComponentsTableComponent,
     HardwareComponentsGroupComponent,
+    SoftwareProfilesTableComponent,
+    SoftwareProfilesGroupComponent,
+    SoftwareComponentsTableComponent,
+    SoftwareComponentsGroupComponent,
     OuGroupComponent,
     OuClientComponent,
     ClientComponent,
+    ClientDhcpComponent,
     CommandComponent,
+    DeployImageCommandComponent,
+    LoginCommandComponent,
+    ExecuteCommandComponent,
+    CreateImageCommandComponent,
     EditCommandComponent,
     OgOuGeneralOptionsComponent,
     TraceComponent,

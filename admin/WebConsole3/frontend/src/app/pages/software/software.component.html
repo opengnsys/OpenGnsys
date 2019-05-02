@@ -1,1 +1,65 @@
-<div>Html template for class Software</div>
+<ng-container>
+  <section class="content-header">
+    <h1 translate="software">
+    </h1>
+    <ol class="breadcrumb">
+      <li><a [routerLink]="'/app/dashboard'"><i class="fa fa-dashboard"></i> {{'dashboard'|translate}}</a></li>
+      <li class="active" translate="software"></li>
+    </ol>
+  </section>
+  <section fixed-toolboxbar class="toolboxbar">
+    <div >
+      <div class="col-md-12">
+        <div class="input-group">
+          <input type="text" name="q" class="form-control" placeholder="{{'search'|translate}}..." ng-model="vm.searchText">
+          <span class="input-group-btn">
+                  <button type="button" name="search" id="search-btn" class="btn btn-flat"><i class="fa fa-search"></i>
+                  </button>
+                </span>
+        </div>
+      </div>
+      <div class="col-md-12" style="margin-top: 5px;margin-bottom: 5px;">
+        <div class="box-tools pull-right">
+          <mk-dropdown class="btn-group">
+            <mk-dropdown-toggle>
+              <span translate="new"></span><span class="caret"></span>
+            </mk-dropdown-toggle>
+            <mk-dropdown-menu>
+              <li role="presentation"><a role="menuitem" tabindex="-1" [routerLink]="'/app/software/profile/create'" translate="profile"></a></li>
+              <li role="presentation"><a role="menuitem" tabindex="-1" [routerLink]="'/app/software/component/create'"  translate="component"></a></li>
+              <!--li role="presentation"><a role="menuitem" tabindex="-1" [routerLink]="app/software.type.new"  translate="software_type"></a></li-->
+            </mk-dropdown-menu>
+          </mk-dropdown>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="content">
+    <div class="row">
+      <span style="padding: 0 10px"></span>
+      <div class="col-md-12">
+        <mk-tabs>
+            <mk-tab>
+              <mk-tab-header><span translate="software_profiles"></span></mk-tab-header>
+              <mk-tab-content>
+                <app-software-profiles [softwareProfileGroups]="softwareProfileGroups"></app-software-profiles>
+              </mk-tab-content>
+            </mk-tab>
+            <mk-tab>
+              <mk-tab-header><span translate="software_components"></span></mk-tab-header>
+              <mk-tab-content>
+                <app-software-components [softwareComponentsGroups]="softwareComponentsGroups" [softwareTypes]="softwareTypes"></app-software-components>
+              </mk-tab-content>
+            </mk-tab>
+            <mk-tab>
+              <mk-tab-header><span translate="software_types"></span></mk-tab-header>
+              <mk-tab-content>
+                <app-software-types [softwareTypes]="softwareTypes" ></app-software-types>
+              </mk-tab-content>
+            </mk-tab>
+          </mk-tabs>
+          <!-- /.tab-content -->
+      </div>
+    </div>
+  </section>
+</ng-container>

@@ -1,0 +1,61 @@
+<table class="table table-hover">
+  <tbody>
+  <tr>
+    <th translate="description"></th>
+    <th translate="windowsboot"></th>
+    <th translate="options"></th>
+  </tr>
+   <tr *ngFor="let profile of profiles; let index = index" class="{{(index%2 == 0)?'odd':'even'}}">
+      <td>
+              <span *ngIf="profile.$$editing">
+                <input type="text" class="form-control" [(ngModel)]="profile.$$tmpDescription">
+              </span>
+        <span *ngIf="!profile.$$editing">
+          {{profile.description}}
+        </span>
+      </td>
+      <td>
+         <span *ngIf="profile.$$editing">
+            <select class="form-control"[(ngModel)]="profile.$$tmpWindowsboot">
+              <option [value]="item" *ngFor="let item of windowsboots"> {{item}}</option>
+            </select>
+          </span>
+        <span *ngIf="!profile.$$editing">
+          {{profile.windowsboot}}
+        </span>
+      </td>
+      <td class="right">
+        <ng-container *ngIf="profile.$$editing">
+          <div class="btn-group ">
+            <button class="btn btn-primary " translate="ok" (click)="saveHardwareProfile(profile)"></button>
+            <button class="btn btn-default " translate="cancel" (click)="profile.$$editing = false"></button>
+          </div>
+        </ng-container>
+        <ng-container *ngIf="!profile.$$editing">
+          <app-table-action [rowData]="profile" [options]="tableOptions" (edit)="editHardwareProfile($event)" (delete)="deleteHardwareProfile($event)"></app-table-action>
+<!--
+          <div class="btn-group visible-md visible-lg hidden-sm hidden-xs">
+            <button class="btn btn-default" translate="edit" (click)="editHardwareProfile(profile)"></button>
+            <button class="btn btn-default" href="javascript:void(0)" translate="config" (click)="goToEditProfile(profile)"></button>
+            <button class="btn btn-danger " translate="delete" (click)="deleteHardwareProfile(profile)"></button>
+          </div>
+          <div class="btn-group hidden-md hidden-lg">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+              <i class="fa fa-gear"></i>
+              <span class="caret"></span>
+              <span class="sr-only">Toggle Dropdown</span>
+            </button>
+            <ul class="dropdown-menu" role="menu">
+              <li class="btn-group-vertical">
+                 <button class="btn btn-default" translate="edit" (click)="editHardwareProfile(profile)"></button>
+                 <button class="btn btn-default" href="javascript:void(0)" translate="config" ui-sref="goToEditProfile(profile)"></button>
+                <button class="btn btn-danger" href="javascript:void(0)" translate="delete" (click)="deleteHardwareProfile(profile)"></button>
+              </li>
+            </ul>
+          </div>
+-->
+        </ng-container>
+      </td>
+    </tr>
+  </tbody>
+  </table>
