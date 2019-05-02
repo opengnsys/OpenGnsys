@@ -37,7 +37,7 @@ function enviaMsg(cmd)
 }
 //______________________________________________________________________________________________________
 function resultadocmd(resul){
-	if(resul===1){ // Si todo va bien se llama a la función que recupera elfichero de eco
+	if(resul==1){ // Si todo va bien se llama a la función que recupera elfichero de eco
 		//alert(TbMsg[1])
 		if(ambito===AMBITO_ORDENADORES){
 			sw=2;

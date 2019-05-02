@@ -58,7 +58,7 @@
 				if(chrChk.checked)	atributos+="cmp=1"+RC; else atributos+="cmp=0"+RC;
 
 				var cc=ochecks[i].getAttribute('idcfg'); // Toma identificador del bloque de configuración
-				if(document.fdatosejecucion.ambito.value!==AMBITO_ORDENADORES){
+				if(document.fdatosejecucion.ambito.value!=AMBITO_ORDENADORES){
 					var tbOrd=document.getElementById("tbOrd_"+cc);			
 					var idordenadores=tbOrd.getAttribute('value'); // Toma identificadores de los ordenadores
 					var cadenaid=document.fdatos.cadenaid.value; // Cadena de identificadores de todos los ordenadores del ámbito
