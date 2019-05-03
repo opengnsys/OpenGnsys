@@ -9,8 +9,8 @@
 ####  AVISO: Puede editar configuración de acceso por defecto.
 ####  WARNING: Edit default access configuration if you wish.
 DEFAULT_MYSQL_ROOT_PASSWORD="passwordroot"	# Clave por defecto root de MySQL
-DEFAULT_OPENGNSYS_DB_USER="usuog"		# Usuario por defecto de acceso a la base de datos
-DEFAULT_OPENGNSYS_DB_PASSWD="passusuog"		# Clave por defecto de acceso a la base de datos
+DEFAULT_OPENGNSYS_DB_USER="admin"		# Usuario por defecto de acceso a la base de datos
+DEFAULT_OPENGNSYS_DB_PASSWD="admin"		# Clave por defecto de acceso a la base de datos
 DEFAULT_OPENGNSYS_CLIENT_PASSWD="og"		# Clave por defecto de acceso del cliente	
 
 # Sólo ejecutable por usuario root
@@ -123,9 +123,8 @@ LOG_FILE=/tmp/$(basename $OGLOGFILE)
 # Usuario del cliente para acceso remoto.
 OPENGNSYS_CLIENT_USER="opengnsys"
 
-# Nombre de la base datos y fichero SQL para su creación.
-OPENGNSYS_DATABASE="ogAdmBD"
-OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/${OPENGNSYS_DATABASE}.sql
+# Nombre de la base datos.
+OPENGNSYS_DATABASE="opengnsys"
 
 
 #####################################################################
@@ -135,7 +134,7 @@ OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/${OPENGNSYS_DATABASE}.sql
 # Generar variables de configuración del instalador
 # Variables globales:
 # - OSDISTRIB, OSVERSION - tipo y versión de la distribución GNU/Linux
-# - DEPENDENCIES - array de dependencias que deben estar instaladas
+# - PREREQS, DEPENDENCIES - arrays de prerrequisitos y dependencias que deben estar instaladas
 # - UPDATEPKGLIST, INSTALLPKGS, CHECKPKGS - comandos para gestión de paquetes
 # - INSTALLEXTRADEPS - instalar dependencias no incluidas en la distribución
 # - STARTSERVICE, ENABLESERVICE - iniciar y habilitar un servicio
@@ -169,9 +168,10 @@ OSVERSION="${OSVERSION%%.*}"
 # Configuración según la distribución GNU/Linux (usar minúsculas).
 case "$OSDISTRIB" in
 	ubuntu|debian|linuxmint)
-		DEPENDENCIES=( subversion apache2 php php-ldap php-fpm mysql-server php-mysql isc-dhcp-server bittorrent tftp-hpa tftpd-hpa xinetd build-essential g++-multilib libmysqlclient-dev wget curl doxygen graphviz bittornado ctorrent samba rsync unzip netpipes debootstrap schroot squashfs-tools btrfs-tools procps arp-scan realpath php-curl gettext moreutils jq udpcast libev-dev shim-signed grub-efi-amd64-signed )
+		PREREQS=( curl software-properties-common )
+		DEPENDENCIES=( subversion apache2 php php-ldap php-fpm mysql-server php-mysql isc-dhcp-server bittorrent tftp-hpa tftpd-hpa xinetd build-essential g++-multilib libmysqlclient-dev wget doxygen graphviz bittornado ctorrent samba rsync unzip netpipes debootstrap schroot squashfs-tools btrfs-tools procps arp-scan realpath php-curl gettext moreutils jq udpcast libev-dev shim-signed grub-efi-amd64-signed git php-mbstring php-xml nodejs )
 		UPDATEPKGLIST="apt-get update"
-		INSTALLPKG="apt-get -y install --force-yes"
+		INSTALLPKG="apt-get -y install"
 		CHECKPKG="dpkg -s \$package 2>/dev/null | grep Status | grep -qw install"
 		if which service &>/dev/null; then
 			STARTSERVICE="eval service \$service restart"
@@ -206,7 +206,8 @@ case "$OSDISTRIB" in
 		TFTPCFGDIR=/var/lib/tftpboot
 		;;
 	fedora|centos)
-		DEPENDENCIES=( subversion httpd mod_ssl php-ldap php-fpm mysql-server mysql-devel mysql-devel.i686 php-mysql dhcp tftp-server tftp xinetd binutils gcc gcc-c++ glibc-devel glibc-devel.i686 glibc-static glibc-static.i686 libstdc++-devel.i686 make wget curl doxygen graphviz ctorrent samba samba-client rsync unzip debootstrap schroot squashfs-tools python-crypto arp-scan procps-ng gettext moreutils jq net-tools udpcast libev-devel shim-x64 grub2-efi-x64 grub2-efi-x64-modules http://ftp.altlinux.org/pub/distributions/ALTLinux/5.1/branch/$(arch)/RPMS.classic/netpipes-4.2-alt1.$(arch).rpm )
+		PREREQS=( curl )
+		DEPENDENCIES=( subversion httpd mod_ssl php-ldap php-fpm mysql-server mysql-devel mysql-devel.i686 php-mysql dhcp tftp-server tftp xinetd binutils gcc gcc-c++ glibc-devel glibc-devel.i686 glibc-static glibc-static.i686 libstdc++-devel.i686 make wget doxygen graphviz ctorrent samba samba-client rsync unzip debootstrap schroot squashfs-tools python-crypto arp-scan procps-ng gettext moreutils jq net-tools udpcast libev-devel shim-x64 grub2-efi-x64 grub2-efi-x64-modules http://ftp.altlinux.org/pub/distributions/ALTLinux/5.1/branch/$(arch)/RPMS.classic/netpipes-4.2-alt1.$(arch).rpm )
 		[ "$OSDISTRIB" == "centos" ] && UPDATEPKGLIST="yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-$OSVERSION.noarch.rpm http://rpms.remirepo.net/enterprise/remi-release-$OSVERSION.rpm"
 		INSTALLEXTRADEPS=( 'pushd /tmp; wget -t3 http://ftp.acc.umu.se/mirror/bittornado/BitTornado-0.3.18.tar.gz && tar xvzf BitTornado-0.3.18.tar.gz && cd BitTornado-CVS && python setup.py install && ln -fs btlaunchmany.py /usr/bin/btlaunchmany && ln -fs bttrack.py /usr/bin/bttrack; popd' )
 		INSTALLPKG="yum install -y libstdc++ libstdc++.i686"
@@ -248,6 +249,10 @@ case "$OSDISTRIB" in
 	*) 	echo "ERROR: Distribution not supported by OpenGnsys."
 		exit 1 ;;
 esac
+# Instalar Composer y Angular-CLI.
+INSTALLEXTRADEPS=( ${INSTALLEXTRADEPS[@]} \
+		   'if [ ! -f /usr/local/bin/composer.phar ]; then php -r "copy(\"https://getcomposer.org/installer\", \"/tmp/composer-setup.php\");"; php /tmp/composer-setup.php --install-dir=/usr/local/bin; rm -f /tmp/composer-setup.php; else /usr/local/bin/composer.phar self-update; fi' \
+		   'npm install -g @angular/cli@6.2.3' )
 
 # Fichero de credenciales de acceso a MySQL.
 TMPMYCNF=/tmp/.my.cnf.$$
@@ -257,8 +262,6 @@ TMPMYCNF=/tmp/.my.cnf.$$
 # Modificar variables de configuración tras instalar paquetes del sistema.
 function autoConfigurePost()
 {
-local f
-
 # Configuraciones específicas para Samba y TFTP en Debian 6.
 [ -z "$SYSTEMD" -a ! -e /etc/init.d/$SAMBASERV ] && SAMBASERV=samba
 [ ! -e $TFTPCFGDIR ] && TFTPCFGDIR=/srv/tftp
@@ -271,12 +274,14 @@ function updatePackageList()
 {
 local DHCPVERSION PHP7VERSION
 
-# Si es necesario, actualizar la lista de paquetes disponibles.
+# Si es necesario, actualizar la lista de paquetes disponibles e instalar prerrequisitos.
 [ -n "$UPDATEPKGLIST" ] && eval $UPDATEPKGLIST
+[ ${#PREREQS[@]} -gt 0 ] && eval $INSTALLPKG ${PREREQS[@]}
 
 # Configuración personallizada de algunos paquetes.
 case "$OSDISTRIB" in
 	ubuntu|linuxmint)	# Postconfiguación personalizada para Ubuntu.
+		# Instalar prerrequisitos.
 		# Configuración para DHCP v3.
 		DHCPVERSION=$(apt-cache show $(apt-cache pkgnames|egrep "dhcp.?-server$") | \
 			      awk '/Version/ {print substr($2,1,1);}' | \
@@ -288,10 +293,9 @@ case "$OSDISTRIB" in
 		fi
 		# Configuración para PHP 7 en Ubuntu.
 		if [ -z "$(apt-cache pkgnames php7)" ]; then
-			eval $INSTALLPKG software-properties-common
 			add-apt-repository -y ppa:ondrej/php
 			eval $UPDATEPKGLIST
-			PHP7VERSION=$(apt-cache pkgnames php7 | sort | head -1)
+			PHP7VERSION=$(apt-cache pkgnames php7. | sort | tail -1)
 			PHPFPMSERV="${PHP7VERSION}-fpm"
 			DEPENDENCIES=( ${DEPENDENCIES[@]//php/$PHP7VERSION} )
 		fi
@@ -299,6 +303,8 @@ case "$OSDISTRIB" in
 		[ -z "$(apt-cache pkgnames libmysqlclient-dev)" ] && [ -n "$(apt-cache pkgnames libmysqlclient15)" ] && DEPENDENCIES=( ${DEPENDENCIES[@]//libmysqlclient-dev/libmysqlclient15} )
 		# Paquete correcto para realpath.
 		[ -z "$(apt-cache pkgnames realpath)" ] && DEPENDENCIES=( ${DEPENDENCIES[@]//realpath/coreutils} )
+		# Instalar NodeJS.
+		curl -sL https://deb.nodesource.com/setup_10.x | bash -
 		;;
 	centos)	# Postconfiguación personalizada para CentOS.
 		# Configuración para PHP 7.
@@ -312,12 +318,16 @@ case "$OSDISTRIB" in
 			# Instalar ctorrent de EPEL para CentOS 6 (no disponible en CentOS 7).
 			DEPENDENCIES=( ${DEPENDENCIES[*]/ctorrent/http://dl.fedoraproject.org/pub/epel/6/$(arch)/Packages/c/ctorrent-1.3.4-14.dnh3.3.2.el6.$(arch).rpm} )
 		fi
+		# Instalar NodeJS.
+		curl -sL https://rpm.nodesource.com/setup_10.x | bash -
 		;;
 	fedora)	# Postconfiguación personalizada para Fedora. 
 		# Incluir paquetes específicos.
 		DEPENDENCIES=( ${DEPENDENCIES[@]} btrfs-progs )
 		# Sustituir MySQL por MariaDB a partir de Fedora 20.
 		[ $OSVERSION -ge 20 ] && DEPENDENCIES=( ${DEPENDENCIES[*]/mysql-/mariadb-} )
+		# Instalar NodeJS.
+		curl -sL https://rpm.nodesource.com/setup_10.x | bash -
 		;;
 esac
 }
@@ -725,23 +735,20 @@ function mysqlCreateDb()
 # Comprueba si ya está definido el usuario de acceso a la BD.
 function mysqlCheckUserExists()
 {
-	if [ $# -ne 1 ]; then
-		errorAndLog "${FUNCNAME}(): invalid number of parameters"
-		exit 1
-	fi
+if [ $# -ne 1 ]; then
+	errorAndLog "${FUNCNAME}(): invalid number of parameters"
+	exit 1
+fi
+local userdb="$1"
 
-	local userdb="$1"
-
-	echoAndLog "${FUNCNAME}(): checking if $userdb exists..."
-	echo "select user from user where user='${userdb}'\\G" |mysql --defaults-extra-file=$TMPMYCNF mysql | grep user
-	if [ $? -ne 0 ]; then
-		echoAndLog "${FUNCNAME}(): user doesn't exists"
-		return 1
-	else
-		echoAndLog "${FUNCNAME}(): user already exists"
-		return 0
-	fi
-
+echoAndLog "${FUNCNAME}(): checking if $userdb exists..."
+if [ "$(mysql --defaults-extra-file=$TMPMYCNF -Nse "SELECT user FROM mysql.user WHERE user='$userdb'")" == "$userdb" ]; then
+	echoAndLog "${FUNCNAME}(): user already exists"
+	return 0
+else
+	echoAndLog "${FUNCNAME}(): user doesn't exists"
+	return 1
+fi
 }
 
 # Crea un usuario administrativo para la base de datos
@@ -810,16 +817,9 @@ function downloadCode()
 # Comprobar si existe conexión.
 function checkNetworkConnection()
 {
-	echoAndLog "${FUNCNAME}(): Checking OpenGnsys server connectivity."
-	OPENGNSYS_SERVER=${OPENGNSYS_SERVER:-"opengnsys.es"}
-	if which wget &>/dev/null; then
-		wget --spider -q $OPENGNSYS_SERVER
-	elif which curl &>/dev/null; then
-		curl --connect-timeout 10 -s $OPENGNSYS_SERVER -o /dev/null
-	else
-		echoAndLog "${FUNCNAME}(): Cannot execute \"wget\" nor \"curl\"."
-		return 1
-	fi
+echoAndLog "${FUNCNAME}(): Checking OpenGnsys server connectivity."
+OPENGNSYS_SERVER=${OPENGNSYS_SERVER:-"opengnsys.es"}
+curl --connect-timeout 10 -s $OPENGNSYS_SERVER -o /dev/null
 }
 
 # Convierte nº de bits (notación CIDR) en máscara de red (gracias a FriedZombie en openwrt.org).
@@ -1045,37 +1045,53 @@ function dhcpConfigure()
 ####### Funciones específicas de la instalación de Opengnsys
 #####################################################################
 
-# Copiar ficheros del OpenGnsys Web Console.
+# Instalar OpenGnsys Web Console.
 function installWebFiles()
 {
-	local COMPATDIR f
-	local SLIMFILE="slim-2.6.1.zip"
-	local SWAGGERFILE="swagger-ui-2.2.5.zip"
+local $tmpdir
 
-	echoAndLog "${FUNCNAME}(): Installing web files..."
-	# Copiar ficheros.
-	cp -a $WORKDIR/opengnsys/admin/WebConsole/* $INSTALL_TARGET/www   #*/ comentario para Doxygen.
-	if [ $? != 0 ]; then
-		errorAndLog "${FUNCNAME}(): Error copying web files."
-		exit 1
-	fi
+echoAndLog "${FUNCNAME}(): Copying backend files..."
+chown -R $OPENGNSYS_CLIENT_USER:$OPENGNSYS_CLIENT_USER $WORKDIR/opengnsys/admin/WebConsole3
+cp -a $WORKDIR/opengnsys/admin/WebConsole3/backend $INSTALL_TARGET/www
+if [ $? != 0 ]; then
+	errorAndLog "${FUNCNAME}(): Error copying backend files."
+	exit 1
+fi
 
-	# Descomprimir librerías: Slim y Swagger-UI.
-	unzip -o $WORKDIR/opengnsys/admin/$SLIMFILE -d $INSTALL_TARGET/www/rest
-	unzip -o $WORKDIR/opengnsys/admin/$SWAGGERFILE -d $INSTALL_TARGET/www/rest
+echoAndLog "${FUNCNAME}(): Installing backend framework..."
+pushd $INSTALL_TARGET/www/backend
+sudo -u $OPENGNSYS_CLIENT_USER composer.phar install
+chmod 777 -R var/cache var/logs
+php app/console doctrine:database:create --if-not-exists
+php app/console doctrine:schema:update --force
+echo yes | php app/console doctrine:fixtures:load
+php app/console fos:user:create "$OPENGNSYS_DB_USER" "${OPENGNSYS_DB_USER}@localhost.localdomain" "$OPENGNSYS_DB_USER"
+# Generar nuevos tokens de seguridad.
+read -e ID SECRET <<<"$(php app/console opengnsys:oauth-server:client:create --no-ansi | \
+			awk 'BEGIN {RS=" "} /^(id|secret)$/ {getline; gsub(/(,|.*_)/,""); printf("%s ", $0)}')"
+popd
 
-	# Compatibilidad con dispositivos móviles.
-	COMPATDIR="$INSTALL_TARGET/www/principal"
-	for f in acciones administracion aula aulas hardwares imagenes menus repositorios softwares; do
-		sed 's/clickcontextualnodo/clicksupnodo/g' $COMPATDIR/$f.php > $COMPATDIR/$f.device.php
-	done
-	cp -a $COMPATDIR/imagenes.device.php $COMPATDIR/imagenes.device4.php
-	# Acceso al manual de usuario
-	ln -fs ../doc/userManual $INSTALL_TARGET/www/userManual
-	# Ficheros de log de la API REST.
-	touch $INSTALL_TARGET/log/{ogagent,remotepc,rest}.log
+echoAndLog "${FUNCNAME}(): Installing frontend framework..."
+pushd $WORKDIR/opengnsys/admin/WebConsole3/frontend
+$tmpdir=$(mktemp -d)
+echo "cache = $tmpdir" > .npmrc
+sudo -u $OPENGNSYS_CLIENT_USER npm install
+sed -i -e "s/SERVERIP/$SERVERIP/" \
+       -e "s/CLIENTID/$ID/" \
+       -e "s/CLIENTSECRET/$SECRET/" src/environments/environment.ts
+sed -i 's,base href=.*,base href="/opengnsys/">,' src/index.html
+sudo -u $OPENGNSYS_CLIENT_USER ng build
 
-	echoAndLog "${FUNCNAME}(): Web files installed successfully."
+echoAndLog "${FUNCNAME}(): Copying frontend files..."
+cp -a dist/opengnsysAngular6/* $INSTALL_TARGET/www/frontend
+if [ $? != 0 ]; then
+	errorAndLog "${FUNCNAME}(): Error copying frontend files."
+	exit 1
+fi
+popd
+rm -fr $tmpdir
+
+echoAndLog "${FUNCNAME}(): Web files installed successfully."
 }
 
 # Copiar ficheros en la zona de descargas de OpenGnsys Web Console.
@@ -1297,45 +1313,6 @@ function copyServerFiles ()
 	popd
 }
 
-####################################################################
-### Funciones de compilación de código fuente de servicios
-####################################################################
-
-# Compilar los servicios de OpenGnsys
-function servicesCompilation ()
-{
-	local hayErrores=0
-
-	# Compilar OpenGnsys Server
-	echoAndLog "${FUNCNAME}(): Compiling OpenGnsys Admin Server"
-	pushd $WORKDIR/opengnsys/admin/Sources/Services/ogAdmServer
-	make && mv ogAdmServer $INSTALL_TARGET/sbin
-	if [ $? -ne 0 ]; then
-		echoAndLog "${FUNCNAME}(): error while compiling OpenGnsys Admin Server"
-		hayErrores=1
-	fi
-	popd
-	# Compilar OpenGnsys Agent
-	echoAndLog "${FUNCNAME}(): Compiling OpenGnsys Agent"
-	pushd $WORKDIR/opengnsys/admin/Sources/Services/ogAdmAgent
-	make && mv ogAdmAgent $INSTALL_TARGET/sbin
-	if [ $? -ne 0 ]; then
-		echoAndLog "${FUNCNAME}(): error while compiling OpenGnsys Agent"
-		hayErrores=1
-	fi
-	popd	
-	# Compilar OpenGnsys Client
-	echoAndLog "${FUNCNAME}(): Compiling OpenGnsys Admin Client"
-	pushd $WORKDIR/opengnsys/admin/Sources/Clients/ogAdmClient
-	make && mv ogAdmClient ../../../../client/shared/bin
-	if [ $? -ne 0 ]; then
-		echoAndLog "${FUNCNAME}(): error while compiling OpenGnsys Admin Client"
-		hayErrores=1
-	fi
-	popd
-
-	return $hayErrores
-}
 
 ####################################################################
 ### Funciones de copia de la Interface de administración
@@ -1460,43 +1437,15 @@ function openGnsysConfigure()
 	for dev in ${DEVICE[*]}; do
 		if [ -n "${SERVERIP[i]}" ]; then
 			sed -e "s/SERVERIP/${SERVERIP[i]}/g" \
-			    -e "s/DBUSER/$OPENGNSYS_DB_USER/g" \
-			    -e "s/DBPASSWORD/$OPENGNSYS_DB_PASSWD/g" \
-			    -e "s/DATABASE/$OPENGNSYS_DATABASE/g" \
-				$WORKDIR/opengnsys/admin/Sources/Services/ogAdmServer/ogAdmServer.cfg > $INSTALL_TARGET/etc/ogAdmServer-$dev.cfg
-			sed -e "s/SERVERIP/${SERVERIP[i]}/g" \
 			    -e "s/REPOKEY/$OPENGNSYS_REPOKEY/g" \
 				$WORKDIR/opengnsys/repoman/etc/ogAdmRepo.cfg.tmpl > $INSTALL_TARGET/etc/ogAdmRepo-$dev.cfg
-			sed -e "s/SERVERIP/${SERVERIP[i]}/g" \
-			    -e "s/DBUSER/$OPENGNSYS_DB_USER/g" \
-			    -e "s/DBPASSWORD/$OPENGNSYS_DB_PASSWD/g" \
-			    -e "s/DATABASE/$OPENGNSYS_DATABASE/g" \
-				$WORKDIR/opengnsys/admin/Sources/Services/ogAdmAgent/ogAdmAgent.cfg > $INSTALL_TARGET/etc/ogAdmAgent-$dev.cfg
-			CONSOLEURL="https://${SERVERIP[i]}/opengnsys"
-			sed -e "s/SERVERIP/${SERVERIP[i]}/g" \
-			    -e "s/DBUSER/$OPENGNSYS_DB_USER/g" \
-			    -e "s/DBPASSWORD/$OPENGNSYS_DB_PASSWD/g" \
-			    -e "s/DATABASE/$OPENGNSYS_DATABASE/g" \
-			    -e "s/OPENGNSYSURL/${CONSOLEURL//\//\\/}/g" \
-				$INSTALL_TARGET/www/controlacceso.php > $INSTALL_TARGET/www/controlacceso-$dev.php
-			sed -e "s/SERVERIP/${SERVERIP[i]}/g" \
-			    -e "s/OPENGNSYSURL/${CONSOLEURL//\//\\/}/g" \
-				$WORKDIR/opengnsys/admin/Sources/Clients/ogAdmClient/ogAdmClient.cfg > $INSTALL_TARGET/client/etc/ogAdmClient-$dev.cfg
 			if [ "$dev" == "$DEFAULTDEV" ]; then
 				OPENGNSYS_CONSOLEURL="$CONSOLEURL"
 			fi
 		fi
 		let i++
 	done
-	ln -f $INSTALL_TARGET/etc/ogAdmServer-$DEFAULTDEV.cfg $INSTALL_TARGET/etc/ogAdmServer.cfg
 	ln -f $INSTALL_TARGET/etc/ogAdmRepo-$DEFAULTDEV.cfg $INSTALL_TARGET/etc/ogAdmRepo.cfg
-	ln -f $INSTALL_TARGET/etc/ogAdmAgent-$DEFAULTDEV.cfg $INSTALL_TARGET/etc/ogAdmAgent.cfg
-	ln -f $INSTALL_TARGET/client/etc/ogAdmClient-$DEFAULTDEV.cfg $INSTALL_TARGET/client/etc/ogAdmClient.cfg
-	ln -f $INSTALL_TARGET/www/controlacceso-$DEFAULTDEV.php $INSTALL_TARGET/www/controlacceso.php
-	chown root:root $INSTALL_TARGET/etc/{ogAdmServer,ogAdmAgent}*.cfg
-	chmod 600 $INSTALL_TARGET/etc/{ogAdmServer,ogAdmAgent}*.cfg
-	chown $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/controlacceso*.php
-	chmod 600 $INSTALL_TARGET/www/controlacceso*.php
 
 	# Configuración del motor de clonación.
 	# - Zona horaria del servidor.
@@ -1517,10 +1466,6 @@ EOT
 		service=$MYSQLSERV
 		$DISABLESERVICE
 	fi
-
-	echoAndLog "${FUNCNAME}(): Starting OpenGnsys services."
-	service="opengnsys"
-	$ENABLESERVICE; $STARTSERVICE
 }
 
 
@@ -1647,19 +1592,12 @@ else
 	ln -fs "$(dirname $PROGRAMDIR)" opengnsys
 fi
 
-# Compilar código fuente de los servicios de OpenGnsys.
-servicesCompilation
-if [ $? -ne 0 ]; then
-	errorAndLog "Error while compiling OpenGnsys services"
-	exit 1
-fi
-
 # Copiar carpeta Interface entre administración y motor de clonación.
-copyInterfaceAdm
-if [ $? -ne 0 ]; then
-	errorAndLog "Error while copying Administration Interface"
-	exit 1
-fi
+#copyInterfaceAdm
+#if [ $? -ne 0 ]; then
+#	errorAndLog "Error while copying Administration Interface"
+#	exit 1
+#fi
 
 # Configuración de TFTP.
 tftpConfigure
@@ -1735,28 +1673,6 @@ if [ $? -ne 0 ]; then
 	fi
 
 fi
-
-mysqlCheckDbIsEmpty ${OPENGNSYS_DATABASE}
-if [ $? -eq 0 ]; then
-	echoAndLog "Creating tables..."
-	if [ -f $WORKDIR/$OPENGNSYS_DB_CREATION_FILE ]; then
-		mysqlImportSqlFileToDb ${OPENGNSYS_DATABASE} $WORKDIR/$OPENGNSYS_DB_CREATION_FILE
-	else
-		errorAndLog "Unable to locate $WORKDIR/$OPENGNSYS_DB_CREATION_FILE!!"
-		exit 1
-	fi
-else
-	# Si existe fichero ogBDAdmin-VersLocal-VersRepo.sql; aplicar cambios.
-	REPOVERSION=$(jq -r '.version' $WORKDIR/opengnsys/doc/VERSION.json)
-	OPENGNSYS_DB_UPDATE_FILE="opengnsys/admin/Database/$OPENGNSYS_DATABASE-$INSTVERSION-$REPOVERSION.sql"
- 	if [ -f $WORKDIR/$OPENGNSYS_DB_UPDATE_FILE ]; then
- 		echoAndLog "Updating tables from version $INSTVERSION to $REPOVERSION"
- 		mysqlImportSqlFileToDb ${OPENGNSYS_DATABASE} $WORKDIR/$OPENGNSYS_DB_UPDATE_FILE
- 	else
- 		echoAndLog "Database unchanged."
- 	fi
-fi
-# Eliminar fichero temporal con credenciales de acceso a MySQL.
 rm -f $TMPMYCNF
 
 # Copiando páqinas web.
