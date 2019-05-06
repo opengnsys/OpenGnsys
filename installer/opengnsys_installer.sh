@@ -169,7 +169,7 @@ OSVERSION="${OSVERSION%%.*}"
 case "$OSDISTRIB" in
 	ubuntu|debian|linuxmint)
 		PREREQS=( curl software-properties-common )
-		DEPENDENCIES=( subversion apache2 php php-ldap php-fpm mysql-server php-mysql isc-dhcp-server bittorrent tftp-hpa tftpd-hpa xinetd build-essential g++-multilib libmysqlclient-dev wget doxygen graphviz bittornado ctorrent samba rsync unzip netpipes debootstrap schroot squashfs-tools btrfs-tools procps arp-scan realpath php-curl gettext moreutils jq udpcast libev-dev shim-signed grub-efi-amd64-signed git php-mbstring php-xml nodejs )
+		DEPENDENCIES=( subversion apache2 php php-ldap php-fpm mysql-server php-mysql isc-dhcp-server bittorrent tftp-hpa tftpd-hpa xinetd build-essential g++-multilib libmysqlclient-dev wget doxygen graphviz bittornado ctorrent samba rsync unzip netpipes debootstrap schroot squashfs-tools btrfs-tools procps arp-scan realpath php-curl gettext moreutils jq udpcast libev-dev shim-signed grub-efi-amd64-signed git php-mbstring php-xml nodejs debhelper )
 		UPDATEPKGLIST="apt-get update"
 		INSTALLPKG="apt-get -y install"
 		CHECKPKG="dpkg -s \$package 2>/dev/null | grep Status | grep -qw install"
@@ -1051,45 +1051,52 @@ function installWebFiles()
 local $tmpdir
 
 echoAndLog "${FUNCNAME}(): Copying backend files..."
+sed -e "s/ database_name:.*/ database_name:     $OPENGNSYS_DATABASE/" \
+    -e "s/ database_user:.*/ database_user:     $OPENGNSYS_DB_USER/" \
+    -e "s/ database_password:.*/ database_password: $OPENGNSYS_DB_PASSWD/" \
+       $WORKDIR/opengnsys/admin/WebConsole3/backend/app/config/parameters.yml.dist \
+       > $WORKDIR/opengnsys/admin/WebConsole3/backend/app/config/parameters.yml
 chown -R $OPENGNSYS_CLIENT_USER:$OPENGNSYS_CLIENT_USER $WORKDIR/opengnsys/admin/WebConsole3
-cp -a $WORKDIR/opengnsys/admin/WebConsole3/backend $INSTALL_TARGET/www
+cp -a $WORKDIR/opengnsys/admin/WebConsole3/backend $INSTALL_TARGET/www3
 if [ $? != 0 ]; then
 	errorAndLog "${FUNCNAME}(): Error copying backend files."
 	exit 1
 fi
 
 echoAndLog "${FUNCNAME}(): Installing backend framework..."
-pushd $INSTALL_TARGET/www/backend
+pushd $INSTALL_TARGET/www3/backend
 sudo -u $OPENGNSYS_CLIENT_USER composer.phar install
 chmod 777 -R var/cache var/logs
-php app/console doctrine:database:create --if-not-exists
-php app/console doctrine:schema:update --force
+sudo -u $OPENGNSYS_CLIENT_USER php app/console doctrine:database:create --if-not-exists
+sudo -u $OPENGNSYS_CLIENT_USER php app/console doctrine:schema:update --force
 echo yes | php app/console doctrine:fixtures:load
 php app/console fos:user:create "$OPENGNSYS_DB_USER" "${OPENGNSYS_DB_USER}@localhost.localdomain" "$OPENGNSYS_DB_USER"
 # Generar nuevos tokens de seguridad.
-read -e ID SECRET <<<"$(php app/console opengnsys:oauth-server:client:create --no-ansi | \
-			awk 'BEGIN {RS=" "} /^(id|secret)$/ {getline; gsub(/(,|.*_)/,""); printf("%s ", $0)}')"
+read -e CLIENTID CLIENTSECRET <<< \
+	"$(php app/console opengnsys:oauth-server:client:create --no-ansi | \
+	   awk 'BEGIN {RS=" "}
+		/^(id|secret)$/ {getline; gsub(/(,|.*_)/,""); printf("%s ", $0)}')"
 popd
 
 echoAndLog "${FUNCNAME}(): Installing frontend framework..."
 pushd $WORKDIR/opengnsys/admin/WebConsole3/frontend
-$tmpdir=$(mktemp -d)
+tmpdir=$(sudo -u $OPENGNSYS_CLIENT_USER mktemp -d)
 echo "cache = $tmpdir" > .npmrc
 sudo -u $OPENGNSYS_CLIENT_USER npm install
 sed -i -e "s/SERVERIP/$SERVERIP/" \
-       -e "s/CLIENTID/$ID/" \
-       -e "s/CLIENTSECRET/$SECRET/" src/environments/environment.ts
-sed -i 's,base href=.*,base href="/opengnsys/">,' src/index.html
+       -e "s/CLIENTID/$CLIENTID/" \
+       -e "s/CLIENTSECRET/$CLIENTSECRET/" src/environments/environment.ts
+sed -i 's,base href=.*,base href="/opengnsys3/frontend/">,' src/index.html
 sudo -u $OPENGNSYS_CLIENT_USER ng build
+rm -fr $tmpdir
 
 echoAndLog "${FUNCNAME}(): Copying frontend files..."
-cp -a dist/opengnsysAngular6/* $INSTALL_TARGET/www/frontend
+cp -a dist/opengnsysAngular6 $INSTALL_TARGET/www3/frontend
 if [ $? != 0 ]; then
 	errorAndLog "${FUNCNAME}(): Error copying frontend files."
 	exit 1
 fi
 popd
-rm -fr $tmpdir
 
 echoAndLog "${FUNCNAME}(): Web files installed successfully."
 }
@@ -1219,7 +1226,8 @@ function createDirs()
 	mkdir -p $path_opengnsys_base/log/clients
 	ln -fs $path_opengnsys_base/log /var/log/opengnsys
 	mkdir -p $path_opengnsys_base/sbin
-	mkdir -p $path_opengnsys_base/www
+	mkdir -p $path_opengnsys_base/www/descargas
+	mkdir -p $path_opengnsys_base/www3		### TEMPORAL
 	mkdir -p $path_opengnsys_base/images/groups
 	mkdir -p $TFTPCFGDIR
 	ln -fs $TFTPCFGDIR $path_opengnsys_base/tftpboot
@@ -1346,6 +1354,9 @@ function copyClientFiles()
 
 	echoAndLog "${FUNCNAME}(): Copying OpenGnsys Client files."
 	cp -a $WORKDIR/opengnsys/client/shared/* $INSTALL_TARGET/client
+	sed -i -e "s/CLIENTID/$CLIENTID/" \
+	       -e "s/CLIENTSECRET/$CLIENTSECRET/" \
+	       $INSTALL_TARGET/client/etc/init/default.sh	### TEMPORAL
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while copying client estructure"
 		errstatus=1
@@ -1401,6 +1412,23 @@ function clientCreate()
 	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/tftpboot/menu.lst
 
 	echoAndLog "${FUNCNAME}(): Client generation success"
+}
+
+
+# Función temporal para generar y copiar el agente OGAgent para ogLive
+function createOgagentPackage () 
+{
+local ogagentdir=$WORKDIR/opengnsys/admin/Sources/Clients/ogagent/oglive
+
+echoAndLog "${FUNCNAME}(): Creating OGAgent for ogLive package..."
+OGAGENTFILE=$($ogagentdir/build-package.sh | awk -F\' '/building package/ {print $(NF-1)}')
+if [ -z "$OGAGENTFILE" ]; then
+	errorAndLog "${FUNCNAME}(): Error generating OGAgent pacakage."
+	return 1
+fi
+OGAGENTFILE=$(realpath $ogagentdir/$OGAGENTFILE)
+cp -va $OGAGENTFILE $INSTALL_TARGET/images
+echoAndLog "${FUNCNAME}(): OGAgent for ogLive package has been copied to the repository"
 }
 
 
@@ -1704,6 +1732,9 @@ for i in $OGLIVE; do
 		exit 1
 	fi
 done
+
+# Copiar paquete ogagent-oglive en el repositorio.
+createOgagentPackage
 
 # Configuración de servicios de OpenGnsys
 openGnsysConfigure
