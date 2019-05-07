@@ -1075,7 +1075,7 @@ php app/console fos:user:create "$OPENGNSYS_DB_USER" "${OPENGNSYS_DB_USER}@local
 read -e CLIENTID CLIENTSECRET <<< \
 	"$(php app/console opengnsys:oauth-server:client:create --no-ansi | \
 	   awk 'BEGIN {RS=" "}
-		/^(id|secret)$/ {getline; gsub(/(,|.*_)/,""); printf("%s ", $0)}')"
+		/^(id|secret)$/ {getline; gsub(/,/, ""); printf("%s ", $0)}')"
 popd
 
 echoAndLog "${FUNCNAME}(): Installing frontend framework..."
@@ -1621,11 +1621,11 @@ else
 fi
 
 # Copiar carpeta Interface entre administración y motor de clonación.
-#copyInterfaceAdm
-#if [ $? -ne 0 ]; then
-#	errorAndLog "Error while copying Administration Interface"
-#	exit 1
-#fi
+copyInterfaceAdm
+if [ $? -ne 0 ]; then
+	errorAndLog "Error while copying Administration Interface"
+	exit 1
+fi
 
 # Configuración de TFTP.
 tftpConfigure
