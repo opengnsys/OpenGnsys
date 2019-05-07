@@ -1071,7 +1071,10 @@ sudo -u $OPENGNSYS_CLIENT_USER php app/console doctrine:database:create --if-not
 sudo -u $OPENGNSYS_CLIENT_USER php app/console doctrine:schema:update --force
 echo yes | php app/console doctrine:fixtures:load
 php app/console fos:user:create "$OPENGNSYS_DB_USER" "${OPENGNSYS_DB_USER}@localhost.localdomain" "$OPENGNSYS_DB_USER"
-# Generar nuevos tokens de seguridad.
+# Guardar tokens de seguridad.
+read -e ADMINID ADMINSECRET <<< \
+	"$(php app/console doctrine:query:sql "SELECT random_id, secret FROM og_core__clients WHERE id=1;" | \
+	   awk -F\" '$2~/^(random_id|secret)$/ {getline; printf("%s ", $2)}')"
 read -e CLIENTID CLIENTSECRET <<< \
 	"$(php app/console opengnsys:oauth-server:client:create --no-ansi | \
 	   awk 'BEGIN {RS=" "}
@@ -1084,8 +1087,8 @@ tmpdir=$(sudo -u $OPENGNSYS_CLIENT_USER mktemp -d)
 echo "cache = $tmpdir" > .npmrc
 sudo -u $OPENGNSYS_CLIENT_USER npm install
 sed -i -e "s/SERVERIP/$SERVERIP/" \
-       -e "s/CLIENTID/$CLIENTID/" \
-       -e "s/CLIENTSECRET/$CLIENTSECRET/" src/environments/environment.ts
+       -e "s/CLIENTID/1_$ADMINID/" \
+       -e "s/CLIENTSECRET/$ADMINSECRET/" src/environments/environment.ts
 sed -i 's,base href=.*,base href="/opengnsys3/frontend/">,' src/index.html
 sudo -u $OPENGNSYS_CLIENT_USER ng build
 rm -fr $tmpdir
