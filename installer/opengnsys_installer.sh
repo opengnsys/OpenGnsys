@@ -188,7 +188,7 @@ case "$OSDISTRIB" in
 		APACHEOGSITE=opengnsys
 		APACHEUSER="www-data"
 		APACHEGROUP="www-data"
-		APACHEENABLEMODS="a2enmod ssl rewrite proxy_fcgi fastcgi actions alias"
+		APACHEENABLEMODS="a2enmod ssl rewrite proxy_fcgi actions alias"
 		APACHEENABLESSL="a2ensite default-ssl"
 		APACHEENABLEOG="a2ensite $APACHEOGSITE"
 		APACHEMAKECERT="make-ssl-cert generate-default-snakeoil --force-overwrite"
@@ -1048,7 +1048,7 @@ function dhcpConfigure()
 # Instalar OpenGnsys Web Console.
 function installWebFiles()
 {
-local $tmpdir
+local $tmpdir jsonfile=$INSTALL_TARGET/etc/opengnsys.json
 
 echoAndLog "${FUNCNAME}(): Copying backend files..."
 sed -e "s/ database_name:.*/ database_name:     $OPENGNSYS_DATABASE/" \
@@ -1072,13 +1072,17 @@ sudo -u $OPENGNSYS_CLIENT_USER php app/console doctrine:schema:update --force
 echo yes | php app/console doctrine:fixtures:load
 php app/console fos:user:create "$OPENGNSYS_DB_USER" "${OPENGNSYS_DB_USER}@localhost.localdomain" "$OPENGNSYS_DB_USER"
 # Guardar tokens de seguridad.
-read -e ADMINID ADMINSECRET <<< \
+read -e APIID APISECRET <<< \
 	"$(php app/console doctrine:query:sql "SELECT random_id, secret FROM og_core__clients WHERE id=1;" | \
 	   awk -F\" '$2~/^(random_id|secret)$/ {getline; printf("%s ", $2)}')"
 read -e CLIENTID CLIENTSECRET <<< \
 	"$(php app/console opengnsys:oauth-server:client:create --no-ansi | \
 	   awk 'BEGIN {RS=" "}
 		/^(id|secret)$/ {getline; gsub(/,/, ""); printf("%s ", $0)}')"
+[ -f $jsonfile ] || echo "{}" > $jsonfile
+jq '.client |= (. + {"id":"'"$CLIENTID"'", "secret":"'"$CLIENTSECRET"'"})' $jsonfile | sponge $jsonfile
+chown root $jsonfile
+chmod 600 $jsonfile
 popd
 
 echoAndLog "${FUNCNAME}(): Installing frontend framework..."
@@ -1087,8 +1091,8 @@ tmpdir=$(sudo -u $OPENGNSYS_CLIENT_USER mktemp -d)
 echo "cache = $tmpdir" > .npmrc
 sudo -u $OPENGNSYS_CLIENT_USER npm install
 sed -i -e "s/SERVERIP/$SERVERIP/" \
-       -e "s/CLIENTID/1_$ADMINID/" \
-       -e "s/CLIENTSECRET/$ADMINSECRET/" src/environments/environment.ts
+       -e "s/CLIENTID/1_$APIID/" \
+       -e "s/CLIENTSECRET/$APISECRET/" src/environments/environment.ts
 sed -i 's,base href=.*,base href="/opengnsys3/frontend/">,' src/index.html
 sudo -u $OPENGNSYS_CLIENT_USER ng build
 rm -fr $tmpdir
@@ -1357,9 +1361,6 @@ function copyClientFiles()
 
 	echoAndLog "${FUNCNAME}(): Copying OpenGnsys Client files."
 	cp -a $WORKDIR/opengnsys/client/shared/* $INSTALL_TARGET/client
-	sed -i -e "s/CLIENTID/$CLIENTID/" \
-	       -e "s/CLIENTSECRET/$CLIENTSECRET/" \
-	       $INSTALL_TARGET/client/etc/init/default.sh	### TEMPORAL
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while copying client estructure"
 		errstatus=1

@@ -19,6 +19,7 @@
 PROG=$(basename "$0")
 PATH=$PATH:$(dirname "$(realpath "$0")")
 OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
+OGCFGFILE=$OPENGNSYS/etc/opengnsys.json
 SAMBAUSER="opengnsys"				# Usuario por defecto.
 TFTPDIR=$OPENGNSYS/tftpboot
 INITRD=oginitrd.img
@@ -88,8 +89,13 @@ for OGLIVE in $LIST; do
 		# FIN CÓDIGO TEMPORAL.
 		# Ticket 565, preparar acceso Rsync cliente.
 		echo "$SAMBAPASS" > scripts/passrsync
-		chown root.root scripts/passrsync
-		chmod 400 scripts/passrsync
+		# Guardar tokens de seguridad.
+		cat << EOT > scripts/client.cfg
+CLIENTID=$(jq -r .client.id $OGCFGFILE)
+CLIENTSECRET=$(jq -r .client.secret $OGCFGFILE)
+EOT
+		chown root.root scripts/passrsync scripts/client.cfg
+		chmod 400 scripts/passrsync scripts/client.cfg
 		# Generar Initrd del cliente.
 		find . | cpio -H newc -oa | gzip -9c > "$CLIENTINITRD"
 	else
