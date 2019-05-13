@@ -10,19 +10,14 @@
 
 namespace Opengnsys\ServerBundle\Form\Type\Api;
 
+use Opengnsys\ServerBundle\Entity\ValidationSettings;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class ValidationSettingsType extends AbstractType
 {
-	private $objectClass;
-	
-	public function __construct($objectClass){
-		$this->objectClass = $objectClass;
-	}
-	
-    /**
+	/**
      * @param FormBuilderInterface $builder
      * @param array $options
      */
@@ -41,9 +36,9 @@ class ValidationSettingsType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
-            'data_class' => $this->objectClass,
-        	'cascade_validation' => true,
-        	'allow_extra_fields' => true
+            'data_class' => ValidationSettings::class,
+            'csrf_protection' => false,
+            'allow_extra_fields' => true
         ));
     }
 

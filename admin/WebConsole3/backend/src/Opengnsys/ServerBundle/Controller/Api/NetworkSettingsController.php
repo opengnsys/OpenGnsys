@@ -125,7 +125,7 @@ class NetworkSettingsController extends ApiController
 	 * @ApiDoc(
 	 *   resource = true,
 	 *   description = "Creates a new object from the submitted data.",
-	 *   input = {"class" = "opengnsys_server__api_form_type_network_settings", "name" = ""},
+	 *   input = {"class" = "Opengnsys\ServerBundle\Form\Type\Api\NetworkSettingsType", "name" = ""},
 	 *   statusCodes = {
 	 *     200 = "Returned when successful",
 	 *     400 = "Returned when the form has errors"
@@ -171,7 +171,7 @@ class NetworkSettingsController extends ApiController
 	 *
 	 * @ApiDoc(
 	 *   resource = true,
-	 *   input = {"class" = "opengnsys_server__api_form_type_network_settings", "name" = ""},
+	 *   input = {"class" = "Opengnsys\ServerBundle\Form\Type\Api\NetworkSettingsType", "name" = ""},
 	 *   statusCodes = {
 	 *     204 = "Returned when successful",
 	 *     400 = "Returned when the form has errors"

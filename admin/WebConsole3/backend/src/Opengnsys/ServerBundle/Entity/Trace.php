@@ -56,7 +56,7 @@ class Trace extends BaseEntity
     private $client;
 
     /**
-     * @var \Opengnsys\ServerBundle\Entity\User
+     * @var \Opengnsys\CoreBundle\Entity\User
      */
     private $doneBy;
 
@@ -218,11 +218,11 @@ class Trace extends BaseEntity
     /**
      * Set doneBy
      *
-     * @param \Opengnsys\ServerBundle\Entity\User $doneBy
+     * @param \Opengnsys\CoreBundle\Entity\User $doneBy
      *
      * @return Trace
      */
-    public function setDoneBy(\Opengnsys\ServerBundle\Entity\User $doneBy = null)
+    public function setDoneBy(\Opengnsys\CoreBundle\Entity\User $doneBy = null)
     {
         $this->doneBy = $doneBy;
 
@@ -232,7 +232,7 @@ class Trace extends BaseEntity
     /**
      * Get doneBy
      *
-     * @return \Opengnsys\ServerBundle\Entity\User
+     * @return \Opengnsys\CoreBundle\Entity\User
      */
     public function getDoneBy()
     {

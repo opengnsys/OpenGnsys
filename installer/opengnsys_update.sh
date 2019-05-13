@@ -708,10 +708,16 @@ function updateWeb3()
 	CREATE DATABASE IF NOT EXISTS ${OPENGNSYS_DATABASE}3;
 	GRANT ALL PRIVILEGES ON ${OPENGNSYS_DATABASE}3.* TO $OPENGNSYS_DBUSER IDENTIFIED BY '$OPENGNSYS_DBPASSWORD';
 "
+    # Crear la base de datos
 	php app/console doctrine:database:create --if-not-exists
+	# Actualizar el esquema de la base de datos
 	php app/console doctrine:schema:update --force
 	php app/console doctrine:fixtures:load
+	# Crear el usuario con permisos de Administrador
 	php app/console fos:user:create admin admin@localhost.localdomain admin
+	# Crear el cliente Auth2 para obtener us client_id y secret
+	php app/console opengnsys:oauth-server:client:create --grant-type="password" --grant-type="refresh_token" --grant-type="token" --grant-type="http://opengnsys.es/grants/og_client"
+	# Realizar la migración de la versión anterior de opengnsys 1.1
 	php app/console opengnsys:migration:execute
 	popd
 

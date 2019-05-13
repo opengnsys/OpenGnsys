@@ -38,11 +38,13 @@
         <option name="fixed"/>
       </options>
     </field>
+    <!--
     <field name="puertorepo" type="integer" column="puertorepo" nullable="false">
       <options>
         <option name="unsigned"/>
       </options>
     </field>
+    -->
     <field name="apikey" type="string" column="apikey" length="32" nullable="false">
       <options>
         <option name="fixed"/>

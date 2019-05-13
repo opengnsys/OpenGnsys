@@ -177,7 +177,7 @@ class OrganizationalUnitController extends ApiController
 	 * @ApiDoc(
 	 *   resource = true,
 	 *   description = "Creates a new object from the submitted data.",
-	 *   input = {"class" = "opengnsys_server__api_form_type_organizational_unit", "name" = ""},
+	 *   input = {"class" = "Opengnsys\ServerBundle\Form\Type\Api\OrganizationalUnitType", "name" = ""},
 	 *   statusCodes = {
 	 *     200 = "Returned when successful",
 	 *     400 = "Returned when the form has errors"
@@ -223,7 +223,7 @@ class OrganizationalUnitController extends ApiController
 	 *
 	 * @ApiDoc(
 	 *   resource = true,
-	 *   input = {"class" = "opengnsys_server__api_form_type_organizational_unit", "name" = ""},
+	 *   input = {"class" = "Opengnsys\ServerBundle\Form\Type\Api\OrganizationalUnitType", "name" = ""},
 	 *   statusCodes = {
 	 *     204 = "Returned when successful",
 	 *     400 = "Returned when the form has errors"

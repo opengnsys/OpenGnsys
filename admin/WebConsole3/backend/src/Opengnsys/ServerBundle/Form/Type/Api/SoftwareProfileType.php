@@ -37,8 +37,8 @@ class SoftwareProfileType extends AbstractType
     {
         $resolver->setDefaults(array(
             'data_class' => SoftwareProfile::class,
-        	'cascade_validation' => true,
-        	'allow_extra_fields' => true
+            'csrf_protection' => false,
+            'allow_extra_fields' => true
         ));
     }
 

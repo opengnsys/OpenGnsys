@@ -34,7 +34,7 @@ class OrganizationalUnitVoter extends Voter
    }
 
    public function checker($user, $attribute, $subject){
-       if (!$user instanceof \Opengnsys\ServerBundle\Entity\User) {
+       if (!$user instanceof \Opengnsys\CoreBundle\Entity\User) {
            return false;
        }
 

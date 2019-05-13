@@ -24,19 +24,12 @@ class MenuType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('description')
-            ->add('idurlimg')
             ->add('title')
-            ->add('publicxcoordinate')
-            ->add('publicycoordinate')
-            ->add('publicmode')
-            ->add('privatexcoordinate')
-            ->add('privateycoordinate')
-            ->add('privatemode')
-            ->add('comments')
-            ->add('publicmenuhtml')
-            ->add('privatemenuhtml')
             ->add('resolution')
+            ->add('description')
+            ->add('comments')
+            ->add('publicUrl')
+            ->add('privateUrl')
         ;
     }
     
@@ -47,8 +40,8 @@ class MenuType extends AbstractType
     {
         $resolver->setDefaults(array(
             'data_class' => Menu::class,
-        	'cascade_validation' => true,
-        	'allow_extra_fields' => true
+            'csrf_protection' => false,
+            'allow_extra_fields' => true
         ));
     }
 

@@ -1,4 +1,4 @@
-Opengnsys\ServerBundle\Entity\UserType:
+Opengnsys\CoreBundle\Entity\UserType:
     exclusion_policy: ALL
     properties:
         name:

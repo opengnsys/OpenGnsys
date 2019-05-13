@@ -75,7 +75,7 @@ services:
 
     opengnsys_server.user_type_manager:
         class: Opengnsys\CoreBundle\Domain\ModelExtendedManager
-        arguments: ["@doctrine.orm.entity_manager", "@form.factory", Opengnsys\ServerBundle\Form\Type\Api\UserTypeType, Opengnsys\ServerBundle\Entity\UserType]
+        arguments: ["@doctrine.orm.entity_manager", "@form.factory", Opengnsys\ServerBundle\Form\Type\Api\UserType, Opengnsys\CoreBundle\Entity\UserType]
 
     opengnsys_server.validation_settings_manager:
         class: Opengnsys\CoreBundle\Domain\ModelExtendedManager

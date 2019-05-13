@@ -93,7 +93,7 @@ class UserController extends ApiController
 	 * @ApiDoc(
 	 *   resource = true,
 	 *   description = "Gets a User for a given id",
-	 *   output = "Opengnsys\ServerBundle\Entity\User",
+	 *   output = "Opengnsys\CoreBundle\Entity\User",
 	 *   statusCodes = {
 	 *     200 = "Returned when successful",
 	 *     404 = "Returned when the user is not found"
@@ -211,7 +211,7 @@ class UserController extends ApiController
 	 * @ApiDoc(
 	 *   resource = true,
 	 *   description = "Delete a User for a given id",
-	 *   output = "Opengnsys\ServerBundle\Entity\User",
+	 *   output = "Opengnsys\CoreBundle\Entity\User",
 	 *   statusCodes = {
 	 *     200 = "Returned when successful",
 	 *     404 = "Returned when the user is not found"

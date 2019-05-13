@@ -9,25 +9,32 @@
             <generator strategy="AUTO"/>
         </id>
 
-        <field name="description" type="string" column="description" length="250" nullable="false"/>
-        <field name="idurlimg" type="integer" column="idurlimg" nullable="false"/>
-        <field name="title" type="string" column="title" length="250" nullable="true"/>
+        <field name="title" type="string" column="title" length="250" nullable="false"/>
+        <field name="resolution" type="string" column="resolution" length="50" nullable="true"/>
+        <field name="description" type="string" column="description" length="250" nullable="true"/>
+        <field name="comments" type="text" column="comments" length="65535" nullable="true"/>
+        <field name="publicUrl" type="string" column="public_url" length="250" nullable="true"/>
+        <field name="privateUrl" type="string" column="private_url" length="250" nullable="true"/>
+
+        <!--
+        <field name="url" type="integer" column="idurlimg" nullable="false"/>
+
+        <field name="publicmenuhtml" type="string" column="publicmenuhtml" length="250" nullable="true"/>
+        <field name="privatemenuhtml" type="string" column="privatemenuhtml" length="250" nullable="true"/>
+
         <field name="publicxcoordinate" type="integer" column="publicxcoordinate" nullable="true"/>
         <field name="publicycoordinate" type="integer" column="publicycoordinate" nullable="true"/>
         <field name="publicmode" type="boolean" column="publicmode" nullable="true"/>
         <field name="privatexcoordinate" type="integer" column="privatexcoordinate" nullable="true"/>
         <field name="privateycoordinate" type="integer" column="privateycoordinate" nullable="true"/>
         <field name="privatemode" type="boolean" column="privatemode" nullable="true"/>
-        <field name="comments" type="text" column="comments" length="65535" nullable="true"/>
-        <field name="publicmenuhtml" type="string" column="publicmenuhtml" length="250" nullable="true"/>
-        <field name="privatemenuhtml" type="string" column="privatemenuhtml" length="250" nullable="true"/>
-        <field name="resolution" type="string" column="resolution" length="50" nullable="true"/>
 
         <many-to-one field="organizationalUnit" target-entity="\Opengnsys\ServerBundle\Entity\OrganizationalUnit">
             <join-columns>
                 <join-column name="organizational_unit_id" referenced-column-name="id"/>
             </join-columns>
         </many-to-one>
+        -->
 
     </entity>
 </doctrine-mapping>

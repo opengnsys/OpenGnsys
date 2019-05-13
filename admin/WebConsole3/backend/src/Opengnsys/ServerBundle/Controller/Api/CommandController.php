@@ -230,6 +230,7 @@ class CommandController extends ApiController
         $logger->info("----------- COMMAND EXECUTE -----------");
 
         $user = $this->getUser();
+        //$logger->info("user: ".get_class($user));
 
         $outputs = [];
         $response = null;
@@ -279,7 +280,7 @@ class CommandController extends ApiController
                     $trace->setClient($client);
                     $trace->setExecutedAt(new \DateTime());
                     $trace->setScript($script);
-                    $trace->setDoneBy($user);$trace->setDoneBy($user);
+                    $trace->setDoneBy($user);
                     $trace->setCommandType($type);
                     //$trace->setTitle();
                     $em->persist($trace);
@@ -299,11 +300,18 @@ class CommandController extends ApiController
                 }
             }
 
+            $outputs['type'] = "success";
+
             $response = Response::HTTP_OK;
+        }else{
+            $outputs = [];
+            $outputs['type'] = "error";
+            $outputs['message'] = "Error en la validación del formulario";
+            $outputs['data'] = $form;
         }
 
         if($response == null){
-            $response = Response::HTTP_NO_CONTENT;
+            $response = Response::HTTP_OK;
         }
 
         return $this->view($outputs, $response);
@@ -314,27 +322,36 @@ class CommandController extends ApiController
         $logger = $this->get('monolog.logger.og_server');
 
         $ip = $client->getIp();
-        $url = "http://".$ip."/cgi-bin/api/LogCommand.sh";
+        $agentToken = $client->getAgentToken();
+
+        //$url = "https://".$ip."cgi-bin/api/LogCommand.sh";
+        $url = "https://".$ip.":8000/opengnsys/script";
         $redirect_uri = $this->generateUrl('opengnsys_server__api_post_traces', array(), UrlGeneratorInterface::ABSOLUTE_URL);
 
         $arrayToPost = array(
             'id' => $trace->getId(),
-            'script' => $script,
+            'script' => base64_encode($script),
             'ip' => $ip,
             'redirect_uri' => $redirect_uri
         ); // this will be json_encode. If you don't want to json_encode, use HttpPostJson instead of HttpPostJsonBody
 
-        $postUrl = http_build_query ($arrayToPost); //json_encode($arrayToPost);
+        $headers[] = "Authorization: ".$agentToken;
+
+        //$postUrl = http_build_query ($arrayToPost);
+        $postUrl = json_encode ($arrayToPost);
+
+        //$postUrl = base64_encode ($postUrl); //json_encode($arrayToPost);
 
         $logger->info("SEND CURL url: " . $url);
         $logger->info("SEND CURL id: " . $trace->getId());
         $logger->info("SEND CURL script: " . $script);
         $logger->info("SEND CURL ip: " . $ip);
+        $logger->info("SEND CURL token: " . $agentToken);
         $logger->info("SEND CURL redirect_uri: " . $redirect_uri);
         $logger->info("SEND CURL postUrl: " .$postUrl);
 
         // _GET
-        $url = $url."?".$postUrl;
+        //$url = $url."?".$postUrl;
 
         // abrimos la sesión cURL
         $ch = curl_init();
@@ -342,10 +359,15 @@ class CommandController extends ApiController
         // definimos la URL a la que hacemos la petición
         curl_setopt($ch, CURLOPT_URL,$url);
 
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+
         // _POST_
-        //curl_setopt($ch, CURLOPT_POST, TRUE); // indicamos el tipo de petición: POST
+        curl_setopt($ch, CURLOPT_POST, true); // indicamos el tipo de petición: POST
         // definimos cada uno de los parámetros
-        //curl_setopt($ch, CURLOPT_POSTFIELDS, $postUrl);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $postUrl);
 
         // recibimos la respuesta y la guardamos en una variable
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);

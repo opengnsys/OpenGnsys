@@ -125,7 +125,7 @@ class MenuController extends ApiController
 	 * @ApiDoc(
 	 *   resource = true,
 	 *   description = "Creates a new object from the submitted data.",
-	 *   input = {"class" = "opengnsys_server__api_form_type_menu", "name" = ""},
+	 *   input = {"class" = "Opengnsys\ServerBundle\Form\Type\Api\MenuType", "name" = ""},
 	 *   statusCodes = {
 	 *     200 = "Returned when successful",
 	 *     400 = "Returned when the form has errors"
@@ -142,21 +142,13 @@ class MenuController extends ApiController
 	 *
 	 * @return FormTypeInterface|View
 	 */
-	public function cpostAction(Request $request)
+	public function postAction(Request $request)
 	{
         $request->setRequestFormat($request->get('_format'));
 		try {
 			$object = $this->container->get('opengnsys_server.menu_manager')->post(
 					$request->request->all()
-			);	
-			
-			/*
-			if (is_object($this->getUser()))
-			{
-				$admin = $this->container->get('globunet_api.admin.object');
-				$admin->createObjectSecurity($object);
-			}
-			*/
+			);
 	
 			return $object;
 	
@@ -171,7 +163,7 @@ class MenuController extends ApiController
 	 *
 	 * @ApiDoc(
 	 *   resource = true,
-	 *   input = {"class" = "opengnsys_server__api_form_type_menu", "name" = ""},
+	 *   input = {"class" = "Opengnsys\ServerBundle\Form\Type\Api\MenuType", "name" = ""},
 	 *   statusCodes = {
 	 *     204 = "Returned when successful",
 	 *     400 = "Returned when the form has errors"
