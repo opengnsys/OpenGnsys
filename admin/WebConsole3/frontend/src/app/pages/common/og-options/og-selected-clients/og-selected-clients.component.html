@@ -1,3 +1,21 @@
-<p>
-  og-selected-clients works!
-</p>
+<div class="row">
+    <div *ngFor="let client of selectedClients | keyvalue" class="col-md-2 col-xs-6 padding-5">
+        <div class="info-box client" *ngIf="client.value && client.value.id">
+			<span style="position: absolute;">
+				<input icheck checkbox-class="icheckbox_square-blue" radio-class="iradio_square-blue" type="checkbox"
+                       class="selection-checkbox" [(ngModel)]="client.value.selected"
+                       (change)="ogCommonService.selectClient(client.value, client.value.parent)"/>
+			</span>
+            <span class="info-box-icon">
+            	<i class="fa fa-desktop">
+            	</i>
+            </span>
+            <div class="info-box-content">
+                <span class="info-box-text">{{client.value.name}}</span>
+                <span class="info-box-text">{{client.value.ip}}</span>
+                <span class="info-box-text">{{client.value.mac}}</span>
+            </div>
+            <!-- /.info-box-content -->
+        </div>
+    </div>
+</div>

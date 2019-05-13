@@ -46,16 +46,16 @@ find $OPENGNSYS_DIR/images -maxdepth 1 -type f -exec chmod 664 {} \;
 find $OPENGNSYS_DIR/client/{interfaceAdm,scripts} ! -name "*.txt" -exec chmod +x {} \;
 chown $OPENGNSYS_USER:$OPENGNSYS_USER $OPENGNSYS_DIR/client/interfaceAdm/CambiarAcceso
 chmod 700 $OPENGNSYS_DIR/client/interfaceAdm/CambiarAcceso
-chown root:root $OPENGNSYS_DIR/etc/{ogAdmServer,ogAdmAgent}*.cfg
-chmod 600 $OPENGNSYS_DIR/etc/{ogAdmServer,ogAdmAgent}*.cfg
-chown root:$APACHE_GROUP $OPENGNSYS_DIR/{www/controlacceso*.php,etc/ogAdmRepo*.cfg}
-chmod 640 $OPENGNSYS_DIR/{www/controlacceso*.php,etc/ogAdmRepo*.cfg}
-chown -R $APACHE_USER:$APACHE_GROUP $OPENGNSYS_DIR/www/images/{fotos,iconos}
+rm -fr $OPENGNSYS_DIR/www3/backend/var/cache/*
+mkdir -p $OPENGNSYS_DIR/www3/backend/var/{cache,logs}
+chown -R $OPENGNSYS_USER:$OPENGNSYS_USER $OPENGNSYS_DIR/www3
+chown -R $APACHE_USER:$APACHE_GROUP $OPENGNSYS_DIR/www3/backend/var
+chmod 777 $OPENGNSYS_DIR/www3/backend/var/{cache,logs}
 mkdir -p $OPENGNSYS_DIR/www/{api,tmp}
 chown -R $APACHE_USER:$APACHE_GROUP $OPENGNSYS_DIR/www/{api,tmp}
 chown -R $APACHE_USER:$APACHE_GROUP $OPENGNSYS_DIR/tftpboot/menu.lst
 chown -R :$OPENGNSYS_USER $OPENGNSYS_DIR/tftpboot/ogLive*
 find -L $OPENGNSYS_DIR/tftpboot -type d -exec chmod 755 {} \;
 find -L $OPENGNSYS_DIR/tftpboot -type f -exec chmod 644 {} \;
-chown $APACHE_USER:$APACHE_GROUP $OPENGNSYS_DIR/log/{ogagent,remotepc,rest}.log
+#chown $APACHE_USER:$APACHE_GROUP $OPENGNSYS_DIR/log/{ogagent,remotepc,rest}.log
 

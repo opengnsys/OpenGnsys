@@ -122,7 +122,8 @@ function HTMLSELECT_imagenes($cmd,$idrepositorio,$idperfilsoft,$disk,$particion,
 	$cmd->texto="SELECT DISTINCT imagenes.idimagen,imagenes.descripcion,imagenes.nombreca,
                 imagenes.idperfilsoft, repositorios.nombrerepositorio, repositorios.ip
 		FROM  imagenes INNER JOIN repositorios USING  (idrepositorio)
-		WHERE repositorios.idrepositorio = (SELECT idrepositorio FROM ordenadores WHERE ordenadores.ip='".$masterip."')
+		WHERE imagenes.tipo=".$IMAGENES_MONOLITICAS."
+		AND   repositorios.idrepositorio IN (SELECT idrepositorio FROM ordenadores WHERE ordenadores.ip='".$masterip."')
 		OR repositorios.ip='".$masterip."' ORDER BY imagenes.descripcion";
 
 	$rs=new Recordset;

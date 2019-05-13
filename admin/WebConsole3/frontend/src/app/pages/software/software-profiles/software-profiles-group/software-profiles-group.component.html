@@ -1,0 +1,47 @@
+<mk-box boxColor="warning" headerBorder="true" isCollapsable="true" [isRemovable]="false">
+  <mk-box-header class="box-header with-border">
+    <i class="fa fa-folder-open-o"></i>
+    <h3 class="box-title">
+      <div class="btn-group" *ngIf="!content.editing">
+        <div mk-dropdown class="btn-group" [isWrapper]="false" >
+          <mk-dropdown-toggle>
+            <button #toggleElement type="button" class="btn btn-default dropdown-toggle">
+              {{content.name}}
+              <span class="fa fa-caret-down"></span>
+            </button>
+          </mk-dropdown-toggle>
+          <mk-dropdown-menu>
+            <li >
+              <a role="menuitem" tabindex="-1" href="#" translate="add_group"></a>
+            </li>
+            <li >
+              <a role="menuitem" tabindex="-1" href="#" translate="add_profile" [routerLink]="'/app/software/profile/create/' + content.id "></a>
+            </li>
+            <li class="divider"></li>
+            <li>
+              <a class="" href="javascript:void(0)" translate="edit" (click)="content.$$tmpName = content.name; content.editing = true"></a>
+            </li>
+            <li role="presentation" class="divider"></li>
+            <li role="presentation" class="delete-option">
+              <a class="" href="javascript:void(0)" translate="delete" (click)="deleteGroup(content.id)"></a>
+            </li>
+          </mk-dropdown-menu>
+        </div>
+      </div>
+      <div *ngIf="content.editing" class="col-xs-6">
+        <input type="text" class="form-control" [(ngModel)]="content.$$tmpName">
+        <span class="input-group-btn">
+          <button type="button" class="btn btn-default btn-flat" translate="done" (click)="changeGroupName(content)"></button>
+          <button type="button" class="btn btn-info btn-flat" translate="cancel" (click)="content.editing = false"></button>
+        </span>
+      </div>
+    </h3>
+    <!-- /.box-tools -->
+  </mk-box-header>
+  <!-- /.box-header -->
+  <mk-box-content class="box-body folders" style="display: block;">
+    <app-software-profiles-group *ngFor="let content of content.groups" [content]="content">
+    </app-software-profiles-group>
+    <app-software-profiles-table *ngIf="content.profiles" [profiles]="content.profiles"></app-software-profiles-table>
+  </mk-box-content>
+</mk-box>

@@ -30,28 +30,13 @@ install-ogagent:
 	
 	cp -r $(SOURCEDIR)/opengnsys $(LIBDIR)/opengnsys
 	cp -r $(SOURCEDIR)/cfg $(LIBDIR)/cfg
+	ln -fs $(LIBDIR)/cfg/ogagent.cfg $(CFGDIR)
+	ln -fs $(LIBDIR)/cfg/ogclient.cfg $(CFGDIR)
 
-	# scripts
 	cp scripts/ogagent $(BINDIR)
-	cp scripts/OGAgentTool-startup $(BINDIR)
-	cp scripts/OGAgentTool $(BINDIR)
-	
-	# Fix permissions
 	chmod 755 $(BINDIR)/ogagent
-	chmod 755 $(BINDIR)/OGAgentTool-startup
-	chmod 600 $(LIBDIR)/cfg/ogagent.cfg
 	
-	# If for red hat based, copy init.d
-ifeq ($(DISTRO),rh)
-	mkdir -p $(INITDIR)
-	cp debian/ogagent.init $(INITDIR)/ogagent
-	chmod +x $(INITDIR)/ogagent
-	ln -fs /usr/share/OGAgent/cfg/ogagent.cfg $(CFGDIR)
-	ln -fs /usr/share/OGAgent/cfg/ogclient.cfg $(CFGDIR)
-endif
-	
-	# chmod 0755 $(BINDIR)/ogagent
 uninstall:
 	rm -rf $(LIBDIR)
-	# rm -f $(BINDIR)/ogagent
+	rm -f $(BINDIR)/ogagent
 	rm -rf $(CFGDIR)

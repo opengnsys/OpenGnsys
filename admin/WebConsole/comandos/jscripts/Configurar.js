@@ -81,7 +81,7 @@ function addParticion(objImg,cc)
 function Confirmar(cc)
 {
 	if(comprobarDatos(cc)){
-		if(document.fdatosejecucion.ambito.value!==AMBITO_ORDENADORES){
+		if(document.fdatosejecucion.ambito.value!=AMBITO_ORDENADORES){
 			var tbOrd= document.getElementById("tbOrd_"+cc); // Recupera tabla de ordenadores de la configuración
 			var idordenadores=tbOrd.getAttribute('value'); // Toma identificadores de los ordenadores
 			var cadenaid=document.fdatos.cadenaid.value; // Cadena de identificadores de todos los ordenadores del ámbito

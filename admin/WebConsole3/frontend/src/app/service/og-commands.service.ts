@@ -14,15 +14,11 @@ import {environment} from '../../environments/environment';
 export class OGCommandsService {
   public ogInstructions = '';
   public execution: any;
-  private commands = [];
+  private commands: any;
 
   constructor(private router: Router, private ogCommonService: OgCommonService, private toaster: ToasterService, private ogSweetAlert: OgSweetAlertService,  private commandService: CommandService, private translate: TranslateService) {
     this.execution = {};
-    this.ogCommonService.loadEngineConfig().subscribe(
-      (response) => {
-        this.commands = response.constants.commandtypes;
-      }
-    );
+    this.commands = environment.commands;
   }
 
     sendCommand() {
@@ -114,14 +110,18 @@ export class OGCommandsService {
         // Comprobar tipo de cada particion para ver si es clonable
         // var parttable = $rootScope.constants.partitiontable[client.partitions[0].partitionCode-1];
         // buscar las particiones que sean clonables
+        const clonablePartitions = [];
         for (let index = 1; index < client.partitions.length; index++) {
           if (client.partitions[index].osName !== 'DATA' && client.partitions[index].osName !== '') {
             // Crear como nombre para mostrar, el disco y partición del sistema
             const obj = Object.assign({}, client.partitions[index]);
-            obj.name = 'disco: ' + obj.numDisk + ', part: ' + obj.numPartition + ', SO: ' + client.partitions[index].osName;
-            options.scope.partitions.push(obj);
+            const str = 'disco: ' + obj.numDisk + ', part: ' + obj.numPartition + ', SO: ' + client.partitions[index].osName;
+            clonablePartitions.push(obj.numDisk + ' ' + obj.numPartition)
+            options.scope.partitions.push(str);
           }
         }
+
+        const self = this;
 
         this.ogSweetAlert.swal({
             title: this.translate.instant('select_partition_to_inventary'),
@@ -137,9 +137,9 @@ export class OGCommandsService {
           function(result) {
             if (result.value) {
               // Montar el script con el disco y partición elegida
-              this.execution.script = this.commands.SOFTWARE_INVENTORY + ' ' + result.value;
-              this.loadClients();
-              this.sendCommand();
+              self.execution.script = self.commands.SOFTWARE_INVENTORY + ' ' + clonablePartitions[result.value];
+              self.loadClients();
+              self.sendCommand();
             }
           },
           null);
@@ -168,22 +168,21 @@ export class OGCommandsService {
               html:
                 '<form style="text-align: left; padding-left: 10px">\
                               <div class="form-group">\
-                                   <label for="execute" translate="execute">\
-                                   </label>\
+                                   <label for="execute">' + this.translate.instant('execute') + '</label>\
                                    <div class="checkbox clip-check check-primary checkbox-inline">\
                                          <input id="execute" icheck checkbox-class="icheckbox_square-blue" radio-class="iradio_square-blue" type="checkbox" class="selection-checkbox" />\
                                      </div>\
                                  </div>\
                                <div class="form-group">\
-                                   <label translate="title"></label>\
+                                   <label>' + this.translate.instant('title') + '</label>\
                                    <input type="text" class="form-control" id="command.title" />\
                                </div>\
                                <div class="form-group">\
-                                   <label for="parameters" translate="parameters"></label>\
+                                   <label for="parameters">' + this.translate.instant('parameters') + '</label>\
                                    <div class="checkbox clip-check check-primary checkbox-inline">\
                                          <input id="parameters" icheck checkbox-class="icheckbox_square-blue" radio-class="iradio_square-blue" type="checkbox" class="selection-checkbox" />\
                                      </div>\
-                                     <p class="help-block" translate="help_command_parameters"></p>\
+                                     <p class="help-block">' + this.translate.instant('help_command_parameters') + '</p>\
                                  </div>\
                              </form>',
               showCancelButton: true,
@@ -192,18 +191,18 @@ export class OGCommandsService {
               closeOnConfirm: true,
               preConfirm: () => {
                   return {
-                    execute: (<HTMLInputElement>document.getElementById('execute')).value,
+                    execute: (<HTMLInputElement>document.getElementById('execute')).checked,
                     command: {
                       title: (<HTMLInputElement>document.getElementById('command.title')).value,
-                      parameters: (<HTMLInputElement>document.getElementById('parameters')).value
+                      parameters: (<HTMLInputElement>document.getElementById('parameters')).checked
                     }
                   };
               }
             }).then(
             function(response) {
               if (response.value) {
-                response.value.command.script = this.execution.script;
-                response.value.command.type = this.execution.type;
+                response.value.command.script = self.execution.script;
+                response.value.command.type = self.execution.type;
                 self.commandService.create(response.value.command).subscribe(
                   (success) => {
                     // Si se seleccionó continuar con la ejecución

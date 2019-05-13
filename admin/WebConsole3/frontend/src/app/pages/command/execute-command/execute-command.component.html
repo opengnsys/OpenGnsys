@@ -1,0 +1,95 @@
+<section class="content-header">
+  <h1 translate="new_command">
+  </h1>
+  <ol class="breadcrumb">
+    <li><a [routerLink]="'/app/dashboard'"><i class="fa fa-dashboard"></i> {{'dashboard'|translate}}</a></li>
+    <li><a [routerLink]="'/app/commands'"><i class="fa fa-terminal"></i> {{'commands'|translate}}</a></li>
+    <li class="active" translate="command"></li>
+  </ol>
+</section>
+<section style="padding: 0 30px;">
+  <h3 translate="selected_clients"></h3>
+  <app-og-selected-clients></app-og-selected-clients>
+</section>
+<section fixed-toolboxbar class="toolboxbar">
+  <div>
+    <div class="col-md-12">
+        <app-og-execute-command-options></app-og-execute-command-options>
+    </div>
+  </div>
+</section>
+<!-- Main content -->
+<section class="content">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="box box-primary">
+        <div class="box-header with-border">
+          <div class="form-inline">
+            <div class="form-group" ng-class="{'has-error':Form.newCommand.$dirty && Form.newCommand.$invalid, 'has-success':Form.newCommand.$valid}">
+              <div class="checkbox clip-check check-primary checkbox-inline">
+                <input id="parameters" name="newCommand" icheck checkbox-class="iradio_square-blue" radio-class="iradio_square-blue" type="radio" class="selection-checkbox" value="true" [(ngModel)]="newCommand" />
+              </div>
+              <label for="newCommand">
+                <span translate="new_command"></span>
+              </label>
+            </div>
+            <div class="form-group" ng-class="{'has-error':Form.savedCommand.$dirty && Form.savedCommand.$invalid, 'has-success':Form.savedCommand.$valid}">
+              <div class="checkbox clip-check check-primary checkbox-inline">
+                <input id="parameters" name="savedCommand" icheck checkbox-class="iradio_square-blue" radio-class="iradio_square-blue" type="radio" class="selection-checkbox" value="false" [(ngModel)]="newCommand" />
+              </div>
+              <label for="savedCommand">
+                <span translate="saved_command"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="box-body">
+          <form role="form" name="Form" *ngIf="newCommand == 'true'">
+            <div class="form-group" ng-class="{'has-error':Form.script.$dirty && Form.script.$invalid, 'has-success':Form.script.$valid}">
+              <label for="script">
+                <span translate="script"></span>
+                <span *ngIf="required == 'true'" class="symbol required"></span>
+              </label>
+              <textarea class="form-control" class="og-instructions" type="text" required="true" [(ngModel)]="ogCommandsService.ogInstructions" name="script"></textarea>
+            </div>
+          </form>
+          <form role="form" name="Form" *ngIf="newCommand == 'false'">
+            <div class="row">
+              <div class="col-md-12">
+                <div class="form-group">
+                  <label translate="commands"></label>
+                  <select class="form-control" name="command" [(ngModel)]="selectedCommand" (change)="updateSelectedCommand()">
+                    <option *ngFor="let command of commands" [ngValue]="command">{{command.title}}</option>
+                  </select>
+                </div>
+                <div class="form-group" *ngIf="selectedCommand.parameters == true">
+                  <label translate="parameters"></label>
+                  <p class="help-block"><span translate="detected_params"></span> <span style="font-weight: bold" ng-bind-html="selectedCommand.inputs.length"></span></p>
+                  <div class="row">
+                    <div class="col-md-2" *ngFor="let input of selectedCommand.inputs; let index = index">
+                      <label for="param{{index}}">
+                        <span translate="parameter"></span> {{index+1}}
+                      </label>
+                      <input type="text" name="param{{index}}" [value]="selectedCommand.inputs[index]" (change)="updateScript(index, $event)">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-12">
+                <div class="box">
+                  <div class="box-header"></div>
+                  <div class="box-body" >
+                    <div *ngIf="editInstructions == false" [innerHTML]="ogCommandsService.ogInstructions|ogCommands"></div>
+                    <textarea *ngIf="editInstructions == true" class="og-instructions" [(ngModel)]="ogCommandsService.ogInstructions"></textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

@@ -29,7 +29,7 @@
     <mk-box [header]="repository.name"  [isLoading]="isRepositoryLoading()" [isCollapsable]="true" [isRemovable]="false" boxColor="primary" *ngFor="let repository of repositories"  class="col-md-6">
       <div class="box-body">
         <form #form>
-          <app-form-input [formType]="formType" [model]="repository" [cols]="2"></app-form-input>
+          <app-form-input [formType]="formType" [model]="repository" [cols]="1"></app-form-input>
         </form>
         <div class="box-footer">
 

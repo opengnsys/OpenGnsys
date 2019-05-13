@@ -55,7 +55,7 @@ export class OrganizationalUnitComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.ogCommonService.loadEngineConfig().subscribe(
+       this.ogCommonService.loadEngineConfig().subscribe(
         data => {
           this.config = data;
 
@@ -74,7 +74,7 @@ export class OrganizationalUnitComponent implements OnInit, OnDestroy {
             (response) => {
               this.ous = Array.isArray(response) ? response : [response];
               // La primera vez que entra
-              if (this.config.timers.clientsStatusInterval.object == null) {
+              if (this.config.timers.clientsStatusInterval.object == null && this.config.timers.clientsStatusInterval.tick > 0) {
                 this.getClientStatus();
                 const self = this;
                 this.config.timers.clientsStatusInterval.object = window.setInterval(function() {
@@ -93,7 +93,6 @@ export class OrganizationalUnitComponent implements OnInit, OnDestroy {
 
         }
     );
-
 
 
   }

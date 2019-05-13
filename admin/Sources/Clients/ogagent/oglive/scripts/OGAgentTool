@@ -1,6 +1,0 @@
-#!/bin/sh
-
-FOLDER=/usr/share/OGAgent
-
-cd $FOLDER
-python OGAgentUser.py $@

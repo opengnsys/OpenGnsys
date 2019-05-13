@@ -24,7 +24,7 @@
       </td>
       <td class="right">
         <div class="btn-group visible-md visible-lg hidden-sm hidden-xs">
-          <button class="btn btn-default " translate="edit" [routerLink]="'app/client.edit({ou: content.id, clientId: client.id})'"></button>
+          <button class="btn btn-default " translate="edit" [routerLink]="'/app/clients/edit/'+client.id"></button>
           <button class="btn btn-danger " translate="delete" (click)="deleteClient(client)"></button>
         </div>
         <div class="btn-group hidden-md hidden-lg">
@@ -35,7 +35,7 @@
           </button>
           <ul class="dropdown-menu" role="menu">
             <li class="btn-group-vertical">
-              <button class="btn btn-default" href="javascript:void(0)" translate="edit" [routerLink]="'app/client.edit({ou: content.id, clientId: client.id})'"></button>
+              <button class="btn btn-default" href="javascript:void(0)" translate="edit" [routerLink]="'/app/clients/edit/'+client.id"></button>
               <button class="btn btn-danger" href="javascript:void(0)" translate="delete" (click)="deleteClient(client)"></button>
             </li>
           </ul>
@@ -49,7 +49,7 @@
   <!-- *ngIf="selectedStatus[client.status] == true" -->
   <div class="row">
     <ng-container *ngFor="let client of ou.clients">
-      <div class="col-md-2 col-xs-6 padding-5">
+      <div class="col-md-2 col-xs-6 og-client-box">
         <div class="info-box client " *ngIf="mustShow(client)">
               <span style="position: absolute;">
                 <input icheck checkbox-class="icheckbox_square-blue" radio-class="iradio_square-blue" type="checkbox" class="selection-checkbox" [(ngModel)]="client.selected" (change)="selectClient(client)" />

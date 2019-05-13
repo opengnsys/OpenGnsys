@@ -2,8 +2,10 @@ import {Repository} from '../model/repository';
 import {GlobunetFormType} from './globunet.form-type';
 
 
-export class RepositoryFormType {
+export class RepositoryFormType extends GlobunetFormType{
   getForm() {
-    return GlobunetFormType.getForm(new Repository());
+    const form =  GlobunetFormType.getForm(new Repository());
+    this.setFieldType(form, 'description', 'textarea');
+    return form;
   }
 }

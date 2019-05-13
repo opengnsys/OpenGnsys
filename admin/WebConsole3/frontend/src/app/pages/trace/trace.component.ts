@@ -21,6 +21,7 @@ import * as moment from 'moment';
 export class TraceComponent implements OnInit, OnDestroy {
   public traces = [];
   public selection = [];
+  public searchText = '';
   public filters = {
     searchText: '',
     status: {
@@ -76,7 +77,7 @@ ngOnInit(): void {
     data => {
       this.config = data;
 
-      if (this.config.timers.executionsInterval.object === null) {
+      if (this.config.timers.executionsInterval.object === null && this.config.timers.executionsInterval.tick > 0) {
         this.config.timers.executionsInterval.object = setInterval(function() {
           self.getExecutionTasks();
         }, this.config.timers.executionsInterval.tick);
@@ -159,20 +160,21 @@ ngOnInit(): void {
   }
 
   deleteTraces() {
+    const self = this;
     this.ogSweetAlert.question( this.translate.instant('sure_to_delete') + '?', this.translate.instant('action_cannot_be_undone'), function(response) {
       const promises = [];
-      for (let index = 0; index < this.selection.length; index++) {
-        promises.push(this.traceService.delete(this.selection[index].id));
+      for (let index = 0; index < self.selection.length; index++) {
+        promises.push(self.traceService.delete(self.selection[index].id));
       }
       forkJoin(promises).subscribe(
         (success) => {
-          this.toaster.pop({type: 'success', title: 'success', body: this.translate.instant('successfully_deleted')});
-          this.selectAll = false;
-          this.selection = [];
-          this.searchText = '';
+          self.toaster.pop({type: 'success', title: 'success', body: self.translate.instant('successfully_deleted')});
+          self.selectAll = false;
+          self.selection = [];
+          self.searchText = '';
         },
         (error) => {
-          this.toaster.pop({type: 'error', title: 'error', body: error});
+          self.toaster.pop({type: 'error', title: 'error', body: error});
         }
       );
     });

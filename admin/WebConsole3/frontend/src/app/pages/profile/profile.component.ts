@@ -42,7 +42,6 @@ export class ProfileComponent implements OnInit {
   }
 
   changeTheme() {
-    this.app.theme = this.user.preferences.theme;
     this.layoutStore.setSkin(this.user.preferences.theme);
   }
 

@@ -9,7 +9,8 @@ import {OgCommonService} from '../../../service/og-common.service';
 
 @Component({
   selector: 'app-ou-client-component',
-  templateUrl: 'ou-client.component.html'
+  templateUrl: 'ou-client.component.html',
+  styleUrls: ['ou-client.component.scss']
 })
 export class OuClientComponent {
   private _ou: OrganizationalUnit;
@@ -41,6 +42,7 @@ export class OuClientComponent {
   }
 
   deleteClient(client) {
+    const self = this;
     this.ogSweetAlert.swal(
       {
         title: this.translate.instant('sure_to_delete') + '?',
@@ -52,18 +54,18 @@ export class OuClientComponent {
 
       }).then(
       function(response) {
-        if (response === true) {
-          this.clientService.delete(client.id).then(
-            function(success) {
+        if (response.value === true) {
+          self.clientService.delete(client.id).subscribe(
+            (success) => {
               // Lo borramos de la unidad organizativa
-              const index = this.ou.clients.indexOf(client);
+              const index = self.ou.clients.indexOf(client);
               if (index !== -1) {
-                this.ou.clients.splice(index, 1);
+                self.ou.clients.splice(index, 1);
               }
-              this.toaster.pop({type: 'success', title: 'success', body: 'Successfully deleted'});
+              self.toaster.pop({type: 'success', title: 'success', body: 'Successfully deleted'});
             },
-            function(error) {
-              this.toaster.pop({type: 'error', title: 'error', body: error});
+            (error) => {
+              self.toaster.pop({type: 'error', title: 'error', body: error});
             }
           );
         }

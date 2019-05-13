@@ -26,10 +26,13 @@ export class OgCommonService {
 
   constructor(private layoutStore: LayoutStore, private adminLteConfig: AdminLteConf, private engineService: EngineService, private translate: TranslateService, private authModule: AuthModule) {
     this.app = {};
-    this.selectedClients = [];
+    this.selectedClients = {};
     this.selectedOu = null;
     this.movingOu = null;
     this.movingClients = false;
+    if (localStorage.getItem('selectedClients')) {
+      this.selectedClients = JSON.parse(localStorage.getItem('selectedClients'));
+    }
   }
 
   loadEngineConfig(): Observable<{constants: any, timers: any}> {
@@ -42,21 +45,23 @@ export class OgCommonService {
               ou: environment.ou,
               themes: environment.themes,
               menus: environment.menus,
-              languages: environment.languages
+              languages: environment.languages,
+              deployMethods: environment.deployMethods,
+              commands: environment.commands
             };
             this.constants = Object.assign(this.constants, data[0]);
             // inicializar timers generales para refresco de información
             this.timers = {
               serverStatusInterval: {
-                tick: 5000,
+                tick: 0,
                 object: null
               },
               clientsStatusInterval: {
-                tick: 5000,
+                tick: 0,
                 object: null
               },
               executionsInterval: {
-                tick: 5000,
+                tick: 0,
                 object: null
               },
 
@@ -188,6 +193,19 @@ export class OgCommonService {
       this.selectedClients[client.id] = client;
     } else {
       delete this.selectedClients[client.id];
+    }
+    this.saveSelection();
+  }
+
+  saveSelection() {
+    if (Object.keys(this.selectedClients).length > 0) {
+      localStorage.setItem('selectedClients', JSON.stringify(this.selectedClients, function (key, value) {
+        let result = value;
+        if (key === 'parent' && typeof value === 'object') {
+          result = value.id;
+        }
+        return result;
+      }));
     }
   }
 

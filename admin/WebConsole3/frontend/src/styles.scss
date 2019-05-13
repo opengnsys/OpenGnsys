@@ -1,4 +1,8 @@
 /* You can add global styles to this file, and also import other style files */
+.input-group {
+  width: 100%;
+}
+
 .capitalize {
   text-transform: capitalize;
 }
@@ -13,6 +17,14 @@ table td input.has-success {
 
 table.table-no-border {
   border: none;
+}
+
+.loader {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 999999;
 }
 
 #loading-bar .bar {
@@ -96,8 +108,7 @@ i.client {
 }
 
 .bg-lab{
-  background-color: #d7dbef;
-  padding: 10px 10px 0 10px;
+  background-color: #d7dbef !important;
 }
 
 tr.odd {
@@ -178,7 +189,7 @@ table.disk-partitions td {
 }
 
 table.disk-partitions td span {
-  padding: 5px 10px;
+  padding: 5px 5px;
   font-weight: bold;
 }
 
@@ -301,4 +312,8 @@ ul.dropdown-menu.fit {
 
 ng2-smart-table {
   font-size: initial !important;
+}
+
+.swal2-popup {
+  font-size: 1em !important;
 }

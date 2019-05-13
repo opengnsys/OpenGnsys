@@ -8,6 +8,7 @@ import {ToasterService} from '../../../service/toaster.service';
 import {TranslateService} from '@ngx-translate/core';
 import {ImageFormType} from '../../../form-type/image.form-type';
 import {RepositoryService} from '../../../api/repository.service';
+import {Observable} from 'rxjs';
 
 @Component({
   selector: 'app-image',
@@ -34,6 +35,11 @@ export class ImageEditComponent implements OnInit {
           this.imageService.read(data.params.id).subscribe(
             image => {
               this.image = image;
+              if (typeof this.image.partitionInfo === 'string') {
+                this.image.partitionInfo = JSON.parse(this.image.partitionInfo);
+              } else if (!this.image.partitionInfo) {
+                this.image.partitionInfo = new PartitionInfo();
+              }
             },
             error => {
               this.toaster.pop({type: 'error', title: 'error', body: error});
@@ -48,9 +54,9 @@ export class ImageEditComponent implements OnInit {
           items: data,
           label: 'name',
           value: 'id'
-        }
+        };
       }
-    )
+    );
   }
 
   getImageFileSystem(image) {
@@ -73,4 +79,22 @@ export class ImageEditComponent implements OnInit {
     return result.type;
   }
 
+  save() {
+    let request: Observable<any>;
+    if (this.image.id !== 0) {
+      request = this.imageService.update(this.image);
+    } else {
+      request = this.imageService.create(this.image);
+    }
+    request.subscribe(
+        (response) => {
+          this.toaster.pop({type: 'success', title: this.translate.instant('success'), body: this.translate.instant('successfully_saved')});
+          this.router.navigate(['/app/images']);
+
+        },
+        (error) => {
+          this.toaster.pop({type: 'error', title: 'error', body: error});
+        }
+    );
+  }
 }

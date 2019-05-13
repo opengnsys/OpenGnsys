@@ -62,7 +62,7 @@ export class HeaderInnerComponent implements  OnInit {
                             self.getExectutionTasks();
                         },
                         function(error) {
-                            this.toaster.pop({type: 'error', title: 'error', body: error});
+                            self.toaster.pop({type: 'error', title: 'error', body: error});
                         }
                     );
 
