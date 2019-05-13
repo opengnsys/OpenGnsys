@@ -7,4 +7,4 @@
 	$TbMsg=array();
 	$TbMsg[0]='';
 	$TbMsg[1]='ATENCIÓN: Ha habido algún problema al consultar el estado de los ordenadore';
-?>
+

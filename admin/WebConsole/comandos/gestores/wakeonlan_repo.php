@@ -43,19 +43,24 @@ foreach($macs as $mac){
 	}
 	$rs->Cerrar();
 }
+
+//Multicast or Unicast
+$typeWol = preg_match_all('!\d{1}!', $atributos, $matches);
+
 // En este punto tenemos un array con todos los repos y cada uno de ellos con una lista de todas las macs que deben arrancar
 // Recorremos cada uno de ellos
 foreach($reposAndMacs as $repo => $macs){
 	// En el array de $macs tenemos la clave "apikey"
-	if($macs["apikey"] !== ""){
+	if($macs["apikey"] !== "") {
 		$apiKeyRepo = $macs["apikey"];
 		unset($macs["apikey"]);
 		// Componer datos de conexión para el repositorio.
 		$urls[$repo]['url'] = "https://$repo/opengnsys/rest/repository/poweron";
 		$urls[$repo]['header'] = array('Authorization: '. $apiKeyRepo);
-		$urls[$repo]['post'] = '{"macs": ["' . implode('","', $macs) . '"]}';
+		$urls[$repo]['post'] = '{"macs": ["' . implode('","', $macs) . '"], "ips": ["' . str_replace(';', '","', $cadenaip) .
+			'"], "mar": "' . $matches[0][0] . '"}';
 	}
-	else{
+	else {
 		$avisoRepo = true;
 	}
 }
@@ -76,10 +81,11 @@ function existREPO($repo, $repos){
 	$index = 0;
 	while(!$found && $index < count($repos)){
 		$r = $repos[$index];
+		$index++;
 		if($r == $repo)
 			$found=true;
 	}
 	return $found;
 }
 
-?>
+

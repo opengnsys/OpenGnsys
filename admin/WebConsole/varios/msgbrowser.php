@@ -23,16 +23,13 @@ else
 	$mensaje=$TbMsg[$idx];
 ?>
 <HTML>
-<TITLE>Administración web de aulas</TITLE>
 <HEAD>
+	<TITLE>Administración web de aulas</TITLE>
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
-	<SCRIPT language="javascript">
-
-	</SCRIPT>
 	<STYLE TYPE="text/css">
 
-	.deepsea, .deepsea TD, .deepsea TH
+	.deepsea TD, .deepsea TH
 	{
 	background-color:#026afe;
 	color:#FFFFFF;
@@ -65,11 +62,11 @@ else
 <BODY>
 <?php
 if(empty($idx) && empty($msg)) {
-	// No hay operaciones realizandose
+	// No hay operaciones realizándose
 	echo '<BR><BR><BR><BR><BR>';
 	echo '<TABLE cellspacing=0 cellpadding=2 align=center border=0>';
 	echo '<TR><TD align=center><IMG border=0 src="../images/iconos/logoopengnsys.png"></TD></TR>';
-	echo '<TR><TD align=center><SPAN style="COLOR: #999999;FONT-FAMILY: Arial;FONT-SIZE: 12px;">Iniciando...</TD></TR>';
+	echo '<TR><TD align=center><SPAN style="COLOR: #999999;FONT-FAMILY: Arial, sans-serif; FONT-SIZE: 12px;">Iniciando...</TD></TR>';
 	echo '</TR>';
 	echo '</TABLE>';
 }
@@ -79,7 +76,7 @@ else{
 	echo '<h1>' . $TbMsg[24]   . ' </h1>';
 	echo '<BR><BR><BR>';
 	echo '<TABLE  cellspacing=0 cellpadding=2 align=center border=0>';
-	echo '<TR><TD align=center class="tdbarra">Opengnsys Browser Message</TD><TR>';
+	echo '<TR><TD align=center class="tdbarra">OpenGnsys Browser Message</TD><TR>';
 	echo '<TR><TD class="tdclien" valign=center >&nbsp;&nbsp;&nbsp;'.$mensaje.'&nbsp;&nbsp;&nbsp;</TD></TR>';
 	echo '</TABLE>';
 }

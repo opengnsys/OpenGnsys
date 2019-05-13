@@ -147,13 +147,19 @@ if($opcion!=$op_movida){
 			break;
 	}
 if ($resul){
-	if ($opcion==$op_alta ) {
+	if ($opcion == $op_alta) {
 	    if ( $datosduplicados != '') {
 		echo $literal."(0,'".$TbMsg["DUPLICADO"].$datosduplicados." ',".$idordenador.",o.innerHTML);".chr(13);
-	    } else {  
+	    } else {
 		echo $literal."(1,'".$cmd->DescripUltimoError()." ',".$idordenador.",o.innerHTML);".chr(13);
 	    }
-	}
+    } elseif ($opcion == $op_modificacion) {
+	    if ( $datosduplicados != '') {
+		echo $literal."(0,'".$TbMsg["DUPLICADO"].$datosduplicados." ','".$nombreordenador."');".chr(13);
+	    } else {
+		echo $literal."(1,'".$cmd->DescripUltimoError()." ','".$nombreordenador."');".chr(13);
+	    }
+    }
 	else
 		echo $literal."(1,'".$cmd->DescripUltimoError()." ','".$nombreordenador."');".chr(13);
 }
@@ -253,34 +259,14 @@ function Gestiona(){
 
 	switch($opcion){
 		case $op_alta :
-                        // Comprueba que no existan duplicados
-                        $ipduplicada='no';
-                        $nombreduplicado='no';
-                        $macduplicada='no';
-                        $cmd->texto="SELECT nombreordenador,ip,mac FROM  ordenadores
-                                WHERE nombreordenador=@nombreordenador OR ip=@ip OR mac=@mac";
-                        $rs=new Recordset;
-                        $rs->Comando=&$cmd;
-                        if (!$rs->Abrir()) return(0); // Error al abrir recordset
-                        $rs->Primero();
-                        while (!$rs->EOF){
-                           if ( $nombreordenador == $rs->campos["nombreordenador"]) $datosduplicados ="nombre: $nombreordenador,";
-                           if ( $ip == $rs->campos["ip"]) $datosduplicados .=" ip: $ip,";
-                           if ( $mac == $rs->campos["mac"]) $datosduplicados .=" mac: $mac,";
-                           $rs->Siguiente();
-                        }
-                        $rs->Cerrar();
-                        // quitamos última coma
-                        $datosduplicados = trim($datosduplicados, ',');
-
-                        // Si no hay datos duplicados insertamos el ordenador;
-                        if ( $datosduplicados == "" ) {
-			     //Insertar fotoord con Values @fotoordenador
-			     $cmd->texto="INSERT INTO ordenadores(nombreordenador,numserie,ip,mac,idperfilhard,idrepositorio,oglivedir,
-			     idmenu,idproautoexec,idaula,grupoid,netiface,netdriver,fotoord,validacion,paginalogin,paginavalidacion) VALUES (@nombreordenador,@numserie,@ip,@mac,@idperfilhard,@idrepositorio,@oglivedir,
-			     @idmenu,@idprocedimiento,@idaula,@grupoid,@netiface,@netdriver,@fotoordenador,@validacion,@paginalogin,@paginavalidacion)";
-                        }
-			$resul=$cmd->Ejecutar();
+            $duplicates = checkDuplicates($cmd, $datosduplicados, $idordenador, $nombreordenador, $ip, $mac);
+            // Si no hay datos duplicados insertamos el ordenador;
+            if (!$duplicates) {
+                $cmd->texto="INSERT INTO ordenadores(nombreordenador,numserie,ip,mac,idperfilhard,idrepositorio,oglivedir,
+                    idmenu,idproautoexec,idaula,grupoid,netiface,netdriver,fotoord,validacion,paginalogin,paginavalidacion) VALUES (@nombreordenador,@numserie,@ip,@mac,@idperfilhard,@idrepositorio,@oglivedir,
+                    @idmenu,@idprocedimiento,@idaula,@grupoid,@netiface,@netdriver,@fotoordenador,@validacion,@paginalogin,@paginavalidacion)";
+             }
+            $resul=$cmd->Ejecutar();
 			if ($resul){ // Crea una tabla nodo para devolver a la página que llamó ésta
 			    $idordenador=$cmd->Autonumerico();
 			    // Crear fichero TFTP/PXE por defecto para el nuevo ordenador.
@@ -293,10 +279,13 @@ function Gestiona(){
 			    $tablanodo=$arbol->CreaArbolVistaXML();
 			}
 			break;
-		case $op_modificacion:
-			$cmd->texto="UPDATE ordenadores SET nombreordenador=@nombreordenador,numserie=@numserie,ip=@ip,mac=@mac,idperfilhard=@idperfilhard,
-			idrepositorio=@idrepositorio,oglivedir=@oglivedir,idmenu=@idmenu,idproautoexec=@idprocedimiento,netiface=@netiface,netdriver=@netdriver,fotoord=@fotoordenador,validacion=@validacion,paginalogin=@paginalogin,paginavalidacion=@paginavalidacion 
-			WHERE idordenador=@idordenador";
+        case $op_modificacion:
+            $duplicates = checkDuplicates($cmd, $datosduplicados, $idordenador, $nombreordenador, $ip, $mac);
+            if (!$duplicates) {
+                $cmd->texto="UPDATE ordenadores SET nombreordenador=@nombreordenador,numserie=@numserie,ip=@ip,mac=@mac,idperfilhard=@idperfilhard,
+                idrepositorio=@idrepositorio,oglivedir=@oglivedir,idmenu=@idmenu,idproautoexec=@idprocedimiento,netiface=@netiface,netdriver=@netdriver,fotoord=@fotoordenador,validacion=@validacion,paginalogin=@paginalogin,paginavalidacion=@paginavalidacion
+                WHERE idordenador=@idordenador";
+            }
 			$resul=$cmd->Ejecutar();
 			// Actualizar fichero TFTP/PXE a partir de la plantilla asociada.
 			createBootMode ($cmd, $arranque, $nombreordenador, $idioma);
@@ -317,6 +306,31 @@ function Gestiona(){
 	}
 	return($resul);
 }
+
+function checkDuplicates(&$cmd, &$duplicate_data, $computer_id, $computer_name, $ip, $mac){
+	$cmd->texto="SELECT idordenador,nombreordenador,ip,mac FROM  ordenadores
+		WHERE nombreordenador=@nombreordenador OR ip=@ip OR mac=@mac";
+	$rs = new Recordset;
+	$rs->Comando=&$cmd;
+	if (!$rs->Abrir()) return(0);
+	$rs->Primero();
+	while (!$rs->EOF) {
+		if ($computer_id != $rs->campos["idordenador"]) {
+			if ( $computer_name == $rs->campos["nombreordenador"])
+				$duplicate_data ="nombre: $computer_name,";
+			if ( $ip == $rs->campos["ip"])
+				$duplicate_data .=" ip: $ip,";
+			if (strtoupper($mac) == strtoupper($rs->campos["mac"]))
+				$duplicate_data .=" mac: $mac,";
+	   }
+	   $rs->Siguiente();
+	}
+	$rs->Cerrar();
+	$duplicate_data = trim($duplicate_data, ',');
+	$ret = !empty($duplicate_data);
+	return ret;
+}
+
 /*________________________________________________________________________________________________________
 	Crea un arbol XML para el nuevo nodo insertado 
 ________________________________________________________________________________________________________*/

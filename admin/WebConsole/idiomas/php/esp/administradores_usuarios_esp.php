@@ -11,4 +11,4 @@
 	$TbMsg[3]='Nombre del centro';
 	$TbMsg[4]='(*)Para asignar algún centro a un administrador determinado debe hacer click sobre la casilla de verificación correspondiente.';
 	$TbMsg[5]='Centros disponibles';
-?>
+

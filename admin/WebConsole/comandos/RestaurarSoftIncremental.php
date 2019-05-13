@@ -1,12 +1,12 @@
 <?php
 // ********************************************************************************************************
-// Aplicaci�n WEB: ogAdmWebCon
-// Autor: Jos� Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creaci�n: A�o 2012
-// Fecha �ltima modificaci�n: Noviembre-2012
+// Aplicación WEB: ogAdmWebCon
+// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha Creación: Año 2012
+// Fecha última modificación: Noviembre-2012
 // Nombre del fichero: RestaurarSoftIncremental.php
-// Descripci�n : 
-//		Implementaci�n del comando "RestaurarSoftIncremental"
+// Descripción:
+//		Implementación del comando "RestaurarSoftIncremental"
 // ********************************************************************************************************
 include_once("../includes/ctrlacc.php");
 include_once("../clases/AdoPhp.php");
@@ -27,11 +27,11 @@ include_once("../includes/ConfiguracionesParticiones.php");
 //
 $cmd=CreaComando($cadenaconexion);
 if (!$cmd)
-	Header('Location: '.$pagerror.'?herror=2'); // Error de conexi�n con servidor B.D.
+	Header('Location: '.$pagerror.'?herror=2'); // Error de conexión con servidor B.D.
 //________________________________________________________________________________________________________
 //
 //
-// Captura par�metros
+// Captura parámetros
 //________________________________________________________________________________________________________
 //
 
@@ -58,9 +58,9 @@ if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 //
 ?>
 <HTML>
-<TITLE>Administraci�n web de aulas</TITLE>
 <HEAD>
-	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<TITLE>Administración web de aulas</TITLE>
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 <LINK rel="stylesheet" type="text/css" href="../estilos.css">
 <STYLE TYPE="text/css"></STYLE>
 <SCRIPT language="javascript" src="./jscripts/RestaurarSoftIncremental.js"></SCRIPT>
@@ -139,7 +139,7 @@ if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 
 /*________________________________________________________________________________________________________
 
-	Crea la etiqueta html <SELECT> de las im�genes
+	Crea la etiqueta html <SELECT> de las imágenes
 ________________________________________________________________________________________________________*/
 function HTMLSELECT_imagenes($cmd,$idimagen,$numpar,$codpar,$icp,$sw,$idordenadores,$ambito)
 {
@@ -192,29 +192,24 @@ function HTMLSELECT_imagenes($cmd,$idimagen,$numpar,$codpar,$icp,$sw,$idordenado
 ----------------------------------------------------------------------------------------------*/
 function opcionesAdicionales()
 {
-	global $TbMsg;	
-	
+	global $TbMsg;
+
 	$tablaHtml='<table style="display:none"  width="95%" align=center border=0 cellPadding=0 cellSpacing=0 class="tabla_accesos">';
 	$tablaHtml.='<tr><th colspan=8 align=center><b>&nbsp;'.$TbMsg[11].'&nbsp;</b></th></tr>';
 	$tablaHtml.='<tr id="trOpc">
 					<td align=right>'.$TbMsg[35].'</td>
-					<td><input  type=checkbox name="bpi"></td>'; // Borrar imagen previamente del servidor 			
-	$tablaHtml.='	
+					<td><input  type=checkbox name="bpi"></td>'; // Borrar imagen previamente del servidor
+	$tablaHtml.='
 					<td  align=right>'.$TbMsg[36].'</td>
-					<td><input type=checkbox name="cpc"></td>'; // Copiar adem�s la imagen a la cach�
-	$tablaHtml.='		
+					<td><input type=checkbox name="cpc"></td>'; // Copiar además la imagen a la caché
+	$tablaHtml.='
 					<td  align=right>'.$TbMsg[37].'</td>
-					<td><input type=checkbox name="bpc"></td>'; // Borrar imagen de la cach� previamente antes de copiarla 		
-	$tablaHtml.='		
+					<td><input type=checkbox name="bpc"></td>'; // Borrar imagen de la caché previamente antes de copiarla
+	$tablaHtml.='
 					<td  align=right>'.$TbMsg[39].'</td>
-					<td><input type=checkbox name="nba"></td>'; // No borrar archivos en destino  						
+					<td><input type=checkbox name="nba"></td>'; // No borrar archivos en destino
 	$tablaHtml.='</tr>';
 	$tablaHtml.='	</table>';
 	echo $tablaHtml;
 }
-
-
-?>
-
-
 

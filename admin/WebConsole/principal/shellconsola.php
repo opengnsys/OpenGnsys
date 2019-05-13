@@ -189,4 +189,4 @@ function RecorreOrdenadores($cmd){
 	}
 	$rs->Cerrar();
 }
-?>
+

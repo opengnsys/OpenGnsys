@@ -13,4 +13,4 @@
 	$TbMsg[5]='Apagar ordinadors';
 	$TbMsg[6]='Àmbit';
 
-?>
+

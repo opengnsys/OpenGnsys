@@ -10,4 +10,3 @@
 	$TbMsg[2]='Software incremental';
 	$TbMsg[3]='Nombre del componente';
 	$TbMsg[4]='(*)Para incluir algún componente en este software incremental debe hacer click sobre la casilla de verificación correspondiente.';
-?>

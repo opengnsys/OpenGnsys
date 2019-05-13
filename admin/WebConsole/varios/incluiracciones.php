@@ -62,7 +62,8 @@ else{ // Viene de menus
 	?>
 	<HTML>
 	<HEAD>
-	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <TITLE>Administración web de aulas</TITLE>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../jscripts/opciones.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/accionmenu.js"></SCRIPT>
@@ -184,6 +185,7 @@ function pintaMenus($cmd,$identificador,$tipoaccion,$op)
 	global $descripcionaccion;
 	global $EJECUCION_PROCEDIMIENTO;
 	global $EJECUCION_TAREA;
+	$urlimg="";
 	
 	// echo $cmd->texto;	
 	$idmenus=""; // Identificadores de menus para segunda consulta	
@@ -261,5 +263,3 @@ function pintaMenus($cmd,$identificador,$tipoaccion,$op)
 	$rs->Cerrar();
 	return($idmenus); // retorna identificadores de menus implicados en la consulta
 }
-?>
-

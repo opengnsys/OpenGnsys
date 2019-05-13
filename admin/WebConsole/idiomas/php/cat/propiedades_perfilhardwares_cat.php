@@ -16,5 +16,5 @@ $TbMsg["HARD_COMPUTERS"]="Ordinadors";
 $TbMsg["HARD_WINBOOT"]="Arrencada Windows";
 $TbMsg["HARD_REBOOT"]="Reinici (reboot)";
 $TbMsg["HARD_KEXEC"]="Directe (kexec)";
-?>
+
 

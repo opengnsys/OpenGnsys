@@ -207,4 +207,4 @@ function SubarbolXML_imagenes($idimagen,$descripcion)
 		$cadenaXML.='</IMAGEN>';
 		return($cadenaXML);
 }
-?>
+

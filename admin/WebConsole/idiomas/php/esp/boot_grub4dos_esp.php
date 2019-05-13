@@ -1,10 +1,10 @@
 <?php
 //____________________________________________________________
 //
-//	Fichero de idiomas php: aulas_esp.php
+//	Fichero de idiomas php: boot_grub4dos_esp.php
 //	Idioma: Español
 //_____________________________________________________________
-	$TbMsg=array();
+	if (!empty($TbMsg))  $TbMsg=array();
 	$TbMsg[0]='Nuevo';
 	$TbMsg[1]='Modificar';
 	$TbMsg[2]='Eliminar';

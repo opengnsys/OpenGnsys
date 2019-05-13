@@ -118,7 +118,7 @@ function autoConfigure()
 	# Configuración según la distribución de Linux.
 	if [ -f /etc/debian_version ]; then
 		# Distribución basada en paquetes Deb.
-		DEPENDENCIES=( curl rsync btrfs-tools procps arp-scan realpath php-curl gettext moreutils jq wakeonlan udpcast libev-dev shim-signed grub-efi-amd64-signed php-fpm )
+		DEPENDENCIES=( curl rsync btrfs-tools procps arp-scan realpath php-curl gettext moreutils jq udpcast libev-dev shim-signed grub-efi-amd64-signed php-fpm )
 		# Paquete correcto para realpath.
 		[ -z "$(apt-cache pkgnames realpath)" ] && DEPENDENCIES=( ${DEPENDENCIES[@]//realpath/coreutils} )
 		UPDATEPKGLIST="add-apt-repository -y ppa:ondrej/php; apt-get update"
@@ -571,7 +571,7 @@ function apacheConfiguration ()
 	else
 	       template=$WORKDIR/opengnsys/server/etc/apache.conf.tmpl
 	fi
-	sockfile=$(find /run/php -name "php*.sock" -type s -print 2>/dev/null)
+	sockfile=$(find /run/php -name "php*.sock" -type s -print 2>/dev/null | tail -1)
 	# Actualizar configuración de Apache a partir de fichero de plantilla.
 	for config in $APACHECFGDIR/{,sites-available/}opengnsys.conf; do
 		if [ -e $config ]; then

@@ -69,4 +69,4 @@ function multiRequest($data, $options=array(CURLOPT_SSL_VERIFYHOST => false, CUR
  
   return $result;
 }
-?>
+

@@ -2,16 +2,15 @@
 //________________________________________________________________________________________________________
 //
 //	Fitxer d'idiomes php: informacion_perfileshard_cat.php 
-//	Idioma: Català 
+//	Idioma: Catalï¿½ 
 //________________________________________________________________________________________________________
 	$TbMsg=array();
 	$TbMsg[0]='Perfils hardware';
-	$TbMsg[1]='Informació sobre Perfils hardware';
+	$TbMsg[1]='Informaciï¿½ sobre Perfils hardware';
 	$TbMsg[2]='Perfil hardware';
-	$TbMsg[3]='Informació Perfil hardware';
+	$TbMsg[3]='Informaciï¿½ Perfil hardware';
 	$TbMsg[4]='Perfils software disponibles';
 	$TbMsg[5]='Components software';
 	$TbMsg[6]='Components hardware ';
 	$TbMsg[7]='Software Incremental';
 	$TbMsg[8]='Comentaris';
-?>

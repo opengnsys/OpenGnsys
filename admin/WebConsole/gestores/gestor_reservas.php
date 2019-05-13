@@ -197,4 +197,4 @@ function SubarbolXML_reservas($idreserva,$descripcion,$estado){
 		$cadenaXML.='</RESERVA>';
 		return($cadenaXML);
 }
-?>
+

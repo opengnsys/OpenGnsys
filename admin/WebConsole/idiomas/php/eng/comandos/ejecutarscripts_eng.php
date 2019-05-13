@@ -54,7 +54,7 @@
 
 	$TbMsg["WCRP31"]='Remote partitions cloning Wizard';
 	$TbMsg["WCRP32"]='Select MASTER PC:';
-	$TbMsg["WCRP33"]='Select the image or partition to send from Master PC';
+	$TbMsg["WCRP33"]='Choose the image or partition to send from Master PC';
 	$TbMsg["WCRP34"]='Select the client target partition';
 	$TbMsg["WCRP35"]='Select the transfer mode';
 	$TbMsg["WCRP36"]='Select cloning tool';

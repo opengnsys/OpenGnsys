@@ -12,4 +12,3 @@ $TbMsg[3]="Eliminar";
 $TbMsg[4]="Gestión Procedimientos";
 $TbMsg[5]="Nombre Procedimiento";
 $TbMsg[6]="Comentarios";
-?>

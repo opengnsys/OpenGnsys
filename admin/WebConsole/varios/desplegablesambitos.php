@@ -25,4 +25,3 @@ $cmd=CreaComando($cadenaconexion); // Crea objeto comando
 if ($cmd){	
 	echo tomaSelectAmbito($cmd,$ambito,0,$idcentro,250);
 }
-?>

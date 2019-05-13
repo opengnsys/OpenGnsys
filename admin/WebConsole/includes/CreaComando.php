@@ -21,4 +21,4 @@ function CreaComando($cadenaconexion){
 	$cmd->Conexion=&$cn; 
 	return($cmd);
 }
-?>
+

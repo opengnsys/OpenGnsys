@@ -2,16 +2,15 @@
 //________________________________________________________________________________________________________
 //
 //	Fitxer d'idiomes php: informacion_perfilessoft_cat.php 
-//	Idioma: Català 
+//	Idioma: Catalï¿½ 
 //________________________________________________________________________________________________________
 	$TbMsg=array();
 	$TbMsg[0]='Perfils software';
-	$TbMsg[1]='Informació sobre perfils software';
+	$TbMsg[1]='Informaciï¿½ sobre perfils software';
 	$TbMsg[2]='Perfil software';
-	$TbMsg[3]='Informació perfils software';
+	$TbMsg[3]='Informaciï¿½ perfils software';
 	$TbMsg[4]='Perfils Hardware soportats';
 	$TbMsg[5]='Components hardware';
 	$TbMsg[6]='Components software';
 	$TbMsg[7]='Software Incremental';
 	$TbMsg[8]='Comentaris';
-?>

@@ -44,4 +44,4 @@ $TbMsg=array();
 	$TbMsg[34]='El proceso de restauración de imagen básica ha terminado correctamente';
 	$TbMsg[35]='ATENCIÓN, ha habido algún error en el proceso de restauración de imagen básica';			
 
-?>
+

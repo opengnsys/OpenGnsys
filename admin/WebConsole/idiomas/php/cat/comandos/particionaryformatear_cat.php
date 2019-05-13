@@ -23,4 +23,3 @@
 	$TbMsg[15]='Ocultar';
 	$TbMsg[16]='Mostrar';
 	$TbMsg[17]='¡¡ Espai liure !!';
-?>

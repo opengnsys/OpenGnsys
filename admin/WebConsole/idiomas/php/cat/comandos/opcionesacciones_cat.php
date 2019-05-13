@@ -18,4 +18,3 @@
 	$TbMsgAux[10]='Guardar como a tasca nova' ;
 	$TbMsgAux[11]='Incluir-ho en una tasca existent' ;
 	$TbMsgAux[12]='Ordre d\'execució';
-?>

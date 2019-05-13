@@ -24,10 +24,10 @@ if (isset($_GET["descripciontarea"]))	$descripciontarea=$_GET["descripciontarea"
 //________________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE>Administración web de aulas</TITLE>
 <HEAD>
-	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
-	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
+<TITLE>Administración web de aulas</TITLE>
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 </HEAD>
 <BODY>
 	<?php
@@ -67,7 +67,7 @@ function pintacomandos($cmd,$idtareacomando){
 	$cmd->texto.=" INNER JOIN comandos ON comandos.idcomando=tareas_comandos.idcomando";
 	$cmd->texto.=" WHERE tareas_comandos.idtareacomando=".$idtareacomando;
 	$rs->Comando=&$cmd; 
-	if (!$rs->Abrir()) return($cadenaXML); // Error al abrir recordset
+	if (!$rs->Abrir()) return(""); // Error al abrir recordset
 	if ($rs->EOF) return("");
 
 	$HTMLparametros='<TABLE class="tabla_parametros" align=center  border=0 cellspacing=1 cellpadding=0 width="90%">'.chr(13);
@@ -78,6 +78,7 @@ function pintacomandos($cmd,$idtareacomando){
 
 	$textambito="";
 	$urlimg="";
+	$nombre="";
 
 	switch($rs->campos["ambito"]){
 		case $AMBITO_CENTROS :
@@ -109,7 +110,7 @@ function pintacomandos($cmd,$idtareacomando){
 	$HTMLparametros.= '<TD>&nbsp;'.$TbMsg[3].'&nbsp;</TD>'.chr(13);
 	$HTMLparametros.= '<TD>&nbsp;'.$textambito.'&nbsp;';
 	$HTMLparametros.= '<IMG src="'.$urlimg.'">&nbsp;</TD>'.chr(13);
-	$HTMLparametros.=	'</TR><TR>';
+	$HTMLparametros.= '</TR><TR>';
 	$HTMLparametros.= '<TD>&nbsp;'.$TbMsg[4].'&nbsp;</TD>'.chr(13);
 	$HTMLparametros.= '<TD>&nbsp;'.$nombre.'&nbsp;</TD>'.chr(13);
 	$HTMLparametros.=	'</TR>';

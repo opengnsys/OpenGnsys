@@ -170,4 +170,4 @@ function SubarbolXML_Componentesoftwares($cmd,$idsoftware,$descripcion,$idtiposo
 		$cadenaXML.='</COMPONENTESOFTWARES>';
 		return($cadenaXML);
 }
-?>
+

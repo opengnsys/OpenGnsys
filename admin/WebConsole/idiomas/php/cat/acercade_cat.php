@@ -17,5 +17,5 @@ $TbMsg["CHANGE"]='Canvis en: ';
 $TbMsg["MANUAL"]='Manual OpenGnsys ';
 
 
-?>
+
 

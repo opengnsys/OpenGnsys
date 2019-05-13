@@ -59,5 +59,5 @@
 	}
 	else
 		echo "0"; // Error de conexión
-?>
+
 

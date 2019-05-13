@@ -74,4 +74,4 @@ function Gestiona(){
 	}
 	return($resul);
 }
-?>
+

@@ -14,4 +14,4 @@
 	$TbMsg[6]='Componentes software';
 	$TbMsg[7]='Ordenades con este perfil';
 	$TbMsg[8]='Comentarios';
-?>
+

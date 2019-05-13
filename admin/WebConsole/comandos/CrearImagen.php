@@ -38,7 +38,7 @@ if (!$resul){
 <HTML>
 <HEAD>
 <TITLE>Administración web de aulas</TITLE>
-	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 <LINK rel="stylesheet" type="text/css" href="../estilos.css">
 <SCRIPT language="javascript" src="./jscripts/CrearImagen.js"></SCRIPT>
 <SCRIPT language="javascript" src="../clases/jscripts/HttpLib.js"></SCRIPT>
@@ -51,11 +51,11 @@ if (!$resul){
 	$urlimg='../images/iconos/ordenador.gif';
 	$textambito=$TbMsg[15];
 
-	echo '<p align=center><span class=cabeceras>'.$TbMsg[0].'&nbsp;</span><br>';
-	echo '<IMG src="'.$urlimg.'">&nbsp;&nbsp;<span align=center class=subcabeceras>
-			<U>'.$TbMsg[14].': '.$textambito.','.$nombreambito.'</U></span>&nbsp;&nbsp;</span></p>';
+	echo '<p align="center"><span class="cabeceras">'.$TbMsg[0].'&nbsp;</span><br>';
+	echo '<img src="'.$urlimg.'" alt="*">&nbsp;&nbsp;<span align=center class=subcabeceras>
+			<u>'.$TbMsg[14].': '.$textambito.','.$nombreambito.'</u></span>&nbsp;&nbsp;</p>';
 
-	echo '<P align=center><SPAN align=center class=subcabeceras><?php echo $TbMsg[6] ?></SPAN></P>'."\n";
+	echo '<p align="center"><SPAN class="subcabeceras">'.$TbMsg[6].'</span></p>'."\n";
 
 	if (tiene_repo($idambito)) {
 		echo '<FORM  align=center name="fdatos">'."\n".
@@ -68,9 +68,8 @@ if (!$resul){
 		     '        <TH align=center>'.$TbMsg["CREATE_NOREPO"].'</TH>'."\n".
 		     '    </TR>'."\n".
 		     '</TABLE>'."\n";
-	} ?>
+	}
 
-<?php
 	//________________________________________________________________________________________________________
 	include_once("./includes/formularioacciones.php");
 	//________________________________________________________________________________________________________
@@ -83,8 +82,8 @@ if (!$resul){
 <?php
 /**************************************************************************************************************************************************
 	Recupera los datos de un ordenador
-		Parametros: 
-		- cmd: Una comando ya operativo (con conexiónabierta)  
+		Parámetros:
+		- cmd: Una comando ya operativo (con conexiónabierta)
 		- ido: El identificador del ordenador
 ________________________________________________________________________________________________________*/
 function tomaPropiedades($cmd,$ido){
@@ -93,11 +92,11 @@ function tomaPropiedades($cmd,$ido){
 	global $mac;
 	global $idperfilhard;
 	global $idrepositorio;
-	$rs=new Recordset; 
+	$rs=new Recordset;
 	$cmd->texto="SELECT nombreordenador,ip,mac,idperfilhard,idrepositorio FROM ordenadores WHERE idordenador='".$ido."'";
-	$rs->Comando=&$cmd; 
+	$rs->Comando=&$cmd;
 	if (!$rs->Abrir()) return(false); // Error al abrir recordset
-	$rs->Primero(); 
+	$rs->Primero();
 	if (!$rs->EOF){
 		$nombreordenador=$rs->campos["nombreordenador"];
 		$ip=$rs->campos["ip"];
@@ -123,15 +122,16 @@ function HTMLSELECT_imagenes($cmd,$idrepositorio,$idperfilsoft,$disk,$particion,
 	$cmd->texto="SELECT DISTINCT imagenes.idimagen,imagenes.descripcion,imagenes.nombreca,
                 imagenes.idperfilsoft, repositorios.nombrerepositorio, repositorios.ip
 		FROM  imagenes INNER JOIN repositorios USING  (idrepositorio)
-		WHERE repositorios.idrepositorio = (SELECT idrepositorio FROM ordenadores WHERE ordenadores.ip='".$masterip."')
+		WHERE imagenes.tipo=".$IMAGENES_MONOLITICAS."
+		AND   repositorios.idrepositorio IN (SELECT idrepositorio FROM ordenadores WHERE ordenadores.ip='".$masterip."')
 		OR repositorios.ip='".$masterip."' ORDER BY imagenes.descripcion";
 
-	$rs=new Recordset; 
-	$rs->Comando=&$cmd; 
+	$rs=new Recordset;
+	$rs->Comando=&$cmd;
 	$SelectHtml.= '<SELECT class="formulariodatos" id="despleimagen_'.$disk."_".$particion.'" style="WIDTH: 300">';
 	$SelectHtml.= '    <OPTION value="0"></OPTION>';
 	if ($rs->Abrir()){
-		$rs->Primero(); 
+		$rs->Primero();
 		while (!$rs->EOF){
 			$SelectHtml.='<OPTION value="'.$rs->campos["idimagen"]."_".$rs->campos["nombreca"]."_".$rs->campos["ip"].'"';
 			if($idperfilsoft==$rs->campos["idperfilsoft"]) $SelectHtml.=" selected ";

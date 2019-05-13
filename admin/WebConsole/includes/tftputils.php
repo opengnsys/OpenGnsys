@@ -18,7 +18,7 @@ define("PXEDIRUEFI", "/opt/opengnsys/tftpboot/grub");
 
 /**
  * @brief    Sustituye espacio por "_" y quita acentos y tildes.
- * @param    cadena   Cadena a modificar.
+ * @param    string   Cadena a modificar.
  * @return   string   Cadena modificada.
  * @versión  1.0.5 - Primera versión, adaptada de NetBoot Avanzado.
  * @author   
@@ -51,10 +51,10 @@ function clientKernelVersion () {
  *           createBootMode ($cmd, $bootopt, $hostname, $lang)
  * @brief    Crea un fichero PXE para el ordenador basado en la plantilla indicada y usando
  *           los datos almacenados en la BD.
- * @param    {Object}  cmd       Objeto de conexión a la base de datos.
- * @param    {String}  bootopt   Plantilla de arranque PXE.
- * @param    {String}  hostname  Nombre del ordenador.
- * @param    {String}  lang      Idioma de arranque.
+ * @param    Object   cmd       Objeto de conexión a la base de datos.
+ * @param    String   bootopt   Plantilla de arranque PXE.
+ * @param    Integer  hostid    Id. del ordenador.
+ * @param    String   lang      Idioma de arranque.
  * @version  1.0.5 - Primera versión, adaptada de NetBoot Avanzado (Antonio J. Doblas Viso - Universidad de Málaga)
  * @author  Ramón Gómez - ETSII Universidad de Sevilla
  * @date     2013-04-25
@@ -64,7 +64,7 @@ function clientKernelVersion () {
  * @version  1.1.0 - La segunda fase de carga del ogLive se define en el SERVER para evitar erores de sincronismo entre versiones (ticket #787).
  * @author   Antonio J. Doblas Viso - Universidad de Malaga
  * @date     2017-06-01
-  * @version  1.1.0 - Se incluye el nombre del perfil hardware y se elimina el winboot (ticket #828).
+ * @version  1.1.0 - Se incluye el nombre del perfil hardware y se elimina el winboot (ticket #828).
  * @author   Antonio J. Doblas Viso - Universidad de Malaga
  * @date     2018-01-21 
  * @version  1.1.1 - Se utiliza setclientmode. Gestiona plantilla bios y uefi (ticket #802 #888)
@@ -114,7 +114,7 @@ function createBootMode ($cmd, $bootopt, $hostname, $lang) {
 /**
  *           deleteBootFile ($mac)
  * @brief    Borra el fichero PXE del ordenador con la dirección MAC correspondiente.
- * @param    {String}  mac     Dirección MAC del ordenador (sin caracteres ":").
+ * @param    String  mac     Dirección MAC del ordenador (sin caracteres ":").
  * @versión  1.0.5 - Primera versión, adaptada de NetBoot Avanzado.
  * @authors  Ramón Gómez - ETSII Universidad de Sevilla
  * @date     2013-04-25
@@ -133,10 +133,10 @@ function deleteBootFile ($mac) {
  *           updateBootMode ($cmd, $idfield, $idvalue, $lang)
  * @brief    Ejecuta la función para componer fichero PXE para todos los clientes que cumplan
  *           con un determinado criterio de búsqueda basado en clave ejena.
- * @param    {Object}  cmd       Objeto de conexión con la base de datos.
- * @param    {String}  idfield   Campo identificador de la clave ajena para buscar ordenadores.
- * @param    {Number}  idvalue   Valor a buscar en el ídentificador de la clave ajena.
- * @param    {String}  lang      Idioma de arranque.
+ * @param    Object   cmd       Objeto de conexión con la base de datos.
+ * @param    String   idfield   Campo identificador de la clave ajena para buscar ordenadores.
+ * @param    Integer  idvalue   Valor a buscar en el ídentificador de la clave ajena.
+ * @param    String   lang      Idioma de arranque.
  * @versión  1.0.5 - Primera versión, adaptada de NetBoot Avanzado.
  * @authors  Ramón Gómez - ETSII Universidad de Sevilla
  * @date     2013-04-25
@@ -175,9 +175,9 @@ function updateBootMode ($cmd, $idfield, $idvalue, $lang) {
 /**
  *           updateBootRepo ($cmd, $repoid)
  * @brief    Actualiza la IP del repositorio en los ficheros PXE de todos sus equipos asociados.
- * @param    {Object}  cmd      Objeto de conexión con la base de datos
- * @param    {Integer} repoid   Campo identificador del repositorio
- * @return   {Integer}          0, sin errores; -1, error acceso a BD; >0, ficheros no modificados
+ * @param    Object  cmd      Objeto de conexión con la base de datos
+ * @param    Integer repoid   Campo identificador del repositorio
+ * @return   Integer          0, sin errores; -1, error acceso a BD; >0, ficheros no modificados
  * @versión  1.1.0 - Primera versión.
  * @authors  Ramón Gómez - ETSII Universidad de Sevilla
  * @date     2018-01-19

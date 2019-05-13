@@ -2,9 +2,8 @@
 //________________________________________________________________________________________________________
 //
 //	Fitxer d'idiomes php: actualitzar_cat.php 
-//	Idioma: Català 
+//	Idioma: Catalï¿½ 
 //________________________________________________________________________________________________________
 	$TbMsg=array();
-	$TbMsg[0]='Aquest àmbit s\'ha actualitzat correctament';
-	$TbMsg[1]='ATENCIÓ: Hi ha hagut un problema al actualitzar l\'àmbit';
-?>
+	$TbMsg[0]='Aquest ï¿½mbit s\'ha actualitzat correctament';
+	$TbMsg[1]='ATENCIï¿½: Hi ha hagut un problema al actualitzar l\'ï¿½mbit';

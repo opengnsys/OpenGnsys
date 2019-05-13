@@ -119,6 +119,8 @@ case "$MODE" in
 
             # Si protocolo es torrent|torrent-cache o multicast|multicast-cache
             TORRENT|TORRENT-CACHE|MULTICAST|MULTICAST-CACHE|UNICAST|UNICAST-CACHE)
+		# Eliminamos CACHE o DIRECT
+                PROTO=${PROTO%%-*}
                 ogEcho log session "[2] updateCache "$REPO" \"/$IMGNAME.img\" $PROTO $PROTOOPT"
                 TIME2=$SECONDS
                 updateCache "$REPO" "/$IMGNAME.img" "$PROTO" "$PROTOOPT"	 	

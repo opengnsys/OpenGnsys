@@ -2,10 +2,9 @@
 //________________________________________________________________________________________________________
 //
 //	Fitxer d'idiomes php: informacion_procedimientos_cat.php 
-//	Idioma: Català 
+//	Idioma: Catalï¿½ 
 //________________________________________________________________________________________________________
 	$TbMsg=array();
-	$TbMsg[0]='Parámetres dels comandaments del Procedment';
-	$TbMsg[1]='Parámetre';
+	$TbMsg[0]='Parï¿½metres dels comandaments del Procedment';
+	$TbMsg[1]='Parï¿½metre';
 	$TbMsg[2]='Valor';
-?>

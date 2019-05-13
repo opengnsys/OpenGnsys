@@ -161,4 +161,3 @@ class MenuContextual{
 		return($layer);
 	}
 }	
-?>

@@ -2,14 +2,13 @@
 //________________________________________________________________________________________________________
 //
 //	Fitxer d'idiomes php: informacion_incrementales_cat.php 
-//	Idioma: Català
+//	Idioma: Catalï¿½
 //________________________________________________________________________________________________________
 	$TbMsg=array();
 	$TbMsg[0]='Software Incremental';
-	$TbMsg[1]='Informació sobre software incremental';
+	$TbMsg[1]='Informaciï¿½ sobre software incremental';
 	$TbMsg[2]='Software Incremental';
-	$TbMsg[3]='Informació software incremental';
+	$TbMsg[3]='Informaciï¿½ software incremental';
 	$TbMsg[4]='Components software';
 	$TbMsg[5]='Perfils Combinables';
 	$TbMsg[6]='Perfils Hardware soportats';
-?>

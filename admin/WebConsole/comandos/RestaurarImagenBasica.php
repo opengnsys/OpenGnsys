@@ -1,12 +1,12 @@
 <?php
 // ********************************************************************************************************
-// Aplicaci�n WEB: ogAdmWebCon
-// Autor: Jos� Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
-// Fecha Creaci�n: A�o 2012
-// Fecha �ltima modificaci�n: Noviembre-2012
+// Aplicación WEB: ogAdmWebCon
+// Autor: José Manuel Alonso (E.T.S.I.I.) Universidad de Sevilla
+// Fecha Creación: Año 2012
+// Fecha última modificación: Noviembre-2012
 // Nombre del fichero: RestaurarImagenBasica.php
-// Descripci�n : 
-//		Implementaci�n del comando "RestaurarImagenB�sica"
+// Descripción:
+//		Implementación del comando "RestaurarImagenBasica"
 // ********************************************************************************************************
 include_once("../includes/ctrlacc.php");
 include_once("../clases/AdoPhp.php");
@@ -27,11 +27,11 @@ include_once("../includes/ConfiguracionesParticiones.php");
 //
 $cmd=CreaComando($cadenaconexion);
 if (!$cmd)
-	Header('Location: '.$pagerror.'?herror=2'); // Error de conexi�n con servidor B.D.
+	Header('Location: '.$pagerror.'?herror=2'); // Error de conexión con servidor B.D.
 //________________________________________________________________________________________________________
 //
 //
-// Captura par�metros
+// Captura parámetros
 //________________________________________________________________________________________________________
 //
 
@@ -44,23 +44,23 @@ $fk_sysFi=0;
 $fk_tamano=0;
 $fk_nombreSO=0;
 
-if (isset($_GET["idambito"])) $idambito=$_GET["idambito"]; 
-if (isset($_GET["ambito"])) $ambito=$_GET["ambito"]; 
+if (isset($_GET["idambito"])) $idambito=$_GET["idambito"];
+if (isset($_GET["ambito"])) $ambito=$_GET["ambito"];
 
-if (isset($_POST["idambito"])) $idambito=$_POST["idambito"]; 
-if (isset($_POST["ambito"])) $ambito=$_POST["ambito"]; 
+if (isset($_POST["idambito"])) $idambito=$_POST["idambito"];
+if (isset($_POST["ambito"])) $ambito=$_POST["ambito"];
 
-if (isset($_POST["fk_sysFi"])) $fk_sysFi=$_POST["fk_sysFi"]; 
-if (isset($_POST["fk_tamano"])) $fk_tamano=$_POST["fk_tamano"]; 
-if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"]; 
+if (isset($_POST["fk_sysFi"])) $fk_sysFi=$_POST["fk_sysFi"];
+if (isset($_POST["fk_tamano"])) $fk_tamano=$_POST["fk_tamano"];
+if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 
 //________________________________________________________________________________________________________
 //
 ?>
 <HTML>
-<TITLE>Administraci�n web de aulas</TITLE>
 <HEAD>
-	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<TITLE>Administración web de aulas</TITLE>
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 <LINK rel="stylesheet" type="text/css" href="../estilos.css">
 <STYLE TYPE="text/css"></STYLE>
 <SCRIPT language="javascript" src="./jscripts/RestaurarImagenBasica.js"></SCRIPT>
@@ -142,7 +142,7 @@ if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 
 /*________________________________________________________________________________________________________
 
-	Crea la etiqueta html <SELECT> de las im�genes
+	Crea la etiqueta html <SELECT> de las imágenes
 ________________________________________________________________________________________________________*/
 function HTMLSELECT_imagenes($cmd,$idimagen,$numpar,$codpar,$icp,$sw,$idordenadores,$ambito)
 {
@@ -215,6 +215,4 @@ function opcionesAdicionales()
 	$tablaHtml.='	</table>';
 	echo $tablaHtml;
 }
-
-?>
 

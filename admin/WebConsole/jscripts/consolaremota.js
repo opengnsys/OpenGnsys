@@ -5,7 +5,7 @@ function confirmar()
 { 
 	ambito=document.fdatos.ambito.value;
  	if(ambito==AMBITO_ORDENADORES){
-		var diveco=document.getElementById("diveco"); // Contenedor de salida de código
+		var diveco=document.getElementById("diveco"); // Contenedor de salida de cÃ³digo
 		diveco.innerHTML="&nbsp"; //
 	}
 	var Obtcmd=document.getElementById("comando");
@@ -37,7 +37,7 @@ function enviaMsg(cmd)
 }
 //______________________________________________________________________________________________________
 function resultadocmd(resul){
-	if(resul==1){ // Si todo va bien se llama a la función que recupera elfichero de eco
+	if(resul==1){ // Si todo va bien se llama a la funciÃ³n que recupera elfichero de eco
 		//alert(TbMsg[1])
 		if(ambito==AMBITO_ORDENADORES){
 			sw=2;

@@ -2,12 +2,11 @@
 //________________________________________________________________________________________________________
 //
 //	Fitxer d'idiomes php: informacion_tareas_cat.php 
-//	Idioma: Català 
+//	Idioma: Catalï¿½ 
 //________________________________________________________________________________________________________
 	$TbMsg=array();
-	$TbMsg[0]='Parámetres de les Comandes de la Tasca';
-	$TbMsg[1]='Parámetre';
+	$TbMsg[0]='Parï¿½metres de les Comandes de la Tasca';
+	$TbMsg[1]='Parï¿½metre';
 	$TbMsg[2]='Valor';
-	$TbMsg[3]='Àmbit';
+	$TbMsg[3]='ï¿½mbit';
 	$TbMsg[4]='Nom';
-?>

@@ -90,7 +90,7 @@ if(!empty($contenido)){ // Se ha introducido contenido en lugar de fichero
 <?php
 //________________________________________________________________________________________________________
 // Mensaje con el resultado del proceso
-echo '<SCRIPT LANGUAGE="javascript">';
+echo '<SCRIPT>';
 if (!empty($resul))
 	echo "	alert('".$TbMsg[$resul]."');";
 if (!empty($ordDup))

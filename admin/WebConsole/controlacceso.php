@@ -16,4 +16,4 @@
  $wac="OPENGNSYSURL/"; // Página de login de la aplicación 
  $idi="esp"; // Idioma por defecto 
  //======================================================================================================== 
-?>
+

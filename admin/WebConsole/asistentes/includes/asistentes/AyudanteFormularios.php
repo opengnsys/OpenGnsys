@@ -458,4 +458,4 @@ function pintaParticionesAsistenteDeployImage($cmd,$configuraciones,$idordenador
 	echo '<TR height=5><TD colspan='.$colums.' style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #FFFFFF;">&nbsp;</TD></TR>';
 }
 
-?> 
+

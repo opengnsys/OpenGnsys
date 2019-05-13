@@ -156,4 +156,4 @@ function SubarbolXML_procedimientos($idprocedimiento,$descripcion){
 	$cadenaXML.='</PROCEDIMIENTO>';
 	return($cadenaXML);
 }
-?>
+

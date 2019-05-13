@@ -7,18 +7,18 @@
 <h1>OGAgent: agentes OpenGnsys para sistemas operativos</h1>
 
 <p>Ficheros disponibles para descarga de agente OGAgent:</p>
-<dl>
- <li><code>ogagent_<em>Version</em>_all.deb</code>: OGAgent para sistemas Ubuntu, Debian y derivados
- <li><code>ogagent-<em>Version</em>.noarch.rpm</code>: OGAgent para sistemas Red Hat, Fedora y derivados
- <li><code>ogagent-opensuse-<em>Version</em>.noarch.rpm</code>: OGAgent para sistemas SuSE y OpenSuSE
- <li><code>OGAgentInstaller-<em>Version</em>.pkg</code>: OGAgent para sistemas macOS X
- <li><code>OGAgentSetup-<em>Version</em>.exe</code>: OGAgent para sistemas Windows
-</dl>
+<ul>
+  <li><code>ogagent_<em>Version</em>_all.deb</code>: OGAgent para sistemas Ubuntu, Debian y derivados</li>
+  <li><code>ogagent-<em>Version</em>.noarch.rpm</code>: OGAgent para sistemas Red Hat, Fedora y derivados</li>
+  <li><code>ogagent-opensuse-<em>Version</em>.noarch.rpm</code>: OGAgent para sistemas SuSE y OpenSuSE</li>
+  <li><code>OGAgentInstaller-<em>Version</em>.pkg</code>: OGAgent para sistemas macOS X</li>
+  <li><code>OGAgentSetup-<em>Version</em>.exe</code>: OGAgent para sistemas Windows</li>
+</ul>
 
 <h2>Instalar los agentes</h2>
 
 <h3>Ubuntu, Debian y derivados:</h3>
-<dl>
+<ul>
   <li>Ejecutar los comandos desde una terminal.</li>
   <li>Descargar el fichero e instalar el agente con sus dependencias:
     <pre>
@@ -29,26 +29,26 @@
     <pre>	sudo sed -i "0,/remote=/ s,remote=.*,remote=https://<em>IPServidorOpenGnsys</em>/opengnsys/rest/," /usr/share/OGAgent/cfg/ogagent.cfg</pre></li>
   <li>Reiniciar el equipo o ejecutar el servicio <em>(se iniciará automáticamente en el proceso de arranque)</em>:
     <pre>	sudo service ogagent start</pre></li>
-</dl>
+</ul>
 
 <h3>Red Hat, Fedora y derivados (como root):</h3>
-<dl>
+<ul>
   <li>Ejecutar los comandos desde una terminal.</li>
   <li>Descargar el fichero e instalar el agente con sus dependencias:
     <pre>	yum install ogagent-<em>Version</em>.noarch.rpm</pre></li>
   <li>Configurar el agente:
     <pre>	sed -i "0,/remote=/ s,remote=.*,remote=https://<em>IPServidorOpenGnsys</em>/opengnsys/rest/," /usr/share/OGAgent/cfg/ogagent.cfg</pre></li>
-  <li>Puede ser necesario corregir permisos antes de iniciar el servicio:</li>
+  <li>Puede ser necesario corregir permisos antes de iniciar el servicio:
     <pre>	chmod +x /etc/init.d/ogagent</pre></li>
   <li>Reiniciar el equipo o ejecutar el servicio <em>(se iniciará automáticamente en el proceso de arranque)</em>:
     <pre>	service ogagent start</pre></li>
-</dl>
+</ul>
 
 <h3>OpenSuSE:</h3>
 <p><em>(en preparación)</em></p>
 
 <h3>macOS X:</h3>
-<dl>
+<ul>
   <li>Ejecutar los comandos desde una terminal.</li>
   <li>Instalar dependencias <em>(la instalación puebe realizar estas operaciones)</em>:
     <pre>
@@ -62,16 +62,16 @@
 	sudo mv /tmp/ogagent.cfg /Applications/OGAgent.app/cfg/ogagent.cfg</pre></li>
   <li>Reiniciar el equipo o ejecutar el servicio <em>(se iniciará automáticamente en el proceso de arranque)</em>:
     <pre>	sudo ogagent start</pre></li>
-</dl>
+</ul>
 
 <h3>Windows (como usuario administrador):</h3>
-<dl>
+<ul>
   <li>Descargar el fichero e instalar el agente ejecutando el fichero <code>OGAgentSetup-<em>Version</em>.exe</code></li>
   <li>Seguir las instrucciones del instalador.</li>
   <li>Editar el fichero de configuación <code>C:\Program Files\OGAgent\cfg\ogagent.cfg</code> (o <code>C:\Archivos de programa\OGAgent\cfg\ogagent.cfg</code>) y modificar el valor de la cláusula <code>remote</code> de la sección <code>[OGAgent]</code> inclyendo la dirección IP del servidor OpenGnsys.</li>
   <li>Reiniciar el equipo o ejecutar el servicio <em>(se iniciará automáticamente en el proceso de arranque)</em>:
     <pre>	NET START OGAgent</pre></li>
-</dl>
+</ul>
 
 
 <h2>Desinstalar los agentes</h2>

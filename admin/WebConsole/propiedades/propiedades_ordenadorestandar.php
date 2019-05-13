@@ -42,8 +42,8 @@ if  ($opcion!=$op_alta){
 //________________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE>Administración web de aulas</TITLE>
 <HEAD>
+    <TITLE>Administración web de aulas</TITLE>
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../jscripts/propiedades_ordenadorestandar.js"></SCRIPT>
@@ -53,11 +53,11 @@ if  ($opcion!=$op_alta){
 <BODY>
 <FORM  name="fdatos"> 
 	<P align=center class=cabeceras><IMG  border=0 src="../images/iconos/aula.gif">&nbsp;<?php echo $TbMsg[0]?>:<SPAN  class=cabeceras><?php echo $nombreaula?></SPAN><BR>
-	<SPAN align=center class=subcabeceras><?php echo $TbMsg[1]?></SPAN></P>
+	<SPAN class=subcabeceras><?php echo $TbMsg[1]?></SPAN></P>
 	<TABLE  align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?php echo $TbMsg[2]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?php echo $TbMsg[2]?>&nbsp;</TH>
 			<?php
 				echo '<TD><INPUT class="formulariodatos" name=nombreordenador  type=text value="'.$nombreordenador.'"></TD>';
 			?>
@@ -65,45 +65,45 @@ if  ($opcion!=$op_alta){
 		</TR>	
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?php echo $TbMsg[3]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?php echo $TbMsg[3]?>&nbsp;</TH>
 			<?php
 				echo '<TD><INPUT class="formulariodatos" name=ip  type=text value="'.$ip.'"></TD>';
 			?>
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?php echo $TbMsg[4]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?php echo $TbMsg[4]?>&nbsp;</TH>
 			<?php
 				echo '<TD><INPUT class="formulariodatos" name=mac  type=text value="'. $mac.'"></TD>';
 			?>
 		</TR>	
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?php echo $TbMsg[5]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?php echo $TbMsg[5]?>&nbsp;</TH>
 			<?php
 				echo '<TD colspan=3>'.HTMLSELECT($cmd,$idcentro,'perfileshard',$idperfilhard,'idperfilhard','descripcion',250).'</TD>';
 			?>
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?php echo $TbMsg[7]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?php echo $TbMsg[7]?>&nbsp;</TH>
 			<?php
 				echo '<TD colspan=3>'.HTMLSELECT($cmd,$idcentro,'repositorios',$idrepositorio,'idrepositorio','nombrerepositorios',250).'</TD>';
 			?>
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?php echo $TbMsg[11]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?php echo $TbMsg[11]?>&nbsp;</TH>
 			<?php
-				echo '<TD colspan=3><INPUT style="width:250"class="formulariodatos" name=cache  type=text value="'. $cache.'"></TD>';
+				echo '<TD colspan=3><INPUT style="width:250px" class="formulariodatos" name=cache  type=text value="'. $cache.'"></TD>';
 			?>
 		</TR>
 
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?php echo $TbMsg[8]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?php echo $TbMsg[8]?>&nbsp;</TH>
 			<?php
-				echo '<TD colspan=3><INPUT class="formulariodatos" name=numorde  type=text value=0 style="width:250"></TD>';
+				echo '<TD colspan=3><INPUT class="formulariodatos" name=numorde  type=text value=0 style="width:250px"></TD>';
 			?>
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->

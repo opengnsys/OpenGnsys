@@ -55,5 +55,5 @@
 	$TbMsg["Particionar"]='Particionar';
         
 
-?>
+
 

@@ -145,7 +145,6 @@ OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/${OPENGNSYS_DATABASE}.sql
 # - APACHEENABLEOG, APACHEOGSITE, - habilitar sitio web de OpenGnsys
 # - PHPFPMSERV - servicio PHP FastCGI Process Manager para Apache
 # - INETDSERV - servicio Inetd
-# - FIREWALLSERV - servicio de cortabuegos IPTables/FirewallD
 # - DHCPSERV, DHCPCFGDIR - servicio y configuración de DHCP
 # - MYSQLSERV, TMPMYCNF - servicio MySQL y fichero temporal con credenciales de acceso
 # - MARIADBSERV - servicio MariaDB (sustituto de MySQL en algunas distribuciones)
@@ -232,11 +231,6 @@ case "$OSDISTRIB" in
 		APACHEREWRITEMOD="sed -i '/rewrite/s/^#//' $APACHECFGDIR/../*.conf"
 		DHCPSERV=dhcpd
 		DHCPCFGDIR=/etc/dhcp
-		if firewall-cmd --state &>/dev/null; then
-			FIREWALLSERV=firewalld
-		else
-			FIREWALLSERV=iptables
-		fi
 		INETDSERV=xinetd
 		INETDCFGDIR=/etc/xinetd.d
 		MYSQLSERV=mysqld
@@ -822,13 +816,7 @@ function downloadCode()
 # Comprobar si existe conexión.
 function checkNetworkConnection()
 {
-	echoAndLog "${FUNCNAME}(): Disabling Firewall: $FIREWALLSERV."
-	if [ -n "$FIREWALLSERV" ]; then
-		service=$FIREWALLSERV
-		$STOPSERVICE; $DISABLESERVICE
-	fi
-
-	echoAndLog "${FUNCNAME}(): Checking OpenGnsys server conectivity."
+	echoAndLog "${FUNCNAME}(): Checking OpenGnsys server connectivity."
 	OPENGNSYS_SERVER=${OPENGNSYS_SERVER:-"opengnsys.es"}
 	if which wget &>/dev/null; then
 		wget --spider -q $OPENGNSYS_SERVER
@@ -1576,16 +1564,15 @@ function installationSummary()
 	echoAndLog "Installed ogLive client(s):       $(oglivecli list | awk '{print $2}')"
 	echoAndLog "Samba configuration directory:    $SAMBACFGDIR"
 	echoAndLog "Web Console URL:                  $OPENGNSYS_CONSOLEURL"
-	echoAndLog "Web Console access data:          specified in installer script"
+	echoAndLog "Web Console access data:          entered by the user"
 	if grep -q "^RUN_BTTRACK.*no" /etc/default/opengnsys; then
 		echoAndLog "BitTorrent service is disabled."
 	fi
 	echo
 	echoAndLog "Post-Installation Instructions:"
 	echo       "==============================="
-	echoAndLog "Firewall service has been disabled and SELinux mode set to"
-	echoAndLog "   permissive during OpenGnsys installation. Please check"
-	echoAndLog "   ${FIREWALLSERV:-firewall} and SELinux configuration, if needed."
+	echoAndLog "You can improve server security by configuring firewall and SELinux,"
+	echoAndLog "   running \"$INSTALL_TARGET/lib/security-config\" script as root."
 	echoAndLog "It's strongly recommended to synchronize this server with an NTP server."
 	echoAndLog "Review or edit all configuration files."
 	echoAndLog "Insert DHCP configuration data and restart service."

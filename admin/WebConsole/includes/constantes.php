@@ -172,6 +172,3 @@ $msk_cache=0x12;
 $IMAGENES_MONOLITICAS=0x01;
 $IMAGENES_BASICAS=0x02;
 $IMAGENES_INCREMENTALES=0x03;
-
-/* AVISO: no crear salto de línea ni líneas en blanco tras el fin del código PHP. */
-?>

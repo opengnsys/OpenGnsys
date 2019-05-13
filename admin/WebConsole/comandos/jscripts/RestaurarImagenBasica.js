@@ -16,7 +16,7 @@
 		var tb_conf=document.getElementById("tabla_conf");
 		var ochecks=tb_conf.getElementsByTagName('INPUT');
 		for(var i=0;i<ochecks.length;i++){
-			if(ochecks[i].checked && ochecks[i].name=="particion"){
+			if(ochecks[i].checked && ochecks[i].name==="particion"){
 				var idradio=ochecks[i].id;
 				var diskPart = ochecks[i].value.split(";");
 				disco =diskPart[0];
@@ -36,15 +36,15 @@
 				atributos+="rti="+imgcanrepo[4]+RC;	// Ruta de origen de la imagen	
 			
 				var desplemet=document.getElementById("desplemet_"+idradio); // Desplegable metodo de restauración
-				var  p=desplemet.selectedIndex; // Toma índice seleccionado
+				var p=desplemet.selectedIndex; // Toma índice seleccionado
 				atributos+="met="+p+RC;	// Método de clonación 0=caché 1=repositorio	
 				
-				var desplemet=document.getElementById("desplesync_"+idradio); // Desplegable metodo de syncronización
-				var  p=desplemet.selectedIndex; // Toma índice seleccionado
+				desplemet=document.getElementById("desplesync_"+idradio); // Desplegable metodo de syncronización
+				p=desplemet.selectedIndex; // Toma índice seleccionado
 				atributos+="msy="+p+RC;	// Método de clonación 
 				
-				var desplemet=document.getElementById("despletpt_"+idradio); // Desplegable metodo de syncronización
-				var  p=desplemet.value; // Toma índice seleccionado
+				desplemet=document.getElementById("despletpt_"+idradio); // Desplegable metodo de syncronización
+				p=desplemet.value; // Toma índice seleccionado
 				atributos+="tpt="+p+RC;	// Método de clonación 
 								
 				var chrChk=document.getElementById('whl-'+idradio); // Recupera objeto fila de la tabla opciones adicionales
@@ -55,12 +55,12 @@
 				if(chrChk.checked)	atributos+="cmp=1"+RC; else atributos+="cmp=0"+RC;
 
 				var cc=ochecks[i].getAttribute('idcfg'); // Toma identificador del bloque de configuración
-				if(document.fdatosejecucion.ambito.value!=AMBITO_ORDENADORES){	
+				if(document.fdatosejecucion.ambito.value!=AMBITO_ORDENADORES){
 					var tbOrd=document.getElementById("tbOrd_"+cc);			
 					var idordenadores=tbOrd.getAttribute('value'); // Toma identificadores de los ordenadores
 					var cadenaid=document.fdatos.cadenaid.value; // Cadena de identificadores de todos los ordenadores del ámbito
-					if(idordenadores!=cadenaid){ 
-						document.fdatosejecucion.ambito.value=0; // Ambito de aplicación restringido
+					if(idordenadores!==cadenaid){
+						document.fdatosejecucion.ambito.value=0; // Ámbito de aplicación restringido
 						document.fdatosejecucion.idambito.value=idordenadores;
 					}
 				}
@@ -68,11 +68,11 @@
 				var trObj=document.getElementById('trOpc'); // Recupera objeto fila de la tabla opciones adicionales
 				var obChk=trObj.childNodes[3].childNodes[0]; // Recupera  objeto checkbox borrar de la Imagen	
 				if(obChk.checked)	atributos+="bpi=1"+RC; else atributos+="bpi=0"+RC;
-				var obChk=trObj.childNodes[7].childNodes[0]; // Recupera  objeto checkbox copiar en cache	
+				obChk=trObj.childNodes[7].childNodes[0]; // Recupera  objeto checkbox copiar en cache
 				if(obChk.checked)	atributos+="cpc=1"+RC; else atributos+="cpc=0"+RC;
-				var obChk=trObj.childNodes[11].childNodes[0]; // Recupera  objeto checkbox borrar la cache	
+				obChk=trObj.childNodes[11].childNodes[0]; // Recupera  objeto checkbox borrar la cache
 				if(obChk.checked)	atributos+="bpc=1"+RC; else atributos+="bpc=0"+RC;
-				var obChk=trObj.childNodes[15].childNodes[0]; // Recupera  objeto checkbox no borrar archivos en destino	
+				obChk=trObj.childNodes[15].childNodes[0]; // Recupera  objeto checkbox no borrar archivos en destino
 				if(obChk.checked)	atributos+="nba=1"+RC; else atributos+="nba=0"+RC;
 	
 				document.fdatosejecucion.atributos.value=atributos;
@@ -92,31 +92,31 @@
 //________________________________________________________________________________________________________
   function comprobar_datos()
 {
-		tb_conf=document.getElementById("tabla_conf");
+		var tb_conf=document.getElementById("tabla_conf");
 		var ochecks=tb_conf.getElementsByTagName('INPUT');
 		var op=0;
 		for(var i=0;i<ochecks.length;i++){
-			if(ochecks[i].checked && ochecks[i].name=="particion"){
+			if(ochecks[i].checked && ochecks[i].name==="particion"){
 				op++;
 				var idradio=ochecks[i].id; // Toma idemtificador del desplegable de imagenes
-				despleimagenizda=document.getElementById("despleimagen_"+idradio+"_1"); // Desplegable izda.
-				var  p1=despleimagenizda.selectedIndex; // Toma índice seleccionado
-				if (p1==0){  
+				var despleimagenizda=document.getElementById("despleimagen_"+idradio+"_1"); // Desplegable izda.
+				var p1=despleimagenizda.selectedIndex; // Toma índice seleccionado
+				if (p1===0){
 						alert(TbMsg[0]);
 						despleimagenizda.focus();
 			      return(false)
 				}
 				// Comprobamos tipo de sincronizacion.
 				var desplemet=document.getElementById("desplesync_"+idradio); // Desplegable metodo de syncronización
-				var  p1=desplemet.selectedIndex; // Toma índice seleccionado
-				if (p1==0){
+				p1=desplemet.selectedIndex; // Toma índice seleccionado
+				if (p1===0){
 					alert(TbMsg[7]);
 					desplemet.focus();
 					return(false)
 				}
 			}
 		}
-		if(op==0){
+		if(op===0){
 			   alert(TbMsg[1]);
 			 return(false);
 		}

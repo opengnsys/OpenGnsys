@@ -2,14 +2,14 @@
 //________________________________________________________________________________________________________
 //
 //	Fitxer d'idiomes php: propiedades_tareas_cat.php 
-//	Idioma: Català
+//	Idioma: Catalï¿½
 //________________________________________________________________________________________________________
 $TbMsg=array();
-$TbMsg[0]="Sense Opció";
+$TbMsg[0]="Sense Opciï¿½";
 $TbMsg[1]="Afegir";
 $TbMsg[2]="Modificar";
 $TbMsg[3]="Eliminar";
-$TbMsg[4]="Gestió Grups";
+$TbMsg[4]="Gestiï¿½ Grups";
 $TbMsg[5]="Nom Grup";
 $TbMsg[6]="Comentaris";
 $TbMsg[7]="Grups d'Aules";
@@ -24,8 +24,7 @@ $TbMsg[15]="Grups de Perfils Software";
 $TbMsg[16]="Grups de Software Incremental";
 $TbMsg[17]="Grups de Servidors Rembo";
 $TbMsg[18]="Grups de Servidors Dhcp";
-$TbMsg[19]="Grups de Menús";
+$TbMsg[19]="Grups de Menï¿½s";
 $TbMsg[20]="Grups de Reserves";
 $TbMsg[21]="Grups d'Entitats";
 $TbMsg[22]="Grupo d'Ordinadors";
-?>

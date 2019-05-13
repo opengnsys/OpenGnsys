@@ -12,4 +12,4 @@
 	$TbMsg[4]='Informació sobre Tasques';
 	$TbMsg[5]='Informació';
 	$TbMsg[6]='Sense paràmetres';	
-?>
+

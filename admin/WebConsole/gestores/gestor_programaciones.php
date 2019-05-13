@@ -205,6 +205,6 @@ function Gestiona()
 	}
 	return($resul);
 }
-?>
+
 
 

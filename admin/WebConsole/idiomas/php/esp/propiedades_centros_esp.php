@@ -14,4 +14,4 @@ $TbMsg[5]="Nombre de  la unidad";
 $TbMsg[6]="Comentarios";
 $TbMsg['DIR']="Directorio";
 $TbMsg['MSG_OGUNIT']="Si se elige separar por unidades organizativas, el directorio <b>/opt/opengnsys/images</b><br> debe contener un subdirectorio llamado como el directorio indicado.";
-?>
+

@@ -64,9 +64,9 @@
 	  <TD>&nbsp; </TD>
 	  <TD>&nbsp; </TD>
 	  <TD><?php echo $TbMsgAux[8] ?>&nbsp;</TD>
-	  <TD><INPUT maxlength=3  style="FONT-FAMILY:Arial, Helvetica, sans-serif;FONT-SIZE: 11px;WIDTH:30" name=ordprocedimiento type=text value=""></TD></TR>
+	  <TD><INPUT maxlength=3  style="FONT-FAMILY:Arial, Helvetica, sans-serif;FONT-SIZE: 11px;WIDTH:30px" name=ordprocedimiento type=text value=""></TD></TR>
 	<!-------------------------------------------------------------------------------------------------------------------------------->
-		 <TR HEIGHT=10><TD colspan=4>&nbsp; <HR></TD></TR>
+		 <TR><TD colspan=4 HEIGHT="10px">&nbsp; <HR></TD></TR>
 	<!-------------------------------------------------------------------------------------------------------------------------------->
 	 <TR>
 	  <TD><INPUT  onclick="clic_mktarea(this)"  name=sw_mktarea type=checkbox></TD>
@@ -88,8 +88,9 @@
 	  <TD>&nbsp; </TD>
 	  <TD>&nbsp; </TD>
 	  <TD><?php echo $TbMsgAux[12] ?>&nbsp;</TD>
-	  <TD><INPUT maxlength=3  style="FONT-FAMILY:Arial, Helvetica, sans-serif;FONT-SIZE: 11px;WIDTH:30" name=ordtarea type=text value=""></TD></TR>
+	  <TD><INPUT maxlength=3  style="FONT-FAMILY:Arial, Helvetica, sans-serif;FONT-SIZE: 11px;WIDTH:30px" name=ordtarea type=text value=""></TD></TR>
 	<!-------------------------------------------------------------------------------------------------------------------------------->
 	</TABLE>
 </FORM>
+
 

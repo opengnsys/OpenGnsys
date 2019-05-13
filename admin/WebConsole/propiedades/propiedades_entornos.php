@@ -49,8 +49,8 @@ if  ($opcion!=$op_alta){
 //________________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE>Administración web de aulas</TITLE>
 <HEAD>
+    <TITLE>Administración web de aulas</TITLE>
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../jscripts/propiedades_entornos.js"></SCRIPT>
@@ -60,18 +60,18 @@ if  ($opcion!=$op_alta){
 </HEAD>
 <BODY>
 <DIV  align=center>
-<FORM  name="fdatos"  name="fdatos" action="../gestores/gestor_entornos.php" method="post">
+<FORM name="fdatos" action="../gestores/gestor_entornos.php" method="post">
 	<INPUT type=hidden name=identorno value="<?php echo $identorno?>">
 
 	<P align=center class=cabeceras><?php echo $TbMsg[4]?><BR>
-	<SPAN align=center class=subcabeceras><?php echo $opciones[$opcion]?></SPAN></P>
+	<SPAN class=subcabeceras><?php echo $opciones[$opcion]?></SPAN></P>
 	<TABLE  align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos >
 
 	
 
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?php echo $TbMsg[5]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?php echo $TbMsg[5]?>&nbsp;</TH>
 			<?php
 				if ($opcion==$op_eliminacion){
 					echo '<TD>'. $ipserveradm.'</TD>';
@@ -84,7 +84,7 @@ if  ($opcion!=$op_alta){
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?php echo $TbMsg[6]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?php echo $TbMsg[6]?>&nbsp;</TH>
 			<?php if ($opcion==$op_eliminacion)
 					echo '<TD>'.$portserveradm.'&nbsp; </TD>';
 				else
@@ -94,7 +94,7 @@ if  ($opcion!=$op_alta){
 		
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
-			<TH align=center>&nbsp;<?php echo $TbMsg[7]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?php echo $TbMsg[7]?>&nbsp;</TH>
 			<?php
 				if ($opcion==$op_eliminacion)
 					echo '<TD>'.$protoclonacion.'</TD>';
@@ -149,4 +149,3 @@ function TomaPropiedades($cmd,$id){
 	else
 		return(false);
 }
-?>

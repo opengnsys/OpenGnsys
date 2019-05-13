@@ -2,9 +2,8 @@
 //________________________________________________________________________________________________________
 //
 //	Fitxer d'idiomes php: conmutar_cat.php 
-//	Idioma: Català
+//	Idioma: Catalï¿½
 //________________________________________________________________________________________________________
 	$TbMsg=array();
-	$TbMsg[0]='Aquest àmbit ha commutat correctament';
-	$TbMsg[1]='ATENCIÓ: Ha hagut algun problema al conmutar l\'àmbit';
-?>
+	$TbMsg[0]='Aquest ï¿½mbit ha commutat correctament';
+	$TbMsg[1]='ATENCIï¿½: Ha hagut algun problema al conmutar l\'ï¿½mbit';

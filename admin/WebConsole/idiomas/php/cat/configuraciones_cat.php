@@ -60,5 +60,5 @@ $TbMsg[44]='Equip sense Perfil de Hardware';
 $TbMsg[45]='Afegeixi Perfil per obtenir dades';
 $TbMsg[495]='Data/Caché';
 $TbMsg[4951]='Caché lliure';
-?>
+
 

@@ -74,8 +74,8 @@ if($apiKeyRepo != ""){
 //#########################################################################
 ?>
 <HTML>
-<TITLE>Administración web de aulas</TITLE>
 <HEAD>
+    <TITLE>Administración web de aulas</TITLE>
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../jscripts/validators.js"></SCRIPT>
@@ -92,44 +92,44 @@ if($apiKeyRepo != ""){
 	<INPUT type=hidden name=ordenadores value="<?php echo $ordenadores?>">
 
 	<P align=center class=cabeceras><?php echo $TbMsg[4]?><BR>
-	<SPAN align=center class=subcabeceras><?php echo $opciones[$opcion]?></SPAN></P>
+	<SPAN class=subcabeceras><?php echo $opciones[$opcion]?></SPAN></P>
 	<TABLE  align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos >
 <!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
 		<TR>
-			<TH align="center">&nbsp;<?php echo $TbMsg[5]?>&nbsp;</TD>
+			<TH align="center">&nbsp;<?php echo $TbMsg[5]?>&nbsp;</TH>
 			<?php
 				if ($opcion==$op_eliminacion)
 					echo '<TD>'.$nombrerepositorio.'</TD>';
 				else
-					echo '<TD><INPUT  class="formulariodatos" name="nombrerepositorio" style="width:200" type="text" value="'.$nombrerepositorio.'"></TD>';
+					echo '<TD><INPUT  class="formulariodatos" name="nombrerepositorio" style="width:200px" type="text" value="'.$nombrerepositorio.'"></TD>';
 			?>
-			<TD valign="top" align="left" rowspan="4"	><CENTER>
+			<TD valign="top" align="center" rowspan="4">
 				<IMG border="3" style="border-color:#63676b" src="../images/aula.jpg">
-				<BR>&nbsp;Ordenadores:&nbsp;<?php echo $ordenadores?></CENTER></TD>
+				<BR>&nbsp;Ordenadores:&nbsp;<?php echo $ordenadores?></TD>
 		</TR>
 <!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
 		<TR>
-			<TH align=center>&nbsp;<?php echo $TbMsg[6]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?php echo $TbMsg[6]?>&nbsp;</TH>
 			<?php
 			if ($opcion==$op_eliminacion)
 					echo '<TD>'.$ip.'</TD>';
 			else
-				echo'<TD><INPUT  class="formulariodatos" name="ip" type="text" style="width:200" value="'.$ip.'"></TD>';
+				echo'<TD><INPUT  class="formulariodatos" name="ip" type="text" style="width:200px" value="'.$ip.'"></TD>';
 			?>
 		</TR>
 <!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
 		<TR>
-			<TH align=center>&nbsp;<?php echo $TbMsg[17]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?php echo $TbMsg[17]?>&nbsp;</TH>
 			<?php
 				if ($opcion==$op_eliminacion)
 					echo '<TD>********</TD>';
 				else
-					echo'<TD><INPUT  class="formulariodatos" name="apiKeyRepo" type="text" style="width:200" value="'.$apiKeyRepo.'"></TD>';
+					echo'<TD><INPUT  class="formulariodatos" name="apiKeyRepo" type="text" style="width:200px" value="'.$apiKeyRepo.'"></TD>';
 			?>
 		</TR>
 <!----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- -->
 		<TR>
-			<TH align=center>&nbsp;<?php echo $TbMsg[7]?>&nbsp;</TD>
+			<TH align=center>&nbsp;<?php echo $TbMsg[7]?>&nbsp;</TH>
 			<?php
 				if ($opcion==$op_eliminacion)
 					echo '<TD colspan="2">'.$comentarios.'</TD>';
@@ -148,10 +148,10 @@ if($apiKeyRepo != ""){
 
 		<?php  if ($repoWithApi) { ?>
 		<TR>
-			<TH align=center width=125>&nbsp;<?php echo $TbMsg[11]?>&nbsp;</TD>
-			<TH align=center width=120>&nbsp;<?php echo $TbMsg[12]?>&nbsp;</TD>
-			<TH align=center width=120>&nbsp;<?php echo $TbMsg[13]?>&nbsp;</TD>
-			<TH align=center width=101>&nbsp;<?php echo $TbMsg[14]?>&nbsp;</TD>
+			<TH align=center width=125>&nbsp;<?php echo $TbMsg[11]?>&nbsp;</TH>
+			<TH align=center width=120>&nbsp;<?php echo $TbMsg[12]?>&nbsp;</TH>
+			<TH align=center width=120>&nbsp;<?php echo $TbMsg[13]?>&nbsp;</TH>
+			<TH align=center width=101>&nbsp;<?php echo $TbMsg[14]?>&nbsp;</TH>
 		</TR>
                 <TR>
 			<TD align=center width=125>&nbsp;<?php echo $totalrepo?>&nbsp;</TD>

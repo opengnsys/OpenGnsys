@@ -267,8 +267,6 @@ const char* tbMensajes[]={"",\
 // ________________________________________________________________________________________________________
 // Prototipo de funciones
 // ________________________________________________________________________________________________________
-char *desencriptar(char *,int*);
-char *encriptar(char *,int*);
 struct tm * tomaHora();
 void registraLog(const char *,const char *,int );
 void errorLog(const char *,int ,int);
@@ -312,7 +310,6 @@ BOOLEAN escribeArchivo(char *,char*);
 BOOLEAN sendArchivo(SOCKET *,char *);
 BOOLEAN recArchivo(SOCKET *,char *);
 SOCKET TCPConnect(char *,char*);
-int tomaPuerto(SOCKET);
 
 #include <stddef.h> /* for offsetof. */
 

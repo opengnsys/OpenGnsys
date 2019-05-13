@@ -21,4 +21,4 @@
 	$TbMsg[13]='ATENCIÓ: Ha escollit un àmbit d\'aplicació per la consola remota diferent al "d\'ordinador". <BR>Per visualitzar l\'eco de qualsevol client premi sobre ell amb el botón secundari i seleccioni "Eco de consola"; <BR>S\'obrirà una finestra que es refrescarà automàticament on podrà fer un seguiment de la/el comanda/script introduït';
 	$TbMsg[14]='...Esperi si us plau, enviant el codi del script';
 	$TbMsg[15]='...El codi del script s\'ha enviat, per veure la sortida de qualsevol ordinador seleccioni "Eco de Consola"';
-?>
+

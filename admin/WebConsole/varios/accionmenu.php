@@ -65,6 +65,7 @@ else{ // Viene de menus
 	?>
 	<HTML>
 	<HEAD>
+	<TITLE>Administración web de aulas</TITLE>
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../jscripts/opciones.js"></SCRIPT>
@@ -178,6 +179,7 @@ else
 
 function pintaMenus($cmd,$identificador,$tipoaccion,$op)
 { 
+	global $pagerror;
 	global $TbMsg;
 	global $ITEM_PUBLICO;
 	global $ITEM_PRIVADO;

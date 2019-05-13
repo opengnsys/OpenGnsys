@@ -50,8 +50,8 @@ if  ($opcion!=$op_alta){
 //________________________________________________________________________________________________________
 ?>
 <HTML>
-<TITLE>Administración web de aulas</TITLE>
 <HEAD>
+    <TITLE>Administración web de aulas</TITLE>
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../jscripts/propiedades_menus.js"></SCRIPT>
@@ -59,28 +59,29 @@ if  ($opcion!=$op_alta){
 	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/propiedades_menus_'.$idioma.'.js"></SCRIPT>'?>
 </HEAD>
 <BODY>
+<div align="center">
 <FORM  name="fdatos" action="../gestores/gestor_menus.php" method="post"> 
 	<INPUT type=hidden name=opcion value=<?php echo $opcion?>>
 	<INPUT type=hidden name=idmenu value=<?php echo $idmenu?>>
 	<INPUT type=hidden name=grupoid value=<?php echo $grupoid?>>
 	<P align=center class=cabeceras><?php echo $TbMsg[4]?><BR>
-	<SPAN align=center class=subcabeceras><?php echo $opciones[$opcion]?></SPAN></P>
+	<SPAN class=subcabeceras><?php echo $opciones[$opcion]?></SPAN></P>
 	<table align="center" border="0" cellPadding="1" cellSpacing="1" class="tabla_datos">
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<tr>
 			<th align="center">&nbsp;<?php echo $TbMsg[5]?>&nbsp;</th>
 			<?php	if ($opcion==$op_eliminacion)
-					echo '<td style="width:300">'.$descripcion.'</td>';
+					echo '<td style="width:300px">'.$descripcion.'</td>';
 				else
-					echo '<td><input class="formulariodatos" name="descripcion" style="width:300" type="text" value="'.$descripcion.'" /></td>';?>
+					echo '<td><input class="formulariodatos" name="descripcion" style="width:300px" type="text" value="'.$descripcion.'" /></td>';?>
 		</tr>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<tr>
 			<th  align=center>&nbsp;<?php echo $TbMsg[6]?>&nbsp;</th>
 			<?php	if ($opcion==$op_eliminacion)
-					echo '<td  style="width:300">'.$titulo.'</td>';
+					echo '<td  style="width:300px">'.$titulo.'</td>';
 				else
-					echo '<td ><input class="formulariodatos" name="titulo" style="width:300" type="text" value="'.$titulo.'" /></td>';?>
+					echo '<td ><input class="formulariodatos" name="titulo" style="width:300px" type="text" value="'.$titulo.'" /></td>';?>
 		</tr>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<tr>
@@ -177,7 +178,7 @@ if  ($opcion!=$op_alta){
 			<?php	if ($opcion==$op_eliminacion){
 					$tbmodalidad[1]=$TbMsg[13];
 					$tbmodalidad[2]=$TbMsg[14];
-					echo '<TD style="width:100">'.$tbmodalidad[$modalidad].'</TD>';
+					echo '<TD style="width:100px">'.$tbmodalidad[$modalidad].'</TD>';
 				}
 				else{
 					$parametros="1=1".chr(13);
@@ -195,7 +196,7 @@ if  ($opcion!=$op_alta){
 			<?php if ($opcion==$op_eliminacion)
 					echo '<TD colspan=5>'.$htmlmenupub.'</TD>';
 				else
-					echo '<TD colspan=5><INPUT  class="formulariodatos" name=htmlmenupub style="width:350" type=text value="'.$htmlmenupub.'"></TD>';
+					echo '<TD colspan=5><INPUT  class="formulariodatos" name=htmlmenupub style="width:350px" type=text value="'.$htmlmenupub.'"></TD>';
 			?>
 		</TR>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
@@ -208,7 +209,7 @@ if  ($opcion!=$op_alta){
 				<?php	if ($opcion==$op_eliminacion){
 						$tbmodalidad[1]=$TbMsg[13];
 						$tbmodalidad[2]=$TbMsg[14];
-						echo '<TD style="width:100">'.$tbmodalidad[$smodalidad].'</TD>';
+						echo '<TD style="width:100px">'.$tbmodalidad[$smodalidad].'</TD>';
 					}
 					else{
 						$parametros="1=1".chr(13);
@@ -225,7 +226,7 @@ if  ($opcion!=$op_alta){
 			<?php if ($opcion==$op_eliminacion)
 					echo '<TD colspan=5">'.$htmlmenupri.'</TD>';
 				else
-					echo '<TD colspan=5><INPUT  class="formulariodatos" name=htmlmenupri style="width:350" type=text value="'.$htmlmenupri.'"></TD>';
+					echo '<TD colspan=5><INPUT  class="formulariodatos" name=htmlmenupri style="width:350px" type=text value="'.$htmlmenupri.'"></TD>';
 			?>
 		</TR>
 	</TABLE>
@@ -237,7 +238,7 @@ if  ($opcion!=$op_alta){
 		?>
 	</table>
 </FORM>
-</DIV>
+</div>
 <?php
 //________________________________________________________________________________________________________
 include_once("../includes/opcionesbotonesop.php");
@@ -284,4 +285,4 @@ function TomaPropiedades($cmd,$id){
 	else
 		return(false);
 }
-?>
+

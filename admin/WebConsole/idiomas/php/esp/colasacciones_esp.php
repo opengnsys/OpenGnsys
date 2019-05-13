@@ -83,4 +83,4 @@ $TbMsg=array();
 	$TbMsg[59]='Ámbito:';	
 	$TbMsg[60]='Todos';		
 	$TbMsg[61]='Todas';			
-?>
+

@@ -17,4 +17,4 @@ function validate($VARS){
 	return true;
 }
 
-?>
+

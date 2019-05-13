@@ -2,7 +2,7 @@
 //________________________________________________________________________________________________________
 //
 //	Fitxer d'idiomes php: programaciones_cat.php 
-//	Idioma: Català 
+//	Idioma: Catalï¿½ 
 //________________________________________________________________________________________________________
 // Literals dels tipus d'accions
 $LITEJECUCION_COMANDO="Comandes";
@@ -15,5 +15,4 @@ $TbMsg=array();
  
 $TbMsg[0]="Programacions";
 $TbMsg[1]="Suspendre temporalment tots els blocs programats";
-$TbMsg[2]="Descripció del bloc";
-?>
+$TbMsg[2]="Descripciï¿½ del bloc";

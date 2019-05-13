@@ -51,7 +51,7 @@ if  ($opcion!=$op_alta){
 ?>
 <HTML>
 <HEAD>
-<TITLE>Administración web de aulas</TITLE>
+	<TITLE>Administración web de aulas</TITLE>
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
 	<LINK rel="stylesheet" type="text/css" href="../estilos.css">
 	<SCRIPT language="javascript" src="../jscripts/propiedades_entidades.js"></SCRIPT>
@@ -60,45 +60,45 @@ if  ($opcion!=$op_alta){
 	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/propiedades_entidades_'.$idioma.'.js"></SCRIPT>'?>
 </HEAD>
 <BODY>
+<div align="center">
 <FORM  name="fdatos" action="../gestores/gestor_entidades.php" method="post"> 
 	<INPUT type=hidden name=opcion value=<?php echo $opcion?>>
 	<INPUT type=hidden name=identidad value=<?php echo $identidad?>>
 	<INPUT type=hidden name=iduniversidad value=<?php echo $iduniversidad?>>
 	<INPUT type=hidden name=grupoid value=<?php echo $grupoid?>>
 	<P align=center class=cabeceras><?php echo $TbMsg[4]?><BR>
-	<SPAN align=center class=subcabeceras><?php echo $opciones[$opcion]?></SPAN></P>
+	<SPAN class=subcabeceras><?php echo $opciones[$opcion]?></SPAN></P>
 	<TABLE  align=center border=0 cellPadding=1 cellSpacing=1 class=tabla_datos>
-<!-------------------------------------------------------------------------------------------------------------------------------------------------->
-			<TR>
-				<TH>&nbsp;<?php echo $TbMsg[5]?>&nbsp;</TH>
-				<?php if ($opcion==$op_eliminacion){?>
-					<TD><?php echo $nombreentidad?></TD>
-				<?php }else{?>
-					<TD><INPUT type=text class=cajatexto  name="nombreentidad"  style="width:350" value="<?php echo $nombreentidad?>">
-				<?php }?>
-			</TR>
-<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+<!-- -------------------------------------------------------------------------------------------------------------------------------------------- -->
 		<TR>
-			<TH align=center>&nbsp;<?php echo $TbMsg[6]?>&nbsp;</TD>
-			<?php if ($opcion==$op_eliminacion)
+			<TH>&nbsp;<?php echo $TbMsg[5]?>&nbsp;</TH>
+			<?php	if ($opcion==$op_eliminacion){
+					echo '<TD>'.$nombreentidad.'</TD>';
+				}else{
+					echo '<TD><INPUT type=text class=cajatexto  name="nombreentidad"  style="width:350px" value="'.$nombreentidad.'">';
+				} ?>
+		</TR>
+<!-- -------------------------------------------------------------------------------------------------------------------------------------------- -->
+		<TR>
+			<TH align=center>&nbsp;<?php echo $TbMsg[6]?>&nbsp;</TH>
+			<?php	if ($opcion==$op_eliminacion)
 					echo '<TD>'.$comentarios.'</TD>';
 				else
 					echo '<TD><TEXTAREA   class="formulariodatos" name=comentarios rows=3 cols=66>'.$comentarios.'</TEXTAREA></TD>';
 			?>
 		</TR>	
-<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
-               <?php  if ($opcion!=$op_eliminacion) {
-			($ogunit == 1) ? $checked = "checked" : $checked = "";
-echo "                  <TR>\n".
-     "                          <TH align=center>&nbsp;".$TbMsg['OGUNIT']."&nbsp;</TD>\n".
+<!-- -------------------------------------------------------------------------------------------------------------------------------------------- -->
+		<?php if ($opcion!=$op_eliminacion) {
+			$checked = ($ogunit == 1) ? "checked" : "";
+			echo "    <TR>\n".
+     "                         <TH align=center>&nbsp;".$TbMsg['OGUNIT']."&nbsp;</TH>\n".
      "                         <TD><input class='formulariodatos' name='ogunit' value='1' type='checkbox' $checked onchange='mensaje_ogunit()'> </TD>\n".
      "                  </TR>\n";
-              }
-               ?>
-<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+		} ?>
+<!-- -------------------------------------------------------------------------------------------------------------------------------------------- -->
 	</TABLE>
 </FORM>
-</DIV>
+</div>
 <?php
 //________________________________________________________________________________________________________
 include_once("../includes/opcionesbotonesop.php");
@@ -133,4 +133,4 @@ function TomaPropiedades($cmd,$id){
 	else
 		return(false);
 }
-?>
+

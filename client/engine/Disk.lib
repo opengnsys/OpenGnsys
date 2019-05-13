@@ -4,7 +4,7 @@
 #@brief   Librería o clase Disk
 #@class   Disk
 #@brief   Funciones para gestión de discos y particiones.
-#@version 1.1.0
+#@version 1.1.1
 #@warning License: GNU GPLv3+
 #*/
 
@@ -47,7 +47,8 @@ timeout -k 5s -s KILL 3s $(which parted) "$@"
 function ogCreatePartitions ()
 {
 # Variables locales.
-local ND DISK PTTYPE PART SECTORS START SIZE TYPE CACHEPART IODISCO IOSIZE CACHESIZE EXTSTART EXTSIZE tmpsfdisk
+local ND DISK PTTYPE PART SECTORS START SIZE TYPE CACHEPART IODISCO IOSIZE CACHESIZE
+local EXTSTART EXTSIZE NVME_PREFIX tmpsfdisk
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk str_parttype:int_partsize ..." \
@@ -94,12 +95,18 @@ trap "rm -f $tmpsfdisk" 1 2 3 9 15
 echo "unit: sectors" >$tmpsfdisk
 echo                >>$tmpsfdisk
 
+NVME_PREFIX=""
+if [[ $DISK == *"nvme"* ]]; then
+	NVME_PREFIX="p"
+fi
+
+
 # Generar fichero de entrada para "sfdisk" con las particiones.
 shift
 while [ $# -gt 0 ]; do
     # Conservar los datos de la partición de caché.
     if [ "$ND $PART" == "$CACHEPART" -a -n "$CACHESIZE" ]; then
-        echo "$DISK$PART : start=$[SECTORS+1], size=$CACHESIZE, Id=ca" >>$tmpsfdisk
+        echo "$DISK$NVME_PREFIX$PART : start=$[SECTORS+1], size=$CACHESIZE, Id=ca" >>$tmpsfdisk
         PART=$[PART+1]
     fi
     # Leer formato de cada parámetro - Tipo:Tamaño
@@ -125,7 +132,7 @@ while [ $# -gt 0 ]; do
         SECTORS=$[EXTSTART+EXTSIZE]
     fi
     # Generar datos para la partición.
-    echo "$DISK$PART : start=$START, size=$SIZE, Id=$ID" >>$tmpsfdisk
+    echo "$DISK$NVME_PREFIX$PART : start=$START, size=$SIZE, Id=$ID" >>$tmpsfdisk
     # Error si se supera el nº total de sectores.
     START=$[START+SIZE]
     if [ "$IOSIZE" == "4096" -a $PART -gt 4 ]; then
@@ -138,9 +145,9 @@ done
 # Si no se indican las 4 particiones primarias, definirlas como vacías, conservando la partición de caché.
 while [ $PART -le 4 ]; do
     if [ "$ND $PART" == "$CACHEPART" -a -n "$CACHESIZE" ]; then
-        echo "$DISK$PART : start=$[SECTORS+1], size=$CACHESIZE, Id=ca" >>$tmpsfdisk
+        echo "$DISK$NVME_PREFIX$PART : start=$[SECTORS+1], size=$CACHESIZE, Id=ca" >>$tmpsfdisk
     else
-        echo "$DISK$PART : start=0, size=0, Id=0" >>$tmpsfdisk
+        echo "$DISK$NVME_PREFIX$PART : start=0, size=0, Id=0" >>$tmpsfdisk
     fi
     PART=$[PART+1]
 done
@@ -396,7 +403,7 @@ esac
 function ogDevToDisk ()
 {
 # Variables locales.
-local CACHEFILE DEV PART d n
+local CACHEFILE DEV PART NVME_PREFIX d n
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME path_device | LABEL=str_label | UUID=str_uuid" \
@@ -431,7 +438,13 @@ fi
 # Si no se encuentra, procesa todos los discos para devolver su nº de orden y de partición.
 n=1
 for d in $(ogDiskToDev); do
-    [ -n "$(echo $DEV | grep $d)" ] && echo "$n ${DEV#$d}" && return
+NVME_PREFIX=""
+if [[ $d == *"nvme"* ]]; then
+        NVME_PREFIX="p"
+fi
+
+
+    [ -n "$(echo $DEV | grep $d)" ] && echo "$n ${DEV#$d$NVME_PREFIX}" && return
     n=$[n+1]
 done
 ogRaiseError $OG_ERR_NOTFOUND "$1"
