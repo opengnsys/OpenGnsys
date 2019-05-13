@@ -17,8 +17,20 @@ import {Router} from '@angular/router';
   styleUrls: ['ou-group.component.css']
 })
 export class OuGroupComponent {
+    private _ou: OrganizationalUnit;
   @Input() ous;
-  @Input() content;
+  @Input()
+  set content(ou) {
+      this._ou = ou;
+      this._ou.clients.forEach((client) => {
+          if (this.ogCommonService.selectedClients[client.id]) {
+              client.selected = true;
+          }
+      });
+  }
+  get content() {
+      return this._ou;
+  }
   @Input() clientStatus;
   @Input() showGrid;
   @Input() selectedStatus;

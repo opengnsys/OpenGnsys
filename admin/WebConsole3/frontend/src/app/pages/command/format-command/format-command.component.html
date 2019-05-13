@@ -1,0 +1,96 @@
+<section class="content-header">
+  <h1 translate="create_image">
+  </h1>
+  <ol class="breadcrumb">
+    <li><a [routerLink]="'/app/dashboard'"><i class="fa fa-dashboard"></i>{{'dashboard'|translate}}</a></li>
+    <li><a [routerLink]="'/app/ous'"><i class="fa fa-th"></i>{{'ous'|translate}}</a></li>
+    <li class="active" translate="create_image"></li>
+  </ol>
+</section>
+<section fixed-toolboxbar class="toolboxbar">
+  <div>
+    <div class="col-md-12">
+      <div class="box-tools pull-right">
+        <button class="btn btn-primary" translate="execute" (click)="sendCommand()"></button>
+      </div>
+    </div>
+  </div>
+</section>
+<section style="padding: 0 30px;">
+  <h3 translate="selected_clients"></h3>
+  <app-og-selected-clients></app-og-selected-clients>
+</section>
+<!-- Main content -->
+<section class="content">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="box box-primary" *ngFor="let item of clientGroups | keyvalue">
+        <div class="box-header with-border">
+        </div>
+        <div class="box-body">
+          <div *ngFor="let client of item.value">
+            <div class="form-group">
+              <span translate="clients"></span>
+              <label>
+                {{client.name}}
+              </label>
+            </div>
+            <div>
+              <table class="table">
+                <thead>
+                <tr>
+                  <th translate="select">
+                  </th>
+                  <th translate="disk">
+                  </th>
+                  <th translate="partition">
+                  </th>
+                  <th translate="type">
+                  </th>
+                  <th translate="filesystem">
+                  </th>
+                  <th translate="size">
+                  </th>
+                  <th translate="osname">
+                  </th>
+                </tr>
+                </thead>
+                <tbody>
+                <ng-container *ngFor="let partition of client.partitions">
+                  <tr  *ngIf="partition.numPartition !== 0 && partition.size > 0">
+                  <td>
+                    <input icheck type="checkbox" checkbox-class="icheckbox_square-blue" radio-class="iradio_square-blue" type="checkbox" class="selection-checkbox" [(ngModel)]="partition.selected" />
+                  </td>
+                  <td>
+                    {{partition.numDisk}}
+                  </td>
+                  <td>
+                    {{partition.numPartition}}
+                  </td>
+                  <td>
+                    <select [(ngModel)]="partition.partitionCode">
+                      <option *ngFor="let type of getPartitionTypes(client.partitions)" [ngValue]="type.id">{{type.type}}</option>
+                    </select>
+                  </td>
+                  <td>
+                    <select [(ngModel)]="partition.filesystem">
+                      <option [ngValue]="filesystem" *ngFor="let filesystem of constants.filesystems">{{filesystem}}</option>
+                    </select>
+                  </td>
+                  <td>
+                    {{ogCommonService.getUnits(partition.size*1024)}}
+                  </td>
+                  <td>
+                    {{partition.osName}}
+                  </td>
+                </tr>
+                </ng-container>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

@@ -11,7 +11,7 @@ import {SoftwareTypeService} from '../../api/software-type.service';
 @Component({
   selector: 'app-software',
   templateUrl: './software.component.html',
-  styleUrls: ['./software.component.css']
+  styleUrls: ['./software.component.scss']
 })
 export class SoftwareComponent implements OnInit {
   public softwareProfileGroups: any[] = [];

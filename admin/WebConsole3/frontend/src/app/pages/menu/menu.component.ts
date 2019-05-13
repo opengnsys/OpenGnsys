@@ -7,6 +7,7 @@ import {Ng2TableActionComponent} from '../common/table-action/ng2-table-action.c
 import {TranslateService} from '@ngx-translate/core';
 import {Router} from '@angular/router';
 import {OgSweetAlertService} from '../../service/og-sweet-alert.service';
+import {ToasterService} from '../../service/toaster.service';
 
 @Component({
   selector: 'app-menu',
@@ -18,7 +19,7 @@ export class MenuComponent implements OnInit {
   private tableSettings: any;
   // this tells the tabs component which Pages
   // should be each tab's root Page
-  constructor(public menuService: MenuService, private router: Router, private ogSweetAlert: OgSweetAlertService, private translate: TranslateService) {
+  constructor(public menuService: MenuService, private router: Router, private ogSweetAlert: OgSweetAlertService, private toaster: ToasterService, private translate: TranslateService) {
   }
 
   ngOnInit(): void {
@@ -82,19 +83,19 @@ export class MenuComponent implements OnInit {
       closeOnConfirm: true
     }).then(
         function(result) {
-          if (result === true) {
+          if (result.value === true) {
 
-            this.menuService.delete(menu.id).then(
-                function(response) {
-                  this.toaster.pop({type: 'success', title: 'success', body: this.translate.instant('successfully_deleted')});
+            self.menuService.delete(menu.id).subscribe(
+                (response) => {
+                  self.toaster.pop({type: 'success', title: 'success', body: self.translate.instant('successfully_deleted')});
                   // Buscar el elemento en el array y borrarlo
-                  const index = this.images.indexOf(menu);
+                  const index = self.menus.indexOf(menu);
                   if (index !== -1) {
-                    this.images.splice(menu, 1);
+                    self.menus.splice(menu, 1);
                   }
                 },
-                function(error) {
-                  this.toaster.pop({type: 'error', title: 'error', body: error});
+                (error) => {
+                  self.toaster.pop({type: 'error', title: 'error', body: error});
                 }
             );
           }

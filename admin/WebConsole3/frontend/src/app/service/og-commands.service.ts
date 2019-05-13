@@ -14,15 +14,11 @@ import {environment} from '../../environments/environment';
 export class OGCommandsService {
   public ogInstructions = '';
   public execution: any;
-  private commands = [];
+  private commands: any;
 
   constructor(private router: Router, private ogCommonService: OgCommonService, private toaster: ToasterService, private ogSweetAlert: OgSweetAlertService,  private commandService: CommandService, private translate: TranslateService) {
     this.execution = {};
-    this.ogCommonService.loadEngineConfig().subscribe(
-      (response) => {
-        this.commands = response.constants.commandtypes;
-      }
-    );
+    this.commands = environment.commands;
   }
 
     sendCommand() {
@@ -114,14 +110,18 @@ export class OGCommandsService {
         // Comprobar tipo de cada particion para ver si es clonable
         // var parttable = $rootScope.constants.partitiontable[client.partitions[0].partitionCode-1];
         // buscar las particiones que sean clonables
+        const clonablePartitions = [];
         for (let index = 1; index < client.partitions.length; index++) {
           if (client.partitions[index].osName !== 'DATA' && client.partitions[index].osName !== '') {
             // Crear como nombre para mostrar, el disco y partición del sistema
             const obj = Object.assign({}, client.partitions[index]);
-            obj.name = 'disco: ' + obj.numDisk + ', part: ' + obj.numPartition + ', SO: ' + client.partitions[index].osName;
-            options.scope.partitions.push(obj);
+            const str = 'disco: ' + obj.numDisk + ', part: ' + obj.numPartition + ', SO: ' + client.partitions[index].osName;
+            clonablePartitions.push(obj.numDisk + ' ' + obj.numPartition)
+            options.scope.partitions.push(str);
           }
         }
+
+        const self = this;
 
         this.ogSweetAlert.swal({
             title: this.translate.instant('select_partition_to_inventary'),
@@ -137,9 +137,9 @@ export class OGCommandsService {
           function(result) {
             if (result.value) {
               // Montar el script con el disco y partición elegida
-              this.execution.script = this.commands.SOFTWARE_INVENTORY + ' ' + result.value;
-              this.loadClients();
-              this.sendCommand();
+              self.execution.script = self.commands.SOFTWARE_INVENTORY + ' ' + clonablePartitions[result.value];
+              self.loadClients();
+              self.sendCommand();
             }
           },
           null);

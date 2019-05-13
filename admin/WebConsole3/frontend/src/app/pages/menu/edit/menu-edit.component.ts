@@ -10,6 +10,7 @@ import {Observable} from 'rxjs';
 import {MenuService} from '../../../api/menu.service';
 import {Menu} from '../../../model/menu';
 import {OgCommonService} from '../../../service/og-common.service';
+import {DomSanitizer} from '@angular/platform-browser';
 
 @Component({
   selector: 'app-menu',
@@ -24,7 +25,7 @@ export class MenuEditComponent implements OnInit {
 
   // this tells the tabs component which Pages
   // should be each tab's root Page
-  constructor(private router: Router, private activatedRouter: ActivatedRoute, private ogCommonService: OgCommonService, private menuService: MenuService, private translate: TranslateService, private toaster: ToasterService) {
+  constructor(public sanitizer: DomSanitizer, private router: Router, private activatedRouter: ActivatedRoute, private ogCommonService: OgCommonService, private menuService: MenuService, private translate: TranslateService, private toaster: ToasterService) {
     this.form = this.formType.getForm();
   }
 

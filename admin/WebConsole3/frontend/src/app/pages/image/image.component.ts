@@ -123,21 +123,21 @@ export class ImageComponent implements OnInit {
         closeOnConfirm: true
       }).then(
         function(result) {
-        if (result === true) {
+        if (result.value === true) {
           if (self.removeFile === true) {
             // TODO Borrar fichero físico...
           }
-          this.imageService.delete(image.id).then(
-            function(response) {
-              this.toaster.pop({type: 'success', title: 'success', body: this.translate.instant('successfully_deleted')});
+          self.imageService.delete(image.id).subscribe(
+            (response) => {
+              self.toaster.pop({type: 'success', title: 'success', body: self.translate.instant('successfully_deleted')});
               // Buscar el elemento en el array y borrarlo
-              const index = this.images.indexOf(image);
+              const index = self.images.indexOf(image);
               if (index !== -1) {
-                this.images.splice(index, 1);
+                self.images.splice(index, 1);
               }
             },
-            function(error) {
-              this.toaster.pop({type: 'error', title: 'error', body: error});
+            (error) => {
+              self.toaster.pop({type: 'error', title: 'error', body: error});
             }
           );
         }

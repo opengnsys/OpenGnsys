@@ -9,7 +9,8 @@ import {OgCommonService} from '../../../service/og-common.service';
 
 @Component({
   selector: 'app-ou-client-component',
-  templateUrl: 'ou-client.component.html'
+  templateUrl: 'ou-client.component.html',
+  styleUrls: ['ou-client.component.scss']
 })
 export class OuClientComponent {
   private _ou: OrganizationalUnit;

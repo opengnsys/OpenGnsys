@@ -1,3 +1,3 @@
-ul.dropdown-menu {
+::ng-deep ng2-smart-table ul.dropdown-menu {
   background-color: transparent;
 }

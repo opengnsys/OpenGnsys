@@ -49,7 +49,7 @@
   <!-- *ngIf="selectedStatus[client.status] == true" -->
   <div class="row">
     <ng-container *ngFor="let client of ou.clients">
-      <div class="col-md-2 col-xs-6 padding-5">
+      <div class="col-md-2 col-xs-6 og-client-box">
         <div class="info-box client " *ngIf="mustShow(client)">
               <span style="position: absolute;">
                 <input icheck checkbox-class="icheckbox_square-blue" radio-class="iradio_square-blue" type="checkbox" class="selection-checkbox" [(ngModel)]="client.selected" (change)="selectClient(client)" />

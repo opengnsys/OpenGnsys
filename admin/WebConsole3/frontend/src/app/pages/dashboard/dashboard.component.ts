@@ -87,11 +87,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.ogCommonService.loadEngineConfig().subscribe(
       (config) => {
         this.timers = config.timers;
-        if (this.timers.serverStatusInterval.object == null) {
+        if (this.timers.serverStatusInterval.object == null && this.timers.serverStatusInterval.tick > 0) {
           this.updateStatus();
           this.timers.serverStatusInterval.object = setInterval(() => {
             this.updateStatus();
           }, this.timers.serverStatusInterval.tick);
+        } else {
+          this.updateStatus();
         }
       },
       (error) => {

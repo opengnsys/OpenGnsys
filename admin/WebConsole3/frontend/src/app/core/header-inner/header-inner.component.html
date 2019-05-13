@@ -2,20 +2,16 @@
   <ul class="nav navbar-nav">
     <li mk-dropdown type="list" [isWrapper]="false" class="notifications-menu">
       <mk-dropdown-toggle>
-        <a [routerLink]="'/app/traces'" *ngIf="executionTasks.length == 0" #toggleElement>
-          <i class="fa fa-bell-o"></i>
-        </a>
-        <a *ngIf="executionTasks.length > 0" #toggleElement>
-          <i class="fa fa-bell-o"></i>
-          <span class="label label-warning" *ngIf="executionTasks.length > 0">{{executionTasks.length}}</span>
-        </a>
+        <a  #toggleElement>
+            <i class="fa fa-bell-o"></i>
+            <span class="label label-warning" *ngIf="executionTasks.length > 0">{{executionTasks.length}}</span>
+          </a>
       </mk-dropdown-toggle>
-      <mk-dropdown-menu *ngIf="executionTasks.length > 0">
-        <li class="header">You have 10 notifications</li>
-        <li class="header">
+      <mk-dropdown-menu>
+        <li class="header" *ngIf="executionTasks.length > 0">
           <span translate="you_have_x_exectution_taks" translate-values="{values: executionTasks.length}"></span>
         </li>
-        <li>
+        <li *ngIf="executionTasks.length > 0">
           <!-- inner menu: contains the actual data -->
           <ul class="menu" *ngFor="let task of executionTasks">
             <li>
@@ -25,7 +21,7 @@
                 </a>
                 <a href="javascript:void(0)" (click)="relaunchExecutionTask(task)" class="btn btn-sm pull-right small-box-footer">
                   <i class="fa fa-refresh"></i>
-                </a>
+                </a>A
               </div>
               <a href="javascript:void(0)" (click)="ogCommandsService.execute('REALTIME_LOG', {clientIp: task.client.ip})">
                 <i class="fa fa-warning text-yellow"></i> {{task.client.name}} ({{task.client.ip}})<br>{{task.commandType|translate}}
@@ -36,7 +32,7 @@
         <li class="footer">
           <a href="javascript:void(0)" translate="view_all" [routerLink]="['/app/traces']"></a>
         </li>
-      </mk-dropdown-menu>
+    </mk-dropdown-menu>
     </li>
     <!-- Tasks: style can be found in dropdown.less -->
     <li mk-dropdown type="list" [isWrapper]="false" class="tasks-menu">

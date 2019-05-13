@@ -9,6 +9,7 @@ export class PartitionInfo {
   partitionCode: string;
   filesystem: string;
   osName: string;
+  type: string;
 }
 
 export class Image extends Resource {

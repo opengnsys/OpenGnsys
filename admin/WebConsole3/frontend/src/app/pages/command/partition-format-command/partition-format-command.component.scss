@@ -1,0 +1,22 @@
+::ng-deep app-partition-format-command {
+  ::ng-deep table.disk-partitions {
+    min-height: 40px;
+  }
+  ::ng-deep table.disk-partitions td {
+    position: relative;
+  }
+  ::ng-deep span.resizer {
+    display: block;
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 0;
+    background-color: black;
+    width: 2px;
+    height: 100%;
+    padding: 0 !important;
+    cursor: col-resize;
+    border: 1px solid transparent;
+  }
+
+}

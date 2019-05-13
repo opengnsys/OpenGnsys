@@ -1,0 +1,164 @@
+<section class="content-header">
+  <h1 translate="partition_format"></h1>
+  <ol class="breadcrumb">
+    <li><a [routerLink]="'/app/dashboard'"><i class="fa fa-dashboard"></i> {{'dashboard'|translate}}</a></li>
+    <li><a [routerLink]="'/app/ous'" ><i class="fa fa-th"></i> {{'ous'|translate}}</a></li>
+    <li class="active" translate="partition_format"></li>
+  </ol>
+</section>
+<section style="padding: 0 30px;">
+  <h3 translate="selected_clients"></h3>
+  <app-og-selected-clients></app-og-selected-clients>
+</section>
+<section class="content padding-top-30" style="padding-top: 30px">
+  <div class="box box-default box-solid">
+    <div class="box-header with-border">
+      <div class="row">
+        <div class="col-md-4">
+          <span translate="num_disk"></span>: <input name="number" type="number" step="1" min="1" [(ngModel)]="diskConfig.disk" >
+        </div>
+        <div class="col-md-4">
+          <span translate="part_table"></span>: <b>
+            <select name="partTableType" [(ngModel)]="diskConfig.parttable.type" (change)="checkPartitionTableType()">
+              <option  *ngFor="let partitionTableTypes of partitionTableTypes">{{partitionTableTypes.type}}</option>
+            </select></b>
+        </div>
+        <div class="col-md-4">
+          <span translate="size"></span>: <b>{{getSizeInGB(diskConfig.size)}} GB ({{getSizeInGB(diskConfig.size*diskConfig.remaining/100)}} GB <span translate="free"></span>)</b>
+        </div>
+      </div>
+      <div class="box-tools pull-right">
+        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+        </button>
+      </div>
+      <!-- /.box-tools -->
+    </div>
+    <!-- /.box-header -->
+    <div class="box-body">
+      <div class="row">
+        <div class="col-md-12">
+          <table col-resizable class="disk-partitions" [elements]="diskConfig.partitions" cr-update-property="usage" (onResize)="updatePartitionUsage($event)">
+            <tr>
+              <td *ngFor="let partition of diskConfig.partitions"  [style]="sanitizer.bypassSecurityTrustStyle('width: '+ partition.usage + '%; background-color:' + getPartitionColor(partition))">
+                <span><span translate="{{partition.type}}"></span> ({{partition.usage}}%)</span>
+                <table *ngIf="partition.partitions && partition.partitions.length > 0" [elements]="partition.partitions" col-resizable class="disk-partitions" cr-update-property="usage" (onResize)="updateExtendedPartitions($event)" cr-force-refresh="refresh-extended-partitions">
+                  <tr>
+                    <td *ngFor="let extendedPartition of partition.partitions" [style]="sanitizer.bypassSecurityTrustStyle('width: '+extendedPartition.usage+'%; background-color: '+ getPartitionColor(extendedPartition))">
+                      <span>{{extendedPartition.type}} ({{extendedPartition.usage}}%)</span>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+          </table>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-8">
+          <button translate="add" class="btn btn-primary" (click)="addPartition()"></button>
+          <table class="table table-condensed table-striped partitions">
+            <tbody>
+            <tr>
+              <th translate="partition"></th>
+              <th translate="part_type"></th>
+              <th translate="filesystem"></th>
+              <th><span translate="size"></span> (bytes)</th>
+              <th translate="usage"></th>
+              <th translate="format"></th>
+              <th translate="remove"></th>
+            </tr>
+            </tbody>
+            <tbody *ngFor="let partition of diskConfig.partitions; let index = index;" ng-class="{'extended-partition': partition.partitions.length > 0}">
+            <tr [ngClass]="index%2 == 0 ? 'odd' : 'even'" *ngIf="partition.partition != 0">
+              <td>{{partition.partition}} ({{getSizeInGB(partition.size)}}GB)</td>
+              <td>
+                <select  name="partitionType" [disabled]="partTableTypeIsGPT() && index == 0 && isEFI(partition)"  [(ngModel)]="partition.type" (change)="checkPartitionType(partition)">
+                  <option *ngFor="let partitionType of diskConfig.parttable.partitions">{{partitionType.type}}</option>
+                </select>
+              </td>
+              <td>{{partition.filesystem}}</td>
+              <td>
+                <input step=".01" name="partitionSize"  type="number" [(ngModel)]="partition.size" (change)="setPartitionUsage(diskConfig, partition)"/>
+              </td>
+              <td>
+                <input step=".01" name="partitionUsage" type="number" [(ngModel)]="partition.usage" (change)="updatePartitionUsage(partition)">
+                <span>%</span>
+              </td>
+              <td>
+                <div *ngIf="isEXTENDED(partition) != true" class="checkbox clip-check check-primary checkbox-inline" style="margin-top: 0">
+                  <input name="format" icheck checkbox-class="icheckbox_square-blue" radio-class="iradio_square-blue" type="checkbox" class="selection-checkbox" value="true" [(ngModel)]="partition.format" />
+                </div>
+              </td>
+              <td>
+                <button *ngIf="!(partTableTypeIsGPT() && $index == 0 && isEFI(partition))" class="btn btn-danger btn-xs"><i class="fa fa-times" (click)="removePartition(partition)"></i></button>
+              </td>
+              <td *ngIf="isEXTENDED(partition) == true">
+                <button class="btn btn-primary btn-xs"><i class="fa fa-plus" (click)="addExtendedPartition(partition)"></i></button>
+              </td>
+            </tr>
+            <tr *ngFor="let extendedPartition of partition.partitions" class="extended" ng-class="{'odd': $index%2 == 0, 'even': $index%2 != 0}">
+              <td>{{extendedPartition.partition}}</td>
+              <td>
+                <select name="extendedPartitionType" [(ngModel)]="extendedPartition.type" (change)="checkPartitionType(extendedPartition)">
+                  <option *ngFor="let partitionType of diskConfig.parttable.partitions">{{partitionType.type}}</option>
+                </select>
+              </td>
+              <td>{{extendedPartition.filesystem}}</td>
+              <td><input step=".01" name="extendedPartitonSize" type="number"[(ngModel)]="extendedPartition.size" (change)="updateExtendedPartitions(extendedPartition)"/></td>
+              <td>
+                <input step=".01" name="extendedPartitionUsage" type="number"[(ngModel)]="extendedPartition.usage" (change)="updateExtendedPartitionsUsage(extendedPartition)">
+                <span>%</span>
+              </td>
+              <td>
+                <div class="checkbox clip-check check-primary checkbox-inline" style="margin-top: 0">
+                  <input name="format" icheck checkbox-class="icheckbox_square-blue" radio-class="iradio_square-blue" type="checkbox" class="selection-checkbox" value="true"[(ngModel)]="extendedPartition.format" />
+                </div>
+              </td>
+              <td>
+                <button class="btn btn-danger btn-xs"><i class="fa fa-times" (click)="removeExtendedPartition(extendedPartition)"></i></button>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="col-md-4">
+          <!--flot dataset="diskConfig.diskChartData" options="diskConfig.diskChartOptions" height="200px"></flot-->
+          <div class="chart" >
+            <canvas baseChart
+                    [data]="diskConfig.diskChartData"
+                    [labels]="diskConfig.diskChartLabels"
+                    [colors]="diskConfig.diskPieChartColors"
+                    [chartType]="'doughnut'"
+                    [options]="diskConfig.diskChartOptions">
+            </canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- /.box-body -->
+    <div class="box-footer">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="btn-group pull-left">
+            <button class="btn btn-primary"(click)="generateOgInstruction()"><span translate="generate_og_instruction"></span></button>
+            <button   [class]="editInstructions == false ? 'btn btn-default':'btn btn-success'" *ngIf="ogCommandsService.ogInstructions != ''" (click)="editInstructions = !editInstructions"><span translate="{{editInstructions == false?'edit':'done'}}"></span></button>
+          </div>
+          <div class="btn-group pull-right">
+            <app-og-execute-command-options></app-og-execute-command-options>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12">
+          <div class="box">
+            <div class="box-header"></div>
+            <div class="box-body" >
+              <div *ngIf="editInstructions == false" [innerHTML]="ogCommandsService.ogInstructions|ogCommands"></div>
+              <textarea *ngIf="editInstructions == true" class="og-instructions" [(ngModel)]="ogCommandsService.ogInstructions"></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

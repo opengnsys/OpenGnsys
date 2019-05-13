@@ -16,6 +16,7 @@
     </div>
 </section>
 <section class="content">
+    {{user.preferences|json}}
     <div class="row">
         <div class="col-md-12">
             <div class="box box-primary">
@@ -26,7 +27,7 @@
                     <form role="form">
                         <div class="form-group col-md-2">
                             <label translate="username"></label>
-                            <input class="form-control" readonly="readonly" type="text" [(ngModel)]="user.username" name="username">
+                            <input class="form-control" readonly="readonly" type="text" [value]="user.username" name="username">
                         </div>
                         <div class="form-group col-md-4">
                             <label translate="password"></label>
@@ -52,11 +53,11 @@
                             <label class="help-block" translate="display_as"></label>
                             <div class="row">
                                 <div class="form-group col-md-1">
-                                    <input icheck type="radio" name="displayGrid" checkbox-class="icheckbox_square-blue" radio-class="iradio_square-blue" class="selection-checkbox" [(ngModel)]="user.preferences.ous.showGrid" value="true" />
+                                    <input icheck type="radio" name="displayGrid" checkbox-class="icheckbox_square-blue" radio-class="iradio_square-blue" class="selection-checkbox" [(ngModel)]="user.preferences.ous.showGrid" [value]="true" />
                                     <label translate="grid"></label>
                                 </div>
                                 <div class="form-group col-md-1">
-                                    <input icheck type="radio" name="displayTable" checkbox-class="icheckbox_square-blue" radio-class="iradio_square-blue" class="selection-checkbox" [(ngModel)]="user.preferences.ous.showGrid" value="false" />
+                                    <input icheck type="radio" name="displayTable" checkbox-class="icheckbox_square-blue" radio-class="iradio_square-blue" class="selection-checkbox" [(ngModel)]="user.preferences.ous.showGrid" [value]="false" />
                                     <label translate="table"></label>
                                 </div>
                             </div>
@@ -66,7 +67,7 @@
                             <div class="row">
                                 <div class="form-group col-md-2">
                                     <label translate="language"></label>
-                                    <select class="form-control" name="language" [(ngModel)]="user.preferences.language" (change)="ogCommonService.changeLanguage($event)">
+                                    <select class="form-control" name="language" [(ngModel)]="user.preferences.language" (ngModelChange)="ogCommonService.changeLanguage(user.preferences.language)">
                                         <option *ngFor="let lang of constants.languages" [ngValue]="lang.id" >{{lang.name}}</option>
                                     </select>
                                 </div>

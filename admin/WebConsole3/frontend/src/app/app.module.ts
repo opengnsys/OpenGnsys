@@ -10,7 +10,7 @@ import {AuthModule, TokenInterceptorService} from 'globunet-angular/core';
 import {HTTP_INTERCEPTORS, HttpClient, HttpClientModule} from '@angular/common/http';
 import {LoginComponent} from './pages/login/login.component';
 import {ImageComponent} from './pages/image/image.component';
-import { LoadingPageModule, MaterialBarModule } from 'angular-loading-page';
+import { LoadingPageModule, CircleModule } from 'angular-loading-page';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import {TranslateHttpLoader} from '@ngx-translate/http-loader';
 import {TranslateLoader, TranslateModule, TranslateService} from '@ngx-translate/core';
@@ -75,6 +75,10 @@ import {SoftwareComponentsGroupComponent} from './pages/software/software-compon
 import {LoginCommandComponent} from './pages/command/login-command/login-command.component';
 import {ExecuteCommandComponent} from './pages/command/execute-command/execute-command.component';
 import {CreateImageCommandComponent} from './pages/command/create-image-command/create-image-command.component';
+import {DeleteCacheImageCommandComponent} from './pages/command/delete-cache-image-command/delete-cache-image-command.component';
+import {FormatCommandComponent} from './pages/command/format-command/format-command.component';
+import {PartitionFormatCommandComponent} from './pages/command/partition-format-command/partition-format-command.component';
+import {ColResizableDirective} from './pages/common/directive/col-resizable.directive';
 
 
 
@@ -121,9 +125,13 @@ import {CreateImageCommandComponent} from './pages/command/create-image-command/
     LoginCommandComponent,
     ExecuteCommandComponent,
     CreateImageCommandComponent,
+    DeleteCacheImageCommandComponent,
+    FormatCommandComponent,
+    PartitionFormatCommandComponent,
     EditCommandComponent,
     IcheckDirective,
     FixedToolboxBarDirective,
+    ColResizableDirective,
     OgInformationOptionsComponent,
     OgCommandsOptionsComponent,
     OgExecuteCommandOptionsComponent,
@@ -166,6 +174,9 @@ import {CreateImageCommandComponent} from './pages/command/create-image-command/
     LoginCommandComponent,
     ExecuteCommandComponent,
     CreateImageCommandComponent,
+    DeleteCacheImageCommandComponent,
+    FormatCommandComponent,
+    PartitionFormatCommandComponent,
     EditCommandComponent,
     OgOuGeneralOptionsComponent,
     TraceComponent,
@@ -179,7 +190,7 @@ import {CreateImageCommandComponent} from './pages/command/create-image-command/
     CoreModule,
     DropdownModule,
     LayoutModule.forRoot(AdminLteConf.staticConf),
-    LoadingPageModule, MaterialBarModule,
+    LoadingPageModule, CircleModule,
     BrowserAnimationsModule,
     HttpClientModule,
     AuthModule.forRoot(environment),

@@ -27,6 +27,9 @@ import {SoftwareComponent} from './pages/software/software.component';
 import {LoginCommandComponent} from './pages/command/login-command/login-command.component';
 import {ExecuteCommandComponent} from './pages/command/execute-command/execute-command.component';
 import {CreateImageCommandComponent} from './pages/command/create-image-command/create-image-command.component';
+import {DeleteCacheImageCommandComponent} from './pages/command/delete-cache-image-command/delete-cache-image-command.component';
+import {FormatCommandComponent} from './pages/command/format-command/format-command.component';
+import {PartitionFormatCommandComponent} from './pages/command/partition-format-command/partition-format-command.component';
 
 
 const routes: Routes = [
@@ -132,8 +135,16 @@ const routes: Routes = [
         component: MenuEditComponent
       },
       {
+        path: 'menus/edit/:id',
+        component: MenuEditComponent
+      },
+      {
         path: 'commands',
         component: CommandComponent
+      },
+      {
+        path: 'commands/partition_format',
+        component: PartitionFormatCommandComponent
       },
       {
         path: 'commands/deploy_image',
@@ -150,6 +161,14 @@ const routes: Routes = [
       {
         path: 'commands/create_image',
         component: CreateImageCommandComponent
+      },
+      {
+        path: 'commands/delete_cache_image',
+        component: DeleteCacheImageCommandComponent
+      },
+      {
+        path: 'commands/format',
+        component: FormatCommandComponent
       },
       {
         path: 'commands/:id',
