@@ -42,7 +42,6 @@ import urllib
 from opengnsys import REST
 from opengnsys import operations
 from opengnsys.log import logger
-from opengnsys.scriptThread import ScriptExecutorThread
 from opengnsys.workers import ServerWorker
 from six.moves.urllib import parse
 
@@ -94,13 +93,14 @@ class OpenGnSysWorker(ServerWorker):
     REST = None  # REST object
     loggedin = False  # User session flag
     locked = {}  # Locked partitions
+    browser = {}  # Browser info
     commands = []  # Running commands
     random = None  # Random string for secure connections
     length = 32  # Random string length
     access_token = refresh_token = None  # Server authorization tokens
     grant_type = 'http://opengnsys.es/grants/og_client'
 
-    def checkSecret(self, server):
+    def _check_secret(self, server):
         """
         Checks for received secret key and raise exception if it isn't valid.
         """
@@ -110,6 +110,46 @@ class OpenGnSysWorker(ServerWorker):
         except Exception as e:
             logger.error(e)
             raise Exception(e)
+
+    def _launch_browser(self, url):
+        """
+        Launchs the Browser with specified URL
+        :param url: URL to show
+        """
+        logger.debug('Launching browser with URL: {}'.format(url))
+        if hasattr(self.browser, 'process'):
+            self.browser['process'].kill()
+        self.browser['url'] = url
+        self.browser['process'] = subprocess.Popen(['browser', '-qws', url])
+
+    def _task_command(self, route, code, op_id):
+        """
+        Task to execute a command and return results to a server URI
+        :param route: server callback REST route to return results
+        :param code: code to execute
+        :param op_id: operation id.
+        """
+        menu_url = ''
+        # Show execution tacking log, if OGAgent runs on ogLive
+        os_type = operations.os_type.lower()
+        if os_type == 'oglive':
+            menu_url = self.browser['url']
+            self._launch_browser('http://localhost/cgi-bin/httpd-log.sh')
+        # Executing command
+        (stat, out, err) = operations.exec_command(code)
+        # Removing command from the list
+        for c in self.commands:
+            if c.getName() == op_id:
+                self.commands.remove(c)
+        # Removing the REST API prefix, if needed
+        if route.startswith(self.REST.endpoint):
+            route = route[len(self.REST.endpoint):]
+        # Sending results
+        self.REST.sendMessage(route, {'mac': self.interface.mac, 'ip': self.interface.ip, 'trace': op_id,
+                                      'status': stat, 'output': out, 'error': err})
+        # Show latest menu, if OGAgent runs on ogLive
+        if os_type == 'oglive':
+            self._launch_browser(menu_url)
 
     def onActivation(self):
         """
@@ -197,17 +237,16 @@ class OpenGnSysWorker(ServerWorker):
             f.write(message)
             f.close()
             # Launching Browser
-            pid = subprocess.Popen(['browser', '-qws', '/tmp/init.html'])
+            self._launch_browser('/tmp/init.html')
             self.REST.sendMessage('clients/statuses', {'mac': self.interface.mac, 'ip': self.interface.ip,
                                                        'status': 'initializing'})
             # Send configuration message
             self.REST.sendMessage('clients/configs', {'mac': self.interface.mac, 'ip': self.interface.ip,
                                                       'config': operations.get_configuration()})
             # Launching new Browser with client's menu
-            pid.kill()
             # menu_url = self.REST.sendMessage('menus?mac' + self.interface.mac + '&ip=' + self.interface.ip)
             menu_url = '/opt/opengnsys/log/' + self.interface.ip + '.info.html'  # TEMPORARY menu
-            subprocess.Popen(['browser', '-qws', menu_url])
+            self._launch_browser(menu_url)
         # Return status message
         self.REST.sendMessage('clients/statuses', {'mac': self.interface.mac, 'ip': self.interface.ip,
                                                    'status': os_type})
@@ -242,7 +281,7 @@ class OpenGnSysWorker(ServerWorker):
         self.loggedin = False
         self.REST.sendMessage('ogagent/loggedout', {'ip': self.interface.ip, 'user': user})
 
-    def process_ogclient(self, path, getParams, postParams, server):
+    def process_ogclient(self, path, get_params, post_params, server):
         """
         This method can be overridden to provide your own message processor, or better you can
         implement a method that is called exactly as "process_" + path[0] (module name has been removed from path
@@ -250,11 +289,11 @@ class OpenGnSysWorker(ServerWorker):
         * Example:
             Imagine this invocation url (no matter if GET or POST): http://example.com:9999/Sample/mazinger/Z
             The HTTP Server will remove "Sample" from path, parse arguments and invoke this method as this:
-            module.processMessage(["mazinger","Z"], getParams, postParams)
+            module.processMessage(["mazinger","Z"], get_params, post_params)
 
             This method will process "mazinger", and look for a "self" method that is called "process_mazinger",
             and invoke it this way:
-               return self.process_mazinger(["Z"], getParams, postParams)
+               return self.process_mazinger(["Z"], get_params, post_params)
 
             In the case path is empty (that is, the path is composed only by the module name, like in
             "http://example.com/Sample", the "process" method will be invoked directly
@@ -268,9 +307,9 @@ class OpenGnSysWorker(ServerWorker):
             operation = getattr(self, 'ogclient_' + path[0])
         except Exception:
             raise Exception('Message processor for "{}" not found'.format(path[0]))
-        return operation(path[1:], getParams, postParams)
+        return operation(path[1:], get_params, post_params)
 
-    def process_status(self, path, getParams, postParams, server):
+    def process_status(self, path, get_params, post_params, server):
         """
         Returns client status (OS type and login status).
         """
@@ -284,12 +323,12 @@ class OpenGnSysWorker(ServerWorker):
             res['status'] = 'busy'
         return res
 
-    def process_reboot(self, path, getParams, postParams, server):
+    def process_reboot(self, path, get_params, post_params, server):
         """
         Launches a system reboot operation.
         """
         logger.debug('Received reboot operation')
-        self.checkSecret(server)
+        self._check_secret(server)
 
         # Rebooting thread.
         def rebt():
@@ -298,12 +337,12 @@ class OpenGnSysWorker(ServerWorker):
         threading.Thread(target=rebt).start()
         return {'op': 'launched'}
 
-    def process_poweroff(self, path, getParams, postParams, server):
+    def process_poweroff(self, path, get_params, post_params, server):
         """
         Launches a system power off operation.
         """
         logger.debug('Received poweroff operation')
-        self.checkSecret(server)
+        self._check_secret(server)
 
         # Powering off thread.
         def pwoff():
@@ -313,41 +352,52 @@ class OpenGnSysWorker(ServerWorker):
         threading.Thread(target=pwoff).start()
         return {'op': 'launched'}
 
-    def process_script(self, path, getParams, postParams, server):
+    def process_script(self, path, get_params, post_params, server):
         """
         Processes an script execution (script should be encoded in base64)
         """
         logger.debug('Processing script request')
-        self.checkSecret(server)
-        # Decoding script.
-        script = urllib.unquote(postParams.get('script').decode('base64')).decode('utf8')
-        script = 'import subprocess; subprocess.check_output("""{}""",shell=True)'.format(script)
-        # Executing script.
-        if postParams.get('client', 'false') == 'false':
-            thr = ScriptExecutorThread(script)
-            thr.start()
-        else:
-            self.sendClientMessage('script', {'code': script})
+        self._check_secret(server)
+        # Processing data
+        try:
+            script = urllib.unquote(post_params.get('script').decode('base64')).decode('utf8')
+            op_id = post_params.get('id')
+            route = post_params.get('redirect_uri')
+            # Checking if the thread id. exists
+            for c in self.commands:
+                if c.getName() == str(op_id):
+                    raise Exception('Task id. already exists: {}'.format(op_id))
+            if post_params.get('client', 'false') == 'false':
+                # Launching a new thread
+                thr = threading.Thread(name=op_id, target=self._task_command, args=(route, script, op_id))
+                thr.start()
+                self.commands.append(thr)
+            else:
+                # Executing as normal user
+                self.sendClientMessage('script', {'code': script})
+        except Exception as e:
+            logger.error('Got exception {}'.format(e))
+            return {'error': e}
         return {'op': 'launched'}
 
-    def process_logoff(self, path, getParams, postParams, server):
+    def process_logoff(self, path, get_params, post_params, server):
         """
         Closes user session.
         """
         logger.debug('Received logoff operation')
-        self.checkSecret(server)
+        self._check_secret(server)
         # Sending log off message to OGAgent client.
         self.sendClientMessage('logoff', {})
         return {'op': 'sent to client'}
 
-    def process_popup(self, path, getParams, postParams, server):
+    def process_popup(self, path, get_params, post_params, server):
         """
         Shows a message popup on the user's session.
         """
         logger.debug('Received message operation')
-        self.checkSecret(server)
+        self._check_secret(server)
         # Sending popup message to OGAgent client.
-        self.sendClientMessage('popup', postParams)
+        self.sendClientMessage('popup', post_params)
         return {'op': 'launched'}
 
     def process_client_popup(self, params):
@@ -366,7 +416,7 @@ class OpenGnSysWorker(ServerWorker):
         storage = []  # Storage configuration
         warnings = 0  # Number of warnings
         logger.debug('Received getconfig operation')
-        # self.checkSecret(server)
+        # self._check_secret(server)
         # Processing data
         for row in operations.get_configuration().split(';'):
             cols = row.split(':')
@@ -398,23 +448,6 @@ class OpenGnSysWorker(ServerWorker):
         # Returning configuration data and count of warnings
         return {'serialno': serialno, 'storage': storage, 'warnings': warnings}
 
-    def task_command(self, code, route, op_id):
-        """
-        Task to execute a command
-        :param code: Code to execute
-        :param route: server callback REST route to return results
-        :param op_id: operation id.
-        """
-        # Executing command
-        (stat, out, err) = operations.exec_command(code)
-        # Removing command from the list
-        for c in self.commands:
-            if c.getName() == op_id:
-                self.commands.remove(c)
-        # Sending results
-        self.REST.sendMessage(route, {'client': self.interface.ip, 'trace': op_id, 'status': stat, 'output': out,
-                                      'error': err})
-
     def process_command(self, path, get_params, post_params, server):
         """
         Launches a thread to executing a command
@@ -428,7 +461,7 @@ class OpenGnSysWorker(ServerWorker):
         :rtype: object with launching status
         """
         logger.debug('Received command operation with params: {}'.format(post_params))
-        self.checkSecret(server)
+        self._check_secret(server)
         # Processing data
         try:
             script = post_params.get('script')
@@ -458,7 +491,7 @@ class OpenGnSysWorker(ServerWorker):
         """
         data = []
         logger.debug('Received execinfo operation')
-        self.checkSecret(server)
+        self._check_secret(server)
         # Returning the arguments of all running threads
         for c in self.commands:
             if c.is_alive():
@@ -467,42 +500,10 @@ class OpenGnSysWorker(ServerWorker):
 
     def process_stopcmd(self, path, get_params, post_params, server):
         logger.debug('Received stopcmd operation with params {}:'.format(post_params))
-        self.checkSecret(server)
+        self._check_secret(server)
         op_id = post_params.get('trace')
         for c in self.commands:
             if c.is_alive() and c.getName() == str(op_id):
                 c._Thread__stop()
                 return {"stopped": op_id}
         return {}
-
-    def process_hardware(self, path, get_params, post_params, server):
-        """
-        Returns client's hardware profile
-        :param path:
-        :param get_params:
-        :param post_params:
-        :param server:
-        """
-        data = []
-        logger.debug('Received hardware operation')
-        self.checkSecret(server)
-        # Processing data
-        try:
-            for comp in operations.get_hardware():
-                data.append({'component': comp.split('=')[0], 'value': comp.split('=')[1]})
-        except:
-            pass
-        # Return list of hardware components
-        return data
-
-    def process_software(self, path, get_params, post_params, server):
-        """
-        Returns software profile installed on an operating system
-        :param path:
-        :param get_params:
-        :param post_params:
-        :param server:
-        :return:
-        """
-        logger.debug('Received software operation with params: {}'.format(post_params))
-        return operations.get_software(post_params.get('disk'), post_params.get('part'))
