@@ -118,9 +118,14 @@ class OpenGnSysWorker(ServerWorker):
         :param url: URL to show
         """
         logger.debug('Launching browser with URL: {}'.format(url))
-        if hasattr(self.browser, 'process'):
-            self.browser['process'].kill()
-            os.kill(self.browser['process'].pid, signal.SIGINT)
+        # Trying to kill an old browser
+        try:
+            os.kill(self.browser['process'].pid, signal.SIGKILL)
+        except OSError:
+            logger.warn('Cannot kill the old browser process')
+        except KeyError:
+            # There is no previous browser
+            pass
         self.browser['url'] = url
         self.browser['process'] = subprocess.Popen(['browser', '-qws', url])
 
