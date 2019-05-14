@@ -33,7 +33,7 @@ export class NetbootComponent implements OnInit {
             classes: 'btn-default'
           },
           {
-            action: 'delete'
+            action: 'delete',
           }
         ]
     };

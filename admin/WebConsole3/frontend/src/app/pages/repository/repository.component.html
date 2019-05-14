@@ -40,7 +40,7 @@
       </div>
       <div class="box-footer">
         <mk-box header="{{'filesystem_info'|translate}}" [isCollapsable]="true" [isRemovable]="false" contentClasses="table-responsive">
-          <button type="button" [disabled]="repository.password.length == 0" class="btn btn-primary pull-right"  (click)="refreshRepoInfo(repository)">
+          <button type="button" [disabled]="!repository.randomId || repository.randomId.length == 0" class="btn btn-primary pull-right"  (click)="refreshRepoInfo(repository)">
             <i class="fa fa-refresh"></i> <span translate="refresh_info"></span>
           </button>
           <div class="box-body no-padding" >

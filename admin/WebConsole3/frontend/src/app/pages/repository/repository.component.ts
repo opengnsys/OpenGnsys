@@ -23,6 +23,7 @@ export class RepositoryComponent implements OnInit {
   constructor(public repositoryService: RepositoryService, private ogCommonService: OgCommonService, private ogSweetAlert: OgSweetAlertService, private toaster: ToasterService, private translate: TranslateService) {
     this.OGCommonService = ogCommonService;
     this.formType = new RepositoryFormType().getForm();
+    this.repositories = [];
   }
 
   ngOnInit(): void {

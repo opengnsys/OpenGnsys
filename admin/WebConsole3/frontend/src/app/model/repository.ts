@@ -3,7 +3,8 @@ import { Resource } from 'globunet-angular/core/models/api/resource';
 export class Repository extends Resource {
   name: string;
   ip: string;
-  password: string;
+  randomId: string;
+  secret: string;
   description: string;
   info: any;
 
@@ -11,7 +12,8 @@ export class Repository extends Resource {
     super();
     this.name = '';
     this.ip = '';
-    this.password = '';
+    this.randomId = '';
+    this.secret = '';
     this.description = '';
   }
 }
