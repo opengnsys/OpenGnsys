@@ -21,6 +21,7 @@ export class NetbootEditComponent implements OnInit {
   // should be each tab's root Page
   constructor(public netbootService: NetbootService, private router: Router, private activatedRoute: ActivatedRoute,  private ogSweetAlert: OgSweetAlertService, private toaster: ToasterService, private  translate: TranslateService) {
     this.form = new NetbootFormType().getForm();
+    this.netboot = new Netboot();
   }
 
   ngOnInit(): void {

@@ -9,7 +9,7 @@ export class FormInputComponent {
   private _cols: number;
 
   @Input() model;
-
+    
   @Input()
   set cols(cols) {
     this._cols = (typeof cols !== 'undefined') ? (12 / cols) : 6;
@@ -43,4 +43,15 @@ export class FormInputComponent {
     }
     return result;
   }
+
+  compareFn = (a, b) => {
+    let result = false;
+    if (a !== null && b !== null && typeof a === 'object' && typeof b === 'object') {
+      result = (a.id === b.id);
+    } else{
+      result = (a === b);
+    }
+    return result;
+  }
+
 }

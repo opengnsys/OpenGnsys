@@ -11,7 +11,7 @@ export class ClientFormType extends GlobunetFormType {
     this.setFieldType(form, 'netboot', 'select');
     this.getField(form, 'oglive').options = {
       label: 'iso',
-      value: 'iso'
+      value: 'directory'
     };
     this.getField(form, 'repository').options = {
       label: 'name',
@@ -20,8 +20,9 @@ export class ClientFormType extends GlobunetFormType {
       label: 'name',
     };
     this.getField(form, 'netboot').options = {
-      label: 'name',
+      label: 'name'
     };
+
 
     return form;
   }
