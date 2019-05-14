@@ -38,7 +38,7 @@ import subprocess
 import threading
 import time
 import urllib
-
+import signal
 from opengnsys import REST
 from opengnsys import operations
 from opengnsys.log import logger
@@ -119,6 +119,7 @@ class OpenGnSysWorker(ServerWorker):
         logger.debug('Launching browser with URL: {}'.format(url))
         if hasattr(self.browser, 'process'):
             self.browser['process'].kill()
+            os.kill(self.browser['process'].pid, signal.SIGINT)
         self.browser['url'] = url
         self.browser['process'] = subprocess.Popen(['browser', '-qws', url])
 
@@ -146,7 +147,7 @@ class OpenGnSysWorker(ServerWorker):
             route = route[len(self.REST.endpoint):]
         # Sending results
         self.REST.sendMessage(route, {'mac': self.interface.mac, 'ip': self.interface.ip, 'trace': op_id,
-                                      'status': stat, 'output': out, 'error': err})
+                                      'status': stat, 'output': out.encode('base64'), 'error': err.encode('base64')})
         # Show latest menu, if OGAgent runs on ogLive
         if os_type == 'oglive':
             self._launch_browser(menu_url)
