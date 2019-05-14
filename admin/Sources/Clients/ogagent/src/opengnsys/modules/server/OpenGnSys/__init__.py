@@ -39,6 +39,7 @@ import threading
 import time
 import urllib
 import signal
+
 from opengnsys import REST
 from opengnsys import operations
 from opengnsys.log import logger
@@ -136,18 +137,19 @@ class OpenGnSysWorker(ServerWorker):
         if os_type == 'oglive':
             menu_url = self.browser['url']
             self._launch_browser('http://localhost/cgi-bin/httpd-log.sh')
-        # Executing command
+        # Execute the code
         (stat, out, err) = operations.exec_command(code)
-        # Removing command from the list
+        # Remove command from the list
         for c in self.commands:
             if c.getName() == op_id:
                 self.commands.remove(c)
-        # Removing the REST API prefix, if needed
+        # Remove the REST API prefix, if needed
         if route.startswith(self.REST.endpoint):
             route = route[len(self.REST.endpoint):]
-        # Sending results
+        # Send back exit status and outputs (base64-encoded)
         self.REST.sendMessage(route, {'mac': self.interface.mac, 'ip': self.interface.ip, 'trace': op_id,
-                                      'status': stat, 'output': out.encode('base64'), 'error': err.encode('base64')})
+                                      'status': stat, 'output': out.encode('utf8').encode('base64'),
+                                      'error': err.encode('utf8').encode('base64')})
         # Show latest menu, if OGAgent runs on ogLive
         if os_type == 'oglive':
             self._launch_browser(menu_url)
@@ -446,40 +448,8 @@ class OpenGnSysWorker(ServerWorker):
                 # Logging warnings
                 logger.warn('Configuration data error: {}'.format(cols))
                 warnings += 1
-        # Returning configuration data and count of warnings
+        # Return configuration data and count of warnings
         return {'serialno': serialno, 'storage': storage, 'warnings': warnings}
-
-    def process_command(self, path, get_params, post_params, server):
-        """
-        Launches a thread to executing a command
-        :param path: ignored
-        :param get_params: ignored
-        :param post_params: object with format:
-            id: operation id.
-            script: command code
-            redirect_url: callback REST route
-        :param server: headers data
-        :rtype: object with launching status
-        """
-        logger.debug('Received command operation with params: {}'.format(post_params))
-        self._check_secret(server)
-        # Processing data
-        try:
-            script = post_params.get('script')
-            op_id = post_params.get('id')
-            route = post_params.get('redirect_url')
-            # Checking if the thread id. exists
-            for c in self.commands:
-                if c.getName() == str(op_id):
-                    raise Exception('Task id. already exists: {}'.format(op_id))
-            # Launching a new thread
-            thr = threading.Thread(name=op_id, target=self.task_command, args=(script, route, op_id))
-            thr.start()
-            self.commands.append(thr)
-        except Exception as e:
-            logger.error('Got exception {}'.format(e))
-            return {'error': e}
-        return {'op': 'launched'}
 
     def process_execinfo(self, path, get_params, post_params, server):
         """
