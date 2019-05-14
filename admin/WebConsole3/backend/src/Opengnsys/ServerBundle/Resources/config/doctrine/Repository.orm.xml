@@ -9,15 +9,12 @@
             <generator strategy="AUTO"/>
         </id>
 
-        <field name="name" type="string" column="name" length="250" nullable="false"/>
         <field name="ip" type="string" column="ip" length="36" nullable="false"/>
-        <field name="password" type="string" column="password" length="50" nullable="false"/>
-        <field name="configurationpath" type="string" column="configurationpath" length="250" nullable="false"/>
-        <field name="adminpath" type="string" column="adminpath" length="250" nullable="false"/>
-        <field name="pxepath" type="string" column="pxepath" length="250" nullable="false"/>
-        <field name="port" type="integer" column="port" nullable="true"/>
-
+        <field name="name" type="string" column="name" length="250" nullable="false"/>
         <field name="description" type="text" column="description" nullable="true"/>
+
+        <field name="randomId" type="string" column="random_id" length="255" nullable="true"/>
+        <field name="secret" type="string" column="secret" length="255" nullable="true"/>
 
         <many-to-one field="organizationalUnit" target-entity="OrganizationalUnit">
             <join-columns>

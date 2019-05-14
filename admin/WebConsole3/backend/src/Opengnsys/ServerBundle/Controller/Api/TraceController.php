@@ -11,6 +11,7 @@
 namespace Opengnsys\ServerBundle\Controller\Api;
 
 use FOS\RestBundle\Context\Context;
+use Opengnsys\ServerBundle\Entity\Enum\ClientStatus;
 use Opengnsys\ServerBundle\Entity\Hardware;
 use Opengnsys\ServerBundle\Entity\HardwareProfile;
 use Opengnsys\ServerBundle\Entity\Image;
@@ -146,14 +147,16 @@ class TraceController extends ApiController
         if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
 
-            $clientId = $data['client'];
+            $clientIp = $data['ip'];
+            $clientMac = $data['mac'];
             $traceId = $data['trace'];
             $status = $data['status'];
-            $output = $data['output'];
-            $error = $data['error'];
+            $output = base64_decode($data['output']);
+            $error = base64_decode($data['error']);
 
             $logger->info("----------- COMMAND STATUS -----------");
-            $logger->info("client: ".$clientId);
+            $logger->info("clientId: ".$clientIp);
+            $logger->info("clientMac: ".$clientMac);
             $logger->info("trace: ".$traceId);
             $logger->info("status: ".$status);
             $logger->info("output: ".$output);
@@ -163,11 +166,14 @@ class TraceController extends ApiController
             $traceRepository = $em->getRepository(Trace::class);
 
             $trace = $traceRepository->findOneBy(array("id"=>$traceId));
+            // Doble comprobación
             if($trace != null){
                 $trace->setStatus($status);
                 $trace->setOutput($output);
                 $trace->setError($error);
                 $trace->setFinishedAt(new \DateTime());
+
+                $client = $trace->getClient();
 
                 switch ($trace->getCommandType()){
                     case \Opengnsys\ServerBundle\Entity\Enum\CommandType::HARDWARE_INVENTORY:
@@ -175,52 +181,51 @@ class TraceController extends ApiController
                         $hardwareProfileRepository = $em->getRepository(HardwareProfile::class);
 
                         $logger->info("-> HARDWARE_INVENTORY <-");
-                        $path = $this->getParameter('path_client');
-                        $client = $trace->getClient();
+                        //$path = $this->getParameter('path_client');
 
                         if($client != null){
-                            $ip = $client->getIp();
-                            $file = "hard-".$ip;
+                            //$ip = $client->getIp();
+                            //$file = "hard-".$ip;
+                            //$filePath = $path.$file;
 
-                            $filePath = $path.$file;
-
-                            if(file_exists($filePath)) {
-                                $description = "HardwareProfile-".$client->getName();
-                                $hardwareProfile = $hardwareProfileRepository->findOneBy(array("description"=>$description));
-                                if($hardwareProfile == null){
-                                    $logger->info("Crea Hardware Profile: ". $description);
-                                    $hardwareProfile = new HardwareProfile();
-                                    $hardwareProfile->setDescription($description);
-                                    $em->persist($hardwareProfile);
-                                }else{
-                                    $logger->info("Ya existe Hardware Profile: ". $description);
-                                    $hardwareProfile->getHardwares()->clear();
-                                }
-
-                                $data = file_get_contents($filePath);
-
-                                $data = explode("\n",trim($data));
-                                unset($data[0]);
-                                foreach ($data as $item){
-                                    $item = explode("=",trim($item));
-
-                                    $type = array_key_exists(0, $item)?trim($item[0]):"";
-                                    $description = array_key_exists(1, $item)?trim($item[1]):"";
-                                    if($type!= "" && $description != ""){
-                                        $logger->info("Hardware: ".$type." = ".$description);
-
-                                        $hardware = $hardwareRepository->findOneBy(array("type"=>$type, "description"=>$description));
-                                        if($hardware == null){
-                                            $logger->info("-- lo crea nuevo --");
-                                            $hardware = new Hardware();
-                                            $hardware->setType($type);
-                                            $hardware->setDescription($description);
-                                        }
-                                        $hardwareProfile->addHardware($hardware);
-                                    }
-                                }
-                                $client->setHardwareProfile($hardwareProfile);
+                            //if(file_exists($filePath)) {
+                            $description = "HardwareProfile-".$client->getName();
+                            $hardwareProfile = $hardwareProfileRepository->findOneBy(array("description"=>$description));
+                            if($hardwareProfile == null){
+                                $logger->info("Crea Hardware Profile: ". $description);
+                                $hardwareProfile = new HardwareProfile();
+                                $hardwareProfile->setDescription($description);
+                                $em->persist($hardwareProfile);
+                            }else{
+                                $logger->info("Ya existe Hardware Profile: ". $description);
+                                $hardwareProfile->getHardwares()->clear();
                             }
+
+                            //$data = file_get_contents($filePath);
+                            $data = $output;
+
+                            $data = explode("\n",trim($data));
+                            unset($data[0]);
+                            foreach ($data as $item){
+                                $item = explode("=",trim($item));
+
+                                $type = array_key_exists(0, $item)?trim($item[0]):"";
+                                $description = array_key_exists(1, $item)?trim($item[1]):"";
+                                if($type!= "" && $description != ""){
+                                    $logger->info("Hardware: ".$type." = ".$description);
+
+                                    $hardware = $hardwareRepository->findOneBy(array("type"=>$type, "description"=>$description));
+                                    if($hardware == null){
+                                        $logger->info("-- lo crea nuevo --");
+                                        $hardware = new Hardware();
+                                        $hardware->setType($type);
+                                        $hardware->setDescription($description);
+                                    }
+                                    $hardwareProfile->addHardware($hardware);
+                                }
+                            }
+                            $client->setHardwareProfile($hardwareProfile);
+                            //}
                         }
                         break;
                     case \Opengnsys\ServerBundle\Entity\Enum\CommandType::CREATE_IMAGE:
@@ -228,7 +233,6 @@ class TraceController extends ApiController
                         $partitionRepository = $em->getRepository(Partition::class);
 
                         $logger->info("-> CREATE_IMAGE <-");
-                        $client = $trace->getClient();
 
                         if($client != null){
                             $script = $trace->getScript();
@@ -290,77 +294,78 @@ class TraceController extends ApiController
                         $partitionRepository = $em->getRepository(Partition::class);
 
                         $logger->info("-> SOFTWARE_INVENTORY <-");
-                        $path = $this->getParameter('path_client');
-                        $client = $trace->getClient();
+                        //$path = $this->getParameter('path_client');
 
                         if($client != null){
-                            $ip = $client->getIp();
+                            //$ip = $client->getIp();
                             $script = $trace->getScript();
                             $script = explode("\n", $script);
                             $script = explode(" ", $script[0]);
                             $numDisk = array_key_exists(1, $script)?trim($script[1]):"";
                             $numPartition = array_key_exists(2, $script)?trim($script[2]):"";
 
-                            $file = "soft-".$ip."-".$numDisk."-".$numPartition;
-                            $filePath = $path.$file;
-                            $logger->info("File: ". $filePath);
+                            //$file = "soft-".$ip."-".$numDisk."-".$numPartition;
+                            //$filePath = $path.$file;
+                            //$logger->info("File: ". $filePath);
 
-                            if(file_exists($filePath)) {
-                                $description = "SoftwareProfile-".$client->getName()."-".$numDisk."-".$numPartition;
-                                $softwareProfile = $softwareProfileRepository->findOneBy(array("description"=>$description));
-                                if($softwareProfile == null){
-                                    $logger->info("Crea Software Profile: ". $description);
-                                    $softwareProfile = new SoftwareProfile();
-                                    $softwareProfile->setDescription($description);
+                            //if(file_exists($filePath)) {
+                            $description = "SoftwareProfile-".$client->getName()."-".$numDisk."-".$numPartition;
+                            $softwareProfile = $softwareProfileRepository->findOneBy(array("description"=>$description));
+                            if($softwareProfile == null){
+                                $logger->info("Crea Software Profile: ". $description);
+                                $softwareProfile = new SoftwareProfile();
+                                $softwareProfile->setDescription($description);
 
-                                    $em->persist($softwareProfile);
-                                }else{
-                                    $logger->info("Ya existe Software Profile: ". $description);
-                                    $softwareProfile->getSoftwares()->clear();
-                                }
+                                $em->persist($softwareProfile);
+                            }else{
+                                $logger->info("Ya existe Software Profile: ". $description);
+                                $softwareProfile->getSoftwares()->clear();
+                            }
 
-                                $data = file_get_contents($filePath);
+                            //$data = file_get_contents($filePath);
+                            $data = $output;
 
-                                $data = explode("\n",trim($data));
-                                foreach ($data as $item){
-                                    $item = trim($item);
-                                    $type = "";
-                                    $description = $item;
-                                    if($description != ""){
-                                        $logger->info("Software: ".$type." = ".$description);
+                            $data = explode("\n",trim($data));
+                            foreach ($data as $item){
+                                $item = trim($item);
+                                $type = "";
+                                $description = $item;
+                                if($description != ""){
+                                    $logger->info("Software: ".$type." = ".$description);
 
-                                        $software = $softwareRepository->findOneBy(array("description"=>$description));
-                                        if($software == null){
-                                            $logger->info("-- lo crea nuevo --");
-                                            $software = new Software();
-                                            $software->setType($type);
-                                            $software->setDescription($description);
-                                        }
-                                        $softwareProfile->addSoftware($software);
+                                    $software = $softwareRepository->findOneBy(array("description"=>$description));
+                                    if($software == null){
+                                        $logger->info("-- lo crea nuevo --");
+                                        $software = new Software();
+                                        $software->setType($type);
+                                        $software->setDescription($description);
                                     }
+                                    $softwareProfile->addSoftware($software);
                                 }
+                            }
 
-                                $logger->info("Partition");
-                                $partition = $partitionRepository->findOneBy(array("client"=>$client, "numDisk"=>$numDisk, "numPartition"=>$numPartition));
-                                if($partition != null){
-                                    $image = $partition->getImage();
-                                    if($image != null){
-                                        $logger->info("Assing Image : " . $image->getCanonicalName() . " to SoftwareProfile: ". $description);
-                                        $image->setSoftwareProfile($softwareProfile);
-                                    }else{
-                                        $logger->info("Not Found Image in Partition: ". "client: ".$client->getIp()." numDisk: ".$numDisk." numPartition: ".$numPartition);
-                                    }
+                            $logger->info("Partition");
+                            $partition = $partitionRepository->findOneBy(array("client"=>$client, "numDisk"=>$numDisk, "numPartition"=>$numPartition));
+                            if($partition != null){
+                                $image = $partition->getImage();
+                                if($image != null){
+                                    $logger->info("Assing Image : " . $image->getCanonicalName() . " to SoftwareProfile: ". $description);
+                                    $image->setSoftwareProfile($softwareProfile);
                                 }else{
-                                    $logger->info("Not Found Partition: ". "client: ".$client->getIp()." numDisk: ".$numDisk." numPartition: ".$numPartition);
+                                    $logger->info("Not Found Image in Partition: ". "client: ".$client->getIp()." numDisk: ".$numDisk." numPartition: ".$numPartition);
                                 }
                             }else{
-                                $logger->info("Not Found File: ". $filePath);
+                                $logger->info("Not Found Partition: ". "client: ".$client->getIp()." numDisk: ".$numDisk." numPartition: ".$numPartition);
                             }
+                            //}else{
+                            //    $logger->info("Not Found File: ". $filePath);
+                            //}
                         }
 
                         break;
 
                 }
+                $client->setStatus(ClientStatus::OG_LIVE);
                 $em->flush();
                 $logger->info("Execute Flush");
             }

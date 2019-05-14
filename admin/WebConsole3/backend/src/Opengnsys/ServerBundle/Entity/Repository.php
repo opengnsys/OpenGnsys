@@ -10,45 +10,30 @@ class Repository extends BaseEntity
     /**
      * @var string
      */
-    private $name;
-
-    /**
-     * @var string
-     */
     private $ip;
 
     /**
      * @var string
      */
-    private $password;
+    private $name;
 
     /**
-     * @var string
-     */
-    private $configurationpath;
-
-    /**
-     * @var string
-     */
-    private $adminpath;
-
-    /**
-     * @var string
-     */
-    private $pxepath;
-
-    /**
-     * @var string
+     * @var string|null
      */
     private $description;
 
     /**
-     * @var integer
+     * @var string|null
      */
-    private $port;
+    private $randomId;
 
     /**
-     * @var integer
+     * @var string|null
+     */
+    private $secret;
+
+    /**
+     * @var int
      */
     private $id;
 
@@ -57,32 +42,9 @@ class Repository extends BaseEntity
      */
     private $organizationalUnit;
 
-    /**
-     * Set name
-     *
-     * @param string $name
-     *
-     * @return Repository
-     */
-    public function setName($name)
-    {
-        $this->name = $name;
-
-        return $this;
-    }
 
     /**
-     * Get name
-     *
-     * @return string
-     */
-    public function getName()
-    {
-        return $this->name;
-    }
-
-    /**
-     * Set ip
+     * Set ip.
      *
      * @param string $ip
      *
@@ -96,7 +58,7 @@ class Repository extends BaseEntity
     }
 
     /**
-     * Get ip
+     * Get ip.
      *
      * @return string
      */
@@ -106,109 +68,37 @@ class Repository extends BaseEntity
     }
 
     /**
-     * Set password
+     * Set name.
      *
-     * @param string $password
+     * @param string $name
      *
      * @return Repository
      */
-    public function setPassword($password)
+    public function setName($name)
     {
-        $this->password = $password;
+        $this->name = $name;
 
         return $this;
     }
 
     /**
-     * Get password
+     * Get name.
      *
      * @return string
      */
-    public function getPassword()
+    public function getName()
     {
-        return $this->password;
+        return $this->name;
     }
 
     /**
-     * Set configurationpath
+     * Set description.
      *
-     * @param string $configurationpath
+     * @param string|null $description
      *
      * @return Repository
      */
-    public function setConfigurationpath($configurationpath)
-    {
-        $this->configurationpath = $configurationpath;
-
-        return $this;
-    }
-
-    /**
-     * Get configurationpath
-     *
-     * @return string
-     */
-    public function getConfigurationpath()
-    {
-        return $this->configurationpath;
-    }
-
-    /**
-     * Set adminpath
-     *
-     * @param string $adminpath
-     *
-     * @return Repository
-     */
-    public function setAdminpath($adminpath)
-    {
-        $this->adminpath = $adminpath;
-
-        return $this;
-    }
-
-    /**
-     * Get adminpath
-     *
-     * @return string
-     */
-    public function getAdminpath()
-    {
-        return $this->adminpath;
-    }
-
-    /**
-     * Set pxepath
-     *
-     * @param string $pxepath
-     *
-     * @return Repository
-     */
-    public function setPxepath($pxepath)
-    {
-        $this->pxepath = $pxepath;
-
-        return $this;
-    }
-
-    /**
-     * Get pxepath
-     *
-     * @return string
-     */
-    public function getPxepath()
-    {
-        return $this->pxepath;
-    }
-
-    /**
-     * Set description
-     *
-     * @param string $description
-     *
-     * @return Repository
-     */
-    public function setDescription($description)
+    public function setDescription($description = null)
     {
         $this->description = $description;
 
@@ -216,9 +106,9 @@ class Repository extends BaseEntity
     }
 
     /**
-     * Get description
+     * Get description.
      *
-     * @return string
+     * @return string|null
      */
     public function getDescription()
     {
@@ -226,33 +116,57 @@ class Repository extends BaseEntity
     }
 
     /**
-     * Set port
+     * Set randomId.
      *
-     * @param integer $port
+     * @param string|null $randomId
      *
      * @return Repository
      */
-    public function setPort($port)
+    public function setRandomId($randomId = null)
     {
-        $this->port = $port;
+        $this->randomId = $randomId;
 
         return $this;
     }
 
     /**
-     * Get port
+     * Get randomId.
      *
-     * @return integer
+     * @return string|null
      */
-    public function getPort()
+    public function getRandomId()
     {
-        return $this->port;
+        return $this->randomId;
     }
 
     /**
-     * Get id
+     * Set secret.
      *
-     * @return integer
+     * @param string|null $secret
+     *
+     * @return Repository
+     */
+    public function setSecret($secret = null)
+    {
+        $this->secret = $secret;
+
+        return $this;
+    }
+
+    /**
+     * Get secret.
+     *
+     * @return string|null
+     */
+    public function getSecret()
+    {
+        return $this->secret;
+    }
+
+    /**
+     * Get id.
+     *
+     * @return int
      */
     public function getId()
     {
@@ -260,9 +174,9 @@ class Repository extends BaseEntity
     }
 
     /**
-     * Set organizationalUnit
+     * Set organizationalUnit.
      *
-     * @param \Opengnsys\ServerBundle\Entity\OrganizationalUnit $organizationalUnit
+     * @param \Opengnsys\ServerBundle\Entity\OrganizationalUnit|null $organizationalUnit
      *
      * @return Repository
      */
@@ -274,13 +188,12 @@ class Repository extends BaseEntity
     }
 
     /**
-     * Get organizationalUnit
+     * Get organizationalUnit.
      *
-     * @return \Opengnsys\ServerBundle\Entity\OrganizationalUnit
+     * @return \Opengnsys\ServerBundle\Entity\OrganizationalUnit|null
      */
     public function getOrganizationalUnit()
     {
         return $this->organizationalUnit;
     }
-
 }

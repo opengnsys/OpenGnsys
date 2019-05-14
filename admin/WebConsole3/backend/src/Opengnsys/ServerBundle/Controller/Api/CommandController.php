@@ -11,6 +11,7 @@
 namespace Opengnsys\ServerBundle\Controller\Api;
 
 use FOS\RestBundle\Context\Context;
+use Opengnsys\ServerBundle\Entity\Enum\ClientStatus;
 use Opengnsys\ServerBundle\Entity\Trace;
 use Opengnsys\ServerBundle\Entity\Client;
 use Opengnsys\ServerBundle\Entity\Command;
@@ -276,6 +277,7 @@ class CommandController extends ApiController
 
             }else{
                 foreach ($clients as $client) {
+                    $client->setStatus(ClientStatus::BUSY);
                     $trace = new Trace();
                     $trace->setClient($client);
                     $trace->setExecutedAt(new \DateTime());
@@ -371,6 +373,9 @@ class CommandController extends ApiController
 
         // recibimos la respuesta y la guardamos en una variable
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5); // The number of seconds to wait while trying to connect. Use 0 to wait indefinitely.
+        curl_setopt($ch, CURLOPT_TIMEOUT, 20); //timeout in seconds
 
         $remote_server_output = curl_exec ($ch);
         $remote_server_error = "";

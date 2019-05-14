@@ -26,12 +26,9 @@ class RepositoryType extends AbstractType
         $builder
             ->add('name')
             ->add('ip')
-            ->add('password')
-            ->add('configurationpath')
-            ->add('adminpath')
-            ->add('pxepath')
             ->add('description')
-            ->add('port')
+            ->add('secret')
+            ->add('randomId')
         ;
     }
     

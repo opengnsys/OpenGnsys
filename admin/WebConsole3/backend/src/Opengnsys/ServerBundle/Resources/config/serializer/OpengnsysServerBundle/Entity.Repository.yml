@@ -9,30 +9,18 @@ Opengnsys\ServerBundle\Entity\Repository:
             groups: [opengnsys_server__repository_get, opengnsys_server__repository_cget]
             expose: true
             serialized_name: ip
-        password:
-            groups: [opengnsys_server__repository_get, opengnsys_server__repository_cget]
-            expose: true
-            serialized_name: password
-        configurationpath:
-            groups: [opengnsys_server__repository_get, opengnsys_server__repository_cget]
-            expose: true
-            serialized_name: configurationpath
-        adminpath:
-            groups: [opengnsys_server__repository_get, opengnsys_server__repository_cget]
-            expose: true
-            serialized_name: adminpath
-        pxepath:
-            groups: [opengnsys_server__repository_get, opengnsys_server__repository_cget]
-            expose: true
-            serialized_name: pxepath
         description:
             groups: [opengnsys_server__repository_get, opengnsys_server__repository_cget]
             expose: true
             serialized_name: description
-        port:
+        randomId:
             groups: [opengnsys_server__repository_get, opengnsys_server__repository_cget]
             expose: true
-            serialized_name: port
+            serialized_name: randomId
+        secret:
+            groups: [opengnsys_server__repository_get, opengnsys_server__repository_cget]
+            expose: true
+            serialized_name: secret
         id:
             groups: [opengnsys_server__repository_get, opengnsys_server__repository_cget]
             expose: true

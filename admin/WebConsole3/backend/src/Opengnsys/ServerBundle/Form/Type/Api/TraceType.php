@@ -24,6 +24,8 @@ class TraceType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
+            ->add('ip', TextType::class)
+            ->add('mac', TextType::class)
             ->add('client', TextType::class)
             ->add('trace', TextType::class)
             ->add('status', TextType::class)
