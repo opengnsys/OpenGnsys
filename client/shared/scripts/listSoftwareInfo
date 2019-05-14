@@ -15,21 +15,10 @@ if [ $# -ne 2 ]; then
     exit $?
 fi
 
-# Directorio del servidor donde se exportan los ficheros de registro.
-SERVERLOGDIR=$(mount | awk -v d=$OGLOG '
-				BEGIN {FS="[: ]"}
-				{if ($4==d) dir=$2}
-				END {print dir}')
-
-# Fichero de listado:  soft-IP-ndisco-npart
-SOFTFILE="soft-$(ogGetIpAddress)-$1-$2"
-# Redirigir salida al fichero de listado.
+# Mostrar inventario (líneas con formato: Programa Versión).
 if [ "$REDUCED" = "no" ]; then
-    ogListSoftware "$1" "$2" >$OGLOG/$SOFTFILE || exit $?
+    ogListSoftware "$1" "$2" || exit $?
 else
-    ogListSoftware "$1" "$2" | egrep -v "\(KB[0-9]{6}\)" >$OGLOG/$SOFTFILE || exit $?
+    ogListSoftware "$1" "$2" | egrep -v "\(KB[0-9]{6}\)" || exit $?
 fi
-# Salid: camino del fichero de listado en el servidor de repositorio.
-#echo $SERVERLOGDIR/$SOFTFILE
-echo $OGLOG/$SOFTFILE
 
