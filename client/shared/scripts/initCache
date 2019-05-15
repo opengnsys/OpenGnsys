@@ -69,6 +69,8 @@ else
 	ogUnmountCache 2>/dev/null
 	ogDeleteCache
     fi
+    # Tomamos el tamaño actual. Si no existe cache será 0.
+    OLDSIZE=$(ogGetCacheSize 2>/dev/null) || OLDSIZE=0
 
     # Error si tamaño definido no es >0.
     if [ ! $SIZE -gt 0 ]; then
@@ -83,9 +85,9 @@ else
         ogCreateCache $NDISK $NPART $SIZE
         ogUpdatePartitionTable $NDISK
     fi
-    # Si caché no montada y no formateada, formatear.
+    # Si caché no montada y no formateada o cambia el tamaño: formatear.
     CACHE=$(ogFindCache) || exit $?
-    if ! ogIsFormated $CACHE; then
+    if ! ogIsFormated $CACHE || [ $SIZE -ne $OLDSIZE ]; then
         echo "[50] Formatear caché local."
         ogFormatCache
     fi
