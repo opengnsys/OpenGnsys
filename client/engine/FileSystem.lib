@@ -55,24 +55,24 @@ PART="$(ogDiskToDev $1 $2)" || return $?
 
 TYPE=$(ogGetFsType $1 $2)
 case "$TYPE" in
-    EXT[234])     PROG="e2fsck"; PARAMS="-y"; CODES=(1 2) ;;
-    BTRFS)        PROG="btrfsck"; CODES=(1) ;;
-    REISERFS)     PROG="fsck.reiserfs"; PARAMS="<<<\"Yes\""; CODES=(1 2) ;;
-    REISER4)      PROG="fsck.reiser4"; PARAMS="-ay" ;;
-    JFS)          PROG="fsck.jfs"; CODES=(1 2) ;;
-    XFS)          PROG="xfs_repair" ;;
-    F2FS)         PROG="fsck.f2fs" ;;
-    NTFS)         PROG="ntfsfix" ;;
-    EXFAT)        PROG="fsck.exfat" ;;
-    FAT32)        PROG="dosfsck"; PARAMS="-a"; CODES=(1) ;;
-    FAT16)        PROG="dosfsck"; PARAMS="-a"; CODES=(1) ;;
-    FAT12)        PROG="dosfsck"; PARAMS="-a"; CODES=(1) ;;
-    HFS)          PROG="fsck.hfs"; PARAMS="-f" ;;
-    HFSPLUS)      PROG="fsck.hfs"; PARAMS="-f" ;;
-    UFS)          PROG="fsck.ufs" ;;
-    ZFS)          PROG="fsck.zfs" ;;
-    *)            ogRaiseError $OG_ERR_PARTITION "$1, $2, $TYPE"
-                  return $? ;;
+    EXT[234]|CACHE) PROG="e2fsck"; PARAMS="-y"; CODES=(1 2) ;;
+    BTRFS)          PROG="btrfsck"; CODES=(1) ;;
+    REISERFS)       PROG="fsck.reiserfs"; PARAMS="<<<\"Yes\""; CODES=(1 2) ;;
+    REISER4)        PROG="fsck.reiser4"; PARAMS="-ay" ;;
+    JFS)            PROG="fsck.jfs"; CODES=(1 2) ;;
+    XFS)            PROG="xfs_repair" ;;
+    F2FS)           PROG="fsck.f2fs" ;;
+    NTFS)           PROG="ntfsfix" ;;
+    EXFAT)          PROG="fsck.exfat" ;;
+    FAT32)          PROG="dosfsck"; PARAMS="-a"; CODES=(1) ;;
+    FAT16)          PROG="dosfsck"; PARAMS="-a"; CODES=(1) ;;
+    FAT12)          PROG="dosfsck"; PARAMS="-a"; CODES=(1) ;;
+    HFS)            PROG="fsck.hfs"; PARAMS="-f" ;;
+    HFSPLUS)        PROG="fsck.hfs"; PARAMS="-f" ;;
+    UFS)            PROG="fsck.ufs" ;;
+    ZFS)            PROG="fsck.zfs" ;;
+    *)              ogRaiseError $OG_ERR_PARTITION "$1, $2, $TYPE"
+                    return $? ;;
 esac
 # Error si el sistema de archivos esta montado o bloqueado.
 ogUnmount $1 $2
