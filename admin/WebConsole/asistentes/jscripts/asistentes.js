@@ -96,7 +96,7 @@ command + " \n";
 }
 else
 {
-	command="updateCache REPO /" + imagen[1] + ".img" + " " + protocol  ;
+	command="updateCache " + imagen[0] + " /" + imagen[1] + ".img" + " " + protocol  ;
 	form.codigo.value="\
 ogEcho log session \"[0] $MSG_SCRIPTS_TASK_START " + command +"\"\n \ " +
 command + " \n";
