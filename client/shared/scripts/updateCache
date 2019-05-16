@@ -35,9 +35,6 @@
 #@version 1.1 - Control de errores en transferencia multicast (ticket #781) 
 #@author  Irina Gomez, ETSII Universidad de Sevilla 
 #@date    2017/04/20 
-@version 1.1 - Verifar existencia de la imagen (ticket #910) 
-#@author  antonio J. Doblas Viso, Universidad de Malaga 
-#@date    2019/05/16 
 #*/ ##
 
 PROG="$(basename $0)"
