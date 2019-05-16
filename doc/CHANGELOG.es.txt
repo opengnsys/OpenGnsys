@@ -34,6 +34,7 @@ Tickets resueltos en módulo OpenGnsys Installer:
 #879	Función checkVersion de opengnsys_update.sh del tar.gz da error si se ejecuta sobre la misma versión de OpenGnsys (corrección)
 #880	openGnsys_update.sh no deja la revisión, solo deja 1.1.0a (corrección)
 #886	Actualización de la 1.0.6b a la 1.1.0 da errores a la hora de agregar ordenadores/aulas (no válido)
+#912	opengnsys_update.sh desde la 1.0.6b a la 1.1.0a no deja la ApiToken del repo en su fichero de configuración (corrección)
 
 Tickets genéricos resueltos:
 #839	Errores detectado en API REST para Remote PC (corrección)

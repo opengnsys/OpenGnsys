@@ -289,7 +289,6 @@ function importSqlFile()
         local mycnf=/tmp/.my.cnf.$$
         local status
 	local APIKEY=$(php -r 'echo md5(uniqid(rand(), true));')
-	REPOKEY=$(php -r 'echo md5(uniqid(rand(), true));')
 
         if [ ! -r $sqlfile ]; then
                 errorAndLog "${FUNCNAME}(): Unable to read $sqlfile!!"
@@ -395,7 +394,10 @@ function downloadCode()
 
 	echoAndLog "${FUNCNAME}(): downloading code..."
 
-	curl "${url}" -o opengnsys.zip && unzip opengnsys.zip && mv "OpenGnsys-$BRANCH" opengnsys
+	curl "${url}" -o opengnsys.zip && \
+		unzip -qo opengnsys.zip && \
+		rm -fr opengnsys && \
+		mv "OpenGnsys-$BRANCH" opengnsys
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error getting code from ${url}, verify your user and password"
 		return 1
@@ -778,6 +780,7 @@ function updateDatabase()
 	fi
 
 	popd >/dev/null
+	REPOKEY=$(php -r 'echo md5(uniqid(rand(), true));')
 	if [ -n "$FILES" ]; then
 		for file in $FILES; do
 			importSqlFile $OPENGNSYS_DBUSER $OPENGNSYS_DBPASSWORD $OPENGNSYS_DATABASE $DBDIR/$file
