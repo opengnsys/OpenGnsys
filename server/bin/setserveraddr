@@ -22,7 +22,7 @@
 PROG="$(basename "$0")"
 OPENGNSYS=/opt/opengnsys
 PXEDIR=$OPENGNSYS/tftpboot/menu.lst
-DEFAULTFILE=/etc/default/opengnsys
+CONFIGFILE=$OPENGNSYS/etc/opengnsys.json
 
 # Checking parameters.
 if [ $# -ne 1 ]; then
@@ -56,8 +56,7 @@ done
 if [ -n "$SERVERIP" ]; then
 	# Temporary files.
 	tmpfile=$(mktemp /tmp/og.XXXXX)
-	MYCNF=$(mktemp /tmp/.my.cnf.XXXXX)
-	trap "rm -f $tmpfile $MYCNF" 1 2 3 6 9 15
+	trap "rm -f $tmpfile" 1 2 3 6 9 15
 
 	# Checking whether the DHCP settings need to be changed.
 	CHANGE=0
@@ -85,73 +84,12 @@ if [ -n "$SERVERIP" ]; then
 		echo "DHCP configuration has not changed."
 	fi
 
-	# Saving old IP address.
-	source $OPENGNSYS/etc/ogAdmRepo.cfg
-	OLDSERVERIP=$IPlocal
-
-	# Checking if configuration files need to be modified.
-	CHANGE=0
-	for f in $OPENGNSYS/{etc/{ogAdmServer,ogAdmRepo,ogAdmAgent}.cfg,www/controlacceso.php,client/etc/ogAdmClient.cfg}; do
-		# Error if configuration file cannot be found.
-		if [ ! -f $f ]; then
-			echo "$PROG: File $file does not exist." >&2
-			exit 2
-		fi
-		# Updating configuration variables (if URLs does not contain "localhost").
-		sed -e "s,ServidorAdm=.*,ServidorAdm=$SERVERIP," \
-		    -e "s,IPlocal=.*,IPlocal=$SERVERIP," \
-		    -e "s,UrlMenu=https?://\([^/]*\)/\(.*\),UrlMenu=https://$SERVERIP/\2," \
-		    -e '/localhost/!s,https\?://[^/]*/\(.*\),https://'$SERVERIP'/\1,' $f >$tmpfile
-		file="${f/./-$SERVERDEV.}"
-		# Copying updated file, if needed.
-		if [ ! $f -ef $file ] || ! diff -q $tmpfile $file &>/dev/null; then
-			cp $tmpfile $file
-			ln -f $file $f
-			CHANGE=1
-		fi
-	done
-
-	# Processing when something has changed.
-	if [ $CHANGE == 1 ]; then
-		# Restart OpenGnsys services.
-		/etc/init.d/opengnsys restart
-		# If Repository is active, generating a new API token.
-		source $DEFAULTFILE
-		if [ "$RUN_OGADMREPO" == "yes" ]; then
-			REPOKEY=$(php -r 'echo md5(uniqid(rand(), true));')
-			sed -i -e "s/ApiToken=.*/ApiToken=$REPOKEY/" $OPENGNSYS/etc/ogAdmRepo.cfg
-		fi
-		# If OpenGnsys Server is active, updating the database.
-		if [ "$RUN_OGADMSERVER" == "yes" ]; then
-			source $OPENGNSYS/etc/ogAdmServer.cfg
-			# Creating credentials file.
-			cat << EOT > $MYCNF
-[client]
-user=$USUARIO
-password=$PASSWORD
-EOT
-			# Updating OpenGnsys Server IP address.
-			mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -e \
-				 "UPDATE entornos
-				     SET ipserveradm='$SERVERIP'
-				   WHERE identorno=1"
-			# If OpenGnsys Repository is active, updating IP address and API token.
-			if [ "$RUN_OGADMREPO" == "yes" ]; then
-				mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -e \
-					 "UPDATE repositorios
-					     SET ip='$SERVERIP', apikey='$REPOKEY'
-					   WHERE ip='$OLDSERVERIP'"
-				unset REPOKEY
-			fi
-			# Updating all menu URLs.
-			mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -e \
-				 "UPDATE menus
-				     SET htmlmenupub = REPLACE(htmlmenupub, '$OLDSERVERIP', '$SERVERIP'),
-				         htmlmenupri = REPLACE(htmlmenupri, '$OLDSERVERIP', '$SERVERIP');"
-			# Updating all PXE files.
-			find $PXEDIR -name "01-*" -exec sed -i -e "s/$OLDSERVERIP/$SERVERIP/g" {} \;
-		fi
-
+	OLDSERVERIP=$(jq -r .server.ip $CONFIGFILE)
+	if [ "$SERVERIP" != "$OLDSERVERIP" ]; then
+		# Updating configuration file.
+		jq ".server.ip=\"$SERVERIP\"" $CONFIGFILE | sponge $CONFIGFILE
+		# Updating all PXE files.
+		find $PXEDIR -name "01-*" -exec sed -i -e "s/$OLDSERVERIP/$SERVERIP/g" {} \;
 		# Showing manual task to do after execution.
 		cat << EOT
 Default server interface set to: $SERVERDEV ($SERVERIP)
@@ -161,7 +99,6 @@ Manual tasks:
 - Check PXE files.
 - Log-in as Web Console user: 
   - Check menu URLs.
-${REPOKEY:+"  - Update repository API token"}
 EOT
 	else
 		# Showing message if nothing changes.
@@ -173,6 +110,6 @@ else
 	exit 1
 fi
 
-# Removing temporary files.
-rm -f $tmpfile $MYCNF
+# Removing temporary file.
+rm -f $tmpfile
 
