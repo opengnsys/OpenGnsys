@@ -250,8 +250,9 @@ class CommandController extends ApiController
 
             $id = $data["id"];
             $script = $data["script"];
-            $clientIds = $data["clients"];
             $type = $data["type"];
+            $sendConfig = $data["sendConfig"];
+            $clientIds = $data["clients"];
             $clientIds = explode(",", $clientIds);
 
             $clients = $clientRepository->findBy(array("id"=>$clientIds));
@@ -288,7 +289,7 @@ class CommandController extends ApiController
                     $em->persist($trace);
                     $em->flush();
 
-                    $result = $this->sendCurl($client,$script,$trace);
+                    $result = $this->sendCurl($client,$script,$trace,$sendConfig);
                     $outputs[] = $result;
 
                     if($result["error"] != ""){
@@ -319,7 +320,7 @@ class CommandController extends ApiController
         return $this->view($outputs, $response);
     }
 
-    private function sendCurl($client, $script, $trace)
+    private function sendCurl($client, $script, $trace, $sendConfig)
     {
         $logger = $this->get('monolog.logger.og_server');
 
@@ -328,13 +329,14 @@ class CommandController extends ApiController
 
         //$url = "https://".$ip."cgi-bin/api/LogCommand.sh";
         $url = "https://".$ip.":8000/opengnsys/script";
-        $redirect_uri = $this->generateUrl('opengnsys_server__api_post_traces', array(), UrlGeneratorInterface::ABSOLUTE_URL);
+        $redirectUri = $this->generateUrl('opengnsys_server__api_post_traces', array(), UrlGeneratorInterface::ABSOLUTE_URL);
 
         $arrayToPost = array(
             'id' => $trace->getId(),
             'script' => base64_encode($script),
             'ip' => $ip,
-            'redirect_uri' => $redirect_uri
+            'sendConfig'=> $sendConfig,
+            'redirectUri' => $redirectUri
         ); // this will be json_encode. If you don't want to json_encode, use HttpPostJson instead of HttpPostJsonBody
 
         $headers[] = "Authorization: ".$agentToken;
@@ -349,7 +351,7 @@ class CommandController extends ApiController
         $logger->info("SEND CURL script: " . $script);
         $logger->info("SEND CURL ip: " . $ip);
         $logger->info("SEND CURL token: " . $agentToken);
-        $logger->info("SEND CURL redirect_uri: " . $redirect_uri);
+        $logger->info("SEND CURL redirect_uri: " . $redirectUri);
         $logger->info("SEND CURL postUrl: " .$postUrl);
 
         // _GET

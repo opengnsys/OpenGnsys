@@ -11,7 +11,9 @@
 
         <field name="description" type="string" column="description" length="250" nullable="false"/>
 
+        <!--
         <field name="osType" column="os_type" type="string" length="60" nullable="true"/>
+        -->
 
         <field name="type" column="type" type="string" length="64" nullable="true"/>
 

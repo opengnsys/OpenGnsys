@@ -5,10 +5,14 @@ Opengnsys\ServerBundle\Entity\Software:
             groups: [opengnsys_server__software_get, opengnsys_server__software_cget]
             expose: true
             serialized_name: description
-        osType:
+        type:
             groups: [opengnsys_server__software_get, opengnsys_server__software_cget]
             expose: true
-            serialized_name: osType
+            serialized_name: type
+        #osType:
+        #    groups: [opengnsys_server__software_get, opengnsys_server__software_cget]
+        #    expose: true
+        #    serialized_name: osType
         id:
             groups: [opengnsys_server__software_get, opengnsys_server__software_cget]
             expose: true

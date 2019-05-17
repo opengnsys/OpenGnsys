@@ -15,7 +15,7 @@ class Software extends BaseEntity
     /**
      * @var string
      */
-    private $osType;
+    //private $osType;
 
     /**
      * @var string
@@ -63,7 +63,7 @@ class Software extends BaseEntity
      * @param string $osType
      *
      * @return Software
-     */
+     *
     public function setOsType($osType)
     {
         $this->osType = $osType;
@@ -75,7 +75,7 @@ class Software extends BaseEntity
      * Get osType
      *
      * @return string
-     */
+     *
     public function getOsType()
     {
         return $this->osType;

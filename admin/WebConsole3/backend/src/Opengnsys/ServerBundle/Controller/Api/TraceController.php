@@ -328,7 +328,12 @@ class TraceController extends ApiController
                             $data = explode("\n",trim($data));
                             foreach ($data as $item){
                                 $item = trim($item);
-                                $type = "";
+                                if ($item === reset($data)) {
+                                    $type = "os";
+                                }else{
+                                    $type = "app";
+                                }
+
                                 $description = $item;
                                 if($description != ""){
                                     $logger->info("Software: ".$type." = ".$description);

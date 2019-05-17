@@ -25,7 +25,8 @@ class SoftwareType extends AbstractType
     {
         $builder
             ->add('description')
-            ->add('osType')
+            ->add('type')
+            //->add('osType')
         ;
     }
     

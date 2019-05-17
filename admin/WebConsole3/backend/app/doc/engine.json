@@ -496,7 +496,7 @@
       "name": "Tipo de proceso de arranque"
     }
   ],
-  "sofwaretypes": [
+  "softwaretypes": [
     {
       "id": 1,
       "nemonic": "os",

@@ -27,6 +27,7 @@ class CommandExecuteType extends AbstractType
             ->add('id', TextType::class)
             ->add('script', TextType::class)
             ->add('type', TextType::class)
+            ->add('sendConfig', TextType::class)
             ->add('clients', TextType::class)
         ;
     }
