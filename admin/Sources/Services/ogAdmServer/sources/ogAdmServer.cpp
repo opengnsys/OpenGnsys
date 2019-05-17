@@ -8,6 +8,7 @@
 // *******************************************************************************************************
 #include "ogAdmServer.h"
 #include "ogAdmLib.c"
+#include "dbi.h"
 #include <ev.h>
 #include <syslog.h>
 #include <sys/ioctl.h>
@@ -23,6 +24,13 @@ static char datasource[LONPRM]; // Dirección IP del gestor de base de datos
 static char catalog[LONPRM]; // Nombre de la base de datos
 static char interface[LONPRM]; // Interface name
 static char auth_token[LONPRM]; // API token
+
+static struct og_dbi_config dbi_config = {
+	.user		= usuario,
+	.passwd		= pasguor,
+	.host		= datasource,
+	.database	= catalog,
+};
 
 //________________________________________________________________________________________________________
 //	Función: tomaConfiguracion
@@ -279,65 +287,45 @@ static bool InclusionClienteWinLnx(TRAMA *ptrTrama, struct og_client *cli)
 // ________________________________________________________________________________________________________
 bool procesoInclusionClienteWinLnx(int socket_c, TRAMA *ptrTrama, int *idordenador, char *nombreordenador)
  {
-	char msglog[LONSTD], sqlstr[LONSQL];
-	Database db;
-	Table tbl;
+	struct og_dbi *dbi;
+	const char *msglog;
+	dbi_result result;
 	char *iph;
 
 	// Toma parámetros
 	iph = copiaParametro("iph",ptrTrama); // Toma ip
 
-	if (!db.Open(usuario, pasguor, datasource, catalog)) {
-		liberaMemoria(iph);
-		db.GetErrorErrStr(msglog);
-		syslog(LOG_ERR, "cannot open connection database (%s:%d) %s\n",
-		       __func__, __LINE__, msglog);
-		return false;
+	dbi = og_dbi_open(&dbi_config);
+	if (!dbi) {
+		syslog(LOG_ERR, "cannot open connection database (%s:%d)\n",
+		       __func__, __LINE__);
+		goto err_dbi_open;
 	}
 
-	// Recupera los datos del cliente
-	sprintf(sqlstr,
+	result = dbi_conn_queryf(dbi->conn,
 			"SELECT idordenador,nombreordenador FROM ordenadores "
 				" WHERE ordenadores.ip = '%s'", iph);
-
-	if (!db.Execute(sqlstr, tbl)) {
-		liberaMemoria(iph);
-		db.GetErrorErrStr(msglog);
+	if (!result) {
+		dbi_conn_error(dbi->conn, &msglog);
 		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
 		       __func__, __LINE__, msglog);
-		db.Close();
-		return false;
+		goto err_query_fail;
 	}
 
-	if (tbl.ISEOF()) {
-		liberaMemoria(iph);
+	if (!dbi_result_next_row(result)) {
 		syslog(LOG_ERR, "client does not exist in database (%s:%d)\n",
 		       __func__, __LINE__);
-		db.liberaResult(tbl);
-		db.Close();
-		return false;
+		dbi_result_free(result);
+		goto err_query_fail;
 	}
 
 	syslog(LOG_DEBUG, "Client %s requesting inclusion\n", iph);
 
-	if (!tbl.Get("idordenador", *idordenador)) {
-		liberaMemoria(iph);
-		db.liberaResult(tbl);
-		tbl.GetErrorErrStr(msglog);
-		og_info(msglog);
-		db.Close();
-		return false;
-	}
-	if (!tbl.Get("nombreordenador", nombreordenador)) {
-		liberaMemoria(iph);
-		db.liberaResult(tbl);
-		tbl.GetErrorErrStr(msglog);
-		og_info(msglog);
-		db.Close();
-		return false;
-	}
-	db.liberaResult(tbl);
-	db.Close();
+	*idordenador = dbi_result_get_uint(result, "idordenador");
+	nombreordenador = (char *)dbi_result_get_string(result, "nombreordenador");
+
+	dbi_result_free(result);
+	og_dbi_close(dbi);
 
 	if (!registraCliente(iph)) { // Incluyendo al cliente en la tabla de sokets
 		liberaMemoria(iph);
@@ -346,6 +334,12 @@ bool procesoInclusionClienteWinLnx(int socket_c, TRAMA *ptrTrama, int *idordenad
 	}
 	liberaMemoria(iph);
 	return true;
+
+err_query_fail:
+	og_dbi_close(dbi);
+err_dbi_open:
+	liberaMemoria(iph);
+	return false;
 }
 // ________________________________________________________________________________________________________
 // Función: InclusionCliente
