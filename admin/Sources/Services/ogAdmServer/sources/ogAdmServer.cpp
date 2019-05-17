@@ -944,52 +944,54 @@ static bool ComandosPendientes(TRAMA *ptrTrama, struct og_client *cli)
 // ________________________________________________________________________________________________________
 bool buscaComandos(char *ido, TRAMA *ptrTrama, int *ids)
 {
-	char msglog[LONSTD], sqlstr[LONSQL];
-	Database db;
-	Table tbl;
-	int lonprm;
+	const char *param, *msglog;
+	struct og_dbi *dbi;
+	dbi_result result;
+	unsigned int lonprm;
 
-	if (!db.Open(usuario, pasguor, datasource, catalog)) {
-		db.GetErrorErrStr(msglog);
-		syslog(LOG_ERR, "cannot open connection database (%s:%d) %s\n",
-		       __func__, __LINE__, msglog);
-		return false;
+	dbi = og_dbi_open(&dbi_config);
+	if (!dbi) {
+		syslog(LOG_ERR, "cannot open connection database (%s:%d)\n",
+		       __func__, __LINE__);
+		goto err_dbi_open;
 	}
-	sprintf(sqlstr,"SELECT sesion,parametros,length( parametros) as lonprm"\
-			" FROM acciones WHERE idordenador=%s AND estado='%d' ORDER BY idaccion", ido, ACCION_INICIADA);
-	if (!db.Execute(sqlstr, tbl)) {
-		db.GetErrorErrStr(msglog);
+	result = dbi_conn_queryf(dbi->conn,
+			"SELECT sesion, parametros"\
+			" FROM acciones WHERE idordenador=%s AND estado='%d'"\
+			" ORDER BY idaccion", ido, ACCION_INICIADA);
+	if (!result) {
+		dbi_conn_error(dbi->conn, &msglog);
 		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
 		       __func__, __LINE__, msglog);
-		return false;
+		goto err_query_fail;
 	}
-	if (tbl.ISEOF()) {
-		db.Close();
+	if (!dbi_result_next_row(result)) {
+		dbi_result_free(result);
+		og_dbi_close(dbi);
 		return false; // No hay comandos pendientes
-	} else { // Busca entre todas las acciones de diversos ambitos
-		if (!tbl.Get("sesion", *ids)) { // Toma identificador de la sesion
-			tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-			og_info(msglog);
-			return false;
-		}
-		if (!tbl.Get("lonprm", lonprm)) { // Toma parámetros del comando
-			tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-			og_info(msglog);
-			return false;
-		}
-		if(!initParametros(ptrTrama,lonprm+LONGITUD_PARAMETROS)){
-			db.Close();
-			syslog(LOG_ERR, "%s:%d OOM\n", __FILE__, __LINE__);
-			return false;
-		}
-		if (!tbl.Get("parametros", ptrTrama->parametros)) { // Toma parámetros del comando
-			tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-			og_info(msglog);
-			return false;
-		}
 	}
-	db.Close();
+
+	*ids = dbi_result_get_uint(result, "sesion");
+	param = dbi_result_get_string(result, "parametros");
+	lonprm = strlen(param);
+
+	if(!initParametros(ptrTrama,lonprm + LONGITUD_PARAMETROS)){
+		syslog(LOG_ERR, "%s:%d OOM\n", __FILE__, __LINE__);
+		goto err_init_params;
+	}
+	sprintf(ptrTrama->parametros, "%s", param);
+
+	dbi_result_free(result);
+	og_dbi_close(dbi);
+
 	return true; // Hay comandos pendientes, se toma el primero de la cola
+
+err_init_params:
+	dbi_result_free(result);
+err_query_fail:
+	og_dbi_close(dbi);
+err_dbi_open:
+	return false;
 }
 // ________________________________________________________________________________________________________
 // Función: DisponibilidadComandos
