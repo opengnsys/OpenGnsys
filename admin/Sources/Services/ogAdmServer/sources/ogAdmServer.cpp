@@ -388,8 +388,6 @@ bool procesoInclusionCliente(struct og_client *cli, TRAMA *ptrTrama)
 	const char *msglog, *str;
 	struct og_dbi *dbi;
 	dbi_result result;
-	Database db;
-	Table tbl;
 
 	char *iph, *cfg;
 	char nombreordenador[LONFIL];
@@ -398,14 +396,6 @@ bool procesoInclusionCliente(struct og_client *cli, TRAMA *ptrTrama)
 	// Toma parámetros
 	iph = copiaParametro("iph",ptrTrama); // Toma ip
 	cfg = copiaParametro("cfg",ptrTrama); // Toma configuracion
-
-	if (!db.Open(usuario, pasguor, datasource, catalog)) {
-		liberaMemoria(iph);
-		liberaMemoria(cfg);
-		syslog(LOG_ERR, "cannot open connection database (%s:%d)\n",
-		       __func__, __LINE__);
-		return false;
-	}
 
 	dbi = og_dbi_open(&dbi_config);
 	if (!dbi) {
@@ -446,10 +436,9 @@ bool procesoInclusionCliente(struct og_client *cli, TRAMA *ptrTrama)
 	idcentro = dbi_result_get_uint(result, "idcentro");
 	dbi_result_free(result);
 
-	resul = actualizaConfiguracion(db, tbl, cfg, idordenador); // Actualiza la configuración del ordenador
+	resul = actualizaConfiguracion(dbi, cfg, idordenador); // Actualiza la configuración del ordenador
 	liberaMemoria(cfg);
 	og_dbi_close(dbi);
-	db.Close();
 
 	if (!resul) {
 		liberaMemoria(iph);
@@ -514,12 +503,13 @@ err_dbi_open:
 //			soi= Nombre del sistema de ficheros instalado en la partición
 //			tam= Tamaño de la partición
 // ________________________________________________________________________________________________________
-bool actualizaConfiguracion(Database db, Table tbl, char *cfg, int ido)
+bool actualizaConfiguracion(struct og_dbi *dbi, char *cfg, int ido)
 {
-	char msglog[LONSTD], sqlstr[LONSQL];
 	int lon, p, c,i, dato, swu, idsoi, idsfi,k;
 	char *ptrPar[MAXPAR], *ptrCfg[7], *ptrDual[2], tbPar[LONSTD];
 	char *ser, *disk, *par, *cpt, *sfi, *soi, *tam, *uso; // Parametros de configuración.
+	dbi_result result, result_update;
+	const char *msglog;
 
 	lon = 0;
 	p = splitCadena(ptrPar, cfg, '\n');
@@ -532,12 +522,13 @@ bool actualizaConfiguracion(Database db, Table tbl, char *cfg, int ido)
 			ser = ptrDual[1];
 			if (strlen(ser) > 0) {
 				// Solo actualizar si número de serie no existía.
-				sprintf(sqlstr, "UPDATE ordenadores SET numserie='%s'"
+				result = dbi_conn_queryf(dbi->conn,
+						"UPDATE ordenadores SET numserie='%s'"
 						" WHERE idordenador=%d AND numserie IS NULL",
 						ser, ido);
-				if (!db.Execute(sqlstr, tbl)) { // Error al insertar
-					db.GetErrorErrStr(msglog);
-					og_info(msglog);
+				if (!result) {
+					dbi_conn_error(dbi->conn, &msglog);
+					og_info((char *)msglog);
 					return false;
 				}
 			}
@@ -564,7 +555,7 @@ bool actualizaConfiguracion(Database db, Table tbl, char *cfg, int ido)
 		if(k==2){
 			sfi = ptrDual[1]; // Sistema de ficheros
 			/* Comprueba existencia del s0xistema de ficheros instalado */
-			idsfi = checkDato(db, tbl, sfi, "sistemasficheros", "descripcion","idsistemafichero");
+			idsfi = checkDato(dbi, sfi, "sistemasficheros", "descripcion","idsistemafichero");
 		}
 		else
 			idsfi=0;
@@ -573,7 +564,7 @@ bool actualizaConfiguracion(Database db, Table tbl, char *cfg, int ido)
 		if(k==2){ // Sistema operativo detecdtado
 			soi = ptrDual[1]; // Nombre del S.O. instalado
 			/* Comprueba existencia del sistema operativo instalado */
-			idsoi = checkDato(db, tbl, soi, "nombresos", "nombreso", "idnombreso");
+			idsoi = checkDato(dbi, soi, "nombresos", "nombreso", "idnombreso");
 		}
 		else
 			idsoi=0;
@@ -586,55 +577,45 @@ bool actualizaConfiguracion(Database db, Table tbl, char *cfg, int ido)
 
 		lon += sprintf(tbPar + lon, "(%s, %s),", disk, par);
 
-		sprintf(sqlstr, "SELECT numdisk, numpar, tamano, uso, idsistemafichero, idnombreso"
+		result = dbi_conn_queryf(dbi->conn,
+				"SELECT numdisk, numpar, tamano, uso, idsistemafichero, idnombreso"
 				"  FROM ordenadores_particiones"
 				" WHERE idordenador=%d AND numdisk=%s AND numpar=%s",
 				ido, disk, par);
-
-
-		if (!db.Execute(sqlstr, tbl)) {
-			db.GetErrorErrStr(msglog);
+		if (!result) {
+			dbi_conn_error(dbi->conn, &msglog);
 			syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
 			       __func__, __LINE__, msglog);
 			return false;
 		}
-		if (tbl.ISEOF()) { // Si no existe el registro
-			sprintf(sqlstr, "INSERT INTO ordenadores_particiones(idordenador,numdisk,numpar,codpar,tamano,uso,idsistemafichero,idnombreso,idimagen)"
+		if (!dbi_result_next_row(result)) {
+			result_update = dbi_conn_queryf(dbi->conn,
+					"INSERT INTO ordenadores_particiones(idordenador,numdisk,numpar,codpar,tamano,uso,idsistemafichero,idnombreso,idimagen)"
 					" VALUES(%d,%s,%s,0x%s,%s,%s,%d,%d,0)",
 					ido, disk, par, cpt, tam, uso, idsfi, idsoi);
-
-
-			if (!db.Execute(sqlstr, tbl)) { // Error al insertar
-				db.GetErrorErrStr(msglog);
-				og_info(msglog);
+			if (!result_update) {
+				dbi_conn_error(dbi->conn, &msglog);
+				og_info((char *)msglog);
 				return false;
 			}
+			dbi_result_free(result_update);
+
 		} else { // Existe el registro
 			swu = true; // Se supone que algún dato ha cambiado
-			if (!tbl.Get("tamano", dato)) { // Toma dato
-				tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-				og_info(msglog);
-				return false;
-			}
-			if (atoi(tam) == dato) { // Parámetro tamaño igual al almacenado
-				if (!tbl.Get("idsistemafichero", dato)) { // Toma dato
-					tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-					og_info(msglog);
-					return false;
-				}
-				if (idsfi == dato) { // Parámetro sistema de fichero igual al almacenado
-					if (!tbl.Get("idnombreso", dato)) { // Toma dato
-						tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-						og_info(msglog);
-						return false;
-					}
-					if (idsoi == dato) { // Parámetro sistema operativo distinto al almacenado
+
+			dato = dbi_result_get_uint(result, "tamano");
+			if (atoi(tam) == dato) {// Parámetro tamaño igual al almacenado
+				dato = dbi_result_get_uint(result, "idsistemafichero");
+				if (idsfi == dato) {// Parámetro sistema de fichero igual al almacenado
+					dato = dbi_result_get_uint(result, "idnombreso");
+					if (idsoi == dato) {// Parámetro sistema de fichero distinto al almacenado
 						swu = false; // Todos los parámetros de la partición son iguales, no se actualiza
 					}
 				}
 			}
 			if (swu) { // Hay que actualizar los parámetros de la partición
-				sprintf(sqlstr, "UPDATE ordenadores_particiones SET "
+				result_update = dbi_conn_queryf(dbi->conn,
+					"UPDATE ordenadores_particiones SET "
 					" codpar=0x%s,"
 					" tamano=%s,"
 					" uso=%s,"
@@ -646,30 +627,36 @@ bool actualizaConfiguracion(Database db, Table tbl, char *cfg, int ido)
 					" WHERE idordenador=%d AND numdisk=%s AND numpar=%s",
 					cpt, tam, uso, idsfi, idsoi, ido, disk, par);
 			} else {  // Actualizar porcentaje de uso.
-				sprintf(sqlstr, "UPDATE ordenadores_particiones SET "
+				result_update = dbi_conn_queryf(dbi->conn,
+					"UPDATE ordenadores_particiones SET "
 					" codpar=0x%s,"
 					" uso=%s"
 					" WHERE idordenador=%d AND numdisk=%s AND numpar=%s",
 					cpt, uso, ido, disk, par);
 			}
-			if (!db.Execute(sqlstr, tbl)) {
-				db.GetErrorErrStr(msglog);
+			if (!result_update) {
+				dbi_conn_error(dbi->conn, &msglog);
 				syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
 				       __func__, __LINE__, msglog);
 				return false;
 			}
+
+			dbi_result_free(result_update);
 		}
 	}
 	lon += sprintf(tbPar + lon, "(0,0)");
 	// Eliminar particiones almacenadas que ya no existen
-	sprintf(sqlstr, "DELETE FROM ordenadores_particiones WHERE idordenador=%d AND (numdisk, numpar) NOT IN (%s)",
+	result_update = dbi_conn_queryf(dbi->conn,
+		"DELETE FROM ordenadores_particiones WHERE idordenador=%d AND (numdisk, numpar) NOT IN (%s)",
 			ido, tbPar);
-	if (!db.Execute(sqlstr, tbl)) {
-		db.GetErrorErrStr(msglog);
+	if (!result_update) {
+		dbi_conn_error(dbi->conn, &msglog);
 		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
 		       __func__, __LINE__, msglog);
 		return false;
 	}
+	dbi_result_free(result_update);
+
 	return true;
 }
 // ________________________________________________________________________________________________________
@@ -692,52 +679,45 @@ bool actualizaConfiguracion(Database db, Table tbl, char *cfg, int ido)
 //		En caso de producirse algún error se devuelve el valor 0
 // ________________________________________________________________________________________________________
 
-int checkDato(Database db, Table tbl, char *dato, const char *tabla,
+int checkDato(struct og_dbi *dbi, char *dato, const char *tabla,
 		     const char *nomdato, const char *nomidentificador)
 {
-	char msglog[LONSTD], sqlstr[LONSQL];
+	const char *msglog;
 	int identificador;
+	dbi_result result;
 
 	if (strlen(dato) == 0)
 		return (0); // EL dato no tiene valor
-	sprintf(sqlstr, "SELECT %s FROM %s WHERE %s ='%s'", nomidentificador,
+	result = dbi_conn_queryf(dbi->conn,
+			"SELECT %s FROM %s WHERE %s ='%s'", nomidentificador,
 			tabla, nomdato, dato);
 
 	// Ejecuta consulta
-	if (!db.Execute(sqlstr, tbl)) {
-		db.GetErrorErrStr(msglog);
+	if (!result) {
+		dbi_conn_error(dbi->conn, &msglog);
 		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
 		       __func__, __LINE__, msglog);
 		return (0);
 	}
-	if (tbl.ISEOF()) { //  Software NO existente
-		sprintf(sqlstr, "INSERT INTO %s (%s) VALUES('%s')", tabla, nomdato, dato);
-		if (!db.Execute(sqlstr, tbl)) { // Error al insertar
-			db.GetErrorErrStr(msglog); // Error al acceder al registro
-			og_info(msglog);
+	if (!dbi_result_next_row(result)) { //  Software NO existente
+		dbi_result_free(result);
+
+		result = dbi_conn_queryf(dbi->conn,
+				"INSERT INTO %s (%s) VALUES('%s')", tabla, nomdato, dato);
+		if (!result) {
+			dbi_conn_error(dbi->conn, &msglog);
+			og_info((char *)msglog);
 			return (0);
 		}
+		dbi_result_free(result);
+
 		// Recupera el identificador del software
-		sprintf(sqlstr, "SELECT LAST_INSERT_ID() as identificador");
-		if (!db.Execute(sqlstr, tbl)) { // Error al leer
-			db.GetErrorErrStr(msglog); // Error al acceder al registro
-			og_info(msglog);
-			return (0);
-		}
-		if (!tbl.ISEOF()) { // Si existe registro
-			if (!tbl.Get("identificador", identificador)) {
-				tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-				og_info(msglog);
-				return (0);
-			}
-		}
+		identificador = dbi_conn_sequence_last(dbi->conn, NULL);
 	} else {
-		if (!tbl.Get(nomidentificador, identificador)) { // Toma dato
-			tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-			og_info(msglog);
-			return (0);
-		}
+		identificador = dbi_result_get_uint(result, nomidentificador);
 	}
+	dbi_result_free(result);
+
 	return (identificador);
 }
 // ________________________________________________________________________________________________________
@@ -1762,25 +1742,14 @@ static bool RESPUESTA_CrearSoftIncremental(TRAMA* ptrTrama, struct og_client *cl
 //
 static bool RESPUESTA_RestaurarImagen(TRAMA* ptrTrama, struct og_client *cli)
 {
-	char msglog[LONSTD];
-	Database db;
-	Table tbl;
 	bool res;
 	char *iph, *ido, *idi, *dsk, *par, *ifs, *cfg;
 	struct og_dbi *dbi;
-
-	if (!db.Open(usuario, pasguor, datasource, catalog)) {
-		db.GetErrorErrStr(msglog);
-		syslog(LOG_ERR, "cannot open connection database (%s:%d) %s\n",
-		       __func__, __LINE__, msglog);
-		return false;
-	}
 
 	dbi = og_dbi_open(&dbi_config);
 	if (!dbi) {
 		syslog(LOG_ERR, "cannot open connection database (%s:%d)\n",
 		       __func__, __LINE__);
-		db.Close();
 		return false;
 	}
 
@@ -1802,10 +1771,10 @@ static bool RESPUESTA_RestaurarImagen(TRAMA* ptrTrama, struct og_client *cli)
 	ifs = copiaParametro("ifs",ptrTrama); // Identificador del perfil software contenido
 	cfg = copiaParametro("cfg",ptrTrama); // Configuración de discos
 	if(cfg){
-		actualizaConfiguracion(db, tbl, cfg, atoi(ido)); // Actualiza la configuración del ordenador
+		actualizaConfiguracion(dbi, cfg, atoi(ido)); // Actualiza la configuración del ordenador
 		liberaMemoria(cfg);	
 	}
-	res=actualizaRestauracionImagen(db, tbl, idi, dsk, par, ido, ifs);
+	res=actualizaRestauracionImagen(dbi, idi, dsk, par, ido, ifs);
 	
 	liberaMemoria(iph);
 	liberaMemoria(ido);
@@ -1816,8 +1785,6 @@ static bool RESPUESTA_RestaurarImagen(TRAMA* ptrTrama, struct og_client *cli)
 
 	if(!res)
 		syslog(LOG_ERR, "Problem after restoring image\n");
-
-	db.Close(); // Cierra conexión
 
 	return res;
 }
@@ -1872,25 +1839,28 @@ static bool RESPUESTA_RestaurarSoftIncremental(TRAMA* ptrTrama, struct og_client
 //		true: Si el proceso es correcto
 //		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-bool actualizaRestauracionImagen(Database db, Table tbl, char *idi,
+bool actualizaRestauracionImagen(struct og_dbi *dbi, char *idi,
 				 char *dsk, char *par, char *ido, char *ifs)
 {
-	char msglog[LONSTD], sqlstr[LONSQL];
+	const char *msglog;
+	dbi_result result;
 
 	/* Actualizar los datos de la imagen */
-	snprintf(sqlstr, LONSQL,
+	result = dbi_conn_queryf(dbi->conn,
 			"UPDATE ordenadores_particiones"
 			"   SET idimagen=%s, idperfilsoft=%s, fechadespliegue=NOW(),"
 			"       revision=(SELECT revision FROM imagenes WHERE idimagen=%s),"
 			"       idnombreso=IFNULL((SELECT idnombreso FROM perfilessoft WHERE idperfilsoft=%s),0)"
 			" WHERE idordenador=%s AND numdisk=%s AND numpar=%s", idi, ifs, idi, ifs, ido, dsk, par);
 
-	if (!db.Execute(sqlstr, tbl)) {
-		db.GetErrorErrStr(msglog);
+	if (!result) {
+		dbi_conn_error(dbi->conn, &msglog);
 		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
 		       __func__, __LINE__, msglog);
 		return false;
 	}
+	dbi_result_free(result);
+
 	return true;
 }
 // ________________________________________________________________________________________________________
@@ -1907,25 +1877,14 @@ bool actualizaRestauracionImagen(Database db, Table tbl, char *idi,
 // ________________________________________________________________________________________________________
 static bool RESPUESTA_EjecutarScript(TRAMA* ptrTrama, struct og_client *cli)
 {
-	char msglog[LONSTD];
-	Database db;
-	Table tbl;
 	char *iph, *ido,*cfg;
 	struct og_dbi *dbi;
 	bool res = true;
-
-	if (!db.Open(usuario, pasguor, datasource, catalog)) {
-		db.GetErrorErrStr(msglog);
-		syslog(LOG_ERR, "cannot open connection database (%s:%d) %s\n",
-		       __func__, __LINE__, msglog);
-		return false;
-	}
 
 	dbi = og_dbi_open(&dbi_config);
 	if (!dbi) {
 		syslog(LOG_ERR, "cannot open connection database (%s:%d)\n",
 		       __func__, __LINE__);
-		db.Close();
 		return false;
 	}
 
@@ -1942,7 +1901,7 @@ static bool RESPUESTA_EjecutarScript(TRAMA* ptrTrama, struct og_client *cli)
 	
 	cfg = copiaParametro("cfg",ptrTrama); // Toma configuración de particiones
 	if(cfg){
-		res = actualizaConfiguracion(db, tbl, cfg, atoi(ido)); // Actualiza la configuración del ordenador
+		res = actualizaConfiguracion(dbi, cfg, atoi(ido)); // Actualiza la configuración del ordenador
 		liberaMemoria(cfg);	
 	}
 
@@ -1952,8 +1911,6 @@ static bool RESPUESTA_EjecutarScript(TRAMA* ptrTrama, struct og_client *cli)
 
 	if (!res)
 		syslog(LOG_ERR, "Problem updating client configuration\n");
-
-	db.Close(); // Cierra conexión
 
 	return res;
 }
@@ -2332,25 +2289,14 @@ bool cuestionPerfilHardware(Database db, Table tbl, char *idc, char *ido,
 // ________________________________________________________________________________________________________
 static bool RESPUESTA_InventarioSoftware(TRAMA* ptrTrama, struct og_client *cli)
 {
-	char msglog[LONSTD];
-	Database db;
-	Table tbl;
 	bool res;
 	char *iph, *ido, *npc, *idc, *par, *sft, *buffer;
 	struct og_dbi *dbi;
-
-	if (!db.Open(usuario, pasguor, datasource, catalog)) {
-		db.GetErrorErrStr(msglog);
-		syslog(LOG_ERR, "cannot open connection database (%s:%d) %s\n",
-		       __func__, __LINE__, msglog);
-		return false;
-	}
 
 	dbi = og_dbi_open(&dbi_config);
 	if (!dbi) {
 		syslog(LOG_ERR, "cannot open connection database (%s:%d)\n",
 		       __func__, __LINE__);
-		db.Close();
 		return false;
 	}
 
@@ -2372,7 +2318,7 @@ static bool RESPUESTA_InventarioSoftware(TRAMA* ptrTrama, struct og_client *cli)
 
 	buffer = rTrim(leeArchivo(sft));
 	if (buffer)
-		res=actualizaSoftware(db, tbl, buffer, par, ido, npc, idc);
+		res=actualizaSoftware(dbi, buffer, par, ido, npc, idc);
 
 	liberaMemoria(iph);
 	liberaMemoria(ido);	
@@ -2384,8 +2330,6 @@ static bool RESPUESTA_InventarioSoftware(TRAMA* ptrTrama, struct og_client *cli)
 
 	if (!res)
 		syslog(LOG_ERR, "cannot update software\n");
-
-	db.Close(); // Cierra conexión
 
 	return res;
 }
@@ -2408,43 +2352,37 @@ static bool RESPUESTA_InventarioSoftware(TRAMA* ptrTrama, struct og_client *cli)
 //
 //	Versión 1.1.0: Se incluye el sistema operativo. Autora: Irina Gómez - ETSII Universidad Sevilla
 // ________________________________________________________________________________________________________
-bool actualizaSoftware(Database db, Table tbl, char *sft, char *par,char *ido,
+bool actualizaSoftware(struct og_dbi *dbi, char *sft, char *par,char *ido,
 		       char *npc, char *idc)
 {
 	int i, j, lon, aux, idperfilsoft, idnombreso;
 	bool retval;
 	char *wsft;
 	int tbidsoftware[MAXSOFTWARE];
-	char *tbSoftware[MAXSOFTWARE],msglog[LONSTD], sqlstr[LONSQL], strInt[LONINT], *idsoftwares;
+	char *tbSoftware[MAXSOFTWARE], strInt[LONINT], *idsoftwares;
+	const char *msglog;
+	dbi_result result;
 
 	/* Toma Centro (Unidad Organizativa) y perfil software */
-	sprintf(sqlstr, "SELECT idperfilsoft,numpar"
+	result = dbi_conn_queryf(dbi->conn,
+		"SELECT idperfilsoft,numpar"
 		" FROM ordenadores_particiones"
 		" WHERE idordenador=%s", ido);
-
-	if (!db.Execute(sqlstr, tbl)) {
-		db.GetErrorErrStr(msglog);
+	if (!result) {
+		dbi_conn_error(dbi->conn, &msglog);
 		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
 		       __func__, __LINE__, msglog);
 		return false;
 	}
 	idperfilsoft = 0; // Por defecto se supone que el ordenador no tiene aún detectado el perfil software
-	while (!tbl.ISEOF()) { // Recorre particiones
-		if (!tbl.Get("numpar", aux)) {
-			tbl.GetErrorErrStr(msglog);
-			og_info(msglog);
-			return false;
-		}
+	while (dbi_result_next_row(result)) {
+		aux = dbi_result_get_uint(result, "numpar");
 		if (aux == atoi(par)) { // Se encuentra la partición
-			if (!tbl.Get("idperfilsoft", idperfilsoft)) {
-				tbl.GetErrorErrStr(msglog);
-				og_info(msglog);
-				return false;
-			}
+			idperfilsoft = dbi_result_get_uint(result, "idperfilsoft");
 			break;
 		}
-		tbl.MoveNext();
 	}
+	dbi_result_free(result);
 	wsft=escaparCadena(sft); // Codificar comillas simples
 	if(!wsft)
 		return false;
@@ -2460,50 +2398,36 @@ bool actualizaSoftware(Database db, Table tbl, char *sft, char *par,char *ido,
 	for (i = 0; i < lon; i++) {
 		// Primera línea es el sistema operativo: se obtiene identificador
 		if (i == 0) {
-			idnombreso = checkDato(db, tbl, rTrim(tbSoftware[i]), "nombresos", "nombreso", "idnombreso");
+			idnombreso = checkDato(dbi, rTrim(tbSoftware[i]), "nombresos", "nombreso", "idnombreso");
 			continue;
 		}
 
-		sprintf(sqlstr,
+		result = dbi_conn_queryf(dbi->conn,
 				"SELECT idsoftware FROM softwares WHERE descripcion ='%s'",
 				rTrim(tbSoftware[i]));
-
-		if (!db.Execute(sqlstr, tbl)) {
-			db.GetErrorErrStr(msglog);
+		if (!result) {
+			dbi_conn_error(dbi->conn, &msglog);
 			syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
 			       __func__, __LINE__, msglog);
 			return false;
 		}
 
-		if (tbl.ISEOF()) { //  Software NO existente
-			sprintf(sqlstr, "INSERT INTO softwares (idtiposoftware,descripcion,idcentro,grupoid)"
+		if (!dbi_result_next_row(result)) {
+			dbi_result_free(result);
+			result = dbi_conn_queryf(dbi->conn,
+						"INSERT INTO softwares (idtiposoftware,descripcion,idcentro,grupoid)"
 						" VALUES(2,'%s',%s,0)", tbSoftware[i], idc);
+			if (!result) { // Error al insertar
+				dbi_conn_error(dbi->conn, &msglog);
+				og_info((char *)msglog);
+				return false;
+			}
+			dbi_result_free(result);
 
-			if (!db.Execute(sqlstr, tbl)) { // Error al insertar
-				db.GetErrorErrStr(msglog); // Error al acceder al registro
-				og_info(msglog);
-				return false;
-			}
 			// Recupera el identificador del software
-			sprintf(sqlstr, "SELECT LAST_INSERT_ID() as identificador");
-			if (!db.Execute(sqlstr, tbl)) { // Error al leer
-				db.GetErrorErrStr(msglog); // Error al acceder al registro
-				og_info(msglog);
-				return false;
-			}
-			if (!tbl.ISEOF()) { // Si existe registro
-				if (!tbl.Get("identificador", tbidsoftware[i])) {
-					tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-					og_info(msglog);
-					return false;
-				}
-			}
+			tbidsoftware[i] = dbi_conn_sequence_last(dbi->conn, NULL);
 		} else {
-			if (!tbl.Get("idsoftware", tbidsoftware[i])) { // Toma dato
-				tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-				og_info(msglog);
-				return false;
-			}
+			tbidsoftware[i] = dbi_result_get_uint(result, "idsoftware");
 		}
 	}
 
@@ -2531,10 +2455,10 @@ bool actualizaSoftware(Database db, Table tbl, char *sft, char *par,char *ido,
 		aux += sprintf(idsoftwares + aux, ",%d", tbidsoftware[i]);
 
 	// Comprueba existencia de perfil software y actualización de éste para el ordenador
-	if (!cuestionPerfilSoftware(db, tbl, idc, ido, idperfilsoft, idnombreso, idsoftwares, 
+	if (!cuestionPerfilSoftware(dbi, idc, ido, idperfilsoft, idnombreso, idsoftwares,
 			npc, par, tbidsoftware, lon)) {
 		syslog(LOG_ERR, "cannot update software\n");
-		og_info(msglog);
+		og_info((char *)msglog);
 		retval=false;
 	}
 	else {
@@ -2564,21 +2488,18 @@ bool actualizaSoftware(Database db, Table tbl, char *sft, char *par,char *ido,
 //
 //	Versión 1.1.0: Se incluye el sistema operativo. Autora: Irina Gómez - ETSII Universidad Sevilla
 //_________________________________________________________________________________________________________
-bool cuestionPerfilSoftware(Database db, Table tbl, char *idc, char *ido,
+bool cuestionPerfilSoftware(struct og_dbi *dbi, char *idc, char *ido,
 			    int idperfilsoftware, int idnombreso,
 			    char *idsoftwares, char *npc, char *par,
 			    int *tbidsoftware, int lon)
 {
-	char *sqlstr, msglog[LONSTD];
 	int i, nwidperfilsoft;
+	const char *msglog;
+	dbi_result result;
 
-	sqlstr = reservaMemoria(strlen(idsoftwares)+LONSQL); // Reserva para escribir sentencia SQL
-	if (sqlstr == NULL) {
-		syslog(LOG_ERR, "%s:%d OOM\n", __FILE__, __LINE__);
-		return false;
-	}
 	// Busca perfil soft del ordenador que contenga todos los componentes software encontrados
-	sprintf(sqlstr, "SELECT idperfilsoft FROM"
+	result = dbi_conn_queryf(dbi->conn,
+		"SELECT idperfilsoft FROM"
 		" (SELECT perfilessoft_softwares.idperfilsoft as idperfilsoft,"
 		"	group_concat(cast(perfilessoft_softwares.idsoftware AS char( 11) )"
 		"	ORDER BY perfilessoft_softwares.idsoftware SEPARATOR ',' ) AS idsoftwares"
@@ -2586,103 +2507,95 @@ bool cuestionPerfilSoftware(Database db, Table tbl, char *idc, char *ido,
 		" GROUP BY perfilessoft_softwares.idperfilsoft) AS temp"
 		" WHERE idsoftwares LIKE '%s'", idsoftwares);
 
-	if (!db.Execute(sqlstr, tbl)) {
-		db.GetErrorErrStr(msglog);
+	if (!result) {
+		dbi_conn_error(dbi->conn, &msglog);
 		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
 		       __func__, __LINE__, msglog);
-		liberaMemoria(sqlstr);
 		return false;
 	}
-	if (tbl.ISEOF()) { // No existe un perfil software con esos componentes de componentes software, lo crea
-		sprintf(sqlstr, "INSERT perfilessoft  (descripcion, idcentro, grupoid, idnombreso)"
+	if (!dbi_result_next_row(result)) { // No existe un perfil software con esos componentes de componentes software, lo crea
+		dbi_result_free(result);
+		result = dbi_conn_queryf(dbi->conn,
+				"INSERT perfilessoft  (descripcion, idcentro, grupoid, idnombreso)"
 				" VALUES('Perfil Software (%s, Part:%s) ',%s,0,%i)", npc, par, idc,idnombreso);
-		if (!db.Execute(sqlstr, tbl)) { // Error al insertar
-			db.GetErrorErrStr(msglog);
-			og_info(msglog);
+		if (!result) {
+			dbi_conn_error(dbi->conn, &msglog);
+			og_info((char *)msglog);
 			return false;
 		}
+
+		dbi_result_free(result);
 		// Recupera el identificador del nuevo perfil software
-		sprintf(sqlstr, "SELECT LAST_INSERT_ID() as identificador");
-		if (!db.Execute(sqlstr, tbl)) { // Error al leer
-			tbl.GetErrorErrStr(msglog);
-			og_info(msglog);
-			liberaMemoria(sqlstr);
-			return false;
-		}
-		if (!tbl.ISEOF()) { // Si existe registro
-			if (!tbl.Get("identificador", nwidperfilsoft)) {
-				tbl.GetErrorErrStr(msglog);
-				og_info(msglog);
-				liberaMemoria(sqlstr);
-				return false;
-			}
-		}
+		nwidperfilsoft = dbi_conn_sequence_last(dbi->conn, NULL);
+
 		// Crea la relación entre perfiles y componenetes software
 		for (i = 0; i < lon; i++) {
-			sprintf(sqlstr, "INSERT perfilessoft_softwares (idperfilsoft,idsoftware)"
+			result = dbi_conn_queryf(dbi->conn,
+						"INSERT perfilessoft_softwares (idperfilsoft,idsoftware)"
 						" VALUES(%d,%d)", nwidperfilsoft, tbidsoftware[i]);
-			if (!db.Execute(sqlstr, tbl)) { // Error al insertar
-				db.GetErrorErrStr(msglog);
-				og_info(msglog);
-				liberaMemoria(sqlstr);
+			if (!result) {
+				dbi_conn_error(dbi->conn, &msglog);
+				og_info((char *)msglog);
 				return false;
 			}
+			dbi_result_free(result);
 		}
 	} else { // Existe un perfil con todos esos componentes
-		if (!tbl.Get("idperfilsoft", nwidperfilsoft)) {
-			tbl.GetErrorErrStr(msglog);
-			og_info(msglog);
-			liberaMemoria(sqlstr);
-			return false;
-		}
+		nwidperfilsoft = dbi_result_get_uint(result, "idperfilsoft");
+		dbi_result_free(result);
 	}
 
 	if (idperfilsoftware != nwidperfilsoft) { // No coinciden los perfiles
 		// Actualiza el identificador del perfil software del ordenador
-		sprintf(sqlstr, "UPDATE ordenadores_particiones SET idperfilsoft=%d,idimagen=0"
+		result = dbi_conn_queryf(dbi->conn,
+				"UPDATE ordenadores_particiones SET idperfilsoft=%d,idimagen=0"
 				" WHERE idordenador=%s AND numpar=%s", nwidperfilsoft, ido, par);
-		if (!db.Execute(sqlstr, tbl)) { // Error al insertar
-			db.GetErrorErrStr(msglog);
-			og_info(msglog);
-			liberaMemoria(sqlstr);
+		if (!result) { // Error al insertar
+			dbi_conn_error(dbi->conn, &msglog);
+			og_info((char *)msglog);
 			return false;
 		}
+		dbi_result_free(result);
 	}
 
 	/* DEPURACIÓN DE PERFILES SOFTWARE */
 
 	 /* Eliminar Relación de softwares con Perfiles software que quedan húerfanos */
-	sprintf(sqlstr, "DELETE FROM perfilessoft_softwares WHERE idperfilsoft IN "\
+	result = dbi_conn_queryf(dbi->conn,
+		"DELETE FROM perfilessoft_softwares WHERE idperfilsoft IN "\
 		" (SELECT idperfilsoft FROM perfilessoft WHERE idperfilsoft NOT IN"\
 		" (SELECT DISTINCT idperfilsoft from ordenadores_particiones) AND idperfilsoft NOT IN"\
 		" (SELECT DISTINCT idperfilsoft from imagenes))");
-	if (!db.Execute(sqlstr, tbl)) { // Error al insertar
-		db.GetErrorErrStr(msglog);
-		og_info(msglog);
-		liberaMemoria(sqlstr);
+	if (!result) {
+		dbi_conn_error(dbi->conn, &msglog);
+		og_info((char *)msglog);
 		return false;
 	}
+	dbi_result_free(result),
 	/* Eliminar Perfiles software que quedan húerfanos */
-	sprintf(sqlstr, "DELETE FROM perfilessoft WHERE idperfilsoft NOT IN"
+	result = dbi_conn_queryf(dbi->conn,
+		"DELETE FROM perfilessoft WHERE idperfilsoft NOT IN"
 		" (SELECT DISTINCT idperfilsoft from ordenadores_particiones)"\
 		" AND  idperfilsoft NOT IN"\
 		" (SELECT DISTINCT idperfilsoft from imagenes)");
-	if (!db.Execute(sqlstr, tbl)) { // Error al insertar
-		db.GetErrorErrStr(msglog);
-		og_info(msglog);
-		liberaMemoria(sqlstr);
+	if (!result) {
+		dbi_conn_error(dbi->conn, &msglog);
+		og_info((char *)msglog);
 		return false;
 	}
+	dbi_result_free(result),
+
 	/* Eliminar Relación de softwares con Perfiles software que quedan húerfanos */
-	sprintf(sqlstr, "DELETE FROM perfilessoft_softwares WHERE idperfilsoft NOT IN"
+	result = dbi_conn_queryf(dbi->conn,
+			"DELETE FROM perfilessoft_softwares WHERE idperfilsoft NOT IN"
 			" (SELECT idperfilsoft from perfilessoft)");
-	if (!db.Execute(sqlstr, tbl)) { // Error al insertar
-		db.GetErrorErrStr(msglog);
-		og_info(msglog);
-		liberaMemoria(sqlstr);
+	if (!result) {
+		dbi_conn_error(dbi->conn, &msglog);
+		og_info((char *)msglog);
 		return false;
 	}
-	liberaMemoria(sqlstr);
+	dbi_result_free(result);
+
 	return true;
 }
 // ________________________________________________________________________________________________________
