@@ -136,7 +136,7 @@ class OpenGnSysWorker(ServerWorker):
         self.browser['url'] = url
         self.browser['process'] = subprocess.Popen(['browser', '-qws', url])
 
-    def _task_command(self, route, code, op_id):
+    def _task_command(self, route, code, op_id, send_config=False):
         """
         Task to execute a command and return results to a server URI
         :param route: server callback REST route to return results
@@ -164,6 +164,10 @@ class OpenGnSysWorker(ServerWorker):
                                       'error': err.encode('utf8').encode('base64')})
         # Show latest menu, if OGAgent runs on ogLive
         if os_type == 'oglive':
+            # Send configuration data, if needed
+            if send_config:
+                self.REST.sendMessage('clients/configs', {'mac': self.interface.mac, 'ip': self.interface.ip,
+                                                          'config': operations.get_configuration()})
             self._launch_browser(menu_url)
 
     def onActivation(self):
@@ -397,14 +401,15 @@ class OpenGnSysWorker(ServerWorker):
         try:
             script = urllib.unquote(post_params.get('script').decode('base64')).decode('utf8')
             op_id = post_params.get('id')
-            route = post_params.get('redirect_uri')
+            route = post_params.get('redirectUri')
+            send_config = (post_params.get('sendConfig', 'false') == 'true')
             # Check if the thread id. exists
             for c in self.commands:
                 if c.getName() == str(op_id):
                     raise Exception('Task id. already exists: {}'.format(op_id))
             if post_params.get('client', 'false') == 'false':
                 # Launching a new thread
-                thr = threading.Thread(name=op_id, target=self._task_command, args=(route, script, op_id))
+                thr = threading.Thread(name=op_id, target=self._task_command, args=(route, script, op_id, send_config))
                 thr.start()
                 self.commands.append(thr)
             else:
