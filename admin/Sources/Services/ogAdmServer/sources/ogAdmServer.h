@@ -36,13 +36,15 @@ typedef struct{ // Estructura usada para guardar información de los clientes
 }SOCKETCL;
 SOCKETCL tbsockets[MAXIMOS_CLIENTES];
 
+struct og_dbi;
+
 bool registraCliente(char *);
 bool procesoInclusionClienteWinLnx(int socket, TRAMA*,int*,char*);
 bool procesoInclusionCliente(struct og_client *, TRAMA*);
 bool clienteExistente(char *,int *);
 bool clienteDisponible(char *,int *);
 bool actualizaConfiguracion(Database , Table ,char* ,int);
-bool recorreProcedimientos(Database ,char* ,FILE*,char*);
+bool recorreProcedimientos(struct og_dbi *,char* ,FILE*,char*);
 bool buscaComandos(char *,TRAMA *,int *);
 bool respuestaConsola(int socket, TRAMA *,int);
 bool enviaComando(TRAMA *ptrTrama,const char*);

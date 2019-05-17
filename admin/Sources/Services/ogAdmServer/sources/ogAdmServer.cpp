@@ -790,11 +790,11 @@ static bool AutoexecCliente(TRAMA *ptrTrama, struct og_client *cli)
 {
 	int socket_c = og_client_socket(cli);
 	int lon;
-	char *iph, *exe, msglog[LONSTD];
-	Database db;
+	char *iph, *exe;
 	FILE *fileexe;
 	char fileautoexec[LONPRM];
 	char parametros[LONGITUD_PARAMETROS];
+	struct og_dbi *dbi;
 
 	iph = copiaParametro("iph",ptrTrama); // Toma dirección IP del cliente
 	exe = copiaParametro("exe",ptrTrama); // Toma identificador del procedimiento inicial
@@ -807,14 +807,14 @@ static bool AutoexecCliente(TRAMA *ptrTrama, struct og_client *cli)
 		return false;
 	}
 
-	if (!db.Open(usuario, pasguor, datasource, catalog)) {
-		db.GetErrorErrStr(msglog);
-		syslog(LOG_ERR, "cannot open connection database (%s:%d) %s\n",
-		       __func__, __LINE__, msglog);
+	dbi = og_dbi_open(&dbi_config);
+	if (!dbi) {
+		syslog(LOG_ERR, "cannot open connection database (%s:%d)\n",
+		       __func__, __LINE__);
 		return false;
 	}
 	initParametros(ptrTrama,0);
-	if (recorreProcedimientos(db, parametros, fileexe, exe)) {
+	if (recorreProcedimientos(dbi, parametros, fileexe, exe)) {
 		lon = sprintf(ptrTrama->parametros, "nfn=RESPUESTA_AutoexecCliente\r");
 		lon += sprintf(ptrTrama->parametros + lon, "nfl=%s\r", fileautoexec);
 		lon += sprintf(ptrTrama->parametros + lon, "res=1\r");
@@ -823,7 +823,7 @@ static bool AutoexecCliente(TRAMA *ptrTrama, struct og_client *cli)
 		lon += sprintf(ptrTrama->parametros + lon, "res=0\r");
 	}
 
-	db.Close();
+	og_dbi_close(dbi);
 	fclose(fileexe);
 
 	if (!mandaTrama(&socket_c, ptrTrama)) {
@@ -847,46 +847,38 @@ static bool AutoexecCliente(TRAMA *ptrTrama, struct og_client *cli)
 //		true: Si el proceso es correcto
 //		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-bool recorreProcedimientos(Database db, char *parametros, FILE *fileexe, char *idp)
+bool recorreProcedimientos(struct og_dbi *dbi, char *parametros, FILE *fileexe, char *idp)
 {
+	char idprocedimiento[LONPRM];
 	int procedimientoid, lsize;
-	char idprocedimiento[LONPRM], msglog[LONSTD], sqlstr[LONSQL];
-	Table tbl;
+	const char *msglog, *param;
+	dbi_result result;
 
-	/* Busca procedimiento */
-	sprintf(sqlstr,
+	result = dbi_conn_queryf(dbi->conn,
 			"SELECT procedimientoid,parametros FROM procedimientos_acciones"
 				" WHERE idprocedimiento=%s ORDER BY orden", idp);
-	// Ejecuta consulta
-	if (!db.Execute(sqlstr, tbl)) {
-		db.GetErrorErrStr(msglog);
+	if (!result) {
+		dbi_conn_error(dbi->conn, &msglog);
 		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
 		       __func__, __LINE__, msglog);
 		return false;
 	}
-	while (!tbl.ISEOF()) { // Recorre procedimientos
-		if (!tbl.Get("procedimientoid", procedimientoid)) { // Toma dato
-			tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-			og_info(msglog);
-			return false;
-		}
+	while (dbi_result_next_row(result)) {
+		procedimientoid = dbi_result_get_uint(result, "procedimientoid");
 		if (procedimientoid > 0) { // Procedimiento recursivo
 			sprintf(idprocedimiento, "%d", procedimientoid);
-			if (!recorreProcedimientos(db, parametros, fileexe, idprocedimiento)) {
+			if (!recorreProcedimientos(dbi, parametros, fileexe, idprocedimiento)) {
 				return false;
 			}
 		} else {
-			if (!tbl.Get("parametros", parametros)) { // Toma dato
-				tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-				og_info(msglog);
-				return false;
-			}
-			strcat(parametros, "@");
+			param = dbi_result_get_string(result, "parametros");
+			sprintf(parametros, "%s@", param);
 			lsize = strlen(parametros);
 			fwrite(parametros, 1, lsize, fileexe); // Escribe el código a ejecutar
 		}
-		tbl.MoveNext();
 	}
+	dbi_result_free(result);
+
 	return true;
 }
 // ________________________________________________________________________________________________________
