@@ -9,7 +9,7 @@
       </mk-dropdown-toggle>
       <mk-dropdown-menu>
         <li class="header" *ngIf="executionTasks.length > 0">
-          <span translate="you_have_x_exectution_taks" translate-values="{values: executionTasks.length}"></span>
+          <span translate="you_have_x_exectution_taks" [translateParams]="{values: executionTasks.length}"></span>
         </li>
         <li *ngIf="executionTasks.length > 0">
           <!-- inner menu: contains the actual data -->
@@ -21,7 +21,7 @@
                 </a>
                 <a href="javascript:void(0)" (click)="relaunchExecutionTask(task)" class="btn btn-sm pull-right small-box-footer">
                   <i class="fa fa-refresh"></i>
-                </a>A
+                </a>
               </div>
               <a href="javascript:void(0)" (click)="ogCommandsService.execute('REALTIME_LOG', {clientIp: task.client.ip})">
                 <i class="fa fa-warning text-yellow"></i> {{task.client.name}} ({{task.client.ip}})<br>{{task.commandType|translate}}

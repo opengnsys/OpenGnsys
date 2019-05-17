@@ -39,9 +39,16 @@ export class OGCommandsService {
         this.commandService.execute(this.execution).subscribe(
           (response: any[]) => {
             // Buscar en la respuesta si hay algún statuscode diferente de 200
-            const errors = response.filter(function(value) {
-              return (value.statusCode && value.statusCode !== '!200');
-            } );
+            const errors = [];
+            const keys = Object.keys(response);
+            keys.forEach((index) => {
+                const elemKeys = Object.keys(response[index]);
+                elemKeys.forEach((elemKey) => {
+                  if (elemKey === 'statusCode' && response[index][elemKey] !== 200) {
+                    errors.push(response[index]);
+                  }
+                });
+            });
             let errorStr = '';
             let toasterOpts = {type: 'success', title: 'success', body: this.translate.instant('successfully_executed')};
             if (errors.length > 0) {
@@ -116,7 +123,7 @@ export class OGCommandsService {
             // Crear como nombre para mostrar, el disco y partición del sistema
             const obj = Object.assign({}, client.partitions[index]);
             const str = 'disco: ' + obj.numDisk + ', part: ' + obj.numPartition + ', SO: ' + client.partitions[index].osName;
-            clonablePartitions.push(obj.numDisk + ' ' + obj.numPartition)
+            clonablePartitions.push(obj.numDisk + ' ' + obj.numPartition);
             options.scope.partitions.push(str);
           }
         }

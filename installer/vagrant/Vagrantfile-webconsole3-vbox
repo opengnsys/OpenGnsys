@@ -1,0 +1,171 @@
+# Vagrantfile to prepare virtual environment using VirtualBox provider to develop new AngularJS-based web interface.
+
+VAGRANTFILE_API_VERSION = "2"
+ENV['VAGRANT_DEFAULT_PROVIDER'] = "virtualbox"
+LANGUAGE = "es_ES"
+ENV['LC_ALL'] = LANGUAGE + ".UTF-8"
+SERVERMEM = 2048
+SERVERCPUS = 2
+CLIENTMEM = 512
+NCLIENTS = 4
+REPODISK = "repo.vdi"
+REPOSIZE = 50
+MACPREFIX = "08:00:27:0e:65"
+NETPREFIX = "192.168.2"
+SERVERIP = "#{NETPREFIX}.10"
+LOCALWEBPORT = 8443
+
+
+# OpenGnsys Server provisioning script.
+SCRIPT = <<EOT
+# Set language.
+export LANG="#{LANGUAGE}.UTF-8"
+echo "LANG=\"$LANG\"" > /etc/default/locale
+echo "LANG=\"$LANG\"" >> /etc/environment
+echo "LANGUAGE=\"$LANG\"" >> /etc/environment
+echo "LC_ALL=\"$LANG\"" >> /etc/environment
+echo "LC_CTYPE=\"$LANG\"" >> /etc/environment
+locale-gen --lang #{LANGUAGE}
+sed -i "s/XKBLAYOUT=.*/XKBLAYOUT=\"${LANG%_*}\"/" /etc/default/keyboard
+dpkg-reconfigure -fnoninteractive console-setup
+# Exit if OpenGnsys is installed.
+[ -f /opt/opengnsys/doc/VERSION.json ] && echo "Cannot provision, OpenGnsys is alread
+y installed." && exit 1
+# Create repository disk using LVM, if necesary.
+if [ -z "$(blkid /dev/mapper/og-images | grep ext4)" ]; then
+    pvcreate /dev/sdb
+    vgcreate og /dev/sdb
+    vgchange -ay
+    lvcreate -ay -n images -l 100%VG og
+    mkfs -t ext4 /dev/mapper/og-images
+    mkdir -p /opt/opengnsys/images
+    echo "/dev/mapper/og-images  /opt/opengnsys/images  ext4  defaults  0  0" >> /etc/fstab
+    mount -a
+fi
+# Update repositories.
+add-apt-repository -y ppa:webupd8team/atom
+apt-get update
+# Install main dependencies.
+apt-get install -y xfce4 gnome-icon-theme-full tango-icon-theme linux-headers-$(uname -r) firefox atom virtualbox-guest-dkms virtualbox-guest-utils virtualbox-guest-x11
+echo "allowed_users=anybody" > /etc/X11/Xwrapper.config
+# Install OpenGnsys Server
+tar xpvzf /vagrant/opengnsys3.tar.gz -C /tmp
+/tmp/opengnsys/installer/opengnsys_installer.sh
+echo y | /opt/opengnsys/bin/setserveraddr eth1
+# Configure the virtual lab.
+read -e APIID APISECRET <<<$(/opt/opengnsys/www3/backend/app/console doctrine:query:sql "SELECT random_id, secret FROM og_core__clients WHERE id=1;" | awk -F\\" '$2~/^(random_id|secret)$/ {getline; printf("%s ", $2)}')
+rm -fr /opt/opengnsys/www3/backend/var/cache/*
+REQ=$(curl -sk 'https://localhost/opengnsys3/backend/web/app_dev.php/oauth/v2/token?client_id=1_'"$APIID"'&client_secret='"$APISECRET"'&grant_type=password&username=admin&password=admin')
+TOKEN="$(echo $REQ | jq -r .access_token)"
+REQ=$(curl -sk -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{"name":"Repositorio virtual", "ip":"#{SERVERIP}", "password":"'$(php -r 'echo md5(uniqid(rand(), true));')'", "configurationpath":"/", "adminpath":"/", "pxepath":"/", "port":0 }' https://localhost/opengnsys3/backend/web/app_dev.php/api/private/repositories)
+REPOID=$(echo $REQ | jq -r .id)
+REQ=$(curl -sk -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{"name":"Aula virtual", "description":"Despliegue virtual con Vagrant.", "networkSettings":{"mcastMode":"full-duplex", "mcastIp":"239.194.2.11", "mcastPort":9000, "mcastPort":9000, "mcastSpeed":100, "netmask":"#{NETPREFIX}.0", "router":"#{NETPREFIX}.1", "p2pMode":"peer", "p2pTime":60} }' https://localhost/opengnsys3/backend/web/app_dev.php/api/private/organizationalunits)
+OUID=$(echo $REQ | jq -r .id)
+for ((i=11; i<=10+#{NCLIENTS}; i++)); do
+	sed -i "/^}$/ i host pc${i} { hardware ethernet #{MACPREFIX}:${i}; fixed-address #{NETPREFIX}.${i}; }" /etc/dhcp/dhcpd.conf
+	[ $i == 11 ] && BOOTID=5 || BOOTID=6
+        REQ=$(curl -sk -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{"name":"pc'$i'", "ip":"#{NETPREFIX}.'$i'", "mac":"#{MACPREFIX}:'$i'", "serialno":"", "netiface":"eth0", "netdriver":"generic", "netboot":'"$BOOTID"', "organizationalUnit":'"$OUID"', "repository":'"$REPOID"'}' https://localhost/opengnsys3/backend/web/app_dev.php/api/private/clients)
+done
+systemctl restart isc-dhcp-server
+#/opt/opengnsys/bin/setclientmode ogLiveAdmin pc11 PERM
+#for ((i=12; i<=#{NCLIENTS+10}; i++)); do
+#    /opt/opengnsys/bin/setclientmode ogLive pc$i PERM
+#done
+sed -i "s,\(url = 'https://\)[^/]*,\1localhost:#{LOCALWEBPORT}," /opt/opengnsys/www3/frontend/main.js
+sed -i "s,\(url = 'https://\)[^/]*,\1localhost:#{LOCALWEBPORT}," /opt/opengnsys/www3/frontend/main.js.map
+echo "Notes:"
+echo "- New OpenGnsys Server URL: https://localhost:#{LOCALWEBPORT}/opengnsys3/frontend/"
+EOT
+
+# Client 1 OS provisioning script.
+OGAGENTPKG = "ogagent_1.1.1_all.deb"
+MODELSCRIPT = <<EOT
+# Comment out next lines to install and configure OGAgent for Ubuntu.
+apt-get update -y
+apt-get install -y curl
+curl -ks https://#{SERVERIP}/opengnsys/descargas/#{OGAGENTPKG} -o /tmp/#{OGAGENTPKG}
+if [ -f /tmp/#{OGAGENTPKG} ]; then
+    apt-get install -y /tmp/#{OGAGENTPKG} || exit $?
+    sed -i "0,/remote=/ s,remote=.*,remote=https://#{SERVERIP}/opengnsys/rest/," /usr/share/OGAgent/cfg/ogagent.cfg
+    rm -f /tmp/#{OGAGENTPKG}
+else
+    echo "Warning: cannot install OGAgent package #{OGAGENTPKG}"
+fi
+# Remove network configuration added by Vagrant.
+sed -i "/eth1/ d" /etc/network/interfaces
+echo "Notes:"
+echo "- After now, use VirtualBox GUI to disable network interface 1 and restart this VM."
+# Leave VM halted.
+sleep 2
+poweroff &
+EOT
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+
+  # OpenGnsys AngularJS VM definition.
+  config.vm.define "ogAngular", primary: true do |ag|
+    # Specific VirtualBox configuration.
+    ag.vm.provider "virtualbox" do |vb|
+      # VM name, memory and CPUs.
+      vb.name = "ogAngular"
+      vb.memory = SERVERMEM
+      vb.cpus = SERVERCPUS
+      # 2nd virtual disk path (current dir on Windows, VM dir on other OSes)
+      if Vagrant::Util::Platform.windows? then
+        second_disk = File.join(".", REPODISK)
+      else
+        line = `VBoxManage list systemproperties`.match("Default machine folder.*")[0]
+        vb_machine_folder = line.split(':')[1].strip()
+        second_disk = File.join(vb_machine_folder, vb.name, REPODISK)
+      end
+      # Create repo virtual disk, if needed.
+      unless File.exist?(second_disk)
+        vb.customize ['createhd', '--filename', second_disk, '--size', REPOSIZE * 1024]
+      end
+      # Attach repo virtual disk.
+      vb.customize ['storageattach', :id, '--storagectl', 'SATA Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', second_disk]
+    end
+    # VM base and host name.
+    ag.vm.box = "bento/ubuntu-18.04"
+    ag.vm.hostname = "ogAngular"
+    # Network settings.
+    ag.vm.network "forwarded_port", guest: 443, host: LOCALWEBPORT, host_ip: "127.0.0.1"
+    ag.vm.network "private_network", mac: "#{MACPREFIX}10".tr(":",""), ip: "#{SERVERIP}", virtualbox__intnet: true
+    # Launch provisioning script.
+    ag.vm.provision "shell", inline: SCRIPT
+  end
+
+  # Client 1 VM definition.
+  config.vm.define "pc11", autostart: false do |v1|
+    v1.vm.box = "bento/ubuntu-18.04"
+    v1.vm.hostname = "pc11"
+    v1.vm.network "private_network", mac: "#{MACPREFIX}11".tr(":",""), type: "dhcp", virtualbox__intnet: true
+    v1.vm.provider "virtualbox" do |vb|
+      vb.name = "pc11"
+      vb.memory = CLIENTMEM
+      vb.cpus = 1
+      vb.customize ['modifyvm', :id, '--boot1', 'net', '--boot2', 'disk']
+    end
+    v1.vm.synced_folder ".", "/vagrant", disabled: true
+    v1.vm.provision "shell", inline: MODELSCRIPT
+  end
+
+  # Clonable clients definition.
+  (2..NCLIENTS).each do |i|
+    config.vm.define "pc#{i+10}", autostart: false do |cl|
+      cl.vm.box = "clink15/pxe"
+      cl.ssh.insert_key = false
+      cl.vm.boot_timeout = 5
+      cl.vm.network "private_network", mac: "#{MACPREFIX}#{i+10}".tr(":",""), type: "dhcp", virtualbox__intnet: true
+      cl.vm.provider "virtualbox" do |vb|
+        vb.name = "pc#{i+10}"
+        vb.memory = CLIENTMEM
+        vb.cpus = 1
+        vb.customize ['modifyvm', :id, '--boot1', 'net', '--boot2', 'disk']
+        vb.customize ["modifyvm", :id, "--nic1", "none"]
+      end
+    end
+  end
+
+end
+

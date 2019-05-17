@@ -12,11 +12,13 @@
     right: 0;
     margin: 0;
     background-color: black;
-    width: 2px;
+    width: 4px;
     height: 100%;
     padding: 0 !important;
     cursor: col-resize;
     border: 1px solid transparent;
   }
-
+  table.disk-partitions td:last-child span.resizer:last-child {
+    display: none;
+  }
 }

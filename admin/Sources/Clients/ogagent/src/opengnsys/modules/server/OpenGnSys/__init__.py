@@ -39,11 +39,31 @@ import threading
 import time
 import urllib
 import signal
+
 from opengnsys import REST
 from opengnsys import operations
 from opengnsys.log import logger
 from opengnsys.workers import ServerWorker
 from six.moves.urllib import parse
+
+
+# Check authorization header decorator
+def check_secret(fnc):
+    """
+    Decorator to check for received secret key and raise exception if it isn't valid.
+    """
+    def wrapper(*args, **kwargs):
+        try:
+            this, path, get_params, post_params, server = args  # @UnusedVariable
+            if this.random == server.headers['Authorization']:
+                fnc(*args, **kwargs)
+            else:
+                raise Exception('Unauthorized operation')
+        except Exception as e:
+            logger.error(e)
+            raise Exception(e)
+
+    return wrapper
 
 
 # Error handler decorator.
@@ -92,7 +112,6 @@ class OpenGnSysWorker(ServerWorker):
     interface = None  # Bound interface for OpenGnsys
     REST = None  # REST object
     loggedin = False  # User session flag
-    locked = {}  # Locked partitions
     browser = {}  # Browser info
     commands = []  # Running commands
     random = None  # Random string for secure connections
@@ -100,30 +119,24 @@ class OpenGnSysWorker(ServerWorker):
     access_token = refresh_token = None  # Server authorization tokens
     grant_type = 'http://opengnsys.es/grants/og_client'
 
-    def _check_secret(self, server):
-        """
-        Checks for received secret key and raise exception if it isn't valid.
-        """
-        try:
-            if self.random != server.headers['Authorization']:
-                raise Exception('Unauthorized operation')
-        except Exception as e:
-            logger.error(e)
-            raise Exception(e)
-
     def _launch_browser(self, url):
         """
         Launchs the Browser with specified URL
         :param url: URL to show
         """
         logger.debug('Launching browser with URL: {}'.format(url))
-        if hasattr(self.browser, 'process'):
-            self.browser['process'].kill()
-            os.kill(self.browser['process'].pid, signal.SIGINT)
+        # Trying to kill an old browser
+        try:
+            os.kill(self.browser['process'].pid, signal.SIGKILL)
+        except OSError:
+            logger.warn('Cannot kill the old browser process')
+        except KeyError:
+            # There is no previous browser
+            pass
         self.browser['url'] = url
         self.browser['process'] = subprocess.Popen(['browser', '-qws', url])
 
-    def _task_command(self, route, code, op_id):
+    def _task_command(self, route, code, op_id, send_config=False):
         """
         Task to execute a command and return results to a server URI
         :param route: server callback REST route to return results
@@ -136,20 +149,25 @@ class OpenGnSysWorker(ServerWorker):
         if os_type == 'oglive':
             menu_url = self.browser['url']
             self._launch_browser('http://localhost/cgi-bin/httpd-log.sh')
-        # Executing command
+        # Execute the code
         (stat, out, err) = operations.exec_command(code)
-        # Removing command from the list
+        # Remove command from the list
         for c in self.commands:
             if c.getName() == op_id:
                 self.commands.remove(c)
-        # Removing the REST API prefix, if needed
+        # Remove the REST API prefix, if needed
         if route.startswith(self.REST.endpoint):
             route = route[len(self.REST.endpoint):]
-        # Sending results
+        # Send back exit status and outputs (base64-encoded)
         self.REST.sendMessage(route, {'mac': self.interface.mac, 'ip': self.interface.ip, 'trace': op_id,
-                                      'status': stat, 'output': out.encode('base64'), 'error': err.encode('base64')})
+                                      'status': stat, 'output': out.encode('utf8').encode('base64'),
+                                      'error': err.encode('utf8').encode('base64')})
         # Show latest menu, if OGAgent runs on ogLive
         if os_type == 'oglive':
+            # Send configuration data, if needed
+            if send_config:
+                self.REST.sendMessage('clients/configs', {'mac': self.interface.mac, 'ip': self.interface.ip,
+                                                          'config': operations.get_configuration()})
             self._launch_browser(menu_url)
 
     def onActivation(self):
@@ -231,7 +249,7 @@ class OpenGnSysWorker(ServerWorker):
 <html>
 <head></head>
 <body>
-<h1>Initializing...</h1>
+<h1 style="margin: 5em; font-size: xx-large;">OpenGnsys 3</h1>
 </body>
 </html>"""
             f = open('/tmp/init.html', 'w')
@@ -312,7 +330,12 @@ class OpenGnSysWorker(ServerWorker):
 
     def process_status(self, path, get_params, post_params, server):
         """
-        Returns client status (OS type and login status).
+        Returns client status (OS type or execution status) and login status.
+        :param path:
+        :param get_params:
+        :param post_params:
+        :param server:
+        :return: JSON object {"status": "status_code", "loggedin": boolean}
         """
         res = {'loggedin': self.loggedin}
         try:
@@ -320,32 +343,42 @@ class OpenGnSysWorker(ServerWorker):
         except KeyError:
             res['status'] = ''
         # Check if OpenGnsys Client is busy
-        if res['status'] == 'oglive' and self.locked:
+        if res['status'] == 'oglive' and len(self.commands) > 0:
             res['status'] = 'busy'
         return res
 
+    @check_secret
     def process_reboot(self, path, get_params, post_params, server):
         """
         Launches a system reboot operation.
+        :param path:
+        :param get_params:
+        :param post_params:
+        :param server: authorization header
+        :return: JSON object {"op": "launched"}
         """
         logger.debug('Received reboot operation')
-        self._check_secret(server)
 
-        # Rebooting thread.
+        # Rebooting thread
         def rebt():
             operations.reboot()
 
         threading.Thread(target=rebt).start()
         return {'op': 'launched'}
 
+    @check_secret
     def process_poweroff(self, path, get_params, post_params, server):
         """
         Launches a system power off operation.
+        :param path:
+        :param get_params:
+        :param post_params:
+        :param server: authorization header
+        :return: JSON object {"op": "launched"}
         """
         logger.debug('Received poweroff operation')
-        self._check_secret(server)
 
-        # Powering off thread.
+        # Powering off thread
         def pwoff():
             time.sleep(2)
             operations.poweroff()
@@ -353,24 +386,30 @@ class OpenGnSysWorker(ServerWorker):
         threading.Thread(target=pwoff).start()
         return {'op': 'launched'}
 
+    @check_secret
     def process_script(self, path, get_params, post_params, server):
         """
         Processes an script execution (script should be encoded in base64)
+        :param path:
+        :param get_params:
+        :param post_params: JSON object {"redirect_uri, "uri", "script": "commands", "id": trace_id}
+        :param server: authorization header
+        :return: JSON object {"op": "launched"} or {"error": "message"}
         """
         logger.debug('Processing script request')
-        self._check_secret(server)
         # Processing data
         try:
             script = urllib.unquote(post_params.get('script').decode('base64')).decode('utf8')
             op_id = post_params.get('id')
-            route = post_params.get('redirect_uri')
-            # Checking if the thread id. exists
+            route = post_params.get('redirectUri')
+            send_config = (post_params.get('sendConfig', 'false') == 'true')
+            # Check if the thread id. exists
             for c in self.commands:
                 if c.getName() == str(op_id):
                     raise Exception('Task id. already exists: {}'.format(op_id))
             if post_params.get('client', 'false') == 'false':
                 # Launching a new thread
-                thr = threading.Thread(name=op_id, target=self._task_command, args=(route, script, op_id))
+                thr = threading.Thread(name=op_id, target=self._task_command, args=(route, script, op_id, send_config))
                 thr.start()
                 self.commands.append(thr)
             else:
@@ -381,43 +420,43 @@ class OpenGnSysWorker(ServerWorker):
             return {'error': e}
         return {'op': 'launched'}
 
+    @check_secret
     def process_logoff(self, path, get_params, post_params, server):
         """
         Closes user session.
         """
         logger.debug('Received logoff operation')
-        self._check_secret(server)
-        # Sending log off message to OGAgent client.
+        # Send log off message to OGAgent client.
         self.sendClientMessage('logoff', {})
         return {'op': 'sent to client'}
 
+    @check_secret
     def process_popup(self, path, get_params, post_params, server):
         """
         Shows a message popup on the user's session.
         """
         logger.debug('Received message operation')
-        self._check_secret(server)
-        # Sending popup message to OGAgent client.
+        # Send popup message to OGAgent client.
         self.sendClientMessage('popup', post_params)
         return {'op': 'launched'}
 
     def process_client_popup(self, params):
         self.REST.sendMessage('popup_done', params)
 
+    @check_secret
     def process_config(self, path, get_params, post_params, server):
         """
         Returns client configuration
         :param path:
         :param get_params:
         :param post_params:
-        :param server:
-        :return: object
+        :param server: authorization header
+        :return: JSON object
         """
         serialno = ''  # Serial number
         storage = []  # Storage configuration
         warnings = 0  # Number of warnings
         logger.debug('Received getconfig operation')
-        # self._check_secret(server)
         # Processing data
         for row in operations.get_configuration().split(';'):
             cols = row.split(':')
@@ -443,65 +482,42 @@ class OpenGnSysWorker(ServerWorker):
                     logger.warn('Configuration parameter error: {}'.format(cols))
                     warnings += 1
             else:
-                # Logging warnings
+                # Log warnings
                 logger.warn('Configuration data error: {}'.format(cols))
                 warnings += 1
-        # Returning configuration data and count of warnings
+        # Return configuration data and count of warnings
         return {'serialno': serialno, 'storage': storage, 'warnings': warnings}
 
-    def process_command(self, path, get_params, post_params, server):
-        """
-        Launches a thread to executing a command
-        :param path: ignored
-        :param get_params: ignored
-        :param post_params: object with format:
-            id: operation id.
-            script: command code
-            redirect_url: callback REST route
-        :param server: headers data
-        :rtype: object with launching status
-        """
-        logger.debug('Received command operation with params: {}'.format(post_params))
-        self._check_secret(server)
-        # Processing data
-        try:
-            script = post_params.get('script')
-            op_id = post_params.get('id')
-            route = post_params.get('redirect_url')
-            # Checking if the thread id. exists
-            for c in self.commands:
-                if c.getName() == str(op_id):
-                    raise Exception('Task id. already exists: {}'.format(op_id))
-            # Launching a new thread
-            thr = threading.Thread(name=op_id, target=self.task_command, args=(script, route, op_id))
-            thr.start()
-            self.commands.append(thr)
-        except Exception as e:
-            logger.error('Got exception {}'.format(e))
-            return {'error': e}
-        return {'op': 'launched'}
-
+    @check_secret
     def process_execinfo(self, path, get_params, post_params, server):
         """
         Returns running commands information
         :param path:
         :param get_params:
         :param post_params:
-        :param server:
-        :return: object
+        :param server: authorization header
+        :return: JSON array: [["callback_url", "commands", trace_id], ...]
         """
         data = []
         logger.debug('Received execinfo operation')
-        self._check_secret(server)
-        # Returning the arguments of all running threads
+        # Return the arguments of all running threads
         for c in self.commands:
             if c.is_alive():
                 data.append(c.__dict__['_Thread__args'])
         return data
 
+    @check_secret
     def process_stopcmd(self, path, get_params, post_params, server):
+        """
+        Stops a running process identified by its trace id.
+        :param path:
+        :param get_params:
+        :param post_params: JSON object {"trace": trace_id}
+        :param server: authorization header
+        :return: JSON object: {"stopped": trace_id}
+        """
         logger.debug('Received stopcmd operation with params {}:'.format(post_params))
-        self._check_secret(server)
+        # Find operation id. and stop the thread
         op_id = post_params.get('trace')
         for c in self.commands:
             if c.is_alive() and c.getName() == str(op_id):
