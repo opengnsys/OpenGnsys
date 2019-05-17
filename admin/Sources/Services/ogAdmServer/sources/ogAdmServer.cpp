@@ -1041,12 +1041,13 @@ static bool DisponibilidadComandos(TRAMA *ptrTrama, struct og_client *cli)
 //		true: Si el proceso es correcto
 //		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-static bool respuestaEstandar(TRAMA *ptrTrama, char *iph, char *ido, Database db,
-		Table tbl)
+static bool respuestaEstandar(TRAMA *ptrTrama, char *iph, char *ido,
+			      struct og_dbi *dbi)
 {
-	char msglog[LONSTD], sqlstr[LONSQL];
 	char *res, *ids, *der;
 	char fechafin[LONPRM];
+	const char *msglog;
+	dbi_result result;
 	struct tm* st;
 	int idaccion;
 
@@ -1072,47 +1073,47 @@ static bool respuestaEstandar(TRAMA *ptrTrama, char *iph, char *ido, Database db
 		return true;
 	}
 
-	sprintf(sqlstr,
+	result = dbi_conn_queryf(dbi->conn,
 			"SELECT * FROM acciones WHERE idordenador=%s"
 			" AND sesion=%s ORDER BY idaccion", ido,ids);
 
 	liberaMemoria(ids);
 
-	if (!db.Execute(sqlstr, tbl)) {
-		db.GetErrorErrStr(msglog);
+	if (!result) {
+		dbi_conn_error(dbi->conn, &msglog);
 		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
 		       __func__, __LINE__, msglog);
 		return false;
 	}
-	if (tbl.ISEOF()) {
+	if (!dbi_result_next_row(result)) {
 		syslog(LOG_ERR, "no actions available\n");
+		dbi_result_free(result);
 		return true;
 	}
-	if (!tbl.Get("idaccion", idaccion)) { // Toma identificador de la accion
-		tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-		og_info(msglog);
-		return false;
-	}
+
+	idaccion = dbi_result_get_uint(result, "idaccion");
+	dbi_result_free(result);
+
 	st = tomaHora();
 	sprintf(fechafin, "%d/%d/%d %d:%d:%d", st->tm_year + 1900, st->tm_mon + 1,
 			st->tm_mday, st->tm_hour, st->tm_min, st->tm_sec);
 
 	der = copiaParametro("der",ptrTrama); // Toma descripción del error (si hubiera habido)
-	
-	sprintf(sqlstr,
+
+	result = dbi_conn_queryf(dbi->conn,
 			"UPDATE acciones"\
 			"   SET resultado='%s',estado='%d',fechahorafin='%s',descrinotificacion='%s'"\
 			" WHERE idordenador=%s AND idaccion=%d",
 			res, ACCION_FINALIZADA, fechafin, der, ido, idaccion);
-			
-	if (!db.Execute(sqlstr, tbl)) { // Error al actualizar
+	if (!result) {
+		dbi_conn_error(dbi->conn, &msglog);
 		liberaMemoria(res);
 		liberaMemoria(der);
-		db.GetErrorErrStr(msglog);
-		og_info(msglog);
+		og_info((char *)msglog);
 		return false;
 	}
-	
+	dbi_result_free(result);
+
 	liberaMemoria(der);
 
 	if (atoi(res) == ACCION_FALLIDA) {
@@ -1396,39 +1397,38 @@ bool WakeUp(int s, char* iph, char *mac, char *mar)
 // ________________________________________________________________________________________________________
 static bool RESPUESTA_Arrancar(TRAMA* ptrTrama, struct og_client *cli)
 {
-	char msglog[LONSTD];
-	Database db;
-	Table tbl;
-	int i;
+	struct og_dbi *dbi;
 	char *iph, *ido;
 	char *tpc;
+	int i;
 
-	if (!db.Open(usuario, pasguor, datasource, catalog)) {
-		db.GetErrorErrStr(msglog);
-		syslog(LOG_ERR, "cannot open connection database (%s:%d) %s\n",
-		       __func__, __LINE__, msglog);
+	dbi = og_dbi_open(&dbi_config);
+	if (!dbi) {
+		syslog(LOG_ERR, "cannot open connection database (%s:%d)\n",
+		       __func__, __LINE__);
 		return false;
 	}
 
 	iph = copiaParametro("iph",ptrTrama); // Toma dirección ip
 	ido = copiaParametro("ido",ptrTrama); // Toma identificador del ordenador
 
-	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
+	if (!respuestaEstandar(ptrTrama, iph, ido, dbi)) {
 		liberaMemoria(iph);
 		liberaMemoria(ido);
 		syslog(LOG_ERR, "failed to register notification\n");
+		og_dbi_close(dbi);
 		return false;
 	}
 
 	tpc = copiaParametro("tpc",ptrTrama); // Tipo de cliente (Plataforma y S.O.)
 	if (clienteExistente(iph, &i)) // Actualiza estado
 		strcpy(tbsockets[i].estado, tpc);
-		
+
 	liberaMemoria(iph);
 	liberaMemoria(ido);
 	liberaMemoria(tpc);
-	
-	db.Close(); // Cierra conexión
+	og_dbi_close(dbi);
+
 	return true;
 }
 // ________________________________________________________________________________________________________
@@ -1445,36 +1445,35 @@ static bool RESPUESTA_Arrancar(TRAMA* ptrTrama, struct og_client *cli)
 // ________________________________________________________________________________________________________
 static bool RESPUESTA_Apagar(TRAMA* ptrTrama, struct og_client *cli)
 {
-	char msglog[LONSTD];
-	Database db;
-	Table tbl;
-	int i;
+	struct og_dbi *dbi;
 	char *iph, *ido;
+	int i;
 
-	if (!db.Open(usuario, pasguor, datasource, catalog)) {
-		db.GetErrorErrStr(msglog);
-		syslog(LOG_ERR, "cannot open connection database (%s:%d) %s\n",
-		       __func__, __LINE__, msglog);
+	dbi = og_dbi_open(&dbi_config);
+	if (!dbi) {
+		syslog(LOG_ERR, "cannot open connection database (%s:%d)\n",
+		       __func__, __LINE__);
 		return false;
 	}
 
 	iph = copiaParametro("iph",ptrTrama); // Toma dirección ip
 	ido = copiaParametro("ido",ptrTrama); // Toma identificador del ordenador
 
-	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
+	if (!respuestaEstandar(ptrTrama, iph, ido, dbi)) {
 		liberaMemoria(iph);
 		liberaMemoria(ido);
 		syslog(LOG_ERR, "failed to register notification\n");
+		og_dbi_close(dbi);
 		return false; // Error al registrar notificacion
 	}
 
 	if (clienteExistente(iph, &i)) // Actualiza estado
 		strcpy(tbsockets[i].estado, CLIENTE_APAGADO);
-	
+
 	liberaMemoria(iph);
 	liberaMemoria(ido);
-	
-	db.Close(); // Cierra conexión
+	og_dbi_close(dbi);
+
 	return true;
 }
 // ________________________________________________________________________________________________________
@@ -1495,6 +1494,7 @@ static bool RESPUESTA_CrearImagen(TRAMA* ptrTrama, struct og_client *cli)
 	Database db;
 	Table tbl;
 	char *iph, *dsk, *par, *cpt, *ipr, *ido;
+	struct og_dbi *dbi;
 	char *idi;
 	bool res;
 
@@ -1505,13 +1505,22 @@ static bool RESPUESTA_CrearImagen(TRAMA* ptrTrama, struct og_client *cli)
 		return false;
 	}
 
+	dbi = og_dbi_open(&dbi_config);
+	if (!dbi) {
+		syslog(LOG_ERR, "cannot open connection database (%s:%d)\n",
+		       __func__, __LINE__);
+		db.Close();
+		return false;
+	}
+
 	iph = copiaParametro("iph",ptrTrama); // Toma dirección ip
 	ido = copiaParametro("ido",ptrTrama); // Toma identificador del ordenador
 
-	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
+	if (!respuestaEstandar(ptrTrama, iph, ido, dbi)) {
 		liberaMemoria(iph);
 		liberaMemoria(ido);
 		syslog(LOG_ERR, "failed to register notification\n");
+		og_dbi_close(dbi);
 		return false; // Error al registrar notificacion
 	}
 
@@ -1528,15 +1537,14 @@ static bool RESPUESTA_CrearImagen(TRAMA* ptrTrama, struct og_client *cli)
 	liberaMemoria(par);
 	liberaMemoria(cpt);
 	liberaMemoria(ipr);
+	og_dbi_close(dbi);
 
-	if(!res){
+	if (!res)
 		syslog(LOG_ERR, "Problem processing update\n");
-		db.Close();
-		return false;
-	}
 
 	db.Close(); // Cierra conexión
-	return true;
+
+	return res;
 }
 // ________________________________________________________________________________________________________
 // Función: actualizaCreacionImagen
@@ -1685,6 +1693,7 @@ static bool RESPUESTA_CrearSoftIncremental(TRAMA* ptrTrama, struct og_client *cl
 	char *iph,*par,*ido,*idf;
 	int ifs;
 	char msglog[LONSTD],sqlstr[LONSQL];
+	struct og_dbi *dbi;
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) {
 		db.GetErrorErrStr(msglog);
@@ -1693,10 +1702,19 @@ static bool RESPUESTA_CrearSoftIncremental(TRAMA* ptrTrama, struct og_client *cl
 		return false;
 	}
 
+	dbi = og_dbi_open(&dbi_config);
+	if (!dbi) {
+		syslog(LOG_ERR, "cannot open connection database (%s:%d)\n",
+		       __func__, __LINE__);
+		db.Close();
+		return false;
+	}
+
 	iph = copiaParametro("iph",ptrTrama); // Toma dirección ip
 	ido = copiaParametro("ido",ptrTrama); // Toma identificador del ordenador
 
-	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
+	if (!respuestaEstandar(ptrTrama, iph, ido, dbi)) {
+		og_dbi_close(dbi);
 		liberaMemoria(iph);
 		liberaMemoria(ido);
 		syslog(LOG_ERR, "failed to register notification\n");
@@ -1735,6 +1753,7 @@ static bool RESPUESTA_CrearSoftIncremental(TRAMA* ptrTrama, struct og_client *cl
 		       __func__, __LINE__, msglog);
 		return false;
 	}
+	og_dbi_close(dbi);
 	db.Close(); // Cierra conexión
 	return true;
 }
@@ -1758,6 +1777,7 @@ static bool RESPUESTA_RestaurarImagen(TRAMA* ptrTrama, struct og_client *cli)
 	Table tbl;
 	bool res;
 	char *iph, *ido, *idi, *dsk, *par, *ifs, *cfg;
+	struct og_dbi *dbi;
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) {
 		db.GetErrorErrStr(msglog);
@@ -1766,10 +1786,19 @@ static bool RESPUESTA_RestaurarImagen(TRAMA* ptrTrama, struct og_client *cli)
 		return false;
 	}
 
+	dbi = og_dbi_open(&dbi_config);
+	if (!dbi) {
+		syslog(LOG_ERR, "cannot open connection database (%s:%d)\n",
+		       __func__, __LINE__);
+		db.Close();
+		return false;
+	}
+
 	iph = copiaParametro("iph",ptrTrama); // Toma dirección ip
 	ido = copiaParametro("ido",ptrTrama); // Toma identificador del ordenador
 
-	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
+	if (!respuestaEstandar(ptrTrama, iph, ido, dbi)) {
+		og_dbi_close(dbi);
 		liberaMemoria(iph);
 		liberaMemoria(ido);
 		syslog(LOG_ERR, "failed to register notification\n");
@@ -1793,15 +1822,14 @@ static bool RESPUESTA_RestaurarImagen(TRAMA* ptrTrama, struct og_client *cli)
 	liberaMemoria(idi);
 	liberaMemoria(par);
 	liberaMemoria(ifs);
+	og_dbi_close(dbi);
 
-	if(!res){
+	if(!res)
 		syslog(LOG_ERR, "Problem after restoring image\n");
-		db.Close();
-		return false;
-	}
 
 	db.Close(); // Cierra conexión
-	return true;
+
+	return res;
 }
 // ________________________________________________________________________________________________________
 //
@@ -1893,6 +1921,7 @@ static bool RESPUESTA_EjecutarScript(TRAMA* ptrTrama, struct og_client *cli)
 	Database db;
 	Table tbl;
 	char *iph, *ido,*cfg;
+	struct og_dbi *dbi;
 	bool res = true;
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) {
@@ -1902,10 +1931,19 @@ static bool RESPUESTA_EjecutarScript(TRAMA* ptrTrama, struct og_client *cli)
 		return false;
 	}
 
+	dbi = og_dbi_open(&dbi_config);
+	if (!dbi) {
+		syslog(LOG_ERR, "cannot open connection database (%s:%d)\n",
+		       __func__, __LINE__);
+		db.Close();
+		return false;
+	}
+
 	iph = copiaParametro("iph",ptrTrama); // Toma dirección ip
 	ido = copiaParametro("ido",ptrTrama); // Toma identificador del ordenador
 
-	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
+	if (!respuestaEstandar(ptrTrama, iph, ido, dbi)) {
+		og_dbi_close(dbi);
 		liberaMemoria(iph);
 		liberaMemoria(ido);
 		syslog(LOG_ERR, "failed to register notification\n");
@@ -1920,14 +1958,14 @@ static bool RESPUESTA_EjecutarScript(TRAMA* ptrTrama, struct og_client *cli)
 
 	liberaMemoria(iph);
 	liberaMemoria(ido);
+	og_dbi_close(dbi);
 
-	if (!res) {
+	if (!res)
 		syslog(LOG_ERR, "Problem updating client configuration\n");
-		return false;
-	}
 
 	db.Close(); // Cierra conexión
-	return true;
+
+	return res;
 }
 // ________________________________________________________________________________________________________
 // Función: RESPUESTA_InventarioHardware
@@ -1948,6 +1986,7 @@ static bool RESPUESTA_InventarioHardware(TRAMA* ptrTrama, struct og_client *cli)
 	Table tbl;
 	bool res;
 	char *iph, *ido, *idc, *npc, *hrd, *buffer;
+	struct og_dbi *dbi;
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) {
 		db.GetErrorErrStr(msglog);
@@ -1956,10 +1995,19 @@ static bool RESPUESTA_InventarioHardware(TRAMA* ptrTrama, struct og_client *cli)
 		return false;
 	}
 
+	dbi = og_dbi_open(&dbi_config);
+	if (!dbi) {
+		syslog(LOG_ERR, "cannot open connection database (%s:%d)\n",
+		       __func__, __LINE__);
+		db.Close();
+		return false;
+	}
+
 	iph = copiaParametro("iph",ptrTrama); // Toma dirección ip del cliente
 	ido = copiaParametro("ido",ptrTrama); // Toma identificador del cliente
 
-	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
+	if (!respuestaEstandar(ptrTrama, iph, ido, dbi)) {
+		og_dbi_close(dbi);
 		liberaMemoria(iph);
 		liberaMemoria(ido);
 		syslog(LOG_ERR, "failed to register notification\n");
@@ -1980,14 +2028,14 @@ static bool RESPUESTA_InventarioHardware(TRAMA* ptrTrama, struct og_client *cli)
 	liberaMemoria(npc);			
 	liberaMemoria(idc);		
 	liberaMemoria(buffer);		
-	
-	if(!res){
+	og_dbi_close(dbi);
+
+	if (!res)
 		syslog(LOG_ERR, "Problem updating client configuration\n");
-		return false;
-	}
-		
+
 	db.Close(); // Cierra conexión
-	return true;
+
+	return res;
 }
 // ________________________________________________________________________________________________________
 // Función: actualizaHardware
@@ -2299,6 +2347,7 @@ static bool RESPUESTA_InventarioSoftware(TRAMA* ptrTrama, struct og_client *cli)
 	Table tbl;
 	bool res;
 	char *iph, *ido, *npc, *idc, *par, *sft, *buffer;
+	struct og_dbi *dbi;
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) {
 		db.GetErrorErrStr(msglog);
@@ -2307,10 +2356,19 @@ static bool RESPUESTA_InventarioSoftware(TRAMA* ptrTrama, struct og_client *cli)
 		return false;
 	}
 
+	dbi = og_dbi_open(&dbi_config);
+	if (!dbi) {
+		syslog(LOG_ERR, "cannot open connection database (%s:%d)\n",
+		       __func__, __LINE__);
+		db.Close();
+		return false;
+	}
+
 	iph = copiaParametro("iph",ptrTrama); // Toma dirección ip
 	ido = copiaParametro("ido",ptrTrama); // Toma identificador del ordenador
 
-	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
+	if (!respuestaEstandar(ptrTrama, iph, ido, dbi)) {
+		og_dbi_close(dbi);
 		liberaMemoria(iph);
 		liberaMemoria(ido);
 		syslog(LOG_ERR, "failed to register notification\n");
@@ -2332,14 +2390,14 @@ static bool RESPUESTA_InventarioSoftware(TRAMA* ptrTrama, struct og_client *cli)
 	liberaMemoria(idc);	
 	liberaMemoria(par);	
 	liberaMemoria(sft);	
+	og_dbi_close(dbi);
 
-	if(!res){
+	if (!res)
 		syslog(LOG_ERR, "cannot update software\n");
-		return false;
-	}
 
 	db.Close(); // Cierra conexión
-	return true;
+
+	return res;
 }
 // ________________________________________________________________________________________________________
 // Función: actualizaSoftware
