@@ -11,6 +11,7 @@ import {OGCommandsService} from '../../../service/og-commands.service';
 import {Client, Partition} from '../../../model/client';
 import {CommandService} from '../../../api/command.service';
 import {forkJoin} from 'rxjs';
+import {Execution} from '../../../model/command';
 
 @Component({
   selector: 'app-format-command',
@@ -18,7 +19,7 @@ import {forkJoin} from 'rxjs';
   styleUrls: [ './format-command.component.scss' ]
 })
 export class FormatCommandComponent implements OnInit {
-  execution = {clients: '', script: '', type: ''};
+  execution = new Execution();
   command = {};
   user: User;
   clientGroups = {};
@@ -85,10 +86,7 @@ export class FormatCommandComponent implements OnInit {
     const groups = Object.keys(this.clientGroups);
     for (let g = 0; g < groups.length; g++) {
       if (!executions[g]) {
-        executions[g] = {
-          clients: '',
-          script: ''
-        };
+        executions[g] = new Execution();
       }
       // Recorrer las particiones del primer cliente de la lista y ver si hay alguna seleccionada
       const found = false;
@@ -101,7 +99,7 @@ export class FormatCommandComponent implements OnInit {
       while (!found && index < client.partitions.length) {
         const partition = client.partitions[index];
         if (partition.selected === true) {
-          if(executions[g].script === '') {
+          if (executions[g].script === '') {
             executions[g].script = 'ogUnmountAll ' + partition.numDisk + '\n';
           }
           // Si la particion es cache
@@ -122,7 +120,8 @@ export class FormatCommandComponent implements OnInit {
       const execution = {
         type: 'RUN_SCRIPT',
         script: executions[index].script,
-        clients: executions[index].clients.substring(0, executions[index].clients.length - 1)	// Quitar la ultima ","
+        clients: executions[index].clients.substring(0, executions[index].clients.length - 1),	// Quitar la ultima ","
+        sendConfig: true
       };
       promises.push(this.commandService.execute(execution));
     }

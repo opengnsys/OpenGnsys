@@ -10,7 +10,7 @@ import {User} from '../../../model/user';
 import {OGCommandsService} from '../../../service/og-commands.service';
 import {CommandService} from '../../../api/command.service';
 import {Image} from '../../../model/image';
-import {Command, Excecution} from '../../../model/command';
+import {Command, Execution} from '../../../model/command';
 import {Client} from '../../../model/client';
 import {Repository} from '../../../model/repository';
 import {RepositoryService} from '../../../api/repository.service';
@@ -25,7 +25,7 @@ export class DeleteCacheImageCommandComponent implements OnInit {
   private readonly user: User;
   private constants: any;
   public repositories: Repository[];
-  public execution = new Excecution();
+  public execution = new Execution();
   public commands: Command[] = [];
   public client: Client;
   public cacheImages = [];
@@ -102,9 +102,9 @@ export class DeleteCacheImageCommandComponent implements OnInit {
         this.execution.script += '\n';
       }
     }
-    this.execution.script += this.constants.commands.REFRESH_INFO + '\n';
     this.execution.script = this.execution.script.replace(/\"/g, '\\"').replace(/\$/g, '\\\$');
     this.execution.type = 'RUN_SCRIPT';
+    this.execution.sendConfig = true;
 
     this.commandService.execute(this.execution).subscribe(
         (response)  => {

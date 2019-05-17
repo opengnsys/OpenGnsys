@@ -1,9 +1,10 @@
 import { Resource } from 'globunet-angular/core/models/api/resource';
 
-export class Excecution {
+export class Execution {
   script = '';
   clients = '';
   type = '';
+  sendConfig =  false;
 }
 
 export class Command extends Resource {

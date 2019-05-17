@@ -12,6 +12,7 @@ import {CommandService} from '../../../api/command.service';
 import {DomSanitizer} from '@angular/platform-browser';
 import {ChartOptions} from 'chart.js';
 import {Client} from '../../../model/client';
+import {Execution} from '../../../model/command';
 
 @Component({
   selector: 'app-partition-format-command',
@@ -19,7 +20,7 @@ import {Client} from '../../../model/client';
   styleUrls: [ './partition-format-command.component.scss' ]
 })
 export class PartitionFormatCommandComponent implements OnInit {
-  execution = {clients: '', script: '', type: ''};
+  execution = new Execution();
   command = {};
   user: User;
   constants: any;

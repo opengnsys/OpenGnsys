@@ -14,7 +14,7 @@ import {ResourceService} from "globunet-angular/core/providers/api/resource.serv
 export class SoftwareComponentService extends ResourceService<SoftwareComponent> {
 
 	constructor(http: HttpClient){
-		super(http, environment.API_URL,"softwarecomponents", new SoftwareComponentSerializer());
+		super(http, environment.API_URL,"softwares", new SoftwareComponentSerializer());
 	}
 
 }

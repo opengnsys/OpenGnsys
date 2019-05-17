@@ -198,15 +198,13 @@ export class OgCommonService {
   }
 
   saveSelection() {
-    if (Object.keys(this.selectedClients).length > 0) {
-      localStorage.setItem('selectedClients', JSON.stringify(this.selectedClients, function (key, value) {
-        let result = value;
-        if (key === 'parent' && typeof value === 'object') {
-          result = value.id;
-        }
-        return result;
-      }));
-    }
+    localStorage.setItem('selectedClients', JSON.stringify(this.selectedClients, function (key, value) {
+      let result = value;
+      if (key === 'parent' && typeof value === 'object') {
+        result = value.id;
+      }
+      return result;
+    }));
   }
 
   getSelectionSize() {

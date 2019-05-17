@@ -10,7 +10,7 @@ import {User} from '../../../model/user';
 import {OGCommandsService} from '../../../service/og-commands.service';
 import {CommandService} from '../../../api/command.service';
 import {Image} from '../../../model/image';
-import {Command, Excecution} from '../../../model/command';
+import {Command, Execution} from '../../../model/command';
 import {Client, Partition} from '../../../model/client';
 import {Repository} from '../../../model/repository';
 import {RepositoryService} from '../../../api/repository.service';
@@ -26,7 +26,7 @@ export class CreateImageCommandComponent implements OnInit {
   private readonly user: User;
   private constants: any;
   public repositories: Repository[];
-  public execution = new Excecution();
+  public execution = new Execution();
   public commands: Command[] = [];
   public client: Client;
   public images = [];
