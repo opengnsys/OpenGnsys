@@ -1307,6 +1307,27 @@ static bool respuestaEstandar(TRAMA *ptrTrama, char *iph, char *ido, Database db
 	liberaMemoria(res);
 	return true;
 }
+
+static bool og_send_cmd(char *ips_array[], int ips_array_len,
+			const char *state, TRAMA *ptrTrama)
+{
+	int i, idx;
+
+	for (i = 0; i < ips_array_len; i++) {
+		if (clienteDisponible(ips_array[i], &idx)) { // Si el cliente puede recibir comandos
+			int sock = tbsockets[idx].cli ? tbsockets[idx].cli->io.fd : -1;
+
+			strcpy(tbsockets[idx].estado, state); // Actualiza el estado del cliente
+			if (!mandaTrama(&sock, ptrTrama)) {
+				syslog(LOG_ERR, "failed to send response to %s:%s\n",
+				       ips_array[i], strerror(errno));
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
 // ________________________________________________________________________________________________________
 // Función: enviaComando
 //
@@ -1322,7 +1343,7 @@ static bool respuestaEstandar(TRAMA *ptrTrama, char *iph, char *ido, Database db
 bool enviaComando(TRAMA* ptrTrama, const char *estado)
 {
 	char *iph, *Ipes, *ptrIpes[MAXIMOS_CLIENTES];
-	int i, idx, lon;
+	int lon;
 
 	iph = copiaParametro("iph",ptrTrama); // Toma dirección/es IP
 	lon = strlen(iph); // Calcula longitud de la cadena de direccion/es IPE/S
@@ -1337,19 +1358,10 @@ bool enviaComando(TRAMA* ptrTrama, const char *estado)
 
 	lon = splitCadena(ptrIpes, Ipes, ';');
 	FINCADaINTRO(ptrTrama);
-	for (i = 0; i < lon; i++) {
-		if (clienteDisponible(ptrIpes[i], &idx)) { // Si el cliente puede recibir comandos
-			int sock = tbsockets[idx].cli ? tbsockets[idx].cli->io.fd : -1;
 
-			strcpy(tbsockets[idx].estado, estado); // Actualiza el estado del cliente
-			if (!mandaTrama(&sock, ptrTrama)) {
-				syslog(LOG_ERR, "failed to send response to %s:%s\n",
-				       ptrIpes[i], strerror(errno));
-				return false;
-			}
-			//close(tbsockets[idx].sock); // Cierra el socket del cliente hasta nueva disponibilidad
-		}
-	}
+	if (!og_send_cmd(ptrIpes, lon, estado, ptrTrama))
+		return false;
+
 	liberaMemoria(Ipes);
 	return true;
 }
