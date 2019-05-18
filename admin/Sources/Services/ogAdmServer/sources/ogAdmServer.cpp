@@ -3560,12 +3560,38 @@ static int og_client_state_recv_hdr(struct og_client *cli)
 	return 1;
 }
 
+static int og_client_state_process_payload(struct og_client *cli)
+{
+	TRAMA *ptrTrama;
+	char *data;
+	int len;
+
+	len = cli->msg_len - (LONGITUD_CABECERATRAMA + LONHEXPRM);
+	data = &cli->buf[LONGITUD_CABECERATRAMA + LONHEXPRM];
+
+	ptrTrama = (TRAMA *)reservaMemoria(sizeof(TRAMA));
+	if (!ptrTrama) {
+		syslog(LOG_ERR, "OOM\n");
+		return -1;
+	}
+
+	initParametros(ptrTrama, len);
+	memcpy(ptrTrama, cli->buf, LONGITUD_CABECERATRAMA);
+	memcpy(ptrTrama->parametros, data, len);
+	ptrTrama->lonprm = len;
+
+	gestionaTrama(ptrTrama, cli);
+
+	liberaMemoria(ptrTrama->parametros);
+	liberaMemoria(ptrTrama);
+
+	return 1;
+}
+
 static void og_client_read_cb(struct ev_loop *loop, struct ev_io *io, int events)
 {
 	struct og_client *cli;
-	TRAMA *ptrTrama;
-	int ret, len;
-	char *data;
+	int ret;
 
 	cli = container_of(io, struct og_client, io);
 
@@ -3619,24 +3645,9 @@ static void og_client_read_cb(struct ev_loop *loop, struct ev_io *io, int events
 		       inet_ntoa(cli->addr.sin_addr),
 		       ntohs(cli->addr.sin_port));
 
-		len = cli->msg_len - (LONGITUD_CABECERATRAMA + LONHEXPRM);
-		data = &cli->buf[LONGITUD_CABECERATRAMA + LONHEXPRM];
-
-		ptrTrama = (TRAMA *)reservaMemoria(sizeof(TRAMA));
-		if (!ptrTrama) {
-			syslog(LOG_ERR, "OOM\n");
+		ret = og_client_state_process_payload(cli);
+		if (ret < 0)
 			goto close;
-		}
-
-		initParametros(ptrTrama, len);
-		memcpy(ptrTrama, cli->buf, LONGITUD_CABECERATRAMA);
-		memcpy(ptrTrama->parametros, data, len);
-		ptrTrama->lonprm = len;
-
-		gestionaTrama(ptrTrama, cli);
-
-		liberaMemoria(ptrTrama->parametros);
-		liberaMemoria(ptrTrama);
 
 		if (cli->keepalive_idx < 0) {
 			syslog(LOG_DEBUG, "server closing connection to %s:%hu\n",
