@@ -12,6 +12,7 @@
 #include <syslog.h>
 #include <sys/ioctl.h>
 #include <ifaddrs.h>
+#include <jansson.h>
 
 static char usuario[LONPRM]; // Usuario de acceso a la base de datos
 static char pasguor[LONPRM]; // Password del usuario
@@ -126,6 +127,7 @@ struct og_client {
 	unsigned int		buf_len;
 	unsigned int		msg_len;
 	int			keepalive_idx;
+	bool			rest;
 };
 
 static inline int og_client_socket(const struct og_client *cli)
@@ -3616,6 +3618,160 @@ static int og_client_state_process_payload(struct og_client *cli)
 	return 1;
 }
 
+struct og_msg_params {
+	const char	*ips_array[64];
+	unsigned int	ips_array_len;
+};
+
+static int og_json_parse_clients(json_t *element, struct og_msg_params *params)
+{
+	unsigned int i;
+	json_t *k;
+
+	if (json_typeof(element) != JSON_ARRAY)
+		return -1;
+
+	for (i = 0; i < json_array_size(element); i++) {
+		k = json_array_get(element, i);
+		if (json_typeof(k) != JSON_STRING)
+			return -1;
+
+		params->ips_array[params->ips_array_len++] =
+			json_string_value(k);
+	}
+	return 0;
+}
+
+static int og_cmd_legacy_sondeo(struct og_msg_params *params)
+{
+	char buf[4096] = {};
+	int len, err = 0;
+	TRAMA *msg;
+
+	len = snprintf(buf, sizeof(buf), "nfn=Sondeo\r");
+
+	msg = og_msg_alloc(buf, len);
+	if (!msg)
+		return -1;
+
+	if (!og_send_cmd((char **)params->ips_array, params->ips_array_len,
+			 CLIENTE_APAGADO, msg))
+		err = -1;
+
+	og_msg_free(msg);
+
+	return err;
+}
+
+static int og_cmd_post_clients(json_t *element, struct og_msg_params *params)
+{
+	const char *key;
+	json_t *value;
+	int err = 0;
+
+	if (json_typeof(element) != JSON_OBJECT)
+		return -1;
+
+	json_object_foreach(element, key, value) {
+		if (!strcmp(key, "clients"))
+			err = og_json_parse_clients(value, params);
+
+		if (err < 0)
+			break;
+	}
+
+	return og_cmd_legacy_sondeo(params);
+}
+
+static int og_client_not_found(struct og_client *cli)
+{
+	char buf[] = "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n";
+
+	send(og_client_socket(cli), buf, strlen(buf), 0);
+
+	return -1;
+}
+
+static int og_client_ok(struct og_client *cli)
+{
+	char buf[] = "HTTP/1.1 200 OK\r\nContent-Length: 0\r\n\r\n";
+
+	send(og_client_socket(cli), buf, strlen(buf), 0);
+
+	return 0;
+}
+
+enum og_rest_method {
+	OG_METHOD_GET	= 0,
+	OG_METHOD_POST,
+};
+
+static int og_client_state_process_payload_rest(struct og_client *cli)
+{
+	struct og_msg_params params = {};
+	const char *cmd, *body, *ptr;
+	enum og_rest_method method;
+	int content_length = 0;
+	json_error_t json_err;
+	json_t *root = NULL;
+	int err = 0;
+
+	if (!strncmp(cli->buf, "GET", strlen("GET"))) {
+		method = OG_METHOD_GET;
+		cmd = cli->buf + strlen("GET") + 2;
+	} else if (!strncmp(cli->buf, "POST", strlen("POST"))) {
+		method = OG_METHOD_POST;
+		cmd = cli->buf + strlen("POST") + 2;
+	} else
+		return -1;
+
+	body = strstr(cli->buf, "\r\n\r\n") + 4;
+
+	ptr = strstr(cli->buf, "Content-Length: ");
+	if (ptr)
+		sscanf(ptr, "Content-Length: %i[^\r\n]", &content_length);
+
+	if (content_length) {
+		root = json_loads(body, 0, &json_err);
+		if (!root) {
+			syslog(LOG_ERR, "malformed json line %d: %s\n",
+			       json_err.line, json_err.text);
+			return og_client_not_found(cli);
+		}
+	}
+
+	if (!strncmp(cmd, "clients", strlen("clients"))) {
+		if (method != OG_METHOD_POST)
+			return -1;
+		if (!root) {
+			syslog(LOG_ERR, "command clients with no payload\n");
+			return og_client_not_found(cli);
+		}
+		err = og_cmd_post_clients(root, &params);
+	} else {
+		syslog(LOG_ERR, "unknown command %s\n", cmd);
+		err = og_client_not_found(cli);
+	}
+
+	json_decref(root);
+
+	if (!err)
+		og_client_ok(cli);
+
+	return err;
+}
+
+static int og_client_state_recv_hdr_rest(struct og_client *cli)
+{
+	char *trailer;
+
+	trailer = strstr(cli->buf, "\r\n\r\n");
+	if (!trailer)
+		return 0;
+
+	return 1;
+}
+
 static void og_client_read_cb(struct ev_loop *loop, struct ev_io *io, int events)
 {
 	struct og_client *cli;
@@ -3653,7 +3809,11 @@ static void og_client_read_cb(struct ev_loop *loop, struct ev_io *io, int events
 
 	switch (cli->state) {
 	case OG_CLIENT_RECEIVING_HEADER:
-		ret = og_client_state_recv_hdr(cli);
+		if (cli->rest)
+			ret = og_client_state_recv_hdr_rest(cli);
+		else
+			ret = og_client_state_recv_hdr(cli);
+
 		if (ret < 0)
 			goto close;
 		if (!ret)
@@ -3673,7 +3833,10 @@ static void og_client_read_cb(struct ev_loop *loop, struct ev_io *io, int events
 		       inet_ntoa(cli->addr.sin_addr),
 		       ntohs(cli->addr.sin_port));
 
-		ret = og_client_state_process_payload(cli);
+		if (cli->rest)
+			ret = og_client_state_process_payload_rest(cli);
+		else
+			ret = og_client_state_process_payload(cli);
 		if (ret < 0)
 			goto close;
 
@@ -3714,6 +3877,8 @@ static void og_client_timer_cb(struct ev_loop *loop, ev_timer *timer, int events
 	og_client_release(loop, cli);
 }
 
+static int socket_s, socket_rest;
+
 static void og_server_accept_cb(struct ev_loop *loop, struct ev_io *io,
 				int events)
 {
@@ -3738,6 +3903,9 @@ static void og_server_accept_cb(struct ev_loop *loop, struct ev_io *io,
 	}
 	memcpy(&cli->addr, &client_addr, sizeof(client_addr));
 	cli->keepalive_idx = -1;
+
+	if (io->fd == socket_rest)
+		cli->rest = true;
 
 	syslog(LOG_DEBUG, "connection from client %s:%hu\n",
 	       inet_ntoa(cli->addr.sin_addr), ntohs(cli->addr.sin_port));
@@ -3776,9 +3944,8 @@ static int og_socket_server_init(const char *port)
 
 int main(int argc, char *argv[])
 {
+	struct ev_io ev_io_server, ev_io_server_rest;
 	struct ev_loop *loop = ev_default_loop(0);
-	struct ev_io ev_io_server;
-	int socket_s;
 	int i;
 
 	if (signal(SIGPIPE, SIG_IGN) == SIG_ERR)
@@ -3812,6 +3979,13 @@ int main(int argc, char *argv[])
 
 	ev_io_init(&ev_io_server, og_server_accept_cb, socket_s, EV_READ);
 	ev_io_start(loop, &ev_io_server);
+
+	socket_rest = og_socket_server_init("8888");
+	if (socket_rest < 0)
+		exit(EXIT_FAILURE);
+
+	ev_io_init(&ev_io_server_rest, og_server_accept_cb, socket_rest, EV_READ);
+	ev_io_start(loop, &ev_io_server_rest);
 
 	infoLog(1); // Inicio de sesión
 

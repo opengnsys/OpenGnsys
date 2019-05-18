@@ -12,7 +12,7 @@ CFLAGS += -g -Wall -I../../Includes
 CPPFLAGS := $(CFLAGS)
 
 # Opciones de linkado
-LDFLAGS := -Wl,--no-as-needed $(shell mysql_config --libs) -lev
+LDFLAGS := -Wl,--no-as-needed $(shell mysql_config --libs) -lev -ljansson
 
 # Ficheros objetos
 OBJS := ../../Includes/Database.o sources/ogAdmServer.o 
