@@ -3529,9 +3529,39 @@ static void og_client_reset_state(struct og_client *cli)
 	cli->buf_len = 0;
 }
 
-static void og_client_read_cb(struct ev_loop *loop, struct ev_io *io, int events)
+static int og_client_state_recv_hdr(struct og_client *cli)
 {
 	char hdrlen[LONHEXPRM];
+
+	/* Still too short to validate protocol fingerprint and message
+	 * length.
+	 */
+	if (cli->buf_len < 15 + LONHEXPRM)
+		return 0;
+
+	if (strncmp(cli->buf, "@JMMLCAMDJ_MCDJ", 15)) {
+		syslog(LOG_ERR, "bad fingerprint from client %s:%hu, closing\n",
+		       inet_ntoa(cli->addr.sin_addr),
+		       ntohs(cli->addr.sin_port));
+		return -1;
+	}
+
+	memcpy(hdrlen, &cli->buf[LONGITUD_CABECERATRAMA], LONHEXPRM);
+	cli->msg_len = strtol(hdrlen, NULL, 16);
+
+	/* Header announces more that we can fit into buffer. */
+	if (cli->msg_len >= sizeof(cli->buf)) {
+		syslog(LOG_ERR, "too large message %u bytes from %s:%hu\n",
+		       cli->msg_len, inet_ntoa(cli->addr.sin_addr),
+		       ntohs(cli->addr.sin_port));
+		return -1;
+	}
+
+	return 1;
+}
+
+static void og_client_read_cb(struct ev_loop *loop, struct ev_io *io, int events)
+{
 	struct og_client *cli;
 	TRAMA *ptrTrama;
 	int ret, len;
@@ -3569,29 +3599,11 @@ static void og_client_read_cb(struct ev_loop *loop, struct ev_io *io, int events
 
 	switch (cli->state) {
 	case OG_CLIENT_RECEIVING_HEADER:
-		/* Still too short to validate protocol fingerprint and message
-		 * length.
-		 */
-		if (cli->buf_len < 15 + LONHEXPRM)
+		ret = og_client_state_recv_hdr(cli);
+		if (ret < 0)
+			goto close;
+		if (!ret)
 			return;
-
-		if (strncmp(cli->buf, "@JMMLCAMDJ_MCDJ", 15)) {
-			syslog(LOG_ERR, "bad fingerprint from client %s:%hu, closing\n",
-			       inet_ntoa(cli->addr.sin_addr),
-			       ntohs(cli->addr.sin_port));
-			goto close;
-		}
-
-		memcpy(hdrlen, &cli->buf[LONGITUD_CABECERATRAMA], LONHEXPRM);
-		cli->msg_len = strtol(hdrlen, NULL, 16);
-
-		/* Header announces more that we can fit into buffer. */
-		if (cli->msg_len >= sizeof(cli->buf)) {
-			syslog(LOG_ERR, "too large message %u bytes from %s:%hu\n",
-			       cli->msg_len, inet_ntoa(cli->addr.sin_addr),
-			       ntohs(cli->addr.sin_port));
-			goto close;
-		}
 
 		cli->state = OG_CLIENT_RECEIVING_PAYLOAD;
 		/* Fall through. */
