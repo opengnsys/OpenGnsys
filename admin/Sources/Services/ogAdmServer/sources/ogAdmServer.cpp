@@ -3720,13 +3720,37 @@ static void og_server_accept_cb(struct ev_loop *loop, struct ev_io *io,
 	ev_timer_start(loop, &cli->timer);
 }
 
+static int og_socket_server_init(const char *port)
+{
+	struct sockaddr_in local;
+	int sd, on = 1;
+
+	sd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	if (sd < 0) {
+		syslog(LOG_ERR, "cannot create main socket\n");
+		return -1;
+	}
+	setsockopt(sd, SOL_SOCKET, SO_REUSEPORT, &on, sizeof(int));
+
+	local.sin_addr.s_addr = htonl(INADDR_ANY);
+	local.sin_family = AF_INET;
+	local.sin_port = htons(atoi(port));
+
+	if (bind(sd, (struct sockaddr *) &local, sizeof(local)) < 0) {
+		syslog(LOG_ERR, "cannot bind socket\n");
+		return -1;
+	}
+
+	listen(sd, 250);
+
+	return sd;
+}
+
 int main(int argc, char *argv[])
 {
 	struct ev_loop *loop = ev_default_loop(0);
 	struct ev_io ev_io_server;
-	struct sockaddr_in local;
 	int socket_s;
-	int activo=1;
 	int i;
 
 	if (signal(SIGPIPE, SIG_IGN) == SIG_ERR)
@@ -3754,23 +3778,9 @@ int main(int argc, char *argv[])
 	/*--------------------------------------------------------------------------------------------------------
 	 Creación y configuración del socket del servicio
 	 ---------------------------------------------------------------------------------------------------------*/
-	socket_s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP); // Crea socket del servicio
-	setsockopt(socket_s, SOL_SOCKET, SO_REUSEPORT, &activo, sizeof(int));
-	if (socket_s < 0) {
-		syslog(LOG_ERR, "cannot create main socket\n");
+	socket_s = og_socket_server_init(puerto);
+	if (socket_s < 0)
 		exit(EXIT_FAILURE);
-	}
-
-	local.sin_addr.s_addr = htonl(INADDR_ANY); // Configura el socket del servicio
-	local.sin_family = AF_INET;
-	local.sin_port = htons(atoi(puerto));
-
-	if (bind(socket_s, (struct sockaddr *) &local, sizeof(local)) < 0) {
-		syslog(LOG_ERR, "cannot bind socket\n");
-		exit(EXIT_FAILURE);
-	}
-
-	listen(socket_s, 250); // Pone a escuchar al socket
 
 	ev_io_init(&ev_io_server, og_server_accept_cb, socket_s, EV_READ);
 	ev_io_start(loop, &ev_io_server);
