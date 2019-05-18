@@ -3572,6 +3572,30 @@ static int og_client_state_recv_hdr(struct og_client *cli)
 	return 1;
 }
 
+static TRAMA *og_msg_alloc(char *data, unsigned int len)
+{
+	TRAMA *ptrTrama;
+
+	ptrTrama = (TRAMA *)reservaMemoria(sizeof(TRAMA));
+	if (!ptrTrama) {
+		syslog(LOG_ERR, "OOM\n");
+		return NULL;
+	}
+
+	initParametros(ptrTrama, len);
+	memcpy(ptrTrama, "@JMMLCAMDJ_MCDJ", LONGITUD_CABECERATRAMA);
+	memcpy(ptrTrama->parametros, data, len);
+	ptrTrama->lonprm = len;
+
+	return ptrTrama;
+}
+
+static void og_msg_free(TRAMA *ptrTrama)
+{
+	liberaMemoria(ptrTrama->parametros);
+	liberaMemoria(ptrTrama);
+}
+
 static int og_client_state_process_payload(struct og_client *cli)
 {
 	TRAMA *ptrTrama;
@@ -3581,21 +3605,13 @@ static int og_client_state_process_payload(struct og_client *cli)
 	len = cli->msg_len - (LONGITUD_CABECERATRAMA + LONHEXPRM);
 	data = &cli->buf[LONGITUD_CABECERATRAMA + LONHEXPRM];
 
-	ptrTrama = (TRAMA *)reservaMemoria(sizeof(TRAMA));
-	if (!ptrTrama) {
-		syslog(LOG_ERR, "OOM\n");
+	ptrTrama = og_msg_alloc(data, len);
+	if (!ptrTrama)
 		return -1;
-	}
-
-	initParametros(ptrTrama, len);
-	memcpy(ptrTrama, cli->buf, LONGITUD_CABECERATRAMA);
-	memcpy(ptrTrama->parametros, data, len);
-	ptrTrama->lonprm = len;
 
 	gestionaTrama(ptrTrama, cli);
 
-	liberaMemoria(ptrTrama->parametros);
-	liberaMemoria(ptrTrama);
+	og_msg_free(ptrTrama);
 
 	return 1;
 }
