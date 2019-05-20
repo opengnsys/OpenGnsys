@@ -80,6 +80,8 @@ class OpenGnSysWorker(ServerWorker):
         Sends OGAgent activation notification to OpenGnsys server
         '''
         self.cmd = None
+        # Generate random secret to send on activation
+        self.random = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(self.length))
         # Ensure cfg has required configuration variables or an exception will be thrown
         self.REST = REST(self.service.config.get('opengnsys', 'remote'))
         # Get network interfaces until they are active or timeout (5 minutes)
@@ -98,16 +100,25 @@ class OpenGnSysWorker(ServerWorker):
         # Raise error after timeout
         if not self.interface:
             raise e
+        # Loop to send initialization message
+        for t in range(0, 100):
+            try:
+                self.REST.sendMessage('ogagent/started', {'mac': self.interface.mac, 'ip': self.interface.ip,
+                                                          'secret': self.random, 'ostype': operations.osType,
+                                                          'osversion': operations.osVersion})
+                break
+            except:
+                time.sleep(3)
+        if 0 < t < 100:
+            logger.debug("Successful connection after {} tries".format(t))
+        elif t == 100:
+            raise Exception('Initialization error: Cannot connect to remote server')
         # Delete marking files
         for f in ['ogboot.me', 'ogboot.firstboot', 'ogboot.secondboot']:
             try:
                 os.remove(os.sep + f)
             except OSError:
                 pass
-        # Generate random secret to send on activation
-        self.random = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(self.length))
-        # Send initalization message
-        self.REST.sendMessage('ogagent/started', {'mac': self.interface.mac, 'ip': self.interface.ip, 'secret': self.random, 'ostype': operations.osType, 'osversion': operations.osVersion})
 
     def onDeactivation(self):
         '''
