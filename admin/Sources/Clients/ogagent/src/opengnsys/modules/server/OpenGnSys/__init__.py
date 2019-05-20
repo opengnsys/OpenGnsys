@@ -174,6 +174,9 @@ class OpenGnSysWorker(ServerWorker):
         """
         Sends OGAgent activation notification to OpenGnsys server
         """
+        t = 0
+        # Generate random secret to send on activation
+        self.random = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(self.length))
         # Ensure cfg has required configuration variables or an exception will be thrown
         url = self.service.config.get('opengnsys', 'remote')
         server_client = self.service.config.get('opengnsys', 'client')
@@ -201,6 +204,28 @@ class OpenGnSysWorker(ServerWorker):
         # Raise error after timeout
         if not self.interface:
             raise e
+        # Loop to send initialization message
+        for t in range(0, 100):
+            try:
+                try:
+                    self.REST.sendMessage('ogagent/started', {'mac': self.interface.mac, 'ip': self.interface.ip,
+                                                              'secret': self.random, 'ostype': operations.os_type,
+                                                              'osversion': operations.os_version})
+                    break
+                except:
+                    # Trying to initialize on alternative server, if defined
+                    # (used in "exam mode" from the University of Seville)
+                    self.REST = REST(self.service.config.get('opengnsys', 'altremote'))
+                    self.REST.sendMessage('ogagent/started', {'mac': self.interface.mac, 'ip': self.interface.ip,
+                                                              'secret': self.random, 'ostype': operations.os_type,
+                                                              'osversion': operations.os_version, 'alt_url': True})
+                    break
+            except:
+                time.sleep(3)
+        if 0 < t < 100:
+            logger.debug("Successful connection after {} tries".format(t))
+        elif t == 100:
+            raise Exception('Initialization error: Cannot connect to remote server')
         # Delete marking files
         for f in ['ogboot.me', 'ogboot.firstboot', 'ogboot.secondboot']:
             try:
