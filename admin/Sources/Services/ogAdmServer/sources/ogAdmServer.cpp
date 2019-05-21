@@ -3683,6 +3683,73 @@ static int og_cmd_post_clients(json_t *element, struct og_msg_params *params)
 	return og_cmd_legacy_sondeo(params);
 }
 
+struct og_buffer {
+	char 	*data;
+	int	len;
+};
+
+static int og_json_dump_clients(const char *buffer, size_t size, void *data)
+{
+	struct og_buffer *og_buffer = (struct og_buffer *)data;
+
+	memcpy(og_buffer->data + og_buffer->len, buffer, size);
+	og_buffer->len += size;
+
+	return 0;
+}
+
+static int og_cmd_get_clients(json_t *element, struct og_msg_params *params,
+			      char *buffer_reply)
+{
+	json_t *root, *array, *addr, *state, *object;
+	struct og_buffer og_buffer = {
+		.data	= buffer_reply,
+	};
+	int i;
+
+	array = json_array();
+	if (!array)
+		return -1;
+
+	for (i = 0; i < MAXIMOS_CLIENTES; i++) {
+		if (tbsockets[i].ip[0] == '\0')
+			continue;
+
+		object = json_object();
+		if (!object) {
+			json_decref(array);
+			return -1;
+		}
+		addr = json_string(tbsockets[i].ip);
+		if (!addr) {
+			json_decref(object);
+			json_decref(array);
+			return -1;
+		}
+		json_object_set_new(object, "addr", addr);
+
+		state = json_string(tbsockets[i].estado);
+		if (!state) {
+			json_decref(object);
+			json_decref(array);
+			return -1;
+		}
+		json_object_set_new(object, "state", state);
+
+		json_array_append_new(array, object);
+	}
+	root = json_pack("{s:o}", "clients", array);
+	if (!root) {
+		json_decref(array);
+		return -1;
+	}
+
+	json_dump_callback(root, og_json_dump_clients, &og_buffer, 4096);
+	json_decref(root);
+
+	return 0;
+}
+
 static int og_client_not_found(struct og_client *cli)
 {
 	char buf[] = "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n";
@@ -3692,9 +3759,12 @@ static int og_client_not_found(struct og_client *cli)
 	return -1;
 }
 
-static int og_client_ok(struct og_client *cli)
+static int og_client_ok(struct og_client *cli, char *buf_reply)
 {
-	char buf[] = "HTTP/1.1 200 OK\r\nContent-Length: 0\r\n\r\n";
+	char buf[4096] = {};
+
+	sprintf(buf, "HTTP/1.1 200 OK\r\nContent-Length: %ld\r\n\r\n%s",
+		strlen(buf_reply), buf_reply);
 
 	send(og_client_socket(cli), buf, strlen(buf), 0);
 
@@ -3711,6 +3781,7 @@ static int og_client_state_process_payload_rest(struct og_client *cli)
 	struct og_msg_params params = {};
 	const char *cmd, *body, *ptr;
 	enum og_rest_method method;
+	char buf_reply[4096] = {};
 	int content_length = 0;
 	json_error_t json_err;
 	json_t *root = NULL;
@@ -3741,22 +3812,32 @@ static int og_client_state_process_payload_rest(struct og_client *cli)
 	}
 
 	if (!strncmp(cmd, "clients", strlen("clients"))) {
-		if (method != OG_METHOD_POST)
+		if (method != OG_METHOD_POST &&
+		    method != OG_METHOD_GET)
 			return -1;
-		if (!root) {
+
+		if (method == OG_METHOD_POST && !root) {
 			syslog(LOG_ERR, "command clients with no payload\n");
 			return og_client_not_found(cli);
 		}
-		err = og_cmd_post_clients(root, &params);
+		switch (method) {
+		case OG_METHOD_POST:
+			err = og_cmd_post_clients(root, &params);
+			break;
+		case OG_METHOD_GET:
+			err = og_cmd_get_clients(root, &params, buf_reply);
+			break;
+		}
 	} else {
 		syslog(LOG_ERR, "unknown command %s\n", cmd);
 		err = og_client_not_found(cli);
 	}
 
-	json_decref(root);
+	if (root)
+		json_decref(root);
 
 	if (!err)
-		og_client_ok(cli);
+		og_client_ok(cli, buf_reply);
 
 	return err;
 }
