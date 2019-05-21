@@ -3627,7 +3627,9 @@ static int og_client_state_process_payload(struct og_client *cli)
 
 struct og_msg_params {
 	const char	*ips_array[64];
+	const char	*mac_array[64];
 	unsigned int	ips_array_len;
+	const char	*wol_type;
 };
 
 static int og_json_parse_clients(json_t *element, struct og_msg_params *params)
@@ -3757,6 +3759,103 @@ static int og_cmd_get_clients(json_t *element, struct og_msg_params *params,
 	return 0;
 }
 
+static int og_json_parse_target(json_t *element, struct og_msg_params *params)
+{
+	const char *key;
+	json_t *value;
+
+	if (json_typeof(element) != JSON_OBJECT) {
+		return -1;
+	}
+
+	json_object_foreach(element, key, value) {
+		if (!strcmp(key, "addr")) {
+			if (json_typeof(value) != JSON_STRING)
+				return -1;
+
+			params->ips_array[params->ips_array_len] =
+				json_string_value(value);
+		} else if (!strcmp(key, "mac")) {
+			if (json_typeof(value) != JSON_STRING)
+				return -1;
+
+			params->mac_array[params->ips_array_len] =
+				json_string_value(value);
+		}
+	}
+
+	return 0;
+}
+
+static int og_json_parse_targets(json_t *element, struct og_msg_params *params)
+{
+	unsigned int i;
+	json_t *k;
+	int err;
+
+	if (json_typeof(element) != JSON_ARRAY)
+		return -1;
+
+	for (i = 0; i < json_array_size(element); i++) {
+		k = json_array_get(element, i);
+
+		if (json_typeof(k) != JSON_OBJECT)
+			return -1;
+
+		err = og_json_parse_target(k, params);
+		if (err < 0)
+			return err;
+
+		params->ips_array_len++;
+	}
+	return 0;
+}
+
+static int og_json_parse_type(json_t *element, struct og_msg_params *params)
+{
+	const char *type;
+
+	if (json_typeof(element) != JSON_STRING)
+		return -1;
+
+	params->wol_type = json_string_value(element);
+
+	type = json_string_value(element);
+	if (!strcmp(type, "unicast"))
+		params->wol_type = "2";
+	else if (!strcmp(type, "broadcast"))
+		params->wol_type = "1";
+
+	return 0;
+}
+
+static int og_cmd_wol(json_t *element, struct og_msg_params *params)
+{
+	const char *key;
+	json_t *value;
+	int err = 0;
+
+	if (json_typeof(element) != JSON_OBJECT)
+		return -1;
+
+	json_object_foreach(element, key, value) {
+		if (!strcmp(key, "clients")) {
+			err = og_json_parse_targets(value, params);
+		} else if (!strcmp(key, "type")) {
+			err = og_json_parse_type(value, params);
+		}
+
+		if (err < 0)
+			break;
+	}
+
+	if (!Levanta((char **)params->ips_array, (char **)params->mac_array,
+		     params->ips_array_len, (char *)params->wol_type))
+		return -1;
+
+	return 0;
+}
+
 static int og_client_not_found(struct og_client *cli)
 {
 	char buf[] = "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n";
@@ -3835,6 +3934,15 @@ static int og_client_state_process_payload_rest(struct og_client *cli)
 			err = og_cmd_get_clients(root, &params, buf_reply);
 			break;
 		}
+	} else if (!strncmp(cmd, "wol", strlen("wol"))) {
+		if (method != OG_METHOD_POST)
+			return -1;
+
+		if (!root) {
+			syslog(LOG_ERR, "command wol with no payload\n");
+			return og_client_not_found(cli);
+		}
+		err = og_cmd_wol(root, &params);
 	} else {
 		syslog(LOG_ERR, "unknown command %s\n", cmd);
 		err = og_client_not_found(cli);
