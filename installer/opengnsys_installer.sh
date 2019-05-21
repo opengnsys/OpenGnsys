@@ -1076,7 +1076,10 @@ read -e APIID APISECRET <<< \
 	"$(php app/console doctrine:query:sql "SELECT random_id, secret FROM og_core__clients WHERE id=1;" | \
 	   awk -F\" '$2~/^(random_id|secret)$/ {getline; printf("%s ", $2)}')"
 read -e CLIENTID CLIENTSECRET <<< \
-	"$(php app/console opengnsys:oauth-server:client:create --no-ansi | \
+	"$(php app/console opengnsys:oauth-server:client:create --no-ansi \
+			--grant-type="password" --grant-type="refresh_token" \
+			--grant-type="token" \
+			--grant-type="http://opengnsys.es/grants/og_client" | \
 	   awk 'BEGIN {RS=" "}
 		/^(id|secret)$/ {getline; gsub(/,/, ""); printf("%s ", $0)}')"
 [ -f $jsonfile ] || echo "{}" > $jsonfile
