@@ -1404,14 +1404,19 @@ bool respuestaConsola(int socket_c, TRAMA *ptrTrama, int res)
 // ________________________________________________________________________________________________________
 static bool Arrancar(TRAMA* ptrTrama, struct og_client *cli)
 {
+	char *ptrIP[MAXIMOS_CLIENTES],*ptrMacs[MAXIMOS_CLIENTES];
 	char *iph,*mac,*mar;
 	bool res;
+	int lon;
 
 	iph = copiaParametro("iph",ptrTrama); // Toma dirección/es IP
 	mac = copiaParametro("mac",ptrTrama); // Toma dirección/es MAC
 	mar = copiaParametro("mar",ptrTrama); // Método de arranque (Broadcast o Unicast)
 
-	res=Levanta(iph,mac,mar);
+	lon = splitCadena(ptrIP, iph, ';');
+	lon = splitCadena(ptrMacs, mac, ';');
+
+	res = Levanta(ptrIP, ptrMacs, lon, mar);
 
 	liberaMemoria(iph);
 	liberaMemoria(mac);
@@ -1442,12 +1447,12 @@ static bool Arrancar(TRAMA* ptrTrama, struct og_client *cli)
 //		true: Si el proceso es correcto
 //		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-bool Levanta(char *iph, char *mac, char *mar)
+
+bool Levanta(char *ptrIP[], char *ptrMacs[], int lon, char *mar)
 {
-	char *ptrIP[MAXIMOS_CLIENTES],*ptrMacs[MAXIMOS_CLIENTES];
 	unsigned int on = 1;
 	sockaddr_in local;
-	int i, lon, res;
+	int i, res;
 	int s;
 
 	/* Creación de socket para envío de magig packet */
@@ -1467,8 +1472,6 @@ bool Levanta(char *iph, char *mac, char *mar)
 	local.sin_port = htons(PUERTO_WAKEUP);
 	local.sin_addr.s_addr = htonl(INADDR_ANY);
 
-	lon = splitCadena(ptrIP, iph, ';');
-	lon = splitCadena(ptrMacs, mac, ';');
 	for (i = 0; i < lon; i++) {
 		if (!WakeUp(s, ptrIP[i], ptrMacs[i], mar)) {
 			syslog(LOG_ERR, "problem sending magic packet\n");
@@ -3329,11 +3332,12 @@ static bool recibeArchivo(TRAMA *ptrTrama, struct og_client *cli)
 // ________________________________________________________________________________________________________
 static bool envioProgramacion(TRAMA *ptrTrama, struct og_client *cli)
 {
+	char *ptrIP[MAXIMOS_CLIENTES],*ptrMacs[MAXIMOS_CLIENTES];
 	char sqlstr[LONSQL], msglog[LONSTD];
 	char *idp,iph[LONIP],mac[LONMAC];
 	Database db;
 	Table tbl;
-	int idx,idcomando;
+	int idx,idcomando,lon;
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) {
 		db.GetErrorErrStr(msglog);
@@ -3387,11 +3391,14 @@ static bool envioProgramacion(TRAMA *ptrTrama, struct og_client *cli)
 				return false;
 			}
 
+			lon = splitCadena(ptrIP, iph, ';');
+			lon = splitCadena(ptrMacs, mac, ';');
+
 			// Se manda por broadcast y por unicast
-			if (!Levanta(iph, mac, (char*)"1"))
+			if (!Levanta(ptrIP, ptrMacs, lon, (char*)"1"))
 				return false;
 
-			if (!Levanta(iph, mac, (char*)"2"))
+			if (!Levanta(ptrIP, ptrMacs, lon, (char*)"2"))
 				return false;
 
 		}
