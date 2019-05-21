@@ -204,69 +204,43 @@ class OpenGnSysWorker(ServerWorker):
         # Raise error after timeout
         if not self.interface:
             raise e
-        # Loop to send initialization message
-        for t in range(0, 100):
-            try:
-                try:
-                    self.REST.sendMessage('ogagent/started', {'mac': self.interface.mac, 'ip': self.interface.ip,
-                                                              'secret': self.random, 'ostype': operations.os_type,
-                                                              'osversion': operations.os_version})
-                    break
-                except:
-                    # Trying to initialize on alternative server, if defined
-                    # (used in "exam mode" from the University of Seville)
-                    self.REST = REST(self.service.config.get('opengnsys', 'altremote'))
-                    self.REST.sendMessage('ogagent/started', {'mac': self.interface.mac, 'ip': self.interface.ip,
-                                                              'secret': self.random, 'ostype': operations.os_type,
-                                                              'osversion': operations.os_version, 'alt_url': True})
-                    break
-            except:
-                time.sleep(3)
-        if 0 < t < 100:
-            logger.debug("Successful connection after {} tries".format(t))
-        elif t == 100:
-            raise Exception('Initialization error: Cannot connect to remote server')
-        # Delete marking files
-        for f in ['ogboot.me', 'ogboot.firstboot', 'ogboot.secondboot']:
-            try:
-                os.remove(os.sep + f)
-            except OSError:
-                pass
-        # Copy file "HostsFile.FirstOctetOfIPAddress" to "HostsFile", if it exists
-        # (used in "exam mode" from the University of Seville)
-        hosts_file = os.path.join(operations.get_etc_path(), 'hosts')
-        new_file = hosts_file + '.' + self.interface.ip.split('.')[0]
-        if os.path.isfile(new_file):
-            shutil.copy2(new_file, hosts_file)
-        # Generate random secret to send on activation
-        self.random = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(self.length))
         # Compose login route
         login_route = 'oauth/v2/token?client_id=' + server_client + '&client_secret=' + server_secret + \
                       '&grant_type=' + self.grant_type + '&ip=' + self.interface.ip + '&mac=' + self.interface.mac + \
                       '&token=' + self.random
         # Send initialization login message
         response = None
-        try:
+        # Loop to send initialization message
+        for t in range(0, 100):
             try:
-                # New web compatibility.
-                response = self.REST.sendMessage(login_route)
+                try:
+                    # New web compatibility.
+                    self.REST = REST(self.service.config.get('opengnsys', 'remote'))
+                    response = self.REST.sendMessage(login_route)
+                    break
+                except:
+                    # Trying to initialize on alternative server, if defined
+                    # (used in "exam mode" from the University of Seville)
+                    self.REST = REST(self.service.config.get('opengnsys', 'altremote'))
+                    response = self.REST.sendMessage(login_route)
+                    break
             except:
-                # Trying to initialize on alternative server, if defined
-                # (used in "exam mode" from the University of Seville)
-                self.REST = REST(self.service.config.get('opengnsys', 'altremote'))
-                response = self.REST.sendMessage(login_route)
-        except:
-            raise Exception('Initialization error: Cannot connect to the server')
-        finally:
-            if response['access_token'] is None:
-                raise Exception('Initialization error: Cannot obtain access token')
+                time.sleep(3)
+        # Raise error after timeout or authentication failure
+        if 0 < t < 100:
+            logger.debug('Successful connection after {} tries'.format(t))
+        elif t == 100:
+            raise Exception('Initialization error: Cannot connect to remote server')
+        if response['access_token'] is None:
+            raise Exception('Initialization error: Cannot obtain access token')
+        # Read access tokens
         self.access_token = response['access_token']
         self.refresh_token = response['refresh_token']
         # Once authenticated with the server, change the API URL for private request
         self.REST = REST(url + 'api/private')
         # Set authorization tokens in the REST object, so in each request this token will be used
         self.REST.set_authorization_headers(self.access_token, self.refresh_token)
-        # Completing ogLive initialization process
+        # Completing OGAgent initialization process
         os_type = operations.os_type.lower()
         if os_type == 'oglive':
             # Create HTML file (TEMPORARY)
@@ -291,6 +265,19 @@ class OpenGnSysWorker(ServerWorker):
             # menu_url = self.REST.sendMessage('menus?mac' + self.interface.mac + '&ip=' + self.interface.ip)
             menu_url = '/opt/opengnsys/log/' + self.interface.ip + '.info.html'  # TEMPORARY menu
             self._launch_browser(menu_url)
+        else:
+            # Delete marking files
+            for f in ['ogboot.me', 'ogboot.firstboot', 'ogboot.secondboot']:
+                try:
+                    os.remove(os.sep + f)
+                except OSError:
+                    pass
+            # Copy file "HostsFile.FirstOctetOfIPAddress" to "HostsFile", if it exists
+            # (used in "exam mode" from the University of Seville)
+            hosts_file = os.path.join(operations.get_etc_path(), 'hosts')
+            new_file = hosts_file + '.' + self.interface.ip.split('.')[0]
+            if os.path.isfile(new_file):
+                shutil.copy2(new_file, hosts_file)
         # Return status message
         self.REST.sendMessage('clients/statuses', {'mac': self.interface.mac, 'ip': self.interface.ip,
                                                    'status': os_type})
