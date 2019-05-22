@@ -2731,8 +2731,9 @@ if [ $? -eq 0 ]; then
     CACHEDEVICE=$(ogDiskToDev $(ogFindCache))
     OGLIVE=$(find $OGCAC/boot -name ogvmlinuz|head -1)
     # Obtenemos parametros del kernel y sustituimos root
-    #CMDLINE="$(cat /proc/cmdline)"
-    CMDLINE="$(cat /proc/cmdline|sed -e s/^.*ogvmlinuz.efi//g -e s/^.*ogvmlinuz//g -e "s|root=/dev/....||g")"
+    # La línea de opciones no puede contener la cadena initrd.
+    CMDLINE="$(cat /proc/cmdline|sed -e 's/^.*ogvmlinuz.efi //g' -e 's/^.*ogvmlinuz //g' -e 's|root=/dev/[a-z]* ||g' \
+                     -e 's/ogupdateinitrd=[a-z]* //g')"
     CMDLINE="root=$CACHEDEVICE ${CMDLINE#*ogvmlinuz}"
 
     # Icono para la entrada de menú
