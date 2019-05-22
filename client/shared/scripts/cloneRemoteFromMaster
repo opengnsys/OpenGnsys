@@ -159,6 +159,13 @@ case $MASTERIP in
 				#Obtener tamaño de la partición.
 				SIZE=$(ogGetPartitionSize $2 $3)  || exit $(ogRaiseError $OG_ERR_REDUCEFS "Error al detectar tamaño partcion $2 $3  l127"; echo $?)
 				
+				# Si es UEFI copio el cargador de arranque a la partición
+				OSTYPE="$(ogGetOsType $2 $3)"
+				if ogIsEfiActive && [ "$OSTYPE" == "Windows" ]; then
+					ogEcho log session "[12] $MSG_HELP_ogCopyEfiBootLoader"
+					ogCopyEfiBootLoader $2 $3
+				fi
+
 				if [ "$OGWINREDUCE" == "TRUE" ]
 				then 
 					ogEcho log session "[15]: Calculando la reduccion del sistema de archivos DISK:$DISKSOURCE PARTITION:$PARTSOURCE SIZE:$SIZE"
