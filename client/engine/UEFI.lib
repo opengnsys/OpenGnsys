@@ -551,12 +551,12 @@ ogIsEfiActive || ogRaiseError $OG_ERR_NOTUEFI || return $?
 [[ "$@" =~ ^([0-9a-fA-F ]+)$ ]] || ogRaiseError $OG_ERR_FORMAT "$FUNCNAME Num_order1 [ Num_order2 ] ..." || return $?
 
 # Entradas de la NVRAM actuales
-NUMENTRYS=$(efibootmgr|awk '{ if ($1~/Boot[0-9a-fA-F]+/) printf "0%s ", substr($1,5,4)}')
+NUMENTRYS=$(efibootmgr|awk '{ if ($1~/Boot[0-9a-fA-F]{4}/) printf "0%s ", substr($1,5,4)}')
 
 ORDER=""
 for ARG in $@; do
     # Si no existe la entrada me salgo
-    ARG=$(printf  %04x 0x$ARG)
+    ARG=$(printf  %04X 0x$ARG)
     echo $NUMENTRYS | grep "$ARG" &>/dev/null || ogRaiseError $OG_ERR_NOTFOUND "NVRAM entry order \"$ARG\"" || return $?
     ORDER=${ORDER},$ARG
 done

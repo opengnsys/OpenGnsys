@@ -2721,7 +2721,7 @@ fi
 ogNvramAddEntry refind /EFI/refind/grubx64.efi
 # La ponemos en el segundo lugar del orden de arranque
 NUMENTRY=$(efibootmgr |awk '{ if ($2=="refind") print substr($1,5,4)}')
-NEWORDER="$(ogNvramGetOrder|awk -v NEW="$NUNENTRY" '{ gsub(",", " "); printf "%x %x %s\n",  $1 ,NEW, substr($0, index($0,$2)) }')"
+NEWORDER="$(ogNvramGetOrder|awk -v NEW="$NUMENTRY" '{ gsub(",", " "); printf "%x %x %s\n",  $1 ,NEW, substr($0, index($0,$2)) }')"
 ogNvramSetOrder $NEWORDER
 
 # Para la configuración del ogLive
