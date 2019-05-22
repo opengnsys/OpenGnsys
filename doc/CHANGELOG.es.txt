@@ -60,9 +60,11 @@ Tickets resueltos en módulo OpenGnsys Cloning Engine:
 #851	Ampliar parámetros de una sesión multicast para los clientes (corrección)
 #868	ConfiguraOs: error al desinstalar el agente de sistema operativo antiguo (corrección)
 #871	Error al crear particiones lógicas en discos con sectores de 4 KB (corrección)
+#910	El control del éxito se verifica por la longitud de la cadena que retorna la función ogGetPath (corrección)
 
 Tickets resueltos en módulo OpenGnsys Client:
 #852	Apagado del cliente si tiempo de espera cambia de día (corrección)
+#913	OGAgent no conecta para algunas tarjetas de red con IP estática (corrección)
 
 Tickets resueltos en módulo OpenGnsys Server:
 #846	Configuración de logrotate para que incluya todos los servicios de OpenGnsys (corrección)
@@ -78,6 +80,7 @@ Tickets resueltos en módulo OpenGnsys Web Admin Console:
 #849	Incorporar ordenadores de dhcp no admite comentarios tras la declarción de un host (corrección)
 #867	La ayuda en la consola incluirá más información
 #870	Netboot avanzado no crea la plantilla de arranque si el equipo no tiene asignado un repositorio (corrección)
+#909	Formulario asistente updateCache no asigna el REPO asociado a la imagen (corrección)
 
 Tickets resueltos en módulo OpenGnsys Installer:
 #876	Problemas al actualizar desde Subversion a Git (corrección)
