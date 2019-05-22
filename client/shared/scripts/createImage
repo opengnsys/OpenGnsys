@@ -131,9 +131,6 @@ OSTYPE="$(ogGetOsType $1 $2)"
 if ogIsEfiActive && [ "$OSTYPE" == "Windows" ]; then
     ogEcho log session "[25] $MSG_HELP_ogCopyEfiBootLoader" 
     ogCopyEfiBootLoader $1 $2
-    echo ogSaveImageInfo $1 $2 "$REPO" "$4"
-    ogSaveImageInfo $1 $2 "$REPO" "$4"
-    
 fi
 
 # Evaluar variable de engine.cfg para reducir el sistema de archivos en la creacion
