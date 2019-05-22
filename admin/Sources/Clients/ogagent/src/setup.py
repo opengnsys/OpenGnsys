@@ -31,8 +31,6 @@
 @author: Ramón M. Gómez, ramongomez at us dot es
 '''
 
-VERSION = '1.1.0'
-
 # ModuleFinder can't handle runtime changes to __path__, but win32com uses them
 try:
     # py2exe 0.6.4 introduced a replacement modulefinder.
@@ -60,6 +58,13 @@ from distutils.core import setup
 import py2exe
 import sys
 import os
+
+# Reading version file:
+try:
+    with open('VERSION', 'r') as v:
+        VERSION = v.read()
+except IOError:
+    VERSION = '1.1.0'
 
 sys.argv.append('py2exe')
 
@@ -115,7 +120,7 @@ setup(
         }
     ],
     service=[udsservice],
-    data_files=[('', [get_requests_cert_file()]),('cfg', ['cfg/ogagent.cfg', 'cfg/ogclient.cfg'])],
+    data_files=[('', [get_requests_cert_file()]), ('cfg', ['cfg/ogagent.cfg', 'cfg/ogclient.cfg'])],
     options={
         'py2exe': {
             'bundle_files': 3,

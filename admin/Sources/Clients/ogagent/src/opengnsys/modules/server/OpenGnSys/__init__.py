@@ -58,7 +58,7 @@ def catchBackgroundError(fnc):
 
 class OpenGnSysWorker(ServerWorker):
     name = 'opengnsys'
-    interface = None  # Binded interface for OpenGnsys
+    interface = None  # Bound interface for OpenGnsys
     loggedin = False  # User session flag
     locked = {}
     random = None     # Random string for secure connections
@@ -79,7 +79,7 @@ class OpenGnSysWorker(ServerWorker):
         '''
         Sends OGAgent activation notification to OpenGnsys server
         '''
-        self.cmd = None
+        t = 0
         # Generate random secret to send on activation
         self.random = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(self.length))
         # Ensure cfg has required configuration variables or an exception will be thrown
@@ -245,7 +245,7 @@ class OpenGnSysWorker(ServerWorker):
         self.checkSecret(server)
         # Sending log off message to OGAgent client.
         self.sendClientMessage('logoff', {})
-        return {'op': 'sended to client'}
+        return {'op': 'sent to client'}
 
     def process_popup(self, path, getParams, postParams, server):
         '''
