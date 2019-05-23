@@ -1334,7 +1334,7 @@ if [ "$*" == "help" ]; then
 fi
 
 # Si el EFI esta activo me salgo.
-ogIsEfiActive && echo "EFI: $MSG_DONTUSE $FUNCNAME" && return
+ogIsEfiActive && ogEcho session log warning "EFI: $MSG_DONTUSE $FUNCNAME" && return
 
 # Error si no se reciben 2 parámetros.
 [ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
