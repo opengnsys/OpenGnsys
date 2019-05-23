@@ -1,8 +1,15 @@
 ogagent (1.1.1) unstable; urgency=medium
 
-  * OGAgent code retrieved from GitHub
+  * Set connection timeout
+  * Compatibility with "Exam Mode" from the University of Seville
 
- -- Ramón M. Gómez <ramongomez@us.es>  Sun, 3 Jun 2018 13:00:00 +0200
+ -- Ramón M. Gómez <ramongomez@us.es>  Thu, 23 May 2019 13:00:00 +0200
+
+ogagent (1.1.0a) stable; urgency=medium
+
+  * Fix a bug when activating the agent with some network devices
+
+ -- Ramón M. Gómez <ramongomez@us.es>  Wed, 22 May 2019 18:00:00 +0200
 
 ogagent (1.1.0) stable; urgency=medium
 
