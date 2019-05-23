@@ -1332,6 +1332,10 @@ if [ "$*" == "help" ]; then
 	   "$FUNCNAME 1 1"
     return
 fi
+
+# Si el EFI esta activo me salgo.
+ogIsEfiActive && echo "EFI: $MSG_DONTUSE $FUNCNAME" && return
+
 # Error si no se reciben 2 parámetros.
 [ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
