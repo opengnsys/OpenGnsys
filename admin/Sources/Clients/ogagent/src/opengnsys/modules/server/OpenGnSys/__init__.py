@@ -111,7 +111,7 @@ class OpenGnSysWorker(ServerWorker):
     name = 'opengnsys'
     interface = None  # Bound interface for OpenGnsys
     REST = None  # REST object
-    loggedin = False  # User session flag
+    logged_in = False  # User session flag
     browser = {}  # Browser info
     commands = []  # Running commands
     random = None  # Random string for secure connections
@@ -300,7 +300,7 @@ class OpenGnSysWorker(ServerWorker):
         """
         user, sep, language = data.partition(',')
         logger.debug('Received login for {} with language {}'.format(user, language))
-        self.loggedin = True
+        self.logged_in = True
         self.REST.sendMessage('ogagent/loggedin', {'ip': self.interface.ip, 'user': user, 'language': language,
                                                    'ostype': operations.os_type, 'osversion': operations.os_version})
 
@@ -309,7 +309,7 @@ class OpenGnSysWorker(ServerWorker):
         Sends session logout notification to OpenGnsys server
         """
         logger.debug('Received logout for {}'.format(user))
-        self.loggedin = False
+        self.logged_in = False
         self.REST.sendMessage('ogagent/loggedout', {'ip': self.interface.ip, 'user': user})
 
     def process_ogclient(self, path, get_params, post_params, server):
@@ -342,14 +342,14 @@ class OpenGnSysWorker(ServerWorker):
 
     def process_status(self, path, get_params, post_params, server):
         """
-        Returns client status (OS type or execution status) and login status.
+        Returns client status (OS type or execution status) and login status
         :param path:
         :param get_params:
         :param post_params:
         :param server:
         :return: JSON object {"status": "status_code", "loggedin": boolean}
         """
-        res = {'loggedin': self.loggedin}
+        res = {'loggedin': self.logged_in}
         try:
             res['status'] = operations.os_type.lower()
         except KeyError:
@@ -362,7 +362,7 @@ class OpenGnSysWorker(ServerWorker):
     @check_secret
     def process_reboot(self, path, get_params, post_params, server):
         """
-        Launches a system reboot operation.
+        Launches a system reboot operation
         :param path:
         :param get_params:
         :param post_params:
@@ -381,7 +381,7 @@ class OpenGnSysWorker(ServerWorker):
     @check_secret
     def process_poweroff(self, path, get_params, post_params, server):
         """
-        Launches a system power off operation.
+        Launches a system power off operation
         :param path:
         :param get_params:
         :param post_params:
@@ -435,20 +435,20 @@ class OpenGnSysWorker(ServerWorker):
     @check_secret
     def process_logoff(self, path, get_params, post_params, server):
         """
-        Closes user session.
+        Closes user session
         """
         logger.debug('Received logoff operation')
-        # Send log off message to OGAgent client.
+        # Send log off message to OGAgent client
         self.sendClientMessage('logoff', {})
         return {'op': 'sent to client'}
 
     @check_secret
     def process_popup(self, path, get_params, post_params, server):
         """
-        Shows a message popup on the user's session.
+        Shows a message popup on the user's session
         """
         logger.debug('Received message operation')
-        # Send popup message to OGAgent client.
+        # Send popup message to OGAgent client
         self.sendClientMessage('popup', post_params)
         return {'op': 'launched'}
 
