@@ -39,6 +39,7 @@ import subprocess
 import struct
 import array
 import six
+import chardet
 from opengnsys import utils
 
 
@@ -209,7 +210,8 @@ def exec_command(cmd):
     proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     (out, err) = proc.communicate()
     stat = proc.returncode
-    return stat, out, err
+    return stat, out.decode(chardet.detect(out)['encoding']).encode('utf8'),\
+           err.decode(chardet.detect(err)['encoding']).encode('utf8')
 
 
 def get_hardware():

@@ -160,8 +160,7 @@ class OpenGnSysWorker(ServerWorker):
             route = route[len(self.REST.endpoint):]
         # Send back exit status and outputs (base64-encoded)
         self.REST.sendMessage(route, {'mac': self.interface.mac, 'ip': self.interface.ip, 'trace': op_id,
-                                      'status': stat, 'output': out.encode('utf8').encode('base64'),
-                                      'error': err.encode('utf8').encode('base64')})
+                                      'status': stat, 'output': out.encode('base64'), 'error': err.encode('base64')})
         # Show latest menu, if OGAgent runs on ogLive
         if os_type == 'oglive':
             # Send configuration data, if needed
