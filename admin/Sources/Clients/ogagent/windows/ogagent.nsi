@@ -2,12 +2,17 @@
 # Copy inside the two x86_xxxxx folders inside nsis plugins folder
 Name "OpenGnsys Agent"
 
-# OpenGnsys Actor version
+# OpenGnsys Agent version
 !define /file OGA_VERSION "src\VERSION"
+!define /file OGA_WINVERSION "windows\VERSION"
 
 # General Symbol Definitions
 !define REGKEY "SOFTWARE\OGAgent"
-!define VERSION ${OGA_VERSION}.0
+!if ${OGA_VERSION} == ${OGA_WINVERSION}
+  !define VERSION ${OGA_WINVERSION}.0
+!else
+  !define VERSION ${OGA_WINVERSION}.1
+!endif
 !define COMPANY "OpenGnsys Project"
 !define URL https://opengnsys.es
 
