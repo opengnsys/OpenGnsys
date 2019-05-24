@@ -5,7 +5,7 @@ install pxe-kexec
 install mbuffer
 install parted 
 install gdisk
-install chntpw 
+install chntpw
 install clonezilla
 install registry-tools
 install reglookup

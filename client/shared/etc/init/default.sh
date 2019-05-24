@@ -18,7 +18,7 @@ echo "${MSG_LAUNCHCLIENT:-.}"
 [ -f /usr/local/etc/${LANG%_*}.qmap ] && export QWS_KEYBOARD="TTY:keymap=/usr/local/etc/${LANG%_*}.qmap"
 
 source /scripts/client.cfg
-VERSION="1.1.1"    # TEMPORAL
+VERSION="3.0.0-20190520"    # TEMPORAL
 if [ -f "$OPENGNSYS/images/ogagent-oglive_${VERSION}_all.deb" -a "$ogstatus" != "offline"  ]; then
     # Instalar, configurar e iniciar agente.
     dpkg -i "$OPENGNSYS/images/ogagent-oglive_${VERSION}_all.deb"

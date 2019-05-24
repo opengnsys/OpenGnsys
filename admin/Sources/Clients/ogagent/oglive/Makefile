@@ -22,12 +22,12 @@ install-ogagent:
 	mkdir -p $(SBINDIR)
 	mkdir -p $(APPSDIR)
 	mkdir -p $(CFGDIR)
-	
+
 	mkdir $(LIBDIR)/img
-	
+
 	# Cleans up .pyc and cache folders
 	rm -f $(PYC) $(CACHES)
-	
+
 	cp -r $(SOURCEDIR)/opengnsys $(LIBDIR)/opengnsys
 	cp -r $(SOURCEDIR)/cfg $(LIBDIR)/cfg
 	ln -fs $(LIBDIR)/cfg/ogagent.cfg $(CFGDIR)
@@ -35,7 +35,7 @@ install-ogagent:
 
 	cp scripts/ogagent $(BINDIR)
 	chmod 755 $(BINDIR)/ogagent
-	
+
 uninstall:
 	rm -rf $(LIBDIR)
 	rm -f $(BINDIR)/ogagent

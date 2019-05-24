@@ -108,8 +108,8 @@ export const environment = {
     'HISTORY_LOG': '/cgi-bin/httpd-history-log.sh',
     'REALTIME_LOG': '/cgi-bin/httpd-log.sh',
     'SOFTWARE_INVENTORY': '/opt/opengnsys/interfaceAdm/InventarioSoftware',
-    'REBOOT': 'reboot 1 &',
-    'POWER_OFF': 'poweroff &',
+    'REBOOT': 'reboot 1',
+    'POWER_OFF': 'poweroff',
     'HARDWARE_INVENTORY': '/opt/opengnsys/interfaceAdm/InventarioHardware',
     'REFRESH_INFO': 'sendConfigToServer'
   },

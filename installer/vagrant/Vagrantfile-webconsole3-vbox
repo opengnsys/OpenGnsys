@@ -61,18 +61,22 @@ REQ=$(curl -sk -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/j
 REPOID=$(echo $REQ | jq -r .id)
 REQ=$(curl -sk -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{"name":"Aula virtual", "description":"Despliegue virtual con Vagrant.", "networkSettings":{"mcastMode":"full-duplex", "mcastIp":"239.194.2.11", "mcastPort":9000, "mcastPort":9000, "mcastSpeed":100, "netmask":"#{NETPREFIX}.0", "router":"#{NETPREFIX}.1", "p2pMode":"peer", "p2pTime":60} }' https://localhost/opengnsys3/backend/web/app_dev.php/api/private/organizationalunits)
 OUID=$(echo $REQ | jq -r .id)
+MACPREFIX="#{MACPREFIX}"
 for ((i=11; i<=10+#{NCLIENTS}; i++)); do
-	sed -i "/^}$/ i host pc${i} { hardware ethernet #{MACPREFIX}:${i}; fixed-address #{NETPREFIX}.${i}; }" /etc/dhcp/dhcpd.conf
+	sed -i "/^}$/ i host pc${i} { hardware ethernet ${MACPREFIX}:${i}; fixed-address #{NETPREFIX}.${i}; }" /etc/dhcp/dhcpd.conf
 	[ $i == 11 ] && BOOTID=5 || BOOTID=6
         REQ=$(curl -sk -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{"name":"pc'$i'", "ip":"#{NETPREFIX}.'$i'", "mac":"#{MACPREFIX}:'$i'", "serialno":"", "netiface":"eth0", "netdriver":"generic", "netboot":'"$BOOTID"', "organizationalUnit":'"$OUID"', "repository":'"$REPOID"'}' https://localhost/opengnsys3/backend/web/app_dev.php/api/private/clients)
+	sed -i "s/ISODIR=$/ISODIR=ogLive/; s/::1/#{SERVERIP}/g; s/#{NETPREFIX}.0/255.255.255.0/" /opt/opengnsys/tftpboot/menu.lst/01-$(echo "${MACPREFIX^^}:${i}" | tr ":" "-")
 done
 systemctl restart isc-dhcp-server
+sed -i "/\\[global\\]/a \\ \\ ntlm auth = ntlmv1-permitted" /etc/samba/smb.conf
+systemctl restart smbd
 #/opt/opengnsys/bin/setclientmode ogLiveAdmin pc11 PERM
 #for ((i=12; i<=#{NCLIENTS+10}; i++)); do
 #    /opt/opengnsys/bin/setclientmode ogLive pc$i PERM
 #done
-sed -i "s,\(url = 'https://\)[^/]*,\1localhost:#{LOCALWEBPORT}," /opt/opengnsys/www3/frontend/main.js
-sed -i "s,\(url = 'https://\)[^/]*,\1localhost:#{LOCALWEBPORT}," /opt/opengnsys/www3/frontend/main.js.map
+sed -i "s,\\(url = 'https://\\)[^/]*,\\1localhost:#{LOCALWEBPORT}," /opt/opengnsys/www3/frontend/main.js
+sed -i "s,\\(url = 'https://\\)[^/]*,\\1localhost:#{LOCALWEBPORT}," /opt/opengnsys/www3/frontend/main.js.map
 echo "Notes:"
 echo "- New OpenGnsys Server URL: https://localhost:#{LOCALWEBPORT}/opengnsys3/frontend/"
 EOT
@@ -104,6 +108,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   # OpenGnsys AngularJS VM definition.
   config.vm.define "ogAngular", primary: true do |ag|
+    # VM base and host name.
+    ag.vm.box = "bento/ubuntu-18.04"
+    ag.vm.hostname = "ogAngular"
     # Specific VirtualBox configuration.
     ag.vm.provider "virtualbox" do |vb|
       # VM name, memory and CPUs.
@@ -125,9 +132,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       # Attach repo virtual disk.
       vb.customize ['storageattach', :id, '--storagectl', 'SATA Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', second_disk]
     end
-    # VM base and host name.
-    ag.vm.box = "bento/ubuntu-18.04"
-    ag.vm.hostname = "ogAngular"
     # Network settings.
     ag.vm.network "forwarded_port", guest: 443, host: LOCALWEBPORT, host_ip: "127.0.0.1"
     ag.vm.network "private_network", mac: "#{MACPREFIX}10".tr(":",""), ip: "#{SERVERIP}", virtualbox__intnet: true

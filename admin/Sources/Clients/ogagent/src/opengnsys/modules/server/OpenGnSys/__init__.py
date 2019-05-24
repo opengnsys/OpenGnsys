@@ -111,7 +111,7 @@ class OpenGnSysWorker(ServerWorker):
     name = 'opengnsys'
     interface = None  # Bound interface for OpenGnsys
     REST = None  # REST object
-    loggedin = False  # User session flag
+    logged_in = False  # User session flag
     browser = {}  # Browser info
     commands = []  # Running commands
     random = None  # Random string for secure connections
@@ -160,8 +160,7 @@ class OpenGnSysWorker(ServerWorker):
             route = route[len(self.REST.endpoint):]
         # Send back exit status and outputs (base64-encoded)
         self.REST.sendMessage(route, {'mac': self.interface.mac, 'ip': self.interface.ip, 'trace': op_id,
-                                      'status': stat, 'output': out.encode('utf8').encode('base64'),
-                                      'error': err.encode('utf8').encode('base64')})
+                                      'status': stat, 'output': out.encode('base64'), 'error': err.encode('base64')})
         # Show latest menu, if OGAgent runs on ogLive
         if os_type == 'oglive':
             # Send configuration data, if needed
@@ -174,6 +173,9 @@ class OpenGnSysWorker(ServerWorker):
         """
         Sends OGAgent activation notification to OpenGnsys server
         """
+        t = 0
+        # Generate random secret to send on activation
+        self.random = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(self.length))
         # Ensure cfg has required configuration variables or an exception will be thrown
         url = self.service.config.get('opengnsys', 'remote')
         server_client = self.service.config.get('opengnsys', 'client')
@@ -201,55 +203,72 @@ class OpenGnSysWorker(ServerWorker):
         # Raise error after timeout
         if not self.interface:
             raise e
-        # Delete marking files
-        for f in ['ogboot.me', 'ogboot.firstboot', 'ogboot.secondboot']:
-            try:
-                os.remove(os.sep + f)
-            except OSError:
-                pass
-        # Copy file "HostsFile.FirstOctetOfIPAddress" to "HostsFile", if it exists
-        # (used in "exam mode" from the University of Seville)
-        hosts_file = os.path.join(operations.get_etc_path(), 'hosts')
-        new_file = hosts_file + '.' + self.interface.ip.split('.')[0]
-        if os.path.isfile(new_file):
-            shutil.copy2(new_file, hosts_file)
-        # Generate random secret to send on activation
-        self.random = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(self.length))
         # Compose login route
         login_route = 'oauth/v2/token?client_id=' + server_client + '&client_secret=' + server_secret + \
                       '&grant_type=' + self.grant_type + '&ip=' + self.interface.ip + '&mac=' + self.interface.mac + \
                       '&token=' + self.random
         # Send initialization login message
         response = None
-        try:
+        # Loop to send initialization message
+        for t in range(0, 100):
             try:
-                # New web compatibility.
-                response = self.REST.sendMessage(login_route)
+                try:
+                    # New web compatibility.
+                    self.REST = REST(self.service.config.get('opengnsys', 'remote'))
+                    response = self.REST.sendMessage(login_route)
+                    break
+                except:
+                    # Trying to initialize on alternative server, if defined
+                    # (used in "exam mode" from the University of Seville)
+                    self.REST = REST(self.service.config.get('opengnsys', 'altremote'))
+                    response = self.REST.sendMessage(login_route)
+                    break
             except:
-                # Trying to initialize on alternative server, if defined
-                # (used in "exam mode" from the University of Seville)
-                self.REST = REST(self.service.config.get('opengnsys', 'altremote'))
-                response = self.REST.sendMessage(login_route)
-        except:
-            raise Exception('Initialization error: Cannot connect to the server')
-        finally:
-            if response['access_token'] is None:
-                raise Exception('Initialization error: Cannot obtain access token')
+                time.sleep(3)
+        # Raise error after timeout or authentication failure
+        if 0 < t < 100:
+            logger.debug('Successful connection after {} tries'.format(t))
+        elif t == 100:
+            raise Exception('Initialization error: Cannot connect to remote server')
+        if response['access_token'] is None:
+            raise Exception('Initialization error: Cannot obtain access token')
+        # Read access tokens
         self.access_token = response['access_token']
         self.refresh_token = response['refresh_token']
         # Once authenticated with the server, change the API URL for private request
         self.REST = REST(url + 'api/private')
         # Set authorization tokens in the REST object, so in each request this token will be used
         self.REST.set_authorization_headers(self.access_token, self.refresh_token)
-        # Completing ogLive initialization process
+        # Completing OGAgent initialization process
         os_type = operations.os_type.lower()
         if os_type == 'oglive':
             # Create HTML file (TEMPORARY)
             message = """
 <html>
 <head></head>
+<style>
+  #barra { width: 20px; height: 10px; position: relative; background: darkslategrey; }
+</style>
 <body>
-<h1 style="margin: 5em; font-size: xx-large;">OpenGnsys 3</h1>
+<h1 style="margin: 5em 0 0 5em; font-size: 250%; color: darkslategrey;">
+  <span id="opengnsys"><span style="font-weight: lighter;">Open</span>Gnsys 3</div>
+  <div id="barra"></span>
+</h1>
+<script>
+  var elem = document.getElementById("barra");
+  var max = document.getElementById("opengnsys").offsetWidth;
+  var pos = 0;
+  var inc = true;
+  var id = setInterval(frame, 5);
+  function frame() {
+    if (inc) {
+      if (pos == max - 20) { inc = false; } else { pos++; }
+    } else {
+      if (pos == 0) { inc = true; } else { pos--; }
+    }
+    elem.style.left = pos + 'px';
+  }
+</script>
 </body>
 </html>"""
             f = open('/tmp/init.html', 'w')
@@ -266,6 +285,19 @@ class OpenGnSysWorker(ServerWorker):
             # menu_url = self.REST.sendMessage('menus?mac' + self.interface.mac + '&ip=' + self.interface.ip)
             menu_url = '/opt/opengnsys/log/' + self.interface.ip + '.info.html'  # TEMPORARY menu
             self._launch_browser(menu_url)
+        else:
+            # Delete marking files
+            for f in ['ogboot.me', 'ogboot.firstboot', 'ogboot.secondboot']:
+                try:
+                    os.remove(os.sep + f)
+                except OSError:
+                    pass
+            # Copy file "HostsFile.FirstOctetOfIPAddress" to "HostsFile", if it exists
+            # (used in "exam mode" from the University of Seville)
+            hosts_file = os.path.join(operations.get_etc_path(), 'hosts')
+            new_file = hosts_file + '.' + self.interface.ip.split('.')[0]
+            if os.path.isfile(new_file):
+                shutil.copy2(new_file, hosts_file)
         # Return status message
         self.REST.sendMessage('clients/statuses', {'mac': self.interface.mac, 'ip': self.interface.ip,
                                                    'status': os_type})
@@ -288,7 +320,7 @@ class OpenGnSysWorker(ServerWorker):
         """
         user, sep, language = data.partition(',')
         logger.debug('Received login for {} with language {}'.format(user, language))
-        self.loggedin = True
+        self.logged_in = True
         self.REST.sendMessage('ogagent/loggedin', {'ip': self.interface.ip, 'user': user, 'language': language,
                                                    'ostype': operations.os_type, 'osversion': operations.os_version})
 
@@ -297,7 +329,7 @@ class OpenGnSysWorker(ServerWorker):
         Sends session logout notification to OpenGnsys server
         """
         logger.debug('Received logout for {}'.format(user))
-        self.loggedin = False
+        self.logged_in = False
         self.REST.sendMessage('ogagent/loggedout', {'ip': self.interface.ip, 'user': user})
 
     def process_ogclient(self, path, get_params, post_params, server):
@@ -330,14 +362,14 @@ class OpenGnSysWorker(ServerWorker):
 
     def process_status(self, path, get_params, post_params, server):
         """
-        Returns client status (OS type or execution status) and login status.
+        Returns client status (OS type or execution status) and login status
         :param path:
         :param get_params:
         :param post_params:
         :param server:
         :return: JSON object {"status": "status_code", "loggedin": boolean}
         """
-        res = {'loggedin': self.loggedin}
+        res = {'loggedin': self.logged_in}
         try:
             res['status'] = operations.os_type.lower()
         except KeyError:
@@ -350,7 +382,7 @@ class OpenGnSysWorker(ServerWorker):
     @check_secret
     def process_reboot(self, path, get_params, post_params, server):
         """
-        Launches a system reboot operation.
+        Launches a system reboot operation
         :param path:
         :param get_params:
         :param post_params:
@@ -369,7 +401,7 @@ class OpenGnSysWorker(ServerWorker):
     @check_secret
     def process_poweroff(self, path, get_params, post_params, server):
         """
-        Launches a system power off operation.
+        Launches a system power off operation
         :param path:
         :param get_params:
         :param post_params:
@@ -423,20 +455,20 @@ class OpenGnSysWorker(ServerWorker):
     @check_secret
     def process_logoff(self, path, get_params, post_params, server):
         """
-        Closes user session.
+        Closes user session
         """
         logger.debug('Received logoff operation')
-        # Send log off message to OGAgent client.
+        # Send log off message to OGAgent client
         self.sendClientMessage('logoff', {})
         return {'op': 'sent to client'}
 
     @check_secret
     def process_popup(self, path, get_params, post_params, server):
         """
-        Shows a message popup on the user's session.
+        Shows a message popup on the user's session
         """
         logger.debug('Received message operation')
-        # Send popup message to OGAgent client.
+        # Send popup message to OGAgent client
         self.sendClientMessage('popup', post_params)
         return {'op': 'launched'}
 

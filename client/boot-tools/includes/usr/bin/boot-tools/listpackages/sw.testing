@@ -16,7 +16,7 @@ install python-requests
 install fusioninventory-agent
 install nvme-cli
 install disktype
-install laptop-detect 
+install laptop-detect
 #install discover 
 #install casper 
 #install lupin-casper
