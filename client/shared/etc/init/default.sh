@@ -27,7 +27,10 @@ if [ -f "$OPENGNSYS/images/ogagent-oglive_${VERSION}_all.deb" -a "$ogstatus" != 
            -e "s,secret=.*,secret=$CLIENTSECRET," \
            /usr/share/OGAgent/cfg/ogagent.cfg
     ogagent start
-    sleep 10
+    while : ; do
+        sleep 60
+        [ $(pgrep -fac OGAgent) -eq 0 ] && ogagent restart
+    done
 elif [ -x "$OPENGNSYS/bin/ogAdmClient" -a "$ogstatus" != "offline"  ]; then
     # Ejecutar servicio cliente.
     $OPENGNSYS/bin/ogAdmClient -f $OPENGNSYS/etc/ogAdmClient.cfg -l $OGLOGFILE -d $LOGLEVEL
