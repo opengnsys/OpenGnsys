@@ -246,8 +246,29 @@ class OpenGnSysWorker(ServerWorker):
             message = """
 <html>
 <head></head>
+<style>
+  #barra { width: 20px; height: 10px; position: relative; background: darkslategrey; }
+</style>
 <body>
-<h1 style="margin: 5em; font-size: xx-large;">OpenGnsys 3</h1>
+<h1 style="margin: 5em 0 0 5em; font-size: 250%; color: darkslategrey;">
+  <span id="opengnsys"><span style="font-weight: lighter;">Open</span>Gnsys 3</div>
+  <div id="barra"></span>
+</h1>
+<script>
+  var elem = document.getElementById("barra");
+  var max = document.getElementById("opengnsys").offsetWidth;
+  var pos = 0;
+  var inc = true;
+  var id = setInterval(frame, 5);
+  function frame() {
+    if (inc) {
+      if (pos == max - 20) { inc = false; } else { pos++; }
+    } else {
+      if (pos == 0) { inc = true; } else { pos--; }
+    }
+    elem.style.left = pos + 'px';
+  }
+</script>
 </body>
 </html>"""
             f = open('/tmp/init.html', 'w')
