@@ -3634,6 +3634,8 @@ struct og_msg_params {
 	unsigned int	ips_array_len;
 	const char	*wol_type;
 	char		run_cmd[4096];
+	const char	*disk;
+	const char	*partition;
 };
 
 static int og_json_parse_clients(json_t *element, struct og_msg_params *params)
@@ -4005,6 +4007,73 @@ static int og_cmd_run_get(json_t *element, struct og_msg_params *params,
 	return 0;
 }
 
+static int og_json_parse_disk(json_t *element, struct og_msg_params *params)
+{
+	if (json_typeof(element) != JSON_STRING)
+		return -1;
+
+	params->disk = json_string_value(element);
+
+	return 0;
+}
+
+static int og_json_parse_partition(json_t *element,
+				   struct og_msg_params *params)
+{
+	if (json_typeof(element) != JSON_STRING)
+		return -1;
+
+	params->partition = json_string_value(element);
+
+	return 0;
+}
+
+static int og_cmd_session(json_t *element, struct og_msg_params *params)
+{
+	char buf[4096], iph[4096];
+	int err = 0, len;
+	const char *key;
+	unsigned int i;
+	json_t *value;
+	TRAMA *msg;
+
+	if (json_typeof(element) != JSON_OBJECT)
+		return -1;
+
+	json_object_foreach(element, key, value) {
+		if (!strcmp(key, "clients")) {
+			err = og_json_parse_clients(value, params);
+		} else if (!strcmp(key, "disk")) {
+			err = og_json_parse_disk(value, params);
+		} else if (!strcmp(key, "partition")) {
+			err = og_json_parse_partition(value, params);
+		}
+
+		if (err < 0)
+			return err;
+	}
+
+	for (i = 0; i < params->ips_array_len; i++) {
+		snprintf(iph + strlen(iph), sizeof(iph), "%s;",
+			 params->ips_array[i]);
+	}
+	len = snprintf(buf, sizeof(buf),
+		       "nfn=IniciarSesion\riph=%s\rdsk=%s\rpar=%s\r",
+		       iph, params->disk, params->partition);
+
+	msg = og_msg_alloc(buf, len);
+	if (!msg)
+		return -1;
+
+	if (!og_send_cmd((char **)params->ips_array, params->ips_array_len,
+			 CLIENTE_APAGADO, msg))
+		err = -1;
+
+	og_msg_free(msg);
+
+	return 0;
+}
+
 static int og_client_not_found(struct og_client *cli)
 {
 	char buf[] = "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n";
@@ -4111,6 +4180,15 @@ static int og_client_state_process_payload_rest(struct og_client *cli)
 		}
 
 		err = og_cmd_run_get(root, &params, buf_reply);
+	} else if (!strncmp(cmd, "session", strlen("session"))) {
+		if (method != OG_METHOD_POST)
+			return -1;
+
+		if (!root) {
+			syslog(LOG_ERR, "command session with no payload\n");
+			return og_client_not_found(cli);
+		}
+		err = og_cmd_session(root, &params);
 	} else {
 		syslog(LOG_ERR, "unknown command %s\n", cmd);
 		err = og_client_not_found(cli);
