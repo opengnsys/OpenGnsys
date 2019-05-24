@@ -25,7 +25,7 @@
 
         <many-to-one field="image" target-entity="\Opengnsys\ServerBundle\Entity\Image">
             <join-columns>
-                <join-column name="image_id" referenced-column-name="id"/>
+                <join-column name="image_id" referenced-column-name="id" on-delete="SET NULL"/>
             </join-columns>
         </many-to-one>
 

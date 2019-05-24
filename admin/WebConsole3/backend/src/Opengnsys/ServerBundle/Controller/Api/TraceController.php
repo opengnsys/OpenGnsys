@@ -77,6 +77,8 @@ class TraceController extends ApiController
      * @Annotations\QueryParam(name="offset", requirements="\d+", nullable=true, description="Offset from which to start listing objects.")
      * @Annotations\QueryParam(name="limit", requirements="\d+", nullable=true, description="How many objects to return.")
      * @Annotations\QueryParam(name="finished", requirements="0|1", nullable=true, description="How many objects to return.")
+     * @Annotations\QueryParam(name="fromDate", requirements="[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])", nullable=true, description="Date start where search. (yyyy-mm-dd)")
+     * @Annotations\QueryParam(name="toDate", requirements="[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])", nullable=true, description="Date end where search. (yyyy-mm-dd)")
      *
      * @Annotations\View(templateVar="objects", serializerGroups={"opengnsys_server__trace_cget"})
      *
@@ -97,7 +99,9 @@ class TraceController extends ApiController
         $em = $this->getDoctrine()->getManager();
         $repository = $em->getRepository(Trace::class);
 
-        $objects = $repository->searchBy($matching, [], $limit, $offset); //findBy(array("status"=>null), array(), $limit, $offset);
+        $ordered = ["executedAt" => "DESC"];
+
+        $objects = $repository->searchBy($matching, $ordered, $limit, $offset);
 
         $groups = array();
         $groups[] = 'opengnsys_server__client_cget';
@@ -181,7 +185,7 @@ class TraceController extends ApiController
                         $hardwareProfileRepository = $em->getRepository(HardwareProfile::class);
 
                         $logger->info("-> HARDWARE_INVENTORY <-");
-                        //$path = $this->getParameter('path_client');
+                        //$path = $this->container->getParameter('path_client');
 
                         if($client != null){
                             //$ip = $client->getIp();
@@ -265,7 +269,7 @@ class TraceController extends ApiController
                                 $image->setRevision($image->getRevision() + 1);
                                 $image->setPartitionInfo(json_encode($partitionInfo));
 
-                                $path = $this->getParameter('path_images');
+                                $path = $this->container->getParameter('path_images');
                                 $file = $canonicalName.".img";
                                 $filePath = $path.$file;
 
@@ -294,7 +298,7 @@ class TraceController extends ApiController
                         $partitionRepository = $em->getRepository(Partition::class);
 
                         $logger->info("-> SOFTWARE_INVENTORY <-");
-                        //$path = $this->getParameter('path_client');
+                        //$path = $this->container->getParameter('path_client');
 
                         if($client != null){
                             //$ip = $client->getIp();
@@ -398,8 +402,6 @@ class TraceController extends ApiController
      *   }
      * )
      *
-     * @Annotations\View(templateVar="delete")
-     *
      * @param int $slug the object id
      *
      * @return array
@@ -421,4 +423,66 @@ class TraceController extends ApiController
 
         return $this->view(null, Response::HTTP_NO_CONTENT);
     }
+
+    /**
+     * Stop single Trace.
+     *
+     * @ApiDoc(
+     *   resource = true,
+     *   description = "Stop a Trace for a given id",
+     *   output = "Opengnsys\ServerBundle\Entity\Trace",
+     *   statusCodes = {
+     *     200 = "Returned when successful",
+     *     404 = "Returned when the client is not found"
+     *   }
+     * )
+     *
+     * @param int $slug the object id
+     *
+     * @return array
+     *
+     * @throws NotFoundHttpException when object not exist
+     */
+    public function postStopAction(Request $request, $slug)
+    {
+        $request->setRequestFormat($request->get('_format'));
+
+        $logger = $this->get('monolog.logger.og_server');
+        $logger->info("----------- TRACE STOP -----------");
+
+        $em = $this->getDoctrine()->getManager();
+        $traceRepository = $em->getRepository(Trace::class);
+
+
+        if (!($object = $traceRepository->find($slug))) {
+            throw new NotFoundHttpException(sprintf('The resource \'%s\' was not found.',$slug));
+        }
+
+        $trace = $object;
+        $script = "";
+        $sendConfig = "";
+
+        $curlService = $this->get("opengnsys_service.curl");
+        $result = $curlService->sendCurl("stopcmd", $trace, $script, $sendConfig);
+
+        //$object->
+
+
+        if($result["error"] != ""){
+            $logger->info("trace with errors");
+            $trace->setError($result["error"]);
+            $trace->setOutput($result["output"]);
+            $trace->setFinishedAt(new \DateTime());
+            $trace->setStatus(-1);
+            $em->flush();
+        }
+
+
+        $em->flush();
+
+        return $this->view(null, Response::HTTP_NO_CONTENT);
+    }
+
+
+
 }

@@ -27,14 +27,14 @@ class SoftwareRepository extends BaseRepository
         if(count($selects) > 0){
             $qb = $this->createSelect($qb, $selects);
         }else{
-            $qb->select("DISTINCT o.createdAt, o.updatedAt, o.notes, o.description, o.osType, o.type, o.id");
+            $qb->select("DISTINCT o.createdAt, o.updatedAt, o.notes, o.description, o.type, o.id");
         }
 
         if($term != ""){
             if(count($searchs) > 0){
                 $qb = $this->createSearch($qb, $term, $searchs);
             }else{
-                $qb->andWhere("o.createdAt LIKE :term OR o.updatedAt LIKE :term OR o.notes LIKE :term OR o.description LIKE :term OR o.osType LIKE :term OR o.type LIKE :term OR o.id LIKE :term ")->setParameter('term', '%' . $term . '%');
+                $qb->andWhere("o.createdAt LIKE :term OR o.updatedAt LIKE :term OR o.notes LIKE :term OR o.description LIKE :term OR OR o.type LIKE :term OR o.id LIKE :term ")->setParameter('term', '%' . $term . '%');
             }
         }
 
@@ -64,7 +64,7 @@ class SoftwareRepository extends BaseRepository
             if(count($searchs) > 0){
                 $qb = $this->createSearch($qb, $term, $searchs);
             }else{
-                $qb->andWhere("o.createdAt LIKE :term OR o.updatedAt LIKE :term OR o.notes LIKE :term OR o.description LIKE :term OR o.osType LIKE :term OR o.type LIKE :term OR o.id LIKE :term ")->setParameter('term', '%' . $term . '%');
+                $qb->andWhere("o.createdAt LIKE :term OR o.updatedAt LIKE :term OR o.notes LIKE :term OR o.description LIKE :term OR o.type LIKE :term OR o.id LIKE :term ")->setParameter('term', '%' . $term . '%');
             }
         }
 

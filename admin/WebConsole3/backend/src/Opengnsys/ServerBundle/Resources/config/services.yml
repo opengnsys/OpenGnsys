@@ -19,6 +19,9 @@ services:
     opengnsys_service.netboot:
         class: Opengnsys\ServerBundle\Service\NetbootService
         arguments: ["%pxedir%", '@doctrine.orm.entity_manager']
+    opengnsys_service.curl:
+        class: Opengnsys\ServerBundle\Service\CurlService
+        arguments: ['@doctrine.orm.entity_manager', '@router', '@monolog.logger.og_server']
 
     # MANAGER
     opengnsys_server.client_manager:

@@ -107,6 +107,16 @@ class TraceRepository extends BaseRepository
             unset($matching['finished']);
         }
 
+        if(array_key_exists("fromDate", $matching) && $matching['fromDate'] != null){
+            $qb->andWhere("o.executedAt >= :fromDate")->setParameter("fromDate", $matching['fromDate']);
+        }
+        unset($matching['fromDate']);
+
+        if(array_key_exists("toDate", $matching) && $matching['toDate'] != null){
+            $qb->andWhere("o.executedAt <= :toDate")->setParameter("toDate", $matching['toDate']);
+        }
+        unset($matching['toDate']);
+
         $qb = parent::createMaching($qb, $matching);
 
         return $qb;
