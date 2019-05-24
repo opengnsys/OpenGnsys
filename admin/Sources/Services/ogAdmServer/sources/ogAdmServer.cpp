@@ -12,6 +12,9 @@
 #include <syslog.h>
 #include <sys/ioctl.h>
 #include <ifaddrs.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #include <jansson.h>
 
 static char usuario[LONPRM]; // Usuario de acceso a la base de datos
@@ -3922,6 +3925,86 @@ static int og_cmd_run_post(json_t *element, struct og_msg_params *params)
 	return 0;
 }
 
+static int og_cmd_run_get(json_t *element, struct og_msg_params *params,
+			  char *buffer_reply)
+{
+	struct og_buffer og_buffer = {
+		.data	= buffer_reply,
+	};
+	json_t *root, *value, *array;
+	const char *key;
+	unsigned int i;
+	int err = 0;
+
+	if (json_typeof(element) != JSON_OBJECT)
+		return -1;
+
+	json_object_foreach(element, key, value) {
+		if (!strcmp(key, "clients"))
+			err = og_json_parse_clients(value, params);
+
+		if (err < 0)
+			return err;
+	}
+
+	array = json_array();
+	if (!array)
+		return -1;
+
+	for (i = 0; i < params->ips_array_len; i++) {
+		json_t *object, *output, *addr;
+		char data[4096] = {};
+		char filename[4096];
+		int fd, numbytes;
+
+		sprintf(filename, "/tmp/_Seconsola_%s", params->ips_array[i]);
+
+		fd = open(filename, O_RDONLY);
+		if (!fd)
+			return -1;
+
+		numbytes = read(fd, data, sizeof(data));
+		if (numbytes < 0) {
+			close(fd);
+			return -1;
+		}
+		data[sizeof(data) - 1] = '\0';
+		close(fd);
+
+		object = json_object();
+		if (!object) {
+			json_decref(array);
+			return -1;
+		}
+		addr = json_string(params->ips_array[i]);
+		if (!addr) {
+			json_decref(object);
+			json_decref(array);
+			return -1;
+		}
+		json_object_set_new(object, "addr", addr);
+
+		output = json_string(data);
+		if (!output) {
+			json_decref(object);
+			json_decref(array);
+			return -1;
+		}
+		json_object_set_new(object, "output", output);
+
+		json_array_append_new(array, object);
+	}
+
+	root = json_pack("{s:o}", "clients", array);
+	if (!root)
+		return -1;
+
+	json_dump_callback(root, og_json_dump_clients, &og_buffer, 4096);
+	json_decref(root);
+
+	return 0;
+}
+
 static int og_client_not_found(struct og_client *cli)
 {
 	char buf[] = "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n";
@@ -4018,6 +4101,16 @@ static int og_client_state_process_payload_rest(struct og_client *cli)
 			return og_client_not_found(cli);
 		}
 		err = og_cmd_run_post(root, &params);
+	} else if (!strncmp(cmd, "shell/output", strlen("shell/output"))) {
+		if (method != OG_METHOD_POST)
+			return -1;
+
+		if (!root) {
+			syslog(LOG_ERR, "command output with no payload\n");
+			return og_client_not_found(cli);
+		}
+
+		err = og_cmd_run_get(root, &params, buf_reply);
 	} else {
 		syslog(LOG_ERR, "unknown command %s\n", cmd);
 		err = og_client_not_found(cli);
