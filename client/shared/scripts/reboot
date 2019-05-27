@@ -44,6 +44,8 @@ ethtool -s $DEVICE wol g 2>/dev/null
 BUSYBOX=$(which busyboxOLD)
 BUSYBOX=${BUSYBOX:-"busybox"}
 
+# Retardo para dar lugar al registro en cola de acciones.
+sleep $TIME
 # Parar agente y Browser.
 ogagent stop &>/dev/null
 pkill -9 browser

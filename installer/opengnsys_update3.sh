@@ -118,7 +118,7 @@ function autoConfigure()
 	# Configuración según la distribución de Linux.
 	if [ -f /etc/debian_version ]; then
 		# Distribución basada en paquetes Deb.
-		DEPENDENCIES=( curl rsync btrfs-tools procps arp-scan realpath php-curl gettext moreutils jq udpcast libev-dev shim-signed grub-efi-amd64-signed php-fpm )
+		DEPENDENCIES=( curl rsync btrfs-tools procps arp-scan realpath php-curl gettext moreutils jq udpcast libev-dev shim-signed grub-efi-amd64-signed php-fpm git libcurl3 nodejs npm php-mbstring php-xml )
 		# Paquete correcto para realpath.
 		[ -z "$(apt-cache pkgnames realpath)" ] && DEPENDENCIES=( ${DEPENDENCIES[@]//realpath/coreutils} )
 		UPDATEPKGLIST="add-apt-repository -y ppa:ondrej/php; apt-get update"
@@ -143,7 +143,7 @@ function autoConfigure()
 		INETDCFGDIR=/etc/xinetd.d
 	elif [ -f /etc/redhat-release ]; then
 		# Distribución basada en paquetes rpm.
-		DEPENDENCIES=( curl rsync btrfs-progs procps-ng arp-scan gettext moreutils jq net-tools udpcast libev-devel shim-x64 grub2-efi-x64 grub2-efi-x64-modules )
+		DEPENDENCIES=( curl rsync btrfs-progs procps-ng arp-scan gettext moreutils jq net-tools udpcast libev-devel shim-x64 grub2-efi-x64 grub2-efi-x64-modules git libcurl3 nodejs npm php-mbstring php-xml )
 		# Repositorios para PHP 7 en CentOS.
 		[ "$OSDISTRIB" == "centos" ] && UPDATEPKGLIST="yum update -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-$OSVERSION.noarch.rpm http://rpms.remirepo.net/enterprise/remi-release-$OSVERSION.rpm"
 		INSTALLPKGS="yum install -y"
@@ -302,6 +302,7 @@ function importSqlFile()
         local mycnf=/tmp/.my.cnf.$$
         local status
 	local APIKEY=$(php -r 'echo md5(uniqid(rand(), true));')
+	REPOKEY=$(php -r 'echo md5(uniqid(rand(), true));')
 
         if [ ! -r $sqlfile ]; then
                 errorAndLog "${FUNCNAME}(): Unable to read $sqlfile!!"
@@ -375,7 +376,7 @@ function installDependencies()
 	eval $UPDATEPKGLIST
 	if [ -f /etc/debian_version ]; then
 		# Basado en paquetes Deb.
-		PHP7VERSION=$(apt-cache pkgnames php7 2>/dev/null | sort | head -1)
+		PHP7VERSION=$(apt-cache pkgnames php7 2>/dev/null | grep -v -- - | sort | tail -1)
 		PHPFPMSERV="${PHP7VERSION}-fpm"
 		PHP5PKGS=( $(dpkg -l | awk '$2~/^php5/ {print $2}') )
 		if [ -n "$PHP5PKGS" ]; then
@@ -429,10 +430,7 @@ function downloadCode()
 
 	echoAndLog "${FUNCNAME}(): downloading code..."
 
-	curl "$url" -o opengnsys.zip && \
-		unzip -qo opengnsys.zip && \
-		rm -fr opengnsys && \
-		mv "OpenGnsys-$BRANCH" opengnsys
+	curl "${url}" -o opengnsys.zip && unzip opengnsys.zip && mv "OpenGnsys-$BRANCH" opengnsys
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error getting code from ${url}, verify your user and password"
 		return 1
@@ -567,6 +565,13 @@ function apacheConfiguration ()
 		echoAndLog "${FUNCNAME}(): Configuring Apache modules"
 		sed -i '/rewrite/s/^#//' $APACHECFGDIR/*.conf
 	fi
+	# Habilitar nueva web.
+	if [ ! -e $APACHECFGDIR/sites-available/opengnsys3.conf ]; then
+		sed -e "s,CONSOLEDIR3,$INSTALL_TARGET/www3,g" \
+			$WORKDIR/opengnsys/server/etc/apache-console3.conf.tmpl > $APACHECFGDIR/sites-available/opengnsys3.conf
+		a2dissite opengnsys
+		a2ensite opengnsys3
+	fi
 	# Elegir plantilla según versión de Apache.
 	if [ -n "$(apachectl -v | grep "2\.[0-2]")" ]; then
 	       template=$WORKDIR/opengnsys/server/etc/apache-prev2.4.conf.tmpl > $config
@@ -678,6 +683,57 @@ function updateWebFiles()
 	touch $INSTALL_TARGET/log/{ogagent,rest,remotepc}.log
 
 	echoAndLog "${FUNCNAME}(): Web files successfully updated"
+}
+
+# Instalar dependencias y copiar ficheros de la nueva web de OpenGnsys 3.
+function updateWeb3()
+{
+	echoAndLog "${FUNCNAME}(): Installing OpenGnsys 3 Web Console..."
+	# Copiar ficheros.
+	mkdir -p $INSTALL_TARGET/www3
+	cp -a $WORKDIR/opengnsys/admin/WebConsole3/backend $INSTALL_TARGET/www3
+
+	# Instalar Composer.
+	if [ ! -f /usr/local/bin/composer.phar ]; then
+		php -r "copy('https://getcomposer.org/installer', '/tmp/composer-setup.php');"
+		php /tmp/composer-setup.php --install-dir=/usr/local/bin
+		rm -f /tmp/composer-setup.php
+	fi
+	# Instalar dependencias y migrar la BD para el backend.
+	pushd $INSTALL_TARGET/www3/backend
+	composer.phar update
+	chmod 777 -R var/cache var/logs
+	echo "Enter MySQL root password: "
+	mysql -u root -p <<< "
+	CREATE DATABASE IF NOT EXISTS ${OPENGNSYS_DATABASE}3;
+	GRANT ALL PRIVILEGES ON ${OPENGNSYS_DATABASE}3.* TO $OPENGNSYS_DBUSER IDENTIFIED BY '$OPENGNSYS_DBPASSWORD';
+"
+    # Crear la base de datos
+	php app/console doctrine:database:create --if-not-exists
+	# Actualizar el esquema de la base de datos
+	php app/console doctrine:schema:update --force
+	php app/console doctrine:fixtures:load
+	# Crear el usuario con permisos de Administrador
+	php app/console fos:user:create admin admin@localhost.localdomain admin
+	# Crear el cliente Auth2 para obtener us client_id y secret
+	php app/console opengnsys:oauth-server:client:create --grant-type="password" --grant-type="refresh_token" --grant-type="token" --grant-type="http://opengnsys.es/grants/og_client"
+	# Realizar la migración de la versión anterior de opengnsys 1.1
+	php app/console opengnsys:migration:execute
+	popd
+
+	# Instalar NodeJs y NG.
+	curl -sL https://deb.nodesource.com/setup_10.x | bash -
+	apt install nodejs
+	[ -L /usr/bin/node ] || ln -s /usr/bin/nodejs /usr/bin/node
+	npm install -g @angular/cli@6.2.3
+	# Instalar el frontend.
+	pushd $WORKDIR/opengnsys/admin/WebConsole3/frontend
+	npm install
+	sed -i "s/SERVERIP/$SERVERIP/" src/environments/environment.ts
+	sed -i 's,base href=.*,base href="/opengnsys3/frontend/">,' src/index.html
+	ng build
+	rsync -irplt dist/opengnsysAngular6/* $INSTALL_TARGET/www3/frontend
+	popd
 }
 
 # Copiar ficheros en la zona de descargas de OpenGnsys Web Console.
@@ -827,7 +883,6 @@ function updateDatabase()
 	fi
 
 	popd >/dev/null
-	REPOKEY=$(php -r 'echo md5(uniqid(rand(), true));')
 	if [ -n "$FILES" ]; then
 		for file in $FILES; do
 			importSqlFile $OPENGNSYS_DBUSER $OPENGNSYS_DBPASSWORD $OPENGNSYS_DATABASE $DBDIR/$file
@@ -1215,13 +1270,16 @@ rsyncConfigure
 updateClientFiles
 updateInterfaceAdm
 
-# Actualizar páqinas web
+# Actualizar antigua páqina web
 apacheConfiguration
 updateWebFiles
 if [ $? -ne 0 ]; then
 	errorAndLog "Error updating OpenGnsys Web Admin files"
 	exit 1
 fi
+# Actualizar nueva página web
+updateWeb3
+
 # Actaulizar ficheros descargables.
 updateDownloadableFiles
 # Generar páginas Doxygen para instalar en el web

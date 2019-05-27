@@ -1,5 +1,19 @@
 #!/bin/bash
-# Script de interfaz para devolver el inventario de software de un sistema operativo instalado.
 
-listSoftwareInfo $1 $2
+TIME1=$SECONDS
+
+#Carga el configurador del engine desde el fichero engine.cfg
+[ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
+
+# Limpia los ficheros temporales usados como log de seguimiento para httpdlog
+echo -n " " | tee  $OGLOGSESSION $OGLOGCOMMAND ${OGLOGCOMMAND}.tmp
+
+# Registro de inicio de ejecución
+ogEcho log session "$MSG_INTERFACE_START $0 $*"
+
+file=$(listSoftwareInfo $1 $2)
+cp $file $3
+
+TIME=$[SECONDS-TIME1]
+ogEcho log session "   [ ]      $MSG_SCRIPTS_TIME_PARTIAL : $[TIME/60]m $[TIME%60]s"
 

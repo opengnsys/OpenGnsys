@@ -1,0 +1,5 @@
+#!/bin/bash
+# Script de interfaz para devolver el inventario de software de un sistema operativo instalado.
+
+listSoftwareInfo $1 $2
+

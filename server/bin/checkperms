@@ -57,5 +57,5 @@ chown -R $APACHE_USER:$APACHE_GROUP $OPENGNSYS_DIR/tftpboot/menu.lst
 chown -R :$OPENGNSYS_USER $OPENGNSYS_DIR/tftpboot/ogLive*
 find -L $OPENGNSYS_DIR/tftpboot -type d -exec chmod 755 {} \;
 find -L $OPENGNSYS_DIR/tftpboot -type f -exec chmod 644 {} \;
-#chown $APACHE_USER:$APACHE_GROUP $OPENGNSYS_DIR/log/{ogagent,remotepc,rest}.log
+chown $APACHE_USER:$APACHE_GROUP $OPENGNSYS_DIR/log/{ogagent,remotepc,rest}.log 2>/dev/null
 

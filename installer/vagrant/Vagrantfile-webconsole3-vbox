@@ -50,8 +50,8 @@ apt-get install -y xfce4 gnome-icon-theme-full tango-icon-theme linux-headers-$(
 echo "allowed_users=anybody" > /etc/X11/Xwrapper.config
 # Install OpenGnsys Server
 tar xpvzf /vagrant/opengnsys3.tar.gz -C /tmp
-/tmp/opengnsys/installer/opengnsys_installer.sh
-echo y | /opt/opengnsys/bin/setserveraddr eth1
+/tmp/opengnsys/installer/opengnsys_installer3.sh
+echo y | /opt/opengnsys/bin/setserveraddr3 eth1
 # Configure the virtual lab.
 read -e APIID APISECRET <<<$(/opt/opengnsys/www3/backend/app/console doctrine:query:sql "SELECT random_id, secret FROM og_core__clients WHERE id=1;" | awk -F\\" '$2~/^(random_id|secret)$/ {getline; printf("%s ", $2)}')
 rm -fr /opt/opengnsys/www3/backend/var/cache/*
