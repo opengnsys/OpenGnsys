@@ -41,6 +41,7 @@ import array
 import six
 import chardet
 from opengnsys import utils
+from opengnsys.log import logger
 
 
 def _getMacAddr(ifname):
@@ -209,9 +210,20 @@ def exec_command(cmd):
     """
     proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     (out, err) = proc.communicate()
+    try:
+        if out is not None:
+            encoding = chardet.detect(out)["encoding"]
+            if encoding is not None:
+                out = out.decode(encoding).encode("utf8")
+        if err is not None:
+            encoding = chardet.detect(err)["encoding"]
+            if encoding is not None:
+                err = err.decode(encoding).encode("utf8")
+    except Exception as e:
+        logger.debug("ERROR EXEC COMMAND: {}".format(str(e)))
+
     stat = proc.returncode
-    return stat, out.decode(chardet.detect(out)['encoding']).encode('utf8'),\
-           err.decode(chardet.detect(err)['encoding']).encode('utf8')
+    return stat, out, err
 
 
 def get_hardware():
