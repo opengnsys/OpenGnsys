@@ -107,10 +107,10 @@ export const environment = {
     'CREATE_IMAGE': '/opt/opengnsys/interfaceAdm/CrearImagen',
     'HISTORY_LOG': '/cgi-bin/httpd-history-log.sh',
     'REALTIME_LOG': '/cgi-bin/httpd-log.sh',
-    'SOFTWARE_INVENTORY': '/opt/opengnsys/interfaceAdm/InventarioSoftware',
+    'SOFTWARE_INVENTORY': '/opt/opengnsys/interfaceAdm/InventarioSoftware3',
     'REBOOT': 'reboot 1',
     'POWER_OFF': 'poweroff',
-    'HARDWARE_INVENTORY': '/opt/opengnsys/interfaceAdm/InventarioHardware',
+    'HARDWARE_INVENTORY': '/opt/opengnsys/interfaceAdm/InventarioHardware3',
     'REFRESH_INFO': 'sendConfigToServer'
   },
   themes: ['black', 'black-light', 'blue-light', 'blue', 'green', 'green-light', 'purple', 'purple-light', 'red', 'red-light', 'yellow', 'yellow-light', 'uhu', 'uhu-light']
