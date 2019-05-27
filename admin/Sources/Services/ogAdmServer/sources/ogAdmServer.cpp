@@ -139,78 +139,6 @@ static inline int og_client_socket(const struct og_client *cli)
 }
 
 // ________________________________________________________________________________________________________
-// Función: Sondeo
-//
-//	Descripción:
-//		Solicita a los clientes su disponibiliad para recibir comandos interactivos
-//	Parámetros:
-//		- socket_c: Socket del cliente que envió el mensaje
-//		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros del mensaje
-//	Devuelve:
-//		true: Si el proceso es correcto
-//		false: En caso de ocurrir algún error
-// ________________________________________________________________________________________________________
-static bool Sondeo(TRAMA* ptrTrama, struct og_client *cli)
-{
-	if (!enviaComando(ptrTrama, CLIENTE_APAGADO)) {
-		respuestaConsola(og_client_socket(cli), ptrTrama, false);
-		return false;
-	}
-	respuestaConsola(og_client_socket(cli), ptrTrama, true);
-	return true;
-}
-// ________________________________________________________________________________________________________
-// Función: respuestaSondeo
-//
-//	Descripción:
-//		Recupera el estatus de los ordenadores solicitados leyendo la tabla de sockets
-//	Parámetros:
-//		- socket_c: Socket del cliente que envió el mensaje
-//		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros del mensaje
-//	Devuelve:
-//		true: Si el proceso es correcto
-//		false: En caso de ocurrir algún error
-// ________________________________________________________________________________________________________
-static bool respuestaSondeo(TRAMA* ptrTrama, struct og_client *cli)
-{
-	int socket_c = og_client_socket(cli);
-	int i;
-	long lSize;
-	char *iph, *Ipes;
-
-	iph = copiaParametro("iph",ptrTrama); // Toma dirección/es IP
-	lSize = strlen(iph); // Calcula longitud de la cadena de direccion/es IPE/S
-	Ipes = (char*) reservaMemoria(lSize + 1);
-	if (Ipes == NULL) {
-		liberaMemoria(iph);
-		syslog(LOG_ERR, "%s:%d OOM\n", __FILE__, __LINE__);
-		return false;
-	}
-	strcpy(Ipes, iph); // Copia cadena de IPES
-	liberaMemoria(iph);
-	initParametros(ptrTrama,0);
-	strcpy(ptrTrama->parametros, "tso="); // Compone retorno tso (sistemas operativos de los clientes )
-	for (i = 0; i < MAXIMOS_CLIENTES; i++) {
-		if (strncmp(tbsockets[i].ip, "\0", 1) != 0) { // Si es un cliente activo
-			if (contieneIP(Ipes, tbsockets[i].ip)) { // Si existe la IP en la cadena
-				strcat(ptrTrama->parametros, tbsockets[i].ip); // Compone retorno
-				strcat(ptrTrama->parametros, "/"); // "ip/sistema operativo;"
-				strcat(ptrTrama->parametros, tbsockets[i].estado);
-				strcat(ptrTrama->parametros, ";");
-			}
-		}
-	}
-	strcat(ptrTrama->parametros, "\r");
-	liberaMemoria(Ipes);
-	if (!mandaTrama(&socket_c, ptrTrama)) {
-		syslog(LOG_ERR, "failed to send response to %s:%hu reason=%s\n",
-		       inet_ntoa(cli->addr.sin_addr), ntohs(cli->addr.sin_port),
-		       strerror(errno));
-		return false;
-	}
-	return true;
-}
-// ________________________________________________________________________________________________________
 // Función: Actualizar
 //
 //	Descripción:
@@ -248,84 +176,6 @@ static bool Purgar(TRAMA* ptrTrama, struct og_client *cli)
 		return false;
 
 	respuestaConsola(og_client_socket(cli), ptrTrama, true);
-	return true;
-}
-// ________________________________________________________________________________________________________
-// Función: ConsolaRemota
-//
-//	Descripción:
-// 		Envia un script al cliente, éste lo ejecuta y manda el archivo que genera la salida por pantalla
-//	Parámetros:
-//		- socket_c: Socket del cliente que envió el mensaje
-//		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros del mensaje
-//	Devuelve:
-//		true: Si el proceso es correcto
-//		false: En caso de ocurrir algún error
-// ________________________________________________________________________________________________________
-static bool ConsolaRemota(TRAMA* ptrTrama, struct og_client *cli)
-{
-	char *iph, fileco[LONPRM], *ptrIpes[MAXIMOS_CLIENTES];;
-	FILE* f;
-	int i,lon;
-
-	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
-		respuestaConsola(og_client_socket(cli), ptrTrama, false);
-		return false;
-	}
-	INTROaFINCAD(ptrTrama);
-	/* Destruye contenido del fichero de eco anterior */
-	iph = copiaParametro("iph",ptrTrama); // Toma dirección ip del cliente
-	lon = splitCadena(ptrIpes,iph,';');
-	for (i = 0; i < lon; i++) {
-		sprintf(fileco,"/tmp/_Seconsola_%s",ptrIpes[i]); // Nombre que tendra el archivo en el Servidor
-		f = fopen(fileco, "wt");
-		fclose(f);
-	}
-	liberaMemoria(iph);
-	respuestaConsola(og_client_socket(cli), ptrTrama, true);
-	return true;
-}
-// ________________________________________________________________________________________________________
-// Función: EcoConsola
-//
-//	Descripción:
-//		Solicita el eco de una consola remota almacenado en un archivo de eco
-//	Parámetros:
-//		- socket_c: Socket del cliente que envió el mensaje
-//		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros del mensaje
-//	Devuelve:
-//		true: Si el proceso es correcto
-//		false: En caso de ocurrir algún error
-// ________________________________________________________________________________________________________
-static bool EcoConsola(TRAMA* ptrTrama, struct og_client *cli)
-{
-	int socket_c = og_client_socket(cli);
-	char *iph,fileco[LONPRM],*buffer;
-	int lSize;
-
-	INTROaFINCAD(ptrTrama);
-	// Lee archivo de eco de consola
-	iph = copiaParametro("iph",ptrTrama); // Toma dirección ip del cliente
-	sprintf(fileco,"/tmp/_Seconsola_%s",iph); // Nombre del archivo en el Servidor
-	liberaMemoria(iph);
-	lSize=lonArchivo(fileco);
-	if(lSize>0){ // Si el fichero tiene contenido...
-		initParametros(ptrTrama,lSize+LONGITUD_PARAMETROS);
-		buffer=leeArchivo(fileco);
-		sprintf(ptrTrama->parametros,"res=%s\r",buffer);
-		liberaMemoria(buffer);
-	}
-	else{
-		initParametros(ptrTrama,0);
-		sprintf(ptrTrama->parametros,"res=\r");
-	}
-	ptrTrama->tipo=MSG_RESPUESTA; // Tipo de mensaje
-	if (!mandaTrama(&socket_c, ptrTrama)) {
-		syslog(LOG_ERR, "failed to send response to %s:%hu reason=%s\n",
-		       inet_ntoa(cli->addr.sin_addr), ntohs(cli->addr.sin_port),
-		       strerror(errno));
-		return false;
-	}
 	return true;
 }
 // ________________________________________________________________________________________________________
@@ -1391,50 +1241,6 @@ bool respuestaConsola(int socket_c, TRAMA *ptrTrama, int res)
 		       __func__, __LINE__, strerror(errno));
 		return false;
 	}
-	return true;
-}
-// ________________________________________________________________________________________________________
-// Función: Arrancar
-//
-//	Descripción:
-//		Procesa el comando Arrancar
-//	Parámetros:
-//		- socket_c: Socket de la consola al envió el mensaje
-//		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
-//	Devuelve:
-//		true: Si el proceso es correcto
-//		false: En caso de ocurrir algún error
-// ________________________________________________________________________________________________________
-static bool Arrancar(TRAMA* ptrTrama, struct og_client *cli)
-{
-	char *ptrIP[MAXIMOS_CLIENTES],*ptrMacs[MAXIMOS_CLIENTES];
-	char *iph,*mac,*mar;
-	bool res;
-	int lon;
-
-	iph = copiaParametro("iph",ptrTrama); // Toma dirección/es IP
-	mac = copiaParametro("mac",ptrTrama); // Toma dirección/es MAC
-	mar = copiaParametro("mar",ptrTrama); // Método de arranque (Broadcast o Unicast)
-
-	lon = splitCadena(ptrIP, iph, ';');
-	lon = splitCadena(ptrMacs, mac, ';');
-
-	res = Levanta(ptrIP, ptrMacs, lon, mar);
-
-	liberaMemoria(iph);
-	liberaMemoria(mac);
-	liberaMemoria(mar);
-
-	if(!res){
-		respuestaConsola(og_client_socket(cli), ptrTrama, false);
-		return false;
-	}
-
-	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
-		respuestaConsola(og_client_socket(cli), ptrTrama, false);
-		return false;
-	}
-	respuestaConsola(og_client_socket(cli), ptrTrama, true);
 	return true;
 }
 // ________________________________________________________________________________________________________
@@ -3426,10 +3232,6 @@ static struct {
 	const char *nf; // Nombre de la función
 	bool (*fcn)(TRAMA *, struct og_client *cli);
 } tbfuncionesServer[] = {
-	{ "Sondeo",				Sondeo,			},
-	{ "respuestaSondeo",			respuestaSondeo,	},
-	{ "ConsolaRemota",			ConsolaRemota,		},
-	{ "EcoConsola",				EcoConsola,		},
 	{ "Actualizar",				Actualizar,		},
 	{ "Purgar",				Purgar,			},
 	{ "InclusionCliente",			InclusionCliente,	},
@@ -3437,7 +3239,6 @@ static struct {
 	{ "AutoexecCliente",			AutoexecCliente,	},
 	{ "ComandosPendientes",			ComandosPendientes,	},
 	{ "DisponibilidadComandos",		DisponibilidadComandos, },
-	{ "Arrancar",				Arrancar, 		},
 	{ "RESPUESTA_Arrancar",			RESPUESTA_Arrancar,	},
 	{ "Apagar",				Apagar,			},
 	{ "RESPUESTA_Apagar",			RESPUESTA_Apagar,	},
