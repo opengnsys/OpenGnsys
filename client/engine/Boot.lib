@@ -865,7 +865,7 @@ then
 		# Si no se reconfigure se borra los ficheros previos de configuración específicos de opengnsys.
         [ -d ${SECONDSTAGE}${PREFIXSECONDSTAGE} ] &&  rm -fr ${SECONDSTAGE}${PREFIXSECONDSTAGE}
         # Reactivamos el grub con el grub.cfg original.
-        grub-install --force ${EFIOPTGRUB} --root-directory=${SECONDSTAGE} $FIRSTSTAGE
+        grub-install --force ${EFIOPTGRUB} --uefi-secure-boot --root-directory=${SECONDSTAGE} $FIRSTSTAGE
         EVAL=$?
         # Movemos el grubx64.efi
         if ogIsEfiActive; then
@@ -904,7 +904,7 @@ sed -i 's/^set -e/#set -e/' /etc/grub.d/00_header
 grubSyntax "$KERNELPARAM" >> ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot/grub/grub.cfg
 
 #Instalar el grub
-grub-install --force ${EFIOPTGRUB} --root-directory=${SECONDSTAGE}${PREFIXSECONDSTAGE} $FIRSTSTAGE
+grub-install --force ${EFIOPTGRUB} --uefi-secure-boot --root-directory=${SECONDSTAGE}${PREFIXSECONDSTAGE} $FIRSTSTAGE
 
 # Movemos el grubx64.efi
 if ogIsEfiActive; then
@@ -1010,7 +1010,7 @@ then
 		# Si no se reconfigure se borra los ficheros previos de configuración específicos de opengnsys.
         [ -d ${SECONDSTAGE}${PREFIXSECONDSTAGE} ] &&  rm -fr ${SECONDSTAGE}${PREFIXSECONDSTAGE}
         # Reactivamos el grub con el grub.cfg original.
-        grub-install --force ${EFIOPTGRUB} --root-directory=${SECONDSTAGE} $FIRSTSTAGE
+        grub-install --force ${EFIOPTGRUB} --uefi-secure-boot --root-directory=${SECONDSTAGE} $FIRSTSTAGE
         EVAL=$?
         # Movemos el grubx64.efi
         if ogIsEfiActive; then
@@ -1045,7 +1045,7 @@ sed -i 's/^set -e/#set -e/' /etc/grub.d/00_header
 grubSyntax $DISK $PART "$KERNELPARAM" >> ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot/grub/grub.cfg
 
 #Instalar el grub
-grub-install --force ${EFIOPTGRUB} --root-directory=${SECONDSTAGE}${PREFIXSECONDSTAGE} $FIRSTSTAGE
+grub-install --force ${EFIOPTGRUB} --uefi-secure-boot --root-directory=${SECONDSTAGE}${PREFIXSECONDSTAGE} $FIRSTSTAGE
 
 # Movemos el grubx64.efi
 if ogIsEfiActive; then
