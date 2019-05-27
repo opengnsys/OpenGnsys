@@ -1,5 +1,140 @@
 <?php
- 
+
+define('OG_REST_URL', 'http://127.0.0.1:8888/');
+
+define('GET', 1);
+define('POST', 2);
+define('CUSTOM', 3);
+
+define('OG_REST_CMD_CLIENTS', 'clients');
+define('OG_REST_CMD_WOL', 'wol');
+define('OG_REST_CMD_SESSION', 'session');
+define('OG_REST_CMD_RUN', 'shell/run');
+define('OG_REST_CMD_OUTPUT', 'shell/output');
+
+define('OG_REST_PARAM_CLIENTS', 'clients');
+define('OG_REST_PARAM_ADDR', 'addr');
+define('OG_REST_PARAM_MAC', 'mac');
+define('OG_REST_PARAM_DISK', 'disk');
+define('OG_REST_PARAM_PART', 'partition');
+define('OG_REST_PARAM_RUN', 'run');
+define('OG_REST_PARAM_TYPE', 'type');
+
+function common_request($command, $type, $data = null, $custom = 'GET') {
+
+	$json = json_encode($data);
+
+	$service_url = OG_REST_URL.$command;
+
+	$curl = curl_init($service_url);
+	curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+
+	switch ($type) {
+		default:
+		case GET:
+			break;
+		case POST:
+			curl_setopt($curl, CURLOPT_POST, true);
+			curl_setopt($curl, CURLOPT_POSTFIELDS, $json);
+	}
+
+	$curl_response = curl_exec($curl);
+	$info = curl_getinfo($curl);
+
+	if ($curl_response === false || $info['http_code'] != 200) {
+		syslog(LOG_ERR, 'error occured during curl exec. Additioanl info: ' . var_export($info));
+		return null;
+	}
+
+	curl_close($curl);
+
+	syslog(LOG_INFO, 'response '.$command.' ok!');
+
+	return json_decode($curl_response, true);
+}
+
+
+function shell($case, $string_ips, $command) {
+
+	$ips = explode(';',$string_ips);
+
+	switch ($case) {
+		case 1:
+			$data = array(OG_REST_PARAM_CLIENTS => $ips,
+				OG_REST_PARAM_RUN => $command);
+			$command = OG_REST_CMD_RUN;
+			break;
+		default:
+		case 2:
+			$data = array(OG_REST_PARAM_CLIENTS => $ips);
+			$command = OG_REST_CMD_OUTPUT;
+	}
+
+	$result = common_request($command, POST,
+		$data)[OG_REST_PARAM_CLIENTS][0]['output'];
+
+	return (is_null($result) ? '1' : $result);
+}
+
+function clients($case, $ips) {
+
+	switch ($case) {
+		case 1:
+			$type = POST;
+			$data = array(OG_REST_PARAM_CLIENTS => $ips);
+			break;
+		case 2:
+			$type = GET;
+			break;
+	}
+
+	$result = common_request(OG_REST_CMD_CLIENTS, $type, $data);
+
+	foreach ($result[OG_REST_PARAM_CLIENTS] as $client) {
+		$trama_notificacion = $trama_notificacion.implode('/', $client).';';
+	}
+
+	return $trama_notificacion;
+}
+
+function wol($type_wol, $macs, $ips) {
+
+	switch ($type_wol) {
+		default:
+		case 1:
+			$wol = 'broadcast';
+			break;
+		case 2:
+			$wol = 'unicast';
+	}
+
+	$clients = array();
+
+	for($i=0; $i<count($macs); $i++) {
+		$clients[] = array(OG_REST_PARAM_ADDR => $ips[$i],
+			OG_REST_PARAM_MAC => $macs[$i]);
+	}
+
+	$data = array(OG_REST_PARAM_TYPE => $wol,
+		OG_REST_PARAM_CLIENTS => $clients);
+
+	common_request(OG_REST_CMD_WOL, POST, $data);
+}
+
+function session($string_ips, $params) {
+
+	preg_match_all('!\d{1}!', $params, $matches);
+
+	$ips = explode(';',$string_ips);
+	$disk = $matches[0][0];
+	$part = $matches[0][1];
+
+	$data = array(OG_REST_PARAM_CLIENTS => $ips,
+		OG_REST_PARAM_DISK => $disk, OG_REST_PARAM_PART => $part);
+
+	common_request(OG_REST_CMD_SESSION, POST, $data);
+}
+
 /*
  * @function multiRequest.
  * @param    URLs array (may include header and POST data), cURL options array.
