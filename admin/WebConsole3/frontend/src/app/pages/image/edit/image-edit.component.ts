@@ -25,6 +25,10 @@ export class ImageEditComponent implements OnInit {
   // should be each tab's root Page
   constructor(private router: Router, private activatedRouter: ActivatedRoute, private imageService: ImageService, private repositoryService: RepositoryService, private translate: TranslateService, private toaster: ToasterService) {
     this.form = this.formType.getForm();
+    this.formType.getField(this.form, 'repository').options = {
+      items: [],
+      label: 'name'
+    };
   }
 
   ngOnInit(): void {
@@ -52,8 +56,7 @@ export class ImageEditComponent implements OnInit {
       data => {
         this.formType.getField(this.form, 'repository').options = {
           items: data,
-          label: 'name',
-          value: 'id'
+          label: 'name'
         };
       }
     );

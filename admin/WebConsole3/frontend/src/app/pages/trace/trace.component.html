@@ -13,9 +13,9 @@
         <div class="input-group">
           <input type="text" name="q" class="form-control" placeholder="Search..." [(ngModel)]="filters.searchText">
           <span class="input-group-btn">
-		            <button type="button" name="search" id="search-btn" class="btn btn-flat"><i class="fa fa-search"></i>
-		            </button>
-		          </span>
+            <button type="button" name="search" id="search-btn" class="btn btn-flat"><i class="fa fa-search"></i>
+            </button>
+          </span>
         </div>
       </div>
       <div class="col-md-12" style="margin-top: 5px;margin-bottom: 5px;">
@@ -52,7 +52,7 @@
               <div class="input-group-addon">
                 <i class="fa fa-clock-o"></i>
               </div>
-              <input date-range-picker placeholder="{{'executed_at_range'|translate}}" type="text" class="form-control pull-right" [(ngModel)]="filters.dateRange" options="datePickerOptions">
+              <input ngxDaterangepickerMd placeholder="{{'executed_at_range'|translate}}" type="text" class="form-control pull-right" [locale]="{applyLabel: 'ok', format: 'DD/MM/YYYY'}" [(ngModel)]="filters.dateRange" (datesUpdated)="updateTraces()" name="daterange" options="datePickerOptions">
             </div>
             <!-- /.input group -->
           </div>

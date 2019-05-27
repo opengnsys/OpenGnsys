@@ -1,0 +1,10 @@
+::ng-deep app-organizational-unit {
+  ::ng-deep .dropdown-menu .icheck {
+    float: left;
+  }
+
+  ::ng-deep .loader {
+    display: none !important;
+  }
+}
+

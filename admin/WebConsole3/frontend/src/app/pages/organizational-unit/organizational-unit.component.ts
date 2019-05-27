@@ -16,7 +16,7 @@ import {environment} from '../../../environments/environment';
 @Component({
   selector: 'app-organizational-unit',
   templateUrl: './organizational-unit.component.html',
-  styleUrls: [ './organizational-unit.component.css' ]
+  styleUrls: [ './organizational-unit.component.scss' ]
 })
 export class OrganizationalUnitComponent implements OnInit, OnDestroy {
   public config: any;
@@ -46,12 +46,14 @@ export class OrganizationalUnitComponent implements OnInit, OnDestroy {
         clientstatus: []
       }
     };
+    this.ogCommonService.showLoader = false;
   }
 
   ngOnDestroy(): void {
     if (this.config.timers && this.config.timers.clientsStatusInterval) {
-      clearInterval(this.config.timers.clientsStatusInterval.object);
+      this.config.timers.clientsStatusInterval.object = null;
     }
+    this.ogCommonService.showLoader = true;
   }
 
   ngOnInit(): void {
@@ -75,11 +77,9 @@ export class OrganizationalUnitComponent implements OnInit, OnDestroy {
               this.ous = Array.isArray(response) ? response : [response];
               // La primera vez que entra
               if (this.config.timers.clientsStatusInterval.object == null && this.config.timers.clientsStatusInterval.tick > 0) {
+                this.config.timers.clientsStatusInterval.object = 1;
                 this.getClientStatus();
                 const self = this;
-                this.config.timers.clientsStatusInterval.object = window.setInterval(function() {
-                  self.getClientStatus();
-                }, this.config.timers.clientsStatusInterval.tick);
               } else {
                 this.getClientStatus();
               }
@@ -121,6 +121,12 @@ export class OrganizationalUnitComponent implements OnInit, OnDestroy {
         console.log(error);
       }
     );
+    const self = this;
+    if (this.config.timers.clientsStatusInterval.object !== null) {
+      window.setTimeout(function () {
+        self.getClientStatus();
+      }, this.config.timers.clientsStatusInterval.tick);
+    }
   }
 
   private getOuClientStatus(ou): Observable<any>[] {

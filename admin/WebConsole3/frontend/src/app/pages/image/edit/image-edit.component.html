@@ -24,8 +24,8 @@
         <div class="box-header with-border">
         </div>
         <div class="box-body">
-          <form role="form" gbn-auto-form name="Form" ng-submit="saveImage(Form)" form-options="formOptions" form-model="image">
-              <app-form-input [model]="image" [cols]="2" [formType]="form"></app-form-input>
+          <form role="form"  name="Form">
+              <app-form-input [model]="image" [cols]="1" [formType]="form"></app-form-input>
           </form>
           <table class="table table-bordered" *ngIf="image.partitionInfo">
             <tbody>
@@ -39,28 +39,28 @@
             </tr>
             <tr>
               <td>
-                <span ng-if="image.partitionInfo">{{image.partitionInfo.numDisk}}</span>
-                <span ng-if="!image.partitionInfo" translate="not_available"></span>
+                <span *ngIf="image.partitionInfo">{{image.partitionInfo.numDisk}}</span>
+                <span *ngIf="!image.partitionInfo" translate="not_available"></span>
               </td>
               <td>
-                <span ng-if="image.partitionInfo">{{image.partitionInfo.numPartition}}</span>
-                <span ng-if="!image.partitionInfo" translate="not_available"></span>
+                <span *ngIf="image.partitionInfo">{{image.partitionInfo.numPartition}}</span>
+                <span *ngIf="!image.partitionInfo" translate="not_available"></span>
               </td>
               <td>
-                <span ng-if="image.partitionInfo">{{image.partitionInfo.filesystem}} ({{image.partitionInfo.partitionCode}})</span>
-                <span ng-if="!image.partitionInfo" translate="not_available"></span>
+                <span *ngIf="image.partitionInfo">{{image.partitionInfo.filesystem}} ({{image.partitionInfo.partitionCode}})</span>
+                <span *ngIf="!image.partitionInfo" translate="not_available"></span>
               </td>
               <td>
-                <span ng-if="image.partitionInfo">{{image.partitionInfo.osName}}</span>
-                <span ng-if="!image.partitionInfo" translate="not_available"></span>
+                <span *ngIf="image.partitionInfo">{{image.partitionInfo.osName}}</span>
+                <span *ngIf="!image.partitionInfo" translate="not_available"></span>
               </td>
               <td>
-                <span ng-if="image.revision" class="badge bg-green">{{image.revision}}</span>
-                <span ng-if="!image.revision" translate="not_available"></span>
+                <span *ngIf="image.revision" class="badge bg-green">{{image.revision}}</span>
+                <span *ngIf="!image.revision" translate="not_available"></span>
               </td>
               <td>
-                <span ng-if="image.createdAt">{{image.createdAt | date: "DD/MM/YYYY HH:mm"}}</span>
-                <span ng-if="!image.createdAt" translate="not_available"></span>
+                <span *ngIf="image.createdAt">{{image.createdAt | date: "DD/MM/YYYY HH:mm"}}</span>
+                <span *ngIf="!image.createdAt" translate="not_available"></span>
               </td>
             </tr>
             </tbody>

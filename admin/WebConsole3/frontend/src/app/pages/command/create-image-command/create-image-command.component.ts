@@ -67,7 +67,7 @@ export class CreateImageCommandComponent implements OnInit {
     } else {
       // TODO - dar error?
       this.ogSweetAlert.error(this.translate.instant('opengnsys_error'), this.translate.instant('not_clients_selected'));
-      this.router.navigate(['app.ous']);
+      this.router.navigate(['/app/ous']);
     }
   }
 
@@ -90,7 +90,7 @@ export class CreateImageCommandComponent implements OnInit {
 
       let result = true;
       // Crear la imagen si no existe
-      if (!image) {
+      if (!image || image.id === 0) {
         newImage = true;
         // Comprobar que exista el repositorio, sino no podemos crear la nueva imagen
         if (!this.repositories) {
@@ -116,7 +116,6 @@ export class CreateImageCommandComponent implements OnInit {
           promises.push(this.imageService.create(image));
         } else {
           const imageCopy = Object.assign({}, image);
-          delete imageCopy.id;
           delete imageCopy.softwareProfile;
           promises.push(this.imageService.update(imageCopy));
         }
@@ -125,7 +124,7 @@ export class CreateImageCommandComponent implements OnInit {
         forkJoin(promises).subscribe(
             (response) => {
               this.toaster.pop({type: 'success', title: 'success', body: this.translate.instant('successfully_executed')});
-              this.router.navigate(['app.ous']);
+              this.router.navigate(['/app/ous']);
             },
             (error) => {
               this.toaster.pop({type: 'error', title: 'error', body: error});

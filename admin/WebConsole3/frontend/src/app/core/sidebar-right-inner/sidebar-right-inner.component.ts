@@ -3,6 +3,9 @@ import {ChangeDetectorRef, Component, OnDestroy, OnInit} from '@angular/core';
 import {Subscriber} from 'rxjs';
 
 import {LayoutStore} from 'angular-admin-lte';
+import {AuthModule} from 'globunet-angular/core';
+import {User, UserPreferences} from '../../model/user';
+import {OgCommonService} from '../../service/og-common.service';
 
 @Component({
   selector: 'app-sidebar-right-inner',
@@ -16,11 +19,15 @@ export class SidebarRightInnerComponent implements OnInit, OnDestroy {
   public isSidebarLeftMini: boolean;
 
   private subscriptions = [];
+  private preferences: UserPreferences;
 
   constructor(
     public layoutStore: LayoutStore,
-    private changeDetectorRef: ChangeDetectorRef
-  ) {}
+    private changeDetectorRef: ChangeDetectorRef,
+    private ogCommonService: OgCommonService
+  ) {
+    this.preferences = this.ogCommonService.loadUserConfig();
+  }
 
   /**
    * [ngOnInit description]
@@ -33,10 +40,14 @@ export class SidebarRightInnerComponent implements OnInit, OnDestroy {
     }));
     this.subscriptions.push(this.layoutStore.isSidebarLeftExpandOnOver.subscribe((value: boolean) => {
       this.isSidebarLeftExpandOnOver = value;
+      this.preferences.isSidebarLeftExpandOnOver = value;
+      this.ogCommonService.saveUserPreferences(this.preferences);
       this.changeDetectorRef.detectChanges();
     }));
     this.subscriptions.push(this.layoutStore.isSidebarLeftMini.subscribe((value: boolean) => {
       this.isSidebarLeftMini = value;
+      this.preferences.isSidebarLeftMini = value;
+      this.ogCommonService.saveUserPreferences(this.preferences);
       this.changeDetectorRef.detectChanges();
     }));
   }
@@ -69,6 +80,8 @@ export class SidebarRightInnerComponent implements OnInit, OnDestroy {
    */
   public onLayoutChange(event): void {
     this.layout = event.target.checked ? event.target.getAttribute('value') : '';
+    this.preferences.layout = this.layout;
+    this.ogCommonService.saveUserPreferences(this.preferences);
     this.layoutStore.setLayout(this.layout);
   }
 
@@ -80,6 +93,8 @@ export class SidebarRightInnerComponent implements OnInit, OnDestroy {
    */
   public changeSkin(event, color: string): void {
     event.preventDefault();
+    this.preferences.theme = color;
+    this.ogCommonService.saveUserPreferences(this.preferences);
     this.layoutStore.setSkin(color);
   }
 
@@ -91,8 +106,11 @@ export class SidebarRightInnerComponent implements OnInit, OnDestroy {
   public changeSidebarRightSkin(value: boolean): void {
     if (value) {
       this.layoutStore.setSidebarRightSkin('light');
+      this.preferences.sidebarRightSkin = 'light';
     } else {
       this.layoutStore.setSidebarRightSkin('dark');
+      this.preferences.sidebarRightSkin = 'dark';
     }
+    this.ogCommonService.saveUserPreferences(this.preferences);
   }
 }

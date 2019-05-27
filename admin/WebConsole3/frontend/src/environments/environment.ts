@@ -76,7 +76,7 @@ export const environment = {
         showGrid: true
       },
       language: 'es',
-      theme: 'skin-black'
+      theme: 'blue'
     }
   },
   languages: [
@@ -113,7 +113,7 @@ export const environment = {
     'HARDWARE_INVENTORY': '/opt/opengnsys/interfaceAdm/InventarioHardware',
     'REFRESH_INFO': 'sendConfigToServer'
   },
-  themes: ['skin-black', 'skin-black-light', 'skin-blue-light', 'skin-blue', 'skin-green', 'skin-green-light', 'skin-purple', 'skin-purple-light', 'skin-red', 'skin-red-light', 'skin-yellow', 'skin-yellow-light', 'skin-uhu', 'skin-uhu-light']
+  themes: ['black', 'black-light', 'blue-light', 'blue', 'green', 'green-light', 'purple', 'purple-light', 'red', 'red-light', 'yellow', 'yellow-light', 'uhu', 'uhu-light']
 
 
 };

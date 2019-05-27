@@ -34,6 +34,7 @@
 .checkmark.iradio {
   border-radius: 50%;
   background-color: white;
+  border-color: #999999;
 }
 
 /* On mouse-over, add a grey background color */

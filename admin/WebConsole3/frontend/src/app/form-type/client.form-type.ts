@@ -17,7 +17,7 @@ export class ClientFormType extends GlobunetFormType {
       label: 'name',
     };
     this.getField(form, 'hardwareProfile').options = {
-      label: 'name',
+      label: 'description',
     };
     this.getField(form, 'netboot').options = {
       label: 'name'

@@ -4,6 +4,7 @@ import {forkJoin} from 'rxjs';
 import {OgSweetAlertService} from '../../../../service/og-sweet-alert.service';
 import {TranslateService} from '@ngx-translate/core';
 import {ToasterService} from '../../../../service/toaster.service';
+import {ClientService} from '../../../../api/client.service';
 
 @Component({
   selector: 'app-og-ou-general-options',
@@ -12,7 +13,7 @@ import {ToasterService} from '../../../../service/toaster.service';
 })
 export class OgOuGeneralOptionsComponent implements OnInit {
 
-  constructor(public ogCommonService: OgCommonService, private ogSweetAlert: OgSweetAlertService, private translate: TranslateService, private toaster: ToasterService) {
+  constructor(private clientService: ClientService,public ogCommonService: OgCommonService, private ogSweetAlert: OgSweetAlertService, private translate: TranslateService, private toaster: ToasterService) {
   }
 
   ngOnInit() {
@@ -35,7 +36,7 @@ export class OgOuGeneralOptionsComponent implements OnInit {
   }
 
   deleteSelectedClients() {
-
+  const self = this;
     this.ogSweetAlert.swal(
       {
         title: this.translate.instant('sure_to_delete') + '?',
@@ -47,25 +48,27 @@ export class OgOuGeneralOptionsComponent implements OnInit {
 
       }).then(
       function(response) {
-        if (response === true) {
-          const clientIds = Object.keys(this.config.selectedClients);
-          let cId = '';
+        if (response.value === true) {
+          const clientIds = Object.keys(self.ogCommonService.selectedClients);
+          let cId: any;
           const promises = [];
           for (let i = 0; i < clientIds.length; i++) {
             cId = clientIds[i];
-            promises.push(this.clientService.delete(cId));
+            promises.push(self.clientService.delete(cId));
           }
           forkJoin(promises).subscribe(
             (success) => {
+              /*
               for (let i = 0; i < clientIds.length; i++) {
                 cId = clientIds[i];
-                this.deleteClientFromOu(this.ous, this.config.selectedClients[cId]);
+                self.deleteClientFromOu(self.ous, self.ogCommonService.selectedClients[cId]);
               }
-              this.toaster.pop({type: 'success', title: 'success', body: 'Successfully deleted'});
-              this.config.selectedClients = [];
+              /**/
+              self.toaster.pop({type: 'success', title: 'success', body: 'Successfully deleted'});
+              self.ogCommonService.selectedClients = [];
             },
             (error) => {
-              this.toaster.pop({type: 'error', title: 'error', body: error});
+              self.toaster.pop({type: 'error', title: 'error', body: error});
             }
           );
         }

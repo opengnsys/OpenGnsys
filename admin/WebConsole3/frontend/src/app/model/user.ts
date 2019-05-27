@@ -4,13 +4,21 @@ export class UserPreferences {
     ous: {showGrid: boolean};
     theme: string;
     language: string;
+    layout: string;
+    isSidebarLeftExpandOnOver: boolean;
+    isSidebarLeftMini: boolean;
+    sidebarRightSkin: string;
 
     constructor() {
         this.ous = {
             showGrid: true
         };
-        this.theme = 'skin-blue';
+        this.theme = 'blue';
         this.language = 'es';
+        this.layout = '';
+        this.isSidebarLeftExpandOnOver =  false;
+        this.isSidebarLeftMini = true;
+        this.sidebarRightSkin = 'dark';
     }
 }
 

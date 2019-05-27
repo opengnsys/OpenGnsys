@@ -1,3 +1,5 @@
-trace {
-
+::ng-deep app-trace {
+  ::ng-deep .dropdown-menu .icheck {
+    float: left;
+  }
 }

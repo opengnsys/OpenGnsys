@@ -1,4 +1,4 @@
-<ng-container *ngIf="!userIsLogged() && isCustomLayout else layoutEnabled">
+<ng-container *ngIf="!userIsLogged() else layoutEnabled">
   <app-login></app-login>
 </ng-container>
 <ng-template #layoutEnabled>
@@ -16,7 +16,7 @@
     </mk-layout-sidebar-right>
     <mk-layout-content>
       <router-outlet></router-outlet>
-      <div>
+      <div *ngIf="ogCommonService.showLoader == true">
         <div class="loader" *mkLoadingPage="{checkPendingHttp: true, checkPendingRoute: true}">
           <mk-circle></mk-circle>
         </div>

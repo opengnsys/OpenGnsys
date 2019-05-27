@@ -46,7 +46,7 @@ export class ProfileComponent implements OnInit {
   }
 
    save() {
-    this.ogCommonService.saveUserPreferences();
+    this.ogCommonService.saveUserPreferences(this.user.preferences);
     this.toaster.pop({type: 'success', title: 'success', body: this.translate.instant('successfully_saved')});
   }
 

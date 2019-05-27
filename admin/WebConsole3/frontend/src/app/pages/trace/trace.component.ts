@@ -45,8 +45,8 @@ export class TraceComponent implements OnInit, OnDestroy {
       },
     },
     dateRange: {
-      startDate: null,
-      endDate: null
+      startDate: moment(),
+      endDate: moment()
     }
   };
   config: { constants: any; timers: any; };
@@ -63,12 +63,14 @@ export class TraceComponent implements OnInit, OnDestroy {
               private ogSweetAlert: OgSweetAlertService,
               private toaster: ToasterService,
               private translate: TranslateService) {
+    this.ogCommonService.showLoader = false;
   }
 
   ngOnDestroy() {
     if (this.config.timers && this.config.timers.executionsInterval) {
-      clearInterval(this.config.timers.executionsInterval.object);
+      this.config.timers.executionsInterval.object = null;
     }
+    this.ogCommonService.showLoader = true;
   }
 
 ngOnInit(): void {
@@ -78,9 +80,7 @@ ngOnInit(): void {
       this.config = data;
 
       if (this.config.timers.executionsInterval.object === null && this.config.timers.executionsInterval.tick > 0) {
-        this.config.timers.executionsInterval.object = setInterval(function() {
-          self.getExecutionTasks();
-        }, this.config.timers.executionsInterval.tick);
+        this.config.timers.serverStatusInterval.object = 1;
       }
 
       this.datePickerOptions = {
@@ -123,14 +123,7 @@ ngOnInit(): void {
         timePicker24Hour: true,
         format: 'DD/MM/YYYY HH:mm'
       };
-      this.traceService.list().subscribe(
-        (response) => {
-          this.traces = response;
-        },
-        (error) => {
-          this.toaster.pop({type: 'error', title: 'error', body: error});
-        }
-      );
+      this.updateTraces();
     }
   );
 }
@@ -172,12 +165,24 @@ ngOnInit(): void {
           self.selectAll = false;
           self.selection = [];
           self.searchText = '';
+          self.updateTraces();
         },
         (error) => {
           self.toaster.pop({type: 'error', title: 'error', body: error});
         }
       );
     });
+  }
+
+  updateTraces() {
+    this.traceService.list(new QueryOptions({fromDate: moment(this.filters.dateRange.startDate).format('YYYY-MM-DD'), toDate: moment(this.filters.dateRange.endDate).add(1, 'days').format('YYYY-MM-DD')})).subscribe(
+        (response) => {
+          this.traces = response;
+        },
+        (error) => {
+          this.toaster.pop({type: 'error', title: 'error', body: error});
+        }
+    );
   }
 
   getExecutionTasks() {
@@ -189,53 +194,20 @@ ngOnInit(): void {
 
       }
     );
+    if(this.config.timers.executionsInterval.object !== null) {
+      const self = this;
+      setTimeout(function () {
+        self.getExecutionTasks();
+      }, this.config.timers.executionsInterval.tick);
+    }
   }
 
-  deleteExecutionTace(task) {
-    this.ogSweetAlert.question(
-      this.translate.instant('delete_task'),
-      this.translate.instant('sure_to_delete_task') + '?',
-      function(result) {
-        if (result) {
-          this.traceService.delete(task.id).subscribe(
-            (response) => {
-              this.toaster.pop({type: 'success', title: 'success', body: this.translate.instant('successfully_deleted')});
-              this.getExecutionTasks();
-            },
-            (error) => {
-              this.toaster.pop({type: 'error', title: 'error', body: error});
-            }
-          );
-
-        }
-      }
-    );
-
-  }
-
-  relaunchExecutionTask(task) {
-    this.ogSweetAlert.question(
-      this.translate.instant('relaunch_task'),
-      this.translate.instant('sure_to_relaunch_task') + '?',
-      function(result) {
-        if (result) {
-
-        }
-      }
-    );
-  }
 
   filterTraceStatus(trace, index, array) {
 
     // Comprobar si para el filtro de estado actual de la traza
     let result = (trace.finishedAt != null && this.filters.status['finished'].selected === true) || (trace.finishedAt === null && this.filters.status['execution'].selected === true);
     result = result && (trace.finishedAt != null && (trace.status === 0 && this.filters.finishedStatus['noErrors'].selected === true) || (trace.status !== 0 && this.filters.finishedStatus['withErrors'].selected === true));
-    if (this.filters.dateRange.startDate != null) {
-      result = result && moment(trace.executedAt).isAfter(this.filters.dateRange.startDate);
-    }
-    if (this.filters.dateRange.endDate != null) {
-      result = result && moment(trace.executedAt).isBefore(this.filters.dateRange.endDate);
-    }
 
     return result;
   }

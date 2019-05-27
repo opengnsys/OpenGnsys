@@ -79,7 +79,7 @@ import {DeleteCacheImageCommandComponent} from './pages/command/delete-cache-ima
 import {FormatCommandComponent} from './pages/command/format-command/format-command.component';
 import {PartitionFormatCommandComponent} from './pages/command/partition-format-command/partition-format-command.component';
 import {ColResizableDirective} from './pages/common/directive/col-resizable.directive';
-
+import { NgxDaterangepickerMd } from 'ngx-daterangepicker-material';
 
 
 @NgModule({
@@ -189,7 +189,6 @@ import {ColResizableDirective} from './pages/common/directive/col-resizable.dire
     AppRoutingModule,
     CoreModule,
     DropdownModule,
-    LayoutModule.forRoot(AdminLteConf.staticConf),
     LoadingPageModule, CircleModule,
     BrowserAnimationsModule,
     HttpClientModule,
@@ -199,12 +198,15 @@ import {ColResizableDirective} from './pages/common/directive/col-resizable.dire
         provide: TranslateLoader,
         useFactory: createTranslateLoader,
         deps: [HttpClient]
-      }
+      },
+      isolate: false
     }),
+    LayoutModule.forRoot(AdminLteConf.staticConf),
     ToastrModule.forRoot(),
     Ng2SmartTableModule,
     FormsModule,
-    ChartsModule
+    ChartsModule,
+    NgxDaterangepickerMd.forRoot()
   ],
   providers: [
     {provide: HTTP_INTERCEPTORS, useClass: TokenInterceptorService, multi: true}

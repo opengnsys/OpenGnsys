@@ -5,36 +5,32 @@
     </mk-tab-header>
     <mk-tab-content>
       <div>
-        <h4 class="control-sidebar-heading">Layout Options</h4>
+        <h4 class="control-sidebar-heading" translate="layout_options"></h4>
         <div class="form-group">
-          <label class="control-sidebar-subheading"><input type="checkbox" (change)="onLayoutChange($event)" value="fixed" [checked]="layout === 'fixed'" class="pull-right"> Fixed layout</label>
-          <p>Activate the fixed layout. You can't use fixed and boxed layouts together</p>
+          <label class="control-sidebar-subheading">
+            <input type="checkbox" (change)="onLayoutChange($event)" value="fixed" [checked]="layout === 'fixed'" class="pull-right"> <span translate="fixed_layout"></span></label>
+          <p translate="activate_fixed_layout"></p>
         </div>
         <div class="form-group">
-          <label class="control-sidebar-subheading"><input type="checkbox" (change)="onLayoutChange($event)" value="boxed" [checked]="layout === 'boxed'" class="pull-right"> Boxed Layout</label>
-          <p>Activate the boxed layout</p>
+          <label class="control-sidebar-subheading">
+            <input type="checkbox" (change)="onLayoutChange($event)" value="boxed" [checked]="layout === 'boxed'" class="pull-right"> <span translate="boxed_layout"></span></label>
+          <p translate="activate_boxed_layout"></p>
         </div>
         <div class="form-group">
-          <label class="control-sidebar-subheading"><input type="checkbox" [checked]="isSidebarLeftCollapsed" #sidebarLeftCollapsedCheckbox (click)="layoutStore.sidebarLeftCollapsed(sidebarLeftCollapsedCheckbox.checked)" class="pull-right"> Toggle Sidebar</label>
-          <p>Toggle the left sidebar's state (open or collapse)</p>
+          <label class="control-sidebar-subheading"><input type="checkbox" [disabled]="isSidebarLeftExpandOnOver" [checked]="isSidebarLeftMini" #sidebarLeftMini (click)="layoutStore.sidebarLeftMini(sidebarLeftMini.checked)" class="pull-right"> <span translate="sidebar_left_mini"></span></label>
+          <p translate="sidebar_left_collapsed_visible"></p>
         </div>
         <div class="form-group">
-          <label class="control-sidebar-subheading"><input type="checkbox" [disabled]="isSidebarLeftExpandOnOver" [checked]="isSidebarLeftMini" #sidebarLeftMini (click)="layoutStore.sidebarLeftMini(sidebarLeftMini.checked)" class="pull-right"> Sidebar Left Mini</label>
-          <p>Let the sidebar left collapsed visible</p>
+          <label class="control-sidebar-subheading">
+            <input type="checkbox" [disabled]="!isSidebarLeftMini" [checked]="isSidebarLeftExpandOnOver && isSidebarLeftMini" #sidebarLeftExpandOnOverCheckbox (click)="layoutStore.sidebarLeftExpandOnOver(sidebarLeftExpandOnOverCheckbox.checked)" class="pull-right"><span translate="sidebar_left_expand_hover"></span></label>
+          <p translate="sidebar_left_mini_expand_hover"></p>
         </div>
         <div class="form-group">
-          <label class="control-sidebar-subheading"><input type="checkbox" [disabled]="!isSidebarLeftMini" [checked]="isSidebarLeftExpandOnOver && isSidebarLeftMini" #sidebarLeftExpandOnOverCheckbox (click)="layoutStore.sidebarLeftExpandOnOver(sidebarLeftExpandOnOverCheckbox.checked)" class="pull-right"> Sidebar Expand on Hover</label>
-          <p>Let the sidebar mini expand on hover</p>
+          <label class="control-sidebar-subheading">
+            <input type="checkbox" #sidebarRightSkinCheckbox (click)="changeSidebarRightSkin(sidebarRightSkinCheckbox.checked)" class="pull-right"> <span translate="toggle_right_sidebar_skin"></span></label>
+          <p translate="change_right_sidebar_color"></p>
         </div>
-        <div class="form-group">
-          <label class="control-sidebar-subheading"><input type="checkbox" #sidebarRightOverContentCheckbox (click)="layoutStore.sidebarRightOverContent(!sidebarRightOverContentCheckbox.checked)" class="pull-right"> Toggle Right Sidebar Slide</label>
-          <p>Toggle between slide over content and push content effects</p>
-        </div>
-        <div class="form-group">
-          <label class="control-sidebar-subheading"><input type="checkbox" #sidebarRightSkinCheckbox (click)="changeSidebarRightSkin(sidebarRightSkinCheckbox.checked)" class="pull-right"> Toggle Right Sidebar Skin</label>
-          <p>Toggle between dark and light skins for the right sidebar</p>
-        </div>
-        <h4 class="control-sidebar-heading">Skins</h4>
+        <h4 class="control-sidebar-heading" translate="skins"></h4>
         <ul class="list-unstyled clearfix">
           <li style="float:left; width: 33.33333%; padding: 5px;">
             <a href="#" (click)="changeSkin($event, 'blue')" style="display: block; box-shadow: 0 0 3px rgba(0,0,0,0.4)" class="clearfix full-opacity-hover">

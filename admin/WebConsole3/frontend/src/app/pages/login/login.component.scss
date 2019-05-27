@@ -1,5 +1,5 @@
-app-login {
-  .login-page {
+::ng-deep app-login {
+  ::ng-deep .login-page {
     overflow: hidden;
     min-height: 100%;
     position: absolute;
@@ -7,11 +7,11 @@ app-login {
     background: white;
   }
 
-  .login-box {
+  ::ng-deep .login-box {
     border: 1px solid;
   }
 
-  .login-logo {
+  ::ng-deep .login-logo {
     background: #d2d6de;
   }
 }

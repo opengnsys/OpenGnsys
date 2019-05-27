@@ -40,6 +40,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   chart: Chart;
 
   constructor(private authModule: AuthModule, private translate: TranslateService, private ogCommonService: OgCommonService, private statusService: StatusService) {
+    this.ogCommonService.showLoader = false;
     this.status = {
       datasets: [
         {
@@ -88,10 +89,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
       (config) => {
         this.timers = config.timers;
         if (this.timers.serverStatusInterval.object == null && this.timers.serverStatusInterval.tick > 0) {
+          this.timers.serverStatusInterval.object = 1;
           this.updateStatus();
-          this.timers.serverStatusInterval.object = setInterval(() => {
-            this.updateStatus();
-          }, this.timers.serverStatusInterval.tick);
         } else {
           this.updateStatus();
         }
@@ -104,8 +103,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.ogCommonService.showLoader = true;
     if (this.timers && this.timers.serverStatusInterval) {
-      clearInterval(this.timers.serverStatusInterval.object);
+      this.timers.serverStatusInterval.object = null;
     }
   }
 
@@ -146,6 +146,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
         if (this.status.datasets[0].data.length > this.maxLength) {
           this.status.datasets[0].data.shift();
           this.status.datasets[1].data.shift();
+        }
+
+        if(this.timers.serverStatusInterval.object !== null) {
+          const self = this;
+          setTimeout(() => {
+            self.updateStatus();
+          }, this.timers.serverStatusInterval.tick);
         }
       },
       (error) => {

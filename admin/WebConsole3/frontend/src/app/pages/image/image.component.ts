@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, NgZone, OnInit} from '@angular/core';
 
 import { ImageService } from 'src/app/api/image.service';
 import {Image, PartitionInfo} from 'src/app/model/image';
@@ -8,6 +8,7 @@ import {ToasterService} from '../../service/toaster.service';
 import {OgSweetAlertService} from '../../service/og-sweet-alert.service';
 import {Ng2TableActionComponent} from '../common/table-action/ng2-table-action.component';
 import {Router} from '@angular/router';
+import {LocalDataSource} from 'ng2-smart-table';
 
 @Component({
   selector: 'app-image',
@@ -15,7 +16,7 @@ import {Router} from '@angular/router';
   styleUrls: [ './image.component.scss' ]
 })
 export class ImageComponent implements OnInit {
-  images: Image[];
+  images: LocalDataSource;
   constants: any;
   removeFile = false;
   tableSettings: any;
@@ -23,6 +24,7 @@ export class ImageComponent implements OnInit {
   // this tells the tabs component which Pages
   // should be each tab's root Page
   constructor(private router: Router, public imageService: ImageService, private ogCommonService: OgCommonService, private translate: TranslateService, private toaster: ToasterService, private ogSweetAlert: OgSweetAlertService) {
+    this.images = new LocalDataSource([]);
     this.ogCommonService.loadEngineConfig().subscribe(
       data => {
         this.constants = data.constants;
@@ -33,7 +35,7 @@ export class ImageComponent implements OnInit {
   ngOnInit(): void {
     this.imageService.list().subscribe(
       data => {
-        this.images = data;
+        this.images.load( data);
       }
     );
     const self = this;
@@ -112,8 +114,7 @@ export class ImageComponent implements OnInit {
 	                    	<div class="checkbox clip-check check-primary checkbox-inline">\
 	                      		<input id="removeFile" icheck checkbox-class="icheckbox_square-blue" radio-class="iradio_square-blue" type="checkbox" class="selection-checkbox" [(ngModel)]="removeFile" />\
 	                      	</div>\
-	                      	<label for="removeFile" translate="remove_file">\
-	                    	</label>?\
+	                      	<label for="removeFile">' + this.translate.instant('remove_file') + '</label>?\
 	                  	</div>\
                   	</form>',
         type: 'warning',
@@ -131,10 +132,7 @@ export class ImageComponent implements OnInit {
             (response) => {
               self.toaster.pop({type: 'success', title: 'success', body: self.translate.instant('successfully_deleted')});
               // Buscar el elemento en el array y borrarlo
-              const index = self.images.indexOf(image);
-              if (index !== -1) {
-                self.images.splice(index, 1);
-              }
+              self.images.remove(image);
             },
             (error) => {
               self.toaster.pop({type: 'error', title: 'error', body: error});

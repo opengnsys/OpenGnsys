@@ -149,6 +149,10 @@ body .toolboxbar.fixed {
   left: 230px;
 }
 
+mk-layout-wrapper.fixed section.toolboxbar.fixed {
+  margin-top: 50px;
+}
+
 /* Para dispositivos moviles */
 @media (max-width: 767px) {
   body .toolboxbar.fixed {
