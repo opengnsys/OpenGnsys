@@ -5,3 +5,4 @@ curl -X POST http://127.0.0.1:8888/shell/run -d @post_shell_run.json
 curl -X POST http://127.0.0.1:8888/shell/output -d @post_shell_output.json
 curl -X POST http://127.0.0.1:8888/session -d @session.json
 curl -X POST http://127.0.0.1:8888/poweroff -d @poweroff.json
+curl -X POST http://127.0.0.1:8888/reboot -d @reboot.json
