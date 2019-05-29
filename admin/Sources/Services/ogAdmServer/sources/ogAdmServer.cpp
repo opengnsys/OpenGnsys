@@ -3916,6 +3916,26 @@ static int og_cmd_reboot(json_t *element, struct og_msg_params *params)
 	return og_cmd_legacy_send(params, "Reiniciar", CLIENTE_OCUPADO);
 }
 
+static int og_cmd_stop(json_t *element, struct og_msg_params *params)
+{
+	const char *key;
+	json_t *value;
+	int err = 0;
+
+	if (json_typeof(element) != JSON_OBJECT)
+		return -1;
+
+	json_object_foreach(element, key, value) {
+		if (!strcmp(key, "clients"))
+			err = og_json_parse_clients(value, params);
+
+		if (err < 0)
+			break;
+	}
+
+	return og_cmd_legacy_send(params, "Purgar", CLIENTE_APAGADO);
+}
+
 static int og_client_not_found(struct og_client *cli)
 {
 	char buf[] = "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n";
@@ -4049,6 +4069,15 @@ static int og_client_state_process_payload_rest(struct og_client *cli)
 			return og_client_not_found(cli);
 		}
 		err = og_cmd_reboot(root, &params);
+	} else if (!strncmp(cmd, "stop", strlen("stop"))) {
+		if (method != OG_METHOD_POST)
+			return -1;
+
+		if (!root) {
+			syslog(LOG_ERR, "command stop with no payload\n");
+			return og_client_not_found(cli);
+		}
+		err = og_cmd_stop(root, &params);
 	} else {
 		syslog(LOG_ERR, "unknown command %s\n", cmd);
 		err = og_client_not_found(cli);
