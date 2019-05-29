@@ -3458,20 +3458,21 @@ static int og_json_parse_clients(json_t *element, struct og_msg_params *params)
 	return 0;
 }
 
-static int og_cmd_legacy_sondeo(struct og_msg_params *params)
+static int og_cmd_legacy_send(struct og_msg_params *params, const char *cmd,
+			      const char *state)
 {
 	char buf[4096] = {};
 	int len, err = 0;
 	TRAMA *msg;
 
-	len = snprintf(buf, sizeof(buf), "nfn=Sondeo\r");
+	len = snprintf(buf, sizeof(buf), "nfn=%s\r", cmd);
 
 	msg = og_msg_alloc(buf, len);
 	if (!msg)
 		return -1;
 
 	if (!og_send_cmd((char **)params->ips_array, params->ips_array_len,
-			 CLIENTE_APAGADO, msg))
+			 state, msg))
 		err = -1;
 
 	og_msg_free(msg);
@@ -3496,7 +3497,7 @@ static int og_cmd_post_clients(json_t *element, struct og_msg_params *params)
 			break;
 	}
 
-	return og_cmd_legacy_sondeo(params);
+	return og_cmd_legacy_send(params, "Sondeo", CLIENTE_APAGADO);
 }
 
 struct og_buffer {
