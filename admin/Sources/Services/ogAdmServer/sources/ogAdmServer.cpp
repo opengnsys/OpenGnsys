@@ -139,46 +139,6 @@ static inline int og_client_socket(const struct og_client *cli)
 }
 
 // ________________________________________________________________________________________________________
-// Función: Actualizar
-//
-//	Descripción:
-//		Obliga a los clientes a iniciar sesión en el sistema
-//	Parámetros:
-//		- socket_c: Socket del cliente que envió el mensaje
-//		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros del mensaje
-//	Devuelve:
-//		true: Si el proceso es correcto
-//		false: En caso de ocurrir algún error
-// ________________________________________________________________________________________________________
-static bool Actualizar(TRAMA* ptrTrama, struct og_client *cli)
-{
-	if (!enviaComando(ptrTrama, CLIENTE_APAGADO))
-		return false;
-
-	respuestaConsola(og_client_socket(cli), ptrTrama, true);
-	return true;
-}
-// ________________________________________________________________________________________________________
-// Función: Purgar
-//
-//	Descripción:
-//		Detiene la ejecución del browser en el cliente
-//	Parámetros:
-//		- socket_c: Socket del cliente que envió el mensaje
-//		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros del mensaje
-//	Devuelve:
-//		true: Si el proceso es correcto
-//		false: En caso de ocurrir algún error
-// ________________________________________________________________________________________________________
-static bool Purgar(TRAMA* ptrTrama, struct og_client *cli)
-{
-	if (!enviaComando(ptrTrama, CLIENTE_APAGADO))
-		return false;
-
-	respuestaConsola(og_client_socket(cli), ptrTrama, true);
-	return true;
-}
-// ________________________________________________________________________________________________________
 // Función: clienteDisponible
 //
 //	Descripción:
@@ -1539,27 +1499,6 @@ static bool RESPUESTA_Apagar(TRAMA* ptrTrama, struct og_client *cli)
 	return true;
 }
 // ________________________________________________________________________________________________________
-// Función: Reiniciar
-//
-//	Descripción:
-//		Procesa el comando Reiniciar
-//	Parámetros:
-//		- socket_c: Socket de la consola al envió el mensaje
-//		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
-//	Devuelve:
-//		true: Si el proceso es correcto
-//		false: En caso de ocurrir algún error
-// ________________________________________________________________________________________________________
-static bool Reiniciar(TRAMA* ptrTrama, struct og_client *cli)
-{
-	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
-		respuestaConsola(og_client_socket(cli), ptrTrama, false);
-		return false;
-	}
-	respuestaConsola(og_client_socket(cli), ptrTrama, true);
-	return true;
-}
-// ________________________________________________________________________________________________________
 // Función: RESPUESTA_Reiniciar
 //
 //	Descripción:
@@ -1603,27 +1542,6 @@ static bool RESPUESTA_Reiniciar(TRAMA* ptrTrama, struct og_client *cli)
 	liberaMemoria(ido);
 
 	db.Close(); // Cierra conexión
-	return true;
-}
-// ________________________________________________________________________________________________________
-// Función: IniciarSesion
-//
-//	Descripción:
-//		Procesa el comando Iniciar Sesión
-//	Parámetros:
-//		- socket_c: Socket de la consola al envió el mensaje
-//		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
-//	Devuelve:
-//		true: Si el proceso es correcto
-//		false: En caso de ocurrir algún error
-// ________________________________________________________________________________________________________
-static bool IniciarSesion(TRAMA* ptrTrama, struct og_client *cli)
-{
-	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
-		respuestaConsola(og_client_socket(cli), ptrTrama, false);
-		return false;
-	}
-	respuestaConsola(og_client_socket(cli), ptrTrama, true);
 	return true;
 }
 // ________________________________________________________________________________________________________
@@ -3232,8 +3150,6 @@ static struct {
 	const char *nf; // Nombre de la función
 	bool (*fcn)(TRAMA *, struct og_client *cli);
 } tbfuncionesServer[] = {
-	{ "Actualizar",				Actualizar,		},
-	{ "Purgar",				Purgar,			},
 	{ "InclusionCliente",			InclusionCliente,	},
 	{ "InclusionClienteWinLnx",		InclusionClienteWinLnx, },
 	{ "AutoexecCliente",			AutoexecCliente,	},
@@ -3242,9 +3158,7 @@ static struct {
 	{ "RESPUESTA_Arrancar",			RESPUESTA_Arrancar,	},
 	{ "Apagar",				Apagar,			},
 	{ "RESPUESTA_Apagar",			RESPUESTA_Apagar,	},
-	{ "Reiniciar",				Reiniciar,		},
 	{ "RESPUESTA_Reiniciar",		RESPUESTA_Reiniciar,	},
-	{ "IniciarSesion",			IniciarSesion,		},
 	{ "RESPUESTA_IniciarSesion",		RESPUESTA_IniciarSesion, },
 	{ "CrearImagen",			CrearImagen,		},
 	{ "RESPUESTA_CrearImagen",		RESPUESTA_CrearImagen,	},
