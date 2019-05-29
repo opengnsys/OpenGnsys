@@ -3896,6 +3896,26 @@ static int og_cmd_poweroff(json_t *element, struct og_msg_params *params)
 	return og_cmd_legacy_send(params, "Apagar", CLIENTE_OCUPADO);
 }
 
+static int og_cmd_refresh(json_t *element, struct og_msg_params *params)
+{
+	const char *key;
+	json_t *value;
+	int err = 0;
+
+	if (json_typeof(element) != JSON_OBJECT)
+		return -1;
+
+	json_object_foreach(element, key, value) {
+		if (!strcmp(key, "clients"))
+			err = og_json_parse_clients(value, params);
+
+		if (err < 0)
+			break;
+	}
+
+	return og_cmd_legacy_send(params, "Actualizar", CLIENTE_APAGADO);
+}
+
 static int og_cmd_reboot(json_t *element, struct og_msg_params *params)
 {
 	const char *key;
@@ -4078,6 +4098,15 @@ static int og_client_state_process_payload_rest(struct og_client *cli)
 			return og_client_not_found(cli);
 		}
 		err = og_cmd_stop(root, &params);
+	} else if (!strncmp(cmd, "refresh", strlen("refresh"))) {
+		if (method != OG_METHOD_POST)
+			return -1;
+
+		if (!root) {
+			syslog(LOG_ERR, "command refresh with no payload\n");
+			return og_client_not_found(cli);
+		}
+		err = og_cmd_refresh(root, &params);
 	} else {
 		syslog(LOG_ERR, "unknown command %s\n", cmd);
 		err = og_client_not_found(cli);
