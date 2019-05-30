@@ -21,8 +21,10 @@ include_once("../../includes/RecopilaIpesMacs.php");
 include_once("../includes/capturaacciones.php");
 //________________________________________________________________________________________________________
 
-define("IDCOMANDWAKEUP", 1);
-define("IDCOMANDSENDMESSAGE", 16);
+define("IDCOMMANDPOWEROFF", 2);
+define("IDCOMMANDREBOOT", 5);
+define("IDCOMMANDEXECSCRIPT", 8);
+define("IDCOMMANDSENDMESSAGE", 16);
 
 // Recoge parametros de seguimiento
 $sw_ejya="";
@@ -177,7 +179,7 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 		$ValorParametros=extrae_parametros($parametros,chr(13),'=');
 		$script=@urldecode($ValorParametros["scp"]);
 		if($sw_ejya=='on'){ 	
-			if ($idcomando != IDCOMANDSENDMESSAGE && $idcomando != IDCOMANDWAKEUP) {
+			if ($idcomando != IDCOMMANDSENDMESSAGE) {
 			    // Envío al servidor
 			    $shidra=new SockHidra($servidorhidra,$hidraport); 
 			    if ($shidra->conectar()){ // Se ha establecido la conexión con el servidor hidra
@@ -201,28 +203,28 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 			    $resulhidra = 1;
 			}
 
-			// Comprobamos si el comando es soportado por el nuevo ogAgent
+			// Comprobamos si el comando es soportado por el nuevo OGAgent
 			$numip=0;
 			$ogAgentNuevo = false;
 			switch ($idcomando) {
-				case 2:
+				case IDCOMMANDPOWEROFF:
  					// Apagar
 					$urlcomando = 'poweroff';
 					$ogAgentNuevo = true;
 					break;
-				case 5:
+				case IDCOMMANDREBOOT:
 					// Reiniciar
 					$urlcomando = 'reboot';
 					$ogAgentNuevo = true;
 					break;
-				case 8:
+				case IDCOMMANDEXECSCRIPT:
 					// Ejecutar script 
 					$urlcomando = 'script';
 					$ogAgentNuevo = true;
 					$client = (isset ($_POST['modoejecucion']) && $_POST['modoejecucion'] != '' ) ? $_POST['modoejecucion'] : 'true';
 					$paramsPost = '{"script":"'.base64_encode($script).'","client":"'.$client.'"}';
 					break;
-				case 16:
+				case IDCOMMANDSENDMESSAGE:
 					// Enviar mensaje
 					$urlcomando = 'popup';
 					$ogAgentNuevo = true;
