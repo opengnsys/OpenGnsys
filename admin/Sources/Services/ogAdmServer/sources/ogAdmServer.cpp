@@ -131,6 +131,7 @@ struct og_client {
 	unsigned int		msg_len;
 	int			keepalive_idx;
 	bool			rest;
+	unsigned int		content_length;
 };
 
 static inline int og_client_socket(const struct og_client *cli)
@@ -3899,10 +3900,9 @@ enum og_rest_method {
 static int og_client_state_process_payload_rest(struct og_client *cli)
 {
 	struct og_msg_params params = {};
-	const char *cmd, *body, *ptr;
 	enum og_rest_method method;
 	char buf_reply[4096] = {};
-	int content_length = 0;
+	const char *cmd, *body;
 	json_error_t json_err;
 	json_t *root = NULL;
 	int err = 0;
@@ -3918,11 +3918,7 @@ static int og_client_state_process_payload_rest(struct og_client *cli)
 
 	body = strstr(cli->buf, "\r\n\r\n") + 4;
 
-	ptr = strstr(cli->buf, "Content-Length: ");
-	if (ptr)
-		sscanf(ptr, "Content-Length: %i[^\r\n]", &content_length);
-
-	if (content_length) {
+	if (cli->content_length) {
 		root = json_loads(body, 0, &json_err);
 		if (!root) {
 			syslog(LOG_ERR, "malformed json line %d: %s\n",
@@ -4037,11 +4033,19 @@ static int og_client_state_process_payload_rest(struct og_client *cli)
 
 static int og_client_state_recv_hdr_rest(struct og_client *cli)
 {
-	char *trailer;
+	char *ptr;
 
-	trailer = strstr(cli->buf, "\r\n\r\n");
-	if (!trailer)
+	ptr = strstr(cli->buf, "\r\n\r\n");
+	if (!ptr)
 		return 0;
+
+	cli->msg_len = ptr - cli->buf + 4;
+
+	ptr = strstr(cli->buf, "Content-Length: ");
+	if (ptr) {
+		sscanf(ptr, "Content-Length: %i[^\r\n]", &cli->content_length);
+		cli->msg_len += cli->content_length;
+	}
 
 	return 1;
 }
