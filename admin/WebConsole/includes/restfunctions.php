@@ -13,6 +13,7 @@ define('OG_REST_CMD_RUN', 'shell/run');
 define('OG_REST_CMD_OUTPUT', 'shell/output');
 define('OG_REST_CMD_POWEROFF', 'poweroff');
 define('OG_REST_CMD_REBOOT', 'reboot');
+define('OG_REST_CMD_STOP', 'stop');
 
 define('OG_REST_PARAM_CLIENTS', 'clients');
 define('OG_REST_PARAM_ADDR', 'addr');
@@ -45,7 +46,7 @@ function common_request($command, $type, $data = null, $custom = 'GET') {
 
 	if ($curl_response === false || $info['http_code'] != 200) {
 		syslog(LOG_ERR, 'error occured during curl exec. Additioanl info: ' . var_export($info));
-		return null;
+		return 0;
 	}
 
 	curl_close($curl);
@@ -153,6 +154,15 @@ function reboot($string_ips) {
 	$data = array(OG_REST_PARAM_CLIENTS => $ips);
 
 	common_request(OG_REST_CMD_REBOOT, POST, $data);
+}
+
+function stop($string_ips) {
+
+	$ips = explode(';',$string_ips);
+
+	$data = array(OG_REST_PARAM_CLIENTS => $ips);
+
+	common_request(OG_REST_CMD_STOP, POST, $data);
 }
 
 /*

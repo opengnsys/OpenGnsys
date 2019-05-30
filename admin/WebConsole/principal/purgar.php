@@ -15,6 +15,7 @@
 	include_once("../includes/comunes.php");
 	include_once("../includes/CreaComando.php");
 	include_once("../includes/RecopilaIpesMacs.php");
+	include_once('../includes/restfunctions.php');
 	//________________________________________________________________________________________________________
 	$ambito=0; 
 	$idambito=0; 
@@ -41,23 +42,5 @@
 	//________________________________________________________________________________________________________
 	// Envio al servidor de la petición
 	//________________________________________________________________________________________________________
-	$trama="";
-	$shidra=new SockHidra($servidorhidra,$hidraport); 
-	if ($shidra->conectar()){ // Se ha establecido la conexión con el servidor hidra
-		$parametros="nfn=".$funcion.chr(13);
-		$parametros.=$aplicacion;
-		$parametros.=$atributos;
-		$parametros.=$acciones;
-		$shidra->envia_comando($parametros);
-		$trama=$shidra->recibe_respuesta();
-		$shidra->desconectar();
-		$hlonprm=hexdec(substr($trama,$LONCABECERA,$LONHEXPRM));
-		$parametros=substr($trama,$LONCABECERA+$LONHEXPRM,$hlonprm);
-		$ValorParametros=extrae_parametros($parametros,chr(13),'=');
-		$trama_notificacion=$ValorParametros["res"];
-		echo $trama_notificacion; // Devuelve respuesta	
-	}
-	else
-		echo "0"; // Error de conexión
 
-
+	echo stop($cadenaip) === 0 ? "0" : "1";
