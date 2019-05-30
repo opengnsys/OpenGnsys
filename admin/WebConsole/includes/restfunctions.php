@@ -12,6 +12,7 @@ define('OG_REST_CMD_SESSION', 'session');
 define('OG_REST_CMD_RUN', 'shell/run');
 define('OG_REST_CMD_OUTPUT', 'shell/output');
 define('OG_REST_CMD_POWEROFF', 'poweroff');
+define('OG_REST_CMD_REBOOT', 'reboot');
 
 define('OG_REST_PARAM_CLIENTS', 'clients');
 define('OG_REST_PARAM_ADDR', 'addr');
@@ -143,6 +144,15 @@ function poweroff($string_ips) {
 	$data = array(OG_REST_PARAM_CLIENTS => $ips);
 
 	common_request(OG_REST_CMD_POWEROFF, POST, $data);
+}
+
+function reboot($string_ips) {
+
+	$ips = explode(';',$string_ips);
+
+	$data = array(OG_REST_PARAM_CLIENTS => $ips);
+
+	common_request(OG_REST_CMD_REBOOT, POST, $data);
 }
 
 /*
