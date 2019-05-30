@@ -121,11 +121,16 @@ $cmd->CreaParametro("@ordprocedimiento",0,1);
 $cmd->CreaParametro("@ordtarea",0,1);
 
 /* PARCHE UHU heredado de la version 1.1.0: Si la accion a realizar es Arrancar incluimos una pagina para arrancar desde el repo */
-if($funcion == "nfn=Arrancar".chr(13))
-	include("wakeonlan_repo.php");
-/**/
-if ($idcomando == 9)
-	session($cadenaip, $atributos);
+switch ($idcomando) {
+	case OG_CMD_ID_WAKEUP:
+		include("wakeonlan_repo.php");
+		break;
+	case OG_CMD_ID_SESSION:
+		session($cadenaip, $atributos);
+		break;
+	case OG_CMD_ID_POWEROFF:
+		poweroff($cadenaip);
+}
 
 if($ambito==0){ // Ambito restringido a un subconjuto de ordenadores con formato (idordenador1,idordenador2,etc)
 	$cmd->ParamSetValor("@restrambito",$idambito);
@@ -181,8 +186,10 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 		$ValorParametros=extrae_parametros($parametros,chr(13),'=');
 		$script=@urldecode($ValorParametros["scp"]);
 		if($sw_ejya=='on'){ 	
-			if ($idcomando != IDCOMANDSENDMESSAGE && $idcomando != IDCOMANDWAKEUP &&
-				$idcomando != IDCOMMANDSESSION) {
+			if ($idcomando != OG_CMD_ID_SENDMESSAGE &&
+			    $idcomando != OG_CMD_ID_WAKEUP &&
+			    $idcomando != OG_CMD_ID_SESSION &&
+			    $idcomando != OG_CMD_ID_POWEROFF) {
 			    // Envío al servidor
 			    $shidra=new SockHidra($servidorhidra,$hidraport); 
 			    if ($shidra->conectar()){ // Se ha establecido la conexión con el servidor hidra
