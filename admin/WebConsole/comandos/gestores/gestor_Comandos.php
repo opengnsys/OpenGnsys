@@ -21,9 +21,10 @@ include_once("../../includes/RecopilaIpesMacs.php");
 include_once("../includes/capturaacciones.php");
 //________________________________________________________________________________________________________
 
-define("IDCOMANDWAKEUP", 1);
-define("IDCOMANDSENDMESSAGE", 16);
-define('IDCOMMANDSESSION', 9);
+define('OG_CMD_ID_WAKEUP', 1);
+define('OG_CMD_ID_SENDMESSAGE', 16);
+define('OG_CMD_ID_SESSION', 9);
+define('OG_CMD_ID_POWEROFF', 2);
 
 // Recoge parametros de seguimiento
 $sw_ejya="";
