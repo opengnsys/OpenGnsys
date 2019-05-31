@@ -92,7 +92,7 @@ case "$TYPE" in
 
             # Borrar cargador guardado con la misma etiqueta.
             BOOTLABEL=$(printf "Part-%02d-%02d" $1 $2)
-            BOOTLOADER="grubx64.efi"
+            BOOTLOADER="shimx64.efi"
             # Obtener parcición EFI.
             read -e EFIDISK EFIPART <<<"$(ogGetEsp)"
             # TODO: Comprobamos que existe la BOOTLABEL, si no buscamos por sistema operativo
@@ -115,17 +115,9 @@ case "$TYPE" in
             fi
 
             # Crear orden de arranque (con unos valores por defecto).
-            BOOTNO=$(efibootmgr -v | awk -v L=$BOOTLABEL '{if ($2==L) print $1}')
-            for b in $BOOTNO; do
-                efibootmgr -B -b ${b:4:4} &>/dev/null
-            done
-            efibootmgr -C -d $(ogDiskToDev $EFIDISK) -p $EFIPART -L "$BOOTLABEL" -l "/EFI/$BOOTLABEL/$BOOTLOADER" &>/dev/null
+            ogNvramAddEntry $BOOTLABEL "/EFI/$BOOTLABEL/Boot/$BOOTLOADER"
             # Marcar próximo arranque y reiniciar.
-            BOOTNO=$(efibootmgr -v | awk -v L="$BOOTLABEL" '{if ($2==L) print $1}')
-            [ -n "$BOOTNO" ] && efibootmgr -n ${BOOTNO:4:4} &>/dev/null
-            # Incluimos en el orden de arranque
-            BOOTORDER=$(efibootmgr | awk -v L="BootOrder:" '{if ($1==L) print $2}')
-            [[ $BOOTORDER =~ ${BOOTNO:4:4} ]] || efibootmgr -o $BOOTORDER,${BOOTNO:4:4} 
+            ogNvramSetNext "$BOOTLABEL"
             reboot
         else
             # Arranque BIOS: configurar kernel Linux con los parámetros leídos de su GRUB.
@@ -801,7 +793,7 @@ function ogGrubInstallMbr ()
 
 # Variables locales.
 local PART DISK VERSION FIRSTAGE SECONSTAGE CHECKOS KERNELPARAM BACKUPNAME
-local EFIDISK EFIPART EFISECONDSTAGE EFISUBDIR
+local EFIDISK EFIPART EFISECONDSTAGE EFISUBDIR EFIOPTGRUB EFIBOOTDIR
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -838,6 +830,9 @@ SECONDSTAGE=$(ogMount "$DISK" "$PART") || return $?
 PREFIXSECONDSTAGE="/boot/grubMBR"
 
 # Instalamos grub para EFI en ESP
+EFIOPTGRUB=""
+# Desde el bootdir uefi y bios buscan el grub.cfg en subdirectorios distintos.
+EFIBOOTDIR=""
 if ogIsEfiActive; then
     read EFIDISK EFIPART <<< $(ogGetEsp)
     # Comprobamos que exista ESP y el directorio para ubuntu
@@ -850,73 +845,67 @@ if ogIsEfiActive; then
     # Borramos la configuración anterior
     [ -d ${EFISECONDSTAGE}/EFI/$EFISUBDIR ] && rm -rf ${EFISECONDSTAGE}/EFI/$EFISUBDIR
     mkdir -p ${EFISECONDSTAGE}/EFI/$EFISUBDIR/Boot
-    EFIOPTGRUB=" --no-nvram --target x86_64-efi --efi-directory=${EFISECONDSTAGE}/EFI/$EFISUBDIR "
-else 
-    EFIOPTGRUB=""
+    EFIOPTGRUB=" --removable --no-nvram --uefi-secure-boot --target $(ogGetArch)-efi --efi-directory=${EFISECONDSTAGE}/EFI/$EFISUBDIR "
+    EFIBOOTDIR="/boot"
 fi 
 
 # Si Reconfigurar segunda etapa (grub.cfg) == FALSE
-if [ -f ${SECONDSTAGE}/boot/grub/grub.cfg -o -f ${SECONDSTAGE}/boot/grub/grub.cfg$BACKUPNAME ]
+if [ "${CHECKOS^^}" == "FALSE" ] && [ -f ${SECONDSTAGE}/boot/grub/grub.cfg -o -f ${SECONDSTAGE}/boot/grub/grub.cfg$BACKUPNAME ]
 then 
-    if [ "$CHECKOS" == "false" -o "$CHECKOS" == "FALSE" ]
-    then
         # Si no se reconfigura se utiliza el grub.cfg orginal
         [ -f ${SECONDSTAGE}/boot/grub/grub.cfg$BACKUPNAME ] && mv ${SECONDSTAGE}/boot/grub/grub.cfg$BACKUPNAME ${SECONDSTAGE}/boot/grub/grub.cfg
-		# Si no se reconfigure se borra los ficheros previos de configuración específicos de opengnsys.
+        # Si no se reconfigure se borra los ficheros previos de configuración específicos de opengnsys.
         [ -d ${SECONDSTAGE}${PREFIXSECONDSTAGE} ] &&  rm -fr ${SECONDSTAGE}${PREFIXSECONDSTAGE}
         # Reactivamos el grub con el grub.cfg original.
-        grub-install --force ${EFIOPTGRUB} --uefi-secure-boot --root-directory=${SECONDSTAGE} $FIRSTSTAGE
+        grub-install --force ${EFIOPTGRUB} --boot-directory=${SECONDSTAGE}${EFIBOOTDIR} $FIRSTSTAGE
         EVAL=$?
-        # Movemos el grubx64.efi
+else
+        # SI Reconfigurar segunda etapa (grub.cfg) == TRUE
+
+        #llamada a updateBootCache para que aloje la primera fase del ogLive
+        updateBootCache
+
         if ogIsEfiActive; then
-            # Nombre OpenGnsys para cargador
-            cp ${EFISECONDSTAGE}/EFI/$EFISUBDIR/EFI/ubuntu/grubx64.efi ${EFISECONDSTAGE}/EFI/$EFISUBDIR/Boot/ogloader.efi
+            # UEFI: grubSintax necesita grub.cfg para detectar los kernels: si no existe recupero backup.
+            if ! [ -f ${SECONDSTAGE}/boot/grub/grub.cfg ]; then
+                 [ -f ${SECONDSTAGE}/boot/grub/grub.cfg$BACKUPNAME ] && mv ${SECONDSTAGE}/boot/grub/grub.cfg$BACKUPNAME ${SECONDSTAGE}/boot/grub/grub.cfg
+            fi
+        else
+            #Evitar detectar modo recovery - mover grub.cfg original a grub.cfg.backup
+            mv ${SECONDSTAGE}/boot/grub/grub.cfg ${SECONDSTAGE}/boot/grub/grub.cfg$BACKUPNAME
+        fi
 
-            mv ${EFISECONDSTAGE}/EFI/$EFISUBDIR/EFI/ubuntu/grubx64.efi ${EFISECONDSTAGE}/EFI/$EFISUBDIR
-            rm -rf ${EFISECONDSTAGE}/EFI/$EFISUBDIR/EFI
-        fi 
-        return $EVAL
-    fi
+        #Configur la sintaxis grub para evitar menus de "recovery" en el OGLive
+        echo "GRUB_DISABLE_RECOVERY=\"true\"" >> /etc/default/grub
+        echo "GRUB_DISABLE_LINUX_UUID=\"true\"" >> /etc/default/grub
+
+
+        #Preparar configuración segunda etapa: crear ubicacion
+        mkdir -p ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot/grub/
+        #Preparar configuración segunda etapa: crear cabecera del fichero (ignorar errores)
+        sed -i 's/^set -e/#set -e/' /etc/grub.d/00_header
+        /etc/grub.d/00_header > ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot/grub/grub.cfg 2>/dev/null
+        #Preparar configuración segunda etapa: crear entrada del sistema operativo
+        grubSyntax "$KERNELPARAM" >> ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot/grub/grub.cfg
+
+
+        # Renombramos la configuración de grub antigua
+        [ -f ${SECONDSTAGE}/boot/grub/grub.cfg ] && mv ${SECONDSTAGE}/boot/grub/grub.cfg ${SECONDSTAGE}/boot/grub/grub.cfg$BACKUPNAME
+
+        #Instalar el grub
+        grub-install --force ${EFIOPTGRUB} --boot-directory=${SECONDSTAGE}${PREFIXSECONDSTAGE}${EFIBOOTDIR} $FIRSTSTAGE
+        EVAL=$?
 fi
-
-# SI Reconfigurar segunda etapa (grub.cfg) == TRUE 
-
-#llamada a updateBootCache para que aloje la primera fase del ogLive
-updateBootCache
-
-# Si no existe el fichero grub.cfg pero sí el backup lo recupero (para UEFI)
-if ogIsEfiActive && [ -f ${SECONDSTAGE}/boot/grub/grub.cfg$BACKUPNAME ]; then
-    [ -f ${SECONDSTAGE}/boot/grub/grub.cfg ] || mv ${SECONDSTAGE}/boot/grub/grub.cfg$BACKUPNAME ${SECONDSTAGE}/boot/grub/grub.cfg
-fi
-
-#Configur la sintaxis grub para evitar menus de "recovery" en el OGLive
-echo "GRUB_DISABLE_RECOVERY=\"true\"" >> /etc/default/grub
-echo "GRUB_DISABLE_LINUX_UUID=\"true\"" >> /etc/default/grub
-
-#Evitar detectar modo recovery - mover grub.cfg original a grub.cfg.backup
-
-#Preparar configuración segunda etapa: crear ubicacion
-mkdir -p ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot/grub/
-#Preparar configuración segunda etapa: crear cabecera del fichero (ignorar errores)
-sed -i 's/^set -e/#set -e/' /etc/grub.d/00_header
-/etc/grub.d/00_header > ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot/grub/grub.cfg 2>/dev/null
-#Preparar configuración segunda etapa: crear entrada del sistema operativo
-grubSyntax "$KERNELPARAM" >> ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot/grub/grub.cfg
-
-#Instalar el grub
-grub-install --force ${EFIOPTGRUB} --uefi-secure-boot --root-directory=${SECONDSTAGE}${PREFIXSECONDSTAGE} $FIRSTSTAGE
 
 # Movemos el grubx64.efi
 if ogIsEfiActive; then
-    # Nombre OpenGnsys para cargador
-    cp ${EFISECONDSTAGE}/EFI/$EFISUBDIR/EFI/ubuntu/grubx64.efi ${EFISECONDSTAGE}/EFI/$EFISUBDIR/Boot/ogloader.efi
-
-    mv ${EFISECONDSTAGE}/EFI/$EFISUBDIR/EFI/ubuntu/grubx64.efi ${EFISECONDSTAGE}/EFI/$EFISUBDIR
+    mv ${EFISECONDSTAGE}/EFI/$EFISUBDIR/EFI/BOOT/* ${EFISECONDSTAGE}/EFI/$EFISUBDIR/Boot
     rm -rf ${EFISECONDSTAGE}/EFI/$EFISUBDIR/EFI
+    cp $OGLIB/shim/shimx64.efi ${EFISECONDSTAGE}/EFI/$EFISUBDIR/Boot
+    # Nombre OpenGnsys para cargador
+    cp ${EFISECONDSTAGE}/EFI/$EFISUBDIR/Boot/{shimx64.efi,ogloader.efi}
 fi 
-
-# Renombramos la configuración de grub antigua
-[ -f ${SECONDSTAGE}/boot/grub/grub.cfg ] && mv ${SECONDSTAGE}/boot/grub/grub.cfg ${SECONDSTAGE}/boot/grub/grub.cfg$BACKUPNAME 
+return $EVAL
 }
 
 
@@ -951,7 +940,7 @@ function ogGrubInstallPartition ()
 
 # Variables locales.
 local PART DISK VERSION FIRSTAGE SECONSTAGE CHECKOS KERNELPARAM BACKUPNAME
-local EFIDISK EFIPART EFISECONDSTAGE EFISUBDIR
+local EFIDISK EFIPART EFISECONDSTAGE EFISUBDIR EFIOPTGRUB EFIBOOTDIR
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -983,6 +972,9 @@ SECONDSTAGE=$(ogMount $DISK $PART)
 PREFIXSECONDSTAGE="/boot/grubPARTITION"
 
 # Si es EFI instalamos el grub en la ESP
+EFIOPTGRUB=""
+# Desde el bootdir uefi y bios buscan el grub.cfg en subdirectorios distintos.
+EFIBOOTDIR=""
 if ogIsEfiActive; then
     read EFIDISK EFIPART <<< $(ogGetEsp)
     # Comprobamos que exista ESP y el directorio para ubuntu
@@ -995,69 +987,65 @@ if ogIsEfiActive; then
     # Borramos la configuración anterior
     [ -d ${EFISECONDSTAGE}/EFI/$EFISUBDIR ] && rm -rf ${EFISECONDSTAGE}/EFI/$EFISUBDIR
     mkdir -p ${EFISECONDSTAGE}/EFI/$EFISUBDIR/Boot
-    EFIOPTGRUB=" --no-nvram --target x86_64-efi --efi-directory=${EFISECONDSTAGE}/EFI/$EFISUBDIR "
-else
-    EFIOPTGRUB=""
+    EFIOPTGRUB=" --removable --no-nvram --uefi-secure-boot --target $(ogGetArch)-efi --efi-directory=${EFISECONDSTAGE}/EFI/$EFISUBDIR "
+    EFIBOOTDIR="/boot"
 fi
 
 # Si Reconfigurar segunda etapa (grub.cfg) == FALSE
-if [ -f ${SECONDSTAGE}/boot/grub/grub.cfg -o -f ${SECONDSTAGE}/boot/grub/grub.cfg$BACKUPNAME ]
+if [ "${CHECKOS^^}" == "FALSE" ] && [ -f ${SECONDSTAGE}/boot/grub/grub.cfg -o -f ${SECONDSTAGE}/boot/grub/grub.cfg$BACKUPNAME ]
 then 
-    if [ "$CHECKOS" == "false" -o "$CHECKOS" == "FALSE" ]
-    then
         # Si no se reconfigura se utiliza el grub.cfg orginal
         [ -f ${SECONDSTAGE}/boot/grub/grub.cfg$BACKUPNAME ] && mv ${SECONDSTAGE}/boot/grub/grub.cfg$BACKUPNAME ${SECONDSTAGE}/boot/grub/grub.cfg
 		# Si no se reconfigure se borra los ficheros previos de configuración específicos de opengnsys.
         [ -d ${SECONDSTAGE}${PREFIXSECONDSTAGE} ] &&  rm -fr ${SECONDSTAGE}${PREFIXSECONDSTAGE}
         # Reactivamos el grub con el grub.cfg original.
-        grub-install --force ${EFIOPTGRUB} --uefi-secure-boot --root-directory=${SECONDSTAGE} $FIRSTSTAGE
+        grub-install --force ${EFIOPTGRUB} --boot-directory=${SECONDSTAGE}${EFIBOOTDIR} $FIRSTSTAGE
         EVAL=$?
-        # Movemos el grubx64.efi
+else
+        # SI Reconfigurar segunda etapa (grub.cfg) == TRUE
+
         if ogIsEfiActive; then
-            # Nombre OpenGnsys para cargador
-            cp ${EFISECONDSTAGE}/EFI/$EFISUBDIR/EFI/ubuntu/grubx64.efi ${EFISECONDSTAGE}/EFI/$EFISUBDIR/Boot/ogloader.efi
-
-            mv ${EFISECONDSTAGE}/EFI/$EFISUBDIR/EFI/ubuntu/grubx64.efi ${EFISECONDSTAGE}/EFI/$EFISUBDIR
-            rm -rf ${EFISECONDSTAGE}/EFI/$EFISUBDIR/EFI
+            # UEFI: grubSintax necesita grub.cfg para detectar los kernels: si no existe recupero backup.
+            if ! [ -f ${SECONDSTAGE}/boot/grub/grub.cfg ]; then
+                 [ -f ${SECONDSTAGE}/boot/grub/grub.cfg$BACKUPNAME ] && mv ${SECONDSTAGE}/boot/grub/grub.cfg$BACKUPNAME ${SECONDSTAGE}/boot/grub/grub.cfg
+            fi
+        else
+            #Evitar detectar modo recovery - mover grub.cfg original a grub.cfg.backup
+            mv ${SECONDSTAGE}/boot/grub/grub.cfg ${SECONDSTAGE}/boot/grub/grub.cfg$BACKUPNAME
         fi
-        return $EVAL
-    fi
+
+	#Configur la sintaxis grub para evitar menus de "recovery" en el OGLive
+	echo "GRUB_DISABLE_RECOVERY=\"true\"" >> /etc/default/grub
+	echo "GRUB_DISABLE_LINUX_UUID=\"true\"" >> /etc/default/grub
+
+	#Preparar configuración segunda etapa: crear ubicacion
+	mkdir -p ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot/grub/
+	#Preparar configuración segunda etapa: crear cabecera del fichero (ingnorar errores)
+	sed -i 's/^set -e/#set -e/' /etc/grub.d/00_header
+	# Para ogLive 5.0 (no afecta a os demás)
+	sed -i /quick_boot/i"pkgdatadir=\$\{datarootdir\}\/grub" /etc/grub.d/00_header
+	/etc/grub.d/00_header > ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot/grub/grub.cfg 2>/dev/null
+	#Preparar configuración segunda etapa: crear entrada del sistema operativo
+	grubSyntax $DISK $PART "$KERNELPARAM" >> ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot/grub/grub.cfg
+
+	# Renombramos la configuración de grub antigua
+	[ -f ${SECONDSTAGE}/boot/grub/grub.cfg ] && mv ${SECONDSTAGE}/boot/grub/grub.cfg ${SECONDSTAGE}/boot/grub/grub.cfg$BACKUPNAME
+
+	#Instalar el grub
+	grub-install --force ${EFIOPTGRUB} --boot-directory=${SECONDSTAGE}${PREFIXSECONDSTAGE}${EFIBOOTDIR} $FIRSTSTAGE
+        EVAL=$?
 fi
-
-# Si no existe el fichero grub.cfg pero sí el backup lo recupero (para UEFI)
-if ogIsEfiActive && [ -f ${SECONDSTAGE}/boot/grub/grub.cfg$BACKUPNAME ]; then
-    [ -f ${SECONDSTAGE}/boot/grub/grub.cfg ] || mv ${SECONDSTAGE}/boot/grub/grub.cfg$BACKUPNAME ${SECONDSTAGE}/boot/grub/grub.cfg
-fi
-
-# SI Reconfigurar segunda etapa (grub.cfg) == TRUE 
-#Configur la sintaxis grub para evitar menus de "recovery" en el OGLive
-echo "GRUB_DISABLE_RECOVERY=\"true\"" >> /etc/default/grub
-echo "GRUB_DISABLE_LINUX_UUID=\"true\"" >> /etc/default/grub
-
-#Evitar detectar modo recovery - mover grub.cfg original a grub.cfg.backup.og
-
-#Preparar configuración segunda etapa: crear ubicacion
-mkdir -p ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot/grub/
-#Preparar configuración segunda etapa: crear cabecera del fichero (ingnorar errores)
-sed -i 's/^set -e/#set -e/' /etc/grub.d/00_header
-/etc/grub.d/00_header > ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot/grub/grub.cfg 2>/dev/null
-#Preparar configuración segunda etapa: crear entrada del sistema operativo
-grubSyntax $DISK $PART "$KERNELPARAM" >> ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot/grub/grub.cfg
-
-#Instalar el grub
-grub-install --force ${EFIOPTGRUB} --uefi-secure-boot --root-directory=${SECONDSTAGE}${PREFIXSECONDSTAGE} $FIRSTSTAGE
 
 # Movemos el grubx64.efi
 if ogIsEfiActive; then
-    # Nombre OpenGnsys para cargador
-    cp ${EFISECONDSTAGE}/EFI/$EFISUBDIR/EFI/ubuntu/grubx64.efi ${EFISECONDSTAGE}/EFI/$EFISUBDIR/Boot/ogloader.efi
-
-    mv ${EFISECONDSTAGE}/EFI/$EFISUBDIR/EFI/ubuntu/grubx64.efi ${EFISECONDSTAGE}/EFI/$EFISUBDIR
+    mv ${EFISECONDSTAGE}/EFI/$EFISUBDIR/EFI/BOOT/* ${EFISECONDSTAGE}/EFI/$EFISUBDIR/Boot
     rm -rf ${EFISECONDSTAGE}/EFI/$EFISUBDIR/EFI
+    cp $OGLIB/shim/shimx64.efi ${EFISECONDSTAGE}/EFI/$EFISUBDIR/Boot/shimx64.efi
+    # Nombre OpenGnsys para cargador
+    cp ${EFISECONDSTAGE}/EFI/$EFISUBDIR/Boot/{shimx64.efi,ogloader.efi}
 fi
 
-# Renombramos la configuración de grub antigua
-[ -f ${SECONDSTAGE}/boot/grub/grub.cfg ] && mv ${SECONDSTAGE}/boot/grub/grub.cfg ${SECONDSTAGE}/boot/grub/grub.cfg$BACKUPNAME 
+return $EVAL
 }
 
 
