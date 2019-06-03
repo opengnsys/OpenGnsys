@@ -1169,7 +1169,6 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 # Actaulizar ficheros descargables.
-NEWVERSION=1.1.0	###  Temporal.
 updateDownloadableFiles
 # Generar páginas Doxygen para instalar en el web
 makeDoxygenFiles
