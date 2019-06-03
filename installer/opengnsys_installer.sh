@@ -1081,7 +1081,6 @@ function installWebFiles()
 # Copiar ficheros en la zona de descargas de OpenGnsys Web Console.
 function installDownloadableFiles()
 {
-	INSTVERSION=1.1.0	###  Temporal.
 	local FILENAME=ogagentpkgs-$INSTVERSION.tar.gz
 	local TARGETFILE=$WORKDIR/$FILENAME
  
