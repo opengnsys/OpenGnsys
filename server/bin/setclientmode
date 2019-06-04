@@ -38,6 +38,7 @@ PXEDIR[1]=$OPENGNSYS/tftpboot/grub
 LOGFILE=$OPENGNSYS/log/opengnsys.log
 MYCNF=/tmp/.my.cnf.$$
 
+
 # Control básico de errores.
 if [ $# -ne 3 -a $# -ne 4 ]; then
 	echo "$PROG: Error de ejecución"
@@ -94,7 +95,9 @@ NPC=0
 for MAC in $ETHERNET; do
 	date +"%b %d %T $PROG: Detectada ethernet \"$MAC\" en \"$2\"" | tee -a $LOGFILE
 	MACFILE="${MAC^^}"
-	PXEFILE=01-${MACFILE:0:2}-${MACFILE:2:2}-${MACFILE:4:2}-${MACFILE:6:2}-${MACFILE:8:2}-${MACFILE:10:2}
+	PXEFILE[0]=01-${MACFILE:0:2}-${MACFILE:2:2}-${MACFILE:4:2}-${MACFILE:6:2}-${MACFILE:8:2}-${MACFILE:10:2}
+	MACFILE="${MAC,,}"
+	PXEFILE[1]=01-${MACFILE:0:2}:${MACFILE:2:2}:${MACFILE:4:2}:${MACFILE:6:2}:${MACFILE:8:2}:${MACFILE:10:2}
 	if [ "$1" != "default" ]; then
 		# Si no está definida la variable LANG, usar idioma inglés por defecto.
 		[ -z "$LANG" -o "$LANG" == "C" ] && LANG="en"
@@ -142,7 +145,7 @@ for MAC in $ETHERNET; do
 		for BOOTTYPE in 0 1; do
 			# Si no existe la plantilla borramos el archivo PXE anterior continuamos
 			if [ -z "${TEMPLATE[$BOOTTYPE]}" ]; then
-				rm ${PXEDIR[$BOOTTYPE]}/$PXEFILE
+				rm ${PXEDIR[$BOOTTYPE]}/${PXEFILE[$BOOTTYPE]}
 				continue
 			fi
 			# Comprobar si existe "oglivedir" en la plantilla para evitar duplicados.
@@ -150,11 +153,11 @@ for MAC in $ETHERNET; do
 				DATOSAUX="${DATOS/oglivedir=$OGLIVEDIR/}"
 			fi
 			# Renombra el fichero PXE original
-			[ -e ${PXEDIR[$BOOTTYPE]}/$PXEFILE ] && mv ${PXEDIR[$BOOTTYPE]}/$PXEFILE ${PXEDIR[$BOOTTYPE]}/$PXEFILE.netboot
+			[ -e ${PXEDIR[$BOOTTYPE]}/${PXEFILE[$BOOTTYPE]} ] && mv ${PXEDIR[$BOOTTYPE]}/${PXEFILE[$BOOTTYPE]} ${PXEDIR[$BOOTTYPE]}/${PXEFILE[$BOOTTYPE]}.netboot
 
 			# Crear fichero PXE a partir de la plantilla con los datos obtenidos en la BD.
-			sed -e "s,vga=[0-9]*,,g; s,INFOHOST,${DATOSAUX//,/\\,},g; s,set ISODIR=.*,set ISODIR=$OGLIVEDIR,g" ${TEMPLATE[$BOOTTYPE]} >${PXEDIR[$BOOTTYPE]}/$PXEFILE
-			[ -n "$PERMS" ] && chown $PERMS ${PXEDIR[$BOOTTYPE]}/$PXEFILE
+			sed -e "s,vga=[0-9]*,,g; s,INFOHOST,${DATOSAUX//,/\\,},g; s,set ISODIR=.*,set ISODIR=$OGLIVEDIR,g" ${TEMPLATE[$BOOTTYPE]} >${PXEDIR[$BOOTTYPE]}/${PXEFILE[$BOOTTYPE]}
+			[ -n "$PERMS" ] && chown $PERMS ${PXEDIR[$BOOTTYPE]}/${PXEFILEE[$BOOTTYPE]}
 		done
 
 
@@ -162,16 +165,16 @@ for MAC in $ETHERNET; do
 		if [ "$MODE" == "TEMP" ]; then
 			sleep 60
 			for BOOTTYPE in 0 1; do
-				[ -e ${PXEDIR[$BOOTTYPE]}/$PXEFILE ] && rm ${PXEDIR[$BOOTTYPE]}/$PXEFILE
-				[ -e ${PXEDIR[$BOOTTYPE]}/$PXEFILE.netboot ] && mv ${PXEDIR[$BOOTTYPE]}/$PXEFILE.netboot ${PXEDIR[$BOOTTYPE]}/$PXEFILE
+				[ -e ${PXEDIR[$BOOTTYPE]}/${PXEFILE[$BOOTTYPE]} ] && rm ${PXEDIR[$BOOTTYPE]}/${PXEFILE[$BOOTTYPE]}
+				[ -e ${PXEDIR[$BOOTTYPE]}/${PXEFILE[$BOOTTYPE]}.netboot ] && mv ${PXEDIR[$BOOTTYPE]}/${PXEFILE[$BOOTTYPE]}.netboot ${PXEDIR[$BOOTTYPE]}/${PXEFILE[$BOOTTYPE]}
 			done
 		fi
 
 
 		# Si el modo de trabajo es permanente (1)  borra el fichero PXE.netboot si existe y graba los datos en la base de datos
 		if [ "$MODE" == "PERM" ]; then
-			[ -e ${PXEDIR[0]}/$PXEFILE.netboot ] && rm ${PXEDIR[0]}/$PXEFILE.netboot
-			[ -e ${PXEDIR[1]}/$PXEFILE.netboot ] && rm ${PXEDIR[1]}/$PXEFILE.netboot
+			[ -e ${PXEDIR[0]}/${PXEFILE[0]}.netboot ] && rm ${PXEDIR[0]}/${PXEFILE[0]}.netboot
+			[ -e ${PXEDIR[1]}/${PXEFILE[1]}.netboot ] && rm ${PXEDIR[1]}/${PXEFILE[1]}.netboot
 			# Si no existe la plantilla de tipo BIOS tomo el nombre de la UEFI
 			[ -z "${TEMPLATE[0]}" ] && TEMPLATE[0]=${TEMPLATE[1]}
 
