@@ -35,25 +35,9 @@ echo "/dev/sda1 / ext4 rw,errors=remount-ro 0 0" > /etc/mtab
 OGCLIENTCFG=${OGCLIENTCFG:-/tmp/ogclient.cfg}
 [ -f $OGCLIENTCFG ] && source $OGCLIENTCFG
 OSRELEASE=${OSRELEASE:-$(uname -r)}
-# inicio de la instalacion
-if [ "$OSRELEASE" == "3.7.6-030706-generic" ]; then
-	# Descargar e instalar Kernel 3.7.
-	mkdir -p /tmp/kernel
-	pushd /tmp/kernel
-	apt-get -y --force-yes install wget crda libnl-3-200 libnl-genl-3-200 wireless-regdb
-	wget http://kernel.ubuntu.com/~kernel-ppa/mainline/v3.7.6-raring/linux-image-3.7.6-030706-generic_3.7.6-030706.201302040006_$OSARCH.deb
-	wget http://kernel.ubuntu.com/~kernel-ppa/mainline/v3.7.6-raring/linux-image-extra-3.7.6-030706-generic_3.7.6-030706.201302040006_$OSARCH.deb
-	wget http://kernel.ubuntu.com/~kernel-ppa/mainline/v3.7.6-raring/linux-headers-3.7.6-030706-generic_3.7.6-030706.201302040006_$OSARCH.deb
-	wget http://kernel.ubuntu.com/~kernel-ppa/mainline/v3.7.6-raring/linux-headers-3.7.6-030706_3.7.6-030706.201302040006_all.deb
-	dpkg -i *.deb
-	apt-get -y --force-yes install dkms
-	popd
-	rm -fr /tmp/kernel
-else
-	# Instalar Kernel firmado del repositorio de paquetes.
-	apt-get -y --force-yes install linux-image-${OSRELEASE} linux-headers-${OSRELEASE} dkms shim-signed
-	apt-get -y --force-yes install linux-modules-${OSRELEASE} linux-modules-extra-${OSRELEASE} 2>/dev/null
-fi
+# Instalar Kernel firmado del repositorio de paquetes.
+apt-get -y --force-yes install linux-image-${OSRELEASE} linux-headers-${OSRELEASE} dkms shim-signed
+apt-get -y --force-yes install linux-modules-${OSRELEASE} linux-modules-extra-${OSRELEASE} 2>/dev/null
 
 # Valores para paquetes interactivos.
 cat << EOT | debconf-set-selections --
@@ -64,7 +48,8 @@ kexec-tools kexec-tools/load_kexec boolean true
 openssh-server openssh-server/permit-root-login boolean true
 refind refind/install_to_esp boolean false
 EOT
-apt-get -y install sshfs console-data kexec-tools davfs2 $PKGS32
+apt-get -y install sshfs console-data kexec-tools $PKGS32
+#apt-get -y install davfs2
 
 #comenzamos con la instalación de los paquetes a instalar.
 for group in `find /usr/bin/boot-tools/listpackages/ -name sw.*`
