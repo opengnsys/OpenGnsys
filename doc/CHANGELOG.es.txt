@@ -30,6 +30,9 @@ Tickets resueltos en módulo OpenGnsys Server:
 #883	Añadir soporte para syslog a ogAdmServer (mejora)
 #884	No ejecutar strip al compilar ogAdmserver
 #885	Eliminar ogAdmBoot
+#891	Fijar problema con Wake-On-Lan
+#892	Usar Wake-On-Lan en ogAdmServer y en repositorio
+#897	No usar tipo socket en ogAdmServer
 #900	Fichero de configuración unificado (duplicado de #140)
 
 Tickets resueltos en módulo OpenGnsys Repository Server:
@@ -47,10 +50,12 @@ Tickets resueltos en módulo OpenGnsys Web Admin Console:
 Tickets resueltos en módulo OpenGnsys Installer:
 #784	Mejorar rendimiento de PHP sobre Apache
 #869	Compatibilidad de servidor con Ubuntu 18.04 LTS y CentOS 7.x
+#916	No mostrar claves en script de instalación
 
 Tickets genéricos resueltos:
 #785	Usar Grub2 como gestor PXE para soporte UEFI (tarea)
 #843	Incluir nombre de versión
+#917	Problemas de compatibilidad con Ubuntu 18.04 (corrección)
 
 
 Lista de cambios incluidos en OpenGnsys 1.1.0a (versión de mantenimiento)
