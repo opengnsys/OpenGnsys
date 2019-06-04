@@ -46,36 +46,14 @@
 	$cadenamac="";
 	RecopilaIpesMacs($cmd,$ambito,$idambito); // Ámbito de aplicación
 
-	$aplicacion="ido=".$cadenaid.chr(13)."iph=".$cadenaip.chr(13);
-	// Envio al servidor de la petición
-	//________________________________________________________________________________________________________
-	$resul=false;
-	$trama="";
-	$trama_notificacion="";
-	$shidra=new SockHidra($servidorhidra,$hidraport); 
-	if ($shidra->conectar()){ // Se ha establecido la conexión con el servidor hidra
-		$parametros="nfn=".$funcion.chr(13);
-		$parametros.=$aplicacion;
-		$parametros.=$atributos;
-		$parametros.=$acciones;
-		$resul=$shidra->envia_peticion($parametros);
-		if($resul)
-			$trama=$shidra->recibe_respuesta();
-		$shidra->desconectar();
-	}
-	if($resul){
-		$hlonprm=hexdec(substr($trama,$LONCABECERA,$LONHEXPRM));
-		$parametros=substr($trama,$LONCABECERA+$LONHEXPRM,$hlonprm);
-		$ValorParametros=extrae_parametros($parametros,chr(13),'=');
-		if (isset ($ValorParametros["tso"])) {
-			$trama_notificacion=$ValorParametros["tso"];
-		}
-	}
+	$ips = explode (';', $cadenaip);
+
+	$trama_notificacion = clients($sw, $ips);
 
 	// Send REST requests to new OGAgent clients.
 	$urls = array();
 	// Compose array of REST URLs.
-	foreach (explode (';', $cadenaip) as $ip) {
+	foreach ($ips as $ip) {
 		$urls[$ip] = "https://$ip:8000/opengnsys/status";
 	}
 	// Launch concurrent requests.

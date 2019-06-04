@@ -46,7 +46,7 @@ bool recorreProcedimientos(Database ,char* ,FILE*,char*);
 bool buscaComandos(char *,TRAMA *,int *);
 bool respuestaConsola(int socket, TRAMA *,int);
 bool enviaComando(TRAMA *ptrTrama,const char*);
-bool Levanta(char*,char*,char*);
+bool Levanta(char**, char**, int, char*);
 bool WakeUp(int,char*,char*,char*);
 void PasaHexBin(char *,char *);
 bool actualizaCreacionImagen(Database,Table,char*,char*,char*,char*,char*,char*);

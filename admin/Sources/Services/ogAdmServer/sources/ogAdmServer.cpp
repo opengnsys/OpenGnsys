@@ -12,6 +12,10 @@
 #include <syslog.h>
 #include <sys/ioctl.h>
 #include <ifaddrs.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <jansson.h>
 
 static char usuario[LONPRM]; // Usuario de acceso a la base de datos
 static char pasguor[LONPRM]; // Password del usuario
@@ -126,6 +130,8 @@ struct og_client {
 	unsigned int		buf_len;
 	unsigned int		msg_len;
 	int			keepalive_idx;
+	bool			rest;
+	unsigned int		content_length;
 };
 
 static inline int og_client_socket(const struct og_client *cli)
@@ -133,196 +139,6 @@ static inline int og_client_socket(const struct og_client *cli)
 	return cli->io.fd;
 }
 
-// ________________________________________________________________________________________________________
-// Función: Sondeo
-//
-//	Descripción:
-//		Solicita a los clientes su disponibiliad para recibir comandos interactivos
-//	Parámetros:
-//		- socket_c: Socket del cliente que envió el mensaje
-//		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros del mensaje
-//	Devuelve:
-//		true: Si el proceso es correcto
-//		false: En caso de ocurrir algún error
-// ________________________________________________________________________________________________________
-static bool Sondeo(TRAMA* ptrTrama, struct og_client *cli)
-{
-	if (!enviaComando(ptrTrama, CLIENTE_APAGADO)) {
-		respuestaConsola(og_client_socket(cli), ptrTrama, false);
-		return false;
-	}
-	respuestaConsola(og_client_socket(cli), ptrTrama, true);
-	return true;
-}
-// ________________________________________________________________________________________________________
-// Función: respuestaSondeo
-//
-//	Descripción:
-//		Recupera el estatus de los ordenadores solicitados leyendo la tabla de sockets
-//	Parámetros:
-//		- socket_c: Socket del cliente que envió el mensaje
-//		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros del mensaje
-//	Devuelve:
-//		true: Si el proceso es correcto
-//		false: En caso de ocurrir algún error
-// ________________________________________________________________________________________________________
-static bool respuestaSondeo(TRAMA* ptrTrama, struct og_client *cli)
-{
-	int socket_c = og_client_socket(cli);
-	int i;
-	long lSize;
-	char *iph, *Ipes;
-
-	iph = copiaParametro("iph",ptrTrama); // Toma dirección/es IP
-	lSize = strlen(iph); // Calcula longitud de la cadena de direccion/es IPE/S
-	Ipes = (char*) reservaMemoria(lSize + 1);
-	if (Ipes == NULL) {
-		liberaMemoria(iph);
-		syslog(LOG_ERR, "%s:%d OOM\n", __FILE__, __LINE__);
-		return false;
-	}
-	strcpy(Ipes, iph); // Copia cadena de IPES
-	liberaMemoria(iph);
-	initParametros(ptrTrama,0);
-	strcpy(ptrTrama->parametros, "tso="); // Compone retorno tso (sistemas operativos de los clientes )
-	for (i = 0; i < MAXIMOS_CLIENTES; i++) {
-		if (strncmp(tbsockets[i].ip, "\0", 1) != 0) { // Si es un cliente activo
-			if (contieneIP(Ipes, tbsockets[i].ip)) { // Si existe la IP en la cadena
-				strcat(ptrTrama->parametros, tbsockets[i].ip); // Compone retorno
-				strcat(ptrTrama->parametros, "/"); // "ip/sistema operativo;"
-				strcat(ptrTrama->parametros, tbsockets[i].estado);
-				strcat(ptrTrama->parametros, ";");
-			}
-		}
-	}
-	strcat(ptrTrama->parametros, "\r");
-	liberaMemoria(Ipes);
-	if (!mandaTrama(&socket_c, ptrTrama)) {
-		syslog(LOG_ERR, "failed to send response to %s:%hu reason=%s\n",
-		       inet_ntoa(cli->addr.sin_addr), ntohs(cli->addr.sin_port),
-		       strerror(errno));
-		return false;
-	}
-	return true;
-}
-// ________________________________________________________________________________________________________
-// Función: Actualizar
-//
-//	Descripción:
-//		Obliga a los clientes a iniciar sesión en el sistema
-//	Parámetros:
-//		- socket_c: Socket del cliente que envió el mensaje
-//		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros del mensaje
-//	Devuelve:
-//		true: Si el proceso es correcto
-//		false: En caso de ocurrir algún error
-// ________________________________________________________________________________________________________
-static bool Actualizar(TRAMA* ptrTrama, struct og_client *cli)
-{
-	if (!enviaComando(ptrTrama, CLIENTE_APAGADO))
-		return false;
-
-	respuestaConsola(og_client_socket(cli), ptrTrama, true);
-	return true;
-}
-// ________________________________________________________________________________________________________
-// Función: Purgar
-//
-//	Descripción:
-//		Detiene la ejecución del browser en el cliente
-//	Parámetros:
-//		- socket_c: Socket del cliente que envió el mensaje
-//		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros del mensaje
-//	Devuelve:
-//		true: Si el proceso es correcto
-//		false: En caso de ocurrir algún error
-// ________________________________________________________________________________________________________
-static bool Purgar(TRAMA* ptrTrama, struct og_client *cli)
-{
-	if (!enviaComando(ptrTrama, CLIENTE_APAGADO))
-		return false;
-
-	respuestaConsola(og_client_socket(cli), ptrTrama, true);
-	return true;
-}
-// ________________________________________________________________________________________________________
-// Función: ConsolaRemota
-//
-//	Descripción:
-// 		Envia un script al cliente, éste lo ejecuta y manda el archivo que genera la salida por pantalla
-//	Parámetros:
-//		- socket_c: Socket del cliente que envió el mensaje
-//		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros del mensaje
-//	Devuelve:
-//		true: Si el proceso es correcto
-//		false: En caso de ocurrir algún error
-// ________________________________________________________________________________________________________
-static bool ConsolaRemota(TRAMA* ptrTrama, struct og_client *cli)
-{
-	char *iph, fileco[LONPRM], *ptrIpes[MAXIMOS_CLIENTES];;
-	FILE* f;
-	int i,lon;
-
-	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
-		respuestaConsola(og_client_socket(cli), ptrTrama, false);
-		return false;
-	}
-	INTROaFINCAD(ptrTrama);
-	/* Destruye contenido del fichero de eco anterior */
-	iph = copiaParametro("iph",ptrTrama); // Toma dirección ip del cliente
-	lon = splitCadena(ptrIpes,iph,';');
-	for (i = 0; i < lon; i++) {
-		sprintf(fileco,"/tmp/_Seconsola_%s",ptrIpes[i]); // Nombre que tendra el archivo en el Servidor
-		f = fopen(fileco, "wt");
-		fclose(f);
-	}
-	liberaMemoria(iph);
-	respuestaConsola(og_client_socket(cli), ptrTrama, true);
-	return true;
-}
-// ________________________________________________________________________________________________________
-// Función: EcoConsola
-//
-//	Descripción:
-//		Solicita el eco de una consola remota almacenado en un archivo de eco
-//	Parámetros:
-//		- socket_c: Socket del cliente que envió el mensaje
-//		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros del mensaje
-//	Devuelve:
-//		true: Si el proceso es correcto
-//		false: En caso de ocurrir algún error
-// ________________________________________________________________________________________________________
-static bool EcoConsola(TRAMA* ptrTrama, struct og_client *cli)
-{
-	int socket_c = og_client_socket(cli);
-	char *iph,fileco[LONPRM],*buffer;
-	int lSize;
-
-	INTROaFINCAD(ptrTrama);
-	// Lee archivo de eco de consola
-	iph = copiaParametro("iph",ptrTrama); // Toma dirección ip del cliente
-	sprintf(fileco,"/tmp/_Seconsola_%s",iph); // Nombre del archivo en el Servidor
-	liberaMemoria(iph);
-	lSize=lonArchivo(fileco);
-	if(lSize>0){ // Si el fichero tiene contenido...
-		initParametros(ptrTrama,lSize+LONGITUD_PARAMETROS);
-		buffer=leeArchivo(fileco);
-		sprintf(ptrTrama->parametros,"res=%s\r",buffer);
-		liberaMemoria(buffer);
-	}
-	else{
-		initParametros(ptrTrama,0);
-		sprintf(ptrTrama->parametros,"res=\r");
-	}
-	ptrTrama->tipo=MSG_RESPUESTA; // Tipo de mensaje
-	if (!mandaTrama(&socket_c, ptrTrama)) {
-		syslog(LOG_ERR, "failed to send response to %s:%hu reason=%s\n",
-		       inet_ntoa(cli->addr.sin_addr), ntohs(cli->addr.sin_port),
-		       strerror(errno));
-		return false;
-	}
-	return true;
-}
 // ________________________________________________________________________________________________________
 // Función: clienteDisponible
 //
@@ -1307,6 +1123,27 @@ static bool respuestaEstandar(TRAMA *ptrTrama, char *iph, char *ido, Database db
 	liberaMemoria(res);
 	return true;
 }
+
+static bool og_send_cmd(char *ips_array[], int ips_array_len,
+			const char *state, TRAMA *ptrTrama)
+{
+	int i, idx;
+
+	for (i = 0; i < ips_array_len; i++) {
+		if (clienteDisponible(ips_array[i], &idx)) { // Si el cliente puede recibir comandos
+			int sock = tbsockets[idx].cli ? tbsockets[idx].cli->io.fd : -1;
+
+			strcpy(tbsockets[idx].estado, state); // Actualiza el estado del cliente
+			if (!mandaTrama(&sock, ptrTrama)) {
+				syslog(LOG_ERR, "failed to send response to %s:%s\n",
+				       ips_array[i], strerror(errno));
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
 // ________________________________________________________________________________________________________
 // Función: enviaComando
 //
@@ -1322,7 +1159,7 @@ static bool respuestaEstandar(TRAMA *ptrTrama, char *iph, char *ido, Database db
 bool enviaComando(TRAMA* ptrTrama, const char *estado)
 {
 	char *iph, *Ipes, *ptrIpes[MAXIMOS_CLIENTES];
-	int i, idx, lon;
+	int lon;
 
 	iph = copiaParametro("iph",ptrTrama); // Toma dirección/es IP
 	lon = strlen(iph); // Calcula longitud de la cadena de direccion/es IPE/S
@@ -1337,19 +1174,10 @@ bool enviaComando(TRAMA* ptrTrama, const char *estado)
 
 	lon = splitCadena(ptrIpes, Ipes, ';');
 	FINCADaINTRO(ptrTrama);
-	for (i = 0; i < lon; i++) {
-		if (clienteDisponible(ptrIpes[i], &idx)) { // Si el cliente puede recibir comandos
-			int sock = tbsockets[idx].cli ? tbsockets[idx].cli->io.fd : -1;
 
-			strcpy(tbsockets[idx].estado, estado); // Actualiza el estado del cliente
-			if (!mandaTrama(&sock, ptrTrama)) {
-				syslog(LOG_ERR, "failed to send response to %s:%s\n",
-				       ptrIpes[i], strerror(errno));
-				return false;
-			}
-			//close(tbsockets[idx].sock); // Cierra el socket del cliente hasta nueva disponibilidad
-		}
-	}
+	if (!og_send_cmd(ptrIpes, lon, estado, ptrTrama))
+		return false;
+
 	liberaMemoria(Ipes);
 	return true;
 }
@@ -1377,45 +1205,6 @@ bool respuestaConsola(int socket_c, TRAMA *ptrTrama, int res)
 	return true;
 }
 // ________________________________________________________________________________________________________
-// Función: Arrancar
-//
-//	Descripción:
-//		Procesa el comando Arrancar
-//	Parámetros:
-//		- socket_c: Socket de la consola al envió el mensaje
-//		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
-//	Devuelve:
-//		true: Si el proceso es correcto
-//		false: En caso de ocurrir algún error
-// ________________________________________________________________________________________________________
-static bool Arrancar(TRAMA* ptrTrama, struct og_client *cli)
-{
-	char *iph,*mac,*mar;
-	bool res;
-
-	iph = copiaParametro("iph",ptrTrama); // Toma dirección/es IP
-	mac = copiaParametro("mac",ptrTrama); // Toma dirección/es MAC
-	mar = copiaParametro("mar",ptrTrama); // Método de arranque (Broadcast o Unicast)
-
-	res=Levanta(iph,mac,mar);
-
-	liberaMemoria(iph);
-	liberaMemoria(mac);
-	liberaMemoria(mar);
-
-	if(!res){
-		respuestaConsola(og_client_socket(cli), ptrTrama, false);
-		return false;
-	}
-
-	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
-		respuestaConsola(og_client_socket(cli), ptrTrama, false);
-		return false;
-	}
-	respuestaConsola(og_client_socket(cli), ptrTrama, true);
-	return true;
-}
-// ________________________________________________________________________________________________________
 // Función: Levanta
 //
 //	Descripción:
@@ -1428,12 +1217,12 @@ static bool Arrancar(TRAMA* ptrTrama, struct og_client *cli)
 //		true: Si el proceso es correcto
 //		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-bool Levanta(char *iph, char *mac, char *mar)
+
+bool Levanta(char *ptrIP[], char *ptrMacs[], int lon, char *mar)
 {
-	char *ptrIP[MAXIMOS_CLIENTES],*ptrMacs[MAXIMOS_CLIENTES];
 	unsigned int on = 1;
 	sockaddr_in local;
-	int i, lon, res;
+	int i, res;
 	int s;
 
 	/* Creación de socket para envío de magig packet */
@@ -1453,8 +1242,6 @@ bool Levanta(char *iph, char *mac, char *mar)
 	local.sin_port = htons(PUERTO_WAKEUP);
 	local.sin_addr.s_addr = htonl(INADDR_ANY);
 
-	lon = splitCadena(ptrIP, iph, ';');
-	lon = splitCadena(ptrMacs, mac, ';');
 	for (i = 0; i < lon; i++) {
 		if (!WakeUp(s, ptrIP[i], ptrMacs[i], mar)) {
 			syslog(LOG_ERR, "problem sending magic packet\n");
@@ -1713,27 +1500,6 @@ static bool RESPUESTA_Apagar(TRAMA* ptrTrama, struct og_client *cli)
 	return true;
 }
 // ________________________________________________________________________________________________________
-// Función: Reiniciar
-//
-//	Descripción:
-//		Procesa el comando Reiniciar
-//	Parámetros:
-//		- socket_c: Socket de la consola al envió el mensaje
-//		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
-//	Devuelve:
-//		true: Si el proceso es correcto
-//		false: En caso de ocurrir algún error
-// ________________________________________________________________________________________________________
-static bool Reiniciar(TRAMA* ptrTrama, struct og_client *cli)
-{
-	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
-		respuestaConsola(og_client_socket(cli), ptrTrama, false);
-		return false;
-	}
-	respuestaConsola(og_client_socket(cli), ptrTrama, true);
-	return true;
-}
-// ________________________________________________________________________________________________________
 // Función: RESPUESTA_Reiniciar
 //
 //	Descripción:
@@ -1777,27 +1543,6 @@ static bool RESPUESTA_Reiniciar(TRAMA* ptrTrama, struct og_client *cli)
 	liberaMemoria(ido);
 
 	db.Close(); // Cierra conexión
-	return true;
-}
-// ________________________________________________________________________________________________________
-// Función: IniciarSesion
-//
-//	Descripción:
-//		Procesa el comando Iniciar Sesión
-//	Parámetros:
-//		- socket_c: Socket de la consola al envió el mensaje
-//		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
-//	Devuelve:
-//		true: Si el proceso es correcto
-//		false: En caso de ocurrir algún error
-// ________________________________________________________________________________________________________
-static bool IniciarSesion(TRAMA* ptrTrama, struct og_client *cli)
-{
-	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
-		respuestaConsola(og_client_socket(cli), ptrTrama, false);
-		return false;
-	}
-	respuestaConsola(og_client_socket(cli), ptrTrama, true);
 	return true;
 }
 // ________________________________________________________________________________________________________
@@ -3315,11 +3060,12 @@ static bool recibeArchivo(TRAMA *ptrTrama, struct og_client *cli)
 // ________________________________________________________________________________________________________
 static bool envioProgramacion(TRAMA *ptrTrama, struct og_client *cli)
 {
+	char *ptrIP[MAXIMOS_CLIENTES],*ptrMacs[MAXIMOS_CLIENTES];
 	char sqlstr[LONSQL], msglog[LONSTD];
 	char *idp,iph[LONIP],mac[LONMAC];
 	Database db;
 	Table tbl;
-	int idx,idcomando;
+	int idx,idcomando,lon;
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) {
 		db.GetErrorErrStr(msglog);
@@ -3373,11 +3119,14 @@ static bool envioProgramacion(TRAMA *ptrTrama, struct og_client *cli)
 				return false;
 			}
 
+			lon = splitCadena(ptrIP, iph, ';');
+			lon = splitCadena(ptrMacs, mac, ';');
+
 			// Se manda por broadcast y por unicast
-			if (!Levanta(iph, mac, (char*)"1"))
+			if (!Levanta(ptrIP, ptrMacs, lon, (char*)"1"))
 				return false;
 
-			if (!Levanta(iph, mac, (char*)"2"))
+			if (!Levanta(ptrIP, ptrMacs, lon, (char*)"2"))
 				return false;
 
 		}
@@ -3402,24 +3151,15 @@ static struct {
 	const char *nf; // Nombre de la función
 	bool (*fcn)(TRAMA *, struct og_client *cli);
 } tbfuncionesServer[] = {
-	{ "Sondeo",				Sondeo,			},
-	{ "respuestaSondeo",			respuestaSondeo,	},
-	{ "ConsolaRemota",			ConsolaRemota,		},
-	{ "EcoConsola",				EcoConsola,		},
-	{ "Actualizar",				Actualizar,		},
-	{ "Purgar",				Purgar,			},
 	{ "InclusionCliente",			InclusionCliente,	},
 	{ "InclusionClienteWinLnx",		InclusionClienteWinLnx, },
 	{ "AutoexecCliente",			AutoexecCliente,	},
 	{ "ComandosPendientes",			ComandosPendientes,	},
 	{ "DisponibilidadComandos",		DisponibilidadComandos, },
-	{ "Arrancar",				Arrancar, 		},
 	{ "RESPUESTA_Arrancar",			RESPUESTA_Arrancar,	},
 	{ "Apagar",				Apagar,			},
 	{ "RESPUESTA_Apagar",			RESPUESTA_Apagar,	},
-	{ "Reiniciar",				Reiniciar,		},
 	{ "RESPUESTA_Reiniciar",		RESPUESTA_Reiniciar,	},
-	{ "IniciarSesion",			IniciarSesion,		},
 	{ "RESPUESTA_IniciarSesion",		RESPUESTA_IniciarSesion, },
 	{ "CrearImagen",			CrearImagen,		},
 	{ "RESPUESTA_CrearImagen",		RESPUESTA_CrearImagen,	},
@@ -3529,13 +3269,791 @@ static void og_client_reset_state(struct og_client *cli)
 	cli->buf_len = 0;
 }
 
-static void og_client_read_cb(struct ev_loop *loop, struct ev_io *io, int events)
+static int og_client_state_recv_hdr(struct og_client *cli)
 {
 	char hdrlen[LONHEXPRM];
-	struct og_client *cli;
+
+	/* Still too short to validate protocol fingerprint and message
+	 * length.
+	 */
+	if (cli->buf_len < 15 + LONHEXPRM)
+		return 0;
+
+	if (strncmp(cli->buf, "@JMMLCAMDJ_MCDJ", 15)) {
+		syslog(LOG_ERR, "bad fingerprint from client %s:%hu, closing\n",
+		       inet_ntoa(cli->addr.sin_addr),
+		       ntohs(cli->addr.sin_port));
+		return -1;
+	}
+
+	memcpy(hdrlen, &cli->buf[LONGITUD_CABECERATRAMA], LONHEXPRM);
+	cli->msg_len = strtol(hdrlen, NULL, 16);
+
+	/* Header announces more that we can fit into buffer. */
+	if (cli->msg_len >= sizeof(cli->buf)) {
+		syslog(LOG_ERR, "too large message %u bytes from %s:%hu\n",
+		       cli->msg_len, inet_ntoa(cli->addr.sin_addr),
+		       ntohs(cli->addr.sin_port));
+		return -1;
+	}
+
+	return 1;
+}
+
+static TRAMA *og_msg_alloc(char *data, unsigned int len)
+{
 	TRAMA *ptrTrama;
-	int ret, len;
+
+	ptrTrama = (TRAMA *)reservaMemoria(sizeof(TRAMA));
+	if (!ptrTrama) {
+		syslog(LOG_ERR, "OOM\n");
+		return NULL;
+	}
+
+	initParametros(ptrTrama, len);
+	memcpy(ptrTrama, "@JMMLCAMDJ_MCDJ", LONGITUD_CABECERATRAMA);
+	memcpy(ptrTrama->parametros, data, len);
+	ptrTrama->lonprm = len;
+
+	return ptrTrama;
+}
+
+static void og_msg_free(TRAMA *ptrTrama)
+{
+	liberaMemoria(ptrTrama->parametros);
+	liberaMemoria(ptrTrama);
+}
+
+static int og_client_state_process_payload(struct og_client *cli)
+{
+	TRAMA *ptrTrama;
 	char *data;
+	int len;
+
+	len = cli->msg_len - (LONGITUD_CABECERATRAMA + LONHEXPRM);
+	data = &cli->buf[LONGITUD_CABECERATRAMA + LONHEXPRM];
+
+	ptrTrama = og_msg_alloc(data, len);
+	if (!ptrTrama)
+		return -1;
+
+	gestionaTrama(ptrTrama, cli);
+
+	og_msg_free(ptrTrama);
+
+	return 1;
+}
+
+struct og_msg_params {
+	const char	*ips_array[64];
+	const char	*mac_array[64];
+	unsigned int	ips_array_len;
+	const char	*wol_type;
+	char		run_cmd[4096];
+	const char	*disk;
+	const char	*partition;
+};
+
+static int og_json_parse_clients(json_t *element, struct og_msg_params *params)
+{
+	unsigned int i;
+	json_t *k;
+
+	if (json_typeof(element) != JSON_ARRAY)
+		return -1;
+
+	for (i = 0; i < json_array_size(element); i++) {
+		k = json_array_get(element, i);
+		if (json_typeof(k) != JSON_STRING)
+			return -1;
+
+		params->ips_array[params->ips_array_len++] =
+			json_string_value(k);
+	}
+	return 0;
+}
+
+static int og_cmd_legacy_send(struct og_msg_params *params, const char *cmd,
+			      const char *state)
+{
+	char buf[4096] = {};
+	int len, err = 0;
+	TRAMA *msg;
+
+	len = snprintf(buf, sizeof(buf), "nfn=%s\r", cmd);
+
+	msg = og_msg_alloc(buf, len);
+	if (!msg)
+		return -1;
+
+	if (!og_send_cmd((char **)params->ips_array, params->ips_array_len,
+			 state, msg))
+		err = -1;
+
+	og_msg_free(msg);
+
+	return err;
+}
+
+static int og_cmd_post_clients(json_t *element, struct og_msg_params *params)
+{
+	const char *key;
+	json_t *value;
+	int err = 0;
+
+	if (json_typeof(element) != JSON_OBJECT)
+		return -1;
+
+	json_object_foreach(element, key, value) {
+		if (!strcmp(key, "clients"))
+			err = og_json_parse_clients(value, params);
+
+		if (err < 0)
+			break;
+	}
+
+	return og_cmd_legacy_send(params, "Sondeo", CLIENTE_APAGADO);
+}
+
+struct og_buffer {
+	char 	*data;
+	int	len;
+};
+
+static int og_json_dump_clients(const char *buffer, size_t size, void *data)
+{
+	struct og_buffer *og_buffer = (struct og_buffer *)data;
+
+	memcpy(og_buffer->data + og_buffer->len, buffer, size);
+	og_buffer->len += size;
+
+	return 0;
+}
+
+static int og_cmd_get_clients(json_t *element, struct og_msg_params *params,
+			      char *buffer_reply)
+{
+	json_t *root, *array, *addr, *state, *object;
+	struct og_buffer og_buffer = {
+		.data	= buffer_reply,
+	};
+	int i;
+
+	array = json_array();
+	if (!array)
+		return -1;
+
+	for (i = 0; i < MAXIMOS_CLIENTES; i++) {
+		if (tbsockets[i].ip[0] == '\0')
+			continue;
+
+		object = json_object();
+		if (!object) {
+			json_decref(array);
+			return -1;
+		}
+		addr = json_string(tbsockets[i].ip);
+		if (!addr) {
+			json_decref(object);
+			json_decref(array);
+			return -1;
+		}
+		json_object_set_new(object, "addr", addr);
+
+		state = json_string(tbsockets[i].estado);
+		if (!state) {
+			json_decref(object);
+			json_decref(array);
+			return -1;
+		}
+		json_object_set_new(object, "state", state);
+
+		json_array_append_new(array, object);
+	}
+	root = json_pack("{s:o}", "clients", array);
+	if (!root) {
+		json_decref(array);
+		return -1;
+	}
+
+	json_dump_callback(root, og_json_dump_clients, &og_buffer, 4096);
+	json_decref(root);
+
+	return 0;
+}
+
+static int og_json_parse_target(json_t *element, struct og_msg_params *params)
+{
+	const char *key;
+	json_t *value;
+
+	if (json_typeof(element) != JSON_OBJECT) {
+		return -1;
+	}
+
+	json_object_foreach(element, key, value) {
+		if (!strcmp(key, "addr")) {
+			if (json_typeof(value) != JSON_STRING)
+				return -1;
+
+			params->ips_array[params->ips_array_len] =
+				json_string_value(value);
+		} else if (!strcmp(key, "mac")) {
+			if (json_typeof(value) != JSON_STRING)
+				return -1;
+
+			params->mac_array[params->ips_array_len] =
+				json_string_value(value);
+		}
+	}
+
+	return 0;
+}
+
+static int og_json_parse_targets(json_t *element, struct og_msg_params *params)
+{
+	unsigned int i;
+	json_t *k;
+	int err;
+
+	if (json_typeof(element) != JSON_ARRAY)
+		return -1;
+
+	for (i = 0; i < json_array_size(element); i++) {
+		k = json_array_get(element, i);
+
+		if (json_typeof(k) != JSON_OBJECT)
+			return -1;
+
+		err = og_json_parse_target(k, params);
+		if (err < 0)
+			return err;
+
+		params->ips_array_len++;
+	}
+	return 0;
+}
+
+static int og_json_parse_type(json_t *element, struct og_msg_params *params)
+{
+	const char *type;
+
+	if (json_typeof(element) != JSON_STRING)
+		return -1;
+
+	params->wol_type = json_string_value(element);
+
+	type = json_string_value(element);
+	if (!strcmp(type, "unicast"))
+		params->wol_type = "2";
+	else if (!strcmp(type, "broadcast"))
+		params->wol_type = "1";
+
+	return 0;
+}
+
+static int og_cmd_wol(json_t *element, struct og_msg_params *params)
+{
+	const char *key;
+	json_t *value;
+	int err = 0;
+
+	if (json_typeof(element) != JSON_OBJECT)
+		return -1;
+
+	json_object_foreach(element, key, value) {
+		if (!strcmp(key, "clients")) {
+			err = og_json_parse_targets(value, params);
+		} else if (!strcmp(key, "type")) {
+			err = og_json_parse_type(value, params);
+		}
+
+		if (err < 0)
+			break;
+	}
+
+	if (!Levanta((char **)params->ips_array, (char **)params->mac_array,
+		     params->ips_array_len, (char *)params->wol_type))
+		return -1;
+
+	return 0;
+}
+
+static int og_json_parse_run(json_t *element, struct og_msg_params *params)
+{
+	if (json_typeof(element) != JSON_STRING)
+		return -1;
+
+	snprintf(params->run_cmd, sizeof(params->run_cmd), "%s",
+		 json_string_value(element));
+
+	return 0;
+}
+
+static int og_cmd_run_post(json_t *element, struct og_msg_params *params)
+{
+	char buf[4096] = {}, iph[4096] = {};
+	int err = 0, len;
+	const char *key;
+	unsigned int i;
+	json_t *value;
+	TRAMA *msg;
+
+	if (json_typeof(element) != JSON_OBJECT)
+		return -1;
+
+	json_object_foreach(element, key, value) {
+		if (!strcmp(key, "clients"))
+			err = og_json_parse_clients(value, params);
+		if (!strcmp(key, "run"))
+			err = og_json_parse_run(value, params);
+
+		if (err < 0)
+			break;
+	}
+
+	for (i = 0; i < params->ips_array_len; i++) {
+		len = snprintf(iph + strlen(iph), sizeof(iph), "%s;",
+			       params->ips_array[i]);
+	}
+	len = snprintf(buf, sizeof(buf), "nfn=ConsolaRemota\riph=%s\rscp=%s\r",
+		       iph, params->run_cmd);
+
+	msg = og_msg_alloc(buf, len);
+	if (!msg)
+		return -1;
+
+	if (!og_send_cmd((char **)params->ips_array, params->ips_array_len,
+			 CLIENTE_OCUPADO, msg))
+		err = -1;
+
+	og_msg_free(msg);
+
+	if (err < 0)
+		return err;
+
+	for (i = 0; i < params->ips_array_len; i++) {
+		char filename[4096];
+		FILE *f;
+
+		sprintf(filename, "/tmp/_Seconsola_%s", params->ips_array[i]);
+		f = fopen(filename, "wt");
+		fclose(f);
+	}
+
+	return 0;
+}
+
+static int og_cmd_run_get(json_t *element, struct og_msg_params *params,
+			  char *buffer_reply)
+{
+	struct og_buffer og_buffer = {
+		.data	= buffer_reply,
+	};
+	json_t *root, *value, *array;
+	const char *key;
+	unsigned int i;
+	int err = 0;
+
+	if (json_typeof(element) != JSON_OBJECT)
+		return -1;
+
+	json_object_foreach(element, key, value) {
+		if (!strcmp(key, "clients"))
+			err = og_json_parse_clients(value, params);
+
+		if (err < 0)
+			return err;
+	}
+
+	array = json_array();
+	if (!array)
+		return -1;
+
+	for (i = 0; i < params->ips_array_len; i++) {
+		json_t *object, *output, *addr;
+		char data[4096] = {};
+		char filename[4096];
+		int fd, numbytes;
+
+		sprintf(filename, "/tmp/_Seconsola_%s", params->ips_array[i]);
+
+		fd = open(filename, O_RDONLY);
+		if (!fd)
+			return -1;
+
+		numbytes = read(fd, data, sizeof(data));
+		if (numbytes < 0) {
+			close(fd);
+			return -1;
+		}
+		data[sizeof(data) - 1] = '\0';
+		close(fd);
+
+		object = json_object();
+		if (!object) {
+			json_decref(array);
+			return -1;
+		}
+		addr = json_string(params->ips_array[i]);
+		if (!addr) {
+			json_decref(object);
+			json_decref(array);
+			return -1;
+		}
+		json_object_set_new(object, "addr", addr);
+
+		output = json_string(data);
+		if (!output) {
+			json_decref(object);
+			json_decref(array);
+			return -1;
+		}
+		json_object_set_new(object, "output", output);
+
+		json_array_append_new(array, object);
+	}
+
+	root = json_pack("{s:o}", "clients", array);
+	if (!root)
+		return -1;
+
+	json_dump_callback(root, og_json_dump_clients, &og_buffer, 4096);
+	json_decref(root);
+
+	return 0;
+}
+
+static int og_json_parse_disk(json_t *element, struct og_msg_params *params)
+{
+	if (json_typeof(element) != JSON_STRING)
+		return -1;
+
+	params->disk = json_string_value(element);
+
+	return 0;
+}
+
+static int og_json_parse_partition(json_t *element,
+				   struct og_msg_params *params)
+{
+	if (json_typeof(element) != JSON_STRING)
+		return -1;
+
+	params->partition = json_string_value(element);
+
+	return 0;
+}
+
+static int og_cmd_session(json_t *element, struct og_msg_params *params)
+{
+	char buf[4096], iph[4096];
+	int err = 0, len;
+	const char *key;
+	unsigned int i;
+	json_t *value;
+	TRAMA *msg;
+
+	if (json_typeof(element) != JSON_OBJECT)
+		return -1;
+
+	json_object_foreach(element, key, value) {
+		if (!strcmp(key, "clients")) {
+			err = og_json_parse_clients(value, params);
+		} else if (!strcmp(key, "disk")) {
+			err = og_json_parse_disk(value, params);
+		} else if (!strcmp(key, "partition")) {
+			err = og_json_parse_partition(value, params);
+		}
+
+		if (err < 0)
+			return err;
+	}
+
+	for (i = 0; i < params->ips_array_len; i++) {
+		snprintf(iph + strlen(iph), sizeof(iph), "%s;",
+			 params->ips_array[i]);
+	}
+	len = snprintf(buf, sizeof(buf),
+		       "nfn=IniciarSesion\riph=%s\rdsk=%s\rpar=%s\r",
+		       iph, params->disk, params->partition);
+
+	msg = og_msg_alloc(buf, len);
+	if (!msg)
+		return -1;
+
+	if (!og_send_cmd((char **)params->ips_array, params->ips_array_len,
+			 CLIENTE_APAGADO, msg))
+		err = -1;
+
+	og_msg_free(msg);
+
+	return 0;
+}
+
+static int og_cmd_poweroff(json_t *element, struct og_msg_params *params)
+{
+	const char *key;
+	json_t *value;
+	int err = 0;
+
+	if (json_typeof(element) != JSON_OBJECT)
+		return -1;
+
+	json_object_foreach(element, key, value) {
+		if (!strcmp(key, "clients"))
+			err = og_json_parse_clients(value, params);
+
+		if (err < 0)
+			break;
+	}
+
+	return og_cmd_legacy_send(params, "Apagar", CLIENTE_OCUPADO);
+}
+
+static int og_cmd_refresh(json_t *element, struct og_msg_params *params)
+{
+	const char *key;
+	json_t *value;
+	int err = 0;
+
+	if (json_typeof(element) != JSON_OBJECT)
+		return -1;
+
+	json_object_foreach(element, key, value) {
+		if (!strcmp(key, "clients"))
+			err = og_json_parse_clients(value, params);
+
+		if (err < 0)
+			break;
+	}
+
+	return og_cmd_legacy_send(params, "Actualizar", CLIENTE_APAGADO);
+}
+
+static int og_cmd_reboot(json_t *element, struct og_msg_params *params)
+{
+	const char *key;
+	json_t *value;
+	int err = 0;
+
+	if (json_typeof(element) != JSON_OBJECT)
+		return -1;
+
+	json_object_foreach(element, key, value) {
+		if (!strcmp(key, "clients"))
+			err = og_json_parse_clients(value, params);
+
+		if (err < 0)
+			break;
+	}
+
+	return og_cmd_legacy_send(params, "Reiniciar", CLIENTE_OCUPADO);
+}
+
+static int og_cmd_stop(json_t *element, struct og_msg_params *params)
+{
+	const char *key;
+	json_t *value;
+	int err = 0;
+
+	if (json_typeof(element) != JSON_OBJECT)
+		return -1;
+
+	json_object_foreach(element, key, value) {
+		if (!strcmp(key, "clients"))
+			err = og_json_parse_clients(value, params);
+
+		if (err < 0)
+			break;
+	}
+
+	return og_cmd_legacy_send(params, "Purgar", CLIENTE_APAGADO);
+}
+
+static int og_client_not_found(struct og_client *cli)
+{
+	char buf[] = "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n";
+
+	send(og_client_socket(cli), buf, strlen(buf), 0);
+
+	return -1;
+}
+
+static int og_client_ok(struct og_client *cli, char *buf_reply)
+{
+	char buf[4096] = {};
+
+	sprintf(buf, "HTTP/1.1 200 OK\r\nContent-Length: %ld\r\n\r\n%s",
+		strlen(buf_reply), buf_reply);
+
+	send(og_client_socket(cli), buf, strlen(buf), 0);
+
+	return 0;
+}
+
+enum og_rest_method {
+	OG_METHOD_GET	= 0,
+	OG_METHOD_POST,
+};
+
+static int og_client_state_process_payload_rest(struct og_client *cli)
+{
+	struct og_msg_params params = {};
+	enum og_rest_method method;
+	char buf_reply[4096] = {};
+	const char *cmd, *body;
+	json_error_t json_err;
+	json_t *root = NULL;
+	int err = 0;
+
+	if (!strncmp(cli->buf, "GET", strlen("GET"))) {
+		method = OG_METHOD_GET;
+		cmd = cli->buf + strlen("GET") + 2;
+	} else if (!strncmp(cli->buf, "POST", strlen("POST"))) {
+		method = OG_METHOD_POST;
+		cmd = cli->buf + strlen("POST") + 2;
+	} else
+		return -1;
+
+	body = strstr(cli->buf, "\r\n\r\n") + 4;
+
+	if (cli->content_length) {
+		root = json_loads(body, 0, &json_err);
+		if (!root) {
+			syslog(LOG_ERR, "malformed json line %d: %s\n",
+			       json_err.line, json_err.text);
+			return og_client_not_found(cli);
+		}
+	}
+
+	if (!strncmp(cmd, "clients", strlen("clients"))) {
+		if (method != OG_METHOD_POST &&
+		    method != OG_METHOD_GET)
+			return -1;
+
+		if (method == OG_METHOD_POST && !root) {
+			syslog(LOG_ERR, "command clients with no payload\n");
+			return og_client_not_found(cli);
+		}
+		switch (method) {
+		case OG_METHOD_POST:
+			err = og_cmd_post_clients(root, &params);
+			break;
+		case OG_METHOD_GET:
+			err = og_cmd_get_clients(root, &params, buf_reply);
+			break;
+		}
+	} else if (!strncmp(cmd, "wol", strlen("wol"))) {
+		if (method != OG_METHOD_POST)
+			return -1;
+
+		if (!root) {
+			syslog(LOG_ERR, "command wol with no payload\n");
+			return og_client_not_found(cli);
+		}
+		err = og_cmd_wol(root, &params);
+	} else if (!strncmp(cmd, "shell/run", strlen("shell/run"))) {
+		if (method != OG_METHOD_POST)
+			return -1;
+
+		if (!root) {
+			syslog(LOG_ERR, "command run with no payload\n");
+			return og_client_not_found(cli);
+		}
+		err = og_cmd_run_post(root, &params);
+	} else if (!strncmp(cmd, "shell/output", strlen("shell/output"))) {
+		if (method != OG_METHOD_POST)
+			return -1;
+
+		if (!root) {
+			syslog(LOG_ERR, "command output with no payload\n");
+			return og_client_not_found(cli);
+		}
+
+		err = og_cmd_run_get(root, &params, buf_reply);
+	} else if (!strncmp(cmd, "session", strlen("session"))) {
+		if (method != OG_METHOD_POST)
+			return -1;
+
+		if (!root) {
+			syslog(LOG_ERR, "command session with no payload\n");
+			return og_client_not_found(cli);
+		}
+		err = og_cmd_session(root, &params);
+	} else if (!strncmp(cmd, "poweroff", strlen("poweroff"))) {
+		if (method != OG_METHOD_POST)
+			return -1;
+
+		if (!root) {
+			syslog(LOG_ERR, "command poweroff with no payload\n");
+			return og_client_not_found(cli);
+		}
+		err = og_cmd_poweroff(root, &params);
+	} else if (!strncmp(cmd, "reboot", strlen("reboot"))) {
+		if (method != OG_METHOD_POST)
+			return -1;
+
+		if (!root) {
+			syslog(LOG_ERR, "command reboot with no payload\n");
+			return og_client_not_found(cli);
+		}
+		err = og_cmd_reboot(root, &params);
+	} else if (!strncmp(cmd, "stop", strlen("stop"))) {
+		if (method != OG_METHOD_POST)
+			return -1;
+
+		if (!root) {
+			syslog(LOG_ERR, "command stop with no payload\n");
+			return og_client_not_found(cli);
+		}
+		err = og_cmd_stop(root, &params);
+	} else if (!strncmp(cmd, "refresh", strlen("refresh"))) {
+		if (method != OG_METHOD_POST)
+			return -1;
+
+		if (!root) {
+			syslog(LOG_ERR, "command refresh with no payload\n");
+			return og_client_not_found(cli);
+		}
+		err = og_cmd_refresh(root, &params);
+	} else {
+		syslog(LOG_ERR, "unknown command %s\n", cmd);
+		err = og_client_not_found(cli);
+	}
+
+	if (root)
+		json_decref(root);
+
+	if (!err)
+		og_client_ok(cli, buf_reply);
+
+	return err;
+}
+
+static int og_client_state_recv_hdr_rest(struct og_client *cli)
+{
+	char *ptr;
+
+	ptr = strstr(cli->buf, "\r\n\r\n");
+	if (!ptr)
+		return 0;
+
+	cli->msg_len = ptr - cli->buf + 4;
+
+	ptr = strstr(cli->buf, "Content-Length: ");
+	if (ptr) {
+		sscanf(ptr, "Content-Length: %i[^\r\n]", &cli->content_length);
+		cli->msg_len += cli->content_length;
+	}
+
+	return 1;
+}
+
+static void og_client_read_cb(struct ev_loop *loop, struct ev_io *io, int events)
+{
+	struct og_client *cli;
+	int ret;
 
 	cli = container_of(io, struct og_client, io);
 
@@ -3569,29 +4087,15 @@ static void og_client_read_cb(struct ev_loop *loop, struct ev_io *io, int events
 
 	switch (cli->state) {
 	case OG_CLIENT_RECEIVING_HEADER:
-		/* Still too short to validate protocol fingerprint and message
-		 * length.
-		 */
-		if (cli->buf_len < 15 + LONHEXPRM)
+		if (cli->rest)
+			ret = og_client_state_recv_hdr_rest(cli);
+		else
+			ret = og_client_state_recv_hdr(cli);
+
+		if (ret < 0)
+			goto close;
+		if (!ret)
 			return;
-
-		if (strncmp(cli->buf, "@JMMLCAMDJ_MCDJ", 15)) {
-			syslog(LOG_ERR, "bad fingerprint from client %s:%hu, closing\n",
-			       inet_ntoa(cli->addr.sin_addr),
-			       ntohs(cli->addr.sin_port));
-			goto close;
-		}
-
-		memcpy(hdrlen, &cli->buf[LONGITUD_CABECERATRAMA], LONHEXPRM);
-		cli->msg_len = strtol(hdrlen, NULL, 16);
-
-		/* Header announces more that we can fit into buffer. */
-		if (cli->msg_len >= sizeof(cli->buf)) {
-			syslog(LOG_ERR, "too large message %u bytes from %s:%hu\n",
-			       cli->msg_len, inet_ntoa(cli->addr.sin_addr),
-			       ntohs(cli->addr.sin_port));
-			goto close;
-		}
 
 		cli->state = OG_CLIENT_RECEIVING_PAYLOAD;
 		/* Fall through. */
@@ -3607,24 +4111,12 @@ static void og_client_read_cb(struct ev_loop *loop, struct ev_io *io, int events
 		       inet_ntoa(cli->addr.sin_addr),
 		       ntohs(cli->addr.sin_port));
 
-		len = cli->msg_len - (LONGITUD_CABECERATRAMA + LONHEXPRM);
-		data = &cli->buf[LONGITUD_CABECERATRAMA + LONHEXPRM];
-
-		ptrTrama = (TRAMA *)reservaMemoria(sizeof(TRAMA));
-		if (!ptrTrama) {
-			syslog(LOG_ERR, "OOM\n");
+		if (cli->rest)
+			ret = og_client_state_process_payload_rest(cli);
+		else
+			ret = og_client_state_process_payload(cli);
+		if (ret < 0)
 			goto close;
-		}
-
-		initParametros(ptrTrama, len);
-		memcpy(ptrTrama, cli->buf, LONGITUD_CABECERATRAMA);
-		memcpy(ptrTrama->parametros, data, len);
-		ptrTrama->lonprm = len;
-
-		gestionaTrama(ptrTrama, cli);
-
-		liberaMemoria(ptrTrama->parametros);
-		liberaMemoria(ptrTrama);
 
 		if (cli->keepalive_idx < 0) {
 			syslog(LOG_DEBUG, "server closing connection to %s:%hu\n",
@@ -3663,6 +4155,8 @@ static void og_client_timer_cb(struct ev_loop *loop, ev_timer *timer, int events
 	og_client_release(loop, cli);
 }
 
+static int socket_s, socket_rest;
+
 static void og_server_accept_cb(struct ev_loop *loop, struct ev_io *io,
 				int events)
 {
@@ -3688,6 +4182,9 @@ static void og_server_accept_cb(struct ev_loop *loop, struct ev_io *io,
 	memcpy(&cli->addr, &client_addr, sizeof(client_addr));
 	cli->keepalive_idx = -1;
 
+	if (io->fd == socket_rest)
+		cli->rest = true;
+
 	syslog(LOG_DEBUG, "connection from client %s:%hu\n",
 	       inet_ntoa(cli->addr.sin_addr), ntohs(cli->addr.sin_port));
 
@@ -3697,13 +4194,36 @@ static void og_server_accept_cb(struct ev_loop *loop, struct ev_io *io,
 	ev_timer_start(loop, &cli->timer);
 }
 
+static int og_socket_server_init(const char *port)
+{
+	struct sockaddr_in local;
+	int sd, on = 1;
+
+	sd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	if (sd < 0) {
+		syslog(LOG_ERR, "cannot create main socket\n");
+		return -1;
+	}
+	setsockopt(sd, SOL_SOCKET, SO_REUSEPORT, &on, sizeof(int));
+
+	local.sin_addr.s_addr = htonl(INADDR_ANY);
+	local.sin_family = AF_INET;
+	local.sin_port = htons(atoi(port));
+
+	if (bind(sd, (struct sockaddr *) &local, sizeof(local)) < 0) {
+		syslog(LOG_ERR, "cannot bind socket\n");
+		return -1;
+	}
+
+	listen(sd, 250);
+
+	return sd;
+}
+
 int main(int argc, char *argv[])
 {
+	struct ev_io ev_io_server, ev_io_server_rest;
 	struct ev_loop *loop = ev_default_loop(0);
-	struct ev_io ev_io_server;
-	struct sockaddr_in local;
-	int socket_s;
-	int activo=1;
 	int i;
 
 	if (signal(SIGPIPE, SIG_IGN) == SIG_ERR)
@@ -3731,26 +4251,19 @@ int main(int argc, char *argv[])
 	/*--------------------------------------------------------------------------------------------------------
 	 Creación y configuración del socket del servicio
 	 ---------------------------------------------------------------------------------------------------------*/
-	socket_s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP); // Crea socket del servicio
-	setsockopt(socket_s, SOL_SOCKET, SO_REUSEPORT, &activo, sizeof(int));
-	if (socket_s < 0) {
-		syslog(LOG_ERR, "cannot create main socket\n");
+	socket_s = og_socket_server_init(puerto);
+	if (socket_s < 0)
 		exit(EXIT_FAILURE);
-	}
-
-	local.sin_addr.s_addr = htonl(INADDR_ANY); // Configura el socket del servicio
-	local.sin_family = AF_INET;
-	local.sin_port = htons(atoi(puerto));
-
-	if (bind(socket_s, (struct sockaddr *) &local, sizeof(local)) < 0) {
-		syslog(LOG_ERR, "cannot bind socket\n");
-		exit(EXIT_FAILURE);
-	}
-
-	listen(socket_s, 250); // Pone a escuchar al socket
 
 	ev_io_init(&ev_io_server, og_server_accept_cb, socket_s, EV_READ);
 	ev_io_start(loop, &ev_io_server);
+
+	socket_rest = og_socket_server_init("8888");
+	if (socket_rest < 0)
+		exit(EXIT_FAILURE);
+
+	ev_io_init(&ev_io_server_rest, og_server_accept_cb, socket_rest, EV_READ);
+	ev_io_start(loop, &ev_io_server_rest);
 
 	infoLog(1); // Inicio de sesión
 
