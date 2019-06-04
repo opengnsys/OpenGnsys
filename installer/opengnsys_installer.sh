@@ -6,131 +6,140 @@
 #####################################################################
 
 
-####  AVISO: Puede editar configuración de acceso por defecto.
-####  WARNING: Edit default access configuration if you wish.
-DEFAULT_MYSQL_ROOT_PASSWORD="passwordroot"	# Clave por defecto root de MySQL
-DEFAULT_OPENGNSYS_DB_USER="usuog"		# Usuario por defecto de acceso a la base de datos
-DEFAULT_OPENGNSYS_DB_PASSWD="passusuog"		# Clave por defecto de acceso a la base de datos
-DEFAULT_OPENGNSYS_CLIENT_PASSWD="og"		# Clave por defecto de acceso del cliente	
-
-# Sólo ejecutable por usuario root
-if [ "$(whoami)" != 'root' ]; then
-        echo "ERROR: this program must run under root privileges!!"
-        exit 1
-fi
-
-echo -e "\\nOpenGnsys Installation"
-echo "=============================="
-
-# Clave root de MySQL
-while : ; do
-	echo -n -e "\\nEnter root password for MySQL (${DEFAULT_MYSQL_ROOT_PASSWORD}): ";
-	read -r MYSQL_ROOT_PASSWORD
-	if [ -n "${MYSQL_ROOT_PASSWORD//[a-zA-Z0-9]/}" ]; then # Comprobamos que sea un valor alfanumerico
-		echo -e "\\aERROR: Must be alphanumeric, try again..."
-	else
-		# Si esta vacio ponemos el valor por defecto
-		MYSQL_ROOT_PASSWORD="${MYSQL_ROOT_PASSWORD:-$DEFAULT_MYSQL_ROOT_PASSWORD}"
-		break
-	fi
-done
-
-# Usuario de acceso a la base de datos
-while : ; do
-	echo -n -e "\\nEnter username for OpenGnsys console (${DEFAULT_OPENGNSYS_DB_USER}): "
-	read -r OPENGNSYS_DB_USER
-	if [ -n "${OPENGNSYS_DB_USER//[a-zA-Z0-9]/}" ]; then # Comprobamos que sea un valor alfanumerico
-		echo -e "\\aERROR: Must be alphanumeric, try again..."
-	else
-		# Si esta vacio ponemos el valor por defecto
-		OPENGNSYS_DB_USER="${OPENGNSYS_DB_USER:-$DEFAULT_OPENGNSYS_DB_USER}"
-		break
-	fi
-done
-
-# Clave de acceso a la base de datos
-while : ; do
-	echo -n -e "\\nEnter password for OpenGnsys console (${DEFAULT_OPENGNSYS_DB_PASSWD}): "
-	read -r OPENGNSYS_DB_PASSWD
-	if [ -n "${OPENGNSYS_DB_PASSWD//[a-zA-Z0-9]/}" ]; then # Comprobamos que sea un valor alfanumerico
-		echo -e "\\aERROR: Must be alphanumeric, try again..."
-	else
-		# Si esta vacio ponemos el valor por defecto
-		OPENGNSYS_DB_PASSWD="${OPENGNSYS_DB_PASSWD:-$DEFAULT_OPENGNSYS_DB_PASSWD}"
-		break
-	fi
-done
-
-# Clave de acceso del cliente
-while : ; do
-	echo -n -e "\\nEnter root password for OpenGnsys client (${DEFAULT_OPENGNSYS_CLIENT_PASSWD}): "
-	read -r OPENGNSYS_CLIENT_PASSWD
-	if [ -n "${OPENGNSYS_CLIENT_PASSWD//[a-zA-Z0-9]/}" ]; then # Comprobamos que sea un valor alfanumerico
-		echo -e "\\aERROR: Must be alphanumeric, try again..."
-	else
-		# Si esta vacio ponemos el valor por defecto
-		OPENGNSYS_CLIENT_PASSWD="${OPENGNSYS_CLIENT_PASSWD:-$DEFAULT_OPENGNSYS_CLIENT_PASSWD}"
-		break
-	fi
-done
-
-# Selección de clientes ogLive para descargar.
-while : ; do
-	echo -e "\\nChoose ogLive client to install."
-	echo -e "1) Kernel 4.13, 64-bit, EFI-compatible"
-	echo -e "2) Kernel 3.2, 32-bit"
-	echo -e "3) Both"
-	echo -n -e "Please, type a valid number (1): "
-	read -r OPT
-	case "$OPT" in
-		1|"")	OGLIVE="ogLive-xenial-4.13.0-17-generic-amd64-r5520.iso"
-			break ;;
-		2)	OGLIVE="ogLive-precise-3.2.0-23-generic-r5159.iso"
-			break ;;
-		3)	OGLIVE="ogLive-xenial-4.13.0-17-generic-amd64-r5520.iso ogLive-precise-3.2.0-23-generic-r5159.iso";
-			break ;;
-		*)	echo -e "\\aERROR: unknown option, try again."
-	esac
-done
-
-echo -e "\\n=============================="
-
-# Comprobar si se ha descargado el paquete comprimido (REMOTE=0) o sólo el instalador (REMOTE=1).
-PROGRAMDIR=$(readlink -e "$(dirname "$0")")
-PROGRAMNAME=$(basename "$0")
-OPENGNSYS_SERVER="opengnsys.es"
-DOWNLOADURL="https://$OPENGNSYS_SERVER/trac/downloads"
-if [ -d "$PROGRAMDIR/../installer" ]; then
-	REMOTE=0
-else
-	REMOTE=1
-fi
-BRANCH="devel"
-CODE_URL="https://codeload.github.com/opengnsys/OpenGnsys/zip/$BRANCH"
-API_URL="https://api.github.com/repos/opengnsys/OpenGnsys/branches/$BRANCH"
-
-WORKDIR=/tmp/opengnsys_installer
-mkdir -p $WORKDIR
-
-# Directorio destino de OpenGnsys.
-INSTALL_TARGET=/opt/opengnsys
-PATH=$PATH:$INSTALL_TARGET/bin
-
-# Registro de incidencias.
-OGLOGFILE=$INSTALL_TARGET/log/${PROGRAMNAME%.sh}.log
-LOG_FILE=/tmp/$(basename $OGLOGFILE)
-
-# Usuario del cliente para acceso remoto.
-OPENGNSYS_CLIENT_USER="opengnsys"
-
-# Nombre de la base datos y fichero SQL para su creación.
-OPENGNSYS_DATABASE="ogAdmBD"
-OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/${OPENGNSYS_DATABASE}.sql
-
-
 #####################################################################
 ####### Funciones de configuración
 #####################################################################
+
+# Devuelve en la variable PASSWORD la clave introducida por el usuario (o la indicada por defecto)
+function enterPassword ()
+{
+	local PASSWORD2
+	local DEFAULT_PASSWORD="$1"
+
+	while : ; do
+		stty -echo
+		read -r PASSWORD
+		stty echo
+		if [ -z "$PASSWORD" ]; then
+			# Si esta vacio ponemos el valor por defecto
+			PASSWORD="${PASSWORD:-$DEFAULT_PASSWORD}"
+			break
+		else
+			if [ -n "${PASSWORD//[a-zA-Z0-9]/}" ]; then # Comprobamos que sea un valor alfanumerico
+				echo -e "\\aERROR: Password must be alphanumeric, try again..."
+			else
+				echo -n -e "\\nConfirm password: "
+				stty -echo
+				read -r PASSWORD2
+				stty echo
+				if [ "$PASSWORD" == "$PASSWORD2" ]; then
+					break
+				else
+					echo -e "\\aERROR: Passwords don't match, try again."
+				fi
+			fi
+		fi
+		echo -n -e "Please, enter a new password (${DEFAULT_PASSWORD}): "
+	done
+}
+
+# Recoge los datos de configuración introducidos por el usuario.
+function userData ()
+{
+	####  AVISO: Puede editar configuración de acceso por defecto.
+	####  WARNING: Edit default access configuration if you wish.
+	DEFAULT_MYSQL_ROOT_PASSWORD="passwordroot"	# Clave por defecto root de MySQL
+	DEFAULT_OPENGNSYS_DB_USER="usuog"		# Usuario por defecto de acceso a la base de datos
+	DEFAULT_OPENGNSYS_DB_PASSWD="passusuog"		# Clave por defecto de acceso a la base de datos
+	DEFAULT_OPENGNSYS_CLIENT_PASSWD="og"		# Clave por defecto de acceso del cliente	
+
+	echo -e "\\nOpenGnsys Installation"
+	echo "=============================="
+
+	# Clave root de MySQL
+	echo -n -e "\\nEnter root password for MySQL (${DEFAULT_MYSQL_ROOT_PASSWORD}): "
+	enterPassword "$DEFAULT_MYSQL_ROOT_PASSWORD"
+	MYSQL_ROOT_PASSWORD="$PASSWORD"
+
+	# Usuario de acceso a la base de datos
+	while : ; do
+		echo -n -e "\\n\\nEnter username for OpenGnsys console (${DEFAULT_OPENGNSYS_DB_USER}): "
+		read -r OPENGNSYS_DB_USER
+		if [ -n "${OPENGNSYS_DB_USER//[a-zA-Z0-9]/}" ]; then # Comprobamos que sea un valor alfanumerico
+			echo -e "\\aERROR: Must be alphanumeric, try again..."
+		else
+			# Si esta vacio ponemos el valor por defecto
+			OPENGNSYS_DB_USER="${OPENGNSYS_DB_USER:-$DEFAULT_OPENGNSYS_DB_USER}"
+			break
+		fi
+	done
+
+	# Clave de acceso a la base de datos
+	echo -n -e "\\nEnter password for OpenGnsys console (${DEFAULT_OPENGNSYS_DB_PASSWD}): "
+	enterPassword "$DEFAULT_OPENGNSYS_DB_PASSWD"
+	OPENGNSYS_DB_PASSWD="$PASSWORD"
+
+	# Clave de acceso del cliente
+	echo -n -e "\\n\\nEnter root password for OpenGnsys client (${DEFAULT_OPENGNSYS_CLIENT_PASSWD}): "
+	enterPassword "$DEFAULT_OPENGNSYS_CLIENT_PASSWD"
+	OPENGNSYS_CLIENT_PASSWD="$PASSWORD"
+	unset PASSWORD
+
+	# Selección de clientes ogLive para descargar.
+	while : ; do
+		echo -e "\\n\\nChoose ogLive client to install."
+		echo -e "1) Kernel 5.0, 64-bit, EFI-compatible"
+		echo -e "2) Kernel 3.2, 32-bit"
+		echo -e "3) Both"
+		echo -n -e "Please, type a valid number (1): "
+		read -r OPT
+		case "$OPT" in
+			1|"")	OGLIVE="ogLive-bionic-5.0.0-15-generic-amd64-r20190515.97b8472.iso "
+				break ;;
+			2)	OGLIVE="ogLive-precise-3.2.0-23-generic-r5159.iso"
+				break ;;
+			3)	OGLIVE="ogLive-bionic-5.0.0-15-generic-amd64-r20190515.97b8472.iso  ogLive-precise-3.2.0-23-generic-r5159.iso";
+				break ;;
+			*)	echo -e "\\aERROR: unknown option, try again."
+		esac
+	done
+
+	echo -e "\\n=============================="
+}
+
+# Asigna valores globales de configuración para el script.
+function globalSetup ()
+{
+	PROGRAMDIR=$(readlink -e "$(dirname "$0")")
+	PROGRAMNAME=$(basename "$0")
+
+	# Comprobar si se ha descargado el paquete comprimido (REMOTE=0) o sólo el instalador (REMOTE=1).
+	OPENGNSYS_SERVER="opengnsys.es"
+	DOWNLOADURL="https://$OPENGNSYS_SERVER/trac/downloads"
+	if [ -d "$PROGRAMDIR/../installer" ]; then
+		REMOTE=0
+	else
+		REMOTE=1
+	fi
+	BRANCH="devel"
+	CODE_URL="https://codeload.github.com/opengnsys/OpenGnsys/zip/$BRANCH"
+	API_URL="https://api.github.com/repos/opengnsys/OpenGnsys/branches/$BRANCH"
+
+	# Directorios de instalación y destino de OpenGnsys.
+	WORKDIR=/tmp/opengnsys_installer
+	INSTALL_TARGET=/opt/opengnsys
+	PATH=$PATH:$INSTALL_TARGET/bin
+
+	# Registro de incidencias.
+	OGLOGFILE=$INSTALL_TARGET/log/${PROGRAMNAME%.sh}.log
+	LOG_FILE=/tmp/$(basename $OGLOGFILE)
+
+	# Usuario del cliente para acceso remoto.
+	OPENGNSYS_CLIENT_USER="opengnsys"
+	# Nombre de la base datos y fichero SQL para su creación.
+	OPENGNSYS_DATABASE="ogAdmBD"
+	OPENGNSYS_DB_CREATION_FILE=opengnsys/admin/Database/${OPENGNSYS_DATABASE}.sql
+}
 
 # Generar variables de configuración del instalador
 # Variables globales:
@@ -1581,7 +1590,18 @@ echo
 ####### Proceso de instalación de OpenGnsys
 #####################################################################
 
+# Sólo ejecutable por usuario root
+if [ "$(whoami)" != 'root' ]; then
+        echo "ERROR: this program must run under root privileges!!"
+        exit 1
+fi
+
+globalSetup
 echoAndLog "OpenGnsys installation begins at $(date)"
+# Introducir datos de configuración y establecer variables globales.
+userData
+
+mkdir -p $WORKDIR
 pushd $WORKDIR
 
 # Detectar datos iniciales de auto-configuración del instalador.
