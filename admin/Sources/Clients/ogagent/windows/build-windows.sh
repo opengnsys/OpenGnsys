@@ -1,5 +1,7 @@
 #!/bin/bash
+cd "$(dirname "$0")"
 export WINEARCH=win32
-export WINEPREFIX=$(realpath $(dirname $0)/wine)
+export WINEPREFIX=$PWD/wine
+grep -o "[0-9]*\.[0-9]*\.[0-9]*" ../src/VERSION > VERSION
 wine cmd /c c:\\ogagent\\build.bat
-chmod -x $(dirname $0)/../OGAgentSetup*.exe
+chmod -x ../OGAgentSetup*.exe

@@ -1,5 +1,5 @@
 ### Fichero de actualización de la base de datos.
-# OpenGnsys 1.1.1
+# OpenGnsys 1.1.1pre - OpenGnsys 1.1.1
 #use ogAdmBD
 
 # Eliminar procedimiento y disparador para evitar errores de ejecución.
