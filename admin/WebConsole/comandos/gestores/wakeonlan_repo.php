@@ -9,9 +9,17 @@ include_once("../../includes/restfunctions.php");
 	$cadenaip
 	$cadenamac
 
-*/
+ */
+
+//Multicast or Unicast
+preg_match_all('!\d{1}!', $atributos, $matches);
+
 // Capturamos todas las ids
 $macs = explode(";",$cadenamac);
+$ips = explode(';',$cadenaip);
+
+wol($matches[0][0], $macs, $ips);
+
 // Recorremos las ids y vemos cual es la ip del repositorio
 $repos = array();
 $reposAndMacs = array();
@@ -43,9 +51,6 @@ foreach($macs as $mac){
 	}
 	$rs->Cerrar();
 }
-
-//Multicast or Unicast
-$typeWol = preg_match_all('!\d{1}!', $atributos, $matches);
 
 // En este punto tenemos un array con todos los repos y cada uno de ellos con una lista de todas las macs que deben arrancar
 // Recorremos cada uno de ellos

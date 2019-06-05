@@ -25,14 +25,12 @@
 # CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-'''
+"""
 @author: Ramón M. Gómez, ramongomez at us dot es
-'''
+"""
 from __future__ import unicode_literals
 
-import subprocess
 import threading
-import thread
 import os
 import platform
 import time
@@ -48,8 +46,27 @@ from opengnsys.log import logger
 from opengnsys.scriptThread import ScriptExecutorThread
 
 
+# Check authorization header decorator
+def check_secret(fnc):
+    """
+    Decorator to check for received secret key and raise exception if it isn't valid.
+    """
+    def wrapper(*args, **kwargs):
+        try:
+            this, path, get_params, post_params, server = args  # @UnusedVariable
+            if this.random == server.headers['Authorization']:
+                fnc(*args, **kwargs)
+            else:
+                raise Exception('Unauthorized operation')
+        except Exception as e:
+            logger.error(e)
+            raise Exception(e)
+
+    return wrapper
+
+
 # Error handler decorator.
-def catchBackgroundError(fnc):
+def catch_background_error(fnc):
     def wrapper(*args, **kwargs):
         this = args[0]
         try:
@@ -62,29 +79,22 @@ def catchBackgroundError(fnc):
 class OpenGnSysWorker(ServerWorker):
     name = 'opengnsys'
     interface = None  # Bound interface for OpenGnsys
-    loggedin = False  # User session flag
+    REST = None  # REST object
+    logged_in = False  # User session flag
     locked = {}
     random = None     # Random string for secure connections
     length = 32       # Random string length
-
-    def checkSecret(self, server):
-        """
-        Checks for received secret key and raise exception if it isn't valid.
-        """
-        try:
-            if self.random != server.headers['Authorization']:
-                raise Exception('Unauthorized operation')
-        except Exception as e:
-            logger.error(e)
-            raise Exception(e)
 
     def onActivation(self):
         """
         Sends OGAgent activation notification to OpenGnsys server
         """
-        self.cmd = None
+        t = 0
+        # Generate random secret to send on activation
+        self.random = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(self.length))
         # Ensure cfg has required configuration variables or an exception will be thrown
-        self.REST = REST(self.service.config.get('opengnsys', 'remote'))
+        url = self.service.config.get('opengnsys', 'remote')
+        self.REST = REST(url)
         # Get network interfaces until they are active or timeout (5 minutes)
         for t in range(0, 300):
             try:
@@ -101,6 +111,29 @@ class OpenGnSysWorker(ServerWorker):
         # Raise error after timeout
         if not self.interface:
             raise e
+        # Loop to send initialization message
+        for t in range(0, 100):
+            try:
+                try:
+                    self.REST.sendMessage('ogagent/started', {'mac': self.interface.mac, 'ip': self.interface.ip,
+                                                              'secret': self.random, 'ostype': operations.os_type,
+                                                              'osversion': operations.os_version})
+                    break
+                except:
+                    # Trying to initialize on alternative server, if defined
+                    # (used in "exam mode" from the University of Seville)
+                    self.REST = REST(self.service.config.get('opengnsys', 'altremote'))
+                    self.REST.sendMessage('ogagent/started', {'mac': self.interface.mac, 'ip': self.interface.ip,
+                                                              'secret': self.random, 'ostype': operations.os_type,
+                                                              'osversion': operations.os_version, 'alt_url': True})
+                    break
+            except:
+                time.sleep(3)
+        # Raise error after timeout
+        if 0 < t < 100:
+            logger.debug('Successful connection after {} tries'.format(t))
+        elif t == 100:
+            raise Exception('Initialization error: Cannot connect to remote server')
         # Delete marking files
         for f in ['ogboot.me', 'ogboot.firstboot', 'ogboot.secondboot']:
             try:
@@ -109,27 +142,10 @@ class OpenGnSysWorker(ServerWorker):
                 pass
         # Copy file "HostsFile.FirstOctetOfIPAddress" to "HostsFile", if it exists
         # (used in "exam mode" from the University of Seville)
-        hostsFile = os.path.join(operations.get_etc_path(), 'hosts')
-        newHostsFile = hostsFile + '.' + self.interface.ip.split('.')[0]
-        if os.path.isfile(newHostsFile):
-            shutil.copyfile(newHostsFile, hostsFile)
-        # Generate random secret to send on activation
-        self.random = ''.join(random.choice(string.ascii_lowercase + string.digits) for _ in range(self.length))
-        # Send initialization message
-        try:
-            try:
-                self.REST.sendMessage('ogagent/started', {'mac': self.interface.mac, 'ip': self.interface.ip,
-                                                          'secret': self.random, 'ostype': operations.osType,
-                                                          'osversion': operations.osVersion})
-            except:
-                # Trying to initialize on alternative server, if defined
-                # (used in "exam mode" from the University of Seville)
-                self.REST = REST(self.service.config.get('opengnsys', 'altremote'))
-                self.REST.sendMessage('ogagent/started', {'mac': self.interface.mac, 'ip': self.interface.ip,
-                                                          'secret': self.random, 'ostype': operations.osType,
-                                                          'osversion': operations.osVersion, 'alt_url': True})
-        except:
-            logger.error('Initialization error')
+        hosts_file = os.path.join(operations.get_etc_path(), 'hosts')
+        new_hosts_file = hosts_file + '.' + self.interface.ip.split('.')[0]
+        if os.path.isfile(new_hosts_file):
+            shutil.copyfile(new_hosts_file, hosts_file)
 
     def onDeactivation(self):
         """
@@ -137,7 +153,7 @@ class OpenGnSysWorker(ServerWorker):
         """
         logger.debug('onDeactivation')
         self.REST.sendMessage('ogagent/stopped', {'mac': self.interface.mac, 'ip': self.interface.ip,
-                                                  'ostype': operations.osType, 'osversion': operations.osVersion})
+                                                  'ostype': operations.os_type, 'osversion': operations.os_version})
 
     def processClientMessage(self, message, data):
         logger.debug('Got OpenGnsys message from client: {}, data {}'.format(message, data))
@@ -148,19 +164,19 @@ class OpenGnSysWorker(ServerWorker):
         """
         user, sep, language = data.partition(',')
         logger.debug('Received login for {} with language {}'.format(user, language))
-        self.loggedin = True
+        self.logged_in = True
         self.REST.sendMessage('ogagent/loggedin', {'ip': self.interface.ip, 'user': user, 'language': language,
-                                                   'ostype': operations.osType, 'osversion': operations.osVersion})
+                                                   'ostype': operations.os_type, 'osversion': operations.os_version})
 
     def onLogout(self, user):
         """
         Sends session logout notification to OpenGnsys server
         """
         logger.debug('Received logout for {}'.format(user))
-        self.loggedin = False
+        self.logged_in = False
         self.REST.sendMessage('ogagent/loggedout', {'ip': self.interface.ip, 'user': user})
 
-    def process_ogclient(self, path, getParams, postParams, server):
+    def process_ogclient(self, path, get_params, post_params, server):
         """
         This method can be overridden to provide your own message processor, or better you can
         implement a method that is called exactly as "process_" + path[0] (module name has been removed from path
@@ -168,11 +184,11 @@ class OpenGnSysWorker(ServerWorker):
         * Example:
             Imagine this invocation url (no matter if GET or POST): http://example.com:9999/Sample/mazinger/Z
             The HTTP Server will remove "Sample" from path, parse arguments and invoke this method as this:
-            module.processMessage(["mazinger","Z"], getParams, postParams)
+            module.processMessage(["mazinger","Z"], get_params, post_params)
 
             This method will process "mazinger", and look for a "self" method that is called "process_mazinger",
             and invoke it this way:
-               return self.process_mazinger(["Z"], getParams, postParams)
+               return self.process_mazinger(["Z"], get_params, post_params)
 
             In the case path is empty (that is, the path is composed only by the module name, like in
             "http://example.com/Sample", the "process" method will be invoked directly
@@ -186,13 +202,18 @@ class OpenGnSysWorker(ServerWorker):
             operation = getattr(self, 'ogclient_' + path[0])
         except Exception:
             raise Exception('Message processor for "{}" not found'.format(path[0]))
-        return operation(path[1:], getParams, postParams)
+        return operation(path[1:], get_params, post_params)
 
-    def process_status(self, path, getParams, postParams, server):
+    def process_status(self, path, get_params, post_params, server):
         """
-        Returns client status.
+        Returns client status (OS type or execution status) and login status
+        :param path:
+        :param get_params:
+        :param post_params:
+        :param server:
+        :return: JSON object {"status": "status_code", "loggedin": boolean}
         """
-        res = {'status': '', 'loggedin': self.loggedin}
+        res = {'status': '', 'loggedin': self.logged_in}
         if platform.system() == 'Linux':        # GNU/Linux
             # Check if it's OpenGnsys Client.
             if os.path.exists('/scripts/oginit'):
@@ -211,68 +232,83 @@ class OpenGnSysWorker(ServerWorker):
             res['status'] = 'OSX'
         return res
 
-    def process_reboot(self, path, getParams, postParams, server):
+    @check_secret
+    def process_reboot(self, path, get_params, post_params, server):
         """
-        Launches a system reboot operation.
+        Launches a system reboot operation
+        :param path:
+        :param get_params:
+        :param post_params:
+        :param server: authorization header
+        :return: JSON object {"op": "launched"}
         """
         logger.debug('Received reboot operation')
-        self.checkSecret(server)
 
-        # Rebooting thread.
+        # Rebooting thread
         def rebt():
             operations.reboot()
         threading.Thread(target=rebt).start()
         return {'op': 'launched'}
 
-    def process_poweroff(self, path, getParams, postParams, server):
+    @check_secret
+    def process_poweroff(self, path, get_params, post_params, server):
         """
-        Launches a system power off operation.
+        Launches a system power off operation
+        :param path:
+        :param get_params:
+        :param post_params:
+        :param server: authorization header
+        :return: JSON object {"op": "launched"}
         """
         logger.debug('Received poweroff operation')
-        self.checkSecret(server)
 
-        # Powering off thread.
+        # Powering off thread
         def pwoff():
             time.sleep(2)
             operations.poweroff()
         threading.Thread(target=pwoff).start()
         return {'op': 'launched'}
 
-    def process_script(self, path, getParams, postParams, server):
+    @check_secret
+    def process_script(self, path, get_params, post_params, server):
         """
         Processes an script execution (script should be encoded in base64)
+        :param path:
+        :param get_params:
+        :param post_params: JSON object {"script": "commands"}
+        :param server: authorization header
+        :return: JSON object {"op": "launched"}
         """
         logger.debug('Processing script request')
-        self.checkSecret(server)
-        # Decoding script.
-        script = urllib.unquote(postParams.get('script').decode('base64')).decode('utf8')
+        # Decoding script
+        script = urllib.unquote(post_params.get('script').decode('base64')).decode('utf8')
         script = 'import subprocess; subprocess.check_output("""{}""",shell=True)'.format(script)
         # Executing script.
-        if postParams.get('client', 'false') == 'false':
+        if post_params.get('client', 'false') == 'false':
             thr = ScriptExecutorThread(script)
             thr.start()
         else:
             self.sendClientMessage('script', {'code': script})
         return {'op': 'launched'}
 
-    def process_logoff(self, path, getParams, postParams, server):
+    @check_secret
+    def process_logoff(self, path, get_params, post_params, server):
         """
-        Closes user session.
+        Closes user session
         """
         logger.debug('Received logoff operation')
-        self.checkSecret(server)
-        # Sending log off message to OGAgent client.
+        # Sending log off message to OGAgent client
         self.sendClientMessage('logoff', {})
         return {'op': 'sent to client'}
 
-    def process_popup(self, path, getParams, postParams, server):
+    @check_secret
+    def process_popup(self, path, get_params, post_params, server):
         """
-        Shows a message popup on the user's session.
+        Shows a message popup on the user's session
         """
         logger.debug('Received message operation')
-        self.checkSecret(server)
-        # Sending popup message to OGAgent client.
-        self.sendClientMessage('popup', postParams)
+        # Sending popup message to OGAgent client
+        self.sendClientMessage('popup', post_params)
         return {'op': 'launched'}
 
     def process_client_popup(self, params):

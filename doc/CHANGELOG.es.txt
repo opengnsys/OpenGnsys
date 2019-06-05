@@ -8,23 +8,32 @@ Lista de cambios incluidos en OpenGnsys 1.1.1 (Espeto)
 
 Tickets resueltos en módulo OpenGnsys Cloning Engine:
 #853	Revisar autodocumentación con doxygen
+#855	Sincronizadas en la 1.1.0 con rsync
 #863	smartPartition: incluir scritps de ejemplo de particionado personalizado para múltiples d
 iscos duros
 #864	FirstRunOnceWindows: scripts de ejemplo para installMiniSetup con ratón y teclado desacti
 vado
 #866	Si al restaurar usando la cache no hay espacio en la misma se finalizará la acción
+#893	configureOs no asigna nombre de host en Linux
 
 Tickets resueltos en módulo OpenGnsys Client:
 #847	La ISO del ogLive debe de utilzar la revisión de Git y no de SVN
 #887	Browser: mostrar aviso si falla la ejecución de un comando
+#905	deployImage falla con UNICAST-CACHE (corrección)
 
 Tickets resueltos en módulo OpenGnsys Server:
 #580	Correcciones del Core de OpenGnsys: ogAdmServer (corrección)
 #856	Mejoras en setserveraddr
+#860	El nombre de la plantilla del fichero PXE para el arranque del primer disco duro no utiliza la misma nomenclatura que el resto
+#878	sendFileMcast con más de una interfaz en el servidor
 #881	Personalizar prioridad de ejecución de proceso de torrents
 #883	Añadir soporte para syslog a ogAdmServer (mejora)
 #884	No ejecutar strip al compilar ogAdmserver
 #885	Eliminar ogAdmBoot
+#891	Fijar problema con Wake-On-Lan
+#892	Usar Wake-On-Lan en ogAdmServer y en repositorio
+#897	No usar tipo socket en ogAdmServer
+#900	Fichero de configuración unificado (duplicado de #140)
 
 Tickets resueltos en módulo OpenGnsys Repository Server:
 #873	Script para importar imagen de otro repositorio
@@ -36,13 +45,17 @@ Tickets resueltos en módulo OpenGnsys Web Admin Console:
 #816	Marcar ordenador de profesor
 #824	Iniciar sistema restaurado (no integrado)
 #842	Internacionalización de la consola web
+#895	Asistente de particionado: error al pasar de tabla de particiones MSDOS a GPT y más (corrección)
 
 Tickets resueltos en módulo OpenGnsys Installer:
 #784	Mejorar rendimiento de PHP sobre Apache
 #869	Compatibilidad de servidor con Ubuntu 18.04 LTS y CentOS 7.x
+#916	No mostrar claves en script de instalación
 
 Tickets genéricos resueltos:
+#785	Usar Grub2 como gestor PXE para soporte UEFI (tarea)
 #843	Incluir nombre de versión
+#917	Problemas de compatibilidad con Ubuntu 18.04 (corrección)
 
 
 Lista de cambios incluidos en OpenGnsys 1.1.0a (versión de mantenimiento)
@@ -52,13 +65,16 @@ Tickets resueltos en módulo OpenGnsys Cloning Engine:
 #851	Ampliar parámetros de una sesión multicast para los clientes (corrección)
 #868	ConfiguraOs: error al desinstalar el agente de sistema operativo antiguo (corrección)
 #871	Error al crear particiones lógicas en discos con sectores de 4 KB (corrección)
+#910	El control del éxito se verifica por la longitud de la cadena que retorna la función ogGetPath (corrección)
 
 Tickets resueltos en módulo OpenGnsys Client:
 #852	Apagado del cliente si tiempo de espera cambia de día (corrección)
+#913	OGAgent no conecta para algunas tarjetas de red con IP estática (corrección)
 
 Tickets resueltos en módulo OpenGnsys Server:
 #846	Configuración de logrotate para que incluya todos los servicios de OpenGnsys (corrección)
 #859	Gestor de los ficheros PXE duplicado
+#904	ogAdmClient se cuelga al programar una tarea para un equipo
 
 Tickets resueltos en módulo OpenGnsys Repository Server:
 #850	Problema con repositorio recién instalado (corrección)
@@ -69,12 +85,14 @@ Tickets resueltos en módulo OpenGnsys Web Admin Console:
 #849	Incorporar ordenadores de dhcp no admite comentarios tras la declarción de un host (corrección)
 #867	La ayuda en la consola incluirá más información
 #870	Netboot avanzado no crea la plantilla de arranque si el equipo no tiene asignado un repositorio (corrección)
+#909	Formulario asistente updateCache no asigna el REPO asociado a la imagen (corrección)
 
 Tickets resueltos en módulo OpenGnsys Installer:
 #876	Problemas al actualizar desde Subversion a Git (corrección)
 #879	Función checkVersion de opengnsys_update.sh del tar.gz da error si se ejecuta sobre la misma versión de OpenGnsys (corrección)
 #880	openGnsys_update.sh no deja la revisión, solo deja 1.1.0a (corrección)
 #886	Actualización de la 1.0.6b a la 1.1.0 da errores a la hora de agregar ordenadores/aulas (no válido)
+#912	opengnsys_update.sh desde la 1.0.6b a la 1.1.0a no deja la ApiToken del repo en su fichero de configuración (corrección)
 
 Tickets genéricos resueltos:
 #839	Errores detectado en API REST para Remote PC (corrección)

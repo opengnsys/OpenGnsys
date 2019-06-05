@@ -1,0 +1,1 @@
+{ "type" : "unicast", "clients" : [ { "addr" : "192.168.2.1", "mac" : "00AABBCCDD01" } ] }

@@ -21,8 +21,12 @@ include_once("../../includes/RecopilaIpesMacs.php");
 include_once("../includes/capturaacciones.php");
 //________________________________________________________________________________________________________
 
-define("IDCOMANDWAKEUP", 1);
-define("IDCOMANDSENDMESSAGE", 16);
+define('OG_CMD_ID_WAKEUP', 1);
+define('OG_CMD_ID_POWEROFF', 2);
+define('OG_CMD_ID_REBOOT', 5);
+define("OG_CMD_ID_SCRIPT", 8);
+define('OG_CMD_ID_SESSION', 9);
+define('OG_CMD_ID_SENDMESSAGE', 16);
 
 // Recoge parametros de seguimiento
 $sw_ejya="";
@@ -119,9 +123,19 @@ $cmd->CreaParametro("@ordprocedimiento",0,1);
 $cmd->CreaParametro("@ordtarea",0,1);
 
 /* PARCHE UHU heredado de la version 1.1.0: Si la accion a realizar es Arrancar incluimos una pagina para arrancar desde el repo */
-if($funcion == "nfn=Arrancar".chr(13))
-	include("wakeonlan_repo.php");
-/**/
+switch ($idcomando) {
+	case OG_CMD_ID_WAKEUP:
+		include("wakeonlan_repo.php");
+		break;
+	case OG_CMD_ID_SESSION:
+		session($cadenaip, $atributos);
+		break;
+	case OG_CMD_ID_POWEROFF:
+		poweroff($cadenaip);
+		break;
+	case OG_CMD_ID_REBOOT:
+		reboot($cadenaip);
+}
 
 if($ambito==0){ // Ambito restringido a un subconjuto de ordenadores con formato (idordenador1,idordenador2,etc)
 	$cmd->ParamSetValor("@restrambito",$idambito);
@@ -177,7 +191,11 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 		$ValorParametros=extrae_parametros($parametros,chr(13),'=');
 		$script=@urldecode($ValorParametros["scp"]);
 		if($sw_ejya=='on'){ 	
-			if ($idcomando != IDCOMANDSENDMESSAGE && $idcomando != IDCOMANDWAKEUP) {
+			if ($idcomando != OG_CMD_ID_SENDMESSAGE &&
+			    $idcomando != OG_CMD_ID_WAKEUP &&
+			    $idcomando != OG_CMD_ID_SESSION &&
+			    $idcomando != OG_CMD_ID_POWEROFF &&
+			    $idcomando != OG_CMD_ID_REBOOT) {
 			    // Envío al servidor
 			    $shidra=new SockHidra($servidorhidra,$hidraport); 
 			    if ($shidra->conectar()){ // Se ha establecido la conexión con el servidor hidra
@@ -201,28 +219,28 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 			    $resulhidra = 1;
 			}
 
-			// Comprobamos si el comando es soportado por el nuevo ogAgent
+			// Comprobamos si el comando es soportado por el nuevo OGAgent
 			$numip=0;
 			$ogAgentNuevo = false;
 			switch ($idcomando) {
-				case 2:
+				case OG_CMD_ID_POWEROFF:
  					// Apagar
 					$urlcomando = 'poweroff';
 					$ogAgentNuevo = true;
 					break;
-				case 5:
+				case OG_CMD_ID_REBOOT:
 					// Reiniciar
 					$urlcomando = 'reboot';
 					$ogAgentNuevo = true;
 					break;
-				case 8:
+				case OG_CMD_ID_SCRIPT:
 					// Ejecutar script 
 					$urlcomando = 'script';
 					$ogAgentNuevo = true;
 					$client = (isset ($_POST['modoejecucion']) && $_POST['modoejecucion'] != '' ) ? $_POST['modoejecucion'] : 'true';
 					$paramsPost = '{"script":"'.base64_encode($script).'","client":"'.$client.'"}';
 					break;
-				case 16:
+				case OG_CMD_ID_SENDMESSAGE:
 					// Enviar mensaje
 					$urlcomando = 'popup';
 					$ogAgentNuevo = true;

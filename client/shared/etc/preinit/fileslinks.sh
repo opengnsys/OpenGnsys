@@ -32,7 +32,7 @@ if [ -n "$OPENGNSYS" ]; then
     # Enlaces para Qt Embeded.
     QTDIR="/usr/local"
     mkdir -p $QTDIR/{etc,lib,plugins}
-    for i in $OGLIB/qtlib/*; do
+    for i in $OGLIB/qtlib/* $OGLIB/fonts; do
         [ -f $QTDIR/lib/$i ] || ln -fs $i $QTDIR/lib 2>/dev/null
     done
     for i in $OGLIB/qtplugins/*; do
