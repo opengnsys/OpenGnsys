@@ -52,9 +52,20 @@ function userData ()
 	DEFAULT_OPENGNSYS_DB_USER="usuog"		# Usuario por defecto de acceso a la base de datos
 	DEFAULT_OPENGNSYS_DB_PASSWD="passusuog"		# Clave por defecto de acceso a la base de datos
 	DEFAULT_OPENGNSYS_CLIENT_PASSWD="og"		# Clave por defecto de acceso del cliente	
+	DEFAULT_OGLIVE="ogLive-bionic-5.0.0-15-generic-amd64-r20190515.97b8472.iso "	# Cliente ogLive
 
 	echo -e "\\nOpenGnsys Installation"
 	echo "=============================="
+
+	if [[ $- =~ s ]]; then
+		echo -e "\\nNot interactive mode: setting default configuration values.\\n"
+		MYSQL_ROOT_PASSWORD="$DEFAULT_MYSQL_ROOT_PASSWORD"
+		OPENGNSYS_DB_USER="$DEFAULT_OPENGNSYS_DB_USER"
+		OPENGNSYS_DB_PASSWD="$DEFAULT_OPENGNSYS_DB_PASSWD"
+		OPENGNSYS_CLIENT_PASSWD="$DEFAULT_OPENGNSYS_CLIENT_PASSWD"
+		OGLIVE="$DEFAULT_OGLIVE"
+		return
+	fi
 
 	# Clave root de MySQL
 	echo -n -e "\\nEnter root password for MySQL (${DEFAULT_MYSQL_ROOT_PASSWORD}): "
