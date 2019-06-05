@@ -90,7 +90,6 @@ case "$TYPE" in
                 return $?
             fi
 
-            # Borrar cargador guardado con la misma etiqueta.
             BOOTLABEL=$(printf "Part-%02d-%02d" $1 $2)
             BOOTLOADER="shimx64.efi"
             # Obtener parcición EFI.
@@ -134,22 +133,14 @@ case "$TYPE" in
             [ -n "$EFIPART" ] || ogRaiseError $OG_ERR_PARTITION "ESP" || return $?
             EFIDIR=$(ogMount $EFIDISK $EFIPART) || exit $?
             # Comprobar cargador (si no existe buscar por defecto en ESP).
-            #LOADER=$(ogGetPath $1 $2 /Boot/bootmgfw.efi)
             LOADER=$(ogGetPath $EFIDIR/EFI/$BOOTLABEL/Boot/bootmgfw.efi)
             [ -z "$LOADER" ] && BOOTLABEL=Microsoft && LOADER=$(ogGetPath $EFIDIR/EFI/Microsoft/Boot/bootmgfw.efi)
             [ -n "$LOADER" ] || ogRaiseError $OG_ERR_NOTOS "$1 $2 ($TYPE, EFI)" || return $?
-            # El directorio se crea en la postconfiguración
-            ## Crear directorio para el cargador y copiar los ficheros.
-            #mkdir -p $EFIDIR/EFI/$BOOTLABEL
-            #cp -a $(dirname "$LOADER") $EFIDIR/EFI/$BOOTLABEL
-            # Borrar cargador guardado con la misma etiqueta.
-            BOOTNO=$(efibootmgr -v | awk -v L=$BOOTLABEL '{if ($2==L) print $1}')
-            [ -n "$BOOTNO" ] && efibootmgr -B -b ${BOOTNO:4:4}
+
             # Crear orden de arranque (con unos valores por defecto).
-            efibootmgr -C -d $(ogDiskToDev $EFIDISK) -p $EFIPART -L "$BOOTLABEL" -l "/EFI/$BOOTLABEL/Boot/BOOTMGFW.EFI"
+            ogNvramAddEntry $BOOTLABEL "/EFI${LOADER#*EFI}"
             # Marcar próximo arranque y reiniciar.
-            BOOTNO=$(efibootmgr -v | awk -v L="$BOOTLABEL" '{if ($2==L) print $1}')
-            [ -n "$BOOTNO" ] && efibootmgr -n ${BOOTNO:4:4}
+            ogNvramSetNext "$BOOTLABEL"
             reboot
         else
             # Arranque BIOS: comprueba si hay un cargador de Windows.
@@ -901,7 +892,7 @@ fi
 if ogIsEfiActive; then
     mv ${EFISECONDSTAGE}/EFI/$EFISUBDIR/EFI/BOOT/* ${EFISECONDSTAGE}/EFI/$EFISUBDIR/Boot
     rm -rf ${EFISECONDSTAGE}/EFI/$EFISUBDIR/EFI
-    cp $OGLIB/shim/shimx64.efi ${EFISECONDSTAGE}/EFI/$EFISUBDIR/Boot
+    cp /usr/lib/shim/shimx64.efi.signed ${EFISECONDSTAGE}/EFI/$EFISUBDIR/Boot
     # Nombre OpenGnsys para cargador
     cp ${EFISECONDSTAGE}/EFI/$EFISUBDIR/Boot/{shimx64.efi,ogloader.efi}
 fi 
@@ -1040,7 +1031,7 @@ fi
 if ogIsEfiActive; then
     mv ${EFISECONDSTAGE}/EFI/$EFISUBDIR/EFI/BOOT/* ${EFISECONDSTAGE}/EFI/$EFISUBDIR/Boot
     rm -rf ${EFISECONDSTAGE}/EFI/$EFISUBDIR/EFI
-    cp $OGLIB/shim/shimx64.efi ${EFISECONDSTAGE}/EFI/$EFISUBDIR/Boot/shimx64.efi
+    cp /usr/lib/shim/shimx64.efi.signed ${EFISECONDSTAGE}/EFI/$EFISUBDIR/Boot/shimx64.efi
     # Nombre OpenGnsys para cargador
     cp ${EFISECONDSTAGE}/EFI/$EFISUBDIR/Boot/{shimx64.efi,ogloader.efi}
 fi

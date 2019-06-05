@@ -43,8 +43,8 @@ efibootmgr -a -b $NUMENTRY &>/dev/null
 #/**
 #         ogNvramAddEntry
 #@brief   Crea nueva entrada en el gestor de arranque (NVRAM), opcionalmente la incluye al final del orden de arranque.
-#@param    Str_Label_entry Etiqueta de la entrada a crear.
-#@param    Str_BootLoader  Cargador de arranque.
+#@param    Str_Label_entry Número de disco o etiqueta de la entrada a crear.
+#@param    Str_BootLoader  Número de partición o cargador de arranque.
 #@param    Bool_Incluir_Arranque  Incluir en el orden de arranque (por defecto FALSE) (opcional)
 #@return  (nada)
 #@exception OG_ERR_FORMAT    formato incorrecto.
@@ -57,6 +57,7 @@ local EFIDISK EFIPART BOOTLABEL BOOTLOADER ADDORDER
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME Str_label_entry Str_boot_loader [ Bool_add_bootorder ]" \
+           "$FUNCNAME 1 2 TRUE" \
            "$FUNCNAME grub /EFI/grub/grubx64.efi TRUE" \
            "$FUNCNAME Windows /EFI/Microsoft/Boot/bootmgfw.efi"
     return
@@ -72,8 +73,15 @@ read -e EFIDISK EFIPART <<<"$(ogGetEsp)"
 [ -n "$EFIPART" ] || ogRaiseError $OG_ERR_NOTFOUND "ESP" || return $?
 
 # Recogemos parámetros
-BOOTLABEL="$1"
-BOOTLOADER="$2"
+# Distinguimos si es disco/partición o etiqueta/cargador
+if [[ "$1$2" =~ ^([0-9]+)$ ]]; then
+    BOOTLABEL=$(printf "Part-%02d-%02d" $1 $2)
+    BOOTLOADER="/EFI/$BOOTLABEL/Boot/ogloader.efi"
+else
+    BOOTLABEL="$1"
+    BOOTLOADER="$2"
+fi
+
 
 # Si existe entrada con la misma etiqueta la borramos
 ogNvramDeleteEntry "$BOOTLABEL" 2>/dev/null
@@ -302,7 +310,7 @@ configfile \$prefix/grub.cfg
 EOT
 
 # Provisional: confirmar si el segundo archivo se utiliza
-#cp $EFIGRUBDIR/grub.cfg "$EFIDIR/EFI/$BOOTLABEL/grub.cfg"
+cp $EFIGRUBDIR/grub.cfg "$EFIDIR/EFI/$BOOTLABEL/grub.cfg"
 }
 
 
