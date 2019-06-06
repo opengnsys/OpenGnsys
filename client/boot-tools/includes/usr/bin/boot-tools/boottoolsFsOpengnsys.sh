@@ -34,8 +34,6 @@ then
 	exit 1
 fi
 
-
-
 #damos permiso al directorio de scripts 
 chmod -R 775 ${SVNCLIENTDIR}/includes/usr/bin/*
 
@@ -43,6 +41,7 @@ chmod -R 775 ${SVNCLIENTDIR}/includes/usr/bin/*
 cp -av ${SVNCLIENTDIR}/includes/* ${OGCLIENTMOUNT}/
 mkdir -p ${OGCLIENTMOUNT}/opt/opengnsys/
 cp -av ${SVNCLIENTSTRUCTURE}/* ${OGCLIENTMOUNT}/opt/opengnsys/
+mkdir -p ${OGCLIENTMOUNT}/opt/opengnsys/lib/engine/bin/
 cp -av ${SVNCLIENTENGINE}/* ${OGCLIENTMOUNT}/opt/opengnsys/lib/engine/bin/
 
 if [ $? -ne 0 ]
@@ -62,19 +61,9 @@ cp -av ${SVNCLIENTSTRUCTURE}/lib/fonts $OGCLIENTMOUNT/usr/local/lib
 cp -av ${SVNCLIENTSTRUCTURE}/lib/qtplugins/* $OGCLIENTMOUNT/usr/local/plugins
 cp -av ${SVNCLIENTSTRUCTURE}/etc/*.qmap $OGCLIENTMOUNT/usr/local/etc
 
-# Browser.
-cp -av ${SVNCLIENTSTRUCTURE}/bin/browser $OGCLIENTMOUNT/bin
-if [ $? -ne 0 ]; then 
-	echo "$FUNCNAME(): Copying Browser : ERROR"
-	exit 1
-fi
-
-# ogAdmClient.
-cp -av ${SVNCLIENTSTRUCTURE}/bin/ogAdmClient $OGCLIENTMOUNT/bin
-if [ $? -ne 0 ]; then 
-	echo "$FUNCNAME(): Copying ogAdmClient: ERROR"
-	exit 1
-fi
+# Browser y ogAdmClient.
+[ -x ${SVNCLIENTSTRUCTURE}/bin/browser ] && cp -av ${SVNCLIENTSTRUCTURE}/bin/browser $OGCLIENTMOUNT/bin
+[ -x ${SVNCLIENTSTRUCTURE}/bin/ogAdmClient ] && cp -av ${SVNCLIENTSTRUCTURE}/bin/ogAdmClient $OGCLIENTMOUNT/bin
 
 # El fichero de configuración debe sustituir a los 2 ficheros (borrar las 2 líneas).
 echo "${VERSIONBOOTTOOLS}-${OSCODENAME}-${OSRELEASE}-${GITRELEASE}" > /$NAMEISOCLIENTFILE
