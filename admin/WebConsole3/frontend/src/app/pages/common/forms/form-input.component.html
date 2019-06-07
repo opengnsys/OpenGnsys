@@ -8,7 +8,7 @@
       <textarea class="form-control" *ngIf="field.type == 'textarea'" [name]="field.name" [(ngModel)]="model[field.field]"></textarea>
       <input *ngIf="field.type == 'checkbox'" [name]="field.name" icheck checkbox-class="icheckbox_square-blue" radio-class="iradio_square-blue" type="checkbox" class="selection-checkbox" [(ngModel)]="model[field.field]" />
       <select *ngIf="field.type == 'select'" [compareWith]="compareFn" [name]="field.name" [(ngModel)]="model[field.field]">
-        <option *ngFor="let option of field.options.items" [ngValue]="getValue(field, option)">{{option[field.options.label]|translate}}</option>
+        <option *ngFor="let option of field.options.items" [ngValue]="getValue(field, option)">{{getLabel(field, option)|translate}}</option>
       </select>
     </div>
   </div>

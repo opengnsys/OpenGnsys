@@ -7,7 +7,7 @@ export class ClientSerializer extends Serializer {
         // @ts-ignore
         client.repository = (client.repository && typeof client.repository === 'object') ? client.repository.id : client.repository;
         // @ts-ignore
-        client.hardwareProfile = (client.hardwareProfile) ? client.hardwareProfile.id : null;
+        client.hardwareProfile =  (client.hardwareProfile && typeof client.hardwareProfile === 'object') ? client.hardwareProfile.id : client.hardwareProfile;
         // @ts-ignore
         client.netboot = (client.netboot && typeof client.netboot === 'object') ? client.netboot.id : client.netboot;
         return super.toJson(client);

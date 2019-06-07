@@ -19,8 +19,8 @@
         </div>
         <div class="col-md-4">
           <span translate="part_table"></span>: <b>
-            <select name="partTableType" [(ngModel)]="diskConfig.parttable.type" (change)="checkPartitionTableType()">
-              <option  *ngFor="let partitionTableTypes of partitionTableTypes">{{partitionTableTypes.type}}</option>
+            <select name="partTableType" [(ngModel)]="diskConfig.parttable" (change)="checkPartitionTableType()">
+              <option  *ngFor="let partitionTableType of partitionTableTypes" [ngValue]="partitionTableType">{{partitionTableType.type}}</option>
             </select></b>
         </div>
         <div class="col-md-4">
@@ -39,11 +39,11 @@
         <div class="col-md-12">
           <table col-resizable class="disk-partitions" [elements]="diskConfig.partitions" cr-update-property="usage" (onResize)="updatePartitionUsage($event)">
             <tr>
-              <td *ngFor="let partition of diskConfig.partitions"  [style]="sanitizer.bypassSecurityTrustStyle('width: '+ partition.usage + '%; background-color:' + getPartitionColor(partition))">
+              <td *ngFor="let partition of diskConfig.partitions"  [style]="sanitizer.bypassSecurityTrustStyle('width: '+ partition.usage + '%; background-color:' + ogCommonService.getPartitionColor(partition))">
                 <span><span translate="{{partition.type}}"></span> ({{partition.usage}}%)</span>
-                <table *ngIf="partition.partitions && partition.partitions.length > 0" [elements]="partition.partitions" col-resizable class="disk-partitions" cr-update-property="usage" (onResize)="updateExtendedPartitions($event)" cr-force-refresh="refresh-extended-partitions">
+                <table *ngIf="partition.partitions && partition.partitions.length > 0" col-resizable class="disk-partitions" [elements]="partition.partitions" cr-update-property="usage" (onResize)="updateExtendedPartitionsUsage($event)">
                   <tr>
-                    <td *ngFor="let extendedPartition of partition.partitions" [style]="sanitizer.bypassSecurityTrustStyle('width: '+extendedPartition.usage+'%; background-color: '+ getPartitionColor(extendedPartition))">
+                    <td *ngFor="let extendedPartition of partition.partitions" [style]="sanitizer.bypassSecurityTrustStyle('width: '+extendedPartition.usage+'%; background-color: '+ ogCommonService.getPartitionColor(extendedPartition))">
                       <span>{{extendedPartition.type}} ({{extendedPartition.usage}}%)</span>
                     </td>
                   </tr>
@@ -72,39 +72,51 @@
             <tr [ngClass]="index%2 == 0 ? 'odd' : 'even'" *ngIf="partition.partition != 0">
               <td>{{partition.partition}} ({{getSizeInGB(partition.size)}}GB)</td>
               <td>
-                <select  name="partitionType" [disabled]="partTableTypeIsGPT() && index == 0 && isEFI(partition)"  [(ngModel)]="partition.type" (change)="checkPartitionType(partition)">
+                <select  name="partitionType" [disabled]="partTableTypeIsGPT() && index == 0 && ogCommonService.isEFI(partition)"  [(ngModel)]="partition.type" (change)="checkPartitionType(partition)">
                   <option *ngFor="let partitionType of diskConfig.parttable.partitions">{{partitionType.type}}</option>
                 </select>
               </td>
-              <td>{{partition.filesystem}}</td>
+              <td>
+                <select  name="partitionType" [disabled]="partTableTypeIsGPT() && index == 0 && ogCommonService.isEFI(partition)"  [(ngModel)]="partition.filesystem" >
+                  <option *ngFor="let partitionFilesystem of constants.filesystems">{{partitionFilesystem}}</option>
+                </select>
+              </td>
               <td>
                 <input step=".01" name="partitionSize"  type="number" [(ngModel)]="partition.size" (change)="setPartitionUsage(diskConfig, partition)"/>
+                ({{getSizeInGB(partition.size)}} GB)
               </td>
               <td>
                 <input step=".01" name="partitionUsage" type="number" [(ngModel)]="partition.usage" (change)="updatePartitionUsage(partition)">
                 <span>%</span>
               </td>
               <td>
-                <div *ngIf="isEXTENDED(partition) != true" class="checkbox clip-check check-primary checkbox-inline" style="margin-top: 0">
+                <div *ngIf="ogCommonService.isEXTENDED(partition) != true" class="checkbox clip-check check-primary checkbox-inline" style="margin-top: 0">
                   <input name="format" icheck checkbox-class="icheckbox_square-blue" radio-class="iradio_square-blue" type="checkbox" class="selection-checkbox" value="true" [(ngModel)]="partition.format" />
                 </div>
               </td>
               <td>
-                <button *ngIf="!(partTableTypeIsGPT() && $index == 0 && isEFI(partition))" class="btn btn-danger btn-xs"><i class="fa fa-times" (click)="removePartition(partition)"></i></button>
+                <button *ngIf="!(partTableTypeIsGPT() && $index == 0 && ogCommonService.isEFI(partition))" class="btn btn-danger btn-xs"><i class="fa fa-times" (click)="removePartition(partition)"></i></button>
               </td>
-              <td *ngIf="isEXTENDED(partition) == true">
+              <td *ngIf="ogCommonService.isEXTENDED(partition) == true">
                 <button class="btn btn-primary btn-xs"><i class="fa fa-plus" (click)="addExtendedPartition(partition)"></i></button>
               </td>
             </tr>
             <tr *ngFor="let extendedPartition of partition.partitions" class="extended" ng-class="{'odd': $index%2 == 0, 'even': $index%2 != 0}">
               <td>{{extendedPartition.partition}}</td>
               <td>
-                <select name="extendedPartitionType" [(ngModel)]="extendedPartition.type" (change)="checkPartitionType(extendedPartition)">
+                <select name="extendedPartitionType" [(ngModel)]="extendedPartition.type" (change)="checkPartitionType(extendedPartition, partition)">
                   <option *ngFor="let partitionType of diskConfig.parttable.partitions">{{partitionType.type}}</option>
                 </select>
               </td>
-              <td>{{extendedPartition.filesystem}}</td>
-              <td><input step=".01" name="extendedPartitonSize" type="number"[(ngModel)]="extendedPartition.size" (change)="updateExtendedPartitions(extendedPartition)"/></td>
+              <td>
+                <select  name="extendedPartitionType" [(ngModel)]="extendedPartition.filesystem" >
+                  <option *ngFor="let partitionFilesystem of constants.filesystems">{{partitionFilesystem}}</option>
+                </select>
+              </td>
+              <td>
+                <input step=".01" name="extendedPartitonSize" type="number"[(ngModel)]="extendedPartition.size" (change)="updateExtendedPartitions(extendedPartition)"/>
+                ({{getSizeInGB(extendedPartition.size)}} GB)
+              </td>
               <td>
                 <input step=".01" name="extendedPartitionUsage" type="number"[(ngModel)]="extendedPartition.usage" (change)="updateExtendedPartitionsUsage(extendedPartition)">
                 <span>%</span>

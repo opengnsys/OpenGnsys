@@ -42,7 +42,9 @@ export class OgSweetAlertService {
 
     }).then((response) => {
       if (response.dismiss) {
-        cancelcallback(response);
+        if (typeof cancelcallback === 'function') {
+          cancelcallback(response);
+        }
       } else {
         okcallback(response);
       }

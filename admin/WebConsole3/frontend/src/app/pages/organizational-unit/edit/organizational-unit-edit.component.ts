@@ -41,6 +41,7 @@ export class OrganizationalUnitEditComponent implements OnInit {
           data => {
               this.constants = data.constants;
               this.formType = new OrganizationalUnitFormType().getForm();
+
               this.activatedRoute.paramMap.subscribe(
                   (route: any) => {
                       if (route.params.id) {
@@ -54,9 +55,29 @@ export class OrganizationalUnitEditComponent implements OnInit {
                           );
                       } else {
                           this.ou = new OrganizationalUnit();
-                          this.ou.networkSettings = new NetworkSettings();
-                          this.ou.networkSettings.p2pMode = this.constants.ou.options.p2p.modes[0];
-                          this.ou.networkSettings.mcastMode = this.constants.ou.options.multicast.modes[0];
+                          this.activatedRoute.queryParams.subscribe(
+                              query => {
+                                  if (query.parent) {
+                                      // Si viene de un padre, copiamos sus propiedades
+                                      this.ou.parent = query.parent;
+                                      // @ts-ignore
+                                      this.organizationalUnitService.read(this.ou.parent).subscribe(
+                                          parent => {
+                                              this.ou.networkSettings = parent.networkSettings;
+                                          },
+                                          error => {
+                                              this.ou.networkSettings = new NetworkSettings();
+                                              this.ou.networkSettings.p2pMode = this.constants.ou.options.p2p.modes[0];
+                                              this.ou.networkSettings.mcastMode = this.constants.ou.options.multicast.modes[0];
+                                          }
+                                      );
+                                  } else {
+                                      this.ou.networkSettings = new NetworkSettings();
+                                      this.ou.networkSettings.p2pMode = this.constants.ou.options.p2p.modes[0];
+                                      this.ou.networkSettings.mcastMode = this.constants.ou.options.multicast.modes[0];
+                                  }
+                              }
+                          );
                       }
                   }
               );

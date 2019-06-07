@@ -60,6 +60,9 @@ export class ClientComponent implements OnInit {
                     this.clientService.read(id).subscribe(
                         client => {
                             this.client = client;
+                            this.ogCommonService.selectedClients = {};
+                            this.ogCommonService.selectedClients[client.id] = client;
+
                             this.client.disksConfig = this.ogCommonService.getDisksConfigFromPartitions(this.client.partitions);
 
                             const self = this;
@@ -151,7 +154,7 @@ export class ClientComponent implements OnInit {
                     (partition.os || partition.filesystem),
                     partition.percentOfDisk + '%'
                 ]);
-                diskPieChartColors[0].backgroundColor.push(self.getPartitionColor(partition));
+                diskPieChartColors[0].backgroundColor.push(self.ogCommonService.getPartitionColor(partition));
             }
         });
         const diskChartOptions: ChartOptions = {
@@ -187,23 +190,6 @@ export class ClientComponent implements OnInit {
             + series.percentOfDisk + '%</div>';
     }
 
-    getPartitionColor(partition) {
-        let color = 'rgb(252, 90, 90)';
-
-        // Para la partición de datos se usa un color específico
-        if (partition.osName === 'DATA') {
-            color = 'rgb(237,194,64)';
-        } else if (partition.filesystem === 'NTFS') {
-            color = 'rgb(0,192, 239)';
-        } else if (partition.filesystem.match('EXT')) {
-            color = 'rgb(96, 92, 168)';
-        } else if (partition.filesystem.match('LINUX-SWAP')) {
-            color = 'rgb(84, 84, 84)';
-        } else if (partition.filesystem.match('CACHE')) {
-            color = 'rgb(252, 90, 90)';
-        }
-        return color;
-    }
 
     save() {
         let request: Observable<Client>;

@@ -7,17 +7,18 @@ import {Router} from '@angular/router';
 import {Injectable} from '@angular/core';
 import * as _ from 'lodash';
 import {environment} from '../../environments/environment';
+import {Execution} from '../model/command';
 
 @Injectable({
   providedIn: 'root'
 })
 export class OGCommandsService {
   public ogInstructions = '';
-  public execution: any;
+  public execution: Execution;
   private commands: any;
 
   constructor(private router: Router, private ogCommonService: OgCommonService, private toaster: ToasterService, private ogSweetAlert: OgSweetAlertService,  private commandService: CommandService, private translate: TranslateService) {
-    this.execution = {};
+    this.execution = new Execution();
     this.commands = environment.commands;
   }
 

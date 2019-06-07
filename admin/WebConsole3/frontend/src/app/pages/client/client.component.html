@@ -69,7 +69,7 @@
                                             <tbody *ngIf="partition.size > 0">
                                             <tr ng-class="{'odd': $index%2 == 0, 'even': $index%2 != 0}">
                                                 <td>{{partition.numPartition}}</td>
-                                                <td>{{partition.parttype}}</td>
+                                                <td>{{partition.type}}</td>
                                                 <td>{{partition.filesystem}}</td>
                                                 <td>{{getSizeInGB(partition.size)}} GB</td>
                                                 <td><span class="badge"

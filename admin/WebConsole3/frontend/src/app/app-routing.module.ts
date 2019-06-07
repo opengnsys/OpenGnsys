@@ -30,6 +30,7 @@ import {CreateImageCommandComponent} from './pages/command/create-image-command/
 import {DeleteCacheImageCommandComponent} from './pages/command/delete-cache-image-command/delete-cache-image-command.component';
 import {FormatCommandComponent} from './pages/command/format-command/format-command.component';
 import {PartitionFormatCommandComponent} from './pages/command/partition-format-command/partition-format-command.component';
+import {NetbootClientsComponent} from './pages/netboot/clients/netboot-clients.component';
 
 
 const routes: Routes = [
@@ -193,6 +194,10 @@ const routes: Routes = [
       {
         path: 'netboots/create',
         component: NetbootEditComponent
+      },
+      {
+        path: 'netboots/clients',
+        component: NetbootClientsComponent
       },
       {
         path: 'user/profile',

@@ -102,7 +102,7 @@ export class DeleteCacheImageCommandComponent implements OnInit {
         this.execution.script += '\n';
       }
     }
-    //this.execution.script = this.execution.script.replace(/\"/g, '\\"').replace(/\$/g, '\\\$');
+    // this.execution.script = this.execution.script.replace(/\"/g, '\\"').replace(/\$/g, '\\\$');
     this.execution.type = 'RUN_SCRIPT';
     this.execution.sendConfig = true;
 

@@ -14,7 +14,9 @@ import {Router} from '@angular/router';
 })
 export class NetbootComponent implements OnInit {
   searchText: any;
-  netboots: any[];
+  netboots: any[] = [];
+  biosNetboots: any[] = [];
+  uefiNetboots: any[] = [];
   tableOptions: any;
 
   // this tells the tabs component which Pages
@@ -43,6 +45,14 @@ export class NetbootComponent implements OnInit {
     this.netbootService.list().subscribe(
       response => {
         this.netboots = response;
+        const self = this;
+        this.netboots.forEach((netboot) => {
+          if (netboot.type && netboot.type === 'uefi') {
+              self.uefiNetboots.push(netboot);
+          } else {
+            self.biosNetboots.push(netboot);
+          }
+        });
       },
       error => {
         this.toaster.pop({type: 'error', title: 'error', body: error});

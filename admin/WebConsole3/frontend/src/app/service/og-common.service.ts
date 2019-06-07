@@ -282,7 +282,7 @@ export class OgCommonService {
             } else {
                 // Comprobar el tipo de partición dependiendo del código
                 const elements = partitionTable.partitions.filter((element) => (element.id === partition.partitionCode));
-                partition.parttype = (elements.length > 0) ? elements[0].type : '';
+                partition.type = (elements.length > 0) ? elements[0].type : '';
                 // Si es cache, actualizar su contenido
                 if (partition.partitionCode === 'ca') {
                     // actualizar el contenido de la cache
@@ -350,5 +350,62 @@ export class OgCommonService {
         } else {
             array.push(component.id);
         }
+    }
+
+    getPartitionColor(partition) {
+        let color = '#c5e72b';
+        // Para la partición de datos se usa un color específico
+        if (this.isDATA(partition)) {
+            color = 'rgb(237,194,64)';
+        } else if (this.isEFI(partition)) {
+            color = '#bfe4e5';
+        } else if (this.isWINDOWS(partition)) {
+            color = '#00c0ef';
+        } else if (this.isLINUXSWAP(partition)) {
+            color = '#545454';
+        } else if (this.isLINUX(partition)) {
+            color = '#605ca8';
+        } else if (this.isCACHE(partition)) {
+            color = '#FC5A5A';
+        } else if (this.isFreeSpace(partition)) {
+            color = '#bcbcbc';
+        }
+        return color;
+    }
+
+    isEFI(partition) {
+        return partition.type === 'EFI';
+    }
+
+    isCACHE(partition) {
+        return partition.type === 'CACHE';
+    }
+
+    isEXTENDED(partition) {
+        return partition.type === 'EXTENDED';
+    }
+
+    isWINDOWS(partition) {
+        return partition.type === 'NTFS' || partition.type === 'WINDOWS';
+    }
+
+    isLINUX(partition) {
+        return typeof partition.type === 'string' && partition.type.includes('LINUX');
+    }
+
+    isLINUXSWAP(partition) {
+        return partition.type === 'LINUX-SWAP';
+    }
+
+    isDATA(partition) {
+        return partition.type === 'DATA';
+    }
+
+    isUNKNOWN(partition) {
+        return partition.type === 'UNKNOWN';
+    }
+
+    isFreeSpace(partition) {
+        return partition.type === 'free_space';
     }
 }

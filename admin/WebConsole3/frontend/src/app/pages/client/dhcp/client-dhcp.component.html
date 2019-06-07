@@ -11,7 +11,7 @@
     <div>
         <div class="col-md-12">
             <div class="box-tools pull-right">
-                <button class="btn btn-primary" translate="save" (click)="save()"></button>
+                <button class="btn btn-primary" translate="save" [disabled]="clients.length == 0" (click)="save()"></button>
             </div>
         </div>
     </div>
@@ -81,23 +81,25 @@
                                                 <input type="text" name="netdriver" class="form-control" [(ngModel)]="commonProperties.netdriver" />
                                             </div>
                                         </div>
-                                        <div class="form-group col-md-3">
-                                            <label for="oglive" translate="oglive">
-                                                <span class="symbol required ng-scope"></span>
-                                            </label>
-                                            <select class="form-control" required="true" [(ngModel)]="commonProperties.oglive" name="oglive">
-                                                <option *ngFor="let item of constants.ogliveinfo" [value]="item.directory">
-                                                    {{item.directory}}
-                                                </option>
-                                            </select>
+                                        <div class="col-xs-3">
+                                            <div class="form-group">
+                                                <label for="oglive" class="control-label" translate="oglive">
+                                                </label>
+                                                <select class="form-control" required="true" [(ngModel)]="commonProperties.oglive" name="oglive">
+                                                    <option *ngFor="let item of constants.ogliveinfo" [value]="item.directory">
+                                                        {{item.directory}}
+                                                    </option>
+                                                </select>
+                                            </div>
                                         </div>
-                                        <div class="form-group col-md-2">
-                                            <label for="netboot" translate="netboot">
-                                                <span class="symbol required ng-scope"></span>
-                                            </label>
-                                            <select class="form-control" required="true" [(ngModel)]="commonProperties.netboot" name="netboot">
-                                                <option *ngFor="let item of netboots" [value]="item.id">{{item.name}}</option>
-                                            </select>
+                                        <div class="col-md-2">
+                                            <div class="form-group">
+                                                <label for="netboot" class="control-label" translate="netboot">
+                                                </label>
+                                                <select class="form-control" required="true" [(ngModel)]="commonProperties.netboot" name="netboot">
+                                                    <option *ngFor="let item of netboots" [value]="item.id">{{item.name}}</option>
+                                                </select>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

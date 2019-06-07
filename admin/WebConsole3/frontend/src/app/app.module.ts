@@ -80,6 +80,7 @@ import {FormatCommandComponent} from './pages/command/format-command/format-comm
 import {PartitionFormatCommandComponent} from './pages/command/partition-format-command/partition-format-command.component';
 import {ColResizableDirective} from './pages/common/directive/col-resizable.directive';
 import { NgxDaterangepickerMd } from 'ngx-daterangepicker-material';
+import {NetbootClientsComponent} from './pages/netboot/clients/netboot-clients.component';
 
 
 @NgModule({
@@ -144,6 +145,7 @@ import { NgxDaterangepickerMd } from 'ngx-daterangepicker-material';
     TraceComponent,
     NetbootComponent,
     NetbootEditComponent,
+    NetbootClientsComponent,
     ProfileComponent,
     OgCommandsPipe
   ],
@@ -182,6 +184,7 @@ import { NgxDaterangepickerMd } from 'ngx-daterangepicker-material';
     TraceComponent,
     NetbootComponent,
     NetbootEditComponent,
+    NetbootClientsComponent,
     ProfileComponent
   ],
   imports: [

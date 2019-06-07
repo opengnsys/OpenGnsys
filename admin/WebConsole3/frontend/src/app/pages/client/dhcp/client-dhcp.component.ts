@@ -62,7 +62,7 @@ export class ClientDhcpComponent implements OnInit {
             (repositories) => {
                 this.repositories = repositories;
                 this.commonProperties.repository = this.repositories[0].id;
-                if (!this.hardwareProfiles) {
+                if (this.hardwareProfiles.length === 0) {
                     this.hardwareProfileService.list().subscribe(
                         (response) => {
                             this.hardwareProfiles = response;
@@ -201,8 +201,12 @@ export class ClientDhcpComponent implements OnInit {
                 // Si se indicó un padre en la url, se añade dicha propiedad
                 client.organizationalUnit = ou;
                 client.idproautoexec = 0;
+                client.repository = this.commonProperties.repository;
+                client.hardwareProfile = this.commonProperties.hardwareProfile;
                 client.netdriver = this.commonProperties.netdriver;
                 client.netiface = this.commonProperties.netiface;
+                client.netboot = this.commonProperties.netboot;
+                client.oglive = this.commonProperties.oglive;
                 // Propiedades comunes
                 // client.repository = this.commonProperties.repository;
                 // client.hardwareProfile = this.commonProperties.hardwareProfile;

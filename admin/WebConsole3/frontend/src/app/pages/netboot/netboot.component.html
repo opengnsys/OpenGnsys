@@ -26,28 +26,66 @@
     </div>
   </section>
   <section class="content">
-    <div class="row">
-      <div class="col-md-12">
-        <table class="table table-hover">
-          <tbody><tr>
-            <th translate="name"></th>
-            <th translate="filename"></th>
-            <th translate="options"></th>
-          </tr>
-          <tr *ngFor="let netboot of netboots; let index = index" class="{{index%2 == 0?'odd':'even'}}">
-            <td>
-              <span >{{netboot.name}}</span>
-            </td>
-            <td>
-              <span >{{netboot.filename}}</span>
-            </td>
-            <td class="right">
-              <app-table-action [rowData]="netboot" [options]="tableOptions" (edit)="goToNetbootEdit($event.id)" (delete)="deleteNetboot($event.id)"></app-table-action>
-            </td>
-          </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+
+    <mk-tabs>
+      <mk-tab>
+        <mk-tab-header><span translate="BIOS"></span></mk-tab-header>
+        <mk-tab-content>
+          <div class="row">
+            <div class="col-md-12">
+              <table class="table table-hover">
+                <tbody><tr>
+                  <th translate="name"></th>
+                  <th translate="filename"></th>
+                  <th translate="options"></th>
+                </tr>
+                <tr *ngFor="let netboot of biosNetboots; let index = index" class="{{index%2 == 0?'odd':'even'}}">
+                  <td>
+                    <span >{{netboot.name}}</span>
+                  </td>
+                  <td>
+                    <span >{{netboot.filename}}</span>
+                  </td>
+                  <td class="right">
+                    <app-table-action [rowData]="netboot" [options]="tableOptions" (edit)="goToNetbootEdit($event.id)" (delete)="deleteNetboot($event.id)"></app-table-action>
+                  </td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </mk-tab-content>
+      </mk-tab>
+      <mk-tab>
+        <mk-tab-header><span translate="UEFI"></span></mk-tab-header>
+        <mk-tab-content>
+          <div class="row">
+            <div class="col-md-12">
+              <table class="table table-hover">
+                <tbody><tr>
+                  <th translate="name"></th>
+                  <th translate="filename"></th>
+                  <th translate="options"></th>
+                </tr>
+                <tr *ngFor="let netboot of uefiNetboots; let index = index" class="{{index%2 == 0?'odd':'even'}}">
+                  <td>
+                    <span >{{netboot.name}}</span>
+                  </td>
+                  <td>
+                    <span >{{netboot.filename}}</span>
+                  </td>
+                  <td class="right">
+                    <app-table-action [rowData]="netboot" [options]="tableOptions" (edit)="goToNetbootEdit($event.id)" (delete)="deleteNetboot($event.id)"></app-table-action>
+                  </td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </mk-tab-content>
+      </mk-tab>
+    </mk-tabs>
+
+
   </section>
 </div>
