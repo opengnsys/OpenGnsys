@@ -211,10 +211,7 @@ function check() {
                 [ $DOWNLOADDIR/$DEF -nt $TFTPDIR/$INST ] && echo "$DEF"
             done)
     [ -n "$AUX" ] && echo "Some ISOs are downloaded after installation: ${AUX//$'\n'/, }" && let ERR++
-    AUX=$(jq -r '.oglive[] as $og | $og.revision[1:9] + ":" + $og.directory' $INFOFILE 2>/dev/null | \
-            while IFS=":" read -r DEF INST; do
-                [ $DEF -lt $MINREL ] && echo "$INST"
-            done)
+    AUX=$(jq -r '.oglive[] as $og | if ($og.revision[1:9] | tonumber) < '$MINREL' then $og.directory else "" end' $INFOFILE 2>/dev/null)
     [ -n "$AUX" ] && echo "Some installed ogLive aren't fully compatible: ${AUX//$'\n'/, }" && let ERR++
     # Print result.
     [ $ERR -eq 0 ] && echo "OK!" || echo "Problems detected: $ERR"
