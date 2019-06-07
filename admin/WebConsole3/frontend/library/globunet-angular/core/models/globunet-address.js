@@ -1,7 +1,5 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const resource_1 = require("./api/resource");
-class GlobunetCoordinates extends resource_1.Resource {
+import { Resource } from "./api/resource";
+export class GlobunetCoordinates extends Resource {
     constructor() {
         super(...arguments);
         this.latitude = 0;
@@ -9,8 +7,7 @@ class GlobunetCoordinates extends resource_1.Resource {
         this.radius = 0;
     }
 }
-exports.GlobunetCoordinates = GlobunetCoordinates;
-class GlobunetAddress extends resource_1.Resource {
+export class GlobunetAddress extends Resource {
     constructor() {
         super(...arguments);
         this.formattedAddress = "";
@@ -27,4 +24,4 @@ class GlobunetAddress extends resource_1.Resource {
         this.coordinates = new GlobunetCoordinates();
     }
 }
-exports.GlobunetAddress = GlobunetAddress;
+//# sourceMappingURL=globunet-address.js.map

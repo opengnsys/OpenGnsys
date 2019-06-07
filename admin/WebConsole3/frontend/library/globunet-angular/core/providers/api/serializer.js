@@ -1,6 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-class Serializer {
+export class Serializer {
     fromJson(json) {
         if (typeof json != "object") {
             json = { response: json };
@@ -11,4 +9,4 @@ class Serializer {
         return JSON.parse(JSON.stringify(resource));
     }
 }
-exports.Serializer = Serializer;
+//# sourceMappingURL=serializer.js.map

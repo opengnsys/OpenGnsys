@@ -1,6 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-class GlobunetUser {
+export class GlobunetUser {
     constructor() {
         this.id = 0;
         this.username = "";
@@ -13,4 +11,4 @@ class GlobunetUser {
         this.timezone = "";
     }
 }
-exports.GlobunetUser = GlobunetUser;
+//# sourceMappingURL=globunet-user.js.map

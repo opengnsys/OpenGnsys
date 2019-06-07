@@ -1,19 +1,21 @@
-"use strict";
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-Object.defineProperty(exports, "__esModule", { value: true });
-const core_1 = require("@angular/core");
-const http_1 = require("@angular/common/http");
-const rxjs_1 = require("rxjs");
-const operators_1 = require("rxjs/operators");
-class AuthConfig {
+import { Injectable, Inject } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { throwError } from 'rxjs';
+import { Observable } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
+export class AuthConfig {
     constructor(environment) {
         this.BASE_URL = "";
         this.OAUTH_DOMAIN = "";
@@ -29,7 +31,6 @@ class AuthConfig {
         }
     }
 }
-exports.AuthConfig = AuthConfig;
 /*
   Generated class for the AuthService provider.
 
@@ -43,7 +44,7 @@ let AuthService = class AuthService {
         this.refreshToken = "";
         this.tokenType = "";
         this.httpOptions = {
-            headers: new http_1.HttpHeaders({
+            headers: new HttpHeaders({
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
             })
@@ -60,7 +61,7 @@ let AuthService = class AuthService {
             this.httpOptions.headers = this.httpOptions.headers.set("Authorization", "Bearer " + data.access_token);
         }
         else {
-            this.httpOptions.headers = new http_1.HttpHeaders({
+            this.httpOptions.headers = new HttpHeaders({
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
             });
@@ -68,11 +69,22 @@ let AuthService = class AuthService {
     }
     getAccessToken(username, password) {
         var url = this.environment.BASE_URL + this.environment.OAUTH_DOMAIN + "?client_id=" + this.environment.OAUTH_CLIENT_ID + "&client_secret=" + this.environment.OAUTH_CLIENT_SECRET + "&grant_type=password&username=" + username + "&password=" + password;
-        return this.http.get(url).pipe(operators_1.map(data => {
+        return this.http.get(url).pipe(map(data => {
             this.setAuthorizationToken(data);
             return data;
-        }), operators_1.catchError((error) => {
-            return this.handleError(error);
+        }), catchError((error) => {
+            return throwError(error);
+        }));
+    }
+    getRefreshToken() {
+        var url = this.environment.BASE_URL + this.environment.OAUTH_DOMAIN + "?client_id=" + this.environment.OAUTH_CLIENT_ID + "&client_secret=" + this.environment.OAUTH_CLIENT_SECRET + "&grant_type=refresh_token&refresh_token=" + this.refreshToken;
+        return new Observable((observer => {
+            this.http.get(url).subscribe(data => {
+                this.setAuthorizationToken(data);
+                observer.next(data);
+            }, error => {
+                this.logout();
+            });
         }));
     }
     getAuthorizationToken() {
@@ -108,14 +120,16 @@ let AuthService = class AuthService {
         }
         console.error(msg);
         // return an observable with a user-facing error message
-        return rxjs_1.throwError(msg);
+        return throwError(msg);
     }
     ;
 };
 AuthService = __decorate([
-    core_1.Injectable({
+    Injectable({
         providedIn: 'root'
     }),
-    __param(0, core_1.Inject(AuthConfig)), __param(1, core_1.Inject(http_1.HttpClient))
+    __param(0, Inject(AuthConfig)), __param(1, Inject(HttpClient)),
+    __metadata("design:paramtypes", [AuthConfig, HttpClient])
 ], AuthService);
-exports.AuthService = AuthService;
+export { AuthService };
+//# sourceMappingURL=auth.service.js.map

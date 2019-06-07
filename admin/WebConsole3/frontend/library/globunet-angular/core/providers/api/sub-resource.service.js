@@ -1,7 +1,5 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const operators_1 = require("rxjs/operators");
-class SubResourceService {
+import { map } from 'rxjs/operators';
+export class SubResourceService {
     constructor(httpClient, url, parentEndpoint, endpoint, serializer) {
         this.httpClient = httpClient;
         this.url = url;
@@ -11,20 +9,20 @@ class SubResourceService {
     }
     create(parentId, item) {
         return this.httpClient
-            .post(`${this.url}/${this.parentEndpoint}/${parentId}/${this.endpoint}`, this.serializer.toJson(item)).pipe(operators_1.map((data) => this.serializer.fromJson(data)));
+            .post(`${this.url}/${this.parentEndpoint}/${parentId}/${this.endpoint}`, this.serializer.toJson(item)).pipe(map((data) => this.serializer.fromJson(data)));
     }
     update(parentId, item) {
         return this.httpClient
-            .patch(`${this.url}/${this.parentEndpoint}/${parentId}/${this.endpoint}/${item.id}`, this.serializer.toJson(item)).pipe(operators_1.map((data) => this.serializer.fromJson(data)));
+            .patch(`${this.url}/${this.parentEndpoint}/${parentId}/${this.endpoint}/${item.id}`, this.serializer.toJson(item)).pipe(map((data) => this.serializer.fromJson(data)));
     }
     read(parentId, id) {
         return this.httpClient
-            .get(`${this.url}/${this.parentEndpoint}/${parentId}/${this.endpoint}/${id}`).pipe(operators_1.map((data) => this.serializer.fromJson(data)));
+            .get(`${this.url}/${this.parentEndpoint}/${parentId}/${this.endpoint}/${id}`).pipe(map((data) => this.serializer.fromJson(data)));
     }
     list(parentId, queryOptions) {
         const params = queryOptions ? "?" + queryOptions.toQueryString() : "";
         return this.httpClient
-            .get(`${this.url}/${this.parentEndpoint}/${parentId}/${this.endpoint}${params}`).pipe(operators_1.map((data) => this.convertData(data)));
+            .get(`${this.url}/${this.parentEndpoint}/${parentId}/${this.endpoint}${params}`).pipe(map((data) => this.convertData(data)));
     }
     delete(parentId, id) {
         return this.httpClient
@@ -37,4 +35,4 @@ class SubResourceService {
         return data.map((item) => this.serializer.fromJson(item));
     }
 }
-exports.SubResourceService = SubResourceService;
+//# sourceMappingURL=sub-resource.service.js.map

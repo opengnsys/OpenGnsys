@@ -19,7 +19,8 @@ export declare class AuthService {
     constructor(config: AuthConfig, http: HttpClient);
     setAuthorizationToken(data: any): void;
     getAccessToken(username: string, password: string): Observable<any>;
-    getAuthorizationToken(): string | null;
+    getRefreshToken(): Observable<any>;
+    getAuthorizationToken(): string;
     me(): Observable<GlobunetUser>;
     logout(): void;
     private log;

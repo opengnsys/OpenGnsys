@@ -1,7 +1,5 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const resource_1 = require("./api/resource");
-class GlobunetMedia extends resource_1.Resource {
+import { Resource } from "./api/resource";
+export class GlobunetMedia extends Resource {
     constructor() {
         super(...arguments);
         this.name = "";
@@ -10,8 +8,7 @@ class GlobunetMedia extends resource_1.Resource {
         this.contentType = "";
     }
 }
-exports.GlobunetMedia = GlobunetMedia;
-class GlobunetGalleryHasMedia extends resource_1.Resource {
+export class GlobunetGalleryHasMedia extends Resource {
     constructor() {
         super(...arguments);
         this.position = 0;
@@ -19,8 +16,7 @@ class GlobunetGalleryHasMedia extends resource_1.Resource {
         this.media = new GlobunetMedia();
     }
 }
-exports.GlobunetGalleryHasMedia = GlobunetGalleryHasMedia;
-class GlobunetGallery extends resource_1.Resource {
+export class GlobunetGallery extends Resource {
     constructor() {
         super(...arguments);
         this.name = "";
@@ -30,4 +26,4 @@ class GlobunetGallery extends resource_1.Resource {
         this.galleryHasMedias = new GlobunetGalleryHasMedia();
     }
 }
-exports.GlobunetGallery = GlobunetGallery;
+//# sourceMappingURL=globunet-media.js.map

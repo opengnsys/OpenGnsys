@@ -1,6 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-class QueryOptions {
+export class QueryOptions {
     constructor(props) {
         this.offset = 0;
         this.limit = 10000;
@@ -26,4 +24,4 @@ class QueryOptions {
         return queryString.substring(0, queryString.length - 1);
     }
 }
-exports.QueryOptions = QueryOptions;
+//# sourceMappingURL=query-options.js.map

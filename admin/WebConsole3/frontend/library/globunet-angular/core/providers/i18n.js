@@ -1,4 +1,2 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-var translate_extract_1 = require("./i18n/translate-extract");
-exports.tr = translate_extract_1.tr;
+export { tr } from "./i18n/translate-extract";
+//# sourceMappingURL=i18n.js.map
