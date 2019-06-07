@@ -328,7 +328,7 @@ function checkDuplicates(&$cmd, &$duplicate_data, $computer_id, $computer_name, 
 	$rs->Cerrar();
 	$duplicate_data = trim($duplicate_data, ',');
 	$ret = !empty($duplicate_data);
-	return ret;
+	return($ret);
 }
 
 /*________________________________________________________________________________________________________
