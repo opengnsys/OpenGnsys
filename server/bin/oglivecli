@@ -14,13 +14,14 @@
 
 
 # Global constants definition.
-PROG=$(basename "$(realpath "$0")")
-OPENGNSYS=/opt/opengnsys
-DOWNLOADDIR=$OPENGNSYS/lib
-DOWNLOADURL="https://opengnsys.es/trac/downloads"
-TFTPDIR=$OPENGNSYS/tftpboot
-DEFOGLIVE="ogLive"
-INFOFILE=$OPENGNSYS/etc/ogliveinfo.json
+PROG=$(basename "$(realpath "$0")")			# Program name.
+OPENGNSYS=/opt/opengnsys				# OpenGnsys main directory.
+DOWNLOADDIR=$OPENGNSYS/lib				# Directory to store ogLive images.
+DOWNLOADURL="https://opengnsys.es/trac/downloads"	# Download URL.
+TFTPDIR=$OPENGNSYS/tftpboot				# TFTP directory.
+DEFOGLIVE="ogLive"					# Default ogLive directory.
+MINREL=20190601						# Mininum ogLive compatibility release.
+INFOFILE=$OPENGNSYS/etc/ogliveinfo.json			# Configuration file.
 
 
 # Auxiliar functions.
@@ -154,6 +155,7 @@ ogLive download URL:            $DOWNLOADURL
 ogLive download directory:      $DOWNLOADDIR
 ogLive installation directory:  $TFTPDIR
 Default ogLive name:            $DEFOGLIVE
+Mainimum compatibility release: r$MINREL
 EOT
             ;;
         1)  # Show specified parameter.
@@ -163,6 +165,7 @@ EOT
                 download-dir)   echo "$DOWNLOADDIR" ;;
                 install-dir)    echo "$TFTPDIR" ;;
                 default-name)   echo "$DEFOGLIVE" ;;
+                min-release)    echo "r$MINREL" ;;
                 *)              raiseError notfound "$1" ;;
             esac
             ;;
@@ -208,6 +211,11 @@ function check() {
                 [ $DOWNLOADDIR/$DEF -nt $TFTPDIR/$INST ] && echo "$DEF"
             done)
     [ -n "$AUX" ] && echo "Some ISOs are downloaded after installation: ${AUX//$'\n'/, }" && let ERR++
+    AUX=$(jq -r '.oglive[] as $og | $og.revision[1:9] + ":" + $og.directory' $INFOFILE 2>/dev/null | \
+            while IFS=":" read -r DEF INST; do
+                [ $DEF -lt $MINREL ] && echo "$INST"
+            done)
+    [ -n "$AUX" ] && echo "Some installed ogLive aren't fully compatible: ${AUX//$'\n'/, }" && let ERR++
     # Print result.
     [ $ERR -eq 0 ] && echo "OK!" || echo "Problems detected: $ERR"
     return $ERR
@@ -253,7 +261,7 @@ function search() {
 # Show a menu to select and download an ogLive ISO image from the OpenGnsys website.
 function download() {
     local OGLIVE NISOS i SOURCELENGTH TARGETFILE
-    local ISOREL MINREL=5000		# Mininum compatibility release.
+    local ISOREL
     [ $# -gt 1 ] && raiseError usage
     [ ! -d $DOWNLOADDIR ] && raiseError notfound "Download directory"
     [ ! -w $DOWNLOADDIR ] && raiseError access "Download directory"
