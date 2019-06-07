@@ -991,12 +991,6 @@ function rsyncConfigure()
 	# Configurar acceso a Rsync.
 	sed -e "s/CLIENTUSER/$OPENGNSYS_CLIENT_USER/g" \
 		$WORKDIR/opengnsys/repoman/etc/rsyncd.conf.tmpl > $RSYNCCFGDIR/rsyncd.conf
-	sed -e "s/CLIENTUSER/$OPENGNSYS_CLIENT_USER/g" \
-	    -e "s/CLIENTPASSWORD/$OPENGNSYS_CLIENT_PASSWD/g" \
-		$WORKDIR/opengnsys/repoman/etc/rsyncd.secrets.tmpl > $RSYNCCFGDIR/rsyncd.secrets
-	chown root.root $RSYNCCFGDIR/rsyncd.secrets
-	chmod 600 $RSYNCCFGDIR/rsyncd.secrets
-
 	# Habilitar Rsync y reiniciar Inetd.
 	if [ -n "$RSYNCSERV" ]; then
 		if [ -f /etc/default/rsync ]; then
@@ -1378,8 +1372,6 @@ function copyInterfaceAdm ()
 		echoAndLog "${FUNCNAME}(): error while copying Administration Interface Folder"
 		hayErrores=1
 	fi
-	chown $OPENGNSYS_CLIENT_USER:$OPENGNSYS_CLIENT_USER $INSTALL_TARGET/client/interfaceAdm/CambiarAcceso
-	chmod 700 $INSTALL_TARGET/client/interfaceAdm/CambiarAcceso
 
 	return $hayErrores
 }
@@ -1445,9 +1437,6 @@ function clientCreate()
 	echoAndLog "${FUNCNAME}(): Installing ogLive Client"
 	echo -ne "$OPENGNSYS_CLIENT_PASSWD\n$OPENGNSYS_CLIENT_PASSWD\n" | \
 			oglivecli install $FILENAME
-	# Adaptar permisos.
-	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/tftpboot/menu.lst
-	chown -R $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/tftpboot/grub
 
 	echoAndLog "${FUNCNAME}(): Client generation success"
 }
@@ -1519,10 +1508,6 @@ function openGnsysConfigure()
 	ln -f $INSTALL_TARGET/etc/ogAdmAgent-$DEFAULTDEV.cfg $INSTALL_TARGET/etc/ogAdmAgent.cfg
 	ln -f $INSTALL_TARGET/client/etc/ogAdmClient-$DEFAULTDEV.cfg $INSTALL_TARGET/client/etc/ogAdmClient.cfg
 	ln -f $INSTALL_TARGET/www/controlacceso-$DEFAULTDEV.php $INSTALL_TARGET/www/controlacceso.php
-	chown root:root $INSTALL_TARGET/etc/{ogAdmServer,ogAdmAgent}*.cfg
-	chmod 600 $INSTALL_TARGET/etc/{ogAdmServer,ogAdmAgent}*.cfg
-	chown $APACHE_RUN_USER:$APACHE_RUN_GROUP $INSTALL_TARGET/www/controlacceso*.php
-	chmod 600 $INSTALL_TARGET/www/controlacceso*.php
 
 	# Configuración del motor de clonación.
 	# - Zona horaria del servidor.
