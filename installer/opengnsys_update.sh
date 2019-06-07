@@ -747,7 +747,7 @@ function createDirs()
 {
 	# Crear estructura de directorios.
 	echoAndLog "${FUNCNAME}(): creating directory paths in ${INSTALL_TARGET}"
-	local dir
+	local dir MKNETDIR
 
 	mkdir -p ${INSTALL_TARGET}/{bin,doc,etc,lib,sbin,www}
 	mkdir -p ${INSTALL_TARGET}/{client,images/groups}
@@ -765,6 +765,12 @@ function createDirs()
 		return 1
 	fi
 	! [ -f $INSTALL_TARGET/tftpboot/menu.lst/templates/00unknown ] && mv $INSTALL_TARGET/tftpboot/menu.lst/templates/* $INSTALL_TARGET/tftpboot/menu.lst/examples
+
+	# Preparar arranque en red con Grub.
+	for f in grub-mknetdir grub2-mknetdir; do
+		if which $f &>/dev/null; then MKNETDIR=$f; fi
+	done
+	$MKNETDIR --net-directory=$TFTPCFGDIR --subdir=grub
 
 	# Crear usuario ficticio.
 	if id -u $OPENGNSYS_CLIENTUSER &>/dev/null; then
@@ -961,9 +967,7 @@ function compileServices()
 	popd
 	# Parar antiguo servicio de repositorio y añadir clave de acceso REST en su fichero de configuración.
 	pgrep ogAdmRepo > /dev/null && service="ogAdmRepo" $STOPSERVICE
-	grep -q '^ApiToken=' $INSTALL_TARGET/etc/ogAdmRepo.cfg && \
-		sed -i "s/^ApiToken=.*$/ApiToken=$REPOKEY/" $INSTALL_TARGET/etc/ogAdmRepo.cfg || \
-		sed -i "$ a\ApiToken=$REPOKEY/" $INSTALL_TARGET/etc/ogAdmRepo.cfg
+	sed -i -n -e "/^ApiToken=/!p" -e "$ a\ApiToken=$REPOKEY/" $INSTALL_TARGET/etc/ogAdmRepo.cfg
 	# Compilar OpenGnsys Agent
 	echoAndLog "${FUNCNAME}(): Recompiling OpenGnsys Server Agent"
 	pushd $WORKDIR/opengnsys/admin/Sources/Services/ogAdmAgent
