@@ -8,7 +8,6 @@
 #@param   $1 NombrePlatilla
 #@param   $2 Ámbito { NombrePC | NombreAula }
 #@param   $3 Modo_trabajo = { 0, TEMP, 1, PERM } - 0 si es temporal y 1 si es permanente. 
-#@param   $4 Fichero con los datos de acceso a la base de datos (USUARIO, PASSWORD, datasource y CATALOG).
 #@version 1.0 - Versión inicial.
 #@author  Irina Gomez y Ramon Gomez - Univ. Sevilla, noviembre 2010
 #@version 1.0.1 - Identificacion de la plantilla por nombre en consola = en primera linea de la plantilla
@@ -23,7 +22,7 @@
 #@version 1.1.0a - El server siempre es el servidor PXE. El segundo parámetro de la IP es el SERVER. La asignación del ogLive siempre es el server. (ticket #859).
 #@author  Antonio J. Doblas Viso, Universidad de Malaga
 #@date    2018-07-11
-#@version 1.1.1 - Crea configuración PXE para BIOS y UEFI. Permite pasar datos de acceso a la base de datos en un fichero. (ticket #802)
+#@version 1.1.1 - Crea configuración PXE para BIOS y UEFI. Permite pasar los datos acceso a la base de datos por variables de entorno. (ticket #802)
 #@author  Irina Gomez, ETSII Universidad de Sevilla
 #@date    2019-02-13
 #*/ ##
@@ -31,8 +30,7 @@
 # Variables.
 PROG=$(basename $0)
 OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
-SERVERCONF="$4"
-SERVERCONF=${SERVERCONF:-$OPENGNSYS/etc/ogAdmServer.cfg}
+SERVERCONF=$OPENGNSYS/etc/ogAdmServer.cfg
 PXEDIR[0]=$OPENGNSYS/tftpboot/menu.lst
 PXEDIR[1]=$OPENGNSYS/tftpboot/grub
 LOGFILE=$OPENGNSYS/log/opengnsys.log
@@ -45,9 +43,14 @@ if [ $# -ne 3 -a $# -ne 4 ]; then
 	echo "Formato: $PROG PLANTILLA [NOMBRE_PC|NOMBRE_AULA] MODO [ BD_CONF ]"
 	exit 1
 fi
-if [ ! -r $SERVERCONF ]; then
-	echo "$PROG: Sin acceso a fichero de configuración"
-	exit 2
+# El acceso a mysql por las variables pasadas o por el fichero de configuarción.
+if  [ -z "$USUARIO" ] || [ -z "$PASSWORD" ] || [ -z "$CATALOG" ]; then
+        if [ -r "$SERVERCONF" ]; then
+	    source $SERVERCONF
+	else
+	    echo "$PROG: Sin acceso a fichero de configuración"
+	    exit 2
+	fi
 fi
 TEMPLATE[0]=$(grep -l "^#.* $1 *$" ${PXEDIR[0]}/templates/*)
 TEMPLATE[1]=$(grep -l "^#.* $1 *$" ${PXEDIR[1]}/templates/*)
@@ -63,8 +66,6 @@ case "$3" in
 		exit 1 ;;
 esac
 
-# Obtener datos de acceso a la Base de datos.
-source $SERVERCONF
 # Sustituir caracteres ' por \' para evitar inyección SQL.
 BOOTMODE="${1//\'/\'}"
 RESOURCE="${2//\'/\'}"

@@ -53,7 +53,7 @@ function clientKernelVersion () {
  *           los datos almacenados en la BD.
  * @param    Object   cmd       Objeto de conexión a la base de datos.
  * @param    String   bootopt   Plantilla de arranque PXE.
- * @param    Integer  hostid    Id. del ordenador.
+ * @param    String  hostname  Nombre del ordenador.
  * @param    String   lang      Idioma de arranque.
  * @version  1.0.5 - Primera versión, adaptada de NetBoot Avanzado (Antonio J. Doblas Viso - Universidad de Málaga)
  * @author  Ramón Gómez - ETSII Universidad de Sevilla
@@ -76,13 +76,7 @@ function createBootMode ($cmd, $bootopt, $hostname, $lang) {
 
 	// Datos para el acceso a mysql
 	$strcn=explode(";",$cadenaconexion);
-	$file=tempnam("/tmp",".server.cnf.");
-
-	// Creo fichero con datos para mysql
-	$gestor=fopen($file, "w");
-	fwrite($gestor, "USUARIO=".$strcn[1]."\nPASSWORD=".$strcn[2]."\n");
-	fwrite($gestor, "datasource=".$strcn[0]."\nCATALOG=".$strcn[3]);
-	fclose($gestor);
+	$acceso="USUARIO=".$strcn[1]." PASSWORD=".$strcn[2]." CATALOG=".$strcn[3];
 
 	// Plantilla con las opciones por defecto.
 	if (empty ($bootopt))  $bootopt = "00unknown";
@@ -104,10 +98,7 @@ function createBootMode ($cmd, $bootopt, $hostname, $lang) {
 	$description=exec("awk 'NR==1 {print $2}' ".PXEDIRBIOS."/templates/".$bootopt);
 	if ($description === "") $description=exec("awk 'NR==1 {print $2}' ".PXEDIRUEFI."/templates/".$bootopt);
 	// Llamamos al script setclientmode
-	shell_exec("export LANG=$lang; /opt/opengnsys/bin/setclientmode $description $hostname PERM $file");
-
-	// Borro fichero para mysql
-	unlink($file);
+	shell_exec("export LANG=$lang $acceso; /opt/opengnsys/bin/setclientmode $description $hostname PERM $file");
 }
 
 
