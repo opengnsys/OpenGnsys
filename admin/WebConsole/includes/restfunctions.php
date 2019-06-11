@@ -23,6 +23,7 @@ define('OG_REST_PARAM_DISK', 'disk');
 define('OG_REST_PARAM_PART', 'partition');
 define('OG_REST_PARAM_RUN', 'run');
 define('OG_REST_PARAM_TYPE', 'type');
+define('OG_REST_PARAM_STATE', 'state');
 
 function common_request($command, $type, $data = null, $custom = 'GET') {
 
@@ -95,7 +96,8 @@ function clients($case, $ips) {
 	$result = common_request(OG_REST_CMD_CLIENTS, $type, $data);
 
 	foreach ($result[OG_REST_PARAM_CLIENTS] as $client) {
-		$trama_notificacion = $trama_notificacion.implode('/', $client).';';
+		$trama_notificacion = $trama_notificacion.$client[OG_REST_PARAM_ADDR].'/'.
+			$client[OG_REST_PARAM_STATE].';';
 	}
 
 	return $trama_notificacion;
