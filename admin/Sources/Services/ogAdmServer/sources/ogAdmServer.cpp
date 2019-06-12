@@ -1287,7 +1287,7 @@ static bool wake_up_broadcast(int sd, struct sockaddr_in *client,
 		client->sin_addr.s_addr = broadcast_addr->sin_addr.s_addr;
 		break;
 	}
-	free(ifaddr);
+	freeifaddrs(ifaddr);
 
 	ret = sendto(sd, msg, sizeof(*msg), 0,
 		     (sockaddr *)client, sizeof(*client));
