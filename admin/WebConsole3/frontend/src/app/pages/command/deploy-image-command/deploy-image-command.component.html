@@ -46,13 +46,13 @@
               </select>
             </div>
           </div>
-          <div class="form-group col-md-2">
+          <div class="form-group col-md-2" *ngIf="deployImage === 'true'">
             <label for="disk" translate="disk">
             </label>
             <input name="disk" type="number" min="1" [(ngModel)]="disk" class="form-control">
 
           </div>
-          <div class="form-group col-md-2">
+          <div class="form-group col-md-2" *ngIf="deployImage === 'true'">
             <label for="partition" translate="partition">
             </label>
             <input name="partition" type="number" min="1" [(ngModel)]="partition" class="form-control">

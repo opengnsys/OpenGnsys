@@ -56,9 +56,9 @@ export class HeaderInnerComponent implements  OnInit {
             this.translate.instant('sure_to_delete_task') + '?',
             function(result) {
                 if (result) {
-                    this.traceService.delete(trace.id).then(
+                    self.traceService.delete(trace.id).subscribe(
                         function(response) {
-                            self.toaster.pop({type: 'success', title: 'success', body: this.translate.instant('successfully_deleted')});
+                            self.toaster.pop({type: 'success', title: 'success', body: self.translate.instant('successfully_deleted')});
                             self.getExectutionTasks();
                         },
                         function(error) {

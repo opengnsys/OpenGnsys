@@ -52,7 +52,7 @@ export class PartitionFormatCommandComponent implements OnInit {
                 data => {
                     this.constants = data.constants;
                     // Comprobar la selección de clientes
-                    if (this.ogCommonService.selectedClients) {
+                    if (this.ogCommonService.getSelectionSize() > 0) {
 
                         // Recorrer todos los clientes seleccionados y usar el tamaño del disco de menor tamaño
                         const clientsId = Object.keys(this.ogCommonService.selectedClients);
@@ -110,8 +110,8 @@ export class PartitionFormatCommandComponent implements OnInit {
                         this.partitionTableTypes = this.constants.partitiontable;
                     } else {
                         // TODO - dar error?
-                        this.ogSweetAlert.error(this.translate.instant('opengnsys_error'), this.translate.instant('not_clients_selected'));
-                        this.router.navigate(['app/ous']);
+                        this.toaster.pop({type: 'error', body: this.translate.instant('not_clients_selected'), title: this.translate.instant('opengnsys_error')});
+                        this.router.navigate(['/app/ous']);
                     }
 
                 }

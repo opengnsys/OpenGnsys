@@ -19,6 +19,6 @@ export class NetbootService extends ResourceService<Netboot> {
     }
 
     updateFiles(assignedNetboots: {}): Observable<any> {
-        return this.httpClient.post(this.url + '/clients', JSON.stringify(assignedNetboots));
+        return this.httpClient.post(this.url + '/netboots/clients', JSON.stringify(assignedNetboots));
     }
 }

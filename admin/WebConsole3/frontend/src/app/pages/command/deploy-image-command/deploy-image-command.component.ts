@@ -34,7 +34,7 @@ export class DeployImageCommandComponent implements OnInit {
   images = [];
   deployMethods = [];
   deployMethod = 'MULTICAST';
-  private deployImage: string;
+  public deployImage: string;
   private user: User;
   private constants: any;
   public image: any;
@@ -75,7 +75,7 @@ export class DeployImageCommandComponent implements OnInit {
       } else {
         // TODO - dar error?
         this.toaster.pop({type: 'error', body: this.translate.instant('not_clients_selected'), title: this.translate.instant('opengnsys_error')});
-        this.router.navigate(['app.ous']);
+        this.router.navigate(['/app/ous']);
       }
     }
   }
