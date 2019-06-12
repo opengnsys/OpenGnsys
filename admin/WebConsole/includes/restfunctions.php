@@ -25,7 +25,7 @@ define('OG_REST_PARAM_RUN', 'run');
 define('OG_REST_PARAM_TYPE', 'type');
 define('OG_REST_PARAM_STATE', 'state');
 
-function common_request($command, $type, $data = null, $custom = 'GET') {
+function common_request($command, $type, $data = null) {
 
 	$json = json_encode($data);
 
