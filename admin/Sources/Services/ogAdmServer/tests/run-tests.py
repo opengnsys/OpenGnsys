@@ -17,14 +17,10 @@ def start_mysql():
     subprocess.run(['mysql', '-D', 'test-db', '-e', sql_data])
     subprocess.run(['mysql', '-D', 'test-db', '-e', sql_create_user])
 
-    return
-
 def stop_mysql():
 
     subprocess.run(['mysql', '-D', 'test-db', '-e', sql_delete_user])
     subprocess.run(['mysqladmin', 'drop', '-f', 'test-db'])
-
-    return
 
 if os.getuid() is not 0:
     print('You need to be root to run these tests :-)')
