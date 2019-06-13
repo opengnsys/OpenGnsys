@@ -44,6 +44,8 @@ find $OPENGNSYS_DIR/images -maxdepth 1 -exec chown :$OPENGNSYS_USER {} \;
 find $OPENGNSYS_DIR/images -maxdepth 1 -type d -exec chmod 775 {} \;
 find $OPENGNSYS_DIR/images -maxdepth 1 -type f -exec chmod 664 {} \;
 find $OPENGNSYS_DIR/client/{interfaceAdm,scripts} ! -name "*.txt" -exec chmod +x {} \;
+chown -R $OPENGNSYS_USER:$OPENGNSYS_USER $OPENGNSYS_DIR/client/etc/ssl/private
+chmod -R go-rwx $OPENGNSYS_USER:$OPENGNSYS_USER $OPENGNSYS_DIR/client/etc/ssl/private
 chown $OPENGNSYS_USER:$OPENGNSYS_USER $OPENGNSYS_DIR/client/interfaceAdm/CambiarAcceso
 chmod 700 $OPENGNSYS_DIR/client/interfaceAdm/CambiarAcceso
 chown root:root $OPENGNSYS_DIR/etc/{ogAdmServer,ogAdmAgent}*.cfg

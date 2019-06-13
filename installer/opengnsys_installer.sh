@@ -1376,6 +1376,7 @@ function copyInterfaceAdm ()
 	return $hayErrores
 }
 
+
 ####################################################################
 ### Funciones instalacion cliente opengnsys
 ####################################################################
@@ -1406,6 +1407,18 @@ function copyClientFiles()
 	fi
 
 	return $errstatus
+}
+
+
+# Crear certificados para la firma de cargadores de arranque.
+function createCerts ()
+{
+	local SSLCFGDIR=$INSTALL_TARGET/client/etc/ssl
+	echoAndLog "${FUNCNAME}(): creating certificate files"
+	mkdir -p $SSLCFGDIR/{certs,private}
+	openssl req -new -x509 -newkey rsa:2048 -keyout $SSLCFGDIR/private/opengnsys.key -out $SSLCFGDIR/certs/opengnsys.crt -nodes -days 3650 -subj "/CN=OpenGnsys/"
+	openssl x509 -in $SSLCFGDIR/certs/opengnsys.crt -out $SSLCFGDIR/certs/opengnsys.cer -outform DER
+	echoAndLog "${FUNCNAME}(): certificate successfully created"
 }
 
 
@@ -1802,6 +1815,9 @@ copyClientFiles
 if [ $? -ne 0 ]; then
 	errorAndLog "Error creating client structure"
 fi
+
+# Crear certificado para firmar cargadores
+createCerts
 
 # Crear la estructura del cliente de OpenGnsys.
 for i in $OGLIVE; do

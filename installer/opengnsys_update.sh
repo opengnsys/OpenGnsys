@@ -169,7 +169,7 @@ function autoConfigure()
 		:
 	fi
 	for service in apache2 httpd; do
-		[ -d /etc/$service ] && APACHECFGDIR="/etc/$service"
+		[ -d "/etc/$service" ] && APACHECFGDIR="/etc/$service"
 		if $SERVICESTATUS &>/dev/null; then APACHESERV="$service"; fi
 	done
 	for service in dhcpd dhcpd3-server isc-dhcp-server; do
@@ -544,6 +544,19 @@ EOT
 	DOWNLOADURL=${DOWNLOADURL:-"https://$OPENGNSYS_SERVER/trac/downloads"}
 
 	echoAndLog "${FUNCNAME}(): client files successfully updated"
+}
+
+# Crear certificado para la firma de cargadores de arranque, si es necesario.
+function createCerts ()
+{
+	local SSLCFGDIR=$INSTALL_TARGET/client/etc/ssl
+	mkdir -p $SSLCFGDIR/{certs,private}
+	if [ ! -f $SSLCFGDIR/private/opengnsys.key ]; then
+		echoAndLog "${FUNCNAME}(): creating certificate files"
+		openssl req -new -x509 -newkey rsa:2048 -keyout $SSLCFGDIR/private/opengnsys.key -out $SSLCFGDIR/certs/opengnsys.crt -nodes -days 3650 -subj "/CN=OpenGnsys/"
+		openssl x509 -in $SSLCFGDIR/certs/opengnsys.crt -out $SSLCFGDIR/certs/opengnsys.cer -outform DER
+		echoAndLog "${FUNCNAME}(): certificate successfully created"
+	fi
 }
 
 # Configurar HTTPS y exportar usuario y grupo del servicio Apache.
@@ -1215,11 +1228,12 @@ fi
 # Configurar Rsync.
 rsyncConfigure
 
-# Actualizar ficheros del cliente
+# Actualizar ficheros del cliente.
 updateClientFiles
+createCerts
 updateInterfaceAdm
 
-# Actualizar páqinas web
+# Actualizar páqinas web.
 apacheConfiguration
 updateWebFiles
 if [ $? -ne 0 ]; then
