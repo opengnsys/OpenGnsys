@@ -2677,31 +2677,34 @@ EFIMNT=$(ogMount $EFIDISK $EFIPART) || ogRaiseError $OG_ERR_PARTITION "$MSG_ERRO
 EFIDIR="$EFIMNT/EFI"
 [ -d $EFIDIR ] || mkdir $EFIDIR
 
-# Instalamos rEFInd. Con refind-install o copiandolo del OGLIB
-if which refind-install &>/dev/null; then
-    # Comprobamos que exista shimx64
-    SHIM=$(ogGetPath /usr/lib/shim/shimx64.efi.signed)
-    [ "$SHIM" == "" ] && return $(ogRaiseError $OG_ERR_NOTFOUND "shimx64.efi.signed")
+# Comprobamos que exista shimx64
+SHIM=$(ogGetPath /usr/lib/shim/shimx64.efi.signed)
+[ "$SHIM" == "" ] && return $(ogRaiseError $OG_ERR_NOTFOUND "shimx64.efi.signed")
 
-    refind-install --yes --alldrivers --usedefault $EFIDEVICE  --shim $SHIM
+# Si existe configuración anterior de refind la borro
+[ -d "$EFIDIR/refind" ] && rm -rf $EFIDIR/refind
 
-    # Cambiamos el nombre del directorio
-    [ -d $EFIDIR/refind ] && rm -rf $EFIDIR/refind
-    mv $EFIDIR/BOOT  $EFIDIR/refind
+# Instalamos rEFInd.
+refind-install --yes --alldrivers --root $EFIMNT --shim $SHIM
 
-    # Desmontamos directorio temporal (para idempotencia)
-    umount /tmp/refind_install
-else
-    REFINDDIR=$OGLIB/refind
-    [ -d $REFINDDIR ] || ogRaiseError $OG_ERR_NOTFOUND "refind-install or $REFINDDIR" || return $?
-    cp -r $REFINDDIR $EFIDIR
-fi
-# Creamos entrada en NVRAM
-ogNvramAddEntry refind /EFI/refind/grubx64.efi
-# La ponemos en el segundo lugar del orden de arranque
-NUMENTRY=$(efibootmgr |awk '{ if ($2=="refind") print substr($1,5,4)}')
-NEWORDER="$(ogNvramGetOrder|awk -v NEW="$NUMENTRY" '{ gsub(",", " "); printf "%x %x %s\n",  $1 ,NEW, substr($0, index($0,$2)) }')"
+# Firmo refind con certificado de OpenGnsys
+mv $EFIDIR/refind/grubx64.efi $EFIDIR/refind/grubx64.efi-unsigned
+sbsign --key $OGETC/ssl/private/opengnsys.key --cert  $OGETC/ssl/certs/opengnsys.crt --output $EFIDIR/refind/grubx64.efi $EFIDIR/refind/grubx64.efi-unsigned
+
+# Copio los certificados
+cp /etc/refind.d/keys/* $EFIDIR/refind/keys
+# Copio certificado opengnsys
+cp $OGETC/ssl/certs/opengnsys.* $EFIDIR/refind/keys
+
+# Ponemos la entrada en NVRAM en el segundo lugar del orden de arranque
+NEWORDER="$(ogNvramGetOrder|awk '{gsub(",", " "); printf "%x %x %s\n", $2, $1, substr($0, index($0,$3))}')"
 ogNvramSetOrder $NEWORDER
+
+# Borramos configuración linux
+#rm $EFIMNT/boot/refind_linux.conf
+
+# Eliminamos punto de motaje (por si ejecutamos más de una vez)
+umount $EFIMNT/boot/efi
 
 # Para la configuración del ogLive
 ogMountCache &>/dev/null
@@ -2764,21 +2767,22 @@ else
         echo "menuentry \"${DIR##*/}\" {" >> $CFGFILE
         echo "    loader /EFI/${DIR##*/}/Boot/ogloader.efi" >> $CFGFILE
         [ -f $DIR/Boot/bootmgfw.efi ] && echo "    icon /EFI/refind/icons/os_win8.png" >> $CFGFILE
-        [ -f $DIR/grubx64.efi ] && echo "    icon /EFI/refind/icons/os_linux.png" >> $CFGFILE
+        [ -f $DIR/Boot/grubx64.efi ] && echo "    icon /EFI/refind/icons/os_linux.png" >> $CFGFILE
         echo "}" >> $CFGFILE
     done
     # Configuración ogLive
-    if [ "$OGLIVE" != "" ]; then
-        echo "menuentry \"OpenGnsys Live\" {" >> $CFGFILE
-        echo "    volume CACHE" >> $CFGFILE
-        echo "    ostype Linux" >> $CFGFILE
-        echo "    loader /boot/$(basename ${OGLIVE%/*})/ogvmlinuz" >> $CFGFILE
-        echo "    initrd /boot/$(basename ${OGLIVE%/*})/oginitrd.img" >> $CFGFILE
-        echo "    options \"$CMDLINE\"" >> $CFGFILE
-        echo "}" >> $CFGFILE
+    # Comantamos temporalmente: Con la versión nueva de refind falla
+    #if [ "$OGLIVE" != "" ]; then
+    #    echo "menuentry \"OpenGnsys Live\" {" >> $CFGFILE
+    #    echo "    volume CACHE" >> $CFGFILE
+    #    echo "    ostype Linux" >> $CFGFILE
+    #    echo "    loader /boot/$(basename ${OGLIVE%/*})/ogvmlinuz" >> $CFGFILE
+    #    echo "    initrd /boot/$(basename ${OGLIVE%/*})/oginitrd.img" >> $CFGFILE
+    #    echo "    options \"$CMDLINE\"" >> $CFGFILE
+    #    echo "}" >> $CFGFILE
 
-        # Ponemos ogLive como la entrada por defecto
-        sed -i '1 i\default_selection "OpenGnsys Live"' $CFGFILE
-    fi
+    #    # Ponemos ogLive como la entrada por defecto
+    #    sed -i '1 i\default_selection "OpenGnsys Live"' $CFGFILE
+    #fi
 fi
 }
