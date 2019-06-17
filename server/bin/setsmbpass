@@ -105,7 +105,7 @@ for OGLIVE in $LIST; do
 done
 if [[ $CHANGES != 0 ]]; then
     # Ticket 565, preparar acceso Rsync servidor.
-    sed -i -n -e "/^$SAMBAUSER:/!p" -e "$ a$SAMBAUSER:$SAMBAPASS" /etc/rsyncd.secrets
+    [ -e /etc/rsyncd.secrets ] && sed -i -n -e "/^$SAMBAUSER:/!p" -e "$ a$SAMBAUSER:$SAMBAPASS" /etc/rsyncd.secrets || echo "$SAMBAUSER:$SAMBAPASS" > /etc/rsyncd.secrets
     chown root.root /etc/rsyncd.secrets
     chmod 600 /etc/rsyncd.secrets
     # Cambiar clave Samba.
