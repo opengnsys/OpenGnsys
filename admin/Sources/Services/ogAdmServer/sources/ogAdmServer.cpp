@@ -22,6 +22,7 @@ static char pasguor[LONPRM]; // Password del usuario
 static char datasource[LONPRM]; // Dirección IP del gestor de base de datos
 static char catalog[LONPRM]; // Nombre de la base de datos
 static char interface[LONPRM]; // Interface name
+static char auth_token[LONPRM]; // API token
 
 //________________________________________________________________________________________________________
 //	Función: tomaConfiguracion
@@ -77,7 +78,8 @@ static bool tomaConfiguracion(const char *filecfg)
 			snprintf(catalog, sizeof(catalog), "%s", value);
 		else if (!strcmp(StrToUpper(key), "INTERFACE"))
 			snprintf(interface, sizeof(interface), "%s", value);
-
+		else if (!strcmp(StrToUpper(key), "APITOKEN"))
+			snprintf(auth_token, sizeof(auth_token), "%s", value);
 
 		line = fgets(buf, sizeof(buf), fcfg);
 	}
@@ -132,6 +134,7 @@ struct og_client {
 	int			keepalive_idx;
 	bool			rest;
 	unsigned int		content_length;
+	char			auth_token[64];
 };
 
 static inline int og_client_socket(const struct og_client *cli)
@@ -3880,6 +3883,15 @@ static int og_client_not_found(struct og_client *cli)
 	return -1;
 }
 
+static int og_client_not_authorized(struct og_client *cli)
+{
+	char buf[] = "HTTP/1.1 404 Unauthorized\r\nContent-Length: 0\r\n\r\n";
+
+	send(og_client_socket(cli), buf, strlen(buf), 0);
+
+	return -1;
+}
+
 static int og_client_ok(struct og_client *cli, char *buf_reply)
 {
 	char buf[4096] = {};
@@ -3917,6 +3929,11 @@ static int og_client_state_process_payload_rest(struct og_client *cli)
 		return -1;
 
 	body = strstr(cli->buf, "\r\n\r\n") + 4;
+
+	if (strcmp(cli->auth_token, auth_token)) {
+		syslog(LOG_ERR, "wrong Authentication key\n");
+		return og_client_not_authorized(cli);
+	}
 
 	if (cli->content_length) {
 		root = json_loads(body, 0, &json_err);
@@ -4046,6 +4063,10 @@ static int og_client_state_recv_hdr_rest(struct og_client *cli)
 		sscanf(ptr, "Content-Length: %i[^\r\n]", &cli->content_length);
 		cli->msg_len += cli->content_length;
 	}
+
+	ptr = strstr(cli->buf, "Authorization: ");
+	if (ptr)
+		sscanf(ptr, "Authorization: %64[^\r\n]", cli->auth_token);
 
 	return 1;
 }
