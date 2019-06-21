@@ -120,6 +120,7 @@ if [ -n "$SERVERIP" ]; then
 		if [ "$RUN_OGADMREPO" == "yes" ]; then
 			REPOKEY=$(php -r 'echo md5(uniqid(rand(), true));')
 			sed -i -e "s/ApiToken=.*/ApiToken=$REPOKEY/" $OPENGNSYS/etc/ogAdmRepo.cfg
+			sed -i -e "s/APITOKEN=.*/APITOKEN=$REPOKEY/" $OPENGNSYS/etc/ogAdmServer.cfg
 		fi
 		# If OpenGnsys Server is active, updating the database.
 		if [ "$RUN_OGADMSERVER" == "yes" ]; then

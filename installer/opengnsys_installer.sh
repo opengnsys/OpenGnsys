@@ -1491,6 +1491,7 @@ function openGnsysConfigure()
 			    -e "s/DBUSER/$OPENGNSYS_DB_USER/g" \
 			    -e "s/DBPASSWORD/$OPENGNSYS_DB_PASSWD/g" \
 			    -e "s/DATABASE/$OPENGNSYS_DATABASE/g" \
+			    -e "s/REPOKEY/$OPENGNSYS_REPOKEY/g" \
 				$WORKDIR/opengnsys/admin/Sources/Services/ogAdmServer/ogAdmServer.cfg > $INSTALL_TARGET/etc/ogAdmServer-$dev.cfg
 			sed -e "s/SERVERIP/${SERVERIP[i]}/g" \
 			    -e "s/REPOKEY/$OPENGNSYS_REPOKEY/g" \
