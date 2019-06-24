@@ -25,6 +25,9 @@ define('OG_REST_PARAM_RUN', 'run');
 define('OG_REST_PARAM_TYPE', 'type');
 define('OG_REST_PARAM_STATE', 'state');
 
+$conf_file = parse_ini_file('../../etc/ogAdmRepo.cfg');
+define('OG_REST_API_TOKEN', 'Authorization: ' . $conf_file['ApiToken']);
+
 function common_request($command, $type, $data = null) {
 
 	$json = json_encode($data);
@@ -33,6 +36,9 @@ function common_request($command, $type, $data = null) {
 
 	$curl = curl_init($service_url);
 	curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+	curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+		OG_REST_API_TOKEN,
+	));
 
 	switch ($type) {
 		default:
