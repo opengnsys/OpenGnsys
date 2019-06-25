@@ -25,7 +25,7 @@ define('OG_REST_PARAM_RUN', 'run');
 define('OG_REST_PARAM_TYPE', 'type');
 define('OG_REST_PARAM_STATE', 'state');
 
-$conf_file = parse_ini_file('../../etc/ogAdmRepo.cfg');
+$conf_file = parse_ini_file(__DIR__ . '/../../etc/ogAdmRepo.cfg');
 define('OG_REST_API_TOKEN', 'Authorization: ' . $conf_file['ApiToken']);
 
 function common_request($command, $type, $data = null) {
