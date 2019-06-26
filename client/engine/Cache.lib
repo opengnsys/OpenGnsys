@@ -125,7 +125,8 @@ case "$(ogGetPartitionTableType $NDSK)" in
         # Si existe la cache se borra previamente
         [ -n "$(ogFindCache)" ] && ogDeleteCache
         # Capturamos el codigo de particion GPT para cache
-        ID=$(ogTypeToId CACHE GPT)
+        # PATCH - Cuando es GPT, la particion con codigo CACHE (CA00) no existe y no puede crearse, se cambia por LINUX (8300)
+        ID=$(ogTypeToId LINUX GPT)
         sgdisk $DISK -n$PART:$START:$END -c$PART:CACHE -t$PART:$ID 2>/dev/null
         ;;
     MSDOS)
@@ -235,7 +236,8 @@ if [ "$*" == "help" ]; then
 fi
 # Obtener el dispositivo del sistema de archivos etiquetado como "CACHE".
 PART=$(blkid -L "CACHE")
-
+# En discos nvme con particiones GPT la partición se detecta usando el tag PARTLABEL
+PART=${PART:-$(blkid -t PARTLABEL=CACHE | awk -F: '{print $1}')}
 # Si no se detecta, obtener particiones marcadas de tipo caché en discos MSDOS.
 PART=${PART:-$(sfdisk -l 2>/dev/null | awk '$6~/ca|a7/ {print $1}')}
 
@@ -244,7 +246,7 @@ if [ -z "$PART" ]; then
     for DISK in $(ogDiskToDev); do
         # Nota: se añade espacio separador solo si existe valor previo.
         PART="${PART:+"$PART "}$(sgdisk -p $DISK 2>/dev/null | awk -v d=$DISK '$7~/CACHE/ {printf "%s%s",d,$1;}')"
-    done  
+    done
 fi
 
 # Devolver número de disco y número de partición de la 1ª partición encontrada.
