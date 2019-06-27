@@ -54,6 +54,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Output
     m_output->setReadOnly(true);
+    m_output->setFontPointSize(16);
 
     // Button Dock
     QDockWidget* dock=new QDockWidget();
@@ -161,20 +162,22 @@ MainWindow::~MainWindow()
 void MainWindow::slotLinkHandle(const QUrl &url)
 {
     // Check if it's executing another process
-    if(m_process->state()!=QProcess::NotRunning)
+    if(m_process->state() != QProcess::NotRunning)
     {
         print(tr(gettext("Hay otro proceso en ejecución. Por favor espere.")));
         return;
     }
     QString urlString = url.toString();
-    if(urlString.startsWith(COMMAND))
+    QString urlScheme = url.scheme();
+    // Clear the output widget for a normal user
+    if(! m_env.contains("ogactiveadmin") || m_env["ogactiveadmin"] != "true")
     {
-        // For COMMAND link, execute
-        executeCommand(urlString.remove(0,QString(COMMAND).length()));
+        m_output->clear();
     }
-    else if(urlString.startsWith(COMMAND_WITH_CONFIRMATION))
+    if(urlScheme == "COMMAND_CONFIRM" || urlScheme == "COMMAND_CONFIRM_OUTPUT" ||
+       urlScheme == "COMMAND_OUTPUT_CONFIRM" || urlScheme == "COMMAND_WITH_CONFIRMATION")
     {
-        // For COMMAND_WITH_CONFIRMATION link, show confirmation box and execute, if accepted
+        // For all command with confirmation links, show a popup box
         QMessageBox msgBox;
         msgBox.setWindowFlags(Qt::CustomizeWindowHint | Qt::WindowTitleHint);
         msgBox.setWindowTitle(tr(gettext("AVISO")));
@@ -185,10 +188,37 @@ void MainWindow::slotLinkHandle(const QUrl &url)
         msgBox.addButton(tr(gettext("Cancelar")), QMessageBox::RejectRole);
         msgBox.setDefaultButton(execButton);
         msgBox.exec();
+        // Continue if user press the execution button
         if (msgBox.clickedButton() == execButton)
         {
-            executeCommand(urlString.remove(0,QString(COMMAND_WITH_CONFIRMATION).length()));
+            // For command with confirmation and output link, show an output window to non-admin user
+            if((urlScheme == "COMMAND_CONFIRM_OUTPUT" || urlScheme == "COMMAND_OUTPUT_CONFIRM") &&
+               (! m_env.contains("ogactiveadmin") || m_env["ogactiveadmin"] != "true"))
+            {
+                int w=MainWindow::width(), h=MainWindow::height();
+                m_output->setWindowFlags(Qt::Window);
+                m_output->move(100, 100);
+                m_output->setFixedSize(w*0.8-100, h*0.8-100);
+                m_output->show();
+            }
+            // Execute the command
+            executeCommand(urlString.remove(0, urlScheme.length()+1));
         }
+    }
+    else if(urlScheme == "COMMAND" || urlScheme == "COMMAND_OUTPUT")
+    {
+        // For command with output link, show an output window to non-admin user
+        if(urlScheme == "COMMAND_OUTPUT" &&
+           (! m_env.contains("ogactiveadmin") || m_env["ogactiveadmin"] != "true"))
+        {
+            int w=MainWindow::width(), h=MainWindow::height();
+            m_output->setWindowFlags(Qt::Window);
+            m_output->move(100, 100);
+            m_output->setFixedSize(w*0.8-100, h*0.8-100);
+            m_output->show();
+        }
+        // Execute the command
+        executeCommand(urlString.remove(0, urlScheme.length()+1));
     }
     else
     {
@@ -263,7 +293,11 @@ void MainWindow::slotProcessOutput()
     while((m_process->readLine(buf,BUFFERSIZE) > 0))
     {
         QString s(buf);
-        print(tr("Proc. stdout: ")+s);
+        if(m_env.contains("ogactiveadmin") && m_env["ogactiveadmin"] == "true")
+        {
+            m_output->insertPlainText(tr("Proc. stdout: "));
+        }
+        print(s);
         captureOutputForStatusBar(s);
     }
 }
@@ -275,26 +309,49 @@ void MainWindow::slotProcessErrorOutput()
     while((m_process->readLine(buf,BUFFERSIZE) > 0))
     {
         QString s(buf);
-        m_output->insertPlainText(tr("Proc. stderr: "));
+        if(m_env.contains("ogactiveadmin") && m_env["ogactiveadmin"] == "true")
+        {
+            m_output->insertPlainText(tr("Proc. stderr: "));
+        }
         m_output->setTextColor(QColor(Qt::darkBlue));
         print(s);
         m_output->setTextColor(QColor(Qt::black));
     }
 }
 
-void MainWindow::slotProcessFinished(int code,QProcess::ExitStatus status)
+void MainWindow::slotProcessFinished(int code, QProcess::ExitStatus status)
 {
-    if(status==QProcess::NormalExit)
+    if(m_env.contains("ogactiveadmin") && m_env["ogactiveadmin"] == "true")
     {
-        print(tr(gettext("Fin del proceso. Valor de retorno: "))+QString::number(code));
+        // Admin user: show process status
+        if(status==QProcess::NormalExit)
+        {
+            if(code > 0)
+	    {
+                m_output->setTextColor(QColor(Qt::darkRed));
+	    }
+            print("\n"+tr(gettext("Fin del proceso. Valor de retorno: "))+QString::number(code));
+        }
+        else
+        {
+            m_output->setTextColor(QColor(Qt::darkRed));
+            print("\n"+tr(gettext("El proceso ha fallado inesperadamente. Salida: ")+code));
+        }
+        m_output->setTextColor(QColor(Qt::black));
     }
     else
     {
-        print(tr(gettext("El proceso ha fallado inesperadamente. Salida: ")+code));
+        // Non-admin user: show instruction to close the popup window
+        write(tr(gettext("Fin del proceso. Valor de retorno: "))+QString::number(code));
+        m_output->setFontUnderline(true);
+        print("\n\n"+tr(gettext("AVISO: Pulsar el botón superior derecho para cerrar"))+" [X]");
+        m_output->setFontUnderline(false);
     }
     // On error, show a message box
-    if(code>0)
+    if(code > 0 && ! m_output->isActiveWindow())
+    {
         showErrorMessage(gettext("Código de salida: ")+QString::number(code));
+    }
     finishProgressBar();
 }
 
@@ -398,24 +455,34 @@ int MainWindow::readEnvironmentValues()
     return ret;
 }
 
-void MainWindow::print(QString s)
+// Write a string to the log file
+void MainWindow::write(QString s)
 {
-    if(!s.endsWith("\n"))
+    if(! s.endsWith("\n"))
         s+="\n";
     if(m_logstream)
     {
         *m_logstream<<CURRENT_TIME()<<": browser: "<<s;
         m_logstream->flush();
     }
+}
+
+// Print and log a string
+void MainWindow::print(QString s)
+{
+    if(! s.endsWith("\n"))
+        s+="\n";
+    write(s);
     if(m_output)
         m_output->insertPlainText(s);
 }
 
+// Show message in status bar
 void MainWindow::captureOutputForStatusBar(QString output)
 {
-    // Capturar para modificar status bar
+    // Modify the status bar
     output=output.trimmed();
-
+    // Get percentage (string starts with "[Number]")
     QRegExp regexp(REGEXP_STRING);
     if(regexp.indexIn(output) != -1)
     {
@@ -440,13 +507,14 @@ void MainWindow::startProgressBar()
     m_web->setEnabled(false);
 }
 
+// Reset status bar
 void MainWindow::finishProgressBar()
 {
     m_progressBar->reset();
     m_web->setEnabled(true);
 }
 
-
+// Execute a command
 void MainWindow::executeCommand(QString &string)
 {
     QStringList list=string.split(" ",QString::SkipEmptyParts);
@@ -455,9 +523,17 @@ void MainWindow::executeCommand(QString &string)
     // Assign the same Browser's environment to the process
     m_process->setEnvironment(QProcess::systemEnvironment());
     m_process->start(program,list);
-    m_output->setTextColor(QColor(Qt::darkGreen));
-    print(tr(gettext("Lanzando el comando: "))+string);
-    m_output->setTextColor(QColor(Qt::black));
+    // Only show the command line to admin user
+    if(m_env.contains("ogactiveadmin") && m_env["ogactiveadmin"] == "true")
+    {
+        m_output->setTextColor(QColor(Qt::darkGreen));
+        print(tr(gettext("Lanzando el comando: "))+string);
+        m_output->setTextColor(QColor(Qt::black));
+    }
+    else
+    {
+        write(tr(gettext("Lanzando el comando: "))+string);
+    }
     startProgressBar();
 }
 

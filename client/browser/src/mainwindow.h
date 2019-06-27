@@ -1,8 +1,12 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#define COMMAND "command:"
-#define COMMAND_WITH_CONFIRMATION "commandwithconfirmation:"
+#define COMMAND "command"
+#define COMMAND_CONFIRM "command+confirm"
+#define COMMAND_WITH_CONFIRMATION "commandwithconfirmation"  // Backwards compatibility
+#define COMMAND_OUTPUT "command+output"
+#define COMMAND_CONFIRM_OUTPUT "command+confirm+output"
+#define COMMAND_OUTPUT_CONFIRM "command+output+confirm"
 #define ENVIRONMENT "OGLOGFILE,ogactiveadmin,DEFAULTSPEED"
 
 #include <QWidget>
@@ -62,6 +66,7 @@ class MainWindow : public QMainWindow
     protected:
         int readEnvironmentValues();
         void print(QString s);
+        void write(QString s);
         void captureOutputForStatusBar(QString output);
         void startProgressBar();
         void finishProgressBar();
