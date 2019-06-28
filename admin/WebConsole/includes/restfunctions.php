@@ -16,6 +16,7 @@ define('OG_REST_CMD_REBOOT', 'reboot');
 define('OG_REST_CMD_STOP', 'stop');
 define('OG_REST_CMD_REFRESH', 'refresh');
 define('OG_REST_CMD_HARDWARE', 'hardware');
+define('OG_REST_CMD_SOFTWARE', 'software');
 
 define('OG_REST_PARAM_CLIENTS', 'clients');
 define('OG_REST_PARAM_ADDR', 'addr');
@@ -191,6 +192,15 @@ function hardware($string_ips) {
 	$data = array(OG_REST_PARAM_CLIENTS => $ips);
 
 	common_request(OG_REST_CMD_HARDWARE, POST, $data);
+}
+
+function software($string_ips) {
+
+	$ips = explode(';',$string_ips);
+
+	$data = array(OG_REST_PARAM_CLIENTS => $ips);
+
+	common_request(OG_REST_CMD_SOFTWARE, POST, $data);
 }
 
 /*
