@@ -24,6 +24,7 @@ include_once("../includes/capturaacciones.php");
 define('OG_CMD_ID_WAKEUP', 1);
 define('OG_CMD_ID_POWEROFF', 2);
 define('OG_CMD_ID_REBOOT', 5);
+define('OG_CMD_ID_HARDWARE', 6);
 define("OG_CMD_ID_SCRIPT", 8);
 define('OG_CMD_ID_SESSION', 9);
 define('OG_CMD_ID_SENDMESSAGE', 16);
@@ -135,6 +136,9 @@ switch ($idcomando) {
 		break;
 	case OG_CMD_ID_REBOOT:
 		reboot($cadenaip);
+		break;
+	case OG_CMD_ID_HARDWARE:
+		hardware($cadenaip);
 }
 
 if($ambito==0){ // Ambito restringido a un subconjuto de ordenadores con formato (idordenador1,idordenador2,etc)
@@ -195,6 +199,7 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 			    $idcomando != OG_CMD_ID_WAKEUP &&
 			    $idcomando != OG_CMD_ID_SESSION &&
 			    $idcomando != OG_CMD_ID_POWEROFF &&
+			    $idcomando != OG_CMD_ID_HARDWARE &&
 			    $idcomando != OG_CMD_ID_REBOOT) {
 			    // Envío al servidor
 			    $shidra=new SockHidra($servidorhidra,$hidraport); 
