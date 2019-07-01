@@ -700,9 +700,17 @@ local PART d
 for d in $(blkid -o device|sort); do
     # Previene error para /dev/loop0
     PART="$(ogDevToDisk $d 2>/dev/null)" || continue
-    if [ "$(ogGetPartitionId $PART)" == "$(ogTypeToId EFI GPT)" ]; then
-        echo $PART
-        break
+    # En discos NVMe blkid devuelve una salida del tipo:
+    #    >/dev/loop0
+    #    >/dev/nvme0n1
+    #    >/dev/nvme0n1p1
+    # al analizar la particion nvme0n1, PART solo tiene un argumento y hace que ogGetPartitionId lance un error
+    LEN=$(echo $PART | awk '{ print length($0) }')
+    if [ $LEN -gt 1 ]; then
+        if [ "$(ogGetPartitionId $PART)" == "$(ogTypeToId EFI GPT)" ]; then
+            echo $PART
+            break
+        fi
     fi
 done
 }
