@@ -30,8 +30,7 @@ start_mysql();
 
 subprocess.Popen(['../ogAdmServer', '-f', 'config/ogAdmServer.cfg'])
 
-for filename in glob.iglob('units/**'):
-    subprocess.run(['python3', filename, '-v'])
+subprocess.run('python3 -m unittest discover -s units -v', shell=True)
 
 stop_mysql();
 
