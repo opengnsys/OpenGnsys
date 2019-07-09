@@ -4,7 +4,7 @@ import unittest
 class TestPostSessionMethods(unittest.TestCase):
 
     def setUp(self):
-        self.url = 'http://localhost:8888/shell/run'
+        self.url = 'http://localhost:8888/session'
         self.headers = {'Authorization' : '07b3bfe728954619b58f0107ad73acc1'}
         self.json = { 'clients' : [ '192.168.2.1', '192.168.2.2' ],
                 'disk' : '0', 'partition' : '1'}
