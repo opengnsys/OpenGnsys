@@ -3929,7 +3929,9 @@ static int og_client_not_found(struct og_client *cli)
 
 static int og_client_not_authorized(struct og_client *cli)
 {
-	char buf[] = "HTTP/1.1 404 Unauthorized\r\nContent-Length: 0\r\n\r\n";
+	char buf[] = "HTTP/1.1 401 Unauthorized\r\n"
+		     "WWW-Authenticate: Basic\r\n"
+		     "Content-Length: 0\r\n\r\n";
 
 	send(og_client_socket(cli), buf, strlen(buf), 0);
 
