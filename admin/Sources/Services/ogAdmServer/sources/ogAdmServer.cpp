@@ -84,6 +84,8 @@ static bool tomaConfiguracion(const char *filecfg)
 		line = fgets(buf, sizeof(buf), fcfg);
 	}
 
+	fclose(fcfg);
+
 	if (!servidoradm[0]) {
 		syslog(LOG_ERR, "Missing SERVIDORADM in configuration file\n");
 		return false;
