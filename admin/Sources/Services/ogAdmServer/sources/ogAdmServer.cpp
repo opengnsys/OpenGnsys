@@ -3918,6 +3918,19 @@ static int og_cmd_software(json_t *element, struct og_msg_params *params)
 				  CLIENTE_OCUPADO);
 }
 
+static int og_client_method_not_found(struct og_client *cli)
+{
+	/* To meet RFC 7231, this function MUST generate an Allow header field
+	 * containing the correct methods. For example: "Allow: POST\r\n"
+	 */
+	char buf[] = "HTTP/1.1 405 Method Not Allowed\r\n"
+		     "Content-Length: 0\r\n\r\n";
+
+	send(og_client_socket(cli), buf, strlen(buf), 0);
+
+	return -1;
+}
+
 static int og_client_not_found(struct og_client *cli)
 {
 	char buf[] = "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n";
@@ -3979,7 +3992,7 @@ static int og_client_state_process_payload_rest(struct og_client *cli)
 		method = OG_METHOD_POST;
 		cmd = cli->buf + strlen("POST") + 2;
 	} else
-		return -1;
+		return og_client_method_not_found(cli);
 
 	body = strstr(cli->buf, "\r\n\r\n") + 4;
 
@@ -4000,7 +4013,7 @@ static int og_client_state_process_payload_rest(struct og_client *cli)
 	if (!strncmp(cmd, "clients", strlen("clients"))) {
 		if (method != OG_METHOD_POST &&
 		    method != OG_METHOD_GET)
-			return -1;
+			return og_client_method_not_found(cli);
 
 		if (method == OG_METHOD_POST && !root) {
 			syslog(LOG_ERR, "command clients with no payload\n");
@@ -4016,7 +4029,7 @@ static int og_client_state_process_payload_rest(struct og_client *cli)
 		}
 	} else if (!strncmp(cmd, "wol", strlen("wol"))) {
 		if (method != OG_METHOD_POST)
-			return -1;
+			return og_client_method_not_found(cli);
 
 		if (!root) {
 			syslog(LOG_ERR, "command wol with no payload\n");
@@ -4025,7 +4038,7 @@ static int og_client_state_process_payload_rest(struct og_client *cli)
 		err = og_cmd_wol(root, &params);
 	} else if (!strncmp(cmd, "shell/run", strlen("shell/run"))) {
 		if (method != OG_METHOD_POST)
-			return -1;
+			return og_client_method_not_found(cli);
 
 		if (!root) {
 			syslog(LOG_ERR, "command run with no payload\n");
@@ -4034,7 +4047,7 @@ static int og_client_state_process_payload_rest(struct og_client *cli)
 		err = og_cmd_run_post(root, &params);
 	} else if (!strncmp(cmd, "shell/output", strlen("shell/output"))) {
 		if (method != OG_METHOD_POST)
-			return -1;
+			return og_client_method_not_found(cli);
 
 		if (!root) {
 			syslog(LOG_ERR, "command output with no payload\n");
@@ -4044,7 +4057,7 @@ static int og_client_state_process_payload_rest(struct og_client *cli)
 		err = og_cmd_run_get(root, &params, buf_reply);
 	} else if (!strncmp(cmd, "session", strlen("session"))) {
 		if (method != OG_METHOD_POST)
-			return -1;
+			return og_client_method_not_found(cli);
 
 		if (!root) {
 			syslog(LOG_ERR, "command session with no payload\n");
@@ -4053,7 +4066,7 @@ static int og_client_state_process_payload_rest(struct og_client *cli)
 		err = og_cmd_session(root, &params);
 	} else if (!strncmp(cmd, "poweroff", strlen("poweroff"))) {
 		if (method != OG_METHOD_POST)
-			return -1;
+			return og_client_method_not_found(cli);
 
 		if (!root) {
 			syslog(LOG_ERR, "command poweroff with no payload\n");
@@ -4062,7 +4075,7 @@ static int og_client_state_process_payload_rest(struct og_client *cli)
 		err = og_cmd_poweroff(root, &params);
 	} else if (!strncmp(cmd, "reboot", strlen("reboot"))) {
 		if (method != OG_METHOD_POST)
-			return -1;
+			return og_client_method_not_found(cli);
 
 		if (!root) {
 			syslog(LOG_ERR, "command reboot with no payload\n");
@@ -4071,7 +4084,7 @@ static int og_client_state_process_payload_rest(struct og_client *cli)
 		err = og_cmd_reboot(root, &params);
 	} else if (!strncmp(cmd, "stop", strlen("stop"))) {
 		if (method != OG_METHOD_POST)
-			return -1;
+			return og_client_method_not_found(cli);
 
 		if (!root) {
 			syslog(LOG_ERR, "command stop with no payload\n");
@@ -4080,7 +4093,7 @@ static int og_client_state_process_payload_rest(struct og_client *cli)
 		err = og_cmd_stop(root, &params);
 	} else if (!strncmp(cmd, "refresh", strlen("refresh"))) {
 		if (method != OG_METHOD_POST)
-			return -1;
+			return og_client_method_not_found(cli);
 
 		if (!root) {
 			syslog(LOG_ERR, "command refresh with no payload\n");
@@ -4089,7 +4102,7 @@ static int og_client_state_process_payload_rest(struct og_client *cli)
 		err = og_cmd_refresh(root, &params);
 	} else if (!strncmp(cmd, "hardware", strlen("hardware"))) {
 		if (method != OG_METHOD_POST)
-			return -1;
+			return og_client_method_not_found(cli);
 
 		if (!root) {
 			syslog(LOG_ERR, "command hardware with no payload\n");
@@ -4098,7 +4111,7 @@ static int og_client_state_process_payload_rest(struct og_client *cli)
 		err = og_cmd_hardware(root, &params);
 	} else if (!strncmp(cmd, "software", strlen("software"))) {
 		if (method != OG_METHOD_POST)
-			return -1;
+			return og_client_method_not_found(cli);
 
 		if (!root) {
 			syslog(LOG_ERR, "command software with no payload\n");
