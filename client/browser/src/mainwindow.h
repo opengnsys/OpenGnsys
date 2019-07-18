@@ -45,7 +45,7 @@ class MainWindow : public QMainWindow
         void slotWebLoadStarted();
         void slotWebLoadFinished(bool ok);
         void slotWebLoadProgress(int progress);
-	void slotSslErrors(QNetworkReply* reply);
+        void slotSslErrors(QNetworkReply* reply);
 
         // Funciones que manejan cada vez que el proceso hace algo
         void slotProcessStarted();
