@@ -174,8 +174,8 @@ void MainWindow::slotLinkHandle(const QUrl &url)
     {
         m_output->clear();
     }
-    if(urlScheme == "COMMAND_CONFIRM" || urlScheme == "COMMAND_CONFIRM_OUTPUT" ||
-       urlScheme == "COMMAND_OUTPUT_CONFIRM" || urlScheme == "COMMAND_WITH_CONFIRMATION")
+    if(urlScheme == COMMAND_CONFIRM || urlScheme == COMMAND_CONFIRM_OUTPUT ||
+       urlScheme == COMMAND_OUTPUT_CONFIRM || urlScheme == COMMAND_WITH_CONFIRMATION)
     {
         // For all command with confirmation links, show a popup box
         QMessageBox msgBox;
@@ -192,7 +192,7 @@ void MainWindow::slotLinkHandle(const QUrl &url)
         if (msgBox.clickedButton() == execButton)
         {
             // For command with confirmation and output link, show an output window to non-admin user
-            if((urlScheme == "COMMAND_CONFIRM_OUTPUT" || urlScheme == "COMMAND_OUTPUT_CONFIRM") &&
+            if((urlScheme == COMMAND_CONFIRM_OUTPUT || urlScheme == COMMAND_OUTPUT_CONFIRM) &&
                (! m_env.contains("ogactiveadmin") || m_env["ogactiveadmin"] != "true"))
             {
                 int w=MainWindow::width(), h=MainWindow::height();
@@ -205,10 +205,10 @@ void MainWindow::slotLinkHandle(const QUrl &url)
             executeCommand(urlString.remove(0, urlScheme.length()+1));
         }
     }
-    else if(urlScheme == "COMMAND" || urlScheme == "COMMAND_OUTPUT")
+    else if(urlScheme == COMMAND || urlScheme == COMMAND_OUTPUT)
     {
         // For command with output link, show an output window to non-admin user
-        if(urlScheme == "COMMAND_OUTPUT" &&
+        if(urlScheme == COMMAND_OUTPUT &&
            (! m_env.contains("ogactiveadmin") || m_env["ogactiveadmin"] != "true"))
         {
             int w=MainWindow::width(), h=MainWindow::height();
@@ -327,9 +327,9 @@ void MainWindow::slotProcessFinished(int code, QProcess::ExitStatus status)
         if(status==QProcess::NormalExit)
         {
             if(code > 0)
-	    {
+            {
                 m_output->setTextColor(QColor(Qt::darkRed));
-	    }
+            }
             print("\n"+tr(gettext("Fin del proceso. Valor de retorno: "))+QString::number(code));
         }
         else
