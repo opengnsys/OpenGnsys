@@ -105,11 +105,11 @@ function userData ()
 		echo -n -e "Please, type a valid number (1): "
 		read -r OPT
 		case "$OPT" in
-			1|"")	OGLIVE="ogLive-bionic-5.0.0-15-generic-amd64-r20190515.97b8472.iso "
+			1|"")	OGLIVE="$DEFAULT_OGLIVE"
 				break ;;
 			2)	OGLIVE="ogLive-precise-3.2.0-23-generic-r5159.iso"
 				break ;;
-			3)	OGLIVE="ogLive-bionic-5.0.0-15-generic-amd64-r20190515.97b8472.iso  ogLive-precise-3.2.0-23-generic-r5159.iso";
+			3)	OGLIVE=" $DEFAULT_OGLIVE ogLive-precise-3.2.0-23-generic-r5159.iso";
 				break ;;
 			*)	echo -e "\\aERROR: unknown option, try again."
 		esac
