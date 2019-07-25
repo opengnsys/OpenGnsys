@@ -90,7 +90,6 @@ esac
 }
 
 
-
 #/**
 #         ogGetSerialNumber
 #@brief   Obtiene el nº de serie del cliente.
@@ -98,17 +97,22 @@ esac
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2015-06-08
 #*/ ##
-
 function ogGetSerialNumber ()
 {
+# Variables locales.
+local SERIALNO
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME"
+    ogHelp "$FUNCNAME" "$FUNCNAME" "$FUNCNAME  =>  123456"
     return
 fi
 
-# Obtener nº de serie (ignorar los no especificados)
-dmidecode -s system-serial-number | egrep -vi "(^[ 0]+$|not specified|to be filled|invalid entry)"
+# Obtener nº de serie (ignorar los no especificados).
+SERIALNO=$(dmidecode -s system-serial-number | egrep -vi "(^[ 0]+$|not specified|to be filled|invalid entry|default string)")
+# Truncar cadena si >25 caracteres.
+[ ${#SERIALNO} -gt 25 ] && SERIALNO="${SERIALNO:0:22}..."
+[ -n "$SERIALNO" ] && echo "$SERIALNO"
+return 0
 }
 
 
