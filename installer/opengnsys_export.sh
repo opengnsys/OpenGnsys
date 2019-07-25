@@ -15,6 +15,8 @@
 #@version 1.1.0 - Cambia cómo se exporta la base de datos para permitir importar en versiones posteriores.
 #@note    Incompatible con versiones de opengnsys_import.sh anteriores a esta fecha.
 #@date    2018-02-14
+#@version 1.1.1 - Incluye scripts personalizados (*Custom)
+#@date    2019-07-25
 #*/ ##
 
 # Variables globales.
@@ -82,6 +84,7 @@ password=$PASSWORD
 EOT
 
 mysqldump --defaults-extra-file=$MYCNF --opt $CATALOG > $MYSQLFILE
+chmod 400 $MYSQLFILE
 
 # Borrar fichero temporal
 rm -f $MYCNF
@@ -94,14 +97,15 @@ echo $ServidorAdm > $TMPDIR/IPSERVER.txt
 
 # Empaquetamos los ficheros
 echo "Creamos un archivo comprimido con los datos: $BACKUPFILE."
+CUSTOMFILES=$(find $OPENGNSYS/client/scripts -name "*Custom" -exec basename {} \;)
 tar -cvzf $BACKUPFILE --transform="s!^!$BACKUPPREFIX/!" \
           -C $(dirname $MYSQLFILE) $(basename $MYSQLFILE) \
           -C $TMPDIR IPSERVER.txt \
           -C $DHCPDIR dhcpd.conf \
-          -C $OPENGNSYS/tftpboot menu.lst \
-          -C $OPENGNSYS/tftpboot grub \
-          -C $OPENGNSYS/doc VERSION.json \
           -C $OPENGNSYS/client/etc engine.cfg engine.json \
+          -C $OPENGNSYS/client/scripts $CUSTOMFILES \
+          -C $OPENGNSYS/doc VERSION.txt VERSION.json \
+          -C $OPENGNSYS/tftpboot menu.lst grub \
           -C $OPENGNSYS/www menus \
           -C /etc default/opengnsys &>/dev/null
 

@@ -17,6 +17,8 @@
 #@version 1.1.0 - Permite importar de versiones de OpenGnsys anteriores. Cambia la importación de la base de datos.
 #@note    Incompatible con versiones de opengnsys_export.sh anteriores a esta fecha.
 #@date    2018-02-14
+#@version 1.1.1 - Importamos scripts Custom, PXE para UEFI y /etc/default/opengnsys.
+#@date    2019-07-18
 #*/ ##
 
 # Variables globales.
@@ -157,7 +159,7 @@ function updateSqlFile()
         done
         # Aplicar posible actualización propia para la versión final.
         file=$CATALOG-$NEWVERSION.sql
-        if [ -n "$FILES" -o "$OLDVERSION" = "$NEWVERSION" -a -r $file ]; then
+        if [ -n "$FILES" -o "$OLDVERSION" = "$NEWVERSION" ] && [ -r $file ]; then
                 FILES="$FILES $file"
         fi
 
@@ -226,7 +228,8 @@ NEWVERSION=$(jq -r '.version' $OPENGNSYS/doc/VERSION.json)
 # FALTA: Comprobar que la versión OLD es menor que la NEW
 if [ $OLDVERSION != $NEWVERSION ] ; then
     echo "La versión del servidor no coincide con la del backup."
-    jq -r '[.project, .version, .codename] | join(" ")' $OPENGNSYS/doc/VERSION.json $TMPDIR/VERSION.json
+    jq -r '[.project, .version, .codename] | join(" ")' $OPENGNSYS/doc/VERSION.json $TMPDIR/VERSION.json 2>/dev/null \
+	    || cat $TMPDIR/VERSION.txt
     read -p "¿Quiere continuar? (y/n): " ANSWER
     if [ "${ANSWER^^}" != "Y" ]; then
         echo "Operación cancelada."
@@ -259,7 +262,7 @@ fi
 mysql --defaults-extra-file=$MYCNF -e "SHOW TRIGGERS FROM $CATALOG;" |grep "Trigger" &>/dev/null
 if [ $? -eq 0 ]; then
     # Existe el trigger: eliminamos líneas del trigger en $CATALOG.sql
-    read INI END <<< $(grep -n -e TRIGGER -e "END.*;;" $MYSQLFILE |cut -d: -f1)
+    read -d\n INI END <<< $(grep -n -e TRIGGER -e "END.*;;" $MYSQLFILE |cut -d: -f1)
     [ -n "$INI" ] && sed -i "$INI,${END}d" $MYSQLFILE
 else
     # No existe: necesitamos privilegios de root
@@ -271,7 +274,6 @@ fi
 
 # Eliminamos las tablas que no importamos: repositorios, entorno
 #     y añadimos los usuarios, sólo si no existen.
-cp $MYSQLFILE $MYSQLFILE.prueba
 sed -i -e '/Table structure.* `repositorios`/,/Table structure/d' \
        -e '/Table structure.* `entornos`/,/Table structure/d' \
        -e '/Table structure.*`usuarios`/,/CHARSET/d' \
@@ -280,11 +282,17 @@ sed -i -e '/Table structure.* `repositorios`/,/Table structure/d' \
 
 # Copia de seguridad del estado de la base de datos
 mysqldump --defaults-extra-file=$MYCNF --opt $CATALOG > $MYSQLBCK
+chmod 400 $MYSQLBCK
 # Importamos los datos nuevos
 mysql --defaults-extra-file=$MYCNF -D "$CATALOG" < $MYSQLFILE &>/dev/null
 [ $? -ne 0 ] && echo "ERROR: Error al importar la información de la base de datos."
 
 # Copiamos los archivos a su sitio correcto
+# default/opengnsys
+echo "   * Guardamos la configuración de /etc/default."
+mv /etc/default/opengnsys /etc/default/opengnsys-$DATE
+cp $TMPDIR/default/opengnsys /etc/default/opengnsys
+
 # DHCP
 echo "   * Componemos la configuración del dhcp."
 for DHCPCFGDIR in /etc/dhcp /etc/dhcp3; do
@@ -306,9 +314,12 @@ done
 # TFTP
 echo "   * Guardamos los ficheros PXE de los clientes."
 for BOOTLOADER in menu.lst grub; do
-    mv $OPENGNSYS/tftpboot/$BOOTLOADER $OPENGNSYS/tftpboot/$BOOTLOADER-$DATE
-    cp -r $TMPDIR/$BOOTLOADER  $OPENGNSYS/tftpboot
-    chown -R www-data:www-data $OPENGNSYS/tftpboot/$BOOTLOADER
+    if [ -d $TMPDIR/$BOOTLOADER ]; then
+        mkdir $OPENGNSYS/tftpboot/$BOOTLOADER-$DATE
+        mv $OPENGNSYS/tftpboot/$BOOTLOADER/{01-*,templates,examples} $OPENGNSYS/tftpboot/$BOOTLOADER-$DATE 2>/dev/null
+        cp -r $TMPDIR/$BOOTLOADER/{01-*,templates,examples}  $OPENGNSYS/tftpboot/$BOOTLOADER 2>/dev/null
+        chown -R www-data:www-data $OPENGNSYS/tftpboot/$BOOTLOADER
+    fi
 done
 
 # Configuración de los clientes
@@ -321,10 +332,21 @@ echo "   * Guardamos las páginas de inicio."
 mv $OPENGNSYS/www/menus $OPENGNSYS/www/menus-$DATE
 cp -r $TMPDIR/menus $OPENGNSYS/www
 
+# Script personalizados
+echo "   * Guardamos los scripts personalizados."
+if ls $OPENGNSYS/client/scripts/*Custom &>/dev/null; then
+    mkdir $OPENGNSYS/client/scripts/Custom-$DATE
+    mv $OPENGNSYS/client/scripts/*Custom $OPENGNSYS/client/scripts/Custom-$DATE
+fi
+cp -r $TMPDIR/*Custom $OPENGNSYS/client/scripts 
+
 echo -e "Se ha terminado de importar los datos del backup. \n\nSe han realizado copias de seguridad de los archivos antiguos:" 
+echo    "  - /etc/default/opengnsys-$DATE"
 echo    "  - $DHCPCFGDIR/dhcpd.conf-$DATE"
 echo    "  - $OPENGNSYS/tftpboot/menu.lst-$DATE"
+echo    "  - $OPENGNSYS/tftpboot/grub-$DATE"
 echo    "  - $OPENGNSYS/client/etc/engine.cfg-$DATE"
+echo    "  - $OPENGNSYS/client/scripts/Custom-$DATE"
 echo    "  - $OPENGNSYS/www/menus-$DATE"
 echo -e "  - $MYSQLBCK \n"
 
