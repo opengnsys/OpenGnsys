@@ -11,6 +11,9 @@ OGBIN=$OPENGNSYS/bin
 PATH=$PATH:$OGBIN
 REPO_IFACE="$(/opt/opengnsys/bin/getRepoIface)"
 
+# Compatibilidad con Ubuntu 18
+source $OPENGNSYS/lib/osadapter.sh
+
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     echo "Formato: $PROG fichero|nombreImagen datosMulticast"
