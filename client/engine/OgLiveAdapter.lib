@@ -1,0 +1,15 @@
+#!/bin/bash
+#/**
+#@file    OgLiveAdapter
+#@brief   Librería o clase OgLiveAdapter
+#@class   OgLiveAdapter
+#@brief   Funciones o configuración para adaptar cambios en los comandos de los ogLive, de modo que no afecten al motor de clonación
+#@version 1.1.1
+#@warning License: GNU GPLv3+
+#*/
+
+set -a
+shopt -s expand_aliases
+
+# read: Configura el salto de línea como delimintador por defecto.
+alias read='read -d\n'
