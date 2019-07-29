@@ -1344,6 +1344,7 @@ enum wol_delivery_type {
 //
 bool WakeUp(int s, char* iph, char *mac, char *mar)
 {
+	unsigned int macaddr[OG_WOL_MACADDR_LEN];
 	char HDaddress_bin[OG_WOL_MACADDR_LEN];
 	struct sockaddr_in WakeUpCliente;
 	struct wol_msg Trama_WakeUp;
@@ -1355,12 +1356,11 @@ bool WakeUp(int s, char* iph, char *mac, char *mar)
 		Trama_WakeUp.secuencia_FF[i] = 0xFF;
 
 	sscanf(mac, "%02x%02x%02x%02x%02x%02x",
-	       (unsigned int *)&HDaddress_bin[0],
-	       (unsigned int *)&HDaddress_bin[1],
-	       (unsigned int *)&HDaddress_bin[2],
-	       (unsigned int *)&HDaddress_bin[3],
-	       (unsigned int *)&HDaddress_bin[4],
-	       (unsigned int *)&HDaddress_bin[5]);
+	       &macaddr[0], &macaddr[1], &macaddr[2],
+	       &macaddr[3], &macaddr[4], &macaddr[5]);
+
+	for (i = 0; i < 6; i++)
+		HDaddress_bin[i] = (uint8_t)macaddr[i];
 
 	for (i = 0; i < 16; i++) // Segunda secuencia de la trama Wake Up , repetir 16 veces su la MAC
 		memcpy(&Trama_WakeUp.macbin[i][0], &HDaddress_bin, 6);
