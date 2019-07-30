@@ -9,7 +9,7 @@ function InvFecha($fecha){
 	if ($fecha=="1970-01-01")return("");
 
 	$auxexplode=explode(" ",$fecha);
-	list($anno_p,$mes_p,$dia_p)=explode("[/-]",$auxexplode[0]);
+	list($anno_p,$mes_p,$dia_p)=explode("-",str_replace("/","-",$auxexplode[0]));
 	$fecha_p=$dia_p.'-'.$mes_p.'-'.$anno_p;
 	return($fecha_p);
 }
