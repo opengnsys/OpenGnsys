@@ -55,7 +55,7 @@ function common_request($command, $type, $data = null) {
 	$info = curl_getinfo($curl);
 
 	if ($curl_response === false || $info['http_code'] != 200) {
-		syslog(LOG_ERR, 'error occured during curl exec. Additioanl info: ' . var_export($info));
+		syslog(LOG_ERR, 'error occured during curl exec. Additioanl info: ' . print_r($info, TRUE));
 		return 0;
 	}
 
