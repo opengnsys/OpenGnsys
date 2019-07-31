@@ -15,7 +15,7 @@ function chntpw ()
 local CHNTPW
 CHNTPW=$(which drbl-chntpw)
 CHNTPW=${CHNTPW:-$(which chntpw)}
-timeout --foreground 5s $CHNTPW "$@"
+timeout --foreground 5s $CHNTPW -e "$@"
 }
 
 
