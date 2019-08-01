@@ -143,7 +143,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       vb.customize ['storageattach', :id, '--storagectl', 'SATA Controller', '--port', 1, '--device', 0, '--type', 'hdd', '--medium', second_disk]
     end
     # VM base and host name.
-    og.vm.box = "bento/ubuntu-16.04"
+    og.vm.box = "bento/ubuntu-18.04"
     og.vm.hostname = "ogAdministrator"
     # Network configuration: forward web port and attach new interface to VMs private network.
     og.vm.network "forwarded_port", guest: 443, host: LOCALWEBPORT, host_ip: "127.0.0.1"
