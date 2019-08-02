@@ -980,8 +980,8 @@ function compileServices()
 	popd
 	# Parar antiguo servicio de repositorio y añadir clave de acceso REST en su fichero de configuración.
 	pgrep ogAdmRepo > /dev/null && service="ogAdmRepo" $STOPSERVICE
-	sed -i -n -e "/^ApiToken=/!p" -e "$ a\ApiToken=$REPOKEY/" $INSTALL_TARGET/etc/ogAdmRepo.cfg
-	sed -i -n -e "/^APITOKEN=/!p" -e "$ a\APITOKEN=$REPOKEY/" $INSTALL_TARGET/etc/ogAdmServer.cfg
+	sed -i -n -e "/^ApiToken=/!p" -e "$ a\ApiToken=$REPOKEY" $INSTALL_TARGET/etc/ogAdmRepo.cfg
+	sed -i -n -e "/^APITOKEN=/!p" -e "$ a\APITOKEN=$REPOKEY" $INSTALL_TARGET/etc/ogAdmServer.cfg
 	# Compilar OpenGnsys Agent
 	echoAndLog "${FUNCNAME}(): Recompiling OpenGnsys Server Agent"
 	pushd $WORKDIR/opengnsys/admin/Sources/Services/ogAdmAgent
