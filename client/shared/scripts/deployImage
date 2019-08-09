@@ -167,6 +167,10 @@ case "$MODE" in
 			# Time-out en la transferencia multicast (El mensaje de error está enviado)
 			exit $RETVAL
 		    ;;
+		    *)
+			# Error desconocido
+			exit $RETVAL
+		    ;;
                 esac
             ;;
             *)  # Error: protocolo desconocido.
