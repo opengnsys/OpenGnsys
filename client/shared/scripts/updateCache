@@ -207,7 +207,7 @@ case "$PROTOCOLO" in
 		ogEcho log session "ogCopyFile $REPOSITORIO $2.torrent absolute $OGCAC/$OGIMG"
 		# tiempos 
 		timewait=$(expr $(printf '%d\n' 0x$(ogGetMacAddress | awk -F: '{print $5$6}')) \* 120 / 65535)                         
-		ogExecAndLog command ogCopyFile $REPOSITORIO "$2.torrent" "$IMGDIR"
+		ogExecAndLog command ogCopyFile $REPOSITORIO "$2.torrent" "$IMGDIR" || exit $?
 		#TODO: comprobar que el tracker definido en el fichero es correcto.
     		#TODO comprobar que el fichero torrent está en cache
 		# retardamos el inicio -aleatorio de 0 a 120 segundos- al tracker para gestionar mas de +-40 equipos 
