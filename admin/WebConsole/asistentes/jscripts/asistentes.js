@@ -93,6 +93,8 @@ command + " \n";
 	form.atrib_restore.value = "dsk=" + diskPart[0] + "@par="+ diskPart[1] +"@idi=" +imagen[2] +
 				   "@nci="+imagen[1] + "@ipr="+ imagen[0] +"@ifs=" +imagen[3] +
 				   "@ptc="+protocol +"@";
+	// Si la partición es EFI mostramos un aviso.
+	if (diskPart[2] == "EFI") alert (TbMsg['EFIPART']);
 }
 else
 {

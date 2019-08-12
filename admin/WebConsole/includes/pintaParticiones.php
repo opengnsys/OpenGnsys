@@ -246,40 +246,47 @@ function pintaParticionesRestaurarImagen($cmd,$configuraciones,$idordenadores,$c
 		$auxCfg=explode("@",$diskConfig); // Crea lista de particiones
 		for($i=0;$i<sizeof($auxCfg);$i++){
 			$auxKey=explode(";",$auxCfg[$i]); // Toma clave de configuracion
+			// Para particiones EFI desabilitamos el selector
+			$disabled='';
 			for($k=0;$k<$conKeys;$k++){ // Busca los literales para las claves de esa partición
 				if($tbKeys[$k]["cfg"]==$auxCfg[$i]){ // Claves encontradas
 				    if($tbKeys[$k]["numpar"]!=0){    // No es info. del disco (part. 0)
 					$swcc=$tbKeys[$k]["clonable"];
 					if($swcc){
+						if ($tbKeys[$k]["tipopar"] == 'EFI') $disabled='disabled';
 						echo '<TR>'.chr(13);
 						echo '<TD align=center>&nbsp;&nbsp;</TD>';
 						$icp=$cc."_".$tbKeys[$k]["numdisk"]."_".$tbKeys[$k]["numpar"]; // Identificador de la configuración-partición
-						echo '<TD ><input type=radio idcfg="'.$cc.'" id="'.$icp.'" name="particion" value='.$tbKeys[$k]["numdisk"].";".$tbKeys[$k]["numpar"].'></TD>'.chr(13);
+						echo '<TD ><input type=radio idcfg="'.$cc.'" id="'.$icp.'" name="particion" value='.$tbKeys[$k]["numdisk"].";".$tbKeys[$k]["numpar"].' '.$disabled.'></TD>'.chr(13);
 						echo '<TD align=center>&nbsp;'.$tbKeys[$k]["numpar"].'&nbsp;</TD>'.chr(13);
 						echo '<TD align=center>&nbsp;'.$tbKeys[$k]["tipopar"].'&nbsp;</TD>'.chr(13);
 						echo '<TD align=center>&nbsp;'.tomaNombresSO($tbKeys[$k]["numpar"],$idordenadores,$tbKeys[$k]["numdisk"]).'&nbsp;</TD>'.chr(13);	
 						echo'<TD align=center>&nbsp;'.tomaSistemasFicheros($tbKeys[$k]["numpar"],$idordenadores,false,$tbKeys[$k]["numdisk"]).'&nbsp;</TD>'.chr(13);
 						echo'<TD align=center>&nbsp;'.tomaTamano($tbKeys[$k]["numpar"],$idordenadores,$tbKeys[$k]["numdisk"]).'&nbsp;</TD>'.chr(13);	
-						echo '<TD>'.HTMLSELECT_imagenes($cmd,$tbKeys[$k]["idimagen"],$tbKeys[$k]["numpar"],$tbKeys[$k]["codpar"],$icp,true,$idambito,$ambito).'</TD>';
-						echo '<TD>'.HTMLSELECT_imagenes($cmd,$tbKeys[$k]["idimagen"],$tbKeys[$k]["numpar"],$tbKeys[$k]["codpar"],$icp,false,$idambito,$ambito).'</TD>';
+						if ($tbKeys[$k]["tipopar"] == 'EFI') {
+							echo "<TD></TD>\n<TD></TD>\n<TD></TD>\n";
+						} else {
+							echo '<TD>'.HTMLSELECT_imagenes($cmd,$tbKeys[$k]["idimagen"],$tbKeys[$k]["numpar"],$tbKeys[$k]["codpar"],$icp,true,$idambito,$ambito).'</TD>';
+							echo '<TD>'.HTMLSELECT_imagenes($cmd,$tbKeys[$k]["idimagen"],$tbKeys[$k]["numpar"],$tbKeys[$k]["codpar"],$icp,false,$idambito,$ambito).'</TD>';
 	
-						//Clonación
-						$metodos="UNICAST=UNICAST-CACHE".chr(13);
-						$metodos.="UNICAST-DIRECT=UNICAST-DIRECT".chr(13);
-						$metodos.="MULTICAST " . mcast_syntax($cmd,$ambito,$idambito) . "=MULTICAST-CACHE".chr(13);
-						$metodos.="MULTICAST-DIRECT " . mcast_syntax($cmd,$ambito,$idambito) . "=MULTICAST-DIRECT".chr(13);
-						$metodos.="TORRENT " . torrent_syntax($cmd,$ambito,$idambito) . "=TORRENT-CACHE";
+							//Clonación
+							$metodos="UNICAST=UNICAST-CACHE".chr(13);
+							$metodos.="UNICAST-DIRECT=UNICAST-DIRECT".chr(13);
+							$metodos.="MULTICAST " . mcast_syntax($cmd,$ambito,$idambito) . "=MULTICAST-CACHE".chr(13);
+							$metodos.="MULTICAST-DIRECT " . mcast_syntax($cmd,$ambito,$idambito) . "=MULTICAST-DIRECT".chr(13);
+							$metodos.="TORRENT " . torrent_syntax($cmd,$ambito,$idambito) . "=TORRENT-CACHE";
 	
-						$TBmetodos["UNICAST-CACHE"]=1;
-						$TBmetodos["UNICAST-DIRECT"]=2;
-						$TBmetodos["MULTICAST-CACHE"]=3;
-						$TBmetodos["MULTICAST-DIRECT"]=4;
-						$TBmetodos["TORRENT-CACHE"]=5;
-						$idxc=$_SESSION["protclonacion"];
-						if ($idxc == "UNICAST") {
-							$idxc = "UNICAST-DIRECT";
+							$TBmetodos["UNICAST-CACHE"]=1;
+							$TBmetodos["UNICAST-DIRECT"]=2;
+							$TBmetodos["MULTICAST-CACHE"]=3;
+							$TBmetodos["MULTICAST-DIRECT"]=4;
+							$TBmetodos["TORRENT-CACHE"]=5;
+							$idxc=$_SESSION["protclonacion"];
+							if ($idxc == "UNICAST") {
+								$idxc = "UNICAST-DIRECT";
+							}
+							echo '<TD>'.HTMLCTESELECT($metodos,"protoclonacion_".$icp,"estilodesple","",$TBmetodos[$idxc],100).'</TD>';
 						}
-						echo '<TD>'.HTMLCTESELECT($metodos,"protoclonacion_".$icp,"estilodesple","",$TBmetodos[$idxc],100).'</TD>';
 						echo '</TR>'.chr(13);
 					}
 				    }
