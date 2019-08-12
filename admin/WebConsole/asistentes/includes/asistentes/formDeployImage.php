@@ -8,7 +8,7 @@ $diskPartIndex = 0;
 for($cfgIndex = 0; $cfgIndex < $conKeys; $cfgIndex++){
 	if($tbKeys[$cfgIndex]["numpar"] != 0 && $tbKeys[$cfgIndex]["clonable"] == 1){
 		$disksPartitions[$diskPartIndex]["text"] = "Disco ".$tbKeys[$cfgIndex]["numdisk"]." - Part ".$tbKeys[$cfgIndex]["numpar"];
-		$disksPartitions[$diskPartIndex]["value"] = $tbKeys[$cfgIndex]["numdisk"].";".$tbKeys[$cfgIndex]["numpar"];
+		$disksPartitions[$diskPartIndex]["value"] = $tbKeys[$cfgIndex]["numdisk"].";".$tbKeys[$cfgIndex]["numpar"].";".$tbKeys[$cfgIndex]["tipopar"];
 		$diskPartIndex++;
 	}
 }
