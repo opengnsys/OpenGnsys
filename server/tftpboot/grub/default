@@ -1,64 +1,65 @@
 # Busca cargadores existentes por orden de prioridad e
 #    inicia el primero que encuentra.
 # Si no existe ningún cargador de arranque muestre mensaje de error.
-set timeout=0
+set timeout=5
 
-# Valor si no detecto ningún sistema
-set label="OpenGnsys: Ningún cargador de arranque detectado."
-set chain=""
-
+set detectado='no'
 # Compruebo si existen distintos cargadores.
-set root=''
 echo "Searching rEFInd"
-search --file --set root /EFI/refind/grubx64.efi
-if [ "$root" != "" ]; then
-    set label="rEFInd"
-    set chain="chainloader /EFI/refind/grubx64.efi" 
-fi
-
-if [ "$root" == "" ]; then
-    echo "Searching Part-01-02"
-    search --file --set root /EFI/Part-01-02/Boot/ogloader.efi
-    if [ "$root" != "" ]; then
-	set label="Part-01-02"
-	set chain="chainloader /EFI/Part-01-02/Boot/ogloader.efi"
-    fi
-fi
-
-if [ "$root" == "" ]; then
-    echo "Searching Part-01-03"
-    search --file --set root /EFI/Part-01-03/Boot/ogloader.efi
-    if [ "$root" != "" ]; then
-	set label="Part-01-03"
-	set chain="chainloader /EFI/Part-01-03/Boot/ogloader.efi"
-    fi
-fi
-
-if [ "$root" == "" ]; then
-    echo "Searching Microsoft"
-    search --file --set root /EFI/Microsoft/Boot/bootmgfw.efi
-    if [ "$root" != "" ]; then
-	set label="Microsoft"
-	set chain="chainloader /EFI/Microsoft/Boot/bootmgfw.efi"
-    fi
-fi
-
-if [ "$root" == "" ]; then
-    echo "Searching Ubuntu"
-    search --file --set root /EFI/ubuntu/grubx64.efi
-    if [ "$root" != "" ]; then
-	set label="Ubuntu"
-	set chain="chainloader /EFI/ubuntu/grubx64.efi"
-    fi
-fi
-
-if [ "$root" != "" ]; then
-    set label="OpenGnsys ha detectado: $label"
-else
-    # para evitar mensajes de error.
-    set root="(hd0,gpt1)"
-fi
-
-menuentry "$label" {
-    eval "$chain"
+search --file --set rootRefind /EFI/refind/shimx64.efi.signed
+if [ "$rootRefind" != "" ]; then
+    set detectado='si'
+    menuentry "rEFInd" {
+        root="$rootRefind"
+        chainloader /EFI/refind/shimx64.efi.signed
 }
+fi
+
+echo "Searching Part-01-02"
+search --file --set rootP2 /EFI/Part-01-02/Boot/ogloader.efi
+if [ "$rootP2" != "" ]; then
+    set detectado='si'
+    menuentry "Part-01-02" {
+        root="$rootP2"
+        chainloader /EFI/Part-01-02/Boot/ogloader.efi
+    }
+fi
+
+echo "Searching Part-01-03"
+search --file --set rootP3 /EFI/Part-01-03/Boot/ogloader.efi
+if [ "$rootP3" != "" ]; then
+    set detectado='si'
+    menuentry "Part-01-03" {
+        root="$rootP3"
+        chainloader /EFI/Part-01-03/Boot/ogloader.efi
+    }
+fi
+
+echo "Searching Microsoft"
+search --file --set rootMS /EFI/Microsoft/Boot/bootmgfw.efi
+if [ "$rootMS" != "" ]; then
+    set detectado='si'
+    menuentry "Microsoft" {
+        root="$rootMS"
+        chainloader /EFI/Microsoft/Boot/bootmgfw.efi
+    }
+fi
+
+echo "Searching Ubuntu"
+search --file --set rootUb /EFI/ubuntu/grubx64.efi
+if [ "$rootUb" != "" ]; then
+    set detectado='si'
+    menuentry "Ubuntu"
+        root="$rootUb"
+        chainloader /EFI/ubuntu/grubx64.efi
+    }
+fi
+
+
+# Si no hay ningún sistam operativo muestro mensaje.
+if [ $detectado == 'no' ]; then
+    menuentry "OpenGnsys no ha detectado ningún sistema operativo" {
+        # para evitar mensajes de error.
+        set root="(hd0,gpt1)"
+    }
+fi
