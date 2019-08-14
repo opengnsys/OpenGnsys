@@ -3,24 +3,9 @@ set timeout=0
 set timeout_style=hidden
 
 set ISODIR=ogLive
+set default=0;
 
-# Si existe ogLive en CACHE lo inicio, si no el de la red
-set root=''
-echo "OgLive CACHE"
-search --file --set root /boot/$ISODIR/ogvmlinuz
-if [ "$root" == "" ]; then
-    echo "OgLive $ISODIR"
-    set default=1;
-else
-    set default=0;
-fi
-
-menuentry "OgLive CACHE" {
-    linux /boot/$ISODIR/ogvmlinuz ro boot=oginit quiet splash vga=788 irqpoll acpi=on og2nd=sqfs ogprotocol=smb ogactiveadmin=true ogdebug=true ogupdateinitrd=true ogtmpfs=15 oglivedir=$ISODIR INFOHOST
-    initrd /boot/$ISODIR/oginitrd.img
-    boot
-}
-
+echo "OgLive $ISODIR"
 menuentry "OgLive $ISODIR" {
     # Si no existe el ogLive de ISODIR en la red, inicio ogLive por defecto
     for DIR in $ISODIR ogLive; do
