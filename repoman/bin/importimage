@@ -64,9 +64,9 @@ IMAGESIZE="$(jq -r '.size' <<< "$IMAGEINFO" 2>/dev/null)"
 [ -z "$IMAGESIZE" ] && raiseError access "Cannot retrieve image size"
 # Checking if local image exists.
 IMAGEPATH="$REPODIR/$IMAGENAME.$IMAGETYPE"
+LOCKFILE="$IMAGEPATH.lock"
 if [ -e "$IMAGEPATH" ]; then
     # Checking if local image is locked.
-    LOCKFILE="$IMAGEPATH.lock"
     [ -f "$LOCKFILE" ] && raiseError access "Local image is locked, cannot write."
     # Confirm image download.
     read -rp "Image $IMAGENAME exists in the local repository. Do you want to continue? (y/N): " ANSWER
