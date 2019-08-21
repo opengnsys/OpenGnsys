@@ -13,3 +13,7 @@ shopt -s expand_aliases
 
 # read: Configura el salto de línea como delimintador por defecto.
 alias read='read -d\n'
+
+# Creación del menú grub.cfg.
+# En /etc/grub.d/00_header si 'pkgdatadir' está vacía ponemos valor otros ogLive
+sed -i '/grub-mkconfig_lib/i\pkgdatadir=${pkgdatadir:-"${datarootdir}/grub"}' /etc/grub.d/00_header
