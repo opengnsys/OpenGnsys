@@ -45,6 +45,7 @@ else{
 	$UrlPagina=$_SERVER['HTTP_HOST'].$_SERVER['PHP_SELF']; // Url página
 	$UrlPagina=dirname($UrlPagina);
 	$UrlPaginaIconos=dirname($UrlPagina)."/images/iconos";
+	$codeHtml="";
 	//________________________________________________________________________________________________________
 	//agp
 	$nombre_archivo = "/opt/opengnsys/log/clients/".$iph.".cache.txt";

@@ -187,7 +187,7 @@ function RecorreAulas($cmd){
 	while (!$rs->EOF){
 		$idaula=$rs->campos["idaula"];
 		$nombreaula=$rs->campos["nombreaula"];
-		$idordprofesor=$rs->campos["idordprofesor"];
+		$idordprofesor=(isset($rs->campos["idordprofesor"]) ? $rs->campos["idordprofesor"] : 0);
 		$cmd->texto="SELECT idordenador,nombreordenador,ip,mac FROM ordenadores WHERE  idaula=".$idaula;
 		$k=0;
 		$cadenaip="";

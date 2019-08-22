@@ -98,14 +98,18 @@ function clients($case, $ips) {
 			break;
 		case 2:
 			$type = GET;
+			$data = null;
 			break;
 	}
 
 	$result = common_request(OG_REST_CMD_CLIENTS, $type, $data);
 
-	foreach ($result[OG_REST_PARAM_CLIENTS] as $client) {
-		$trama_notificacion = $trama_notificacion.$client[OG_REST_PARAM_ADDR].'/'.
-			$client[OG_REST_PARAM_STATE].';';
+	$trama_notificacion = "";
+	if (isset($result[OG_REST_PARAM_CLIENTS])) {
+		foreach ($result[OG_REST_PARAM_CLIENTS] as $client) {
+			$trama_notificacion .= $client[OG_REST_PARAM_ADDR].'/'.
+				$client[OG_REST_PARAM_STATE].';';
+		}
 	}
 
 	return $trama_notificacion;

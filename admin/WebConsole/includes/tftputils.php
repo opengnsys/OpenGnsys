@@ -98,7 +98,7 @@ function createBootMode ($cmd, $bootopt, $hostname, $lang) {
 	$description=exec("awk 'NR==1 {print $2}' ".PXEDIRBIOS."/templates/".$bootopt);
 	if ($description === "") $description=exec("awk 'NR==1 {print $2}' ".PXEDIRUEFI."/templates/".$bootopt);
 	// Llamamos al script setclientmode
-	shell_exec("export LANG=$lang $acceso; /opt/opengnsys/bin/setclientmode $description $hostname PERM $file");
+	shell_exec("export LANG=$lang $acceso; /opt/opengnsys/bin/setclientmode $description $hostname PERM");
 }
 
 
