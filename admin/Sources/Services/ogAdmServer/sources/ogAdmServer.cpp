@@ -3941,13 +3941,20 @@ static int og_client_not_authorized(struct og_client *cli)
 static int og_client_ok(struct og_client *cli, char *buf_reply)
 {
 	char buf[4096] = {};
+	int err = 0, len;
 
-	sprintf(buf, "HTTP/1.1 200 OK\r\nContent-Length: %ld\r\n\r\n%s",
-		strlen(buf_reply), buf_reply);
+	len = snprintf(buf, sizeof(buf),
+		       "HTTP/1.1 200 OK\r\nContent-Length: %ld\r\n\r\n%s",
+		       strlen(buf_reply), buf_reply);
+	if (len >= (int)sizeof(buf)) {
+		snprintf(buf, sizeof(buf),
+			 "HTTP/1.1 500 Internal Server Error\r\nContent-Length: 0\r\n\r\n");
+		err = -1;
+	}
 
 	send(og_client_socket(cli), buf, strlen(buf), 0);
 
-	return 0;
+	return err;
 }
 
 enum og_rest_method {
@@ -4107,7 +4114,7 @@ static int og_client_state_process_payload_rest(struct og_client *cli)
 		json_decref(root);
 
 	if (!err)
-		og_client_ok(cli, buf_reply);
+		err = og_client_ok(cli, buf_reply);
 
 	return err;
 }
