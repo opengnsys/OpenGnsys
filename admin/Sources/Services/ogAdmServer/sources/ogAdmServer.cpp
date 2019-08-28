@@ -3481,7 +3481,7 @@ static int og_cmd_get_clients(json_t *element, struct og_msg_params *params,
 		return -1;
 	}
 
-	json_dump_callback(root, og_json_dump_clients, &og_buffer, 4096);
+	json_dump_callback(root, og_json_dump_clients, &og_buffer, 0);
 	json_decref(root);
 
 	return 0;
@@ -3723,7 +3723,7 @@ static int og_cmd_run_get(json_t *element, struct og_msg_params *params,
 	if (!root)
 		return -1;
 
-	json_dump_callback(root, og_json_dump_clients, &og_buffer, 4096);
+	json_dump_callback(root, og_json_dump_clients, &og_buffer, 0);
 	json_decref(root);
 
 	return 0;
