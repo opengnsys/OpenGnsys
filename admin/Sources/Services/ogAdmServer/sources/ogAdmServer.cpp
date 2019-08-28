@@ -3991,6 +3991,10 @@ static int og_client_state_process_payload_rest(struct og_client *cli)
 	json_t *root = NULL;
 	int err = 0;
 
+	syslog(LOG_DEBUG, "%s:%hu %.32s ...\n",
+	       inet_ntoa(cli->addr.sin_addr),
+	       ntohs(cli->addr.sin_port), cli->buf);
+
 	if (!strncmp(cli->buf, "GET", strlen("GET"))) {
 		method = OG_METHOD_GET;
 		cmd = cli->buf + strlen("GET") + 2;
@@ -4223,10 +4227,6 @@ static void og_client_read_cb(struct ev_loop *loop, struct ev_io *io, int events
 		cli->state = OG_CLIENT_PROCESSING_REQUEST;
 		/* fall through. */
 	case OG_CLIENT_PROCESSING_REQUEST:
-		syslog(LOG_DEBUG, "processing request from %s:%hu\n",
-		       inet_ntoa(cli->addr.sin_addr),
-		       ntohs(cli->addr.sin_port));
-
 		if (cli->rest)
 			ret = og_client_state_process_payload_rest(cli);
 		else
