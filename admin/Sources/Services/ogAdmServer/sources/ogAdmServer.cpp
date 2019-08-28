@@ -122,6 +122,8 @@ enum og_client_state {
 	OG_CLIENT_PROCESSING_REQUEST,
 };
 
+#define OG_MSG_REQUEST_MAXLEN	4096
+
 /* Shut down connection if there is no complete message after 10 seconds. */
 #define OG_CLIENT_TIMEOUT	10
 
@@ -130,7 +132,7 @@ struct og_client {
 	struct ev_timer		timer;
 	struct sockaddr_in	addr;
 	enum og_client_state	state;
-	char			buf[4096];
+	char			buf[OG_MSG_REQUEST_MAXLEN];
 	unsigned int		buf_len;
 	unsigned int		msg_len;
 	int			keepalive_idx;
@@ -4193,6 +4195,11 @@ static void og_client_read_cb(struct ev_loop *loop, struct ev_io *io, int events
 	ev_timer_again(loop, &cli->timer);
 
 	cli->buf_len += ret;
+	if (cli->buf_len >= sizeof(cli->buf)) {
+		syslog(LOG_ERR, "client request from %s:%hu is too long\n",
+		       inet_ntoa(cli->addr.sin_addr), ntohs(cli->addr.sin_port));
+		goto close;
+	}
 
 	switch (cli->state) {
 	case OG_CLIENT_RECEIVING_HEADER:
