@@ -4136,7 +4136,7 @@ static int og_client_state_process_payload_rest(struct og_client *cli)
 		}
 		err = og_cmd_software(root, &params);
 	} else {
-		syslog(LOG_ERR, "unknown command %s\n", cmd);
+		syslog(LOG_ERR, "unknown command: %.32s ...\n", cmd);
 		err = og_client_not_found(cli);
 	}
 
