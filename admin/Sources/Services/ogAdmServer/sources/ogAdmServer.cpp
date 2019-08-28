@@ -3951,9 +3951,11 @@ static int og_client_not_authorized(struct og_client *cli)
 	return -1;
 }
 
+#define OG_MSG_RESPONSE_MAXLEN	65536
+
 static int og_client_ok(struct og_client *cli, char *buf_reply)
 {
-	char buf[4096] = {};
+	char buf[OG_MSG_RESPONSE_MAXLEN] = {};
 	int err = 0, len;
 
 	len = snprintf(buf, sizeof(buf),
@@ -3977,9 +3979,9 @@ enum og_rest_method {
 
 static int og_client_state_process_payload_rest(struct og_client *cli)
 {
+	char buf_reply[OG_MSG_RESPONSE_MAXLEN] = {};
 	struct og_msg_params params = {};
 	enum og_rest_method method;
-	char buf_reply[4096] = {};
 	const char *cmd, *body;
 	json_error_t json_err;
 	json_t *root = NULL;
