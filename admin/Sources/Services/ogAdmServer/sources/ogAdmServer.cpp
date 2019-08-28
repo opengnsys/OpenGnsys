@@ -3349,9 +3349,11 @@ static int og_client_state_process_payload(struct og_client *cli)
 	return 1;
 }
 
+#define OG_CLIENTS_MAX	4096
+
 struct og_msg_params {
-	const char	*ips_array[4096];
-	const char	*mac_array[4096];
+	const char	*ips_array[OG_CLIENTS_MAX];
+	const char	*mac_array[OG_CLIENTS_MAX];
 	unsigned int	ips_array_len;
 	const char	*wol_type;
 	char		run_cmd[4096];
