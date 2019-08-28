@@ -534,7 +534,7 @@ bool actualizaConfiguracion(Database db, Table tbl, char *cfg, int ido)
 {
 	char msglog[LONSTD], sqlstr[LONSQL];
 	int lon, p, c,i, dato, swu, idsoi, idsfi,k;
-	char *ptrPar[MAXPAR], *ptrCfg[6], *ptrDual[2], tbPar[LONSTD];
+	char *ptrPar[MAXPAR], *ptrCfg[7], *ptrDual[2], tbPar[LONSTD];
 	char *ser, *disk, *par, *cpt, *sfi, *soi, *tam, *uso; // Parametros de configuración.
 
 	lon = 0;
