@@ -4143,8 +4143,15 @@ static int og_client_state_process_payload_rest(struct og_client *cli)
 	if (root)
 		json_decref(root);
 
-	if (!err)
-		err = og_client_ok(cli, buf_reply);
+	if (err < 0)
+		return err;
+
+	err = og_client_ok(cli, buf_reply);
+	if (err < 0) {
+		syslog(LOG_ERR, "HTTP response to %s:%hu is too large\n",
+		       inet_ntoa(cli->addr.sin_addr),
+		       ntohs(cli->addr.sin_port));
+	}
 
 	return err;
 }
@@ -4234,10 +4241,16 @@ static void og_client_read_cb(struct ev_loop *loop, struct ev_io *io, int events
 		cli->state = OG_CLIENT_PROCESSING_REQUEST;
 		/* fall through. */
 	case OG_CLIENT_PROCESSING_REQUEST:
-		if (cli->rest)
+		if (cli->rest) {
 			ret = og_client_state_process_payload_rest(cli);
-		else
+			if (ret < 0) {
+				syslog(LOG_ERR, "Failed to process HTTP request from %s:%hu\n",
+				       inet_ntoa(cli->addr.sin_addr),
+				       ntohs(cli->addr.sin_port));
+			}
+		} else {
 			ret = og_client_state_process_payload(cli);
+		}
 		if (ret < 0)
 			goto close;
 
