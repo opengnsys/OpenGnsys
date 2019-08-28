@@ -3350,8 +3350,8 @@ static int og_client_state_process_payload(struct og_client *cli)
 }
 
 struct og_msg_params {
-	const char	*ips_array[64];
-	const char	*mac_array[64];
+	const char	*ips_array[4096];
+	const char	*mac_array[4096];
 	unsigned int	ips_array_len;
 	const char	*wol_type;
 	char		run_cmd[4096];
