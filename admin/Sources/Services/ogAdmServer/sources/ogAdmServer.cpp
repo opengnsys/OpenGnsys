@@ -3955,6 +3955,16 @@ static int og_client_not_authorized(struct og_client *cli)
 	return -1;
 }
 
+static int og_server_internal_error(struct og_client *cli)
+{
+	char buf[] = "HTTP/1.1 500 Internal Server Error\r\n"
+		     "Content-Length: 0\r\n\r\n";
+
+	send(og_client_socket(cli), buf, strlen(buf), 0);
+
+	return -1;
+}
+
 #define OG_MSG_RESPONSE_MAXLEN	65536
 
 static int og_client_ok(struct og_client *cli, char *buf_reply)
@@ -3965,11 +3975,8 @@ static int og_client_ok(struct og_client *cli, char *buf_reply)
 	len = snprintf(buf, sizeof(buf),
 		       "HTTP/1.1 200 OK\r\nContent-Length: %ld\r\n\r\n%s",
 		       strlen(buf_reply), buf_reply);
-	if (len >= (int)sizeof(buf)) {
-		snprintf(buf, sizeof(buf),
-			 "HTTP/1.1 500 Internal Server Error\r\nContent-Length: 0\r\n\r\n");
-		err = -1;
-	}
+	if (len >= (int)sizeof(buf))
+		err = og_server_internal_error(cli);
 
 	send(og_client_socket(cli), buf, strlen(buf), 0);
 
