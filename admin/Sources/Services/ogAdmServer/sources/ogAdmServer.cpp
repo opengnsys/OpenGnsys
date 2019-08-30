@@ -1141,10 +1141,9 @@ static bool og_send_cmd(char *ips_array[], int ips_array_len,
 			int sock = tbsockets[idx].cli ? tbsockets[idx].cli->io.fd : -1;
 
 			strcpy(tbsockets[idx].estado, state); // Actualiza el estado del cliente
-			if (!mandaTrama(&sock, ptrTrama)) {
+			if (sock >= 0 && !mandaTrama(&sock, ptrTrama)) {
 				syslog(LOG_ERR, "failed to send response to %s:%s\n",
 				       ips_array[i], strerror(errno));
-				return false;
 			}
 		}
 	}
@@ -3141,10 +3140,9 @@ static bool envioProgramacion(TRAMA *ptrTrama, struct og_client *cli)
 			int sock = tbsockets[idx].cli ? tbsockets[idx].cli->io.fd : -1;
 
 			strcpy(tbsockets[idx].estado, CLIENTE_OCUPADO); // Actualiza el estado del cliente
-			if (!mandaTrama(&sock, ptrTrama)) {
+			if (sock >= 0 && !mandaTrama(&sock, ptrTrama)) {
 				syslog(LOG_ERR, "failed to send response: %s\n",
 				       strerror(errno));
-				return false;
 			}
 			//close(tbsockets[idx].sock); // Cierra el socket del cliente hasta nueva disponibilidad
 		}
