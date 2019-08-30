@@ -1014,7 +1014,6 @@ else
 
 fi
 #Instalar el grub 
-echo grub-install --force ${EFIOPTGRUB} --root-directory=${SECONDSTAGE}${PREFIXSECONDSTAGE} $FIRSTSTAGE
 grub-install --force ${EFIOPTGRUB} --root-directory=${SECONDSTAGE}${PREFIXSECONDSTAGE} $FIRSTSTAGE
 EVAL=$?
 
@@ -1336,6 +1335,8 @@ function ogBurgHidePartitions ()
 #@brief Configura el grub/burg para que oculte las particiones de windows que no se esten iniciando.
 #@param 1 Numero de disco
 #@param 2 Numero de particion
+#@param 3 Numero de disco de la partición de datos (no ocultar)
+#@param 4 Numero de particion de datos (no ocultar)
 #@return  (nada)
 #@exception OG_ERR_FORMAT    Formato incorrecto.
 #@exception No existe archivo de configuracion del grub/burg.
@@ -1348,15 +1349,18 @@ function ogBurgHidePartitions ()
 #@version 1.1.1 Se incluye comentarios en codigo para autodocuemtnacion con Doxygen
 #@author  Antonio J. Doblas Viso, EVLT Univesidad de Malaga.
 #@date    2018-07-05
+#@version Se permite una partición de datos que no se ocultará. Soporta más de un disco. Compatible con grub.cfg creado por ogLive 5.0
+#@author  Irina Gomez, ETSII Universidad de Sevilla
+#@date    2019-08-26
 #*/
 
 function ogBootLoaderHidePartitions ()
 {
-    local FUNC DIRMOUNT GFCFILE PARTTABLETYPE WINENTRY ENTRY PART TEXT LINE2 PART2 HIDDEN
+    local FUNC DIRMOUNT GFCFILE PARTTABLETYPE WINENTRY WINPART ENTRY LINE PART PARTDATA TEXT PARTHIDDEN HIDDEN
 
     # Si se solicita, mostrar ayuda.
     if [ "$*" == "help" ]; then
-        ogHelp "$FUNCNAME" "$MSG_SEE ogGrubHidePartitions or ogBurgHidePartitions."
+        ogHelp "$FUNCNAME" "$MSG_SEE ogGrubHidePartitions ogBurgHidePartitions"
         return
     fi
 
@@ -1365,11 +1369,13 @@ function ogBootLoaderHidePartitions ()
     FUNC="${FUNC%%\ *}"
 
     # Error si no se reciben 2 parámetros.
-    [ $# -lt 2 ] && return $(ogRaiseError session $OG_ERR_FORMAT "$MSG_FORMAT: $FUNCNAME num_disk num_part"; echo $?)
+    [ $# -lt 2 ] && return $(ogRaiseError session $OG_ERR_FORMAT "$MSG_FORMAT: $FUNCNAME num_disk num_part [ num_disk_partdata num_partdata ]"; echo $?)
+    # Si no existe $4 pongo un valor imposible para la partición de datos
+    [ $# -eq 4 ] && PARTDATA=$(ogDiskToDev $3 $4) || PARTDATA=0
 
     # Archivo de configuracion del grub
     DIRMOUNT=$(ogMount $1 $2)
-    # La función debe ser llamanda desde ogGrubHidePartitions or ogBurgHidePartitions.
+    # La función debe ser llamanda desde ogGrubHidePartitionsCdc or ogBurgHidePartitionsCdc.
     case "$FUNC" in
         ogGrubHidePartitions)
             CFGFILE="$DIRMOUNT/boot/grubMBR/boot/grub/grub.cfg"
@@ -1378,7 +1384,7 @@ function ogBootLoaderHidePartitions ()
             CFGFILE="$DIRMOUNT/boot/burg/burg.cfg"
             ;;
         *)
-            ogRaiseError $OG_ERR_FORMAT "Use ogGrubHidePartitions or ogBurgHidePartitions."
+            ogRaiseError $OG_ERR_FORMAT "Use ogGrubHidePartitionsCdc or ogBurgHidePartitionsCdc."
             return $?
             ;;
     esac
@@ -1387,37 +1393,41 @@ function ogBootLoaderHidePartitions ()
     [ -r $CFGFILE ] || return $(ogRaiseError log session $OG_ERR_NOTFOUND  "$CFGFILE" 1>&2; echo $?)
 
     # Si solo hay una particion de Windows me salgo
-    [ $(fdisk -l $(ogDiskToDev $1) | grep 'NTFS' |wc -l) -eq 1 ] && return 0
+    [ $(fdisk -l $(ogDiskToDev) | grep 'NTFS' |wc -l) -eq 1 ] && return 0
 
     # Elimino llamadas a parttool, se han incluido en otras ejecuciones de esta funcion.
     sed -i '/parttool/d' $CFGFILE
 
     PARTTABLETYPE=$(ogGetPartitionTableType $1 | tr [:upper:] [:lower:])
+
 #   /*  (comentario de bloque para  Doxygen)
     # Entradas de Windows: numero de linea y particion. De mayor a menor.
-    WINENTRY=$(awk '/menuentry.*Windows/ {gsub(/\)\"/, "");  print NR":"$6} ' $CFGFILE | sed -e '1!G;h;$!d' -e s/[a-z\/]//g)
+    WINENTRY=$(awk '/menuentry.*Windows/ {gsub(/\)\"/, "");  gsub(/^.*dev/,"");  print NR":/dev"$1} ' $CFGFILE | sed -e '1!G;h;$!d')
     #*/ (comentario para bloque Doxygen)
     # Particiones de Windows, pueden no estar en el grub.
-    WINPART=$(fdisk -l $(ogDiskToDev $1)|awk '/NTFS/ {print substr($1,9,1)}' |sed '1!G;h;$!d')
+    WINPART=$(fdisk -l $(ogDiskToDev)|awk '/NTFS/ {print $1}'|sed '1!G;h;$!d')
+
+
     # Modifico todas las entradas de Windows.
     for ENTRY in $WINENTRY; do
         LINE=${ENTRY%:*}
-	PART=${ENTRY#*:}
+        PART=${ENTRY#*:}
+
         # En cada entrada, oculto o muestro cada particion.
         TEXT=""
-        for PART2 in $WINPART; do
-                # Muestro solo la particion de la entrada actual.
-                [ $PART2 -eq $PART ] && HIDDEN="-" || HIDDEN="+"
+        for PARTHIDDEN in $WINPART; do
+                # Muestro la particion de la entrada actual y la de datos.
+                [ "$PARTHIDDEN" == "$PART" -o "$PARTHIDDEN" == "$PARTDATA" ] && HIDDEN="-" || HIDDEN="+"
+                read NUMDISK NUMPART <<< $(ogDevToDisk $PARTHIDDEN)
 
-                TEXT="\tparttool (hd0,$PARTTABLETYPE$PART2) hidden$HIDDEN \n$TEXT"
+                TEXT="\tparttool (hd$((NUMDISK-1)),$PARTTABLETYPE$NUMPART) hidden$HIDDEN \n$TEXT"
         done
-	
+
         sed -i "${LINE}a\ $TEXT" $CFGFILE
     done
 
     # Activamos la particion que se inicia en todas las entradas de windows.
     sed -i "/chainloader/i\\\tparttool \$\{root\} boot+"  $CFGFILE
-
 }
 
 #/**
