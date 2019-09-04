@@ -75,7 +75,7 @@ echo "FASE 5 - Incorporando ficheros OpenGnsys al sistema raíz rootfs "
 cp -a ${BTDIR}/includes/usr/bin/* /tmp
 chmod +x /tmp/boot-tools/*.sh
 # Incluir revisión.
-sed -i "1 s/$/ $GITRELEASE/" ${BTDIR}/includes/etc/initramfs-tools/scripts/VERSION.txt
+sed -i "1 s/$/ $GITRELEASE ($OSRELEASE)/" ${BTDIR}/includes/etc/initramfs-tools/scripts/VERSION.txt
 # En Ubuntu 13.04+ es necesario matar proceso de "udev" antes de desmontar.
 umount $BTROOTFSMNT 2>/dev/null || (kill -9 $(lsof -t $BTROOTFSMNT); umount $BTROOTFSMNT 2>/dev/null)
 schroot -p -c IMGogclient -- /tmp/boot-tools/boottoolsFsOpengnsys.sh 

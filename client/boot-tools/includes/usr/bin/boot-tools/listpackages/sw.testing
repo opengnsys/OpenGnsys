@@ -1,12 +1,14 @@
 #sw.other
 install screen 
 install schroot 
-#install grub
 install xmlstarlet 
 ############# UEFI
 install efibootmgr 
 install efitools
 install refind
+install grub-efi-amd64-bin
+install grub-efi-ia32-bin
+install grub-pc-bin
 ############# OGAgent
 install libxss1
 install python-prctl
@@ -51,7 +53,6 @@ install laptop-detect
 #install nitrogen 
 #install ttf-ubuntu-font-family
 #install time 
-#install openssh-client 
 #install synaptic 
 #install libglib-perl 
 #install libgtk2-perl 
