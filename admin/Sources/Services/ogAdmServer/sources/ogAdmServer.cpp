@@ -4172,7 +4172,7 @@ static int og_client_state_recv_hdr_rest(struct og_client *cli)
 
 	ptr = strstr(cli->buf, "Authorization: ");
 	if (ptr)
-		sscanf(ptr, "Authorization: %64[^\r\n]", cli->auth_token);
+		sscanf(ptr, "Authorization: %63[^\r\n]", cli->auth_token);
 
 	return 1;
 }
