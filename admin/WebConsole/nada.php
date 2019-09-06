@@ -1,6 +1,20 @@
 <?php
+/**
+ * @file    nada.php
+ * @brief   Muestra el marco derecho "por defecto" cuando no se ejecuta un comando.
+ * @version 1.1.1 - Se incluyen consejos del día la primera vez que se entra.
+ * @date    2019-09-06
+ */
+
 include_once("./includes/ctrlacc.php");
 include_once("./idiomas/php/".$idioma."/nada_".$idioma.".php");
+
+// ################### Consejo del día ################# //
+// Elijo el consejo de hoy aleatoriamente.
+$numTip=rand(0,count($TipOfDay)-1);
+$tipMessage=$TipOfDay[$numTip];
+$tipImage=is_file("images/tipOfDay_$numTip.png") ? "images/tipOfDay_$numTip.png" : "images/blanco.png";
+
 // ##########################################################################################################
 // ###############  PARA SABER QUE IP TIENE EL DISPOSITIVO QUE ESTA UTILIZANDO OPENGNSYS  ###################
 // ##########################################################################################################
@@ -230,7 +244,13 @@ if (empty($data->project)) {
 </head>
 <body>
 
-"Here we will show our content"
+<div>
+    <p align=center class=cabeceras><img  border=0 nod="aulas-1" value="Sala Virtual" style="cursor:pointer" src="images/iconos/logocirculos.png" >&nbsp;&nbsp;<?php echo $TbMsg["TIP"]; ?></p>
+    <div class="tipOfDay">
+        <p class="subcabeceras help_menu"> <?php echo $tipMessage ?></p>
+        <img src="<?php echo $tipImage ?>">
+    </div>
+</div>
 
 </body>
 </html>
