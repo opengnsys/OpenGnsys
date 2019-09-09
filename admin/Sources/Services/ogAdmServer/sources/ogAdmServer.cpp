@@ -137,7 +137,7 @@ struct og_client {
 	unsigned int		msg_len;
 	int			keepalive_idx;
 	bool			rest;
-	unsigned int		content_length;
+	int			content_length;
 	char			auth_token[64];
 };
 
@@ -4167,6 +4167,8 @@ static int og_client_state_recv_hdr_rest(struct og_client *cli)
 	ptr = strstr(cli->buf, "Content-Length: ");
 	if (ptr) {
 		sscanf(ptr, "Content-Length: %i[^\r\n]", &cli->content_length);
+		if (cli->content_length < 0)
+			return -1;
 		cli->msg_len += cli->content_length;
 	}
 
