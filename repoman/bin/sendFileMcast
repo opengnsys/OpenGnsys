@@ -4,15 +4,12 @@
 #@param   str_session    Datos de sesión (Puerto:Duplex:IP:Mpbs:Nclientes:Timeout)
 
 
-PROG=$(basename $0)
+PROG=$(basename "$0")
 OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
 OGIMG=$OPENGNSYS/images
 OGBIN=$OPENGNSYS/bin
 PATH=$PATH:$OGBIN
 REPO_IFACE="$(/opt/opengnsys/bin/getRepoIface)"
-
-# Compatibilidad con Ubuntu 18
-source $OPENGNSYS/lib/osadapter.sh
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -40,16 +37,17 @@ if [ ! -f "$FICHIMG" ]; then
 fi
 
 # Parámetros de sesión separado por ":".
-PARAMS=$(echo $2 | \
-	awk -F: '$1~/^[0-9]*$/ {print $1}
-		 tolower($2)~/^(half)(-duplex)?$/ {print "half-duplex"}
-		 tolower($2)~/^(full)(-duplex)?$/ {print "full-duplex"}
-		 $3~/^[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*$/ {print $3}
-		 $4~/^[0-9]*[mM]/ {print toupper($4)}
-		 $5~/^[0-9]*/ {print $5}
-		 $6~/^[0-9]*/ {print $6}
+PARAMS=$(echo "$2" | \
+	awk -F: '$1~/^[0-9]+$/ {v1=$1}
+		 tolower($2)~/^half(-duplex)?$/ {v2="--half-duplex"}
+		 tolower($2)~/^full(-duplex)?$/ {v2="--full-duplex"}
+		 $3~/^[0-9]+(\.[0-9]+){3}$/ {v3=$3}
+		 $4~/^[0-9]+[mM]$/ {v4=tolower($4)}
+		 $5~/^[0-9]+$/ {v5=$5}
+		 $6~/^[0-9]+$/ {v6=$6}
+		 END {print v1,v2,v3,v4,v5,v6}
 		')
-read -e PORTBASE METHOD ADDRESS BITRATE NCLIENTS MAXTIME <<< $PARAMS
+read -re PORTBASE METHOD ADDRESS BITRATE NCLIENTS MAXTIME <<< "$PARAMS"
 if [ -z "$MAXTIME" ]; then
     echo "$PROG Error: Datos de sesión incorrectos: \"$2\"" 
     exit 3
@@ -59,7 +57,7 @@ fi
 CERROR="8x8/128"
 
 # Envío de fichero por Multicast.
-# Se desabilita el uso de mbuffer: eesta versión del upd-sender no la admite.
+# Se desabilita el uso de mbuffer: esta versión del upd-sender no la admite.
 #which mbuffer &> /dev/null && MBUFFER="--pipe 'mbuffer -m 20M'" 
-$OGBIN/udp-sender $MBUFFER --nokbd --retries-until-drop 65 --portbase $PORTBASE --$METHOD --interface $REPO_IFACE --mcast-data-address $ADDRESS --fec $CERROR --max-bitrate $BITRATE --ttl 16 --min-clients $NCLIENTS --max-wait $MAXTIME --file "$FICHIMG" 
+$OGBIN/udp-sender "$MBUFFER" --nokbd --retries-until-drop 65 --portbase "$PORTBASE" "$METHOD" --interface "$REPO_IFACE" --mcast-data-address "$ADDRESS" --fec "$CERROR" --max-bitrate "$BITRATE" --ttl 16 --min-clients "$NCLIENTS" --max-wait "$MAXTIME" --file "$FICHIMG"
 
