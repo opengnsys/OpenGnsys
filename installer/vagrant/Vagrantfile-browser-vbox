@@ -29,19 +29,29 @@ echo "yes" | ./configure -opensource -embedded x86 -webkit -openssl -qt-gfx-vnc 
 make
 make install
 # Compile Browser.
-svn export https://github.com/opengnsys/OpenGnsys/branches/devel/client/browser ../browser
+BRANCH="devel"
+svn export "https://github.com/opengnsys/OpenGnsys/branches/$BRANCH/client/browser" ../browser
 cd browser
 qmake browser.pro
 make
 strip browser
+# Update locale string files.
+xgettext -C --qt --from-code=UTF-8 -o browser.pot src/*.cpp
+msgmerge -U po/en.po browser.pot
+msgmerge -U po/ca.po browser.pot
+rm -f browser.pot
 # Instructions.
 echo "Browser's code is in /home/vagrant/browser directory."
 echo "To compile a new Browser, run as root user:"
 echo "    cd /home/vagrant/browser && qmake browser.pro && make"
-echo "Do not forget to copy all Browser's files to OpenGnsys Server:"
+echo "To compile new locale files (note that \"xx\" is a locale code, like \"en\" or \"ca\"):"
+echo " - Translate strings by editing each po/xx.po file."
+echo " - Compile each locale file by running as root: msgfmt -o xx.mo po/xx.po"
+echo "Do not forget to copy all Browser's files to the OpenGnsys Server:"
 echo " - Browser binary to /opt/opengnsys/client/bin directory on server."
 echo " - Qt linked libraries to /opt/opengnsys/client/lib/qtlibs directory."
 echo " - 64-bit-based ogLive only: libssl and libcrypto to /opt/opengnsys/client/lib/qtlibs directory."
+echo " - Compiled Locale files, if needed: xx.mo as /opt/opengnsys/client/lib/locale/xx/LC_MESSAGES/browser.mo (\"xx\" is a locale code)."
 EOT
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
