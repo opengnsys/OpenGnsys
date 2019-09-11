@@ -43,7 +43,8 @@ if which curl &>/dev/null; then
 elif which wget &>/dev/null; then
     DOWNLOAD="wget -q -O -"
 fi
-$DOWNLOAD -s https://raw.githubusercontent.com/opengnsys/OpenGnsys/devel/installer/opengnsys_installer.sh | bash || exit $?
+BRANCH="devel"
+$DOWNLOAD "https://raw.githubusercontent.com/opengnsys/OpenGnsys/$BRANCH/installer/opengnsys_installer.sh" | bash || exit $?
 mv /opt/opengnsys/log/bash.log /opt/opengnsys/log/opengnsys_installer.log
 echo y | /opt/opengnsys/bin/setserveraddr $(ip -o link show | tail -1 | cut -d: -f2)
 # Insert DHCP data.
@@ -68,34 +69,13 @@ dpkg-reconfigure -fnoninteractive console-setup
 #for ((i=12; i<=#{NCLIENTS+10}; i++)); do
 #    /opt/opengnsys/bin/setclientmode ogLive pc$i PERM
 #done
-# Comment out next lines to install new Angular-based web application (on early development).
-#apt-get install -y git nodejs npm
-#ln -fs nodejs /usr/bin/node
-#npm install bower -g
-#svn export https://opengnsys.es/svn/branches/version1.1-tickets/ogWebAdmin-ticket761/admin/WebConsole/angular /opt/opengnsys/www/angular
-#cd /opt/opengnsys/www/angular
-#chown -R vagrant.vagrant .
-#su vagrant -c "bower install -F"
-#sed -i 's!BASE_URL = .*$!BASE_URL = "https://localhost:#{LOCALWEBPORT}/opengnsys";!' ogWebAdmin/assets/js/config.constants.js
-#### TEMPORAL PATCHES
-#su vagrant -c "bower install angular-sanitize -F"
-#su vagrant -c "bower install angular-translate-loader-static-files -F"
-#su vagrant -c "bower install angular-ui-select -F"
-#su vagrant -c "bower install bootstrap -F"
-#su vagrant -c "bower install isteven-angular-multiselect -F"
-#ln -s globunet-util.min.css ogWebAdmin/lib/globunet/dist/css/globunet-util.css
-#cp -a ogWebAdmin/assets/i18n/es.json ogWebAdmin/assets/i18n/en.json
-#sed -i 's/jm.bardallo/usuog/' ogWebAdmin/assets/js/controllers/login.controller.js
-#sed -i "s/DirectoryIndex index.php/DirectoryIndex index.php index.html/" /etc/apache2/sites-enabled/opengnsys.conf
-#service apache2 reload
 echo "Notes:"
 echo "- OpenGnsys Server URL: https://localhost:#{LOCALWEBPORT}/opengnsys/"
-[ -d /opt/opengnsys/www/angular ] && echo "- Angular-based web URL: https://localhost:#{LOCALWEBPORT}/opengnsys/angular/ogWebAdmin/"
 exit 0
 EOT
 
 # Client 1 OS provisioning script.
-OGAGENTPKG = "ogagent_1.1.0_all.deb"
+OGAGENTPKG = "ogagent_1.1.1_all.deb"
 MODELSCRIPT = <<EOT
 # Comment out next lines to install and configure OGAgent for Ubuntu.
 #apt-get update -y
@@ -109,7 +89,7 @@ MODELSCRIPT = <<EOT
 #    echo "Warning: cannot install OGAgent package #{OGAGENTPKG}"
 #fi
 # Remove network configuration added by Vagrant.
-sed -i "/enp0s3/ d" /etc/network/interfaces
+sed -i "/eth1/ d" /etc/network/interfaces
 echo "Notes:"
 echo "- After now, use VirtualBox GUI to disable network interface 1 and restart this VM."
 # Leave VM halted.
@@ -156,7 +136,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   # Client 1 VM definition.
   config.vm.define "pc11", autostart: false do |v1|
-    v1.vm.box = "bento/ubuntu-16.04"
+    v1.vm.box = "bento/ubuntu-18.04"
     v1.vm.hostname = "pc11"
     v1.vm.network "private_network", mac: "#{MACPREFIX}11".tr(":",""), type: "dhcp", virtualbox__intnet: true
     v1.vm.provider "virtualbox" do |vb|
