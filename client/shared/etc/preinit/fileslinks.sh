@@ -6,7 +6,7 @@
 #@version 0.9
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2009-10-10
-#@version 1.0.5 - Enlace para librería libmac.
+#@version 1.0.5 - Enlace para librería libmac (obsoleto en versión 1.1.1).
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2012-06-28
 #*/
@@ -18,9 +18,6 @@ if [ -n "$OPENGNSYS" ]; then
 
     # Shell BASH por defecto (para usar "runtest")
     ln -fs /bin/bash /bin/sh 2>/dev/null
-
-    # Enlace a la librería libmac para ld-mac.
-    [ -f /usr/lib/libmac.so ] || ln -fs $OGLIB/libmac.so /usr/lib 2>/dev/null
 
     # Crear directorio de bloqueos
     mkdir -p /var/lock 2>/dev/null || mkdir -p /run/lock
