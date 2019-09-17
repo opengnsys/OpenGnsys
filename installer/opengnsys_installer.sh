@@ -881,17 +881,18 @@ function getNetworkSettings()
 		exit 1
 	fi
 	for dev in ${DEVICE[*]}; do
-		SERVERIP[i]=$(ip -o addr show dev "$dev" | awk '$3~/inet$/ {sub (/\/.*/, ""); print ($4)}')
+		SERVERIP[i]=$(ip -o addr show dev "$dev" | awk '$3~/inet$/ {sub (/\/.*/, ""); print ($4); exit;}')
 		if [ -n "${SERVERIP[i]}" ]; then
-			NETMASK[i]=$( cidr2mask $(ip -o addr show dev "$dev" | awk '$3~/inet$/ {sub (/.*\//, "", $4); print ($4)}') )
-			NETBROAD[i]=$(ip -o addr show dev "$dev" | awk '$3~/inet$/ {print ($6)}')
-			NETIP[i]=$(ip route list proto kernel | awk -v d="$dev" '$3==d && /src/ {sub (/\/.*/,""); print $1}')
-			ROUTERIP[i]=$(ip route list default | awk -v d="$dev" '$5==d {print $3}')
+			NETMASK[i]=$( cidr2mask $(ip -o addr show dev "$dev" | awk '$3~/inet$/ {sub (/.*\//, "", $4); print ($4); exit;}') )
+			NETBROAD[i]=$(ip -o addr show dev "$dev" | awk '$3~/inet$/ {print ($6); exit;}')
+			NETIP[i]=$(ip route list proto kernel | awk -v d="$dev" '$3==d && /src/ {sub (/\/.*/,""); print $1; exit;}')
+			ROUTERIP[i]=$(ip route list default | awk -v d="$dev" '$5==d {print $3; exit;}')
 			DEFAULTDEV=${DEFAULTDEV:-"$dev"}
 		fi
 		let i++
 	done
-	DNSIP=$(awk '/nameserver/ {print $2}' /etc/resolv.conf | head -n1)
+	DNSIP=$(systemd-resolve --status 2>/dev/null | awk '/DNS Servers:/ {print $3; exit;}')
+	[ -z "$DNSIP" ] && DNSIP=$(awk '/nameserver/ {print $2; exit;}' /etc/resolv.conf)
 	if [ -z "${NETIP[*]}" -o -z "${NETMASK[*]}" ]; then
 		errorAndLog "${FUNCNAME}(): Network not detected."
 		exit 1
