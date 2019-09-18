@@ -11,7 +11,7 @@ class TestGetClientsMethods(unittest.TestCase):
         returned = requests.get(self.url, headers=self.headers)
         self.assertEqual(returned.status_code, 200)
 
-    def test_post(self):
+    def test_post_without_data(self):
         returned = requests.post(self.url, headers=self.headers)
         self.assertEqual(returned.status_code, 404)
 
