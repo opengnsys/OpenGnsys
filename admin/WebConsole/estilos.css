@@ -438,3 +438,13 @@ A.tabla_listados_sin:link{
     color: #6b6363;
     font-weight: bold;
 }
+/* consejo del día */
+.consejo {
+    margin: 0 auto;
+    text-align: justify;
+    padding: 0 2em 0 2em;
+    max-width: 50em;
+}
+.consejo > div {
+    text-align: center;
+}

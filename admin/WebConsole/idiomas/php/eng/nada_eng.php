@@ -16,19 +16,19 @@
 
         // Los mensajes pueden tener imágenes asociadas llamadas images/tipOfDay_N.png
         $TipOfDay=Array();
-        $TipOfDay[0]="El cliente de OpenGnsys puede restaurar y crear imágenes en todos los repositorios definidos en la unidad organizativa.";
-        $TipOfDay[1]="OpenGnsys permite gestionar equipos UEFI desde la versión 1.1.1 (Espeto).";
-        $TipOfDay[2]="<a href='https://opengnsys.es' class='help_menu' target='blank'>Nueva web de OpenGnsys</a> dirigida a los usuarios. Donde encontrarán fácilmente:   \n".
+        $TipOfDay[0]="OpenGnsys client can create and restore images from all repositories in organization unit."
+        $TipOfDay[1]="OpenGnsys can manage UEFI computers form version 1.1.1 (Espeto)."
+        $TipOfDay[2]="<a href='https://opengnsys.es' class='help_menu' target='blank'>New OpenGnsys website</a> aimed at the user, where you will easily find:   \n".
                      "<ul>\n".
-                     "  <li>Descarga de la última versión de Opengnsys</li>\n".
-                     "  <li>Manual de usuario</li>\n".
-                     "  <li>Documentación de la instalación</li>\n".
-                     "  <li>Casos de éxito</li>\n".
+                     "  <li>Download OpenGnsys last version.</li>\n".
+                     "  <li>User Manual</li>\n".
+                     "  <li>Installation documentation</li>\n".
+                     "  <li>Success stories</li>\n".
                      "</ul>\n<br>\n";
-        $TipOfDay[3]="OpenGnsys permite instalar varios ogLive, pudiendo seleccionar en cada equipo el que mejor reconozca su hardware.";
-        $TipOfDay[4]="OpenGnsys permite independizar el alojamiento de las imágenes de distintas unidades organizativas dentro de un mismo repositorio.";
-        $TipOfDay[5]="Para facilitar la migración de un servidor existen scripts para exportar e importar los datos de OpenGnsys.";
-        $TipOfDay[6]="RemotePC conjuga OpenGnsys con UDS para ofrecer acceso remoto a los equipos de las aulas fuera del horario de docencia.";
-        $TipOfDay[7]="<b>Curso Online</b><p>Todos los miembros de organizaciones que estén federadas en el Servicio de Identidad de RedIRIS pueden acceder al curso 'Curso Básico de OpenGnsys 1.1.0' en la <a href='https://docencia-net.cv.uma.es' class='help_menu' target='blank'>Plataforma de Formación del Grupo Docencia-Net.</p>";
-        $TipOfDay[8]="El nuevo agente de OpenGnsys para el sistema operativo permite mandar mensajes a los usuarios y ejecutar comandos sobre el equipo.";
-        $TipOfDay[9]="En la web de OpenGnsys puedes encontrar <a href='https://opengnsys.es/trac/wiki/EjemploPracticos' class='help_menu' target='blank'>ejemplos prácticos y recetas</a>, como por ejemplo la postconfiguración necesario para la activación de Windows con KMS.";
+        $TipOfDay[3]="OpenGnsys allows users to install several ogLive, being able to select on each computer the one that best recognizes your hardware.";
+        $TipOfDay[4]="OpenGnsys allows independent hosting of images from different organizational units within the same repository.";
+        $TipOfDay[5]="For facilitate OpenGnsys migration, there are scripts to export and import data."
+        $TipOfDay[6]="RemotePC combines OpenGnsys with UDS to offer remote access to classroom computers outside teaching hours.";
+        $TipOfDay[7]="<b>Course Online</b><p>All members of organizations that are federated in the RedIRIS Identity Service can access the course 'OpenGnsys Basic Course 1.1.0' in the <a href='https://docencia-net.cv.uma.es' class='help_menu' target='blank'>Training Platform of the Docencia-Net group.</p>";
+        $TipOfDay[8]="The new OpenGnsys agent for the operating system allows users to send messages and execute commands on the computer."
+        $TipOfDay[9]="On the OpenGnsys web project you can find <a href='https://opengnsys.es/trac/wiki/EjemploPracticos' class='help_menu' target='blank'>practical examples and recipes</a>, such as the postconfiguration required for Windows activation with KMS.";

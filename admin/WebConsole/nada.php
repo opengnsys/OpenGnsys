@@ -10,10 +10,22 @@ include_once("./includes/ctrlacc.php");
 include_once("./idiomas/php/".$idioma."/nada_".$idioma.".php");
 
 // ################### Consejo del día ################# //
-// Elijo el consejo de hoy aleatoriamente.
-$numTip=rand(0,count($TipOfDay)-1);
-$tipMessage=$TipOfDay[$numTip];
-$tipImage=is_file("images/tipOfDay_$numTip.png") ? "images/tipOfDay_$numTip.png" : "images/blanco.png";
+// Sólo lo muestro al entrar en la consola
+$consejo = '';
+if (basename($_SERVER['HTTP_REFERER']) == "frames.php") {
+    // Elijo el consejo de hoy aleatoriamente.
+    $numTip=rand(0,count($TipOfDay)-1);
+    $tipMessage=$TipOfDay[$numTip];
+    $tipImage=is_file("images/tipOfDay_$numTip.png") ? '<img src="images/tipOfDay_'.$numTip.'.png">' : '';
+
+    $consejo = ' <div>'."\n".
+               '    <p align=center class=cabeceras><img  border=0 nod="aulas-1" value="Sala Virtual" style="cursor:pointer" src="images/iconos/logocirculos.png" >&nbsp;&nbsp;'.$TbMsg["TIP"].'</p>'."\n".
+               '    <div class="consejo">'."\n".
+               '        <p class="subcabeceras help_menu">'.$tipMessage.'</p>'."\n".
+               '        <div>'.$tipImage.'</div>'."\n".
+               '    </div>'."\n".
+               ' </div>'."\n";
+}
 
 // ##########################################################################################################
 // ###############  PARA SABER QUE IP TIENE EL DISPOSITIVO QUE ESTA UTILIZANDO OPENGNSYS  ###################
@@ -243,15 +255,7 @@ if (empty($data->project)) {
   <link rel="stylesheet" type="text/css" href="./estilos.css">
 </head>
 <body>
-
-<div>
-    <p align=center class=cabeceras><img  border=0 nod="aulas-1" value="Sala Virtual" style="cursor:pointer" src="images/iconos/logocirculos.png" >&nbsp;&nbsp;<?php echo $TbMsg["TIP"]; ?></p>
-    <div class="tipOfDay">
-        <p class="subcabeceras help_menu"> <?php echo $tipMessage ?></p>
-        <img src="<?php echo $tipImage ?>">
-    </div>
-</div>
-
+   <?php  echo $consejo; ?>
 </body>
 </html>
 

@@ -18,7 +18,7 @@
 	$TipOfDay=Array();
 	$TipOfDay[0]="El cliente de OpenGnsys puede restaurar y crear imágenes en todos los repositorios definidos en la unidad organizativa.";
 	$TipOfDay[1]="OpenGnsys permite gestionar equipos UEFI desde la versión 1.1.1 (Espeto).";
-	$TipOfDay[2]="<a href='https://opengnsys.es' class='help_menu' target='blank'>Nueva web de OpenGnsys</a> dirigida a los usuarios. Donde encontrarán fácilmente:   \n".
+	$TipOfDay[2]="<a href='https://opengnsys.es' class='help_menu' target='blank'>Nueva web de OpenGnsys</a> dirigida a los usuarios, donde encontrarán fácilmente:   \n".
 		     "<ul>\n".
 		     "	<li>Descarga de la última versión de Opengnsys</li>\n".
                      "  <li>Manual de usuario</li>\n".
