@@ -3933,6 +3933,15 @@ static int og_client_method_not_found(struct og_client *cli)
 	return -1;
 }
 
+static int og_client_bad_request(struct og_client *cli)
+{
+	char buf[] = "HTTP/1.1 400 Bad Request\r\nContent-Length: 0\r\n\r\n";
+
+	send(og_client_socket(cli), buf, strlen(buf), 0);
+
+	return -1;
+}
+
 static int og_client_not_found(struct og_client *cli)
 {
 	char buf[] = "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n";
@@ -4032,7 +4041,7 @@ static int og_client_state_process_payload_rest(struct og_client *cli)
 
 		if (method == OG_METHOD_POST && !root) {
 			syslog(LOG_ERR, "command clients with no payload\n");
-			return og_client_not_found(cli);
+			return og_client_bad_request(cli);
 		}
 		switch (method) {
 		case OG_METHOD_POST:
@@ -4048,7 +4057,7 @@ static int og_client_state_process_payload_rest(struct og_client *cli)
 
 		if (!root) {
 			syslog(LOG_ERR, "command wol with no payload\n");
-			return og_client_not_found(cli);
+			return og_client_bad_request(cli);
 		}
 		err = og_cmd_wol(root, &params);
 	} else if (!strncmp(cmd, "shell/run", strlen("shell/run"))) {
@@ -4057,7 +4066,7 @@ static int og_client_state_process_payload_rest(struct og_client *cli)
 
 		if (!root) {
 			syslog(LOG_ERR, "command run with no payload\n");
-			return og_client_not_found(cli);
+			return og_client_bad_request(cli);
 		}
 		err = og_cmd_run_post(root, &params);
 	} else if (!strncmp(cmd, "shell/output", strlen("shell/output"))) {
@@ -4066,7 +4075,7 @@ static int og_client_state_process_payload_rest(struct og_client *cli)
 
 		if (!root) {
 			syslog(LOG_ERR, "command output with no payload\n");
-			return og_client_not_found(cli);
+			return og_client_bad_request(cli);
 		}
 
 		err = og_cmd_run_get(root, &params, buf_reply);
@@ -4076,7 +4085,7 @@ static int og_client_state_process_payload_rest(struct og_client *cli)
 
 		if (!root) {
 			syslog(LOG_ERR, "command session with no payload\n");
-			return og_client_not_found(cli);
+			return og_client_bad_request(cli);
 		}
 		err = og_cmd_session(root, &params);
 	} else if (!strncmp(cmd, "poweroff", strlen("poweroff"))) {
@@ -4085,7 +4094,7 @@ static int og_client_state_process_payload_rest(struct og_client *cli)
 
 		if (!root) {
 			syslog(LOG_ERR, "command poweroff with no payload\n");
-			return og_client_not_found(cli);
+			return og_client_bad_request(cli);
 		}
 		err = og_cmd_poweroff(root, &params);
 	} else if (!strncmp(cmd, "reboot", strlen("reboot"))) {
@@ -4094,7 +4103,7 @@ static int og_client_state_process_payload_rest(struct og_client *cli)
 
 		if (!root) {
 			syslog(LOG_ERR, "command reboot with no payload\n");
-			return og_client_not_found(cli);
+			return og_client_bad_request(cli);
 		}
 		err = og_cmd_reboot(root, &params);
 	} else if (!strncmp(cmd, "stop", strlen("stop"))) {
@@ -4103,7 +4112,7 @@ static int og_client_state_process_payload_rest(struct og_client *cli)
 
 		if (!root) {
 			syslog(LOG_ERR, "command stop with no payload\n");
-			return og_client_not_found(cli);
+			return og_client_bad_request(cli);
 		}
 		err = og_cmd_stop(root, &params);
 	} else if (!strncmp(cmd, "refresh", strlen("refresh"))) {
@@ -4112,7 +4121,7 @@ static int og_client_state_process_payload_rest(struct og_client *cli)
 
 		if (!root) {
 			syslog(LOG_ERR, "command refresh with no payload\n");
-			return og_client_not_found(cli);
+			return og_client_bad_request(cli);
 		}
 		err = og_cmd_refresh(root, &params);
 	} else if (!strncmp(cmd, "hardware", strlen("hardware"))) {
@@ -4121,7 +4130,7 @@ static int og_client_state_process_payload_rest(struct og_client *cli)
 
 		if (!root) {
 			syslog(LOG_ERR, "command hardware with no payload\n");
-			return og_client_not_found(cli);
+			return og_client_bad_request(cli);
 		}
 		err = og_cmd_hardware(root, &params);
 	} else if (!strncmp(cmd, "software", strlen("software"))) {
@@ -4130,7 +4139,7 @@ static int og_client_state_process_payload_rest(struct og_client *cli)
 
 		if (!root) {
 			syslog(LOG_ERR, "command software with no payload\n");
-			return og_client_not_found(cli);
+			return og_client_bad_request(cli);
 		}
 		err = og_cmd_software(root, &params);
 	} else {

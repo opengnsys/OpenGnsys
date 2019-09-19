@@ -13,7 +13,7 @@ class TestGetClientsMethods(unittest.TestCase):
 
     def test_post_without_data(self):
         returned = requests.post(self.url, headers=self.headers)
-        self.assertEqual(returned.status_code, 404)
+        self.assertEqual(returned.status_code, 400)
 
 if __name__ == '__main__':
     unittest.main()
