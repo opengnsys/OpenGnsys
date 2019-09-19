@@ -322,6 +322,19 @@ for BOOTLOADER in menu.lst grub; do
     fi
 done
 
+if [ -f $OPENGNSYS/tftpboot/menu.lst/templates/01 ]; then
+    echo "   * Cambio del nombre de las plantillas PXE para compatibilidad con UEFI."
+    BIOSPXEDIR="$OPENGNSYS/tftpboot/menu.lst/templates"
+    mv $BIOSPXEDIR/01 $BIOSPXEDIR/10
+    sed -i s/MBR/1hd/ $BIOSPXEDIR/10
+    sed -i s/1hd-1partition/1hd-1os/ $BIOSPXEDIR/11
+    sed -i s/1hd-2partition/1hd-2os/ $BIOSPXEDIR/12
+
+    # Cambiamos el valor en la base de datos. Si no lo hacemos desaparecen de las columnas del NetBootAvanzado.
+    mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -e "update ordenadores set arranque='10' where arranque='01';" &>/dev/null
+    [ $? -ne 0 ] && echo "ERROR: Error al modificar nombre de las plantilla '10' en la base de datos."
+fi
+
 # Configuración de los clientes
 echo "   * Guardamos la configuración de los clientes."
 mv $OPENGNSYS/client/etc/engine.cfg $OPENGNSYS/client/etc/engine.cfg-$DATE
