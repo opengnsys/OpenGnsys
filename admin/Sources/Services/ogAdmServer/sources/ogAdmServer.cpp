@@ -4356,6 +4356,7 @@ static int og_socket_server_init(const char *port)
 	local.sin_port = htons(atoi(port));
 
 	if (bind(sd, (struct sockaddr *) &local, sizeof(local)) < 0) {
+		close(sd);
 		syslog(LOG_ERR, "cannot bind socket\n");
 		return -1;
 	}
