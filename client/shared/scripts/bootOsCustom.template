@@ -6,8 +6,11 @@
 #@param   $2 nº de partición 
 #@warning Renombrar este fichero como "bootOsCustom" para personalizar el script estándar "bootOs".
 #@note	  La partición a inicializar debe estar montada
+#@version 1.1.1 Soporta varios discos
+#@date    2019/08/26
 #**/
-# CONFIGURAR: Partición de datos de Windows que no queremos ocultar
+# CONFIGURAR: Partición de datos de Windows que no queremos ocultar (valor por defecto '0' no oculta nada)
+DISKDATA=0
 PARTDATA=0
 
 PROG="$(basename $0)"
@@ -22,51 +25,57 @@ DISK="$1"               # Nº de disco.
 PART="$2"               # Nº de partición.
 
 # Paso 0: Añadir código para realizar control de errores de los parámetros de entrada (recomendado).
+DEVICE=$(ogDiskToDev "$DISK" "$PART") || exit $?
 
-# Paso 1: Adaptar el código de ejemplo para postconfiguración personalizada.
+# Paso 1: Adaptar el código de ejemplo para arranque personalizado.
 # Nota: el script "bootOs" llama al script "bootOsCustom" después de realizar la operaciones de inicio estándar y antes de desmontar las particiones e iniciar el sistema operativo.
 
 
-MNTDIR=$(ogMount $DISK $PART)
+MNTDIR=$(ogMount $DISK $PART) || exit $?
 NAME="$(ogGetHostname)"
 NAME=${NAME:-"pc"}
 OSTYPE=$(ogGetOsType $DISK $PART)
 
 case "$OSTYPE" in
     Windows)
-        ## Borrar marcas de arrranque de todos los Windows instalados en el disco.
-        #echo "[30] Borrar marcas de arrranque de todos los Windows instalados en el disco."
-        #for (( i=1; i<=$(ogGetPartitionsNumber $1); i++ )); do
-        #    [ "$(ogGetOsType $1 $i)" == "Windows" ] && ogMount $1 $i &>/dev/null
-        #done
-        #rm -f /mnt/*/ogboot.*
-
         ## Mostrar las particiones NTFS de sistema (dos opciones)
         ## Opción 1: SIN ocultar las demás. 
-        #echo "[40] Mostrar y activar particion de Windows $PART."
-        #[ $(ogGetPartitionType $1 $2) == "HNTFS" ] && ogUnhidePartition $1 $2
+        #ogEcho log session "[40] Mostrar y activar particion de Windows $PART."
+        #[ $(ogGetPartitionType $DISK $PART) == "HNTFS" -o $(ogGetPartitionType $DISK $PART) == "WIN-RESERV" ] && ogUnhidePartition $DISK $PART
 
-        ## Opción 2: Ocultamos las demás. 
-        #echo "[40] Activar particion de Windows $PART y ocultar las demás."
-        #for (( i=1; i<=$(ogGetPartitionsNumber $DISK); i++ )); do
-        #        if [ $i == $PART -o $i == $PARTDATA ]; then
-        #	    [ $(ogGetPartitionType $DISK $PART) == "HNTFS" -o $(ogGetPartitionType $DISK $PART) == "WIN-RESERV" ] && ogUnhidePartition $1 $PART
-        #            # Activo la particion si no es de datos
-        #            [ $i -ne $PARTDATA ] && ogSetPartitionActive $DISK $i
+        ## Recorremos los distintos discos
+        #for DEVICE in $(ogDiskToDev); do
+        #    d=$(ogDevToDisk $DEVICE)
+
+        #    ## Mostrar las particiones NTFS de sistema (dos opciones)
+        #    ## Opción 2: Ocultamos las demás.
+        #    ogEcho log session "[40] Activar particion de Windows $PART y ocultar las demás."
+        #    for (( i=1; i<=$(ogGetPartitionsNumber $d); i++ )); do
+        #        if [ $d == $DISK -a $i == $PART ] || [ $d == $DISKDATA -a $i == $PARTDATA ]; then
+        #	    [ $(ogGetPartitionType $d $i) == "HNTFS" -o $(ogGetPartitionType $d $i) == "WIN-RESERV" ] && ogUnhidePartition $d $i
         #        else
-        #            [ "$(ogGetPartitionType $DISK $i)" == NTFS -o "$(ogGetPartitionType $DISK $i)" == "WINDOWS" ] && ogHidePartition $DISK $i
+        #            [ "$(ogGetPartitionType $d $i)" == NTFS -o "$(ogGetPartitionType $d $i)" == "WINDOWS" ] && ogHidePartition $d $i
         #        fi
+        #    done
+
+        #    ## Borrar marcas de arrranque de todos los Windows instalados en el disco.
+        #    ogEcho log session "[30] Borrar marcas de arrranque de todos los Windows instalados en el disco."
+        #    for (( i=1; i<=$(ogGetPartitionsNumber $d); i++ )); do
+        #        [ "$(ogGetOsType $d $i)" == "Windows" ] && ogMount $d $i &>/dev/null
+        #    done
+        #    rm -f /mnt/*/ogboot.*
+
         #done
     ;;
     Linux)
         ## Modificar el nombre del equipo
-        #echo "[30] Asignar nombre Linux \"$NAME\"."
-        #ETC=$(ogGetPath $1 $2 /etc)
+        #ogEcho log session "[30] Asignar nombre Linux \"$NAME\"."
+        #ETC=$(ogGetPath $DISK $PART /etc)
         #[ -d "$ETC" ] && echo "$NAME" >$ETC/hostname 2>/dev/null
 
         ## Sustituir UUID o LABEL por su dispositivo en definición de sistema de archivo raíz.
         #if [ -f "$ETC/fstab" ]; then
-        #    echo "[40] Actualizar fstab con particion raiz \"$PART\"."
+        #    ogEcho log session "[40] Actualizar fstab con particion raíz \"$PART\"."
         #    awk -v P="$PART " '{ if ($2=="/" && $1!~/^#/) {sub(/^.*$/, P, $1)}
         #                         print }' $ETC/fstab >/tmp/fstab
         #    mv /tmp/fstab $ETC/fstab
@@ -76,7 +85,7 @@ case "$OSTYPE" in
 	## En el servidor el nuevo fichero debe situarse en el directorio del grupo: 
 	##    /opt/opengnsys/images/groups/nombre_aula
 	#if [ -r $(ogGetGroupDir)/passwd ]; then
-	#    echo "[65] Cambiar claves de usuarios." 
+	#    ogEcho log session "[65] Cambiar claves de usuarios."
 	#    cp $(ogGetGroupDir)/passwd $MNTDIR/etc
 	#fi
     ;;
