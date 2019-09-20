@@ -1014,7 +1014,7 @@ function compileServices()
 function updateClient()
 {
 	#local FILENAME=ogLive-precise-3.2.0-23-generic-r5159.iso       # 1.1.0-rc6 (32-bit)
-	local FILENAME=ogLive-bionic-5.0.0-15-generic-amd64-r20190605.527cd97.iso 	# 1.1.1-rc4
+	local FILENAME=ogLive-bionic-5.0.0-27-generic-amd64-r20190830.7208cc9.iso	# 1.1.1-rc5
 	local SOURCEFILE=$DOWNLOADURL/$FILENAME
 	local TARGETFILE=$(oglivecli config download-dir)/$FILENAME
 	local SOURCELENGTH
@@ -1042,7 +1042,7 @@ function updateClient()
 		echoAndLog "${FUNCNAME}(): Updatting ogLive client"
 		oglivecli install $FILENAME
 		
-		CLIENTUPDATED=${FILENAME%.*}
+		INSTALLEDOGLIVE=${FILENAME%.*}
 
 		echoAndLog "${FUNCNAME}(): ogLive successfully updated"
 	else
@@ -1135,8 +1135,8 @@ function updateSummary()
 	echoAndLog "Warnings:"
 	echoAndLog " - You must to clear web browser cache before loading OpenGnsys page"
 	echoAndLog " - Generated new key to access Repository REST API (file ogAdmRepo.cfg)"
-	if [ -n "$CLIENTUPDATED" ]; then
-		echoAndLog " - ogLive Client is updated to: $CLIENTUPDATED"
+	if [ -n "$INSTALLEDOGLIVE" ]; then
+		echoAndLog " - Installed new ogLive Client: $INSTALLEDOGLIVE"
 	fi
 	if [ -n "$MYSQLCONFIG" ]; then
 		echoAndLog " - MySQL must be reconfigured, run next code as DB root user and restart service:"

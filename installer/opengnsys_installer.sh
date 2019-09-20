@@ -52,7 +52,7 @@ function userData ()
 	DEFAULT_OPENGNSYS_DB_USER="usuog"		# Usuario por defecto de acceso a la base de datos
 	DEFAULT_OPENGNSYS_DB_PASSWD="passusuog"		# Clave por defecto de acceso a la base de datos
 	DEFAULT_OPENGNSYS_CLIENT_PASSWD="og"		# Clave por defecto de acceso del cliente	
-	DEFAULT_OGLIVE="ogLive-bionic-5.0.0-15-generic-amd64-r20190605.527cd97.iso"	# Cliente ogLive
+	DEFAULT_OGLIVE="ogLive-bionic-5.0.0-27-generic-amd64-r20190830.7208cc9.iso"	# Cliente ogLive
 
 	echo -e "\\nOpenGnsys Installation"
 	echo "=============================="
