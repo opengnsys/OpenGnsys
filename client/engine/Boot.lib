@@ -870,7 +870,10 @@ else
         mkdir -p ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot/grub/
         #Preparar configuración segunda etapa: crear cabecera del fichero (ignorar errores)
         sed -i 's/^set -e/#set -e/' /etc/grub.d/00_header
+        # (ogLive 5.0) Si 'pkgdatadir' está vacía ponemos valor de otros ogLive
+        sed -i '/grub-mkconfig_lib/i\pkgdatadir=${pkgdatadir:-"${datarootdir}/grub"}' /etc/grub.d/00_header
         /etc/grub.d/00_header > ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot/grub/grub.cfg 2>/dev/null
+
         #Preparar configuración segunda etapa: crear entrada del sistema operativo
         grubSyntax "$KERNELPARAM" >> ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot/grub/grub.cfg
 
@@ -1008,6 +1011,8 @@ else
 	mkdir -p ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot/grub/
 	#Preparar configuración segunda etapa: crear cabecera del fichero (ingnorar errores)
 	sed -i 's/^set -e/#set -e/' /etc/grub.d/00_header
+        # (ogLive 5.0) Si 'pkgdatadir' está vacía ponemos valor de otros ogLive
+        sed -i '/grub-mkconfig_lib/i\pkgdatadir=${pkgdatadir:-"${datarootdir}/grub"}' /etc/grub.d/00_header
 	/etc/grub.d/00_header > ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot/grub/grub.cfg 2>/dev/null
 	#Preparar configuración segunda etapa: crear entrada del sistema operativo
 	grubSyntax $DISK $PART "$KERNELPARAM" >> ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot/grub/grub.cfg
