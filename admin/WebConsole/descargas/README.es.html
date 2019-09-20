@@ -22,9 +22,8 @@
   <li>Ejecutar los comandos desde una terminal.</li>
   <li>Descargar el fichero e instalar el agente con sus dependencias:
     <pre>
-	sudo dpkg -i ogagent_<em>Version</em>_all.deb
-	sudo apt-get update
-	sudo apt-get install -fy</pre></li>
+	sudo apt update
+	sudo apt install <em>DirectorioDescarga</em>/ogagent_<em>Version</em>_all.deb</pre></li>
   <li>Configurar el agente:
     <pre>	sudo sed -i "0,/remote=/ s,remote=.*,remote=https://<em>IPServidorOpenGnsys</em>/opengnsys/rest/," /usr/share/OGAgent/cfg/ogagent.cfg</pre></li>
   <li>Reiniciar el equipo o ejecutar el servicio <em>(se iniciará automáticamente en el proceso de arranque)</em>:
@@ -53,7 +52,7 @@
   <li>Instalar dependencias <em>(la instalación puebe realizar estas operaciones)</em>:
     <pre>
 	sudo easy_install pip
-	sudo pip install netifaces requests six</pre></li>
+	sudo pip install -U --ignore-installed netifaces requests six</pre></li>
   <li>Descargar el fichero e instalar el agente:
     <pre>	sudo installer -pkg OGAgentInstaller-<em>Version</em>.pkg -target /</pre></li>
   <li>Configurar el agente:
@@ -66,7 +65,7 @@
 
 <h3>Windows (como usuario administrador):</h3>
 <ul>
-  <li>Descargar el fichero e instalar el agente ejecutando el fichero <code>OGAgentSetup-<em>Version</em>.exe</code></li>
+  <li>Descargar el fichero e instalar el agente ejecutando <code>OGAgentSetup-<em>Version</em>.exe</code></li>
   <li>Seguir las instrucciones del instalador.</li>
   <li>Editar el fichero de configuación <code>C:\Program Files\OGAgent\cfg\ogagent.cfg</code> (o <code>C:\Archivos de programa\OGAgent\cfg\ogagent.cfg</code>) y modificar el valor de la cláusula <code>remote</code> de la sección <code>[OGAgent]</code> inclyendo la dirección IP del servidor OpenGnsys.</li>
   <li>Reiniciar el equipo o ejecutar el servicio <em>(se iniciará automáticamente en el proceso de arranque)</em>:
