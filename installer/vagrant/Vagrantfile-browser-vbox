@@ -21,17 +21,17 @@ dpkg-reconfigure -fnoninteractive console-setup
 # Install main dependencies.
 apt-get update
 apt-get install -y build-essential gettext libssl-dev libucommon-dev libxtst-dev subversion
-# Compile Qt-Embedded 4.8 (aceptar la licencia Open Source).
-wget http://download.qt.io/official_releases/qt/4.8/4.8.7/qt-everywhere-opensource-src-4.8.7.tar.gz
+# Compile Qt-Embedded 4.8 (accept Open Source license).
+wget http://download.qt.io/archive/qt/4.8/4.8.7/qt-everywhere-opensource-src-4.8.7.tar.gz
 tar xvzf qt-everywhere-opensource-src-4.8.7.tar.gz
 cd qt-everywhere-opensource-src-4.8.7
 echo "yes" | ./configure -opensource -embedded x86 -webkit -openssl -qt-gfx-vnc -qvfb -prefix /usr/local/ -nomake demos -nomake examples
 make
 make install
-# Compile Browser.
+# Compile the Browser.
 BRANCH="devel"
 svn export "https://github.com/opengnsys/OpenGnsys/branches/$BRANCH/client/browser" ../browser
-cd browser
+cd ../browser
 qmake browser.pro
 make
 strip browser
@@ -64,7 +64,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       vb.name = "ogBrowser"
       vb.memory = VMMEM
       vb.cpus = VMCPUS
-      vb.gui = true
     end
     # VM base and host name.
     br.vm.box = "ubuntu/trusty32"
