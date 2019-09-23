@@ -41,6 +41,7 @@ $app->post('/ous/:ouid/images/:imageid/reserve(/)', 'validateApiKey',
 	global $userid;
 	$response = Array();
 	$ogagent = Array();
+	$repo = Array();
 
 	if ($app->settings['debug'])
 		writeRemotepcLog($app->request()->getResourceUri(). ": Init.");
@@ -83,14 +84,15 @@ $app->post('/ous/:ouid/images/:imageid/reserve(/)', 'validateApiKey',
 	$cmd->texto = <<<EOD
 SELECT adm.idusuario, entornos.ipserveradm, entornos.portserveradm,
        ordenadores.idordenador, ordenadores.nombreordenador, ordenadores.ip,
-       ordenadores.mac, ordenadores.agentkey, ordenadores_particiones.numdisk,
-       ordenadores_particiones.numpar, aulas.idaula, aulas.idcentro
+       ordenadores.mac, ordenadores.agentkey, par.numdisk, par.numpar,
+       aulas.idaula, aulas.idcentro, repo.ip AS repoip, repo.apikey AS repokey
   FROM entornos, ordenadores
   JOIN aulas USING(idaula)
  RIGHT JOIN administradores_centros AS adm USING(idcentro)
  RIGHT JOIN usuarios USING(idusuario)
- RIGHT JOIN ordenadores_particiones USING(idordenador)
+ RIGHT JOIN ordenadores_particiones AS par USING(idordenador)
  RIGHT JOIN imagenes USING(idimagen)
+ RIGHT JOIN repositorios AS repo ON repo.idrepositorio = ordenadores.idrepositorio
   LEFT JOIN remotepc ON remotepc.id=ordenadores.idordenador
  WHERE adm.idusuario = '$userid'
    AND aulas.idcentro = '$ouid' AND aulas.idaula LIKE '$labid' AND aulas.inremotepc = 1
@@ -116,6 +118,8 @@ EOD;
 		$part = $rs->campos["numpar"];
 		$labid = $rs->campos["idaula"];
 		$ouid = $rs->campos["idcentro"];
+		$repoip = $rs->campos["repoip"];
+		$repokey = $rs->campos["repokey"];
 		// Check client's status.
 		$ogagent[$clntip]['url'] = "https://$clntip:8000/opengnsys/status";
 		if ($app->settings['debug'])
@@ -132,6 +136,16 @@ EOD;
 			if ($app->settings['debug'])
 				writeRemotepcLog($app->request()->getResourceUri(). "Send Boot command to ogAdmClient, ido=$clntid,iph=$clntip,mac=$clntmac.");
 			sendCommand($serverip, $serverport, $reqframe, $values);
+			// Send WOL command to client repository.
+			$repo[$repoip]['url'] = "https://$repoip/opengnsys/rest/repository/poweron";
+			$repo[$repoip]['header'] = Array("Authorization: ".$repokey);
+			$repo[$repoip]['post'] = '{"macs": ["'.$clntmac.'"], "ips": ["'.$clntip.'"]}';
+			if ($app->settings['debug'])
+				writeRemotepcLog($app->request()->getResourceUri(). "Send Boot command to repo: repo=$repoip, ip=$clntip,mac=$clntmac.");
+			$result = multiRequest($repo);
+			// ... (check response)
+			//if ($result[$repoip]['code'] != 200) {
+			// ...
 		} else {
 			// Client is on, send a rieboot command to its OGAgent.
 			$ogagent[$clntip]['url'] = "https://$clntip:8000/opengnsys/reboot";
