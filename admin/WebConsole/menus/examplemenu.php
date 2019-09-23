@@ -58,19 +58,14 @@
 	<dl class="windows">
 		<dt><a href="command:bootOs 1 1" title="Init session Windows, accesskey: 1" accesskey="1">Init session Windows.</a></dt>
 			<dd>Normal boot Windows without changes.</dd>
-		<dt><a href="commandwithconfirmation:restoreImage REPO windows 1 1" title="Format the disk and install the Windows operating system, accesskey: 2" accesskey="2">Install Windows.</a></dt>
+		<dt><a href="command+confirm:restoreImage REPO windows 1 1" title="Format the disk and install the Windows operating system, accesskey: 2" accesskey="2">Install Windows.</a></dt>
 			<dd>The installation process takes a few minutes.</dd>
 	</dl>
 
-	<!-- dl class="windows">
-		<dt><a href="commandwithconfirmation:/opt/opengnsys/interfaceAdm/RestaurarImagenBasica 1 1 WINXPRD2 10.1.15.3 0000 0" title="Restore Windows Image, accesskey: 2" accesskey="2">Restore Windows Image.</a></dt>
-			<dd>Restore Windows Image using synchronization.</dd>
-	</dl -->	
-	
 	<dl class="linux">
-		<dt><a href="command:bootOs 1 2" title="Init session GNU/Linux, accesskey: 3" accesskey="3">Init session GNU/Linux.</a></dt>
+		<dt><a href="command+output:bootOs 1 2" title="Init session GNU/Linux, accesskey: 3" accesskey="3">Init session GNU/Linux.</a></dt>
 			<dd>Normal boot <acronym title="GNU's not Unix">GNU</acronym>/Linux without changes.</dd>
-		<dt><a href="commandwithconfirmation:restoreImage REPO linux 1 2" title="Format the disk and install the GNU/Linux operating system GNU/Linux, accesskey: 4" accesskey="4">Install GNU/Linux.</a></dt>
+		<dt><a href="command+output+confirm:restoreImage REPO linux 1 2" title="Format the disk and install the GNU/Linux operating system GNU/Linux, accesskey: 4" accesskey="4">Install GNU/Linux.</a></dt>
 			<dd>The installation process takes a few minutes.</dd>
 	</dl>
 

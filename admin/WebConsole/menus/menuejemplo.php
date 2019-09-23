@@ -58,20 +58,15 @@
 	<dl class="windows">
 		<dt><a href="command:bootOs 1 1" title="Iniciar sesi&oacute;n de Windows, accesskey: 1" accesskey="1">[1] Arrancar Windows.</a></dt>
 			<dd>Arranque normal de Windows sin modificaciones.</dd>
-		<dt><a href="commandwithconfirmation:restoreImage REPO windows 1 1" title="Formatear el disco e instalar el sistema operativo Windows, accesskey: 2" accesskey="2">[2] Instalar Windows. </a></dt>
+		<dt><a href="command+confirm:restoreImage REPO windows 1 1" title="Formatear el disco e instalar el sistema operativo Windows, accesskey: 2" accesskey="2">[2] Instalar Windows. </a></dt>
 			<dd>El proceso de instalaci&oacute;n tardar&aacute; unos minutos.</dd>
 	</dl>
 
- 	<!-- dl class="windows"> 
-		<dt><a href="commandwithconfirmation:/opt/opengnsys/interfaceAdm/RestaurarImagenBasica 1 1 WINXPRD2 10.1.15.3 0000 0" title="Sincronizar imagen de Windows, accesskey: 2" accesskey="2">Sincronizar Imagen Window.</a></dt> 
-			<dd>Restaurar Imagen Windows con sincronizaci&oacute;n.</dd> 
-	</dl --> 
-
 	<dl class="linux">
-		<dt><a href="command:bootOs 1 2" title="Iniciar sesi&oacute;n de Ubuntu 12, accesskey: 3" accesskey="3">[3] Arrancar GNU/Linux. </a></dt>
+		<dt><a href="command+output:bootOs 1 2" title="Iniciar sesi&oacute;n de Ubuntu 12, accesskey: 3" accesskey="3">[3] Arrancar GNU/Linux. </a></dt>
 			<dd>Arranque normal de <acronym title="GNU's not Unix">GNU</acronym>/Linux sin modificaciones.</dd>
 			
-		<dt><a href="commandwithconfirmation:restoreImage REPO linux 1 2" title="Formatear el disco e instalar el sistema operativo GNU/Linux, accesskey: 4" accesskey="4">[4] Instalar GNU/Linux. </a></dt>
+		<dt><a href="command+output+confirm:restoreImage REPO linux 1 2" title="Formatear el disco e instalar el sistema operativo GNU/Linux, accesskey: 4" accesskey="4">[4] Instalar GNU/Linux. </a></dt>
 			<dd>El proceso de instalaci&oacute;n tardar&aacute; unos minutos.</dd>
 	</dl>
 	
