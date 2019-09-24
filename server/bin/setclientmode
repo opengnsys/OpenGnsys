@@ -44,7 +44,9 @@ if [ $# -ne 3 ]; then
 	exit 1
 fi
 
-if [ "$USER" != "root" -a "$USER" != "www-data" ]; then
+# Comprobar si el usuario es "root" o el del servicio web.
+WEBUSER=$(ps axho user,comm|awk '!/root/ && /httpd|apache/ {print $1; exit;}')
+if [ "$USER" != "root" -a "$USER" != "$WEBUSER" ]; then
 	echo "$PROG: Need to be root. (The console can also call the script)." >&2
         exit 1
 fi
@@ -147,8 +149,7 @@ for MAC in $ETHERNET; do
 		OGLIVEDIR=$(echo "$DATOS" | awk -F= 'BEGIN {RS=" "} $1=="oglivedir" {print $2}')
 
 		# Pondremos como propietario al usuario y grupo de Apache para que se pueda cambiar desde la consola web.
-		PERMS=$(ps axho user,group,comm|awk '!/root/ && /httpd|apache/ {u=$1; g=$2} END {if (g) printf "%s:%s",u,g}')
-
+		WEBGROUP=$(ps axho group,comm|awk '!/root/ && /httpd|apache/ {print $1; exit;}')
 		for BOOTTYPE in 0 1; do
 			# Si no existe la plantilla borramos el archivo PXE anterior continuamos
 			if [ -z "${TEMPLATE[$BOOTTYPE]}" ]; then
@@ -164,7 +165,7 @@ for MAC in $ETHERNET; do
 
 			# Crear fichero PXE a partir de la plantilla con los datos obtenidos en la BD.
 			sed -e "s,vga=[0-9]*,,g; s,INFOHOST,${DATOSAUX//,/\\,},g; s,set ISODIR=.*,set ISODIR=$OGLIVEDIR,g" ${TEMPLATE[$BOOTTYPE]} >${PXEDIR[$BOOTTYPE]}/${PXEFILE[$BOOTTYPE]}
-			[ -n "$PERMS" ] && chown $PERMS ${PXEDIR[$BOOTTYPE]}/${PXEFILEE[$BOOTTYPE]}
+			[ -n "$WEBUSER" ] && chown $WEBUSER:$WEBGROUP ${PXEDIR[$BOOTTYPE]}/${PXEFILEE[$BOOTTYPE]}
 		done
 
 
