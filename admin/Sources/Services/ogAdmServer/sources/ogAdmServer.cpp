@@ -3765,13 +3765,12 @@ static int og_cmd_session(json_t *element, struct og_msg_params *params)
 		return -1;
 
 	json_object_foreach(element, key, value) {
-		if (!strcmp(key, "clients")) {
+		if (!strcmp(key, "clients"))
 			err = og_json_parse_clients(value, params);
-		} else if (!strcmp(key, "disk")) {
+		else if (!strcmp(key, "disk"))
 			err = og_json_parse_disk(value, params);
-		} else if (!strcmp(key, "partition")) {
+		else if (!strcmp(key, "partition"))
 			err = og_json_parse_partition(value, params);
-		}
 
 		if (err < 0)
 			return err;
