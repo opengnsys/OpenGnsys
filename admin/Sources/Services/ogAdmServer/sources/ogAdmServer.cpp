@@ -3359,6 +3359,10 @@ struct og_msg_params {
 	char		run_cmd[4096];
 	const char	*disk;
 	const char	*partition;
+	const char	*repository;
+	const char	*name;
+	const char	*id;
+	const char	*code;
 };
 
 static int og_json_parse_clients(json_t *element, struct og_msg_params *params)
@@ -3752,6 +3756,47 @@ static int og_json_parse_partition(json_t *element,
 	return 0;
 }
 
+static int og_json_parse_name(json_t *element, struct og_msg_params *params)
+{
+	if (json_typeof(element) != JSON_STRING)
+		return -1;
+
+	params->name = json_string_value(element);
+
+	return 0;
+}
+
+static int og_json_parse_repository(json_t *element,
+				    struct og_msg_params *params)
+{
+	if (json_typeof(element) != JSON_STRING)
+		return -1;
+
+	params->repository = json_string_value(element);
+
+	return 0;
+}
+
+static int og_json_parse_id(json_t *element, struct og_msg_params *params)
+{
+	if (json_typeof(element) != JSON_STRING)
+		return -1;
+
+	params->id = json_string_value(element);
+
+	return 0;
+}
+
+static int og_json_parse_code(json_t *element, struct og_msg_params *params)
+{
+	if (json_typeof(element) != JSON_STRING)
+		return -1;
+
+	params->code = json_string_value(element);
+
+	return 0;
+}
+
 static int og_cmd_session(json_t *element, struct og_msg_params *params)
 {
 	char buf[4096], iph[4096];
@@ -3917,6 +3962,54 @@ static int og_cmd_software(json_t *element, struct og_msg_params *params)
 
 	return og_cmd_legacy_send(params, "InventarioSoftware",
 				  CLIENTE_OCUPADO);
+}
+
+static int og_cmd_create_image(json_t *element, struct og_msg_params *params)
+{
+	char buf[4096] = {};
+	int err = 0, len;
+	const char *key;
+	json_t *value;
+	TRAMA *msg;
+
+	if (json_typeof(element) != JSON_OBJECT)
+		return -1;
+
+	json_object_foreach(element, key, value) {
+		if (!strcmp(key, "disk"))
+			err = og_json_parse_disk(value, params);
+		else if (!strcmp(key, "partition"))
+			err = og_json_parse_partition(value, params);
+		else if (!strcmp(key, "name"))
+			err = og_json_parse_name(value, params);
+		else if (!strcmp(key, "repository"))
+			err = og_json_parse_repository(value, params);
+		else if (!strcmp(key, "clients"))
+			err = og_json_parse_clients(value, params);
+		else if (!strcmp(key, "id"))
+			err = og_json_parse_id(value, params);
+		else if (!strcmp(key, "code"))
+			err = og_json_parse_code(value, params);
+
+		if (err < 0)
+			break;
+	}
+
+	len = snprintf(buf, sizeof(buf),
+			"nfn=CrearImagen\rdsk=%s\rpar=%s\rcpt=%s\ridi=%s\rnci=%s\ripr=%s\r",
+			params->disk, params->partition, params->code,
+			params->id, params->name, params->repository);
+
+	msg = og_msg_alloc(buf, len);
+	if (!msg)
+		return -1;
+
+	og_send_cmd((char **)params->ips_array, params->ips_array_len,
+		    CLIENTE_OCUPADO, msg);
+
+	og_msg_free(msg);
+
+	return 0;
 }
 
 static int og_client_method_not_found(struct og_client *cli)
@@ -4141,6 +4234,15 @@ static int og_client_state_process_payload_rest(struct og_client *cli)
 			return og_client_bad_request(cli);
 		}
 		err = og_cmd_software(root, &params);
+	} else if (!strncmp(cmd, "image/create", strlen("image/create"))) {
+		if (method != OG_METHOD_POST)
+			return og_client_method_not_found(cli);
+
+		if (!root) {
+			syslog(LOG_ERR, "command create with no payload\n");
+			return og_client_bad_request(cli);
+		}
+		err = og_cmd_create_image(root, &params);
 	} else {
 		syslog(LOG_ERR, "unknown command: %.32s ...\n", cmd);
 		err = og_client_not_found(cli);

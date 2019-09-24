@@ -12,3 +12,4 @@ curl -X POST -H "Authorization: $API_KEY" http://127.0.0.1:8888/stop -d @stop.js
 curl -X POST -H "Authorization: $API_KEY" http://127.0.0.1:8888/refresh -d @refresh.json
 curl -X POST -H "Authorization: $API_KEY" http://127.0.0.1:8888/hardware -d @post_clients.json
 curl -X POST -H "Authorization: $API_KEY" http://127.0.0.1:8888/software -d @post_clients.json
+curl -X POST -H "Authorization: $API_KEY" http://127.0.0.1:8888/image/create -d @create_image.json
