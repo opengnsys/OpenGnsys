@@ -38,11 +38,17 @@ MYCNF=/tmp/.my.cnf.$$
 
 
 # Control básico de errores.
-if [ $# -ne 3 -a $# -ne 4 ]; then
+if [ $# -ne 3 ]; then
 	echo "$PROG: Error de ejecución"
-	echo "Formato: $PROG PLANTILLA [NOMBRE_PC|NOMBRE_AULA] MODO [ BD_CONF ]"
+	echo "Formato: $PROG PLANTILLA [NOMBRE_PC|NOMBRE_AULA] MODO"
 	exit 1
 fi
+
+if [ "$USER" != "root" -a "$USER" != "www-data" ]; then
+	echo "$PROG: Need to be root. (The console can also call the script)." >&2
+        exit 1
+fi
+
 # El acceso a mysql por las variables pasadas o por el fichero de configuarción.
 if  [ -z "$USUARIO" ] || [ -z "$PASSWORD" ] || [ -z "$CATALOG" ]; then
         if [ -r "$SERVERCONF" ]; then
@@ -59,7 +65,7 @@ if [ -z "${TEMPLATE[0]}" -a -z "${TEMPLATE[1]}" ]; then
 	exit
 fi
 
-case "$3" in
+case "${3^^}" in
 	0|TEMP)	MODE="TEMP" ;;
 	1|PERM)	MODE="PERM" ;;
 	*)	echo "$PROG: Modo desconodido: 0, TEMP (temporal), 1, PERM (permanente)"
