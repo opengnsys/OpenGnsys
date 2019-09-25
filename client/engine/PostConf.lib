@@ -468,126 +468,39 @@ EOT
 
 #/**
 #         ogInstallLinuxClient int_ndisk int_filesys
-#@brief   Instala el cliente OpenGnSys para sistemas operativos GNU/Linux.
-#@param   int_ndisk    nº de orden del disco
-#@param   int_filesys  nº de orden del sistema de archivos
-#@return  (nada)
-#@exception OG_ERR_FORMAT    Formato incorrecto.
-#@exception OG_ERR_NOTFOUND  Fichero o dispositivo no encontrado.
-#@exception OG_ERR_PARTITION Paritición o sistema de archivos incorrectos.
-#@exception OG_ERR_LOCKED    Sistema de archivos bloqueado.
+#@brief   Instala el cliente OpenGnSys para sistemas operativos GNU/Linux (obsoleta).
 #@version 1.0.4 - Primera adaptación para OpenGnSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2012-04-10
 #@version 1.0.5 - Evitar duplicidad de instalación del cliente.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2014-03-06
+#@version 1.1.1 - Marked as obsolete.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2019-09-25
 #*/ ##
 function ogInstallLinuxClient ()
 {
-# Variables locales.
-local MNTDIR CLIENTFILE i SBINDIR ETCDIR RCLOCAL
-# Si se solicita, mostrar ayuda.
-if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_filesys" \
-           "$FUNCNAME 1 1"
-    return
-fi
-
-# Error si no se reciben 2 parámetros.
-[ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
-# Obtener sistema de archvios.
-MNTDIR=$(ogMount $1 $2) || return $?
-
-# Comprobar si existe el cliente y los directorios y ficheros destino.
-CLIENTFILE=$OGLIB/ogclient/ogAdmLnxClient
-[ -f $CLIENTFILE ] || ogRaiseError $OG_ERR_FOUND "$CLIENTFILE" || return $?
-for i in /usr/local/sbin /sbin /usr/sbin; do
-    [ -d $MNTDIR/$i ] && SBINDIR=$i
-done
-[ -n "$SBINDIR" ] || ogRaiseError $OG_ERR_NOTFOUND "$1 $2 sbin" || return $?
-for i in /usr/local/etc /etc; do
-    [ -d $MNTDIR/$i ] && ETCDIR=$i
-done
-[ -n "$ETCDIR" ] || ogRaiseError $OG_ERR_NOTFOUND "$1 $2 etc" || return $?
-for i in $ETCDIR/rc.local $ETCDIR/rc.d/rc.local; do
-    [ -f $i ] && RCLOCAL=$i
-done
-[ -n "$RCLOCAL" ] || ogRaiseError $OG_ERR_NOTFOUND "$1 $2 rc.local" || return $?
-# Realizar la instalación en modo uso exclusivo.
-ogLock $1 $2
-trap "ogUnlock $1 $2" 1 2 3 6 9
-# Copiar cliente, generar fichero de configuración e incluir en el arranque.
-cp -a $CLIENTFILE $MNTDIR/$SBINDIR
-cat > $MNTDIR/$ETCDIR/ogAdmLnxClient.cfg << EOT
-ServidorAdm=$(ogGetServerIp)
-PUERTO=2008
-IPLOCAL=$(ogGetIpAddress)
-EOT
-cp -a $MNTDIR/$RCLOCAL /tmp/rclocal
-awk -v sbin=$SBINDIR -v etc=$ETCDIR \
-        '{ if (/^#/) { print; }
-           else {
-                if (loc==0) {
-                    printf "%s/ogAdmLnxClient -f %s/ogAdmLnxClient.cfg &\n",sbin,etc;
-                    loc=1; }
-                if (! /ogAdmLnxClient/)
-                    print; }
-        }' /tmp/rclocal > $MNTDIR/$RCLOCAL
-rm /tmp/rclocal
-ogUnlock $1 $2
 }
 
 
 #/**
 #         ogInstallWindowsClient int_ndisk int_filesys str_filename
-#@brief   Instala el cliente OpenGnSys para sistemas operativos Windows.
-#@param   int_ndisk         nº de orden del disco
-#@param   int_npartition    nº de orden de la partición
-#@param   str_filename      nombre del fichero cmd donde deberemos introducir el comando de ejecutar el script vbs
-#@return  (nada)
-#@exception OG_ERR_FORMAT    Formato incorrecto.
-#@exception OG_ERR_NOTFOUND  Fichero o dispositivo no encontrado.
-#@exception OG_ERR_PARTITION Paritición o sistema de archivos incorrectos.
-#@exception OG_ERR_LOCKED    Sistema de archivos bloqueado.
+#@brief   Instala el cliente OpenGnSys para sistemas operativos Windows (obsoleta).
 #@version 1.0.4 - Primera adaptación para OpenGnSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2012-04-11
 #@version 1.0.5 - Cambios en los parametros de entrada y funcionamiento de la funcion
 #@author  Jonathan Alonso Martinez - Universidad Autonoma de Barcelona
 #@date    2013-02-12
+#@version 1.1.1 - Marked as obsolete.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2019-09-25
 #*/ ##
 
 function ogInstallWindowsClient ()
 {
-# Variables locales.
-local MNTDIR CLIENTFILE i DIR WINDIR
-# Si se solicita, mostrar ayuda.
-if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_filesys str_filename" \
-           "$FUNCNAME 1 1 filename.cmd" 
-    return
-fi
-
-# Error si no se reciben 3 parámetros.
-[ $# == 3 ] || ogRaiseError $OG_ERR_FORMAT || return $?
-# Obtener sistema de archvios.
-MNTDIR=$(ogMount $1 $2) || return $?
-
-# Comprobar si existe el cliente y los directorios y ficheros destino.
-CLIENTFILE=$OGLIB/ogclient/ogAdmWinClient.exe
-[ -f $CLIENTFILE ] || ogRaiseError $OG_ERR_FOUND "$CLIENTFILE" || return $?
-for i in winnt windows; do
-    DIR=$(ogGetPath $MNTDIR/$i)
-    [ -n "$DIR" ] && WINDIR=$DIR
-done
-[ -n "$WINDIR " ] || ogRaiseError $OG_ERR_NOTFOUND "$1 $2 windows" || return $?
-# Copiar cliente e incluir en el fichero de configuracion dado que instale el cliente en el arranque.
-cp -a $CLIENTFILE "$WINDIR"
-ogAddCmd $1 $2 $3 "ogAdmWinClient -remove"
-ogAddCmd $1 $2 $3 "ogAdmWinClient -install -s $(ogGetServerIp) -p 2008 -i $(ogGetIpAddress)"
 }
-
 
 
 #/**
