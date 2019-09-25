@@ -9,6 +9,9 @@
 #@version 1.0.5 - Enlace para librería libmac (obsoleto en versión 1.1.1).
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2012-06-28
+#@version 1.1.2 - Autenticación con clave pública para SSH
+#@author  Irina Gómez, ETSII Universidad de Sevilla
+#@date    2019-09-25
 #*/
 
 
@@ -38,6 +41,9 @@ if [ -n "$OPENGNSYS" ]; then
     for i in $OGETC/*.qmap; do
         [ -f $QTDIR/etc/$i ] || ln -fs $i $QTDIR/etc 2>/dev/null
     done
+
+    # Autenticación con clave pública para SSH
+    [ -f /scripts/ssl/authorized_keys ] && cp /scripts/ssl/* /root/.ssh
 
 else
     # FIXME Error: entorno de OpenGnsys no configurado.

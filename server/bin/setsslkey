@@ -1,0 +1,127 @@
+#!/bin/bash
+
+#/**
+#         setsslkey
+#@file    setsslkey [NEW] [ogLive]
+#@brief   Configura las claves públicas en los ogLive para que puedan autenticarse entre ellos.
+#@param	  $1 crear_key [NEW] (opcional). Crear la pareja de claves ssl. Por defecto toma la del oglive por defecto.
+#@param   $2 ogLive (opcional). ogLive al que se le incluyen las claves públicas, por defecto a todos.
+#@warning Se modifica el Initrd del cliente.
+#@version 1.1.2 - Versión inicial - Basado en setserveraddr
+#@author  Irina Gómez - ETSII Universidad Sevilla
+#@date    2019-09-25
+#*/ ##
+
+
+# Variables.
+PROG=$(basename "$0")
+PATH=$PATH:$(dirname "$(realpath "$0")")
+OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
+TFTPDIR=$OPENGNSYS/tftpboot
+INITRD=oginitrd.img
+TMPDIR=/tmp/oglive$$
+let CHANGES=0
+
+# Control básico de errores.
+if [ "$USER" != "root" ]; then
+    echo "$PROG: Error: solo ejecutable por root" >&2
+    exit 1
+fi
+
+# Regenerar las claves públicas aunque existan
+[ "${1^^}" == "NEW" ] && NEWKEY="NEW" && shift
+
+case $# in
+    0)  # Cambios en todos los clientes ogLive instalados.
+        if which oglivecli &>/dev/null; then
+            LIST=$(oglivecli list | awk '{print $2}')
+        else
+            LIST="ogclient"
+        fi ;;
+    1)  # Cambios en único ogLive (AVISO: puede crear inconsistencias con otros ogLive).
+        LIST="$1" ;;
+    *)	# Error de formato.
+        echo "$PROG: Error de ejecución" >&2
+        echo "Formato: $PROG ogLive"
+        exit 1 ;;
+esac
+
+# Si me salgo con error borro el directorio temporal
+trap "rm -rf $TMPDIR 2>/dev/null" 1 2 3 6 9 15
+
+# ogLive por defecto
+OGLIVEDEFAULT=$(oglivecli list |awk -v NUM=$(oglivecli get-default) '{if ($1 == NUM) print $2}')
+
+if [ "$NEWKEY" != "NEW" ]; then 
+    # Comprobamos si el ogLive por defecto contiene la clave
+    CLIENTINITRD="$TFTPDIR/$OGLIVEDEFAULT/$INITRD"
+    if [ -r "$CLIENTINITRD" ]; then
+        mkdir -p $TMPDIR
+	cd $TMPDIR || exit 3
+        gzip -dc "$CLIENTINITRD" | cpio -im
+	if [ -r scripts/ssl/id_rsa ]; then
+            PRIVKEY=$(cat scripts/ssl/id_rsa |grep -v '\-\-\-')
+	    PUBLICKEY=$(cat scripts/ssl/id_rsa.pub)
+	else
+            NEWKEY="NEW"
+        fi
+	rm -fr $TMPDIR
+    else
+	NEWKEY="NEW"
+    fi
+fi
+
+# Genero nueva clave
+if [ "$NEWKEY" == "NEW" ]; then
+    [ -d $TMPDIR ] && rm -rf $TMPDIR
+    mkdir $TMPDIR
+    ssh-keygen -N "" -f $TMPDIR/id_rsa
+    PRIVKEY=$(cat $TMPDIR/id_rsa |grep -v "\-\-\-")
+    PUBLICKEY=$(cat $TMPDIR/id_rsa.pub)
+    rm -rf $TMPDIR
+fi
+
+# Buscar todos los clients ogLive instalados.
+for OGLIVE in $LIST; do
+    # Si no hay generar nueva clave ssl no hay que modificar el ogLive por defecto
+    [ "$NEWKEY" != "NEW" ] && [ "$OGLIVE" == "$OGLIVEDEFAULT" ] && continue
+
+    # Crear clave para usuario de acceso a los recursos.
+    CLIENTINITRD="$TFTPDIR/$OGLIVE/$INITRD"
+    if [ -r "$CLIENTINITRD" ]; then
+	# Editar la parte de acceso del cliente:
+	#    descomprimir Initrd, sustituir clave y recomprimir Initrd).
+	echo "Configurando cliente \"$OGLIVE\" ..."
+	mkdir -p $TMPDIR
+	cd $TMPDIR || exit 3
+	gzip -dc "$CLIENTINITRD" | cpio -im
+
+        # Genero archivos de claves
+	[ -d $TMPDIR/scripts/ssl ] || mkdir -p $TMPDIR/scripts/ssl
+
+        echo "-----BEGIN RSA PRIVATE KEY-----" > $TMPDIR/scripts/ssl/id_rsa
+        echo $PRIVKEY |sed s/" "/\\n/g >> $TMPDIR/scripts/ssl/id_rsa
+	echo "-----END RSA PRIVATE KEY-----" >> $TMPDIR/scripts/ssl/id_rsa
+
+        echo $PUBLICKEY > $TMPDIR/scripts/ssl/id_rsa.pub
+	echo $PUBLICKEY > $TMPDIR/scripts/ssl/authorized_keys
+
+        chmod 400 $TMPDIR/scripts/ssl/id_rsa
+	chmod 400 $TMPDIR/scripts/ssl/authorized_keys
+
+	# Generar Initrd del cliente.
+	find . | cpio -H newc -oa | gzip -9c > "$CLIENTINITRD"
+
+	rm -fr $TMPDIR
+	# Calcular suma de comprobación.
+	md5sum "$CLIENTINITRD" | cut -f1 -d" " > "$CLIENTINITRD.sum"
+	let CHANGES++
+    else
+        echo "$PROG: Cliente \"$OGLIVE\" no accesible."
+    fi
+done
+if [[ $CHANGES != 0 ]]; then
+    echo "$PROG: Se ha modificado la pareja de claves ssl en $CHANGES clientes."
+else
+    echo "$PROG: Aviso: no se ha modificado la clave de ningún cliente."
+fi
