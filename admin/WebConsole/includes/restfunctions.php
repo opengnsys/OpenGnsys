@@ -1,3 +1,4 @@
+
 <?php
 
 define('OG_REST_URL', 'http://127.0.0.1:8888/');
@@ -17,6 +18,7 @@ define('OG_REST_CMD_STOP', 'stop');
 define('OG_REST_CMD_REFRESH', 'refresh');
 define('OG_REST_CMD_HARDWARE', 'hardware');
 define('OG_REST_CMD_SOFTWARE', 'software');
+define('OG_REST_CMD_CREATE_IMAGE', 'image/create');
 
 define('OG_REST_PARAM_CLIENTS', 'clients');
 define('OG_REST_PARAM_ADDR', 'addr');
@@ -26,6 +28,10 @@ define('OG_REST_PARAM_PART', 'partition');
 define('OG_REST_PARAM_RUN', 'run');
 define('OG_REST_PARAM_TYPE', 'type');
 define('OG_REST_PARAM_STATE', 'state');
+define('OG_REST_PARAM_NAME', 'name');
+define('OG_REST_PARAM_REPOS', 'repository');
+define('OG_REST_PARAM_ID', 'id');
+define('OG_REST_PARAM_CODE', 'code');
 
 $conf_file = parse_ini_file(__DIR__ . '/../../etc/ogAdmRepo.cfg');
 define('OG_REST_API_TOKEN', 'Authorization: ' . $conf_file['ApiToken']);
@@ -151,6 +157,29 @@ function session($string_ips, $params) {
 		OG_REST_PARAM_DISK => $disk, OG_REST_PARAM_PART => $part);
 
 	common_request(OG_REST_CMD_SESSION, POST, $data);
+}
+
+function create_image($string_ips, $params) {
+
+	preg_match_all('/(?<=\=)(.*?)(?=\r)/', $params, $matches);
+
+	$ips = explode(';',$string_ips);
+	$disk = $matches[0][0];
+	$part = $matches[0][1];
+	$code = $matches[0][2];
+	$id = $matches[0][3];
+	$name = $matches[0][4];
+	$repos = $matches[0][5];
+
+	$data = array(OG_REST_PARAM_CLIENTS => $ips,
+		OG_REST_PARAM_DISK => $disk,
+		OG_REST_PARAM_PART => $part,
+		OG_REST_PARAM_CODE => $code,
+		OG_REST_PARAM_ID => $id,
+		OG_REST_PARAM_NAME => $name,
+		OG_REST_PARAM_REPOS => $repos);
+
+	common_request(OG_REST_CMD_CREATE_IMAGE, POST, $data);
 }
 
 function poweroff($string_ips) {

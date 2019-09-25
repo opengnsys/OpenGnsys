@@ -23,6 +23,7 @@ include_once("../includes/capturaacciones.php");
 
 define('OG_CMD_ID_WAKEUP', 1);
 define('OG_CMD_ID_POWEROFF', 2);
+define('OG_CMD_ID_CREATE_IMAGE', 4);
 define('OG_CMD_ID_REBOOT', 5);
 define('OG_CMD_ID_HARDWARE', 6);
 define('OG_CMD_ID_SOFTWARE', 7);
@@ -135,6 +136,9 @@ switch ($idcomando) {
 	case OG_CMD_ID_POWEROFF:
 		poweroff($cadenaip);
 		break;
+	case OG_CMD_ID_CREATE_IMAGE:
+		create_image($cadenaip, $atributos);
+		break;
 	case OG_CMD_ID_REBOOT:
 		reboot($cadenaip);
 		break;
@@ -201,6 +205,7 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 		if($sw_ejya=='on'){ 	
 			if ($idcomando != OG_CMD_ID_SENDMESSAGE &&
 			    $idcomando != OG_CMD_ID_WAKEUP &&
+			    $idcomando != OG_CMD_ID_CREATE_IMAGE &&
 			    $idcomando != OG_CMD_ID_SESSION &&
 			    $idcomando != OG_CMD_ID_POWEROFF &&
 			    $idcomando != OG_CMD_ID_HARDWARE &&
