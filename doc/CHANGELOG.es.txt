@@ -8,53 +8,68 @@ Lista de cambios incluidos en OpenGnsys 1.1.1 (Espeto)
 
 Tickets resueltos en módulo OpenGnsys Cloning Engine:
 #853	Revisar autodocumentación con doxygen
-#855	Sincronizadas en la 1.1.0 con rsync
-#863	smartPartition: incluir scritps de ejemplo de particionado personalizado para múltiples d
-iscos duros
-#864	FirstRunOnceWindows: scripts de ejemplo para installMiniSetup con ratón y teclado desacti
-vado
+#855	Sincronizadas en la 1.1.0 con rsync (no se resolverá)
+#863	smartPartition: incluir scritps de ejemplo de particionado personalizado para múltiples discos duros
+#864	FirstRunOnceWindows: scripts de ejemplo para installMiniSetup con ratón y teclado desactivado
 #866	Si al restaurar usando la cache no hay espacio en la misma se finalizará la acción
+#889	Gestión de Windows compatible con UEFI
+#890	Gestión de Linux compatible con UEFI
 #893	configureOs no asigna nombre de host en Linux
+#905	deployImage falla con UNICAST-CACHE (corrección)
+#906	Soporte NVMe
+#920	Error al guardar en la BD el número de serie (corrección)
+#923	Mejora de control de errores en deployImagen (corrección)
+#926	bootOsCustom soportará varios discos y una partición de datos
 
 Tickets resueltos en módulo OpenGnsys Client:
 #847	La ISO del ogLive debe de utilzar la revisión de Git y no de SVN
 #887	Browser: mostrar aviso si falla la ejecución de un comando
-#905	deployImage falla con UNICAST-CACHE (corrección)
+#919	Browser muestra salida de comando a usuario normal (mejora)
+#922	Compatibilidad con ogLive basado en Kernel 5.0
 
 Tickets resueltos en módulo OpenGnsys Server:
 #580	Correcciones del Core de OpenGnsys: ogAdmServer (corrección)
+#836	Crear informe de soporte (mejora)
 #856	Mejoras en setserveraddr
+#857	Crear documento de texto con la compatibilidad
 #860	El nombre de la plantilla del fichero PXE para el arranque del primer disco duro no utiliza la misma nomenclatura que el resto
+#873	Script para importar imagen de otro repositorio
+#874	Problemas con Multicast cuando hay 2 o más tarjetas de red en el servidor (corrección)
+#875	Eliminar el servicio inactivo ogAdmRepo
 #878	sendFileMcast con más de una interfaz en el servidor
 #881	Personalizar prioridad de ejecución de proceso de torrents
 #883	Añadir soporte para syslog a ogAdmServer (mejora)
 #884	No ejecutar strip al compilar ogAdmserver
 #885	Eliminar ogAdmBoot
+#888	Arranque PXE compatible con UEFI
 #891	Fijar problema con Wake-On-Lan
 #892	Usar Wake-On-Lan en ogAdmServer y en repositorio
 #897	No usar tipo socket en ogAdmServer
+#898	Eliminar rutinas obsoletas de encriptación y desencriptación
+#899	Eliminar código obsoleto en ogAdmLib
 #900	Fichero de configuración unificado (duplicado de #140)
-
-Tickets resueltos en módulo OpenGnsys Repository Server:
-#873	Script para importar imagen de otro repositorio
-#875	Eliminar el servicio inactivo ogAdmRepo
 
 Tickets resueltos en módulo OpenGnsys Web Admin Console:
 #772	Módulo de administración web para dispositivos smartphones y tablets (no se resolverá)
 #804	Conversión de todo el código php de la consola web de administración a Php7 y Mysqli (tarea)
 #816	Marcar ordenador de profesor
-#824	Iniciar sistema restaurado (no integrado)
+#834	Aplicar limpieza de código PHP
 #842	Internacionalización de la consola web
+#858	Añadir contenido al panel en blanco de la consola
 #895	Asistente de particionado: error al pasar de tabla de particiones MSDOS a GPT y más (corrección)
+#903	Formulario "Añadir Nuevo Ordenador" no valida dirección MAC (corrección)
+#921	Cola de acciones: no muestra nada (corrección)
+#928	Multicast: ampliar el rango de puertos posibles (mejora)
 
 Tickets resueltos en módulo OpenGnsys Installer:
 #784	Mejorar rendimiento de PHP sobre Apache
+#843	Incluir nombre de versión
 #869	Compatibilidad de servidor con Ubuntu 18.04 LTS y CentOS 7.x
 #916	No mostrar claves en script de instalación
 
 Tickets genéricos resueltos:
 #785	Usar Grub2 como gestor PXE para soporte UEFI (tarea)
-#843	Incluir nombre de versión
+#802	Gestión equipos UEFI (tarea)
 #917	Problemas de compatibilidad con Ubuntu 18.04 (corrección)
 
 
@@ -133,6 +148,7 @@ Tickets resueltos en módulo OpenGnsys Cloning Engine:
 Tickets resueltos en módulo OpenGnsys Client:
 #233	Añadir reloj al cliente (resuelto en #746)
 #244	Internacionalización de los mensajes del Browser (mejora)
+#467	ogLive iniciado desde caché
 #528	busybox tftp ogLive con acceso subdirectorio contenedor tftpd del server
 #625	Modo offline: segundo sistema de ficheros en cache/USB (duplicado de #467)
 #709	Script para instalar módulos del Kenrel en el cliente ogLive
