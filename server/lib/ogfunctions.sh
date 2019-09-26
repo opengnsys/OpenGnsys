@@ -23,6 +23,9 @@ function raiseError() {
         download)
             echo "$PROG: Download error: $2" >&2
             exit 4 ;;
+        cancel)
+            echo "$PROG: Operation cancelled: $2" >&2
+            exit 5 ;;
         *)
             echo "$PROG: Unknown error" >&2
             exit 1 ;;
@@ -54,6 +57,20 @@ function help() {
     exit 0
 }
 
+# Functions to manage a service.
+function restart() {
+    _service restart "$1"
+}
+function start() {
+    _service start "$1"
+}
+function stop() {
+    _service stop "$1"
+}
+
+
+### Meta-functions and private functions.
+
 # Metafunction to check if JSON result exists.
 JQ=$(which jq 2>/dev/null) || raiseError notfound "Need to install \"jq\"."
 function jq() {
@@ -63,3 +80,17 @@ function jq() {
     echo "$OUTPUT"
 }
 
+# Private function to acts on a service (do not use directly).
+function _service() {
+    local ACTION="$1"
+    local SERVICE="$2"
+    if which systemctl 2>/dev/null; then
+        systemctl "$ACTION" "$SERVICE"
+    elif which service 2>/dev/null; then
+        service "$SERVICE" "$ACTION"
+    elif [ -x /etc/init.d/"$SERVICE" ]; then
+        /etc/init.d/"$SERVICE" "$ACTION"
+    else
+        raiseError notfound "Service $SERVICE"
+    fi
+}
