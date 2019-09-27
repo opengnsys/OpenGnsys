@@ -943,9 +943,9 @@ function updateServerFiles()
 	if [ -f $INSTALL_TARGET/tftpboot/menu.lst/templates/01 ]; then
             BIOSPXEDIR="$INSTALL_TARGET/tftpboot/menu.lst/templates"
 	    mv $BIOSPXEDIR/01 $BIOSPXEDIR/10
-	    sed -i s/MBR/1hd/ $BIOSPXEDIR/10
-	    sed -i s/1hd-1partition/1hd-1os/ $BIOSPXEDIR/11
-	    sed -i s/1hd-2partition/1hd-2os/ $BIOSPXEDIR/12
+	    sed -i "s/\bMBR\b/1hd/" $BIOSPXEDIR/10
+	    sed -i "s/\b1hd-1partition\b/1hd-1os/" $BIOSPXEDIR/11
+	    sed -i "s/\b1hd-2partition\b/1hd-2os/" $BIOSPXEDIR/12
 	fi
 }
 
