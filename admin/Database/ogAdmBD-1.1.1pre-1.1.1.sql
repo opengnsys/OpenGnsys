@@ -28,3 +28,5 @@ DELIMITER ';'
 CALL addcols();
 DROP PROCEDURE addcols;
 
+# Cambio del nombre de las plantillas PXE para compatibilidad con UEFI.
+UPDATE ordenadores SET arranque='10' WHERE arranque='01';

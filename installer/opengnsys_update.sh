@@ -772,12 +772,13 @@ function createDirs()
 			[ -d $dir ] && ln -fs $dir ${INSTALL_TARGET}/tftpboot
 		done
 	fi
-	mkdir -p $INSTALL_TARGET/tftpboot/menu.lst/examples
+	mkdir -p $INSTALL_TARGET/tftpboot/{menu.lst,grub}/examples
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error while creating dirs. Do you have write permissions?"
 		return 1
 	fi
 	! [ -f $INSTALL_TARGET/tftpboot/menu.lst/templates/00unknown ] && mv $INSTALL_TARGET/tftpboot/menu.lst/templates/* $INSTALL_TARGET/tftpboot/menu.lst/examples
+	! [ -f $INSTALL_TARGET/tftpboot/grub/templates/10 ] && mv $INSTALL_TARGET/tftpboot/grub/templates/* $INSTALL_TARGET/tftpboot/grub/examples
 
 	# Preparar arranque en red con Grub.
 	for f in grub-mknetdir grub2-mknetdir; do
@@ -937,6 +938,15 @@ function updateServerFiles()
 	[ ! -f /etc/cron.d/imagedelete ] && echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/deletepreimage ] && $INSTALL_TARGET/bin/deletepreimage" > /etc/cron.d/imagedelete
 	[ ! -f /etc/cron.d/ogagentqueue ] && echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/ogagentqueue.cron ] && $INSTALL_TARGET/bin/ogagentqueue.cron" > /etc/cron.d/ogagentqueue
 	echoAndLog "${FUNCNAME}(): server files successfully updated"
+
+	# Se modifican los nombres de las plantilla PXE por compatibilidad con los equipos UEFI.
+	if [ -f $INSTALL_TARGET/tftpboot/menu.lst/templates/01 ]; then
+            BIOSPXEDIR="$INSTALL_TARGET/tftpboot/menu.lst/templates"
+	    mv $BIOSPXEDIR/01 $BIOSPXEDIR/10
+	    sed -i s/MBR/1hd/ $BIOSPXEDIR/10
+	    sed -i s/1hd-1partition/1hd-1os/ $BIOSPXEDIR/11
+	    sed -i s/1hd-2partition/1hd-2os/ $BIOSPXEDIR/12
+	fi
 }
 
 ####################################################################
