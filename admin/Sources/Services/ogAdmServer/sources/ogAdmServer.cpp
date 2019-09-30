@@ -3363,6 +3363,8 @@ struct og_msg_params {
 	const char	*name;
 	const char	*id;
 	const char	*code;
+	const char	*type;
+	const char	*profile;
 };
 
 static int og_json_parse_clients(json_t *element, struct og_msg_params *params)
@@ -3959,6 +3961,58 @@ static int og_cmd_create_image(json_t *element, struct og_msg_params *params)
 	return 0;
 }
 
+static int og_cmd_restore_image(json_t *element, struct og_msg_params *params)
+{
+	char buf[4096] = {};
+	int err = 0, len;
+	const char *key;
+	json_t *value;
+	TRAMA *msg;
+
+	if (json_typeof(element) != JSON_OBJECT)
+		return -1;
+
+	json_object_foreach(element, key, value) {
+		if (!strcmp(key, "disk"))
+			err = og_json_parse_string(value, &params->disk);
+		else if (!strcmp(key, "partition"))
+			err = og_json_parse_string(value, &params->partition);
+		else if (!strcmp(key, "name"))
+			err = og_json_parse_string(value, &params->name);
+		else if (!strcmp(key, "repository"))
+			err = og_json_parse_string(value, &params->repository);
+		else if (!strcmp(key, "clients"))
+			err = og_json_parse_clients(value, params);
+		else if (!strcmp(key, "type"))
+			err = og_json_parse_string(value, &params->type);
+		else if (!strcmp(key, "profile"))
+			err = og_json_parse_string(value, &params->profile);
+		else if (!strcmp(key, "id"))
+			err = og_json_parse_string(value, &params->id);
+
+		if (err < 0)
+			break;
+	}
+
+	len = snprintf(buf, sizeof(buf),
+		       "nfn=RestaurarImagen\ridi=%s\rdsk=%s\rpar=%s\rifs=%s\r"
+		       "nci=%s\ripr=%s\rptc=%s\r",
+		       params->id, params->disk, params->partition,
+		       params->profile, params->name,
+		       params->repository, params->type);
+
+	msg = og_msg_alloc(buf, len);
+	if (!msg)
+		return -1;
+
+	og_send_cmd((char **)params->ips_array, params->ips_array_len,
+		    CLIENTE_OCUPADO, msg);
+
+	og_msg_free(msg);
+
+	return 0;
+}
+
 static int og_client_method_not_found(struct og_client *cli)
 {
 	/* To meet RFC 7231, this function MUST generate an Allow header field
@@ -4190,6 +4244,15 @@ static int og_client_state_process_payload_rest(struct og_client *cli)
 			return og_client_bad_request(cli);
 		}
 		err = og_cmd_create_image(root, &params);
+	} else if (!strncmp(cmd, "image/restore", strlen("image/restore"))) {
+		if (method != OG_METHOD_POST)
+			return og_client_method_not_found(cli);
+
+		if (!root) {
+			syslog(LOG_ERR, "command create with no payload\n");
+			return og_client_bad_request(cli);
+		}
+		err = og_cmd_restore_image(root, &params);
 	} else {
 		syslog(LOG_ERR, "unknown command: %.32s ...\n", cmd);
 		err = og_client_not_found(cli);
