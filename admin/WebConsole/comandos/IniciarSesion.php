@@ -58,14 +58,11 @@ if (!$cmd)
                 RecopilaIpesMacs($cmd,$ambito,$idambito);
 
         ?>
-<<<<<<< HEAD
 	<P align=center><SPAN class=subcabeceras><?php echo $TbMsg[7] ?></SPAN></P>
 	<BR>
-=======
 	<P align=center>
 	<SPAN align=center class=subcabeceras><?php echo $TbMsg[7] ?></SPAN>
 	<br>
->>>>>>> #812: Usar fichero de configuración JSON en comandos Configurar e Iniciar Sesión.
 <form  align=center name="fdatos" method="POST"> 
 	<INPUT type="hidden" name="idambito" value="<?php echo $idambito?>">
 	<INPUT type="hidden" name="ambito" value="<?php echo $ambito?>">
@@ -140,7 +137,6 @@ function tabla_configuraciones($cmd,$idordenador){
 			  AND nombresos.nombreso!='DATA'
 			ORDER BY ordenadores_particiones.numpar";
 	$rs=new Recordset;
-	$rs->Comando=&$cmd; 
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) return($tablaHtml); // Error al abrir recordset
 	$rs->Primero(); 
