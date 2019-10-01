@@ -1,1 +1,1 @@
-{ "clients" : [ "192.168.56.11" ], "disk" : "1", "partition" : "1", "name" : "test", "repository" : "192.168.56.10", "type" : "UNICAST", "filesystem": "1", "image_id": "1"}
+{ "clients" : [ "192.168.56.11" ], "disk" : "1", "partition" : "1", "name" : "test", "repository" : "192.168.56.10", "type" : "UNICAST", "profile": "1", "id": "1"}
