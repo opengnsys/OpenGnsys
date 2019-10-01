@@ -19,6 +19,7 @@ define('OG_REST_CMD_REFRESH', 'refresh');
 define('OG_REST_CMD_HARDWARE', 'hardware');
 define('OG_REST_CMD_SOFTWARE', 'software');
 define('OG_REST_CMD_CREATE_IMAGE', 'image/create');
+define('OG_REST_CMD_RESTORE_IMAGE', 'image/restore');
 
 define('OG_REST_PARAM_CLIENTS', 'clients');
 define('OG_REST_PARAM_ADDR', 'addr');
@@ -32,6 +33,8 @@ define('OG_REST_PARAM_NAME', 'name');
 define('OG_REST_PARAM_REPOS', 'repository');
 define('OG_REST_PARAM_ID', 'id');
 define('OG_REST_PARAM_CODE', 'code');
+define('OG_REST_PARAM_PROFILE', 'profile');
+define('OG_REST_PARAM_TYPE', 'type');
 
 $conf_file = parse_ini_file(__DIR__ . '/../../etc/ogAdmRepo.cfg');
 define('OG_REST_API_TOKEN', 'Authorization: ' . $conf_file['ApiToken']);
@@ -180,6 +183,29 @@ function create_image($string_ips, $params) {
 		OG_REST_PARAM_REPOS => $repos);
 
 	common_request(OG_REST_CMD_CREATE_IMAGE, POST, $data);
+}
+
+function restore_image($string_ips, $params) {
+
+	preg_match_all('/(?<=\=)(.*?)(?=\r)/', $params, $matches);
+
+	$ips = explode(';',$string_ips);
+	$disk = $matches[0][0];
+	$part = $matches[0][1];
+	$image_id = $matches[0][2];
+	$name = $matches[0][3];
+	$repos = $matches[0][4];
+	$profile = $matches[0][5];
+	$type = $matches[0][6];
+
+	$data = array(OG_REST_PARAM_DISK => $disk, OG_REST_PARAM_PART => $part,
+		OG_REST_PARAM_IMAGE_ID => $image_id, OG_REST_PARAM_NAME => $name,
+		OG_REST_PARAM_REPOS => $repos,
+		OG_REST_PARAM_PROFILE => $profile,
+		OG_REST_PARAM_TYPE => $type,
+		OG_REST_PARAM_CLIENTS => $ips);
+
+	common_request(OG_REST_CMD_RESTORE_IMAGE, POST, $data);
 }
 
 function poweroff($string_ips) {
