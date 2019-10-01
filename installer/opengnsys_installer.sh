@@ -838,10 +838,12 @@ function checkNetworkConnection()
 {
 	echoAndLog "${FUNCNAME}(): Checking OpenGnsys server connectivity."
 	OPENGNSYS_SERVER=${OPENGNSYS_SERVER:-"opengnsys.es"}
-	if which wget &>/dev/null; then
-		wget --spider -q $OPENGNSYS_SERVER
-	elif which curl &>/dev/null; then
-		curl --connect-timeout 10 -s $OPENGNSYS_SERVER -o /dev/null
+	if which curl &>/dev/null; then
+		curl --connect-timeout 10 -s "https://$OPENGNSYS_SERVER/" -o /dev/null && \
+			curl --connect-timeout 10 -s "http://$OPENGNSYS_SERVER/" -o /dev/null
+	elif which wget &>/dev/null; then
+		wget --spider -q "https://$OPENGNSYS_SERVER/" && \
+			wget --spider -q "http://$OPENGNSYS_SERVER/"
 	else
 		echoAndLog "${FUNCNAME}(): Cannot execute \"wget\" nor \"curl\"."
 		return 1
