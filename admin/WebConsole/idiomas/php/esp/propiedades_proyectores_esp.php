@@ -1,7 +1,7 @@
 <?php
 //______________________________________________________________
 //
-//	Fichero de idiomas php: propiedades_proyectores_esp.php 
+//	Fichero de idiomas php: propiedades_proyectores_esp.php
 //	Idioma: Español
 //______________________________________________________________
 if (empty ($TbMsg)) $TbMsg=array();

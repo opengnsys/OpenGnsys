@@ -142,17 +142,10 @@ function autoConfigure()
 		PHPFPMSERV="php-fpm"
 		INETDCFGDIR=/etc/xinetd.d
 	elif [ -f /etc/redhat-release ]; then
-<<<<<<< HEAD
 		# Distribución basada en paquetes rpm.
-		DEPENDENCIES=( curl rsync btrfs-progs procps-ng arp-scan gettext moreutils jq net-tools udpcast libev-devel shim-x64 grub2-efi-x64 grub2-efi-x64-modules )
+		DEPENDENCIES=( curl rsync btrfs-progs procps-ng arp-scan gettext moreutils jq net-tools udpcast libev-devel shim-x64 grub2-efi-x64 grub2-efi-x64-modules python-pip )
 		# Repositorios para PHP 7 en CentOS.
 		[ "$OSDISTRIB" == "centos" ] && UPDATEPKGLIST="yum update -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-$OSVERSION.noarch.rpm http://rpms.remirepo.net/enterprise/remi-release-$OSVERSION.rpm"
-=======
-        	# Distribución basada en paquetes rpm.
-		DEPENDENCIES=( curl rsync btrfs-progs procps-ng arp-scan gettext moreutils jq net-tools python-pip )
-		# En CentOS 7 instalar arp-scan de CentOS 6.
-		[ "$OSDISTRIB$OSVERSION" == "centos7" ] && DEPENDENCIES=( ${DEPENDENCIES[*]/arp-scan/http://dag.wieers.com/redhat/el6/en/$(arch)/dag/RPMS/arp-scan-1.9-1.el6.rf.$(arch).rpm} )
->>>>>>> #794: instalar y actualizar dependencias para PJLink.
 		INSTALLPKGS="yum install -y"
 		DELETEPKGS="yum remove -y"
 		CHECKPKG="rpm -q --quiet \$package"

@@ -783,7 +783,7 @@ CREATE TABLE `programaciones` (
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `projector`
+-- Estructura de tabla para la tabla `projectors`
 --
 
 DROP TABLE IF EXISTS projectors;
@@ -793,7 +793,7 @@ CREATE TABLE `projectors` (
   `model` varchar(50) NOT NULL DEFAULT '',
   `type` enum('no-net', 'net-pjlink', 'net-other', 'unknown') NOT NULL DEFAULT 'no-net',
   `ipaddr` varchar(16) NOT NULL DEFAULT '',
-  `lab_id` int(11) DEFAULT NULL,
+  `lab_id` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY(`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
 

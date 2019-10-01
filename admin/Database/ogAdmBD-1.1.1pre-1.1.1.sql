@@ -30,3 +30,15 @@ DROP PROCEDURE addcols;
 
 # Cambio del nombre de las plantillas PXE para compatibilidad con UEFI.
 UPDATE ordenadores SET arranque='10' WHERE arranque='01';
+
+# Nueva tabla de proyectores (ticket #794).
+DROP TABLE IF EXISTS projectors;
+CREATE TABLE `projectors` (
+	id INT(11) NOT NULL AUTO_INCREMENT,
+	name VARCHAR(50) NOT NULL DEFAULT '',
+	model VARCHAR(50) NOT NULL DEFAULT '',
+	type ENUM('no-net', 'net-pjlink', 'net-other', 'unknown') NOT NULL DEFAULT 'no-net',
+	ipaddr VARCHAR(16) NOT NULL DEFAULT '',
+	lab_id INT(11) NOT NULL DEFAULT 0,
+	  PRIMARY KEY(`id`)
+	) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
