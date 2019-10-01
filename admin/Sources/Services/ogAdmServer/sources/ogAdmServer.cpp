@@ -3384,6 +3384,15 @@ static int og_json_parse_clients(json_t *element, struct og_msg_params *params)
 	return 0;
 }
 
+static int og_json_parse_string(json_t *element, const char **str)
+{
+	if (json_typeof(element) != JSON_STRING)
+		return -1;
+
+	*str = json_string_value(element);
+	return 0;
+}
+
 static int og_cmd_legacy_send(struct og_msg_params *params, const char *cmd,
 			      const char *state)
 {
@@ -3735,68 +3744,6 @@ static int og_cmd_run_get(json_t *element, struct og_msg_params *params,
 	return 0;
 }
 
-static int og_json_parse_disk(json_t *element, struct og_msg_params *params)
-{
-	if (json_typeof(element) != JSON_STRING)
-		return -1;
-
-	params->disk = json_string_value(element);
-
-	return 0;
-}
-
-static int og_json_parse_partition(json_t *element,
-				   struct og_msg_params *params)
-{
-	if (json_typeof(element) != JSON_STRING)
-		return -1;
-
-	params->partition = json_string_value(element);
-
-	return 0;
-}
-
-static int og_json_parse_name(json_t *element, struct og_msg_params *params)
-{
-	if (json_typeof(element) != JSON_STRING)
-		return -1;
-
-	params->name = json_string_value(element);
-
-	return 0;
-}
-
-static int og_json_parse_repository(json_t *element,
-				    struct og_msg_params *params)
-{
-	if (json_typeof(element) != JSON_STRING)
-		return -1;
-
-	params->repository = json_string_value(element);
-
-	return 0;
-}
-
-static int og_json_parse_id(json_t *element, struct og_msg_params *params)
-{
-	if (json_typeof(element) != JSON_STRING)
-		return -1;
-
-	params->id = json_string_value(element);
-
-	return 0;
-}
-
-static int og_json_parse_code(json_t *element, struct og_msg_params *params)
-{
-	if (json_typeof(element) != JSON_STRING)
-		return -1;
-
-	params->code = json_string_value(element);
-
-	return 0;
-}
-
 static int og_cmd_session(json_t *element, struct og_msg_params *params)
 {
 	char buf[4096], iph[4096];
@@ -3813,9 +3760,9 @@ static int og_cmd_session(json_t *element, struct og_msg_params *params)
 		if (!strcmp(key, "clients"))
 			err = og_json_parse_clients(value, params);
 		else if (!strcmp(key, "disk"))
-			err = og_json_parse_disk(value, params);
+			err = og_json_parse_string(value, &params->disk);
 		else if (!strcmp(key, "partition"))
-			err = og_json_parse_partition(value, params);
+			err = og_json_parse_string(value, &params->partition);
 
 		if (err < 0)
 			return err;
@@ -3977,19 +3924,19 @@ static int og_cmd_create_image(json_t *element, struct og_msg_params *params)
 
 	json_object_foreach(element, key, value) {
 		if (!strcmp(key, "disk"))
-			err = og_json_parse_disk(value, params);
+			err = og_json_parse_string(value, &params->disk);
 		else if (!strcmp(key, "partition"))
-			err = og_json_parse_partition(value, params);
+			err = og_json_parse_string(value, &params->partition);
 		else if (!strcmp(key, "name"))
-			err = og_json_parse_name(value, params);
+			err = og_json_parse_string(value, &params->name);
 		else if (!strcmp(key, "repository"))
-			err = og_json_parse_repository(value, params);
+			err = og_json_parse_string(value, &params->repository);
 		else if (!strcmp(key, "clients"))
 			err = og_json_parse_clients(value, params);
 		else if (!strcmp(key, "id"))
-			err = og_json_parse_id(value, params);
+			err = og_json_parse_string(value, &params->id);
 		else if (!strcmp(key, "code"))
-			err = og_json_parse_code(value, params);
+			err = og_json_parse_string(value, &params->code);
 
 		if (err < 0)
 			break;
