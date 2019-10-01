@@ -1439,27 +1439,6 @@ static bool RESPUESTA_Arrancar(TRAMA* ptrTrama, struct og_client *cli)
 	return true;
 }
 // ________________________________________________________________________________________________________
-// Función: Apagar
-//
-//	Descripción:
-//		Procesa el comando Apagar
-//	Parámetros:
-//		- socket_c: Socket de la consola al envió el mensaje
-//		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
-//	Devuelve:
-//		true: Si el proceso es correcto
-//		false: En caso de ocurrir algún error
-// ________________________________________________________________________________________________________
-static bool Apagar(TRAMA* ptrTrama, struct og_client *cli)
-{
-	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
-		respuestaConsola(og_client_socket(cli), ptrTrama, false);
-		return false;
-	}
-	respuestaConsola(og_client_socket(cli), ptrTrama, true);
-	return true;
-}
-// ________________________________________________________________________________________________________
 // Función: RESPUESTA_Apagar
 //
 //	Descripción:
@@ -1595,27 +1574,6 @@ static bool RESPUESTA_IniciarSesion(TRAMA* ptrTrama, struct og_client *cli)
 	liberaMemoria(ido);
 		
 	db.Close(); // Cierra conexión
-	return true;
-}
-// ________________________________________________________________________________________________________
-// Función: CrearImagen
-//
-//	Descripción:
-//		Crea una imagen de una partición de un disco y la guarda o bien en un repositorio
-//	Parámetros:
-//		- socket_c: Socket de la consola al envió el mensaje
-//		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
-//	Devuelve:
-//		true: Si el proceso es correcto
-//		false: En caso de ocurrir algún error
-// ________________________________________________________________________________________________________
-static bool CrearImagen(TRAMA* ptrTrama, struct og_client *cli)
-{
-	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
-		respuestaConsola(og_client_socket(cli), ptrTrama, false);
-		return false;
-	}
-	respuestaConsola(og_client_socket(cli), ptrTrama, true);
 	return true;
 }
 // ________________________________________________________________________________________________________
@@ -1899,27 +1857,6 @@ static bool RESPUESTA_CrearSoftIncremental(TRAMA* ptrTrama, struct og_client *cl
 		return false;
 	}
 	db.Close(); // Cierra conexión
-	return true;
-}
-// ________________________________________________________________________________________________________
-// Función: RestaurarImagen
-//
-//	Descripción:
-//		Restaura una imagen en una partición
-//	Parámetros:
-//		- socket_c: Socket de la consola al envió el mensaje
-//		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
-//	Devuelve:
-//		true: Si el proceso es correcto
-//		false: En caso de ocurrir algún error
-// ________________________________________________________________________________________________________
-static bool RestaurarImagen(TRAMA* ptrTrama, struct og_client *cli)
-{
-	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
-		respuestaConsola(og_client_socket(cli), ptrTrama, false);
-		return false;
-	}
-	respuestaConsola(og_client_socket(cli), ptrTrama, true);
 	return true;
 }
 // ________________________________________________________________________________________________________
@@ -2243,27 +2180,6 @@ static bool RESPUESTA_EjecutarScript(TRAMA* ptrTrama, struct og_client *cli)
 
 	
 	db.Close(); // Cierra conexión
-	return true;
-}
-// ________________________________________________________________________________________________________
-// Función: InventarioHardware
-//
-//	Descripción:
-//		Solicita al cliente un inventario de su hardware
-//	Parámetros:
-//		- socket_c: Socket de la consola al envió el mensaje
-//		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
-//	Devuelve:
-//		true: Si el proceso es correcto
-//		false: En caso de ocurrir algún error
-// ________________________________________________________________________________________________________
-static bool InventarioHardware(TRAMA* ptrTrama, struct og_client *cli)
-{
-	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
-		respuestaConsola(og_client_socket(cli), ptrTrama, false);
-		return false;
-	}
-	respuestaConsola(og_client_socket(cli), ptrTrama, true);
 	return true;
 }
 // ________________________________________________________________________________________________________
@@ -2615,27 +2531,6 @@ bool cuestionPerfilHardware(Database db, Table tbl, char *idc, char *ido,
 		return false;
 	}
 	liberaMemoria(sqlstr);
-	return true;
-}
-// ________________________________________________________________________________________________________
-// Función: InventarioSoftware
-//
-//	Descripción:
-//		Solicita al cliente un inventario de su software
-//	Parámetros:
-//		- socket_c: Socket de la consola al envió el mensaje
-//		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
-//	Devuelve:
-//		true: Si el proceso es correcto
-//		false: En caso de ocurrir algún error
-// ________________________________________________________________________________________________________
-static bool InventarioSoftware(TRAMA* ptrTrama, struct og_client *cli)
-{
-	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
-		respuestaConsola(og_client_socket(cli), ptrTrama, false);
-		return false;
-	}
-	respuestaConsola(og_client_socket(cli), ptrTrama, true);
 	return true;
 }
 // ________________________________________________________________________________________________________
@@ -3162,17 +3057,14 @@ static struct {
 	{ "ComandosPendientes",			ComandosPendientes,	},
 	{ "DisponibilidadComandos",		DisponibilidadComandos, },
 	{ "RESPUESTA_Arrancar",			RESPUESTA_Arrancar,	},
-	{ "Apagar",				Apagar,			},
 	{ "RESPUESTA_Apagar",			RESPUESTA_Apagar,	},
 	{ "RESPUESTA_Reiniciar",		RESPUESTA_Reiniciar,	},
 	{ "RESPUESTA_IniciarSesion",		RESPUESTA_IniciarSesion, },
-	{ "CrearImagen",			CrearImagen,		},
 	{ "RESPUESTA_CrearImagen",		RESPUESTA_CrearImagen,	},
 	{ "CrearImagenBasica",			CrearImagenBasica,	},
 	{ "RESPUESTA_CrearImagenBasica",	RESPUESTA_CrearImagenBasica, },
 	{ "CrearSoftIncremental",		CrearSoftIncremental,	},
 	{ "RESPUESTA_CrearSoftIncremental",	RESPUESTA_CrearSoftIncremental, },
-	{ "RestaurarImagen",			RestaurarImagen,	},
 	{ "RESPUESTA_RestaurarImagen",		RESPUESTA_RestaurarImagen },
 	{ "RestaurarImagenBasica",		RestaurarImagenBasica, },
 	{ "RESPUESTA_RestaurarImagenBasica",	RESPUESTA_RestaurarImagenBasica, },
@@ -3182,9 +3074,7 @@ static struct {
 	{ "RESPUESTA_Configurar",		RESPUESTA_Configurar,	},
 	{ "EjecutarScript",			EjecutarScript,		},
 	{ "RESPUESTA_EjecutarScript",		RESPUESTA_EjecutarScript, },
-	{ "InventarioHardware",			InventarioHardware, 	},
 	{ "RESPUESTA_InventarioHardware",	RESPUESTA_InventarioHardware, },
-	{ "InventarioSoftware",			InventarioSoftware	},
 	{ "RESPUESTA_InventarioSoftware",	RESPUESTA_InventarioSoftware, },
 	{ "enviaArchivo",			enviaArchivo,		},
 	{ "recibeArchivo",			recibeArchivo, 		},
