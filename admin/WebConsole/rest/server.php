@@ -1039,7 +1039,7 @@ EOD;
 			while (!$rs->EOF) {
 				// Ignoring empty fields.
 				if (!is_null($rs->campos["descripcion"])) {
-					array_push($response['software']['application'], $rs->campos["descripcion"]);
+					array_push($response['software']['applications'], $rs->campos["descripcion"]);
 				}
 				$rs->Siguiente();
 			}
