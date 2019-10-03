@@ -199,7 +199,7 @@ function restore_image($string_ips, $params) {
 	$type = $matches[0][6];
 
 	$data = array(OG_REST_PARAM_DISK => $disk, OG_REST_PARAM_PART => $part,
-		OG_REST_PARAM_IMAGE_ID => $image_id, OG_REST_PARAM_NAME => $name,
+		OG_REST_PARAM_ID => $image_id, OG_REST_PARAM_NAME => $name,
 		OG_REST_PARAM_REPOS => $repos,
 		OG_REST_PARAM_PROFILE => $profile,
 		OG_REST_PARAM_TYPE => $type,
