@@ -467,43 +467,6 @@ EOT
 
 
 #/**
-#         ogInstallLinuxClient int_ndisk int_filesys
-#@brief   Instala el cliente OpenGnSys para sistemas operativos GNU/Linux (obsoleta).
-#@version 1.0.4 - Primera adaptación para OpenGnSys.
-#@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2012-04-10
-#@version 1.0.5 - Evitar duplicidad de instalación del cliente.
-#@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2014-03-06
-#@version 1.1.1 - Marked as obsolete.
-#@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2019-09-25
-#*/ ##
-function ogInstallLinuxClient ()
-{
-}
-
-
-#/**
-#         ogInstallWindowsClient int_ndisk int_filesys str_filename
-#@brief   Instala el cliente OpenGnSys para sistemas operativos Windows (obsoleta).
-#@version 1.0.4 - Primera adaptación para OpenGnSys.
-#@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2012-04-11
-#@version 1.0.5 - Cambios en los parametros de entrada y funcionamiento de la funcion
-#@author  Jonathan Alonso Martinez - Universidad Autonoma de Barcelona
-#@date    2013-02-12
-#@version 1.1.1 - Marked as obsolete.
-#@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2019-09-25
-#*/ ##
-
-function ogInstallWindowsClient ()
-{
-}
-
-
-#/**
 #         ogUninstallLinuxClient int_ndisk int_filesys
 #@brief   Desinstala el cliente OpenGnSys para sistemas operativos GNU/Linux.
 #@param   int_ndisk    nº de orden del disco
