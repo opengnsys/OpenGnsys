@@ -3240,6 +3240,15 @@ static int og_client_state_process_payload(struct og_client *cli)
 }
 
 #define OG_CLIENTS_MAX	4096
+#define OG_PARTITION_MAX 4
+
+struct og_partition {
+	const char	*number;
+	const char	*code;
+	const char	*size;
+	const char	*filesystem;
+	const char	*format;
+};
 
 struct og_msg_params {
 	const char	*ips_array[OG_CLIENTS_MAX];
@@ -3255,6 +3264,9 @@ struct og_msg_params {
 	const char	*code;
 	const char	*type;
 	const char	*profile;
+	const char	*cache;
+	const char	*cache_size;
+	struct og_partition	partition_setup[OG_PARTITION_MAX];
 };
 
 static int og_json_parse_clients(json_t *element, struct og_msg_params *params)
@@ -3282,6 +3294,34 @@ static int og_json_parse_string(json_t *element, const char **str)
 		return -1;
 
 	*str = json_string_value(element);
+	return 0;
+}
+
+static void og_json_parse_partition(json_t *element, og_partition *part)
+{
+	part->number = json_string_value(json_object_get(element, "partition"));
+	part->code = json_string_value(json_object_get(element, "code"));
+	part->filesystem = json_string_value(json_object_get(element, "filesystem"));
+	part->size = json_string_value(json_object_get(element, "size"));
+	part->format = json_string_value(json_object_get(element, "format"));
+}
+
+static int og_json_parse_partition_setup(json_t *element, og_partition *part)
+{
+	unsigned int i;
+	json_t *k;
+
+	if (json_typeof(element) != JSON_ARRAY)
+		return -1;
+
+	for (i = 0; i < json_array_size(element) && i < OG_PARTITION_MAX; ++i) {
+		k = json_array_get(element, i);
+
+		if (json_typeof(k) != JSON_OBJECT)
+			return -1;
+
+		og_json_parse_partition(k, part + i);
+	}
 	return 0;
 }
 
@@ -3903,6 +3943,57 @@ static int og_cmd_restore_image(json_t *element, struct og_msg_params *params)
 	return 0;
 }
 
+static int og_cmd_setup_image(json_t *element, struct og_msg_params *params)
+{
+	char buf[4096] = {};
+	int err = 0, len;
+	const char *key;
+	json_t *value;
+	TRAMA *msg;
+
+	if (json_typeof(element) != JSON_OBJECT)
+		return -1;
+
+	json_object_foreach(element, key, value) {
+		if (!strcmp(key, "clients"))
+			err = og_json_parse_clients(value, params);
+		else if (!strcmp(key, "disk"))
+			err = og_json_parse_string(value, &params->disk);
+		else if (!strcmp(key, "cache"))
+			err = og_json_parse_string(value, &params->cache);
+		else if (!strcmp(key, "cache_size"))
+			err = og_json_parse_string(value, &params->cache_size);
+		else if (!strcmp(key, "partition_setup"))
+			err = og_json_parse_partition_setup(value, params->partition_setup);
+
+		if (err < 0)
+			break;
+	}
+
+	len = snprintf(buf, sizeof(buf),
+			"nfn=Configurar\rdsk=%s\rcfg=dis=%s*che=%s*tch=%s!",
+			params->disk, params->disk, params->cache, params->cache_size);
+
+	for (unsigned int i = 0; i < OG_PARTITION_MAX; ++i) {
+		const og_partition *part = params->partition_setup + i;
+
+		len += snprintf(buf + strlen(buf), sizeof(buf),
+			"par=%s*cpt=%s*sfi=%s*tam=%s*ope=%s%%",
+			part->number, part->code, part->filesystem, part->size, part->format);
+	}
+
+	msg = og_msg_alloc(buf, len + 1);
+	if (!msg)
+		return -1;
+
+	og_send_cmd((char **)params->ips_array, params->ips_array_len,
+			CLIENTE_OCUPADO, msg);
+
+	og_msg_free(msg);
+
+	return 0;
+}
+
 static int og_client_method_not_found(struct og_client *cli)
 {
 	/* To meet RFC 7231, this function MUST generate an Allow header field
@@ -4143,6 +4234,15 @@ static int og_client_state_process_payload_rest(struct og_client *cli)
 			return og_client_bad_request(cli);
 		}
 		err = og_cmd_restore_image(root, &params);
+	} else if (!strncmp(cmd, "image/setup", strlen("image/setup"))) {
+		if (method != OG_METHOD_POST)
+			return og_client_method_not_found(cli);
+
+		if (!root) {
+			syslog(LOG_ERR, "command create with no payload\n");
+			return og_client_bad_request(cli);
+		}
+		err = og_cmd_setup_image(root, &params);
 	} else {
 		syslog(LOG_ERR, "unknown command: %.32s ...\n", cmd);
 		err = og_client_not_found(cli);
