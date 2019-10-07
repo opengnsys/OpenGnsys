@@ -21,6 +21,7 @@ define('OG_REST_CMD_SOFTWARE', 'software');
 define('OG_REST_CMD_CREATE_IMAGE', 'image/create');
 define('OG_REST_CMD_RESTORE_IMAGE', 'image/restore');
 define('OG_REST_CMD_SETUP', 'image/setup');
+define('OG_REST_CMD_CREATE_BASIC_IMAGE', 'image/create/basic');
 
 define('OG_REST_PARAM_CLIENTS', 'clients');
 define('OG_REST_PARAM_ADDR', 'addr');
@@ -43,7 +44,15 @@ define('OG_REST_PARAM_FILE_SYSTEM', 'filesystem');
 define('OG_REST_PARAM_SIZE', 'size');
 define('OG_REST_PARAM_FORMAT', 'format');
 define('OG_REST_PARAM_PARTITION_SETUP', 'partition_setup');
-
+define('OG_REST_PARAM_SYNC_PARAMS', 'sync_params');
+define('OG_REST_PARAM_SYNC', 'sync');
+define('OG_REST_PARAM_DIFF', 'diff');
+define('OG_REST_PARAM_REMOVE', 'remove');
+define('OG_REST_PARAM_COMPRESS', 'compress');
+define('OG_REST_PARAM_CLEANUP', 'cleanup');
+define('OG_REST_PARAM_CACHE', 'cache');
+define('OG_REST_PARAM_CLEANUP_CACHE', 'cleanup_cache');
+define('OG_REST_PARAM_REMOVE_DST', 'remove_dst');
 
 $conf_file = parse_ini_file(__DIR__ . '/../../etc/ogAdmRepo.cfg');
 define('OG_REST_API_TOKEN', 'Authorization: ' . $conf_file['ApiToken']);
@@ -215,6 +224,51 @@ function restore_image($string_ips, $params) {
 		OG_REST_PARAM_CLIENTS => $ips);
 
 	common_request(OG_REST_CMD_RESTORE_IMAGE, POST, $data);
+}
+
+function create_basic_image($string_ips, $params) {
+
+	preg_match_all('/(?<=\=)[^\r]*(?=\r)?/', $params, $matches);
+
+	$ips = explode(';',$string_ips);
+	$disk = $matches[0][0];
+	$part = $matches[0][1];
+	$code = $matches[0][2];
+	$image_id = $matches[0][3];
+	$name = $matches[0][4];
+	$repos = $matches[0][5];
+
+	$sync = $matches[0][7]; // Syncronization method
+
+	$diff = $matches[0][8]; // Send the whole file if there are differences
+	$remove = $matches[0][9]; // Delete files at destination that are not at source
+	$compress = $matches[0][10]; // Compress before sending
+
+	$cleanup = $matches[0][11]; // Delete image before creating it
+	$cache = $matches[0][12]; // Copy image to cache
+	$cleanup_cache = $matches[0][13]; // Delete image from cache before copying
+	$remove_dst = $matches[0][14]; // Dont delete files in destination
+
+	$data = array(OG_REST_PARAM_CLIENTS => $ips,
+		OG_REST_PARAM_DISK => $disk,
+		OG_REST_PARAM_PART => $part,
+		OG_REST_PARAM_CODE => $code,
+		OG_REST_PARAM_ID => $image_id,
+		OG_REST_PARAM_NAME => $name,
+		OG_REST_PARAM_REPOS => $repos,
+		OG_REST_PARAM_SYNC_PARAMS => array(
+			OG_REST_PARAM_SYNC => $sync,
+			OG_REST_PARAM_DIFF => $diff,
+			OG_REST_PARAM_REMOVE => $remove,
+			OG_REST_PARAM_COMPRESS => $compress,
+			OG_REST_PARAM_CLEANUP => $cleanup,
+			OG_REST_PARAM_CACHE => $cache,
+			OG_REST_PARAM_CLEANUP_CACHE => $cleanup_cache,
+			OG_REST_PARAM_REMOVE_DST => $remove_dst,
+		)
+	);
+
+	common_request(OG_REST_CMD_CREATE_BASIC_IMAGE, POST, $data);
 }
 
 function poweroff($string_ips) {
