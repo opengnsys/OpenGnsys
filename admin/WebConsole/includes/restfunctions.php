@@ -20,6 +20,7 @@ define('OG_REST_CMD_HARDWARE', 'hardware');
 define('OG_REST_CMD_SOFTWARE', 'software');
 define('OG_REST_CMD_CREATE_IMAGE', 'image/create');
 define('OG_REST_CMD_RESTORE_IMAGE', 'image/restore');
+define('OG_REST_CMD_SETUP', 'image/setup');
 
 define('OG_REST_PARAM_CLIENTS', 'clients');
 define('OG_REST_PARAM_ADDR', 'addr');
@@ -35,6 +36,14 @@ define('OG_REST_PARAM_ID', 'id');
 define('OG_REST_PARAM_CODE', 'code');
 define('OG_REST_PARAM_PROFILE', 'profile');
 define('OG_REST_PARAM_TYPE', 'type');
+define('OG_REST_PARAM_CACHE', 'cache');
+define('OG_REST_PARAM_CACHE_SIZE', 'cache_size');
+define('OG_REST_PARAM_CODE', 'code');
+define('OG_REST_PARAM_FILE_SYSTEM', 'filesystem');
+define('OG_REST_PARAM_SIZE', 'size');
+define('OG_REST_PARAM_FORMAT', 'format');
+define('OG_REST_PARAM_PARTITION_SETUP', 'partition_setup');
+
 
 $conf_file = parse_ini_file(__DIR__ . '/../../etc/ogAdmRepo.cfg');
 define('OG_REST_API_TOKEN', 'Authorization: ' . $conf_file['ApiToken']);
@@ -260,6 +269,50 @@ function software($string_ips) {
 	$data = array(OG_REST_PARAM_CLIENTS => $ips);
 
 	common_request(OG_REST_CMD_SOFTWARE, POST, $data);
+}
+
+function setup($string_ips, $params) {
+
+	preg_match_all('/(?<=\=)(?!dis)(.*?)((?=\*)|(?=\r)|(?=\!)|(?=\%))/',
+		$params, $matches);
+
+	$ips = explode(';',$string_ips);
+	$disk = $matches[0][0];
+	$cache = $matches[0][2];
+	$cache_size = $matches[0][3];
+	$partition_number = array();
+	$partition_code = array();
+	$file_system = array();
+	$part_size = array();
+	$format = array();
+	for ($x = 0; $x < 4; $x++) {
+		$partition_number[$x] = $matches[0][4 + 5 * $x];
+		$partition_code[$x] = $matches[0][5 + 5 * $x];
+		$file_system[$x] = $matches[0][6 + 5 * $x];
+		$part_size[$x] = $matches[0][7 + 5 * $x];
+		$format[$x] = $matches[0][8 + 5 * $x];
+	}
+
+	$data = array(
+		OG_REST_PARAM_CLIENTS => $ips,
+		OG_REST_PARAM_DISK => $disk,
+		OG_REST_PARAM_CACHE => $cache,
+		OG_REST_PARAM_CACHE_SIZE => $cache_size,
+		OG_REST_PARAM_PARTITION_SETUP => array()
+	);
+
+	for ($i = 0; $i < sizeof($partition_number); $i++) {
+		$partition_setup = array(
+			OG_REST_PARAM_PART => $partition_number[$i],
+			OG_REST_PARAM_CODE => $partition_code[$i],
+			OG_REST_PARAM_FILE_SYSTEM => $file_system[$i],
+			OG_REST_PARAM_SIZE => $part_size[$i],
+			OG_REST_PARAM_FORMAT => $format[$i]
+		);
+		array_push($data[OG_REST_PARAM_PARTITION_SETUP], $partition_setup);
+	}
+
+	common_request(OG_REST_CMD_SETUP, POST, $data);
 }
 
 /*

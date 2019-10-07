@@ -30,6 +30,7 @@ define('OG_CMD_ID_HARDWARE', 6);
 define('OG_CMD_ID_SOFTWARE', 7);
 define("OG_CMD_ID_SCRIPT", 8);
 define('OG_CMD_ID_SESSION', 9);
+define('OG_CMD_ID_SETUP', 10);
 define('OG_CMD_ID_SENDMESSAGE', 16);
 
 // Recoge parametros de seguimiento
@@ -131,6 +132,9 @@ switch ($idcomando) {
 	case OG_CMD_ID_WAKEUP:
 		include("wakeonlan_repo.php");
 		break;
+	case OG_CMD_ID_SETUP:
+		setup($cadenaip, $atributos);
+		break;
 	case OG_CMD_ID_SESSION:
 		session($cadenaip, $atributos);
 		break;
@@ -211,6 +215,7 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 			    $idcomando != OG_CMD_ID_WAKEUP &&
 			    $idcomando != OG_CMD_ID_CREATE_IMAGE &&
 			    $idcomando != OG_CMD_ID_RESTORE_IMAGE &&
+			    $idcomando != OG_CMD_ID_SETUP &&
 			    $idcomando != OG_CMD_ID_SESSION &&
 			    $idcomando != OG_CMD_ID_POWEROFF &&
 			    $idcomando != OG_CMD_ID_HARDWARE &&
