@@ -3297,13 +3297,28 @@ static int og_json_parse_string(json_t *element, const char **str)
 	return 0;
 }
 
-static void og_json_parse_partition(json_t *element, og_partition *part)
+static int og_json_parse_partition(json_t *element, og_partition *part)
 {
-	part->number = json_string_value(json_object_get(element, "partition"));
-	part->code = json_string_value(json_object_get(element, "code"));
-	part->filesystem = json_string_value(json_object_get(element, "filesystem"));
-	part->size = json_string_value(json_object_get(element, "size"));
-	part->format = json_string_value(json_object_get(element, "format"));
+	const char *key;
+	json_t *value;
+	int err = 0;
+
+	json_object_foreach(element, key, value) {
+		if (!strcmp(key, "partition"))
+			err = og_json_parse_string(value, &part->number);
+		else if (!strcmp(key, "code"))
+			err = og_json_parse_string(value, &part->code);
+		else if (!strcmp(key, "filesystem"))
+			err = og_json_parse_string(value, &part->filesystem);
+		else if (!strcmp(key, "size"))
+			err = og_json_parse_string(value, &part->size);
+		else if (!strcmp(key, "format"))
+			err = og_json_parse_string(value, &part->format);
+
+		if (err < 0)
+			return err;
+	}
+	return err;
 }
 
 static int og_json_parse_partition_setup(json_t *element, og_partition *part)
@@ -3320,7 +3335,8 @@ static int og_json_parse_partition_setup(json_t *element, og_partition *part)
 		if (json_typeof(k) != JSON_OBJECT)
 			return -1;
 
-		og_json_parse_partition(k, part + i);
+		if (og_json_parse_partition(k, part + i) != 0)
+			return -1;
 	}
 	return 0;
 }
