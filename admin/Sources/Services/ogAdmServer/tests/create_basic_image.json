@@ -1,0 +1,1 @@
+{"clients":["192.168.56.11"],"disk":"1","partition":"1","code":"131","id":"8","name":"debianbasica","repository":"192.168.56.10","sync_params":{"sync":"1","diff":"0","remove":"1","compress":"0","cleanup":"0","cache":"0","cleanup_cache":"0","remove_dst":"0"}}
