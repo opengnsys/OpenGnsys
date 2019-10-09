@@ -46,8 +46,11 @@ Tickets resueltos en módulo OpenGnsys Server:
 #892	Usar Wake-On-Lan en ogAdmServer y en repositorio
 #897	No usar tipo socket en ogAdmServer
 #898	Eliminar rutinas obsoletas de encriptación y desencriptación
+#896	Enviar Wake On Lan por la interfaz correcta
 #899	Eliminar código obsoleto en ogAdmLib
 #900	Fichero de configuración unificado (duplicado de #140)
+#915	API REST para ogAdmServer
+#929	Autenticación de clave pública entre los ogLive
 
 Tickets resueltos en módulo OpenGnsys Web Admin Console:
 #772	Módulo de administración web para dispositivos smartphones y tablets (no se resolverá)
@@ -70,6 +73,7 @@ Tickets resueltos en módulo OpenGnsys Installer:
 Tickets genéricos resueltos:
 #785	Usar Grub2 como gestor PXE para soporte UEFI (tarea)
 #802	Gestión equipos UEFI (tarea)
+#914	Liberar versión OpenGnsys 1.1.1 Espeto (tarea)
 #917	Problemas de compatibilidad con Ubuntu 18.04 (corrección)
 
 

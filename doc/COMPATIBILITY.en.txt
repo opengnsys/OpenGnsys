@@ -10,7 +10,7 @@ Installation of OpenGnsys services has been tested on the following GNU/Linux di
 
  - Ubuntu Server 18.04 LTS 64-bit (recommended)
  - Ubuntu Server 16.04 LTS 64-bit (not fully tested)
- - CentOS 7.5 64-bit (not fully tested)
+ - CentOS 7.x 64-bit (not fully tested)
 
 
 OpenGnsys Clients
@@ -18,8 +18,8 @@ OpenGnsys Clients
 
 Installation and cloning operations have been tested on the following operating systems and filesystems:
 
- - Ubuntu Desktop 16.04.4 64-bit and 18.04.1 64-bit with Ext4 filesystem and Swap partition
+ - Ubuntu Desktop 14.04 LTS 64-bit, 16.04 LTS 64-bit and 18.04 LTS 64-bit with Ext4 filesystem and Swap partition
  - Windows 7 Enterprise 64-bit with NTFS filesystem
- - Windows 10 Education 1709 64-bit and 1803 64-bit with NTFS filesystem
+ - Windows 10 Education 1709 64-bit, 1803 64-bit, 1809 64-bit and 1903 64-bit with NTFS filesystem
 
 
