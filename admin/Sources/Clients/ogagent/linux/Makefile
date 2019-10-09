@@ -17,6 +17,7 @@ CACHES := $(shell find $(SOURCEDIR) -name '__pycache__')
 
 clean:
 	rm -rf $(PYC) $(CACHES) $(DESTDIR)
+
 install-ogagent:
 	rm -rf $(DESTDIR)
 	mkdir -p $(LIBDIR)
@@ -26,12 +27,11 @@ install-ogagent:
 	mkdir -p $(CFGDIR)
 	mkdir -p $(XDGAUTOSTARTDIR)
 	mkdir -p $(KDEAUTOSTARTDIR)
-	
-	mkdir $(LIBDIR)/img
-	
+	mkdir -p $(LIBDIR)/img
+
 	# Cleans up .pyc and cache folders
 	rm -f $(PYC) $(CACHES)
-	
+
 	cp -r $(SOURCEDIR)/opengnsys $(LIBDIR)/opengnsys
 	cp -r $(SOURCEDIR)/cfg $(LIBDIR)/cfg
 	cp $(SOURCEDIR)/img/oga.png $(LIBDIR)/img
@@ -40,22 +40,24 @@ install-ogagent:
 	# QT Dialogs & resources
 	cp $(SOURCEDIR)/*_ui.py $(LIBDIR)
 	cp $(SOURCEDIR)/OGAgent_rc.py $(LIBDIR)
-	
+	# Version file
+	cp $(SOURCEDIR)/VERSION $(LIBDIR)
+
 	# Autostart elements for gnome/kde
 	cp desktop/OGAgentTool.desktop $(XDGAUTOSTARTDIR)
 	cp desktop/OGAgentTool.desktop $(KDEAUTOSTARTDIR)
-	
+
 	# scripts
 	cp scripts/ogagent $(BINDIR)
 	cp scripts/OGAgentTool-startup $(BINDIR)
 	cp scripts/OGAgentTool $(BINDIR)
-	
+
 	# Fix permissions
 	chmod 755 $(BINDIR)/ogagent
 	chmod 755 $(BINDIR)/OGAgentTool-startup
 	chmod 755 $(LIBDIR)/OGAgentUser.py
 	chmod 600 $(LIBDIR)/cfg/ogagent.cfg
-	
+
 	# If for red hat based, copy init.d
 ifeq ($(DISTRO),rh)
 	mkdir -p $(INITDIR)
@@ -64,8 +66,7 @@ ifeq ($(DISTRO),rh)
 	ln -fs /usr/share/OGAgent/cfg/ogagent.cfg $(CFGDIR)
 	ln -fs /usr/share/OGAgent/cfg/ogclient.cfg $(CFGDIR)
 endif
-	
-	# chmod 0755 $(BINDIR)/ogagent
+
 uninstall:
 	rm -rf $(LIBDIR)
 	# rm -f $(BINDIR)/ogagent

@@ -8,12 +8,12 @@ BuildRoot: %{buildroot}
 Name: %{name}
 Version: %{version}
 Release: %{release}
-Summary: OpenGnsys Agent & tools
+Summary: OpenGnsys Agent for Operating Systems
 License: BSD3
 Group: Admin
-Requires: python-six python-requests PyQt4 libXScrnSaver
+Requires: chkconfig initscripts python-six python-requests PyQt4 libXScrnSaver
 Vendor: OpenGnsys Project
-URL: https://opengnsys.es
+URL: https://opengnsys.es/
 Provides: ogagent
 
 %define _rpmdir ../

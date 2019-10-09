@@ -26,6 +26,7 @@
 	sudo apt install <em>DirectorioDescarga</em>/ogagent_<em>Version</em>_all.deb</pre></li>
   <li>Configurar el agente:
     <pre>	sudo sed -i "0,/remote=/ s,remote=.*,remote=https://<em>IPServidorOpenGnsys</em>/opengnsys/rest/," /usr/share/OGAgent/cfg/ogagent.cfg</pre></li>
+  <li>Para sistemas con GNOME 3: ejecutar GNOME Tweaks y habilitar la extensión TopIcons Plus.</li>
   <li>Reiniciar el equipo o ejecutar el servicio <em>(se iniciará automáticamente en el proceso de arranque)</em>:
     <pre>	sudo service ogagent start</pre></li>
 </ul>
@@ -39,6 +40,12 @@
     <pre>	sed -i "0,/remote=/ s,remote=.*,remote=https://<em>IPServidorOpenGnsys</em>/opengnsys/rest/," /usr/share/OGAgent/cfg/ogagent.cfg</pre></li>
   <li>Puede ser necesario corregir permisos antes de iniciar el servicio:
     <pre>	chmod +x /etc/init.d/ogagent</pre></li>
+  <li>Para sistemas con GNOME 3:</li>
+    <ul>
+      <li>Instalar TopIcons Plus:
+        <pre>	sudo yum install gnome-shell-extension-topicons-plus</pre></li>
+      <li>Ejecutar GNOME Tweaks y habilitar la extensión TopIcons Plus.</li>
+    </ul>
   <li>Reiniciar el equipo o ejecutar el servicio <em>(se iniciará automáticamente en el proceso de arranque)</em>:
     <pre>	service ogagent start</pre></li>
 </ul>
