@@ -22,6 +22,7 @@ define('OG_REST_CMD_CREATE_IMAGE', 'image/create');
 define('OG_REST_CMD_RESTORE_IMAGE', 'image/restore');
 define('OG_REST_CMD_SETUP', 'image/setup');
 define('OG_REST_CMD_CREATE_BASIC_IMAGE', 'image/create/basic');
+define('OG_REST_CMD_RESTORE_BASIC_IMAGE', 'image/restore/basic');
 
 define('OG_REST_PARAM_CLIENTS', 'clients');
 define('OG_REST_PARAM_ADDR', 'addr');
@@ -53,6 +54,8 @@ define('OG_REST_PARAM_CLEANUP', 'cleanup');
 define('OG_REST_PARAM_CACHE', 'cache');
 define('OG_REST_PARAM_CLEANUP_CACHE', 'cleanup_cache');
 define('OG_REST_PARAM_REMOVE_DST', 'remove_dst');
+define('OG_REST_PARAM_PATH', 'path');
+define('OG_REST_PARAM_METHOD', 'method');
 
 $conf_file = parse_ini_file(__DIR__ . '/../../etc/ogAdmRepo.cfg');
 define('OG_REST_API_TOKEN', 'Authorization: ' . $conf_file['ApiToken']);
@@ -269,6 +272,58 @@ function create_basic_image($string_ips, $params) {
 	);
 
 	common_request(OG_REST_CMD_CREATE_BASIC_IMAGE, POST, $data);
+}
+
+function restore_basic_image($string_ips, $params) {
+
+	preg_match_all('/(?<=\=)[^\r]*(?=\r)?/', $params, $matches);
+
+	$ips = explode(';',$string_ips);
+	$disk = $matches[0][0];
+	$part = $matches[0][1];
+	$image_id = $matches[0][2];
+	$name = $matches[0][3];
+	$repos = $matches[0][4];
+	$profile = $matches[0][5];
+
+	$path = $matches[0][6];
+	$method = $matches[0][7];
+	$sync = $matches[0][8]; // Syncronization method
+
+	$type = $matches[0][9];
+
+	$diff = $matches[0][10]; // Send the whole file if there are differences
+	$remove = $matches[0][11]; // Delete files at destination that are not at source
+	$compress = $matches[0][12]; // Compress before sending
+
+	$cleanup = $matches[0][13]; // Delete image before creating it
+	$cache = $matches[0][14]; // Copy image to cache
+	$cleanup_cache = $matches[0][15]; // Delete image from cache before copying
+	$remove_dst = $matches[0][16]; // Dont delete files in destination
+
+	$data = array(OG_REST_PARAM_CLIENTS => $ips,
+		OG_REST_PARAM_DISK => $disk,
+		OG_REST_PARAM_PART => $part,
+		OG_REST_PARAM_ID => $image_id,
+		OG_REST_PARAM_NAME => $name,
+		OG_REST_PARAM_REPOS => $repos,
+		OG_REST_PARAM_PROFILE => $profile,
+		OG_REST_PARAM_TYPE => $type,
+		OG_REST_PARAM_SYNC_PARAMS => array(
+			OG_REST_PARAM_PATH => $path,
+			OG_REST_PARAM_METHOD => $method,
+			OG_REST_PARAM_SYNC => $sync,
+			OG_REST_PARAM_DIFF => $diff,
+			OG_REST_PARAM_REMOVE => $remove,
+			OG_REST_PARAM_COMPRESS => $compress,
+			OG_REST_PARAM_CLEANUP => $cleanup,
+			OG_REST_PARAM_CACHE => $cache,
+			OG_REST_PARAM_CLEANUP_CACHE => $cleanup_cache,
+			OG_REST_PARAM_REMOVE_DST => $remove_dst,
+		)
+	);
+
+	common_request(OG_REST_CMD_RESTORE_BASIC_IMAGE, POST, $data);
 }
 
 function poweroff($string_ips) {
