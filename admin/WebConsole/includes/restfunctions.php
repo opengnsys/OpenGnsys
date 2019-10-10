@@ -24,6 +24,7 @@ define('OG_REST_CMD_SETUP', 'image/setup');
 define('OG_REST_CMD_CREATE_BASIC_IMAGE', 'image/create/basic');
 define('OG_REST_CMD_CREATE_INCREMENTAL_IMAGE', 'image/create/incremental');
 define('OG_REST_CMD_RESTORE_BASIC_IMAGE', 'image/restore/basic');
+define('OG_REST_CMD_RESTORE_INCREMENTAL_IMAGE', 'image/restore/incremental');
 
 define('OG_REST_PARAM_CLIENTS', 'clients');
 define('OG_REST_PARAM_ADDR', 'addr');
@@ -372,6 +373,58 @@ function restore_basic_image($string_ips, $params) {
 	);
 
 	common_request(OG_REST_CMD_RESTORE_BASIC_IMAGE, POST, $data);
+}
+
+function restore_incremental_image($string_ips, $params) {
+
+	preg_match_all('/(?<=\=)[^\r]*(?=\r)?/', $params, $matches);
+
+	$ips = explode(';',$string_ips);
+	$disk = $matches[0][0];
+	$part = $matches[0][1];
+	$image_id = $matches[0][2];
+	$name = $matches[0][3];
+	$repos = $matches[0][4];
+	$profile = $matches[0][5];
+	$diff_id = $matches[0][6];
+	$diff_name = $matches[0][7];
+	$path = $matches[0][8];
+	$method = $matches[0][9];
+	$sync = $matches[0][10];
+	$type = $matches[0][11];
+	$diff = $matches[0][12];
+	$remove = $matches[0][13];
+	$compress = $matches[0][14];
+	$cleanup = $matches[0][15];
+	$cache = $matches[0][16];
+	$cleanup_cache = $matches[0][17];
+	$remove_dst = $matches[0][18];
+
+	$data = array(OG_REST_PARAM_CLIENTS => $ips,
+		OG_REST_PARAM_DISK => $disk,
+		OG_REST_PARAM_PART => $part,
+		OG_REST_PARAM_ID => $image_id,
+		OG_REST_PARAM_NAME => $name,
+		OG_REST_PARAM_REPOS => $repos,
+		OG_REST_PARAM_PROFILE => $profile,
+		OG_REST_PARAM_TYPE => $type,
+		OG_REST_PARAM_SYNC_PARAMS => array(
+			OG_REST_PARAM_DIFF_ID => $diff_id,
+			OG_REST_PARAM_DIFF_NAME => $diff_name,
+			OG_REST_PARAM_PATH => $path,
+			OG_REST_PARAM_METHOD => $method,
+			OG_REST_PARAM_SYNC => $sync,
+			OG_REST_PARAM_DIFF => $diff,
+			OG_REST_PARAM_REMOVE => $remove,
+			OG_REST_PARAM_COMPRESS => $compress,
+			OG_REST_PARAM_CLEANUP => $cleanup,
+			OG_REST_PARAM_CACHE => $cache,
+			OG_REST_PARAM_CLEANUP_CACHE => $cleanup_cache,
+			OG_REST_PARAM_REMOVE_DST => $remove_dst,
+		)
+	);
+
+	common_request(OG_REST_CMD_RESTORE_INCREMENTAL_IMAGE, POST, $data);
 }
 
 function poweroff($string_ips) {
