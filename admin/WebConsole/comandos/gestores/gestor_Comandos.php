@@ -33,6 +33,7 @@ define('OG_CMD_ID_SESSION', 9);
 define('OG_CMD_ID_SETUP', 10);
 define('OG_CMD_ID_CREATE_BASIC_IMAGE', 12);
 define('OG_CMD_ID_RESTORE_BASIC_IMAGE', 13);
+define('OG_CMD_ID_CREATE_INCREMENTAL_IMAGE', 14);
 define('OG_CMD_ID_SENDMESSAGE', 16);
 
 // Recoge parametros de seguimiento
@@ -143,6 +144,9 @@ switch ($idcomando) {
 	case OG_CMD_ID_CREATE_BASIC_IMAGE:
 		create_basic_image($cadenaip, $atributos);
 		break;
+	case OG_CMD_ID_CREATE_INCREMENTAL_IMAGE:
+		create_incremental_image($cadenaip, $atributos);
+		break;
 	case OG_CMD_ID_RESTORE_BASIC_IMAGE:
 		restore_basic_image($cadenaip, $atributos);
 		break;
@@ -226,6 +230,7 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 			    $idcomando != OG_CMD_ID_SETUP &&
 			    $idcomando != OG_CMD_ID_SESSION &&
 			    $idcomando != OG_CMD_ID_CREATE_BASIC_IMAGE &&
+			    $idcomando != OG_CMD_ID_CREATE_INCREMENTAL_IMAGE &&
 			    $idcomando != OG_CMD_ID_RESTORE_BASIC_IMAGE &&
 			    $idcomando != OG_CMD_ID_POWEROFF &&
 			    $idcomando != OG_CMD_ID_HARDWARE &&

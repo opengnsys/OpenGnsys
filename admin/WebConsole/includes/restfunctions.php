@@ -22,6 +22,7 @@ define('OG_REST_CMD_CREATE_IMAGE', 'image/create');
 define('OG_REST_CMD_RESTORE_IMAGE', 'image/restore');
 define('OG_REST_CMD_SETUP', 'image/setup');
 define('OG_REST_CMD_CREATE_BASIC_IMAGE', 'image/create/basic');
+define('OG_REST_CMD_CREATE_INCREMENTAL_IMAGE', 'image/create/incremental');
 define('OG_REST_CMD_RESTORE_BASIC_IMAGE', 'image/restore/basic');
 
 define('OG_REST_PARAM_CLIENTS', 'clients');
@@ -55,6 +56,8 @@ define('OG_REST_PARAM_CACHE', 'cache');
 define('OG_REST_PARAM_CLEANUP_CACHE', 'cleanup_cache');
 define('OG_REST_PARAM_REMOVE_DST', 'remove_dst');
 define('OG_REST_PARAM_PATH', 'path');
+define('OG_REST_PARAM_DIFF_ID', 'diff_id');
+define('OG_REST_PARAM_DIFF_NAME', 'diff_name');
 define('OG_REST_PARAM_METHOD', 'method');
 
 $conf_file = parse_ini_file(__DIR__ . '/../../etc/ogAdmRepo.cfg');
@@ -272,6 +275,51 @@ function create_basic_image($string_ips, $params) {
 	);
 
 	common_request(OG_REST_CMD_CREATE_BASIC_IMAGE, POST, $data);
+}
+
+function create_incremental_image($string_ips, $params) {
+
+	preg_match_all('/(?<=\=)[^\r]*(?=\r)?/', $params, $matches);
+
+	$ips = explode(';',$string_ips);
+	$disk = $matches[0][0];
+	$part = $matches[0][1];
+	$id = $matches[0][2];
+	$name = $matches[0][3];
+	$repos = $matches[0][4];
+	$diff_id = $matches[0][5];
+	$diff_name = $matches[0][6];
+	$path = $matches[0][7];
+	$sync = $matches[0][8];
+	$diff = $matches[0][9];
+	$remove = $matches[0][10];
+	$compress = $matches[0][11];
+	$cleanup = $matches[0][12];
+	$cache = $matches[0][13];
+	$cleanup_cache = $matches[0][14];
+	$remove_dst = $matches[0][15];
+
+	$data = array(OG_REST_PARAM_CLIENTS => $ips,
+		OG_REST_PARAM_DISK => $disk,
+		OG_REST_PARAM_PART => $part,
+		OG_REST_PARAM_ID => $id,
+		OG_REST_PARAM_NAME => $name,
+		OG_REST_PARAM_REPOS => $repos,
+		OG_REST_PARAM_SYNC_PARAMS => array(
+			OG_REST_PARAM_SYNC => $sync,
+			OG_REST_PARAM_PATH => $path,
+			OG_REST_PARAM_DIFF => $diff,
+			OG_REST_PARAM_DIFF_ID => $diff_id,
+			OG_REST_PARAM_DIFF_NAME => $diff_name,
+			OG_REST_PARAM_REMOVE => $remove,
+			OG_REST_PARAM_COMPRESS => $compress,
+			OG_REST_PARAM_CLEANUP => $cleanup,
+			OG_REST_PARAM_CACHE => $cache,
+			OG_REST_PARAM_CLEANUP_CACHE => $cleanup_cache,
+			OG_REST_PARAM_REMOVE_DST => $remove_dst)
+	);
+
+	common_request(OG_REST_CMD_CREATE_INCREMENTAL_IMAGE, POST, $data);
 }
 
 function restore_basic_image($string_ips, $params) {
