@@ -4234,6 +4234,67 @@ static int og_cmd_restore_basic_image(json_t *element, struct og_msg_params *par
 	return 0;
 }
 
+static int og_cmd_restore_incremental_image(json_t *element, struct og_msg_params *params)
+{
+	char buf[4096] = {};
+	int err = 0, len;
+	const char *key;
+	json_t *value;
+	TRAMA *msg;
+
+	if (json_typeof(element) != JSON_OBJECT)
+		return -1;
+
+	json_object_foreach(element, key, value) {
+		if (!strcmp(key, "clients"))
+			err = og_json_parse_clients(value, params);
+		else if (!strcmp(key, "disk"))
+			err = og_json_parse_string(value, &params->disk);
+		else if (!strcmp(key, "partition"))
+			err = og_json_parse_string(value, &params->partition);
+		else if (!strcmp(key, "id"))
+			err = og_json_parse_string(value, &params->id);
+		else if (!strcmp(key, "name"))
+			err = og_json_parse_string(value, &params->name);
+		else if (!strcmp(key, "repository"))
+			err = og_json_parse_string(value, &params->repository);
+		else if (!strcmp(key, "profile"))
+			err = og_json_parse_string(value, &params->profile);
+		else if (!strcmp(key, "type"))
+			err = og_json_parse_string(value, &params->type);
+		else if (!strcmp(key, "sync_params"))
+			err = og_json_parse_sync_params(value, &(params->sync_setup));
+
+		if (err < 0)
+			break;
+	}
+
+	len = snprintf(buf, sizeof(buf),
+		       "nfn=RestaurarSoftIncremental\rdsk=%s\rpar=%s\ridi=%s\rnci=%s\r"
+			   "ipr=%s\rifs=%s\ridf=%s\rncf=%s\rrti=%s\rmet=%s\rmsy=%s\r"
+			   "tpt=%s\rwhl=%s\reli=%s\rcmp=%s\rbpi=%s\rcpc=%s\rbpc=%s\r"
+			   "nba=%s\r",
+		       params->disk, params->partition, params->id, params->name,
+			   params->repository, params->profile, params->sync_setup.diff_id,
+			   params->sync_setup.diff_name, params->sync_setup.path,
+			   params->sync_setup.method, params->sync_setup.sync, params->type,
+			   params->sync_setup.diff, params->sync_setup.remove,
+		       params->sync_setup.compress, params->sync_setup.cleanup,
+		       params->sync_setup.cache, params->sync_setup.cleanup_cache,
+		       params->sync_setup.remove_dst);
+
+	msg = og_msg_alloc(buf, len);
+	if (!msg)
+		return -1;
+
+	og_send_cmd((char **)params->ips_array, params->ips_array_len,
+		    CLIENTE_OCUPADO, msg);
+
+	og_msg_free(msg);
+
+	return 0;
+}
+
 static int og_client_method_not_found(struct og_client *cli)
 {
 	/* To meet RFC 7231, this function MUST generate an Allow header field
@@ -4495,6 +4556,16 @@ static int og_client_state_process_payload_rest(struct og_client *cli)
 			return og_client_bad_request(cli);
 		}
 		err = og_cmd_restore_basic_image(root, &params);
+	} else if (!strncmp(cmd, "image/restore/incremental",
+				strlen("image/restore/incremental"))) {
+		if (method != OG_METHOD_POST)
+			return og_client_method_not_found(cli);
+
+		if (!root) {
+			syslog(LOG_ERR, "command create with no payload\n");
+			return og_client_bad_request(cli);
+		}
+		err = og_cmd_restore_incremental_image(root, &params);
 	} else if (!strncmp(cmd, "image/restore", strlen("image/restore"))) {
 		if (method != OG_METHOD_POST)
 			return og_client_method_not_found(cli);
