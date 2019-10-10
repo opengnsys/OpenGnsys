@@ -354,10 +354,10 @@ function abrir_ventana(URL){
 					echo '<TD colspan=3>'.$pormul.'</TD>';
 				else {
 					echo '<td colspan="3">';
-					for ($i=9000; $i<9100; $i+=2) {
+					for ($i=9000; $i<9098; $i+=2) {
 						$pormulmetodos.="$i=$i".chr(13);
 					}
-					$pormulmetodos.="9100=9100";
+					$pormulmetodos.="9098=9098";
 					echo HTMLCTESELECT($pormulmetodos,"pormul","estilodesple","",$pormul,100).'</td>';
 				}
 			?>

@@ -32,7 +32,7 @@ if which ufw &>/dev/null; then
 	ufw allow 2008,2009,2011/tcp	# OpenGnsys services
 	ufw allow 6881:6999/udp		# BitTorrent
 	ufw allow 9000/tcp		# PHP-FPM
-	ufw allow 9000:9101/udp		# Multicast
+	ufw allow 9000:9099/udp		# Multicast
 	# Applying configuration.
 	ufw enable
 # FirewallD configuration.

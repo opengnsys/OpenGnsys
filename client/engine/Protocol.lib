@@ -399,7 +399,7 @@ fi
 ##### BEGIN SERVER SESSION #####
 # 2º param check: controlamos el primer componente comun de las sesiones de servidor y cliente: PORTBASE
 PORTBASE=${SESSION[0]}
-ogCheckStringInGroup ${SESSION[0]} "$(seq 9000 2 9100)" || ogRaiseError $OG_ERR_FORMAT "McastSession portbase ${SESSION[0]}" || PERROR=3 #return $?
+ogCheckStringInGroup ${SESSION[0]} "$(seq 9000 2 9098)" || ogRaiseError $OG_ERR_FORMAT "McastSession portbase ${SESSION[0]}" || PERROR=3 #return $?
 # 2º param check:  Controlamos el resto de componenentes de la sesion del servidor. 
 if [ $MODE == "server" ]
 then    
