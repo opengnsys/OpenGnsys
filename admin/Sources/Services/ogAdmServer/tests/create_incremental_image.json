@@ -1,0 +1,1 @@
+{"clients":["192.168.56.11"], "disk":"1", "partition":"1", "id":"3", "name":"basica1", "repository":"192.168.56.10", "sync_params":{"sync":"1", "path":"", "diff":"0", "diff_id":"4", "diff_name":"p2", "remove":"1", "compress":"0", "cleanup":"0", "cache":"0", "cleanup_cache":"0", "remove_dst":"0"}}
