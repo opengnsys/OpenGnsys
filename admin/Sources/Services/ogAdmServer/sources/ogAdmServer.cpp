@@ -3259,6 +3259,8 @@ struct og_sync_params {
 	const char	*cache;
 	const char	*cleanup_cache;
 	const char	*remove_dst;
+	const char	*diff_id;
+	const char	*diff_name;
 	const char	*path;
 	const char	*method;
 };
@@ -3334,6 +3336,10 @@ static int og_json_parse_sync_params(json_t *element, og_sync_params *params)
 			err = og_json_parse_string(value, &params->cleanup_cache);
 		else if (!strcmp(key, "remove_dst"))
 			err = og_json_parse_string(value, &params->remove_dst);
+		else if (!strcmp(key, "diff_id"))
+			err = og_json_parse_string(value, &params->diff_id);
+		else if (!strcmp(key, "diff_name"))
+			err = og_json_parse_string(value, &params->diff_name);
 		else if (!strcmp(key, "path"))
 			err = og_json_parse_string(value, &params->path);
 		else if (!strcmp(key, "method"))
@@ -4114,6 +4120,61 @@ static int og_cmd_create_basic_image(json_t *element, struct og_msg_params *para
 	return 0;
 }
 
+static int og_cmd_create_incremental_image(json_t *element, struct og_msg_params *params)
+{
+	char buf[4096] = {};
+	int err = 0, len;
+	const char *key;
+	json_t *value;
+	TRAMA *msg;
+
+	if (json_typeof(element) != JSON_OBJECT)
+		return -1;
+
+	json_object_foreach(element, key, value) {
+		if (!strcmp(key, "clients"))
+			err = og_json_parse_clients(value, params);
+		else if (!strcmp(key, "disk"))
+			err = og_json_parse_string(value, &params->disk);
+		else if (!strcmp(key, "partition"))
+			err = og_json_parse_string(value, &params->partition);
+		else if (!strcmp(key, "id"))
+			err = og_json_parse_string(value, &params->id);
+		else if (!strcmp(key, "name"))
+			err = og_json_parse_string(value, &params->name);
+		else if (!strcmp(key, "repository"))
+			err = og_json_parse_string(value, &params->repository);
+		else if (!strcmp(key, "sync_params"))
+			err = og_json_parse_sync_params(value, &(params->sync_setup));
+
+		if (err < 0)
+			break;
+	}
+
+	len = snprintf(buf, sizeof(buf),
+		       "nfn=CrearSoftIncremental\rdsk=%s\rpar=%s\ridi=%s\rnci=%s\r"
+		       "rti=%s\ripr=%s\ridf=%s\rncf=%s\rmsy=%s\rwhl=%s\reli=%s\rcmp=%s\r"
+		       "bpi=%s\rcpc=%s\rbpc=%s\rnba=%s\r",
+		       params->disk, params->partition, params->id, params->name,
+		       params->sync_setup.path, params->repository, params->sync_setup.diff_id,
+		       params->sync_setup.diff_name, params->sync_setup.sync,
+		       params->sync_setup.diff, params->sync_setup.remove_dst,
+		       params->sync_setup.compress, params->sync_setup.cleanup,
+		       params->sync_setup.cache, params->sync_setup.cleanup_cache,
+		       params->sync_setup.remove_dst);
+
+	msg = og_msg_alloc(buf, len);
+	if (!msg)
+		return -1;
+
+	og_send_cmd((char **)params->ips_array, params->ips_array_len,
+		    CLIENTE_OCUPADO, msg);
+
+	og_msg_free(msg);
+
+	return 0;
+}
+
 static int og_cmd_restore_basic_image(json_t *element, struct og_msg_params *params)
 {
 	char buf[4096] = {};
@@ -4405,6 +4466,16 @@ static int og_client_state_process_payload_rest(struct og_client *cli)
 			return og_client_bad_request(cli);
 		}
 		err = og_cmd_create_basic_image(root, &params);
+	} else if (!strncmp(cmd, "image/create/incremental",
+			    strlen("image/create/incremental"))) {
+		if (method != OG_METHOD_POST)
+			return og_client_method_not_found(cli);
+
+		if (!root) {
+			syslog(LOG_ERR, "command create with no payload\n");
+			return og_client_bad_request(cli);
+		}
+		err = og_cmd_create_incremental_image(root, &params);
 	} else if (!strncmp(cmd, "image/create", strlen("image/create"))) {
 		if (method != OG_METHOD_POST)
 			return og_client_method_not_found(cli);
