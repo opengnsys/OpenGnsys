@@ -1,30 +1,59 @@
 ##NO-TOCAR-ESTA-LINEA Sin-designar
-set default="0"
-set timeout="30"
+#
+# Arranque por defecto en OpenGnsys
+# Busca cargadores existentes por orden de prioridad y
+#    muestra menú con las opciones
+set default=0
 
 menuentry 'ogLive' {
-set ISODIR=ogLive
-linux (tftp)/$ISODIR/ogvmlinuz ro boot=oginit quiet splash vga=788 irqpoll acpi=on og2nd=sqfs ogprotocol=smb ogactiveadmin=false ogdebug=false ogtmpfs=15 oglivedir=$ISODIR INFOHOST
-initrd (tftp)/$ISODIR/oginitrd.img
-boot
-}
-menuentry 'ReFind' {
-    root='hd0,gpt1'
-    chainloader /EFI/refind/shimx64.efi
+    set ISODIR=ogLive
+    linux (tftp)/$ISODIR/ogvmlinuz ro boot=oginit quiet splash vga=788 irqpoll acpi=on og2nd=sqfs ogprotocol=smb ogactiveadmin=false ogdebug=false ogtmpfs=15 oglivedir=$ISODIR INFOHOST
+    initrd (tftp)/$ISODIR/oginitrd.img
     boot
 }
-menuentry 'Part-01-02' {
-    root='hd0,gpt1'
-    chainloader /EFI/Part-01-02/Boot/ogloader.efi
-    boot
+
+# Compruebo si existen distintos cargadores.
+echo "Searching rEFInd"
+search --file --set rootRefind /EFI/refind/shimx64.efi.signed
+if [ "$rootRefind" != "" ]; then
+    menuentry "rEFInd" {
+        root="$rootRefind"
+        chainloader /EFI/refind/shimx64.efi.signed
 }
-menuentry 'Windows' {
-    root='hd0,gpt1'
-    chainloader /EFI/Microsoft/Boot/bootmgfw.efi
-    boot
-}
-menuentry 'Ubuntu' {
-    root='hd0,gpt1'
-    chainloader /EFI/ubuntu/grubx64.efi
-    boot
-}
+fi
+
+echo "Searching Part-01-02"
+search --file --set rootP2 /EFI/Part-01-02/Boot/ogloader.efi
+if [ "$rootP2" != "" ]; then
+    menuentry "Part-01-02" {
+        root="$rootP2"
+        chainloader /EFI/Part-01-02/Boot/ogloader.efi
+    }
+fi
+
+echo "Searching Part-01-03"
+search --file --set rootP3 /EFI/Part-01-03/Boot/ogloader.efi
+if [ "$rootP3" != "" ]; then
+    menuentry "Part-01-03" {
+        root="$rootP3"
+        chainloader /EFI/Part-01-03/Boot/ogloader.efi
+    }
+fi
+
+echo "Searching Microsoft"
+search --file --set rootMS /EFI/Microsoft/Boot/bootmgfw.efi
+if [ "$rootMS" != "" ]; then
+    menuentry "Microsoft" {
+        root="$rootMS"
+        chainloader /EFI/Microsoft/Boot/bootmgfw.efi
+    }
+fi
+
+echo "Searching Ubuntu"
+search --file --set rootUb /EFI/ubuntu/grubx64.efi
+if [ "$rootUb" != "" ]; then
+    menuentry "Ubuntu"
+        root="$rootUb"
+        chainloader /EFI/ubuntu/grubx64.efi
+    }
+fi

@@ -1,5 +1,5 @@
-# Busca cargadores existentes por orden de prioridad e
-#    inicia el primero que encuentra.
+# Busca cargadores existentes por orden de prioridad y
+#    muestra menú con las opciones.
 # Si no existe ningún cargador de arranque muestre mensaje de error.
 set timeout=5
 
@@ -56,7 +56,7 @@ if [ "$rootUb" != "" ]; then
 fi
 
 
-# Si no hay ningún sistam operativo muestro mensaje.
+# Si no hay ningún sistema operativo muestro mensaje.
 if [ $detectado == 'no' ]; then
     menuentry "OpenGnsys no ha detectado ningún sistema operativo" {
         # para evitar mensajes de error.
