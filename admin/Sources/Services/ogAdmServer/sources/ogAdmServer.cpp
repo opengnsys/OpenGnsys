@@ -3894,9 +3894,11 @@ static int og_cmd_hardware(json_t *element, struct og_msg_params *params)
 
 static int og_cmd_software(json_t *element, struct og_msg_params *params)
 {
+	char buf[4096] = {};
+	int err = 0, len;
 	const char *key;
 	json_t *value;
-	int err = 0;
+	TRAMA *msg;
 
 	if (json_typeof(element) != JSON_OBJECT)
 		return -1;
@@ -3904,13 +3906,29 @@ static int og_cmd_software(json_t *element, struct og_msg_params *params)
 	json_object_foreach(element, key, value) {
 		if (!strcmp(key, "clients"))
 			err = og_json_parse_clients(value, params);
+		else if (!strcmp(key, "disk"))
+			err = og_json_parse_string(value, &params->disk);
+		else if (!strcmp(key, "partition"))
+			err = og_json_parse_string(value, &params->partition);
 
 		if (err < 0)
 			break;
 	}
 
-	return og_cmd_legacy_send(params, "InventarioSoftware",
-				  CLIENTE_OCUPADO);
+	len = snprintf(buf, sizeof(buf),
+		       "nfn=InventarioSoftware\rdsk=%s\rpar=%s\r",
+		       params->disk, params->partition);
+
+	msg = og_msg_alloc(buf, len);
+	if (!msg)
+		return -1;
+
+	og_send_cmd((char **)params->ips_array, params->ips_array_len,
+		    CLIENTE_OCUPADO, msg);
+
+	og_msg_free(msg);
+
+	return 0;
 }
 
 static int og_cmd_create_image(json_t *element, struct og_msg_params *params)

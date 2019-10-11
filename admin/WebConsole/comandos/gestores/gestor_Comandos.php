@@ -170,7 +170,7 @@ switch ($idcomando) {
 		hardware($cadenaip);
 		break;
 	case OG_CMD_ID_SOFTWARE:
-		software($cadenaip);
+		software($cadenaip, $atributos);
 }
 
 if($ambito==0){ // Ambito restringido a un subconjuto de ordenadores con formato (idordenador1,idordenador2,etc)

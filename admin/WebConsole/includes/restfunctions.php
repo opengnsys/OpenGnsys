@@ -472,11 +472,17 @@ function hardware($string_ips) {
 	common_request(OG_REST_CMD_HARDWARE, POST, $data);
 }
 
-function software($string_ips) {
+function software($string_ips, $params) {
+
+	preg_match_all('/(?<=\=)(.*?)(?=\r)/', $params, $matches);
 
 	$ips = explode(';',$string_ips);
+	$disk = $matches[0][0];
+	$part = $matches[0][1];
 
-	$data = array(OG_REST_PARAM_CLIENTS => $ips);
+	$data = array(OG_REST_PARAM_CLIENTS => $ips,
+		OG_REST_PARAM_DISK => $disk,
+		OG_REST_PARAM_PART => $part);
 
 	common_request(OG_REST_CMD_SOFTWARE, POST, $data);
 }
