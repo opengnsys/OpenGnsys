@@ -61,8 +61,8 @@ define('OG_REST_PARAM_DIFF_ID', 'diff_id');
 define('OG_REST_PARAM_DIFF_NAME', 'diff_name');
 define('OG_REST_PARAM_METHOD', 'method');
 
-$conf_file = parse_ini_file(__DIR__ . '/../../etc/ogAdmRepo.cfg');
-define('OG_REST_API_TOKEN', 'Authorization: ' . $conf_file['ApiToken']);
+$conf_file = parse_ini_file(__DIR__ . '/../../etc/ogAdmServer.cfg');
+define('OG_REST_API_TOKEN', 'Authorization: ' . $conf_file['APITOKEN']);
 
 function common_request($command, $type, $data = null) {
 
