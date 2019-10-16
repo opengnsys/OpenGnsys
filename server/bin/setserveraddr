@@ -115,13 +115,7 @@ if [ -n "$SERVERIP" ]; then
 	if [ $CHANGE == 1 ]; then
 		# Restart OpenGnsys services.
 		/etc/init.d/opengnsys restart
-		# If Repository is active, generating a new API token.
 		source $DEFAULTFILE
-		if [ "$RUN_OGADMREPO" == "yes" ]; then
-			REPOKEY=$(php -r 'echo md5(uniqid(rand(), true));')
-			sed -i -e "s/ApiToken=.*/ApiToken=$REPOKEY/" $OPENGNSYS/etc/ogAdmRepo.cfg
-			sed -i -e "s/APITOKEN=.*/APITOKEN=$REPOKEY/" $OPENGNSYS/etc/ogAdmServer.cfg
-		fi
 		# If OpenGnsys Server is active, updating the database.
 		if [ "$RUN_OGADMSERVER" == "yes" ]; then
 			source $OPENGNSYS/etc/ogAdmServer.cfg
@@ -136,14 +130,6 @@ EOT
 				 "UPDATE entornos
 				     SET ipserveradm='$SERVERIP'
 				   WHERE identorno=1"
-			# If OpenGnsys Repository is active, updating IP address and API token.
-			if [ "$RUN_OGADMREPO" == "yes" ]; then
-				mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -e \
-					 "UPDATE repositorios
-					     SET ip='$SERVERIP', apikey='$REPOKEY'
-					   WHERE ip='$OLDSERVERIP'"
-				unset REPOKEY
-			fi
 			# Updating all menu URLs.
 			mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -e \
 				 "UPDATE menus
@@ -162,7 +148,7 @@ Manual tasks:
 - Check PXE files.
 - Log-in as Web Console user: 
   - Check menu URLs.
-${REPOKEY:+"  - Update repository API token"}
+- Note: Run "settoken" script to update authentication tokens.
 EOT
 	else
 		# Showing message if nothing changes.

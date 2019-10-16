@@ -301,7 +301,6 @@ function importSqlFile()
         local tmpfile=$(mktemp)
         local mycnf=/tmp/.my.cnf.$$
         local status
-	local APIKEY=$(php -r 'echo md5(uniqid(rand(), true));')
 
         if [ ! -r $sqlfile ]; then
                 errorAndLog "${FUNCNAME}(): Unable to read $sqlfile!!"
@@ -311,8 +310,7 @@ function importSqlFile()
         echoAndLog "${FUNCNAME}(): importing SQL file to ${database}..."
         chmod 600 $tmpfile
         sed -e "s/SERVERIP/$SERVERIP/g" -e "s/DBUSER/$OPENGNSYS_DB_USER/g" \
-            -e "s/DBPASSWORD/$OPENGNSYS_DB_PASSWD/g" \
-            -e "s/APIKEY/$APIKEY/g" -e "s/REPOKEY/$REPOKEY/g" $sqlfile > $tmpfile
+            -e "s/DBPASSWORD/$OPENGNSYS_DB_PASSWD/g" $sqlfile > $tmpfile
 	# Componer fichero con credenciales de conexión.  
 	touch $mycnf
 	chmod 600 $mycnf
@@ -849,7 +847,6 @@ function updateDatabase()
 	fi
 
 	popd >/dev/null
-	REPOKEY=$(php -r 'echo md5(uniqid(rand(), true));')
 	if [ -n "$FILES" ]; then
 		for file in $FILES; do
 			importSqlFile $OPENGNSYS_DBUSER $OPENGNSYS_DBPASSWORD $OPENGNSYS_DATABASE $DBDIR/$file
@@ -990,10 +987,8 @@ function compileServices()
 		hayErrores=1
 	fi
 	popd
-	# Parar antiguo servicio de repositorio y añadir clave de acceso REST en su fichero de configuración.
+	# Parar antiguo servicio de repositorio.
 	pgrep ogAdmRepo > /dev/null && service="ogAdmRepo" $STOPSERVICE
-	sed -i -n -e "/^ApiToken=/!p" -e "$ a\ApiToken=$REPOKEY" $INSTALL_TARGET/etc/ogAdmRepo.cfg
-	sed -i -n -e "/^APITOKEN=/!p" -e "$ a\APITOKEN=$REPOKEY" $INSTALL_TARGET/etc/ogAdmServer.cfg
 	# Compilar OpenGnsys Agent
 	echoAndLog "${FUNCNAME}(): Recompiling OpenGnsys Server Agent"
 	pushd $WORKDIR/opengnsys/admin/Sources/Services/ogAdmAgent
@@ -1146,7 +1141,7 @@ function updateSummary()
 	fi
 	echoAndLog "Warnings:"
 	echoAndLog " - You must to clear web browser cache before loading OpenGnsys page"
-	echoAndLog " - Generated new key to access Repository REST API (file ogAdmRepo.cfg)"
+	echoAndLog " - Run \"settoken\" script to update authentication tokens"
 	if [ -n "$INSTALLEDOGLIVE" ]; then
 		echoAndLog " - Installed new ogLive Client: $INSTALLEDOGLIVE"
 	fi

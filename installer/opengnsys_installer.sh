@@ -692,9 +692,6 @@ function mysqlImportSqlFileToDb()
 	local i=0
 	local dev=""
 	local status
-	# Claves aleatorias para acceso a las APIs REST.
-	local OPENGNSYS_APIKEY=$(php -r 'echo md5(uniqid(rand(), true));')
-	OPENGNSYS_REPOKEY=$(php -r 'echo md5(uniqid(rand(), true));')
 
 	if [ ! -f $sqlfile ]; then
 		errorAndLog "${FUNCNAME}(): Unable to locate $sqlfile!!"
@@ -708,8 +705,6 @@ function mysqlImportSqlFileToDb()
 			sed -e "s/SERVERIP/${SERVERIP[i]}/g" \
 			    -e "s/DBUSER/$OPENGNSYS_DB_USER/g" \
 			    -e "s/DBPASSWORD/$OPENGNSYS_DB_PASSWD/g" \
-			    -e "s/APIKEY/$OPENGNSYS_APIKEY/g" \
-			    -e "s/REPOKEY/$OPENGNSYS_REPOKEY/g" \
 				$sqlfile > $tmpfile
 		fi
 		let i++
@@ -1494,10 +1489,8 @@ function openGnsysConfigure()
 			    -e "s/DBUSER/$OPENGNSYS_DB_USER/g" \
 			    -e "s/DBPASSWORD/$OPENGNSYS_DB_PASSWD/g" \
 			    -e "s/DATABASE/$OPENGNSYS_DATABASE/g" \
-			    -e "s/REPOKEY/$OPENGNSYS_REPOKEY/g" \
 				$WORKDIR/opengnsys/admin/Sources/Services/ogAdmServer/ogAdmServer.cfg > $INSTALL_TARGET/etc/ogAdmServer-$dev.cfg
 			sed -e "s/SERVERIP/${SERVERIP[i]}/g" \
-			    -e "s/REPOKEY/$OPENGNSYS_REPOKEY/g" \
 				$WORKDIR/opengnsys/repoman/etc/ogAdmRepo.cfg.tmpl > $INSTALL_TARGET/etc/ogAdmRepo-$dev.cfg
 			sed -e "s/SERVERIP/${SERVERIP[i]}/g" \
 			    -e "s/DBUSER/$OPENGNSYS_DB_USER/g" \
@@ -1546,9 +1539,16 @@ EOT
 		$DISABLESERVICE
 	fi
 
-	echoAndLog "${FUNCNAME}(): Starting OpenGnsys services."
+	# Actualizar tokens de autenticación e iniciar los servicios.
 	service="opengnsys"
-	$ENABLESERVICE; $STARTSERVICE
+	$ENABLESERVICE
+	if [ -x $INSTALL_TARGET/bin/settoken ]; then
+		echoAndLog "${FUNCNAME}(): Setting authentication tokens and starting OpenGnsys services."
+		$INSTALL_TARGET/bin/settoken -f
+	else
+		echoAndLog "${FUNCNAME}(): Starting OpenGnsys services."
+		$STARTSERVICE
+	fi
 }
 
 
@@ -1582,7 +1582,7 @@ function installationSummary()
 	echoAndLog "Repository directory:             $INSTALL_TARGET/images"
 	echoAndLog "DHCP configuration directory:     $DHCPCFGDIR"
 	echoAndLog "TFTP configuration directory:     $TFTPCFGDIR"
-	echoAndLog "Installed ogLive client(s):       $(oglivecli list | awk '{print $2}')"
+	echoAndLog "Installed ogLive client:          $(oglivecli list | awk '{print $2}')"
 	echoAndLog "Samba configuration directory:    $SAMBACFGDIR"
 	echoAndLog "Web Console URL:                  $OPENGNSYS_CONSOLEURL"
 	echoAndLog "Web Console access data:          entered by the user"

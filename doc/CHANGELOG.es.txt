@@ -50,6 +50,7 @@ Tickets resueltos en módulo OpenGnsys Server:
 #899	Eliminar código obsoleto en ogAdmLib
 #900	Fichero de configuración unificado (duplicado de #140)
 #915	API REST para ogAdmServer
+#925	Script para generar API tokens de servicios
 #929	Autenticación de clave pública entre los ogLive
 
 Tickets resueltos en módulo OpenGnsys Web Admin Console:

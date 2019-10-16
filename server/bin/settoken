@@ -50,14 +50,14 @@ if [ "$SERVER" ]; then
         [ "${ANSWER,,}" != "y" ] && raiseError cancel "API tokens not updated"
     fi
     APIKEY=$(php -r 'echo md5(uniqid(rand(), true));')
-    sed -i "s/^APITOKEN=.*/APITOKEN=$APIKEY/" $SERVERCFG || raiseError access "Cannot update server file"
+    sed -i -n -e "/^APITOKEN=/!p" -e "$ a\APITOKEN=$APIKEY" $SERVERCFG || raiseError access "Cannot update server file"
 fi
 
 # Update repository token.
 if [ "$REPO" ]; then
     [ -w $REPOCFG ] || raiseError access "Repository configuration file"
     APIKEY=$(php -r 'echo md5(uniqid(rand(), true));')
-    sed -i "s/^ApiToken=.*/ApiToken=$APIKEY/" $REPOCFG || raiseError access "Cannot update repository file"
+    sed -i -n -e "/^ApiToken=/!p" -e "$ a\ApiToken=$APIKEY" $REPOCFG || raiseError access "Cannot update repository file"
     # If database is local, update it.
     source $SERVERCFG
     source $REPOCFG
@@ -73,6 +73,8 @@ host=$datasource
 EOT
         mysql --defaults-extra-file="$MYCNF" --default-character-set=utf8 -D "$CATALOG" -e \
             "UPDATE repositorios SET apikey='$APIKEY' WHERE ip='$IPlocal';" || raiseError access  "Database error"
+    else
+        echo "Please, don't forget to update the authentication token for this repository on the web server (check the file ogAdmRepo.cfg)."
     fi
 fi
 
