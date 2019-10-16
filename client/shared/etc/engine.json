@@ -366,6 +366,11 @@
           "clonable": true
         },
         {
+          "id": "27",
+          "type": "HNTFS-WINRE",
+          "clonable": true
+        },
+        {
           "id": "82",
           "type": "LINUX-SWAP",
           "clonable": false

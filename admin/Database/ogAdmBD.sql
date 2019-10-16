@@ -1031,6 +1031,7 @@ INSERT INTO `tipospar` (`codpar`, `tipopar`, `clonable`) VALUES
 (CONV('16',16,10), 'HFAT16', 1),
 (CONV('17',16,10), 'HNTFS', 1),
 (CONV('1B',16,10), 'HFAT32', 1),
+(CONV('27',16,10), 'HNTFS-WINRE', 1),
 (CONV('82',16,10), 'LINUX-SWAP', 0),
 (CONV('83',16,10), 'LINUX', 1),
 (CONV('8E',16,10), 'LINUX-LVM', 1),
