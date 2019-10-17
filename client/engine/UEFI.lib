@@ -129,14 +129,14 @@ BOOTLABEL=$(printf "Part-%02d-%02d" $1 $2)
 OSVERSION=$(ogGetOsVersion $1 $2)
 case $OSVERSION in
     *Windows\ 10*)
-        for f in $EFIDIR/EFI/{$BOOTLABEL,Microsoft}/Boot/bootmgfw.efi; do
+        for f in $EFIDIR/EFI/{Microsoft,$BOOTLABEL}/Boot/bootmgfw.efi; do
             [ -r $f ] && LOADER=$f
         done
         [ -n "$LOADER" ] || ogRaiseError $OG_ERR_NOTOS "$1 $2 ($OSVERSION, EFI)" || return $?
         # Si existe el directorio Boot lo borramos
-        [ -d $MNTDIR/Boot ] && rm -rf $MNTDIR/Boot
+        [ -d $MNTDIR/ogBoot ] && rm -rf $MNTDIR/ogBoot
         DIRLOADER=$(realpath "${LOADER%/*}/..")
-        cp -r ${DIRLOADER}/Boot $MNTDIR
+        cp -r ${DIRLOADER}/Boot $MNTDIR/ogBoot
         ;;
 esac
 }
@@ -413,13 +413,16 @@ OSVERSION=$(ogGetOsVersion $1 $2)
 case $OSVERSION in
     *Windows\ 10*)
         BOOTLABEL=$(printf "Part-%02d-%02d" $1 $2)
-        LOADER=$(ogGetPath $MNTDIR/Boot/bootmgfw.efi)
+        LOADER=$(ogGetPath $MNTDIR/ogBoot/bootmgfw.efi)
         [ -n "$LOADER" ] || ogRaiseError $OG_ERR_NOTOS "$1 $2 ($OSVERSION, EFI)" || return $?
-        [ -r $EFIDIR/$BOOTLABEL ] && rm -rf $EFIDIR/$BOOTLABEL
+        [ -r $EFIDIR/EFI/$BOOTLABEL ] && rm -rf $EFIDIR/EFI/$BOOTLABEL
         mkdir -p $EFIDIR/EFI/$BOOTLABEL
-        cp -r "${LOADER%/*}" $EFIDIR/EFI/$BOOTLABEL
+        cp -r "${LOADER%/*}" $EFIDIR/EFI/$BOOTLABEL/Boot
         # Nombre OpenGnsys para cargador
         cp $LOADER $EFIDIR/EFI/$BOOTLABEL/Boot/ogloader.efi
+
+        # Si existe subcarpeta Microsoft en la partición EFI la renombramos
+        [ "$(ogGetPath $EFIDIR/EFI/Microsoft)" == "" ] || mv $EFIDIR/EFI/{Microsoft,Microsoft.backup.og}
         ;; 
 esac
 }
