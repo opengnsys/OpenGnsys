@@ -5,7 +5,7 @@ Preparar entorno virtual de desarrollo para OpenGnsys
 
 Ficheros de configuración disponibles:
 
- - Vagrantfile-prod-vbox   Vagrantfile para OpenGnsys estable con proveedor VirtualBox.
+ - Vagrantfile-prod-vbox   Vagrantfile para OpenGnsys última versión estable con proveedor VirtualBox.
  - Vagrantfile-devel-vbox  Vagrantfile para OpenGnsys en desarrollo con proveedor VirtualBox.
  - Vagrantfile-boottools-vbox  Vagrantfile para preparar el entorno de generación del cliente ogLive (recomendado solo para desarrolladores experimentados).
  - Vagrantfile-browser-vbox    Vagrantfile para preparar el entorno de desarrollo del Browser del cliente (recomendado solo para miembros del grupo de desarrollo).
@@ -14,15 +14,15 @@ Ficheros de configuración disponibles:
 
 Requisitos previos.
 
- - Instalar Oracle VM VirtualBox 5.x con su Extension Pack.
- - Instalar la última versión oficial de Vagrant (no usar la incluida en Ubuntu 14.04).
+ - Instalar Oracle VM VirtualBox con su Extension Pack.
+ - Instalar la última versión oficial de Vagrant.
 
 
 El entorno de trabajo de OpenGnsys.
 
  - ogAdministrator: MV para servidor OpenGnsys basada en Ubuntu 16.04 y 2º disco para repositorio.
  - pc11: MV cliente mlodelo con Ubuntu 16.04 instalado.
- - pc12 - ogclientN: MV clientes para restaurar con disco vacío.
+ - pc12 - pcX: MV clientes para restaurar con disco vacío.
 
 
 Ejecutar el entorno virtual (Vagrantfile-prod-vbox y Vagrantfile-devel-vbox).
