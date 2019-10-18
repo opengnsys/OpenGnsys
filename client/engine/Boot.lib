@@ -2771,24 +2771,29 @@ else
     # Configuración para sistemas restaurados con OpenGnsys
     for DIR in $(ls -d /mnt/sda1/EFI/Part-*-* 2>/dev/null); do
         echo "menuentry \"${DIR##*/}\" {" >> $CFGFILE
-        echo "    loader /EFI/${DIR##*/}/Boot/ogloader.efi" >> $CFGFILE
-        [ -f $DIR/Boot/bootmgfw.efi ] && echo "    icon /EFI/refind/icons/os_win8.png" >> $CFGFILE
-        [ -f $DIR/Boot/grubx64.efi ] && echo "    icon /EFI/refind/icons/os_linux.png" >> $CFGFILE
+        if [ -f $DIR/Boot/grubx64.efi ]; then
+            echo "    loader /EFI/${DIR##*/}/Boot/grubx64.efi" >> $CFGFILE
+            echo "    icon /EFI/refind/icons/os_linux.png" >> $CFGFILE
+        else
+            echo "    loader /EFI/${DIR##*/}/Boot/ogloader.efi" >> $CFGFILE
+            [ -f $DIR/Boot/bootmgfw.efi ] && echo "    icon /EFI/refind/icons/os_win8.png" >> $CFGFILE
+        fi
         echo "}" >> $CFGFILE
     done
-    # Configuración ogLive
-    # Comantamos temporalmente: Con la versión nueva de refind falla
-    #if [ "$OGLIVE" != "" ]; then
-    #    echo "menuentry \"OpenGnsys Live\" {" >> $CFGFILE
-    #    echo "    volume CACHE" >> $CFGFILE
-    #    echo "    ostype Linux" >> $CFGFILE
-    #    echo "    loader /boot/$(basename ${OGLIVE%/*})/ogvmlinuz" >> $CFGFILE
-    #    echo "    initrd /boot/$(basename ${OGLIVE%/*})/oginitrd.img" >> $CFGFILE
-    #    echo "    options \"$CMDLINE\"" >> $CFGFILE
-    #    echo "}" >> $CFGFILE
+    # Configuración ogLive si secureboot no está activado
+    if ! dmesg|grep secureboot.*enabled &>/dev/null; then
+        if [ "$OGLIVE" != "" ]; then
+            echo "menuentry \"OpenGnsys Live\" {" >> $CFGFILE
+            echo "    volume CACHE" >> $CFGFILE
+            echo "    ostype Linux" >> $CFGFILE
+            echo "    loader /boot/$(basename ${OGLIVE%/*})/ogvmlinuz" >> $CFGFILE
+            echo "    initrd /boot/$(basename ${OGLIVE%/*})/oginitrd.img" >> $CFGFILE
+            echo "    options \"$CMDLINE\"" >> $CFGFILE
+            echo "}" >> $CFGFILE
 
-    #    # Ponemos ogLive como la entrada por defecto
-    #    sed -i '1 i\default_selection "OpenGnsys Live"' $CFGFILE
-    #fi
+            # Ponemos ogLive como la entrada por defecto
+            sed -i '1 i\default_selection "OpenGnsys Live"' $CFGFILE
+        fi
+    fi
 fi
 }
