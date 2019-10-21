@@ -4,9 +4,9 @@
 
 # Nuevos tipos de particiones.
 INSERT INTO tipospar (codpar, tipopar, clonable) VALUES
-        (CONV('27',16,10), 'HNTFS-WINRE', 1)
-        ON DUPLICATE KEY UPDATE
-                codpar=VALUES(codpar), tipopar=VALUES(tipopar), clonable=VALUES(clonable);
+	(CONV('27',16,10), 'HNTFS-WINRE', 1)
+	ON DUPLICATE KEY UPDATE
+		codpar=VALUES(codpar), tipopar=VALUES(tipopar), clonable=VALUES(clonable);
 
 # Añadir campo para incluir PC de profesor de aula (ticket #816).
 ALTER TABLE aulas
@@ -17,3 +17,10 @@ ALTER TABLE repositorios
 	DROP passguor,
 	DROP puertorepo;
 
+# Cambio del nombre de las plantillas PXE para compatibilidad con UEFI.
+UPDATE ordenadores SET arranque='10' WHERE arranque='01';
+
+# Actualizar gestores de los asistentes (ticket #915).
+UPDATE asistentes
+	SET gestor = REPLACE(gestor, '/asistentes/', '/comandos/')
+	WHERE gestor LIKE '../asistentes/%';
