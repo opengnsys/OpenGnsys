@@ -890,9 +890,9 @@ EVAL=$?
 if ogIsEfiActive; then
     mv ${EFISECONDSTAGE}/EFI/$EFISUBDIR/EFI/BOOT/* ${EFISECONDSTAGE}/EFI/$EFISUBDIR/Boot
     rm -rf ${EFISECONDSTAGE}/EFI/$EFISUBDIR/EFI
-    cp /usr/lib/shim/shimx64.efi.signed ${EFISECONDSTAGE}/EFI/$EFISUBDIR/Boot
+    cp /usr/lib/shim/shimx64.efi.signed ${EFISECONDSTAGE}/EFI/$EFISUBDIR/Boot/shimx64.efi
     # Nombre OpenGnsys para cargador
-    cp ${EFISECONDSTAGE}/EFI/$EFISUBDIR/Boot/{shimx64.efi.signed,ogloader.efi}
+    cp ${EFISECONDSTAGE}/EFI/$EFISUBDIR/Boot/{grubx64.efi,ogloader.efi}
 fi 
 return $EVAL
 
@@ -1028,7 +1028,7 @@ if ogIsEfiActive; then
     rm -rf ${EFISECONDSTAGE}/EFI/$EFISUBDIR/EFI
     cp /usr/lib/shim/shimx64.efi.signed ${EFISECONDSTAGE}/EFI/$EFISUBDIR/Boot/shimx64.efi
     # Nombre OpenGnsys para cargador
-    cp ${EFISECONDSTAGE}/EFI/$EFISUBDIR/Boot/{shimx64.efi,ogloader.efi}
+    cp ${EFISECONDSTAGE}/EFI/$EFISUBDIR/Boot/{grubx64.efi,ogloader.efi}
 fi
 
 return $EVAL
@@ -2771,13 +2771,9 @@ else
     # Configuración para sistemas restaurados con OpenGnsys
     for DIR in $(ls -d /mnt/sda1/EFI/Part-*-* 2>/dev/null); do
         echo "menuentry \"${DIR##*/}\" {" >> $CFGFILE
-        if [ -f $DIR/Boot/grubx64.efi ]; then
-            echo "    loader /EFI/${DIR##*/}/Boot/grubx64.efi" >> $CFGFILE
-            echo "    icon /EFI/refind/icons/os_linux.png" >> $CFGFILE
-        else
-            echo "    loader /EFI/${DIR##*/}/Boot/ogloader.efi" >> $CFGFILE
-            [ -f $DIR/Boot/bootmgfw.efi ] && echo "    icon /EFI/refind/icons/os_win8.png" >> $CFGFILE
-        fi
+        echo "    loader /EFI/${DIR##*/}/Boot/ogloader.efi" >> $CFGFILE
+        [ -f $DIR/Boot/bootmgfw.efi ] && echo "    icon /EFI/refind/icons/os_win8.png" >> $CFGFILE
+        [ -f $DIR/Boot/grubx64.efi ] && echo "    icon /EFI/refind/icons/os_linux.png" >> $CFGFILE
         echo "}" >> $CFGFILE
     done
     # Configuración ogLive si secureboot no está activado
