@@ -1,0 +1,8 @@
+##NO-TOCAR-ESTA-LINEA 1hd-3partition
+timeout 1
+title FirstDisk-ThirdPartition
+root (hd0,2)
+chainloader (hd0,2)+1
+boot
+
+

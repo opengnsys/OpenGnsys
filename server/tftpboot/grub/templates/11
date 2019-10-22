@@ -1,4 +1,4 @@
-##NO-TOCAR-ESTA-LINEA 1hd-1os
-root='hd0,gpt1'
-chainloader /EFI/Part-01-02/Boot/ogloader.efi
+##NO-TOCAR-ESTA-LINEA 1hd-1partition
+search --file --set root /EFI/Part-01-01/Boot/ogloader.efi
+chainloader /EFI/Part-01-01/Boot/ogloader.efi
 boot

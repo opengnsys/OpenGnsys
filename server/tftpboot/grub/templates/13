@@ -1,0 +1,4 @@
+##NO-TOCAR-ESTA-LINEA 1hd-3partition
+search --file --set root /EFI/Part-01-03/Boot/ogloader.efi
+chainloader /EFI/Part-01-03/Boot/ogloader.efi
+boot

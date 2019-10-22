@@ -1,6 +1,6 @@
-##NO-TOCAR-ESTA-LINEA 1hd-1os
+##NO-TOCAR-ESTA-LINEA 1hd-1partition
 timeout 1
-title FirstDisk-FirstOperatingSystem
+title FirstDisk-FirstPartition
 root (hd0,0)
 chainloader (hd0,0)+1
 boot

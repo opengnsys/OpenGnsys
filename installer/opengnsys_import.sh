@@ -327,8 +327,6 @@ if [ -f $OPENGNSYS/tftpboot/menu.lst/templates/01 ]; then
     BIOSPXEDIR="$OPENGNSYS/tftpboot/menu.lst/templates"
     mv $BIOSPXEDIR/01 $BIOSPXEDIR/10
     sed -i "s/\bMBR\b/1hd/" $BIOSPXEDIR/10
-    sed -i "s/\b1hd-1partition\b/1hd-1os/" $BIOSPXEDIR/11
-    sed -i "s/\b1hd-2partition\b/1hd-2os/" $BIOSPXEDIR/12
 
     # Cambiamos el valor en la base de datos. Si no lo hacemos desaparecen de las columnas del NetBootAvanzado.
     mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -e "update ordenadores set arranque='10' where arranque='01';" &>/dev/null

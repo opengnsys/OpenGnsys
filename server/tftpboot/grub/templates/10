@@ -1,6 +1,4 @@
 ##NO-TOCAR-ESTA-LINEA 1hd
-echo "rEFInd"
-
-root='hd0,gpt1'
+search --file --set root /EFI/refind/shimx64.efi.signed
 chainloader /EFI/refind/shimx64.efi.signed
 boot
