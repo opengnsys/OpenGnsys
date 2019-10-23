@@ -90,9 +90,8 @@ function getStatus($ouid, $labid, $clntid=0) {
 
 	// Database query.
 	$cmd->texto = <<<EOD
-SELECT adm.idusuario, entornos.ipserveradm, entornos.portserveradm,
-       aulas.idaula, ordenadores.idordenador, ordenadores.ip
-  FROM entornos, ordenadores
+SELECT adm.idusuario, aulas.idaula, ordenadores.idordenador, ordenadores.ip
+  FROM ordenadores
   JOIN aulas USING(idaula)
  RIGHT JOIN administradores_centros AS adm USING(idcentro)
  WHERE adm.idusuario = '$userid'
@@ -112,41 +111,20 @@ EOD;
 	$rs->Primero();
 	// Check if user is an UO admin and asset exists.
 	if (checkAdmin($rs->campos["idusuario"]) and (($single and checkParameter($rs->campos["idordenador"])) or (! $single and checkParameter($rs->campos["idaula"])))) {
-		// First, try to connect to ogAdmCleint service.
-		$serverip = $rs->campos["ipserveradm"];
-		$serverport = $rs->campos["portserveradm"];
 		while (!$rs->EOF) {
 			$id[$rs->campos["ip"]] = $rs->campos["idordenador"];
 			$stat[$rs->campos["ip"]] = $status['OFF'];
 			$rs->Siguiente();
 		}
-		// Connect to reset client's status.
+		// Get client status.
 		$clientid = implode(",", $id);
 		$clientip = implode(";", array_keys($id));
-		$reqframe = "nfn=Sondeo\r".
-			    "ido=$clientid\r".
-			    "iph=$clientip\r";
-		$result = sendCommand($serverip, $serverport, $reqframe, $values);
-		// Connect to fetch client's status.
-		// Asuming client is off by default.
-		$values["tso"]="OFF";
-		// Iterate to check client's status.
-		// Exit if status!=OFF or end iterations (status=OFF).
-		$maxIter = 30;
-		for ($i=1; $i<$maxIter and preg_match('/OFF/', $values["tso"]); $i++) {
-			// Connect to check status.
-			$reqframe = "nfn=respuestaSondeo\r".
-				    "ido=$clientid\r".
-				    "iph=$clientip\r";
-			$result = sendCommand($serverip, $serverport, $reqframe, $values);
-			// Wait until next checking (0.1 ms).
-			usleep(100000);
-		}
+		$result = clients(2, $clientip);
 		// Parse status response.
 		if ($result) {
 			// Check status type.
-			if (checkParameter($values["tso"])) {
-				foreach (explode(";", $values["tso"]) as $data) {
+			if (checkParameter($result)) {
+				foreach (explode(";", $result) as $data) {
 					if (!empty($data)) {
 						list($clip, $clst) = explode("/", $data);
 						if ($clst != "OFF") {
