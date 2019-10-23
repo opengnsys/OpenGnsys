@@ -161,44 +161,6 @@ function checkIds() {
 }
 
 /**
- * @fn       sendCommand($serverip, $serverport, $reqframe, &$values)
- * @brief    Send a command to an OpenGnsys ogAdmServer and get request.
- * @param    string serverip    Server IP address.
- * @param    string serverport  Server port.
- * @param    string reqframe    Request frame (field's separator is "\r").
- * @param    array values       Response values (out parameter).
- * @return   boolean            "true" if success, otherwise "false".
- */
-function sendCommand($serverip, $serverport, $reqframe, &$values) {
-	global $LONCABECERA;
-	global $LONHEXPRM;
-
-	// Connect to server.
-	$respvalues = "";
-	$connect = new SockHidra($serverip, $serverport);
-	if ($connect->conectar()) {
-		// Send request frame to server.
-		$result = $connect->envia_peticion($reqframe);
-		if ($result) {
-			// Parse request frame.
-			$respframe = $connect->recibe_respuesta();
-			$connect->desconectar();
-			$paramlen = hexdec(substr($respframe, $LONCABECERA, $LONHEXPRM));
-			$params = substr($respframe, $LONCABECERA+$LONHEXPRM, $paramlen);
-			// Fetch values and return result.
-			$values = extrae_parametros($params, "\r", '=');
-			return ($values);
-		} else {
-			// Return with error.
-			return (false);
-		}
-	} else {
-		// Return with error.
-		return (false);
-	}
-}
-
-/**
  * @brief   Show custom message for "not found" error (404).
  */
 $app->notFound(function() {
