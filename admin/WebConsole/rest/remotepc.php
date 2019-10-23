@@ -82,11 +82,10 @@ $app->post('/ous/:ouid/images/:imageid/reserve(/)', 'validateApiKey',
 		writeRemotepcLog($app->request()->getResourceUri(). ": Parameters: labid=$labid, maxtime=$maxtime");
 	// Choose older not-reserved client with image installed and get ogAdmServer data.
 	$cmd->texto = <<<EOD
-SELECT adm.idusuario, entornos.ipserveradm, entornos.portserveradm,
-       ordenadores.idordenador, ordenadores.nombreordenador, ordenadores.ip,
+SELECT adm.idusuario, ordenadores.idordenador, ordenadores.nombreordenador, ordenadores.ip,
        ordenadores.mac, ordenadores.agentkey, par.numdisk, par.numpar,
        aulas.idaula, aulas.idcentro, repo.ip AS repoip, repo.apikey AS repokey
-  FROM entornos, ordenadores
+  FROM ordenadores
   JOIN aulas USING(idaula)
  RIGHT JOIN administradores_centros AS adm USING(idcentro)
  RIGHT JOIN usuarios USING(idusuario)
@@ -107,8 +106,6 @@ EOD;
 	$rs->Primero();
 	if (checkAdmin($rs->campos["idusuario"]) and checkParameter($rs->campos["idordenador"])) {
 		// Read query data.
-		$serverip = $rs->campos["ipserveradm"];
-		$serverport = $rs->campos["portserveradm"];
 		$clntid = $rs->campos["idordenador"];
 		$clntname = $rs->campos["nombreordenador"];
 		$clntip = $rs->campos["ip"];
@@ -126,22 +123,17 @@ EOD;
 			writeRemotepcLog($app->request()->getResourceUri(). ": OGAgent status, url=".$ogagent[$clntip]['url'].".");
 		$result = multiRequest($ogagent);
 		if (empty($result[$clntip]['data'])) {
-			// Client is off, send a boot command to ogAdmServer.
+			// Client is off, send WOL command to ogAdmServer.
 			// TODO: if client is busy?????
-			$reqframe = "nfn=Arrancar\r".
-				    "ido=$clntid\r".
-				    "iph=$clntip\r".
-				    "mac=$clntmac\r".
-				    "mar=1\r";
 			if ($app->settings['debug'])
-				writeRemotepcLog($app->request()->getResourceUri(). "Send Boot command to ogAdmClient, ido=$clntid,iph=$clntip,mac=$clntmac.");
-			sendCommand($serverip, $serverport, $reqframe, $values);
+				writeRemotepcLog($app->request()->getResourceUri(). ": Send boot command through ogAdmServer: iph=$clntip,mac=$clntmac.");
+			wol(1, [$clntmac], [$clntip]);
 			// Send WOL command to client repository.
 			$repo[$repoip]['url'] = "https://$repoip/opengnsys/rest/repository/poweron";
 			$repo[$repoip]['header'] = Array("Authorization: ".$repokey);
 			$repo[$repoip]['post'] = '{"macs": ["'.$clntmac.'"], "ips": ["'.$clntip.'"]}';
 			if ($app->settings['debug'])
-				writeRemotepcLog($app->request()->getResourceUri(). "Send Boot command to repo: repo=$repoip, ip=$clntip,mac=$clntmac.");
+				writeRemotepcLog($app->request()->getResourceUri(). ": Send Boot command through repo: repo=$repoip, ip=$clntip,mac=$clntmac.");
 			$result = multiRequest($repo);
 			// ... (check response)
 			//if ($result[$repoip]['code'] != 200) {
@@ -220,14 +212,9 @@ EOD;
 			if ($app->settings['debug'])
 				writeRemotepcLog($app->request()->getResourceUri(). ": DB tables and events updated, clntid=$clntid.");
 			// Send init session command if client is booted on ogLive.
-			$reqframe = "nfn=IniciarSesion\r".
-			   	    "ido=$clntid\r".
-				    "iph=$clntip\r".
-				    "dsk=$disk\r".
-				    "par=$part\r";
 			if ($app->settings['debug'])
 				writeRemotepcLog($app->request()->getResourceUri(). ": Send Init Session command to ogAdmClient, ido=$clntid,iph=$clntip,dsk=$disk,par=$part.");
-			sendCommand($serverip, $serverport, $reqframe, $values);
+			session($clntip, "$disk\r$part");
 			// Compose JSON response.
 			$response['id'] = (int)$clntid;
 			$response['name'] = $clntname;
