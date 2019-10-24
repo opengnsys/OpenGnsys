@@ -240,19 +240,18 @@ EOD;
 			// Read query data.
 			$rs->Primero();
 			$id = $rs->campos['idordenador'];
-			$redirto[0]['url'] = $rs->campos['urllogout'];
+			$url = $rs->campos['urllogout'];
 			$reserved = $rs->campos['reserved'];
 			$rs->Cerrar();
 			if (!is_null($id)) {
 				// Log activity, respond to client and continue processing.
 				writeLog("User logged out: ip=$ip, user=$user.");
-				$response = "";
-				jsonResponseNow(200, $response);
 			} else {
 		    		throw new Exception("Client is not in the database: ip=$ip, user=$user");
 			}
 			// Redirect notification to UDS server, if needed.
-			if ($reserved == 1 and !is_null($redirto[0]['url'])) {
+			if ($reserved == 1 and !is_null($url)) {
+				$redirto[0]['url'] = $url;
 				$redirto[0]['get'] = $app->request()->getBody();
 				$result = multiRequest($redirto);
 				// ... (check response)
@@ -268,6 +267,8 @@ EOD;
 		writeLog($app->request()->getResourceUri().": ERROR: ".$response["message"]);
 		jsonResponse(400, $response);
 	}
+	$response = "";
+	jsonResponse(200, $response);
     }
 );
 
