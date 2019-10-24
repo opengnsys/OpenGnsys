@@ -501,8 +501,8 @@ EOD;
 			// Read query data.
 			$clntip = $rs->campos["ip"];
 			$agentkey = $rs->campos["agentkey"];
-			// DB Transaction: set reservation time to the past and
-			// remove pending boot commands from client's and agent's queues.
+			// DB Transaction: set reservation time to the past, remove pending
+			// boot commands from client's and agent's queues, and drop its event.
 			if ($app->settings['debug'])
 				writeRemotepcLog($app->request()->getResourceUri(). ": Updating database.");
 			$cmd->texto = "START TRANSACTION;";
@@ -523,6 +523,8 @@ EOD;
 DELETE FROM ogagent_queue
  WHERE clientid = '$clntid' AND command IN ('popup-10', 'popup-5', 'poweroff');
 EOD;
+			$cmd->Ejecutar();
+			$cmd->texto = "DROP EVENT IF EXISTS e_timeout_$clntid;";
 			$cmd->Ejecutar();
 			$cmd->texto = "COMMIT;";
 			$cmd->Ejecutar();
