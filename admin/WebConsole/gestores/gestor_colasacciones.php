@@ -85,7 +85,7 @@ function gestiona($cmd,$opcion,$acciones){
 
 				/* Update de la tabla */
 				$cmd->texto="UPDATE acciones 
-						SET estado=".$ACCION_INICIADA.",resultado=".$ACCION_SINRESULTADO.",descrinotificacion='',fechahorafin=''";
+						SET estado=".$ACCION_INICIADA.",resultado=".$ACCION_SINRESULTADO.",descrinotificacion='',fechahorafin=DEFAULT";
 				if(!empty($idaccion))
 					$cmd->texto.=" WHERE idaccion=".$idaccion;
 				else	
