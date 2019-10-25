@@ -25,6 +25,7 @@ define('OG_REST_CMD_CREATE_BASIC_IMAGE', 'image/create/basic');
 define('OG_REST_CMD_CREATE_INCREMENTAL_IMAGE', 'image/create/incremental');
 define('OG_REST_CMD_RESTORE_BASIC_IMAGE', 'image/restore/basic');
 define('OG_REST_CMD_RESTORE_INCREMENTAL_IMAGE', 'image/restore/incremental');
+define('OG_REST_CMD_RUN_SCHEDULE', 'run/schedule');
 
 define('OG_REST_PARAM_CLIENTS', 'clients');
 define('OG_REST_PARAM_ADDR', 'addr');
@@ -529,6 +530,12 @@ function setup($string_ips, $params) {
 	}
 
 	common_request(OG_REST_CMD_SETUP, POST, $data);
+}
+
+function run_schedule($string_ips) {
+	$ips = explode(';',$string_ips);
+	$data = array(OG_REST_PARAM_CLIENTS => $ips);
+	common_request(OG_REST_CMD_RUN_SCHEDULE, POST, $data);
 }
 
 /*
