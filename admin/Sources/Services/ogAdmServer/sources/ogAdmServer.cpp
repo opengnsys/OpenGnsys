@@ -4082,6 +4082,36 @@ static int og_cmd_setup_image(json_t *element, struct og_msg_params *params)
 	return 0;
 }
 
+static int og_cmd_run_schedule(json_t *element, struct og_msg_params *params)
+{
+	char buf[4096] = {};
+	int err = 0, len;
+	const char *key;
+	json_t *value;
+	TRAMA *msg;
+
+	json_object_foreach(element, key, value) {
+		if (!strcmp(key, "clients"))
+			err = og_json_parse_clients(value, params);
+
+		if (err < 0)
+			break;
+	}
+
+	len = snprintf(buf, sizeof(buf), "nfn=EjecutaComandosPendientes");
+
+	msg = og_msg_alloc(buf, len);
+	if (!msg)
+		return -1;
+
+	og_send_cmd((char **)params->ips_array, params->ips_array_len,
+			CLIENTE_OCUPADO, msg);
+
+	og_msg_free(msg);
+
+	return 0;
+}
+
 static int og_cmd_create_basic_image(json_t *element, struct og_msg_params *params)
 {
 	char buf[4096] = {};
@@ -4602,6 +4632,16 @@ static int og_client_state_process_payload_rest(struct og_client *cli)
 			return og_client_bad_request(cli);
 		}
 		err = og_cmd_setup_image(root, &params);
+	} else if (!strncmp(cmd, "run/schedule", strlen("run/schedule"))) {
+		if (method != OG_METHOD_POST)
+			return og_client_method_not_found(cli);
+
+		if (!root) {
+			syslog(LOG_ERR, "command create with no payload\n");
+			return og_client_bad_request(cli);
+		}
+
+		err = og_cmd_run_schedule(root, &params);
 	} else {
 		syslog(LOG_ERR, "unknown command: %.32s ...\n", cmd);
 		err = og_client_not_found(cli);
