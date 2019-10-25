@@ -2132,6 +2132,12 @@ BOOLEAN ejecutaArchivo(char* filecmd,TRAMA *ptrTrama)
 	liberaMemoria(buffer);
 	return(TRUE);
 }
+
+BOOLEAN EjecutaComandosPendientes(TRAMA* ptrTrama)
+{
+	return(TRUE);
+}
+
 //______________________________________________________________________________________________________
 // Función: enviaMensajeServidor
 //
@@ -2261,6 +2267,9 @@ int main(int argc, char *argv[])
 
 	strcpy(tbfuncionesClient[cf].nf, "InventarioSoftware");
 	tbfuncionesClient[cf++].fptr = &InventarioSoftware;
+
+	strcpy(tbfuncionesClient[cf].nf, "EjecutaComandosPendientes");
+	tbfuncionesClient[cf++].fptr = &EjecutaComandosPendientes;
 
 	/*--------------------------------------------------------------------------------------------------------
 		Toma dirección IP del cliente 	
