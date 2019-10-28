@@ -4084,11 +4084,9 @@ static int og_cmd_setup_image(json_t *element, struct og_msg_params *params)
 
 static int og_cmd_run_schedule(json_t *element, struct og_msg_params *params)
 {
-	char buf[4096] = {};
-	int err = 0, len;
 	const char *key;
 	json_t *value;
-	TRAMA *msg;
+	int err = 0;
 
 	json_object_foreach(element, key, value) {
 		if (!strcmp(key, "clients"))
@@ -4098,16 +4096,7 @@ static int og_cmd_run_schedule(json_t *element, struct og_msg_params *params)
 			break;
 	}
 
-	len = snprintf(buf, sizeof(buf), "nfn=EjecutaComandosPendientes");
-
-	msg = og_msg_alloc(buf, len);
-	if (!msg)
-		return -1;
-
-	og_send_cmd((char **)params->ips_array, params->ips_array_len,
-			CLIENTE_OCUPADO, msg);
-
-	og_msg_free(msg);
+	og_cmd_legacy_send(params, "EjecutaComandosPendientes", CLIENTE_OCUPADO);
 
 	return 0;
 }
