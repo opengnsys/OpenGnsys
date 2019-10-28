@@ -90,6 +90,11 @@ if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 				<INPUT type="hidden" name="idambito" value="<?php echo $idambito?>">
 				<INPUT type="hidden" name="ambito" value="<?php echo $ambito?>">	
 				<INPUT type="hidden" name="cadenaid" value="<?php echo $cadenaid?>">				
+				<INPUT type="hidden" name="nombreambito" value="<?php echo $nombreambito?>">
+				<INPUT type="hidden" name="idcomando" value="<?php echo $idcomando?>">
+				<INPUT type="hidden" name="descricomando" value="<?php echo $descricomando?>">
+				<INPUT type="hidden" name="gestor" value="<?php echo $gestor?>">
+				<INPUT type="hidden" name="funcion" value="<?php echo $funcion?>">
 				<TABLE class="tabla_busquedas" align=center border=0 cellPadding=0 cellSpacing=0>
 				<TR>
 					<TH height=15 align="center" colspan=14><?php echo $TbMsg[18]?></TH>
