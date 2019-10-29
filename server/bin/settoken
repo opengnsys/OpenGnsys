@@ -7,7 +7,7 @@
 #@param   -f: force server restart without prompting (ask by default)
 #@param   Service: may be "server", "repo" or "both" (by default)
 #@warning This script uses "php" command.
-#@version 1.1.2 - Initial version.
+#@version 1.1.1 - Initial version.
 #@author  Ramón M. Gómez - ETSII Univ. Sevilla
 #@date    2019-09-25
 #*/ ##
@@ -22,7 +22,7 @@ REPOCFG=$OPENGNSYS/etc/ogAdmRepo.cfg
 source $OPENGNSYS/lib/ogfunctions.sh
 
 # Error control.
-[ "$USER" != "root" ] && raiseError access "Need to by root"
+[ "$USER" != "root" ] && raiseError access "Need to be root"
 if [ "$1" == "-f" ]; then
     FORCE=1
     shift

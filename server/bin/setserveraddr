@@ -1,18 +1,18 @@
 #!/bin/bash
 
 #/**
-#         setserveraddr {str_ipaddress | str_netiface}
 #@file    setserveraddr
-#@brief   Command the modifies configuration files to assign the default network interface.
+#@brief   Assign default IP address to OpenGnsys services.
+#@usage   setserveraddr {str_ipaddress | str_netiface}
 #@param   str_ipaddress  IP address assigned to a network interface
-#@param   str_netiface   network interface name defined by the operating system.
+#@param   str_netiface   network interface name defined by the operating system
 #@version Initial version.
 #@author  Ramón M. Gómez - ETSII Univ. Sevilla
 #@date    2011-01-25
 #@version 1.0.5 - Regenerate configuration files.
 #@author  Ramón M. Gómez - ETSII Univ. Sevilla
 #@date    2014-06-06
-#@version 1.1.1 - Updating menu URLs, PXE files, and repository API key.
+#@version 1.1.1 - Updating menu URLs and PXE files.
 #@author  Ramón M. Gómez - ETSII Univ. Sevilla
 #@date    2018-11-15
 #*/ ##
@@ -21,25 +21,21 @@
 # Variables.
 PROG="$(basename "$0")"
 OPENGNSYS=/opt/opengnsys
-PXEDIR=$OPENGNSYS/tftpboot/menu.lst
+PXEDIRS="$OPENGNSYS/tftpboot/menu.lst $OPENGNSYS/tftpboot/grub"
 DEFAULTFILE=/etc/default/opengnsys
 
-# Checking parameters.
-if [ $# -ne 1 ]; then
-	echo "$PROG: Incorrect operand. Format: $PROG ipaddress|netiface" >&2
-	exit 1
-fi
-if [ "$USER" != "root" ]; then
-	echo "$PROG: Need to be root." >&2
-	exit 1
-fi
+# Functions.
+source $OPENGNSYS/lib/ogfunctions.sh
 
-# Showing warning to inform that initiated clients may hang.
-read -rp "WARNING: initiated clients can hang. Continue? (y/n): " ANSWER
-if [ "${ANSWER,,}" != "y" ]; then
-	echo "Operation canceled."
-	exit 0
-fi
+# Checking parameters.
+[ "$USER" != "root" ] && raiseError access "Need to be root"
+[ $# -ne 1 ] && raiseError usage
+[ -r $DEFAULTFILE ] || raiseError access "Cannot read default configuration file"
+for f in $OPENGNSYS/{etc/{ogAdmServer,ogAdmRepo,ogAdmAgent}.cfg,www/controlacceso.php,client/etc/ogAdmClient.cfg}; do
+	[ -w $f ] || raiseError access "Cannot write to file: $f"
+done
+# Show help message.
+[ "$1" == "help" ] && help
 
 # Detecting network interfaces.
 DEVICES=$(ip -o link show up | awk -F: '$2!~/lo/ {print $2}')
@@ -54,6 +50,12 @@ done
 
 # Checking if IP address has been detected.
 if [ -n "$SERVERIP" ]; then
+	# Showing warning to inform that initiated clients may hang.
+	read -rp "WARNING: initiated clients can hang. Continue? (y/n): " ANSWER
+	if [ "${ANSWER,,}" != "y" ]; then
+		echo "Operation canceled."
+		exit 0
+	fi
 	# Temporary files.
 	tmpfile=$(mktemp /tmp/og.XXXXX)
 	MYCNF=$(mktemp /tmp/.my.cnf.XXXXX)
@@ -86,20 +88,13 @@ if [ -n "$SERVERIP" ]; then
 	fi
 
 	# Saving old IP address.
-	source $OPENGNSYS/etc/ogAdmRepo.cfg
-	OLDSERVERIP=$IPlocal
-
+	source $OPENGNSYS/etc/ogAdmServer.cfg
+	OLDSERVERIP=$ServidorAdm
 	# Checking if configuration files need to be modified.
 	CHANGE=0
 	for f in $OPENGNSYS/{etc/{ogAdmServer,ogAdmRepo,ogAdmAgent}.cfg,www/controlacceso.php,client/etc/ogAdmClient.cfg}; do
-		# Error if configuration file cannot be found.
-		if [ ! -f $f ]; then
-			echo "$PROG: File $file does not exist." >&2
-			exit 2
-		fi
-		# Updating configuration variables (if URLs does not contain "localhost").
-		sed -e "s,ServidorAdm=.*,ServidorAdm=$SERVERIP," \
-		    -e "s,IPlocal=.*,IPlocal=$SERVERIP," \
+		# Updating configuration variables (if URL does not contain "localhost").
+		sed -e "s,\(ServidorAdm\|IPlocal\)=.*,\1=$SERVERIP," \
 		    -e "s,UrlMenu=https?://\([^/]*\)/\(.*\),UrlMenu=https://$SERVERIP/\2," \
 		    -e '/localhost/!s,https\?://[^/]*/\(.*\),https://'$SERVERIP'/\1,' $f >$tmpfile
 		file="${f/./-$SERVERDEV.}"
@@ -118,25 +113,26 @@ if [ -n "$SERVERIP" ]; then
 		source $DEFAULTFILE
 		# If OpenGnsys Server is active, updating the database.
 		if [ "$RUN_OGADMSERVER" == "yes" ]; then
-			source $OPENGNSYS/etc/ogAdmServer.cfg
 			# Creating credentials file.
 			cat << EOT > $MYCNF
 [client]
 user=$USUARIO
 password=$PASSWORD
 EOT
-			# Updating OpenGnsys Server IP address.
-			mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -e \
-				 "UPDATE entornos
-				     SET ipserveradm='$SERVERIP'
-				   WHERE identorno=1"
-			# Updating all menu URLs.
-			mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -e \
-				 "UPDATE menus
-				     SET htmlmenupub = REPLACE(htmlmenupub, '$OLDSERVERIP', '$SERVERIP'),
-				         htmlmenupri = REPLACE(htmlmenupri, '$OLDSERVERIP', '$SERVERIP');"
+			# Updating IP addresses and menu URLs.
+			mysql --defaults-extra-file=$MYCNF -D "$CATALOG" << EOT
+UPDATE entornos
+   SET ipserveradm='$SERVERIP'
+ WHERE identorno=1;
+UPDATE repositorios
+   SET ip='$SERVERIP'
+ WHERE ip='$OLDSERVERIP';
+UPDATE menus
+   SET htmlmenupub = REPLACE(htmlmenupub, '$OLDSERVERIP', '$SERVERIP'),
+       htmlmenupri = REPLACE(htmlmenupri, '$OLDSERVERIP', '$SERVERIP');
+EOT
 			# Updating all PXE files.
-			find $PXEDIR -name "01-*" -exec sed -i -e "s/$OLDSERVERIP/$SERVERIP/g" {} \;
+			find $PXEDIRS -name "01-*" -exec sed -i -e "s/$OLDSERVERIP/$SERVERIP/g" {} \;
 		fi
 
 		# Showing manual task to do after execution.
@@ -156,8 +152,7 @@ EOT
 	fi
 else
 	# Error if network interface is not found.
-	echo "$PROG: Network device not found. Format: $PROG ipaddress|netiface" >&2
-	exit 1
+	raiseError notfound "Network device"
 fi
 
 # Removing temporary files.
