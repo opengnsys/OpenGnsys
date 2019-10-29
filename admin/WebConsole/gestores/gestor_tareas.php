@@ -140,7 +140,6 @@ function Gestiona(){
 	global	$op_modificacion;
 	global	$op_eliminacion;
 	global	$op_movida;
-	global	$op_ejecucion;
 	global	$tablanodo;
 	$resul=false;
 
@@ -179,9 +178,6 @@ function Gestiona(){
 			$cmd->texto="UPDATE tareas SET  grupoid=@grupoid WHERE idtarea=@idtarea";
 			$resul=$cmd->Ejecutar();
 			break;
-		case $op_ejecucion :
-			$resul=EjecutandoTareas();
-			break;
 		default:
 			break;
 	}
@@ -206,106 +202,4 @@ function SubarbolXML_tareas($idtarea,$descripcion,$urlimg){
 		return($cadenaXML);
 }
 //________________________________________________________________________________________________________
-function EjecutandoTareas(){
-
-	global $EJECUCION_COMANDO;
-	global $EJECUCION_TAREA;
-	global $PROCESOS;
-	global $ACCION_INICIADA;
-	global $ACCION_SINRESULTADO;
-	global $idcentro;
-	global $servidorhidra;
-	global $hidraport;
-	global	$idtarea;
-	global	$cmd;
-
-	$shidra=new SockHidra($servidorhidra,$hidraport); 
-
-	$ambitarea="";
-	$paramtarea="cmd=";
-
-	$tbComandos="";
-	$tabla_comandos="";
-	$cont_comandos=0;
-
-	$rs=new Recordset; 
-	$cmd->texto="SELECT * FROM tareas_comandos WHERE idtarea=".$idtarea;
-	$cmd->texto.=" ORDER by tareas_comandos.orden";
-	$rs->Comando=&$cmd; 
-	if (!$rs->Abrir()) return(false); // Error al abrir recordset
-	$rs->Primero(); 
-	// Recorre tareas-comandos
-	while (!$rs->EOF){
-			$tbComandos["idcomando"]=$rs->campos["idcomando"];
-			$tbComandos["ambito"]=$rs->campos["ambito"];
-			$tbComandos["idambito"]=$rs->campos["idambito"];
-			$tbComandos["parametros"]=$rs->campos["parametros"];
-			$tbComandos["idnotificador"]=$rs->campos["idtareacomando"];
-			$tabla_comandos[$cont_comandos]=$tbComandos;
-			$cont_comandos++;
-
-			$ambitarea.=$rs->campos["ambito"].":".$rs->campos["idambito"].";";
-			$paramtarea.=$rs->campos["idtareacomando"].";";
-			
-			$rs->Siguiente();
-	}
-	$rs->Cerrar();
-
-	$ambitarea=substr($ambitarea,0,strlen($ambitarea)-1); // Quita la coma final
-	$paramtarea=substr($paramtarea,0,strlen($paramtarea)-1); // Quita la coma final
-
-	//Creación parametros para inserción
-	$cmd->CreaParametro("@tipoaccion","",1);
-	$cmd->CreaParametro("@idtipoaccion",0,1);
-	$cmd->CreaParametro("@cateaccion",$PROCESOS,1);
-	$cmd->CreaParametro("@ambito",0,1);
-	$cmd->CreaParametro("@idambito",0,1);
-	$cmd->CreaParametro("@ambitskwrk","",0);
-	$cmd->CreaParametro("@fechahorareg","",0);
-	$cmd->CreaParametro("@estado",$ACCION_INICIADA,0);
-	$cmd->CreaParametro("@resultado",$ACCION_SINRESULTADO,0);
-	$cmd->CreaParametro("@idcentro",$idcentro,1);
-	$cmd->CreaParametro("@parametros","",0);	
-	$cmd->CreaParametro("@accionid",0,1);	
-	$cmd->CreaParametro("@idnotificador",0,1);	
-
-	// Insertar accion:tarea --------------------------------------------------------------------
-	$cmd->ParamSetValor("@tipoaccion",$EJECUCION_TAREA);
-	$cmd->ParamSetValor("@idtipoaccion",$idtarea);
-	$cmd->ParamSetValor("@ambito",0);
-	$cmd->ParamSetValor("@idambito",0);
-	$cmd->ParamSetValor("@ambitskwrk",$ambitarea);
-	$cmd->ParamSetValor("@fechahorareg",date("d/m/y H:i:s"));
-	$cmd->ParamSetValor("@parametros",$paramtarea);
-	$cmd->texto="INSERT INTO acciones (tipoaccion,idtipoaccion,cateaccion,ambito,idambito,ambitskwrk,fechahorareg,estado,resultado,idcentro,parametros,accionid,idnotificador) VALUES (@tipoaccion,@idtipoaccion,@cateaccion,@ambito,@idambito,@ambitskwrk,@fechahorareg,@estado,@resultado,@idcentro,@parametros,0,0)";
-	$resul=$cmd->Ejecutar();
-	if(!$resul) return(false);
-
-	$accionid=$cmd->Autonumerico(); // Toma identificador dela acción
-
-	// Insertar acciones:comandos
-	$shidra=new SockHidra($servidorhidra,$hidraport); 
-	for ($i=0;$i<$cont_comandos;$i++){
-		$tbComandos=$tabla_comandos[$i];
-		$cmd->ParamSetValor("@tipoaccion",$EJECUCION_COMANDO);
-		$cmd->ParamSetValor("@idtipoaccion",$tbComandos["idcomando"]);
-		$cmd->ParamSetValor("@ambito",$tbComandos["ambito"]);
-		$cmd->ParamSetValor("@idambito",$tbComandos["idambito"]);
-		$cmd->ParamSetValor("@ambitskwrk","");
-		$cmd->ParamSetValor("@fechahorareg",date("d/m/y H:i:s"));
-		$cmd->ParamSetValor("@parametros",$tbComandos["parametros"]);
-		$cmd->ParamSetValor("@accionid",$accionid);
-		$cmd->ParamSetValor("@idnotificador",$tbComandos["idnotificador"]);
-		$cmd->texto="INSERT INTO acciones (tipoaccion,idtipoaccion,cateaccion,ambito,idambito,ambitskwrk,fechahorareg,estado,resultado,idcentro,parametros,accionid,idnotificador) VALUES (@tipoaccion,@idtipoaccion,@cateaccion,@ambito,@idambito,@ambitskwrk,@fechahorareg,@estado,@resultado,@idcentro,@parametros,@accionid,@idnotificador)";
-		$resul=$cmd->Ejecutar();
-		if(!$resul) return(false);
-		$tbComandos["parametros"].="ids=".$cmd->Autonumerico().chr(13);
-
-		if ($shidra->conectar()){ // Se ha establecido la conexión con el servidor hidra
-			$shidra->envia_comando($tbComandos["parametros"]);
-			$shidra->desconectar();
-		}
-	}
-	return(true);
-}
 
