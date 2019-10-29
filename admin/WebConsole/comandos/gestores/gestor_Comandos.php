@@ -14,7 +14,6 @@ include_once("../../clases/AdoPhp.php");
 include_once("../../clases/SockHidra.php");
 include_once("../../includes/constantes.php");
 include_once("../../includes/comunes.php");
-include_once("../../includes/cuestionacciones.php");
 include_once("../../includes/CreaComando.php");
 include_once("../../includes/RecopilaIpesMacs.php");
 //________________________________________________________________________________________________________
