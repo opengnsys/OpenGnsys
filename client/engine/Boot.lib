@@ -784,7 +784,7 @@ function ogGrubInstallMbr ()
 
 # Variables locales.
 local PART DISK VERSION FIRSTAGE SECONSTAGE CHECKOS KERNELPARAM BACKUPNAME
-local EFIDISK EFIPART EFISECONDSTAGE EFISUBDIR EFIOPTGRUB
+local EFIDISK EFIPART EFISECONDSTAGE EFISUBDIR EFIOPTGRUB GRUBENTRY NEWORDER
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -893,6 +893,12 @@ if ogIsEfiActive; then
     cp /usr/lib/shim/shimx64.efi.signed ${EFISECONDSTAGE}/EFI/$EFISUBDIR/Boot/shimx64.efi
     # Nombre OpenGnsys para cargador
     cp ${EFISECONDSTAGE}/EFI/$EFISUBDIR/Boot/{grubx64.efi,ogloader.efi}
+
+    # Creamos entrada NVRAM y la ponemos en segundo lugar
+    ogNvramAddEntry grub /EFI/grub/Boot/shimx64.efi
+    GRUBENTRY=$(ogNvramList| awk '/grub/ {print $1}')
+    NEWORDER="$(ogNvramGetOrder|awk -v ENTRY=$GRUBENTRY '{gsub(",", " "); printf "%x %x %s\n", $1 , ENTRY , substr($0, index($0,$2))}')"
+    ogNvramSetOrder $NEWORDER
 fi 
 return $EVAL
 
