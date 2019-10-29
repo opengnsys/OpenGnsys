@@ -86,7 +86,6 @@ include_once("../includes/ctrlacc.php");
 include_once("../clases/AdoPhp.php");
 include_once("../clases/XmlPhp.php");
 include_once("../clases/MenuContextual.php");
-include_once("../clases/SockHidra.php");
 include_once("../includes/constantes.php");
 include_once("../includes/comunes.php");
 include_once("../includes/CreaComando.php");

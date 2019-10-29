@@ -12,7 +12,6 @@ include_once("../includes/ctrlacc.php");
 include_once("../clases/AdoPhp.php");
 include_once("../clases/XmlPhp.php");
 include_once("../clases/ArbolVistaXML.php");
-include_once("../clases/SockHidra.php");
 include_once("../includes/CreaComando.php");
 include_once("../includes/constantes.php");
 include_once("../includes/comunes.php");
@@ -49,7 +48,6 @@ if (isset($_GET["swc"])) $swc=$_GET["swc"]; // Switch que indica que la página 
 $cmd=CreaComando($cadenaconexion); // Crea objeto comando
 $resul=false;
 if ($cmd){
-	$shidra=new SockHidra($servidorhidra,$hidraport); 
 	$cadenaid="";
 	$cadenaip="";
 	$cadenamac="";

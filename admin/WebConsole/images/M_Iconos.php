@@ -12,7 +12,6 @@ include_once("../clases/AdoPhp.php");
 include_once("../includes/CreaComando.php");
 include_once("../includes/TomaDato.php");
 include_once("../includes/HTMLCTESELECT.php");
-include_once("../clases/SockHidra.php");
 include_once("../includes/FicherosPost.php");
 include_once("../idiomas/php/".$idioma."/iconos_".$idioma.".php");
 

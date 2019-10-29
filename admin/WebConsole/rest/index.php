@@ -19,7 +19,6 @@ include_once("../includes/CreaComando.php");
 // Connection class.
 @include_once("../includes/constantes.php");
 include_once("../includes/comunes.php");
-include_once("../clases/SockHidra.php");
 // REST functions.
 @include_once("../includes/restfunctions.php");
 // Slim framework.

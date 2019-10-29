@@ -9,7 +9,6 @@
 //		Consulta el eco de los clientes a traqvés de la consola remota
 // *************************************************************************************************************************************************
 	include_once("../includes/ctrlacc.php");
-	include_once("../clases/SockHidra.php");
 	include_once("../clases/AdoPhp.php");
 	include_once("../includes/constantes.php");
 	include_once("../includes/comunes.php");

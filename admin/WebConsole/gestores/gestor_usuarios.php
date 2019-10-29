@@ -9,7 +9,6 @@
 //		Gestiona el mantenimiento de la tabla de usuarios
 // *******************************************************************************************************
 include_once("../includes/ctrlacc.php");
-include_once("../clases/SockHidra.php");
 include_once("../clases/AdoPhp.php");
 include_once("../clases/XmlPhp.php");
 include_once("../clases/ArbolVistaXML.php");
