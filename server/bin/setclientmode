@@ -1,13 +1,13 @@
 #!/bin/bash
 
 #/**
-# 	  setclientmode NombrePlatilla { NombrePC | NombreAula } Modo_trabajo
-#@file	  setclientmode
+#@file    setclientmode
 #@brief   Configura el archivo de arranque de PXE para los clientes, ya sea un equipo o un aula, generando enlaces a archivos usados como plantilla. 
+#@usage   setclientmode Plantilla Ambito Modo
 #@warning El archivo PXE por defecto "default" se deja en modo de ejecución "user" y se eliminan los enlaces para equipos con la plantilla por defecto.
-#@param   $1 NombrePlatilla
-#@param   $2 Ámbito { NombrePC | NombreAula }
-#@param   $3 Modo_trabajo = { 0, TEMP, 1, PERM } - 0 si es temporal y 1 si es permanente. 
+#@param   Plantilla: nombre de plantilla PXE
+#@param   Ambito: nombre de cliente o aula
+#@param   Modo: "TEMP" (temporal) o "PERM" (permanente)
 #@version 1.0 - Versión inicial.
 #@author  Irina Gomez y Ramon Gomez - Univ. Sevilla, noviembre 2010
 #@version 1.0.1 - Identificacion de la plantilla por nombre en consola = en primera linea de la plantilla
@@ -36,42 +36,28 @@ PXEDIR[1]=$OPENGNSYS/tftpboot/grub
 LOGFILE=$OPENGNSYS/log/opengnsys.log
 MYCNF=/tmp/.my.cnf.$$
 
+source $OPENGNSYS/lib/ogfunctions.sh
 
+# Mostrar ayuda.
+[ "$*" == "help" ] && help
 # Control básico de errores.
-if [ $# -ne 3 ]; then
-	echo "$PROG: Error de ejecución"
-	echo "Formato: $PROG PLANTILLA [NOMBRE_PC|NOMBRE_AULA] MODO"
-	exit 1
-fi
-
+[ $# -ne 3 ] && raiseError usage
 # Comprobar si el usuario es "root" o el del servicio web.
 WEBUSER=$(ps axho user,comm|awk '!/root/ && /httpd|apache/ {print $1; exit;}')
-if [ "$USER" != "root" -a "$USER" != "$WEBUSER" ]; then
-	echo "$PROG: Need to be root. (The console can also call the script)." >&2
-        exit 1
-fi
-
+[ "$USER" != "root" -a "$USER" != "$WEBUSER" ] && raiseError access "Need to be root (or webserver user)"
 # El acceso a mysql por las variables pasadas o por el fichero de configuarción.
 if  [ -z "$USUARIO" ] || [ -z "$PASSWORD" ] || [ -z "$CATALOG" ]; then
-        if [ -r "$SERVERCONF" ]; then
-	    source $SERVERCONF
-	else
-	    echo "$PROG: Sin acceso a fichero de configuración"
-	    exit 2
-	fi
+	[ ! -r "$SERVERCONF" ] && raiseError access "Cannot read access configuration file"
+	source $SERVERCONF
 fi
-TEMPLATE[0]=$(grep -l "^#.* $1 *$" ${PXEDIR[0]}/templates/*)
-TEMPLATE[1]=$(grep -l "^#.* $1 *$" ${PXEDIR[1]}/templates/*)
-if [ -z "${TEMPLATE[0]}" -a -z "${TEMPLATE[1]}" ]; then
-	echo "No existe archivo platilla: $1"
-	exit
-fi
+TEMPLATE[0]=$(grep -l "^#.* $1 *$" ${PXEDIR[0]}/templates/* 2>/dev/null)
+TEMPLATE[1]=$(grep -l "^#.* $1 *$" ${PXEDIR[1]}/templates/* 2>/dev/null)
+[ -z "${TEMPLATE[0]}${TEMPLATE[1]}" ] && raiseError notfound "PXE template file \"$1\""
 
 case "${3^^}" in
 	0|TEMP)	MODE="TEMP" ;;
 	1|PERM)	MODE="PERM" ;;
-	*)	echo "$PROG: Modo desconodido: 0, TEMP (temporal), 1, PERM (permanente)"
-		exit 1 ;;
+	*)	raiseError notfound "Unknown mode \"$3\"" ;;
 esac
 
 # Sustituir caracteres ' por \' para evitar inyección SQL.
@@ -94,8 +80,8 @@ ETHERNET=$(mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -s -N -e \
  		  WHERE aulas.nombreaula='$RESOURCE' 
  		     OR nombreordenador='$RESOURCE';")
 if [ -z "$ETHERNET" ]; then
-	date +"%b %d %T $PROG: No existe aula o equipo con el nombre \"$2\"" | tee -a $LOGFILE
-	exit 1
+	date +"%b %d %T $PROG: No existe aula o equipo con el nombre \"$2\"" >> $LOGFILE
+	raiseError notfound "Client or lab name \"$2\""
 fi
 
 # Copiar fichero de configuración y actualizar base de datos.

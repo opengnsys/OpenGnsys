@@ -52,10 +52,7 @@ done
 if [ -n "$SERVERIP" ]; then
 	# Showing warning to inform that initiated clients may hang.
 	read -rp "WARNING: initiated clients can hang. Continue? (y/n): " ANSWER
-	if [ "${ANSWER,,}" != "y" ]; then
-		echo "Operation canceled."
-		exit 0
-	fi
+	[ "${ANSWER,,}" != "y" ] && raiseError cancel "Do nothing"
 	# Temporary files.
 	tmpfile=$(mktemp /tmp/og.XXXXX)
 	MYCNF=$(mktemp /tmp/.my.cnf.XXXXX)
