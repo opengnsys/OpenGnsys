@@ -224,6 +224,9 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 				case OG_CMD_ID_SOFTWARE:
 					software($cadenaip, $atributos);
 					break;
+				case OG_CMD_ID_SCRIPT:
+					shell(3, $cadenaip, $atributos);
+					break;
 			}
 			// En agente nuevo devuelvo siempre correcto
 			$resulhidra = 1;

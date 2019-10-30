@@ -107,6 +107,9 @@ function shell($case, $string_ips, $command) {
 	$ips = explode(';',$string_ips);
 
 	switch ($case) {
+		case 3:
+			$command = substr($command, 4);
+			/* fall through */
 		case 1:
 			$data = array(OG_REST_PARAM_CLIENTS => $ips,
 				OG_REST_PARAM_RUN => $command);
