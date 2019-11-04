@@ -1068,13 +1068,25 @@ static bool respuestaEstandar(TRAMA *ptrTrama, char *iph, char *ido, Database db
 	struct tm* st;
 	int idaccion;
 
-	ids = copiaParametro("ids",ptrTrama); // Toma identificador de la sesión
+	ids = copiaParametro("ids",ptrTrama);
+	res = copiaParametro("res",ptrTrama);
 
-	if (ids == NULL) // No existe seguimiento de la acción
+	if (ids == NULL) {
+		if (atoi(res) == ACCION_FALLIDA) {
+			liberaMemoria(res);
+			return false;
+		}
+		liberaMemoria(res);
 		return true;
+	}
 
-	if (atoi(ids) == 0){ // No existe seguimiento de la acción
+	if (atoi(ids) == 0) {
 		liberaMemoria(ids);
+		if (atoi(res) == ACCION_FALLIDA) {
+			liberaMemoria(res);
+			return false;
+		}
+		liberaMemoria(res);
 		return true;
 	}
 
@@ -1103,7 +1115,6 @@ static bool respuestaEstandar(TRAMA *ptrTrama, char *iph, char *ido, Database db
 	sprintf(fechafin, "%d/%d/%d %d:%d:%d", st->tm_year + 1900, st->tm_mon + 1,
 			st->tm_mday, st->tm_hour, st->tm_min, st->tm_sec);
 
-	res = copiaParametro("res",ptrTrama); // Toma resultado
 	der = copiaParametro("der",ptrTrama); // Toma descripción del error (si hubiera habido)
 	
 	sprintf(sqlstr,
@@ -1121,11 +1132,6 @@ static bool respuestaEstandar(TRAMA *ptrTrama, char *iph, char *ido, Database db
 	}
 	
 	liberaMemoria(der);
-	
-	if (atoi(res) == ACCION_FALLIDA) {
-		liberaMemoria(res);
-		return false; // Error en la ejecución del comando
-	}
 
 	liberaMemoria(res);
 	return true;
