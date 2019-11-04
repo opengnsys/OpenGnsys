@@ -1,4 +1,0 @@
-##NO-TOCAR-ESTA-LINEA grub
-search --file --set root /EFI/grub/Boot/grubx64.efi
-chainloader /EFI/grub/Boot/grubx64.efi
-boot

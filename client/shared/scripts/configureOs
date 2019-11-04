@@ -70,10 +70,10 @@ case "$OSTYPE" in
         # Cambiar nombre en sistemas Windows.
         HOST=${HOST:-"pc"}
         ogSetWindowsName $1 $2 "$HOST"
-        # Si es UEFI copio el cargador de arranque a la partición EFI e instalo rEFInd.
+        # Si es UEFI copio el cargador de arranque a la partición EFI e instalo Grub.
         if ogIsEfiActive; then
             ogRestoreEfiBootLoader $1 $2
-            ogRefindInstall
+            ogGrubInstallMbr $(ogGetEsp) TRUE
         else
             # Configurar el boot sector de la partición Windows.
             ogFixBootSector $1 $2
@@ -93,10 +93,10 @@ case "$OSTYPE" in
     Linux)      # Postconfiguración de GNU/Linux.
         # Configuro fstab: particion de Swap y si es UEFI además la partición EFI.
         ogConfigureFstab $1 $2
+        # Si es UEFI instalo Grub en la partición EFI
+        ogIsEfiActive && ogGrubInstallMbr $(ogGetEsp) TRUE
         ## Instala (no configura) el codigo de arranque del Grub en la partición (no lo configura, se mantiene el original de la imagen)
         ogGrubInstallPartition $1 $2
-        # Si es UEFI instalo rEFInd.
-        ogIsEfiActive && ogRefindInstall
         # Eliminar el antiguo cliente de Linux.
         [ -n "$(find $MNTDIR/usr/sbin $MNTDIR/sbin $MNTDIR/usr/local/sbin -name ogAdmLnxClient -print)" ] && ogUninstallLinuxClient $1 $2
         # Configurar nuevo agente OGAgent.
@@ -173,4 +173,3 @@ EOT
         ;;
 esac
 exit 0
-

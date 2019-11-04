@@ -1,17 +1,17 @@
 # Busca cargadores existentes por orden de prioridad y
 #    muestra menú con las opciones.
 # Si no existe ningún cargador de arranque muestre mensaje de error.
-set timeout=5
+set timeout=30
 
 set detectado='no'
 # Compruebo si existen distintos cargadores.
-echo "Searching rEFInd"
-search --file --set rootRefind /EFI/refind/shimx64.efi.signed
-if [ "$rootRefind" != "" ]; then
+echo "Searching Grub"
+search --file --set rootGrub /EFI/grub/Boot/grubx64.efi
+if [ "$rootGrub" != "" ]; then
     set detectado='si'
-    menuentry "rEFInd" {
-        root="$rootRefind"
-        chainloader /EFI/refind/shimx64.efi.signed
+    menuentry "Grub" {
+        root="$rootGrub"
+        chainloader /EFI/grub/Boot/grubx64.efi
 }
 fi
 

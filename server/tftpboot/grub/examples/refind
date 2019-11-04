@@ -1,0 +1,4 @@
+##NO-TOCAR-ESTA-LINEA refind
+search --file --set root /EFI/refind/shimx64.efi.signed
+chainloader /EFI/refind/shimx64.efi.signed
+boot
