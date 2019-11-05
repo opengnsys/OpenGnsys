@@ -3298,6 +3298,10 @@ struct og_msg_params {
 #define OG_REST_PARAM_RUN_CMD			(1UL << 3)
 #define OG_REST_PARAM_DISK			(1UL << 4)
 #define OG_REST_PARAM_PARTITION			(1UL << 5)
+#define OG_REST_PARAM_REPO			(1UL << 6)
+#define OG_REST_PARAM_NAME			(1UL << 7)
+#define OG_REST_PARAM_ID			(1UL << 8)
+#define OG_REST_PARAM_CODE			(1UL << 9)
 
 static bool og_msg_params_validate(const struct og_msg_params *params,
 				   const uint64_t flags)
@@ -4021,24 +4025,40 @@ static int og_cmd_create_image(json_t *element, struct og_msg_params *params)
 		return -1;
 
 	json_object_foreach(element, key, value) {
-		if (!strcmp(key, "disk"))
+		if (!strcmp(key, "disk")) {
 			err = og_json_parse_string(value, &params->disk);
-		else if (!strcmp(key, "partition"))
+			params->flags |= OG_REST_PARAM_DISK;
+		} else if (!strcmp(key, "partition")) {
 			err = og_json_parse_string(value, &params->partition);
-		else if (!strcmp(key, "name"))
+			params->flags |= OG_REST_PARAM_PARTITION;
+		} else if (!strcmp(key, "name")) {
 			err = og_json_parse_string(value, &params->name);
-		else if (!strcmp(key, "repository"))
+			params->flags |= OG_REST_PARAM_NAME;
+		} else if (!strcmp(key, "repository")) {
 			err = og_json_parse_string(value, &params->repository);
-		else if (!strcmp(key, "clients"))
+			params->flags |= OG_REST_PARAM_REPO;
+		} else if (!strcmp(key, "clients")) {
 			err = og_json_parse_clients(value, params);
-		else if (!strcmp(key, "id"))
+		} else if (!strcmp(key, "id")) {
 			err = og_json_parse_string(value, &params->id);
-		else if (!strcmp(key, "code"))
+			params->flags |= OG_REST_PARAM_ID;
+		} else if (!strcmp(key, "code")) {
 			err = og_json_parse_string(value, &params->code);
+			params->flags |= OG_REST_PARAM_CODE;
+		}
 
 		if (err < 0)
 			break;
 	}
+
+	if (!og_msg_params_validate(params, OG_REST_PARAM_ADDR |
+					    OG_REST_PARAM_DISK |
+					    OG_REST_PARAM_PARTITION |
+					    OG_REST_PARAM_CODE |
+					    OG_REST_PARAM_ID |
+					    OG_REST_PARAM_NAME |
+					    OG_REST_PARAM_REPO))
+		return -1;
 
 	len = snprintf(buf, sizeof(buf),
 			"nfn=CrearImagen\rdsk=%s\rpar=%s\rcpt=%s\ridi=%s\rnci=%s\ripr=%s\r",
