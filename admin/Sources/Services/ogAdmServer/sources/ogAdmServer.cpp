@@ -3296,6 +3296,8 @@ struct og_msg_params {
 #define OG_REST_PARAM_MAC			(1UL << 1)
 #define OG_REST_PARAM_WOL_TYPE			(1UL << 2)
 #define OG_REST_PARAM_RUN_CMD			(1UL << 3)
+#define OG_REST_PARAM_DISK			(1UL << 4)
+#define OG_REST_PARAM_PARTITION			(1UL << 5)
 
 static bool og_msg_params_validate(const struct og_msg_params *params,
 				   const uint64_t flags)
@@ -3803,16 +3805,24 @@ static int og_cmd_session(json_t *element, struct og_msg_params *params)
 		return -1;
 
 	json_object_foreach(element, key, value) {
-		if (!strcmp(key, "clients"))
+		if (!strcmp(key, "clients")) {
 			err = og_json_parse_clients(value, params);
-		else if (!strcmp(key, "disk"))
+		} else if (!strcmp(key, "disk")) {
 			err = og_json_parse_string(value, &params->disk);
-		else if (!strcmp(key, "partition"))
+			params->flags |= OG_REST_PARAM_DISK;
+		} else if (!strcmp(key, "partition")) {
 			err = og_json_parse_string(value, &params->partition);
+			params->flags |= OG_REST_PARAM_PARTITION;
+		}
 
 		if (err < 0)
 			return err;
 	}
+
+	if (!og_msg_params_validate(params, OG_REST_PARAM_ADDR |
+					    OG_REST_PARAM_DISK |
+					    OG_REST_PARAM_PARTITION))
+		return -1;
 
 	for (i = 0; i < params->ips_array_len; i++) {
 		snprintf(iph + strlen(iph), sizeof(iph), "%s;",
