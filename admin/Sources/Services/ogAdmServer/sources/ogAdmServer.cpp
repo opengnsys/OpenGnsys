@@ -3289,7 +3289,16 @@ struct og_msg_params {
 	const char	*cache_size;
 	struct og_partition	partition_setup[OG_PARTITION_MAX];
 	struct og_sync_params sync_setup;
+	uint64_t	flags;
 };
+
+#define OG_REST_PARAM_ADDR			(1UL << 0)
+
+static bool og_msg_params_validate(const struct og_msg_params *params,
+				   const uint64_t flags)
+{
+	return (params->flags & flags) == flags;
+}
 
 static int og_json_parse_clients(json_t *element, struct og_msg_params *params)
 {
@@ -3307,6 +3316,9 @@ static int og_json_parse_clients(json_t *element, struct og_msg_params *params)
 		params->ips_array[params->ips_array_len++] =
 			json_string_value(k);
 	}
+
+	params->flags |= OG_REST_PARAM_ADDR;
+
 	return 0;
 }
 
@@ -3439,6 +3451,9 @@ static int og_cmd_post_clients(json_t *element, struct og_msg_params *params)
 		if (err < 0)
 			break;
 	}
+
+	if (!og_msg_params_validate(params, OG_REST_PARAM_ADDR))
+		return -1;
 
 	return og_cmd_legacy_send(params, "Sondeo", CLIENTE_APAGADO);
 }
