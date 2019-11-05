@@ -3293,6 +3293,8 @@ struct og_msg_params {
 };
 
 #define OG_REST_PARAM_ADDR			(1UL << 0)
+#define OG_REST_PARAM_MAC			(1UL << 1)
+#define OG_REST_PARAM_WOL_TYPE			(1UL << 2)
 
 static bool og_msg_params_validate(const struct og_msg_params *params,
 				   const uint64_t flags)
@@ -3541,12 +3543,16 @@ static int og_json_parse_target(json_t *element, struct og_msg_params *params)
 
 			params->ips_array[params->ips_array_len] =
 				json_string_value(value);
+
+			params->flags |= OG_REST_PARAM_ADDR;
 		} else if (!strcmp(key, "mac")) {
 			if (json_typeof(value) != JSON_STRING)
 				return -1;
 
 			params->mac_array[params->ips_array_len] =
 				json_string_value(value);
+
+			params->flags |= OG_REST_PARAM_MAC;
 		}
 	}
 
@@ -3592,6 +3598,8 @@ static int og_json_parse_type(json_t *element, struct og_msg_params *params)
 	else if (!strcmp(type, "broadcast"))
 		params->wol_type = "1";
 
+	params->flags |= OG_REST_PARAM_WOL_TYPE;
+
 	return 0;
 }
 
@@ -3614,6 +3622,11 @@ static int og_cmd_wol(json_t *element, struct og_msg_params *params)
 		if (err < 0)
 			break;
 	}
+
+	if (!og_msg_params_validate(params, OG_REST_PARAM_ADDR |
+					    OG_REST_PARAM_MAC |
+					    OG_REST_PARAM_WOL_TYPE))
+		return -1;
 
 	if (!Levanta((char **)params->ips_array, (char **)params->mac_array,
 		     params->ips_array_len, (char *)params->wol_type))
