@@ -3295,6 +3295,7 @@ struct og_msg_params {
 #define OG_REST_PARAM_ADDR			(1UL << 0)
 #define OG_REST_PARAM_MAC			(1UL << 1)
 #define OG_REST_PARAM_WOL_TYPE			(1UL << 2)
+#define OG_REST_PARAM_RUN_CMD			(1UL << 3)
 
 static bool og_msg_params_validate(const struct og_msg_params *params,
 				   const uint64_t flags)
@@ -3643,6 +3644,8 @@ static int og_json_parse_run(json_t *element, struct og_msg_params *params)
 	snprintf(params->run_cmd, sizeof(params->run_cmd), "%s",
 		 json_string_value(element));
 
+	params->flags |= OG_REST_PARAM_RUN_CMD;
+
 	return 0;
 }
 
@@ -3667,6 +3670,10 @@ static int og_cmd_run_post(json_t *element, struct og_msg_params *params)
 		if (err < 0)
 			break;
 	}
+
+	if (!og_msg_params_validate(params, OG_REST_PARAM_ADDR |
+					    OG_REST_PARAM_RUN_CMD))
+		return -1;
 
 	for (i = 0; i < params->ips_array_len; i++) {
 		len = snprintf(iph + strlen(iph), sizeof(iph), "%s;",
