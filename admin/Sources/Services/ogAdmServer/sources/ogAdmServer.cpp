@@ -3729,6 +3729,9 @@ static int og_cmd_run_get(json_t *element, struct og_msg_params *params,
 			return err;
 	}
 
+	if (!og_msg_params_validate(params, OG_REST_PARAM_ADDR))
+		return -1;
+
 	array = json_array();
 	if (!array)
 		return -1;
