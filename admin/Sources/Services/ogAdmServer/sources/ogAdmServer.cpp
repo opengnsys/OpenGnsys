@@ -3862,6 +3862,9 @@ static int og_cmd_poweroff(json_t *element, struct og_msg_params *params)
 			break;
 	}
 
+	if (!og_msg_params_validate(params, OG_REST_PARAM_ADDR))
+		return -1;
+
 	return og_cmd_legacy_send(params, "Apagar", CLIENTE_OCUPADO);
 }
 
