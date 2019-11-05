@@ -3302,6 +3302,8 @@ struct og_msg_params {
 #define OG_REST_PARAM_NAME			(1UL << 7)
 #define OG_REST_PARAM_ID			(1UL << 8)
 #define OG_REST_PARAM_CODE			(1UL << 9)
+#define OG_REST_PARAM_TYPE			(1UL << 10)
+#define OG_REST_PARAM_PROFILE			(1UL << 11)
 
 static bool og_msg_params_validate(const struct og_msg_params *params,
 				   const uint64_t flags)
@@ -4089,26 +4091,44 @@ static int og_cmd_restore_image(json_t *element, struct og_msg_params *params)
 		return -1;
 
 	json_object_foreach(element, key, value) {
-		if (!strcmp(key, "disk"))
+		if (!strcmp(key, "disk")) {
 			err = og_json_parse_string(value, &params->disk);
-		else if (!strcmp(key, "partition"))
+			params->flags |= OG_REST_PARAM_DISK;
+		} else if (!strcmp(key, "partition")) {
 			err = og_json_parse_string(value, &params->partition);
-		else if (!strcmp(key, "name"))
+			params->flags |= OG_REST_PARAM_PARTITION;
+		} else if (!strcmp(key, "name")) {
 			err = og_json_parse_string(value, &params->name);
-		else if (!strcmp(key, "repository"))
+			params->flags |= OG_REST_PARAM_NAME;
+		} else if (!strcmp(key, "repository")) {
 			err = og_json_parse_string(value, &params->repository);
-		else if (!strcmp(key, "clients"))
+			params->flags |= OG_REST_PARAM_REPO;
+		} else if (!strcmp(key, "clients")) {
 			err = og_json_parse_clients(value, params);
-		else if (!strcmp(key, "type"))
+		} else if (!strcmp(key, "type")) {
 			err = og_json_parse_string(value, &params->type);
-		else if (!strcmp(key, "profile"))
+			params->flags |= OG_REST_PARAM_TYPE;
+		} else if (!strcmp(key, "profile")) {
 			err = og_json_parse_string(value, &params->profile);
-		else if (!strcmp(key, "id"))
+			params->flags |= OG_REST_PARAM_PROFILE;
+		} else if (!strcmp(key, "id")) {
 			err = og_json_parse_string(value, &params->id);
+			params->flags |= OG_REST_PARAM_ID;
+		}
 
 		if (err < 0)
 			break;
 	}
+
+	if (!og_msg_params_validate(params, OG_REST_PARAM_ADDR |
+					    OG_REST_PARAM_DISK |
+					    OG_REST_PARAM_PARTITION |
+					    OG_REST_PARAM_NAME |
+					    OG_REST_PARAM_REPO |
+					    OG_REST_PARAM_TYPE |
+					    OG_REST_PARAM_PROFILE |
+					    OG_REST_PARAM_ID))
+		return -1;
 
 	len = snprintf(buf, sizeof(buf),
 		       "nfn=RestaurarImagen\ridi=%s\rdsk=%s\rpar=%s\rifs=%s\r"
