@@ -3975,14 +3975,23 @@ static int og_cmd_software(json_t *element, struct og_msg_params *params)
 	json_object_foreach(element, key, value) {
 		if (!strcmp(key, "clients"))
 			err = og_json_parse_clients(value, params);
-		else if (!strcmp(key, "disk"))
+		else if (!strcmp(key, "disk")) {
 			err = og_json_parse_string(value, &params->disk);
-		else if (!strcmp(key, "partition"))
+			params->flags |= OG_REST_PARAM_DISK;
+		}
+		else if (!strcmp(key, "partition")) {
 			err = og_json_parse_string(value, &params->partition);
+			params->flags |= OG_REST_PARAM_PARTITION;
+		}
 
 		if (err < 0)
 			break;
 	}
+
+	if (!og_msg_params_validate(params, OG_REST_PARAM_ADDR |
+					    OG_REST_PARAM_DISK |
+					    OG_REST_PARAM_PARTITION))
+		return -1;
 
 	len = snprintf(buf, sizeof(buf),
 		       "nfn=InventarioSoftware\rdsk=%s\rpar=%s\r",
