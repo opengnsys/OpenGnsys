@@ -4379,22 +4379,47 @@ static int og_cmd_create_incremental_image(json_t *element, struct og_msg_params
 	json_object_foreach(element, key, value) {
 		if (!strcmp(key, "clients"))
 			err = og_json_parse_clients(value, params);
-		else if (!strcmp(key, "disk"))
+		else if (!strcmp(key, "disk")) {
 			err = og_json_parse_string(value, &params->disk);
-		else if (!strcmp(key, "partition"))
+			params->flags |= OG_REST_PARAM_DISK;
+		} else if (!strcmp(key, "partition")) {
 			err = og_json_parse_string(value, &params->partition);
-		else if (!strcmp(key, "id"))
+			params->flags |= OG_REST_PARAM_PARTITION;
+		} else if (!strcmp(key, "id")) {
 			err = og_json_parse_string(value, &params->id);
-		else if (!strcmp(key, "name"))
+			params->flags |= OG_REST_PARAM_ID;
+		} else if (!strcmp(key, "name")) {
 			err = og_json_parse_string(value, &params->name);
-		else if (!strcmp(key, "repository"))
+			params->flags |= OG_REST_PARAM_NAME;
+		} else if (!strcmp(key, "repository")) {
 			err = og_json_parse_string(value, &params->repository);
-		else if (!strcmp(key, "sync_params"))
-			err = og_json_parse_sync_params(value, &(params->sync_setup));
+			params->flags |= OG_REST_PARAM_REPO;
+		} else if (!strcmp(key, "sync_params")) {
+			err = og_json_parse_sync_params(value, params);
+		}
 
 		if (err < 0)
 			break;
 	}
+
+	if (!og_msg_params_validate(params, OG_REST_PARAM_ADDR |
+					    OG_REST_PARAM_DISK |
+					    OG_REST_PARAM_PARTITION |
+					    OG_REST_PARAM_ID |
+					    OG_REST_PARAM_NAME |
+					    OG_REST_PARAM_REPO |
+					    OG_REST_PARAM_SYNC_SYNC |
+					    OG_REST_PARAM_SYNC_PATH |
+					    OG_REST_PARAM_SYNC_DIFF |
+					    OG_REST_PARAM_SYNC_DIFF_ID |
+					    OG_REST_PARAM_SYNC_DIFF_NAME |
+					    OG_REST_PARAM_SYNC_REMOVE |
+					    OG_REST_PARAM_SYNC_COMPRESS |
+					    OG_REST_PARAM_SYNC_CLEANUP |
+					    OG_REST_PARAM_SYNC_CACHE |
+					    OG_REST_PARAM_SYNC_CLEANUP_CACHE |
+					    OG_REST_PARAM_SYNC_REMOVE_DST))
+		return -1;
 
 	len = snprintf(buf, sizeof(buf),
 		       "nfn=CrearSoftIncremental\rdsk=%s\rpar=%s\ridi=%s\rnci=%s\r"
