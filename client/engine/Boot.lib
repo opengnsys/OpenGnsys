@@ -896,7 +896,7 @@ if ogIsEfiActive; then
 
     # Creamos entrada NVRAM y la ponemos en segundo lugar
     ogNvramAddEntry grub /EFI/grub/Boot/shimx64.efi
-    GRUBENTRY=$(ogNvramList| awk '/grub/ {print $1}')
+    GRUBENTRY=$(ogNvramList| awk '{if ($2=="grub") print $1}')
     NEWORDER="$(ogNvramGetOrder|awk -v ENTRY=$GRUBENTRY '{gsub(",", " "); printf "%x %x %s\n", $1 , ENTRY , substr($0, index($0,$2))}')"
     ogNvramSetOrder $NEWORDER
 fi 
