@@ -4280,6 +4280,9 @@ static int og_cmd_run_schedule(json_t *element, struct og_msg_params *params)
 			break;
 	}
 
+	if (!og_msg_params_validate(params, OG_REST_PARAM_ADDR))
+		return -1;
+
 	og_cmd_legacy_send(params, "EjecutaComandosPendientes", CLIENTE_OCUPADO);
 
 	return 0;
