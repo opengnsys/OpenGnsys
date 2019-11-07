@@ -3297,6 +3297,12 @@ struct og_msg_params {
 #define OG_REST_PARAM_CODE			(1UL << 9)
 #define OG_REST_PARAM_TYPE			(1UL << 10)
 #define OG_REST_PARAM_PROFILE			(1UL << 11)
+#define OG_REST_PARAM_CACHE			(1UL << 12)
+#define OG_REST_PARAM_CACHE_SIZE		(1UL << 13)
+#define OG_REST_PARAM_PART_0			(1UL << 14)
+#define OG_REST_PARAM_PART_1			(1UL << 15)
+#define OG_REST_PARAM_PART_2			(1UL << 16)
+#define OG_REST_PARAM_PART_3			(1UL << 17)
 
 static bool og_msg_params_validate(const struct og_msg_params *params,
 				   const uint64_t flags)
@@ -3373,31 +3379,58 @@ static int og_json_parse_sync_params(json_t *element, og_sync_params *params)
 	return err;
 }
 
-static int og_json_parse_partition(json_t *element, og_partition *part)
+#define OG_PARAM_PART_NUMBER			(1UL << 0)
+#define OG_PARAM_PART_CODE			(1UL << 1)
+#define OG_PARAM_PART_FILESYSTEM		(1UL << 2)
+#define OG_PARAM_PART_SIZE			(1UL << 3)
+#define OG_PARAM_PART_FORMAT			(1UL << 4)
+
+static int og_json_parse_partition(json_t *element,
+				   struct og_msg_params *params,
+				   unsigned int i)
 {
+	struct og_partition *part = &params->partition_setup[i];
+	uint64_t flags = 0UL;
 	const char *key;
 	json_t *value;
 	int err = 0;
 
 	json_object_foreach(element, key, value) {
-		if (!strcmp(key, "partition"))
+		if (!strcmp(key, "partition")) {
 			err = og_json_parse_string(value, &part->number);
-		else if (!strcmp(key, "code"))
+			flags |= OG_PARAM_PART_NUMBER;
+		} else if (!strcmp(key, "code")) {
 			err = og_json_parse_string(value, &part->code);
-		else if (!strcmp(key, "filesystem"))
+			flags |= OG_PARAM_PART_CODE;
+		} else if (!strcmp(key, "filesystem")) {
 			err = og_json_parse_string(value, &part->filesystem);
-		else if (!strcmp(key, "size"))
+			flags |= OG_PARAM_PART_FILESYSTEM;
+		} else if (!strcmp(key, "size")) {
 			err = og_json_parse_string(value, &part->size);
-		else if (!strcmp(key, "format"))
+			flags |= OG_PARAM_PART_SIZE;
+		} else if (!strcmp(key, "format")) {
 			err = og_json_parse_string(value, &part->format);
+			flags |= OG_PARAM_PART_FORMAT;
+		}
 
 		if (err < 0)
 			return err;
 	}
+
+	if (flags != (OG_PARAM_PART_NUMBER |
+		      OG_PARAM_PART_CODE |
+		      OG_PARAM_PART_FILESYSTEM |
+		      OG_PARAM_PART_SIZE |
+		      OG_PARAM_PART_FORMAT))
+		return -1;
+
+	params->flags |= (OG_REST_PARAM_PART_0 << i);
+
 	return err;
 }
 
-static int og_json_parse_partition_setup(json_t *element, og_partition *part)
+static int og_json_parse_partition_setup(json_t *element,
+					 struct og_msg_params *params)
 {
 	unsigned int i;
 	json_t *k;
@@ -3411,7 +3444,7 @@ static int og_json_parse_partition_setup(json_t *element, og_partition *part)
 		if (json_typeof(k) != JSON_OBJECT)
 			return -1;
 
-		if (og_json_parse_partition(k, part + i) != 0)
+		if (og_json_parse_partition(k, params, i) != 0)
 			return -1;
 	}
 	return 0;
@@ -4154,27 +4187,41 @@ static int og_cmd_setup_image(json_t *element, struct og_msg_params *params)
 		return -1;
 
 	json_object_foreach(element, key, value) {
-		if (!strcmp(key, "clients"))
+		if (!strcmp(key, "clients")) {
 			err = og_json_parse_clients(value, params);
-		else if (!strcmp(key, "disk"))
+		} else if (!strcmp(key, "disk")) {
 			err = og_json_parse_string(value, &params->disk);
-		else if (!strcmp(key, "cache"))
+			params->flags |= OG_REST_PARAM_DISK;
+		} else if (!strcmp(key, "cache")) {
 			err = og_json_parse_string(value, &params->cache);
-		else if (!strcmp(key, "cache_size"))
+			params->flags |= OG_REST_PARAM_CACHE;
+		} else if (!strcmp(key, "cache_size")) {
 			err = og_json_parse_string(value, &params->cache_size);
-		else if (!strcmp(key, "partition_setup"))
-			err = og_json_parse_partition_setup(value, params->partition_setup);
+			params->flags |= OG_REST_PARAM_CACHE_SIZE;
+		} else if (!strcmp(key, "partition_setup")) {
+			err = og_json_parse_partition_setup(value, params);
+		}
 
 		if (err < 0)
 			break;
 	}
+
+	if (!og_msg_params_validate(params, OG_REST_PARAM_ADDR |
+					    OG_REST_PARAM_DISK |
+					    OG_REST_PARAM_CACHE |
+					    OG_REST_PARAM_CACHE_SIZE |
+					    OG_REST_PARAM_PART_0 |
+					    OG_REST_PARAM_PART_1 |
+					    OG_REST_PARAM_PART_2 |
+					    OG_REST_PARAM_PART_3))
+		return -1;
 
 	len = snprintf(buf, sizeof(buf),
 			"nfn=Configurar\rdsk=%s\rcfg=dis=%s*che=%s*tch=%s!",
 			params->disk, params->disk, params->cache, params->cache_size);
 
 	for (unsigned int i = 0; i < OG_PARTITION_MAX; ++i) {
-		const og_partition *part = params->partition_setup + i;
+		const struct og_partition *part = &params->partition_setup[i];
 
 		len += snprintf(buf + strlen(buf), sizeof(buf),
 			"par=%s*cpt=%s*sfi=%s*tam=%s*ope=%s%%",
