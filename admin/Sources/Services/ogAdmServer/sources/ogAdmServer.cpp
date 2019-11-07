@@ -3303,6 +3303,18 @@ struct og_msg_params {
 #define OG_REST_PARAM_PART_1			(1UL << 15)
 #define OG_REST_PARAM_PART_2			(1UL << 16)
 #define OG_REST_PARAM_PART_3			(1UL << 17)
+#define OG_REST_PARAM_SYNC_SYNC			(1UL << 18)
+#define OG_REST_PARAM_SYNC_DIFF			(1UL << 19)
+#define OG_REST_PARAM_SYNC_REMOVE		(1UL << 20)
+#define OG_REST_PARAM_SYNC_COMPRESS		(1UL << 21)
+#define OG_REST_PARAM_SYNC_CLEANUP		(1UL << 22)
+#define OG_REST_PARAM_SYNC_CACHE		(1UL << 23)
+#define OG_REST_PARAM_SYNC_CLEANUP_CACHE	(1UL << 24)
+#define OG_REST_PARAM_SYNC_REMOVE_DST		(1UL << 25)
+#define OG_REST_PARAM_SYNC_DIFF_ID		(1UL << 26)
+#define OG_REST_PARAM_SYNC_DIFF_NAME		(1UL << 27)
+#define OG_REST_PARAM_SYNC_PATH			(1UL << 28)
+#define OG_REST_PARAM_SYNC_METHOD		(1UL << 29)
 
 static bool og_msg_params_validate(const struct og_msg_params *params,
 				   const uint64_t flags)
@@ -3341,37 +3353,51 @@ static int og_json_parse_string(json_t *element, const char **str)
 	return 0;
 }
 
-static int og_json_parse_sync_params(json_t *element, og_sync_params *params)
+static int og_json_parse_sync_params(json_t *element,
+                                     struct og_msg_params *params)
 {
 	const char *key;
 	json_t *value;
 	int err = 0;
 
 	json_object_foreach(element, key, value) {
-		if (!strcmp(key, "sync"))
-			err = og_json_parse_string(value, &params->sync);
-		else if (!strcmp(key, "diff"))
-			err = og_json_parse_string(value, &params->diff);
-		else if (!strcmp(key, "remove"))
-			err = og_json_parse_string(value, &params->remove);
-		else if (!strcmp(key, "compress"))
-			err = og_json_parse_string(value, &params->compress);
-		else if (!strcmp(key, "cleanup"))
-			err = og_json_parse_string(value, &params->cleanup);
-		else if (!strcmp(key, "cache"))
-			err = og_json_parse_string(value, &params->cache);
-		else if (!strcmp(key, "cleanup_cache"))
-			err = og_json_parse_string(value, &params->cleanup_cache);
-		else if (!strcmp(key, "remove_dst"))
-			err = og_json_parse_string(value, &params->remove_dst);
-		else if (!strcmp(key, "diff_id"))
-			err = og_json_parse_string(value, &params->diff_id);
-		else if (!strcmp(key, "diff_name"))
-			err = og_json_parse_string(value, &params->diff_name);
-		else if (!strcmp(key, "path"))
-			err = og_json_parse_string(value, &params->path);
-		else if (!strcmp(key, "method"))
-			err = og_json_parse_string(value, &params->method);
+		if (!strcmp(key, "sync")) {
+			err = og_json_parse_string(value, &params->sync_setup.sync);
+			params->flags |= OG_REST_PARAM_SYNC_SYNC;
+		} else if (!strcmp(key, "diff")) {
+			err = og_json_parse_string(value, &params->sync_setup.diff);
+			params->flags |= OG_REST_PARAM_SYNC_DIFF;
+		} else if (!strcmp(key, "remove")) {
+			err = og_json_parse_string(value, &params->sync_setup.remove);
+			params->flags |= OG_REST_PARAM_SYNC_REMOVE;
+		} else if (!strcmp(key, "compress")) {
+			err = og_json_parse_string(value, &params->sync_setup.compress);
+			params->flags |= OG_REST_PARAM_SYNC_COMPRESS;
+		} else if (!strcmp(key, "cleanup")) {
+			err = og_json_parse_string(value, &params->sync_setup.cleanup);
+			params->flags |= OG_REST_PARAM_SYNC_CLEANUP;
+		} else if (!strcmp(key, "cache")) {
+			err = og_json_parse_string(value, &params->sync_setup.cache);
+			params->flags |= OG_REST_PARAM_SYNC_CACHE;
+		} else if (!strcmp(key, "cleanup_cache")) {
+			err = og_json_parse_string(value, &params->sync_setup.cleanup_cache);
+			params->flags |= OG_REST_PARAM_SYNC_CLEANUP_CACHE;
+		} else if (!strcmp(key, "remove_dst")) {
+			err = og_json_parse_string(value, &params->sync_setup.remove_dst);
+			params->flags |= OG_REST_PARAM_SYNC_REMOVE_DST;
+		} else if (!strcmp(key, "diff_id")) {
+			err = og_json_parse_string(value, &params->sync_setup.diff_id);
+			params->flags |= OG_REST_PARAM_SYNC_DIFF_ID;
+		} else if (!strcmp(key, "diff_name")) {
+			err = og_json_parse_string(value, &params->sync_setup.diff_name);
+			params->flags |= OG_REST_PARAM_SYNC_DIFF_NAME;
+		} else if (!strcmp(key, "path")) {
+			err = og_json_parse_string(value, &params->sync_setup.path);
+			params->flags |= OG_REST_PARAM_SYNC_PATH;
+		} else if (!strcmp(key, "method")) {
+			err = og_json_parse_string(value, &params->sync_setup.method);
+			params->flags |= OG_REST_PARAM_SYNC_METHOD;
+		}
 
 		if (err != 0)
 			return err;
@@ -4271,26 +4297,50 @@ static int og_cmd_create_basic_image(json_t *element, struct og_msg_params *para
 		return -1;
 
 	json_object_foreach(element, key, value) {
-		if (!strcmp(key, "clients"))
+		if (!strcmp(key, "clients")) {
 			err = og_json_parse_clients(value, params);
-		else if (!strcmp(key, "disk"))
+		} else if (!strcmp(key, "disk")) {
 			err = og_json_parse_string(value, &params->disk);
-		else if (!strcmp(key, "partition"))
+			params->flags |= OG_REST_PARAM_DISK;
+		} else if (!strcmp(key, "partition")) {
 			err = og_json_parse_string(value, &params->partition);
-		else if (!strcmp(key, "code"))
+			params->flags |= OG_REST_PARAM_PARTITION;
+		} else if (!strcmp(key, "code")) {
 			err = og_json_parse_string(value, &params->code);
-		else if (!strcmp(key, "id"))
+			params->flags |= OG_REST_PARAM_CODE;
+		} else if (!strcmp(key, "id")) {
 			err = og_json_parse_string(value, &params->id);
-		else if (!strcmp(key, "name"))
+			params->flags |= OG_REST_PARAM_ID;
+		} else if (!strcmp(key, "name")) {
 			err = og_json_parse_string(value, &params->name);
-		else if (!strcmp(key, "repository"))
+			params->flags |= OG_REST_PARAM_NAME;
+		} else if (!strcmp(key, "repository")) {
 			err = og_json_parse_string(value, &params->repository);
-		else if (!strcmp(key, "sync_params"))
-			err = og_json_parse_sync_params(value, &(params->sync_setup));
+			params->flags |= OG_REST_PARAM_REPO;
+		} else if (!strcmp(key, "sync_params")) {
+			err = og_json_parse_sync_params(value, params);
+		}
 
 		if (err < 0)
 			break;
 	}
+
+	if (!og_msg_params_validate(params, OG_REST_PARAM_ADDR |
+					    OG_REST_PARAM_DISK |
+					    OG_REST_PARAM_PARTITION |
+					    OG_REST_PARAM_CODE |
+					    OG_REST_PARAM_ID |
+					    OG_REST_PARAM_NAME |
+					    OG_REST_PARAM_REPO |
+					    OG_REST_PARAM_SYNC_SYNC |
+					    OG_REST_PARAM_SYNC_DIFF |
+					    OG_REST_PARAM_SYNC_REMOVE |
+					    OG_REST_PARAM_SYNC_COMPRESS |
+					    OG_REST_PARAM_SYNC_CLEANUP |
+					    OG_REST_PARAM_SYNC_CACHE |
+					    OG_REST_PARAM_SYNC_CLEANUP_CACHE |
+					    OG_REST_PARAM_SYNC_REMOVE_DST))
+		return -1;
 
 	len = snprintf(buf, sizeof(buf),
 		       "nfn=CrearImagenBasica\rdsk=%s\rpar=%s\rcpt=%s\ridi=%s\r"
