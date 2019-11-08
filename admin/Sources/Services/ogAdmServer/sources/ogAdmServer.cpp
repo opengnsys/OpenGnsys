@@ -3337,9 +3337,9 @@ static int og_json_parse_clients(json_t *element, struct og_msg_params *params)
 
 		params->ips_array[params->ips_array_len++] =
 			json_string_value(k);
-	}
 
-	params->flags |= OG_REST_PARAM_ADDR;
+		params->flags |= OG_REST_PARAM_ADDR;
+	}
 
 	return 0;
 }
