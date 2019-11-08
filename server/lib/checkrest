@@ -1,0 +1,151 @@
+#!/bin/bash
+
+#/**
+#@file    checktest
+#@brief   Run tests to check the OpenGnsys Server REST functions.
+#@usage   checktest [help]
+#@warning This script inserts test data into the database and deletes it before finishing.
+#@version 1.1.1 - Initial version.
+#@author  Ramón M. Gómez - ETSII Univ. Sevilla
+#@date    2019-10-07
+#*/ ##
+
+PROG=$(basename "$0")
+OPENGNSYS=/opt/opengnsys
+CONFIGFILE=$OPENGNSYS/etc/ogAdmServer.cfg
+RESTURL="https://localhost/opengnsys/rest"
+source $OPENGNSYS/lib/ogfunctions.sh || exit 1
+
+# Test a REST ROUTE. Parameters: Route Headers Data Agent
+function route () {
+    local ROUTE PARAM METHOD HEADER DATA AGENT RET STATUS
+    ROUTE="$1"
+    PARAM="$2"
+    HEADER="$3"
+    DATA="$4"
+    AGENT="$5"
+    METHOD="${DATA:+POST}"
+    METHOD="${METHOD:-GET}"
+    RESP=$(curl -4ks -w "%{http_code}" ${HEADER:+-H "$HEADER"} ${DATA:+-d "$DATA"} ${AGENT:+-A "$AGENT"} "$RESTURL$ROUTE")
+    RET=$?
+    CODE="${RESP: -3}"
+    RESP="${RESP::-3}"
+    [ "$PARAM" ] && PARAM="($PARAM: $(jq -r ".$PARAM // \"not found\"" <<<"$RESP"))"
+    case "$CODE" in
+        200) let OK=OK+1
+	     STATUS="OK $PARAM" ;;
+        404) let FAIL=FAIL+1
+             STATUS="FAIL ($CODE: $(echo $RESP))" ;;
+        000) let FAIL=FAIL+1
+             STATUS="FAIL (Connection error: $RET)" ;;
+        *)   let FAIL=FAIL+1
+             STATUS="FAIL ($CODE: $(jq -r '.message|gsub(":.*";"")' <<<"$RESP"))" ;;
+    esac
+    printf "%-40s: %s\n" "- $METHOD $ROUTE" "$STATUS"
+}
+
+# Execute database operation.
+function dbexec () {
+    MYCNF=$(mktemp)
+    trap "rm -f $MYCNF" 0 1 2 3 6 9 15
+    touch $MYCNF
+    chmod 600 $MYCNF
+    cat << EOT > $MYCNF 
+[client] 
+user=$USUARIO 
+password=$PASSWORD 
+EOT
+    mysql --defaults-extra-file="$MYCNF" -D "$CATALOG" -s -N -e "$1" || \
+        raiseError access "Cannot access the databse"
+}
+
+# Delete test data from the database.
+function deletedata () {
+    # Delete test data, if exists.
+    DATA="
+DELETE FROM centros, administradores_centros USING centros INNER JOIN administradores_centros
+ WHERE centros.idcentro=administradores_centros.idcentro AND centros.nombrecentro='TestOU';
+DELETE FROM repositorios WHERE nombrerepositorio='TestRepo';
+DELETE FROM aulas WHERE nombreaula='TestLab';
+DELETE FROM ordenadores WHERE nombreordenador='TestClnt';
+"
+    dbexec "$DATA"
+}
+
+# Load test data into the database.
+function loaddata () {
+    # Insert test data.
+    DATA="
+INSERT INTO centros (nombrecentro, identidad, comentarios)
+       VALUES ('TestOU', 1, 'Tests');
+SET @ou_id := LAST_INSERT_ID();
+INSERT INTO administradores_centros (idusuario, idcentro)
+       VALUES (1, @ou_id);
+INSERT INTO repositorios (nombrerepositorio, idcentro, ip)
+       VALUES ('TestRepo', @ou_id, '127.0.0.1');
+SET @repo_id := LAST_INSERT_ID();
+INSERT INTO aulas (nombreaula, idcentro, inremotepc)
+       VALUES ('TestLab', @ou_id, 0);
+SET @lab_id := LAST_INSERT_ID();
+INSERT INTO ordenadores (nombreordenador, idrepositorio, idaula, ip, mac)
+       VALUES ('TestClnt', @id_repo, @lab_id, '127.0.0.1', '001122334455');
+SET @clnt_id := LAST_INSERT_ID();
+"
+    dbexec "$DATA"
+}
+
+function runtests () {
+    local OK FAIL
+
+    let OK=FAIL=0
+    echo "Running tests..."
+    route "/info" "release"
+    route "/status" "cpu.usage"
+    DATA='{"username":"'$USUARIO'","password":"'$PASSWORD'"}'
+    route /login "" "" "$DATA"
+    HEADERS="Authorization: $(jq -r '.apikey' <<<"$RESP")"
+    route /ous
+    OU=$(jq -r '.[] | select(.name=="TestOU").id' <<<"$RESP")
+    route "/ous/$OU" "name" "$HEADERS"
+    route "/ous/$OU/repos" "" "$HEADERS"
+    REPO=$(jq -r '.[] | select(.name=="TestRepo").id' <<<"$RESP")
+    route "/ous/$OU/repos/$REPO" "name" "$HEADERS"
+    route "/ous/$OU/labs" "" "$HEADERS"
+    LAB=$(jq -r '.[] | select(.name=="TestLab").id' <<<"$RESP")
+    route "/ous/$OU/labs/$LAB" "name" "$HEADERS"
+    route "/ous/$OU/labs/$LAB/clients" "" "$HEADERS"
+    CLNT=$(jq -r '.[] | select(.name=="TestClnt").id' <<<"$RESP")
+    route "/ous/$OU/labs/$LAB/clients/$CLNT" "name" "$HEADERS"
+    read -r IP MAC <<<$(jq -r '.ip+" "+([.mac[0:2],.mac[2:4],.mac[4:6],.mac[6:8],.mac[8:10],.mac[10:12]] | join(":"))' <<<"$RESP")
+    route "/ous/$OU/labs/$LAB/clients/$CLNT/status" "status" "$HEADERS"
+    route "/ous/$OU/images" "" "$HEADERS"
+    AGENT="python-requests/test"
+    DATA='{"ip":"'$IP'","mac":"'$MAC'","ostype":"Windows","osversion":"Windows Test","secret":"'$(printf "%.sX" {1..32})'"}'
+    route "/ogagent/started" "" "" "$DATA" "$AGENT"
+    DATA='{"ip":"'$IP'","user":"test","language":"en","ostype":"Windows","osversion":"Windows 10 Test"}'
+    route "/ogagent/loggedin" "" "" "$DATA" "$AGENT"
+    route "/ogagent/loggedout" "" "" "$DATA" "$AGENT"
+    DATA='{"ip":"'$IP'","mac":"'$MAC'","ostype":"Windows","osversion":"Windows Test"}'
+    route "/ogagent/stopped" "" "" "$DATA" "$AGENT"
+    echo "Tests OK: $OK"
+    echo "Tests failed: $FAIL"
+}
+
+
+# Main program.
+
+# Show help.
+[ "$*" == "help" ] && help
+[ "$*" ] && raiseError usage
+# Access control.
+[ "$USER" == "root" ] || raiseError access "Need to be root."
+[ -r $CONFIGFILE ] || raiseError access "Configuration file."
+# Check dependencies.
+which jq &>/dev/null || raiseError notfound "Need to install \"jq\"."
+
+source $CONFIGFILE
+deletedata
+loaddata
+runtests
+deletedata
+
