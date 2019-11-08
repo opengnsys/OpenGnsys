@@ -98,7 +98,12 @@ fi
 
 #Informacioin previa de la imagen
 IMGOS=$(ogGetImageInfo `ogGetPath $MODE $IMGNAME.img`)
-[ -n "$IMGOS" ] || exit $(ogRaiseError session $OG_ERR_NOTFOUND "$REPO $2"; echo $?)
+case $? in
+    0) ;;
+    1) ogRaiseError session $OG_ERR_NOTFOUND "$REPO $2" || exit $? ;;
+    5) ogRaiseError session $OG_ERR_IMAGEFILE "$REPO $2" || exit $? ;;
+    *) ogRaiseError session $OG_ERR_GENERIC || exit $? ;;
+esac
 IMGSIZE=$(ls -s `ogGetPath $MODE $IMGNAME.img`| cut -f1 -d" ")
 
 ogEcho log session "[1] REPO=$REPO IMG-FILE=$IMGNAME.img  SIZE=$IMGSIZE (KB)   METADATA=$IMGOS"

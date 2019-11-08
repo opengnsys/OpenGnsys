@@ -122,6 +122,7 @@ export OG_ERR_REPO=23		# Error al montar el repositorio de imagenes
 export OG_ERR_IMGSIZEPARTITION=30    # Error al restaurar partición más pequeña que la imagen
 export OG_ERR_UPDATECACHE=31	# Error al realizar el comando updateCache
 export OG_ERR_DONTFORMAT=32	# Error al formatear
+export OG_ERR_IMAGEFILE=33	# Archivo de imagen corrupto o de otra versión de $IMGPROG
 export OG_ERR_GENERIC=40 	# Error imprevisto no definido
 export OG_ERR_UCASTSYNTAXT=50   # Error en la generación de sintaxis de transferenica UNICAST
 export OG_ERR_UCASTSENDPARTITION=51  # Error en envío UNICAST de partición
