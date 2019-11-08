@@ -34,11 +34,11 @@ grub_probe=${grub_probe:-$OGBIN/grub-probe1.99_$(arch)}
 
 #librerias del osProber para kernel antiguos: detecta e identifica sistema operativos.
 if grub-install --version | grep 1.99 ; then
-    cp -r /opt/opengnsys/lib/os-probes/* /usr/lib/os-probes/
+	cp -r /opt/opengnsys/lib/os-probes/* /usr/lib/os-probes/
 else
-    # Librería os-probe para cargador de microsoft en dir part-x-y (uefi)
-    OSPROBE_MS_PART="/opt/opengnsys/lib/os-probes/mounted/efi/31part-x-y"
-    [ -f $OSPROBE_MS_PART ] && cp $OSPROBE_MS_PART /usr/lib/os-probes/mounted/efi
+	# Librería os-probe para cargador de microsoft en dir part-x-y (uefi)
+	OSPROBE_MS_PART="/opt/opengnsys/lib/os-probes/mounted/efi/31part-x-y"
+	[ -f $OSPROBE_MS_PART ] && cp $OSPROBE_MS_PART /usr/lib/os-probes/mounted/efi
 fi
 
 
@@ -60,62 +60,80 @@ fi
 
 OG_prepare_grub_to_access_device ()
 {
-  device="$1"
-  loop_file=
-  case ${device} in
-    /dev/loop/*|/dev/loop[0-9])
-      grub_loop_device="${device#/dev/}"
-      loop_file=`losetup "${device}" | sed -e "s/^[^(]*(\([^)]\+\)).*/\1/"`
-      case $loop_file in
-        /dev/*) ;;
-        *)
-          loop_device="${device}"
-          device=`"${grub_probe}" --target=device "${loop_file}"` || return 0
-        ;;
-      esac
-    ;;
-  esac
-  if dmsetup status $device 2>/dev/null | grep -q 'crypt[[:space:]]$'; then
-    grub_warn \
-      "$device is a crypto device, which GRUB cannot read directly.  Some" \
-      "necessary modules may be missing from /boot/grub/grub.cfg.  You may" \
-      "need to list them in GRUB_PRELOAD_MODULES in /etc/default/grub.  See" \
-      "http://bugs.debian.org/542165 for details."
-    return 0
-  fi
-  # Abstraction modules aren't auto-loaded.
-  abstraction="`"${grub_probe}" --device "${device}" --target=abstraction`"
-  for module in ${abstraction} ; do
-    echo "insmod ${module}"
-  done
-  partmap="`"${grub_probe}" --device "${device}" --target=partmap`"
-  for module in ${partmap} ; do
-    case "${module}" in
-      netbsd | openbsd)
-        echo "insmod part_bsd";;
-      *)
-        echo "insmod part_${module}";;
-    esac
-  done
-  fs="`"${grub_probe}" --device "${device}" --target=fs`"
-  for module in ${fs} ; do
-    echo "insmod ${module}"
-  done
-  # If there's a filesystem UUID that GRUB is capable of identifying, use it;
-  # otherwise set root as per value in device.map. 
-  #OG modificacion
-  echo "set root='`"${grub_probe}" --device "${device}" --target=drive`'"
-  #if fs_uuid="`"${grub_probe}" --device "${device}" --target=fs_uuid 2> /dev/null`" ; then
-  #  echo "search --no-floppy --fs-uuid --set=root ${fs_uuid}"
-  #fi
+	device="$1"
+	loop_file=
+	case ${device} in
+		/dev/loop/*|/dev/loop[0-9])
+			grub_loop_device="${device#/dev/}"
+			loop_file=`losetup "${device}" | sed -e "s/^[^(]*(\([^)]\+\)).*/\1/"`
+			case $loop_file in
+				/dev/*) ;;
+				*)
+					loop_device="${device}"
+					device=`"${grub_probe}" --target=device "${loop_file}"` || return 0
+					;;
+			esac
+			;;
+	esac
+	if dmsetup status $device 2>/dev/null | grep -q 'crypt[[:space:]]$'; then
+		grub_warn \
+			"$device is a crypto device, which GRUB cannot read directly.  Some" \
+			"necessary modules may be missing from /boot/grub/grub.cfg.  You may" \
+			"need to list them in GRUB_PRELOAD_MODULES in /etc/default/grub.  See" \
+			"http://bugs.debian.org/542165 for details."
+		return 0
+	fi
+	# Abstraction modules aren't auto-loaded.
+	abstraction="`"${grub_probe}" --device "${device}" --target=abstraction`"
+	for module in ${abstraction} ; do
+		echo "insmod ${module}"
+	done
+	partmap="`"${grub_probe}" --device "${device}" --target=partmap`"
+	for module in ${partmap} ; do
+		case "${module}" in
+			netbsd | openbsd)
+				echo "insmod part_bsd";;
+			*)
+				echo "insmod part_${module}";;
+		esac
+	done
+	fs="`"${grub_probe}" --device "${device}" --target=fs`"
+	for module in ${fs} ; do
+		echo "insmod ${module}"
+	done
+	# If there's a filesystem UUID that GRUB is capable of identifying, use it;
+	# otherwise set root as per value in device.map. 
+	#OG modificacion
+	# PARCHE UHU ...SI el disco es nvme se cambia su nomenclatura, ya que grub_probe no funciona bien
+	if [[ $DEVICE  == *"nvme"* ]]; then
+		#DEVICE=`echo $DEVICE | sed -e "s/\/dev\/nvme/hd/g" | sed -e "s/n.*p/,gpt/g"`
+		#TODO Detectar si es GPT o no...
+		read -r D P <<< `ogDevToDisk $DEVICE`
+		if [ "`ogGetPartitionTableType $D`" == "GPT" ]; then
+			# Si es gpt se sustituye por "hd(X-1),gptY"
+			#device=`echo $device | sed -e "s/\/dev\/nvme/hd/g" | sed -e "s/n.*p/,gpt/g"`
+			nvmeDevice=`echo "hd"$(expr $D - 1)",gpt$P"`
 
-  if [ "x${loop_file}" != x ]; then
-    loop_mountpoint="$(awk '"'${loop_file}'" ~ "^"$2 && $2 != "/" { print $2 }' /proc/mounts | tail -n1)"
-    if [ "x${loop_mountpoint}" != x ]; then
-      echo "loopback ${grub_loop_device} ${loop_file#$loop_mountpoint}"
-      echo "set root=(${grub_loop_device})"
-    fi
-  fi
+		else
+			# Sino se sustituye por hd(X-1),(Y-1)
+			nvmeDevice=`echo "hd"$(expr $D - 1)","$(expr $P - 1)`
+		fi
+		echo "set root='$nvmeDevice'"
+	else
+		echo "set root='`"${grub_probe}" --device "${device}" --target=drive`'"
+	fi
+
+	#if fs_uuid="`"${grub_probe}" --device "${device}" --target=fs_uuid 2> /dev/null`" ; then
+	#  echo "search --no-floppy --fs-uuid --set=root ${fs_uuid}"
+	#fi
+
+	if [ "x${loop_file}" != x ]; then
+		loop_mountpoint="$(awk '"'${loop_file}'" ~ "^"$2 && $2 != "/" { print $2 }' /proc/mounts | tail -n1)"
+		if [ "x${loop_mountpoint}" != x ]; then
+			echo "loopback ${grub_loop_device} ${loop_file#$loop_mountpoint}"
+			echo "set root=(${grub_loop_device})"
+		fi
+	fi
 }
 
 
@@ -148,16 +166,16 @@ libdir=${exec_prefix}/lib
 found_other_os=
 
 make_timeout () {
-  if [ "x${found_other_os}" = "x" ] ; then
-    if [ "x${1}" != "x" ] ; then
-      if [ "x${GRUB_HIDDEN_TIMEOUT_QUIET}" = "xtrue" ] ; then
-	verbose=
-      else
-	verbose=" --verbose"
-      fi
+	if [ "x${found_other_os}" = "x" ] ; then
+		if [ "x${1}" != "x" ] ; then
+			if [ "x${GRUB_HIDDEN_TIMEOUT_QUIET}" = "xtrue" ] ; then
+				verbose=
+			else
+				verbose=" --verbose"
+			fi
 
-      if [ "x${1}" = "x0" ] ; then
-	cat <<EOF
+			if [ "x${1}" = "x0" ] ; then
+				cat <<EOF
 if [ "x\${timeout}" != "x-1" ]; then
   if keystatus; then
     if keystatus --shift; then
@@ -173,7 +191,7 @@ if [ "x\${timeout}" != "x-1" ]; then
 fi
 EOF
       else
-	cat << EOF
+	      cat << EOF
 if [ "x\${timeout}" != "x-1" ]; then
   if sleep$verbose --interruptible ${GRUB_HIDDEN_TIMEOUT} ; then
     set timeout=0
@@ -186,28 +204,28 @@ EOF
 }
 
 adjust_timeout () {
-  if [ "x$GRUB_BUTTON_CMOS_ADDRESS" != "x" ]; then
-    cat <<EOF
+	if [ "x$GRUB_BUTTON_CMOS_ADDRESS" != "x" ]; then
+		cat <<EOF
 if cmostest $GRUB_BUTTON_CMOS_ADDRESS ; then
 EOF
-    make_timeout "${GRUB_HIDDEN_TIMEOUT_BUTTON}" "${GRUB_TIMEOUT_BUTTON}"
-    echo else
-    make_timeout "${GRUB_HIDDEN_TIMEOUT}" "${GRUB_TIMEOUT}"
-    echo fi
+make_timeout "${GRUB_HIDDEN_TIMEOUT_BUTTON}" "${GRUB_TIMEOUT_BUTTON}"
+echo else
+make_timeout "${GRUB_HIDDEN_TIMEOUT}" "${GRUB_TIMEOUT}"
+echo fi
   else
-    make_timeout "${GRUB_HIDDEN_TIMEOUT}" "${GRUB_TIMEOUT}"
+	  make_timeout "${GRUB_HIDDEN_TIMEOUT}" "${GRUB_TIMEOUT}"
   fi
 }
 
 if [ "x${GRUB_DISABLE_OS_PROBER}" = "xtrue" ]; then
-  adjust_timeout
-  exit 0
+	adjust_timeout
+	exit 0
 fi
 
 if [ -z "`which os-prober 2> /dev/null`" -o -z "`which linux-boot-prober 2> /dev/null`" ] ; then
-  # missing os-prober and/or linux-boot-prober
-  adjust_timeout
-  exit 0
+	# missing os-prober and/or linux-boot-prober
+	adjust_timeout
+	exit 0
 fi
 
 case "$1" in
@@ -233,59 +251,59 @@ fi
 
 
 if [ -z "${OSPROBED}" ] ; then
-  # empty os-prober output, nothing doing
-  adjust_timeout
-  exit 0
+	# empty os-prober output, nothing doing
+	adjust_timeout
+	exit 0
 fi
 
 osx_entry() {
 	found_other_os=1
-        cat << EOF
+	cat << EOF
 menuentry "${LONGNAME} (${2}-bit) (on ${DEVICE})" --class osx --class darwin --class os {
 EOF
-	save_default_entry | sed -e "s/^/\t/"
-	prepare_grub_to_access_device ${DEVICE} | sed -e "s/^/\t/"
-	cat << EOF
-        load_video
-        set do_resume=0
-        if [ /var/vm/sleepimage -nt10 / ]; then
-           if xnu_resume /var/vm/sleepimage; then
-             set do_resume=1
-           fi
-        fi
-        if [ \$do_resume = 0 ]; then
-           xnu_uuid ${OSXUUID} uuid
-           if [ -f /Extra/DSDT.aml ]; then
-              acpi -e /Extra/DSDT.aml
-           fi
-           $1 /mach_kernel boot-uuid=\${uuid} rd=*uuid
-           if [ /System/Library/Extensions.mkext -nt /System/Library/Extensions ]; then
-              xnu_mkext /System/Library/Extensions.mkext
-           else
-              xnu_kextdir /System/Library/Extensions
-           fi
-           if [ -f /Extra/Extensions.mkext ]; then
-              xnu_mkext /Extra/Extensions.mkext
-           fi
-           if [ -d /Extra/Extensions ]; then
-              xnu_kextdir /Extra/Extensions
-           fi
-           if [ -f /Extra/devprop.bin ]; then
-              xnu_devprop_load /Extra/devprop.bin
-           fi
-           if [ -f /Extra/splash.jpg ]; then
-              insmod jpeg
-              xnu_splash /Extra/splash.jpg
-           fi
-           if [ -f /Extra/splash.png ]; then
-              insmod png
-              xnu_splash /Extra/splash.png
-           fi
-           if [ -f /Extra/splash.tga ]; then
-              insmod tga
-              xnu_splash /Extra/splash.tga
-           fi
-        fi
+save_default_entry | sed -e "s/^/\t/"
+prepare_grub_to_access_device ${DEVICE} | sed -e "s/^/\t/"
+cat << EOF
+	load_video
+	set do_resume=0
+	if [ /var/vm/sleepimage -nt10 / ]; then
+	   if xnu_resume /var/vm/sleepimage; then
+	     set do_resume=1
+     fi
+	fi
+	if [ \$do_resume = 0 ]; then
+	   xnu_uuid ${OSXUUID} uuid
+	   if [ -f /Extra/DSDT.aml ]; then
+	      acpi -e /Extra/DSDT.aml
+      fi
+	   $1 /mach_kernel boot-uuid=\${uuid} rd=*uuid
+	   if [ /System/Library/Extensions.mkext -nt /System/Library/Extensions ]; then
+	      xnu_mkext /System/Library/Extensions.mkext
+      else
+	      xnu_kextdir /System/Library/Extensions
+      fi
+	   if [ -f /Extra/Extensions.mkext ]; then
+	      xnu_mkext /Extra/Extensions.mkext
+      fi
+	   if [ -d /Extra/Extensions ]; then
+	      xnu_kextdir /Extra/Extensions
+      fi
+	   if [ -f /Extra/devprop.bin ]; then
+	      xnu_devprop_load /Extra/devprop.bin
+      fi
+	   if [ -f /Extra/splash.jpg ]; then
+	      insmod jpeg
+	      xnu_splash /Extra/splash.jpg
+      fi
+	   if [ -f /Extra/splash.png ]; then
+	      insmod png
+	      xnu_splash /Extra/splash.png
+      fi
+	   if [ -f /Extra/splash.tga ]; then
+	      insmod tga
+	      xnu_splash /Extra/splash.tga
+      fi
+	fi
 }
 EOF
 }
@@ -293,156 +311,156 @@ EOF
 wubi=
 
 for OS in ${OSPROBED} ; do
-  DEVICE="`echo ${OS} | cut -d ':' -f 1`"
-  LONGNAME="`echo ${OS} | cut -d ':' -f 2 | tr '^' ' '`"
-  LABEL="`echo ${OS} | cut -d ':' -f 3 | tr '^' ' '`"
-  BOOT="`echo ${OS} | cut -d ':' -f 4`"
+	DEVICE="`echo ${OS} | cut -d ':' -f 1`"
+	LONGNAME="`echo ${OS} | cut -d ':' -f 2 | tr '^' ' '`"
+	LABEL="`echo ${OS} | cut -d ':' -f 3 | tr '^' ' '`"
+	BOOT="`echo ${OS} | cut -d ':' -f 4`"
 
-  if [ -z "${LONGNAME}" ] ; then
-    LONGNAME="${LABEL}"
-  fi
+	if [ -z "${LONGNAME}" ] ; then
+		LONGNAME="${LABEL}"
+	fi
 
-  echo "Found ${LONGNAME} on ${DEVICE}" >&2
+	echo "Found ${LONGNAME} on ${DEVICE}" >&2
 
-  case ${BOOT} in
-    chain)
+	case ${BOOT} in
+		chain)
 
-      case ${LONGNAME} in
-	Windows*)
-	  if [ -z "$wubi" ]; then
-	    if [ -x /usr/share/lupin-support/grub-mkimage ] && \
-	       /usr/share/lupin-support/grub-mkimage --test; then
-	      wubi=yes
-	    else
-	      wubi=no
-	    fi
-	  fi
-	  if [ "$wubi" = yes ]; then
-	    echo "Skipping ${LONGNAME} on Wubi system" >&2
-	    continue
-	  fi
-	  ;;
-      esac
-      #adv
-      LABELCLASS=$(echo "${LONGNAME}" | awk '{print tolower($1$2);}')
+			case ${LONGNAME} in
+				Windows*)
+					if [ -z "$wubi" ]; then
+						if [ -x /usr/share/lupin-support/grub-mkimage ] && \
+							/usr/share/lupin-support/grub-mkimage --test; then
+						wubi=yes
+					else
+						wubi=no
+					fi
+				fi
+				if [ "$wubi" = yes ]; then
+					echo "Skipping ${LONGNAME} on Wubi system" >&2
+					continue
+				fi
+				;;
+		esac
+		#adv
+		LABELCLASS=$(echo "${LONGNAME}" | awk '{print tolower($1$2);}')
 
-      found_other_os=1
-      cat << EOF
+		found_other_os=1
+		cat << EOF
 menuentry "${LONGNAME} (on ${DEVICE})" --class $LABELCLASS --class windows {
 EOF
-      save_default_entry | sed -e "s/^/\t/"
+save_default_entry | sed -e "s/^/\t/"
 #ADV      prepare_grub_to_access_device ${DEVICE} | sed -e "s/^/\t/"
-      OG_prepare_grub_to_access_device ${DEVICE} | sed -e "s/^/\t/"
+OG_prepare_grub_to_access_device ${DEVICE} | sed -e "s/^/\t/"
 
-      case ${LONGNAME} in
+case ${LONGNAME} in
 	Windows\ Vista*|Windows\ 7*|Windows\ Server\ 2008*)
-	;;
+		;;
 	*)
-#ADV	  cat << EOF
-#ADV	drivemap -s (hd0) \${root}
-#ADV EOF
-	;;
-      esac
+		#ADV	  cat << EOF
+		#ADV	drivemap -s (hd0) \${root}
+		#ADV EOF
+		;;
+esac
 
-      cat <<EOF
+cat <<EOF
 	chainloader +1
 }
 EOF
-    ;;
+;;
     efi)
 
-        found_other_os=1
-        EFIPATH=${DEVICE#*@}
-        DEVICE=${DEVICE%@*}
-        onstr="$(gettext_printf "(on %s)" "${DEVICE}")"
-      cat << EOF
+	    found_other_os=1
+	    EFIPATH=${DEVICE#*@}
+	    DEVICE=${DEVICE%@*}
+	    onstr="$(gettext_printf "(on %s)" "${DEVICE}")"
+	    cat << EOF
 menuentry '$(echo "${LONGNAME} $onstr" | grub_quote)' --class windows --class os \$menuentry_id_option 'osprober-efi-$(grub_get_device_id "${DEVICE}")' {
 EOF
-      save_default_entry | sed -e "s/^/\t/"
+save_default_entry | sed -e "s/^/\t/"
 #ADV      prepare_grub_to_access_device ${DEVICE} | sed -e "s/^/\t/"
-      OG_prepare_grub_to_access_device ${DEVICE} | sed -e "s/^/\t/"
+OG_prepare_grub_to_access_device ${DEVICE} | sed -e "s/^/\t/"
 
-      cat <<EOF
-        chainloader ${EFIPATH}
+cat <<EOF
+	chainloader ${EFIPATH}
 }
 EOF
-    ;;
+;;
     linux)
-	KERNELPARAM=""
-	#linuxprobed detecta todos los  kernels de una partición.
-      LINUXPROBED="`linux-boot-prober ${DEVICE} 2> /dev/null | tr ' ' '^' | paste -s -d ' '`"
-#esta opcion de linuxprobe solo interpreta el primer kernel detectado de la partición 
-#Si queremos que autoincluya todos los kernels hay que comentar esta filtrado de LINUXPROBED
-      LINUXPROBED=$(echo $LINUXPROBED | awk '{ print $1}') 	
-      prepare_boot_cache=
-       #	echo "ADV listado de los kerenel encontrados linux-boot-prober ${DEVICE} $LINUXPROBED"
-      for LINUX in ${LINUXPROBED} ; do
-	LINUX=$LINUXPROBED
-        LROOT="`echo ${LINUX} | cut -d ':' -f 1`"
-        LBOOT="`echo ${LINUX} | cut -d ':' -f 2`"
-        LLABEL="`echo ${LINUX} | cut -d ':' -f 3 | tr '^' ' '`"
-        LKERNEL="`echo ${LINUX} | cut -d ':' -f 4`"
-        LINITRD="`echo ${LINUX} | cut -d ':' -f 5`"
-        LPARAMS="`echo ${LINUX} | cut -d ':' -f 6- | tr '^' ' '`"
-        # En los parámetros cambiamos el UUID por el valor de LROOT
-        UUID=$(blkid -s UUID -o value $LROOT)
-        LPARAMS="$(echo $LPARAMS | sed "s|UUID=$UUID|$LROOT|g")"
-        if [ -z "${LLABEL}" ] ; then
-          LLABEL="${LONGNAME}"
-        fi
+	    KERNELPARAM=""
+	    #linuxprobed detecta todos los  kernels de una partición.
+	    LINUXPROBED="`linux-boot-prober ${DEVICE} 2> /dev/null | tr ' ' '^' | paste -s -d ' '`"
+	    #esta opcion de linuxprobe solo interpreta el primer kernel detectado de la partición 
+	    #Si queremos que autoincluya todos los kernels hay que comentar esta filtrado de LINUXPROBED
+	    LINUXPROBED=$(echo $LINUXPROBED | awk '{ print $1}') 	
+	    prepare_boot_cache=
+	    #	echo "ADV listado de los kerenel encontrados linux-boot-prober ${DEVICE} $LINUXPROBED"
+	    for LINUX in ${LINUXPROBED} ; do
+		    LINUX=$LINUXPROBED
+		    LROOT="`echo ${LINUX} | cut -d ':' -f 1`"
+		    LBOOT="`echo ${LINUX} | cut -d ':' -f 2`"
+		    LLABEL="`echo ${LINUX} | cut -d ':' -f 3 | tr '^' ' '`"
+		    LKERNEL="`echo ${LINUX} | cut -d ':' -f 4`"
+		    LINITRD="`echo ${LINUX} | cut -d ':' -f 5`"
+		    LPARAMS="`echo ${LINUX} | cut -d ':' -f 6- | tr '^' ' '`"
+		    # En los parámetros cambiamos el UUID por el valor de LROOT
+		    UUID=$(blkid -s UUID -o value $LROOT)
+		    LPARAMS="$(echo $LPARAMS | sed "s|UUID=$UUID|$LROOT|g")"
+		    if [ -z "${LLABEL}" ] ; then
+			    LLABEL="${LONGNAME}"
+		    fi
 
-	if [ "${LROOT}" != "${LBOOT}" ]; then
-	  LKERNEL="${LKERNEL#/boot}"
-	  LINITRD="${LINITRD#/boot}"
-	fi
+		    if [ "${LROOT}" != "${LBOOT}" ]; then
+			    LKERNEL="${LKERNEL#/boot}"
+			    LINITRD="${LINITRD#/boot}"
+		    fi
 
-	found_other_os=1
-      	LABELCLASS=$(echo "${LLABEL}" | awk '{print tolower($1);}')
-        cat << EOF
+		    found_other_os=1
+		    LABELCLASS=$(echo "${LLABEL}" | awk '{print tolower($1);}')
+		    cat << EOF
 menuentry "${LLABEL} (on ${DEVICE})" --class $LABELCLASS --class linux --class os {
 EOF
-	save_default_entry | sed -e "s/^/\t/"
-	if [ -z "${prepare_boot_cache}" ]; then
-#ADV	    prepare_boot_cache="$(prepare_grub_to_access_device ${LBOOT} | sed -e "s/^/\t/")"
-	    prepare_boot_cache="$(OG_prepare_grub_to_access_device ${LBOOT} | sed -e "s/^/\t/")"
-	fi
-	printf '%s\n' "${prepare_boot_cache}"
-	if [ "$LABELCLASS" == "opengnsys" ]; then
-		KERNELPARAM=$(cat /proc/cmdline)
-	fi
-	cat <<  EOF
+save_default_entry | sed -e "s/^/\t/"
+if [ -z "${prepare_boot_cache}" ]; then
+	#ADV	    prepare_boot_cache="$(prepare_grub_to_access_device ${LBOOT} | sed -e "s/^/\t/")"
+	prepare_boot_cache="$(OG_prepare_grub_to_access_device ${LBOOT} | sed -e "s/^/\t/")"
+fi
+printf '%s\n' "${prepare_boot_cache}"
+if [ "$LABELCLASS" == "opengnsys" ]; then
+	KERNELPARAM=$(cat /proc/cmdline)
+fi
+cat <<  EOF
 	linux ${LKERNEL} ${LPARAMS} ${KERNELPARAM} 
 EOF
-        if [ -n "${LINITRD}" ] ; then
-          cat << EOF
+if [ -n "${LINITRD}" ] ; then
+	cat << EOF
 	initrd ${LINITRD}
 EOF
-        fi
-        cat << EOF
+	fi
+	cat << EOF
 }
 EOF
      done
-    ;;
+     ;;
     macosx)
-      OSXUUID="`grub-probe --target=fs_uuid --device ${DEVICE} 2> /dev/null`"
-      osx_entry xnu_kernel 32
-      osx_entry xnu_kernel64 64
-    ;;
+	    OSXUUID="`grub-probe --target=fs_uuid --device ${DEVICE} 2> /dev/null`"
+	    osx_entry xnu_kernel 32
+	    osx_entry xnu_kernel64 64
+	    ;;
     hurd)
-      found_other_os=1
-      cat << EOF
+	    found_other_os=1
+	    cat << EOF
 menuentry "${LONGNAME} (on ${DEVICE})" --class hurd --class gnu --class os {
 EOF
-      save_default_entry | sed -e "s/^/\t/"
-      prepare_grub_to_access_device ${DEVICE} | sed -e "s/^/\t/"
-      grub_device="`${grub_probe} --device ${DEVICE} --target=drive`"
-      mach_device="`echo "${grub_device}" | sed -e 's/(\(hd.*\),msdos\(.*\))/\1s\2/'`"
-      grub_fs="`${grub_probe} --device ${DEVICE} --target=fs`"
-      case "${grub_fs}" in
+save_default_entry | sed -e "s/^/\t/"
+prepare_grub_to_access_device ${DEVICE} | sed -e "s/^/\t/"
+grub_device="`${grub_probe} --device ${DEVICE} --target=drive`"
+mach_device="`echo "${grub_device}" | sed -e 's/(\(hd.*\),msdos\(.*\))/\1s\2/'`"
+grub_fs="`${grub_probe} --device ${DEVICE} --target=fs`"
+case "${grub_fs}" in
 	*fs)	hurd_fs="${grub_fs}" ;;
 	*)	hurd_fs="${grub_fs}fs" ;;
-      esac
-      cat << EOF
+esac
+cat << EOF
 	multiboot /boot/gnumach.gz root=device:${mach_device}
 	module /hurd/${hurd_fs}.static ${hurd_fs} --readonly \\
 			--multiboot-command-line='\${kernel-command-line}' \\
@@ -453,10 +471,10 @@ EOF
 	module /lib/ld.so.1 exec /hurd/exec '\$(exec-task=task-create)'
 }
 EOF
-    ;;
+;;
     *)
-      echo "  ${LONGNAME} is not yet supported by grub-mkconfig." >&2
-    ;;
+	    echo "  ${LONGNAME} is not yet supported by grub-mkconfig." >&2
+	    ;;
   esac
 done
 
