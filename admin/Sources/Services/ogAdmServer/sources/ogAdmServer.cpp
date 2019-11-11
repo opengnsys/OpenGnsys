@@ -602,7 +602,7 @@ bool actualizaConfiguracion(Database db, Table tbl, char *cfg, int ido)
 
 		lon += sprintf(tbPar + lon, "(%s, %s),", disk, par);
 
-		sprintf(sqlstr, "SELECT numdisk, numpar, codpar, tamano, uso, idsistemafichero, idnombreso"
+		sprintf(sqlstr, "SELECT numdisk, numpar, tamano, uso, idsistemafichero, idnombreso"
 				"  FROM ordenadores_particiones"
 				" WHERE idordenador=%d AND numdisk=%s AND numpar=%s",
 				ido, disk, par);
@@ -627,32 +627,25 @@ bool actualizaConfiguracion(Database db, Table tbl, char *cfg, int ido)
 			}
 		} else { // Existe el registro
 			swu = true; // Se supone que algún dato ha cambiado
-			if (!tbl.Get("codpar", dato)) { // Toma dato
+			if (!tbl.Get("tamano", dato)) { // Toma dato
 				tbl.GetErrorErrStr(msglog); // Error al acceder al registro
 				og_info(msglog);
 				return false;
 			}
-			if (strtol(cpt, NULL, 16) == dato) {// Parámetro tipo de partición (hexadecimal) igual al almacenado (decimal)
-				if (!tbl.Get("tamano", dato)) { // Toma dato
+			if (atoi(tam) == dato) { // Parámetro tamaño igual al almacenado
+				if (!tbl.Get("idsistemafichero", dato)) { // Toma dato
 					tbl.GetErrorErrStr(msglog); // Error al acceder al registro
 					og_info(msglog);
 					return false;
 				}
-				if (atoi(tam) == dato) {// Parámetro tamaño igual al almacenado
-					if (!tbl.Get("idsistemafichero", dato)) { // Toma dato
+				if (idsfi == dato) { // Parámetro sistema de fichero igual al almacenado
+					if (!tbl.Get("idnombreso", dato)) { // Toma dato
 						tbl.GetErrorErrStr(msglog); // Error al acceder al registro
 						og_info(msglog);
 						return false;
 					}
-					if (idsfi == dato) {// Parámetro sistema de fichero igual al almacenado
-						if (!tbl.Get("idnombreso", dato)) { // Toma dato
-							tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-							og_info(msglog);
-							return false;
-						}
-						if (idsoi == dato) {// Parámetro sistema de fichero distinto al almacenado
-							swu = false; // Todos los parámetros de la partición son iguales, no se actualiza
-						}
+					if (idsoi == dato) { // Parámetro sistema operativo distinto al almacenado
+						swu = false; // Todos los parámetros de la partición son iguales, no se actualiza
 					}
 				}
 			}
