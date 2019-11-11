@@ -68,6 +68,22 @@ function stop() {
     _service stop "$1"
 }
 
+# Execute database operation.
+function dbexec () {
+    MYCNF=$(mktemp)
+    trap "rm -f $MYCNF" 0 1 2 3 6 9 15
+    touch $MYCNF
+    chmod 600 $MYCNF
+    cat << EOT > $MYCNF
+[client]
+user=$USUARIO
+password=$PASSWORD
+EOT
+    mysql --defaults-extra-file="$MYCNF" -D "$CATALOG" -s -N -e "$1" || \
+        raiseError access "Cannot access the databse"
+    rm -f "$MYCNF"
+}
+
 
 ### Meta-functions and private functions.
 
@@ -94,3 +110,4 @@ function _service() {
         raiseError notfound "Service $SERVICE"
     fi
 }
+
