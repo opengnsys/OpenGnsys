@@ -1544,6 +1544,7 @@ EOT
 	$ENABLESERVICE
 	if [ -x $INSTALL_TARGET/bin/settoken ]; then
 		echoAndLog "${FUNCNAME}(): Setting authentication tokens and starting OpenGnsys services."
+		$INSTALL_TARGET/bin/settoken "$OPENGNSYS_DB_USER"
 		$INSTALL_TARGET/bin/settoken -f
 	else
 		echoAndLog "${FUNCNAME}(): Starting OpenGnsys services."

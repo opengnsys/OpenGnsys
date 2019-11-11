@@ -2,10 +2,11 @@
 
 #/**
 #@file    settoken
-#@brief   Generate a new security token for the specified service.
-#@usage   settoken [-f] [Service]
+#@brief   Generate a new security token for the specified service or user.
+#@usage   settoken [[-f] [Service]] | User
 #@param   -f: force server restart without prompting (ask by default)
-#@param   Service: may be "server", "repo" or "both" (by default)
+#@param   Service: may be "server", "repo" or "services" (for all services, by default)
+#@param   User: OpenGnsys-defined username
 #@warning This script uses "php" command.
 #@version 1.1.1 - Initial version.
 #@author  Ramón M. Gómez - ETSII Univ. Sevilla
@@ -19,7 +20,11 @@ SERVERCFG=$OPENGNSYS/etc/ogAdmServer.cfg                # Configuration files.
 REPOCFG=$OPENGNSYS/etc/ogAdmRepo.cfg
 
 # Functions.
-source $OPENGNSYS/lib/ogfunctions.sh
+source $OPENGNSYS/lib/ogfunctions.sh || exit 1
+
+function new_token() {
+    php -r 'echo md5(uniqid(rand(), true));'
+}
 
 # Error control.
 [ "$USER" != "root" ] && raiseError access "Need to be root"
@@ -31,16 +36,29 @@ fi
 case "${1,,}" in
     help)
         help ;;
-    server)
+    server)         # Generate server token.
         SERVER=1 ;;
-    repo)
+    repo)           # Generate repository token.
         REPO=1 ;;
-    ""|both)
+    ""|services)    # Generate server and repo tokens.
         SERVER=1; REPO=1 ;;
-    *)
-      	raiseError notfound "Unknown service"
+    *)              # Generate user token.
+        OGUSER="$1" ;;
 esac
 [ -w $SERVERCFG ] || raiseError access "Server configuration file"
+source $SERVERCFG
+
+# Update user token.
+if [ "$OGUSER" ]; then
+    APIKEY="$(new_token)"
+    DATA="
+UPDATE usuarios
+   SET apikey='$APIKEY', idusuario=LAST_INSERT_ID(idusuario)
+ WHERE usuario='$OGUSER';
+SELECT LAST_INSERT_ID();
+"
+    [ "$(dbexec "$DATA")" == "0" ] && raiseError notfound "User \"$OGUSER\""
+fi
 
 # Update server token.
 if [ "$SERVER" ]; then
@@ -49,30 +67,19 @@ if [ "$SERVER" ]; then
         read -rp "It will be necessary to restart ogAdmServer service. Continue? [y/N]: " ANSWER
         [ "${ANSWER,,}" != "y" ] && raiseError cancel "API tokens not updated"
     fi
-    APIKEY=$(php -r 'echo md5(uniqid(rand(), true));')
+    APIKEY="$(new_token)"
     sed -i -n -e "/^APITOKEN=/!p" -e "$ a\APITOKEN=$APIKEY" $SERVERCFG || raiseError access "Cannot update server file"
 fi
 
 # Update repository token.
 if [ "$REPO" ]; then
     [ -w $REPOCFG ] || raiseError access "Repository configuration file"
-    APIKEY=$(php -r 'echo md5(uniqid(rand(), true));')
+    APIKEY="$(new_token)"
     sed -i -n -e "/^ApiToken=/!p" -e "$ a\ApiToken=$APIKEY" $REPOCFG || raiseError access "Cannot update repository file"
     # If database is local, update it.
-    source $SERVERCFG
     source $REPOCFG
     if [ "$ServidorAdm" == "$IPlocal" ]; then
-        MYCNF=$(mktemp)
-        trap "rm -f $MYCNF" 0 1 2 3 6 9 15
-        chmod 600 $MYCNF
-        cat << EOT > $MYCNF
-[client]
-user=$USUARIO
-password=$PASSWORD
-host=$datasource
-EOT
-        mysql --defaults-extra-file="$MYCNF" --default-character-set=utf8 -D "$CATALOG" -e \
-            "UPDATE repositorios SET apikey='$APIKEY' WHERE ip='$IPlocal';" || raiseError access  "Database error"
+        dbexec "UPDATE repositorios SET apikey='$APIKEY' WHERE ip='$IPlocal';"
     else
         echo "Please, don't forget to update the authentication token for this repository on the web server (check the file ogAdmRepo.cfg)."
     fi
