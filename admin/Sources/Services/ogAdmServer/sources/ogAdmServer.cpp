@@ -3280,6 +3280,7 @@ struct og_msg_params {
 	const char	*profile;
 	const char	*cache;
 	const char	*cache_size;
+	bool		echo;
 	struct og_partition	partition_setup[OG_PARTITION_MAX];
 	struct og_sync_params sync_setup;
 	uint64_t	flags;
@@ -3315,6 +3316,7 @@ struct og_msg_params {
 #define OG_REST_PARAM_SYNC_DIFF_NAME		(1UL << 27)
 #define OG_REST_PARAM_SYNC_PATH			(1UL << 28)
 #define OG_REST_PARAM_SYNC_METHOD		(1UL << 29)
+#define OG_REST_PARAM_ECHO			(1UL << 30)
 
 static bool og_msg_params_validate(const struct og_msg_params *params,
 				   const uint64_t flags)
@@ -3350,6 +3352,18 @@ static int og_json_parse_string(json_t *element, const char **str)
 		return -1;
 
 	*str = json_string_value(element);
+	return 0;
+}
+
+static int og_json_parse_bool(json_t *element, bool *value)
+{
+	if (json_typeof(element) == JSON_TRUE)
+		*value = true;
+	else if (json_typeof(element) == JSON_FALSE)
+		*value = false;
+	else
+		return -1;
+
 	return 0;
 }
 
@@ -3724,23 +3738,36 @@ static int og_cmd_run_post(json_t *element, struct og_msg_params *params)
 	json_object_foreach(element, key, value) {
 		if (!strcmp(key, "clients"))
 			err = og_json_parse_clients(value, params);
-		if (!strcmp(key, "run"))
+		else if (!strcmp(key, "run"))
 			err = og_json_parse_run(value, params);
+		else if (!strcmp(key, "echo")) {
+			err = og_json_parse_bool(value, &params->echo);
+			params->flags |= OG_REST_PARAM_ECHO;
+                }
 
 		if (err < 0)
 			break;
 	}
 
 	if (!og_msg_params_validate(params, OG_REST_PARAM_ADDR |
-					    OG_REST_PARAM_RUN_CMD))
+					    OG_REST_PARAM_RUN_CMD |
+					    OG_REST_PARAM_ECHO))
 		return -1;
 
 	for (i = 0; i < params->ips_array_len; i++) {
 		len = snprintf(iph + strlen(iph), sizeof(iph), "%s;",
 			       params->ips_array[i]);
 	}
-	len = snprintf(buf, sizeof(buf), "nfn=ConsolaRemota\riph=%s\rscp=%s\r",
-		       iph, params->run_cmd);
+
+	if (params->echo) {
+		len = snprintf(buf, sizeof(buf),
+			       "nfn=ConsolaRemota\riph=%s\rscp=%s\r",
+			       iph, params->run_cmd);
+	} else {
+		len = snprintf(buf, sizeof(buf),
+			       "nfn=EjecutarScript\riph=%s\rscp=%s\r",
+			       iph, params->run_cmd);
+	}
 
 	msg = og_msg_alloc(buf, len);
 	if (!msg)
