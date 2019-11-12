@@ -58,6 +58,7 @@ define('OG_REST_PARAM_PATH', 'path');
 define('OG_REST_PARAM_DIFF_ID', 'diff_id');
 define('OG_REST_PARAM_DIFF_NAME', 'diff_name');
 define('OG_REST_PARAM_METHOD', 'method');
+define('OG_REST_PARAM_ECHO', 'echo');
 
 $conf_file = parse_ini_file(__DIR__ . '/../../etc/ogAdmServer.cfg');
 define('OG_REST_API_TOKEN', 'Authorization: ' . $conf_file['APITOKEN']);
@@ -106,10 +107,15 @@ function shell($case, $string_ips, $command) {
 	switch ($case) {
 		case 3:
 			$command = substr($command, 4);
-			/* fall through */
+			$data = array(OG_REST_PARAM_CLIENTS => $ips,
+				      OG_REST_PARAM_RUN => $command,
+				      OG_REST_PARAM_ECHO => false);
+			$command = OG_REST_CMD_RUN;
+			break;
 		case 1:
 			$data = array(OG_REST_PARAM_CLIENTS => $ips,
-				OG_REST_PARAM_RUN => $command);
+				      OG_REST_PARAM_RUN => $command,
+				      OG_REST_PARAM_ECHO => true);
 			$command = OG_REST_CMD_RUN;
 			break;
 		default:
