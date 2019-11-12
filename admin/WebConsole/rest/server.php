@@ -67,22 +67,21 @@ function getStatus($ouid, $labid, $clntid=0) {
 	global $cmd;
 	global $LONCABECERA;
 	global $LONHEXPRM;
+	$app = \Slim\Slim::getInstance();
 	$response = [];
 	$id = [];
 	$stat = [];
 	$ip = "";
-
-	$app = \Slim\Slim::getInstance();
-	$urls = Array();
+	$urls = [];
 	// Status mapping.
-	$status = Array('OFF'=>"off",
-			'INI'=>"initializing",
-			'OPG'=>"oglive",
-			'BSY'=>"busy",
-			'LNX'=>"linux",
-			'OSX'=>"macos",
-			'WIN'=>"windows",
-			'UNK'=>"unknown");
+	$status = ['OFF'=>"off",
+		   'INI'=>"initializing",
+		   'OPG'=>"oglive",
+		   'BSY'=>"busy",
+		   'LNX'=>"linux",
+		   'OSX'=>"macos",
+		   'WIN'=>"windows",
+		   'UNK'=>"unknown"];
 	// Parameters.
 	$ouid = htmlspecialchars($ouid);
 	$labid = htmlspecialchars($labid);
@@ -120,70 +119,63 @@ EOD;
 		$clientid = implode(",", $id);
 		$clientip = implode(";", array_keys($id));
 		$result = clients(2, $clientip);
-		// Parse status response.
-		if ($result) {
-			// Check status type.
-			if (checkParameter($result)) {
-				foreach (explode(";", $result) as $data) {
-					if (!empty($data)) {
-						list($clip, $clst) = explode("/", $data);
-						if ($clst != "OFF") {
-							// Update current status.
-							$stat[$clip] = $status[$clst];
-						}
+		// Check status type.
+		if (checkParameter($result)) {
+			foreach (explode(";", $result) as $data) {
+				if (!empty($data)) {
+					list($clip, $clst) = explode("/", $data);
+					if ($clst != "OFF") {
+						// Update current status.
+						$stat[$clip] = $status[$clst];
 					}
 				}
 			}
-			// Prepare request to new OGAgent for OSes.
-			foreach ($stat as $ip => $st) {
-				if ($st == "off") {
-					$urls[$ip] = "https://$ip:8000/opengnsys/status";
-				}
-			}
-			// Send request to OGAgents.
-			if (isset($urls)) {
-				$result = multiRequest($urls);
-			}
-			// Parse responses.
-			reset($urls);
-			foreach ($result as $res) {
-				if (!empty($res['data'])) {
-					// Get status and session data.
-					$ip = key($urls);
-					$data = json_decode($res['data']);
-					if (@isset($status[$data->status])) {
-						$stat[$ip] = $status[$data->status];
-						$logged[$ip] = $data->loggedin;
-					} else {
-						$stat[$ip] = $status['UNK'];
-					}
-				}
-				unset($urls[$ip]);
-			}
-			// Compose JSON response.
-			if ($single) {
-				// Single response.
-				$response['id'] = (int)reset($id);
-				$response['ip'] = key($id);
-				$response['status'] = $stat[$ip];
-				empty($logged[$ip]) || $response['loggedin'] = $logged[$ip];
-			} else {
-				// Multiple responses.
-				foreach ($stat as $ip => $st) {
-					$tmp = Array();
-					$tmp['id'] = (int)$id[$ip];
-					$tmp['ip'] = $ip;
-					$tmp['status'] = $stat[$ip];
-					empty($logged[$ip]) || $tmp['loggedin'] = $logged[$ip];
-					array_push($response, $tmp);
-				}
-			}
-			jsonResponse(200, $response);
-		} else {
-			// Access error.
-			$response['message'] = "Cannot access to OpenGnsys server";
-			jsonResponse(500, $response);
 		}
+		// Prepare request to new OGAgent for OSes.
+		foreach ($stat as $ip => $st) {
+			if ($st == "off") {
+				$urls[$ip] = "https://$ip:8000/opengnsys/status";
+			}
+		}
+		// Send request to OGAgents.
+		if (isset($urls)) {
+			$result = multiRequest($urls);
+		}
+		// Parse responses.
+		reset($urls);
+		foreach ($result as $res) {
+			if (!empty($res['data'])) {
+				// Get status and session data.
+				$ip = key($urls);
+				$data = json_decode($res['data']);
+				if (@isset($status[$data->status])) {
+					$stat[$ip] = $status[$data->status];
+					$logged[$ip] = $data->loggedin;
+				} else {
+					$stat[$ip] = $status['UNK'];
+				}
+			}
+			unset($urls[$ip]);
+		}
+		// Compose JSON response.
+		if ($single) {
+			// Single response.
+			$response['id'] = (int)reset($id);
+			$response['ip'] = key($id);
+			$response['status'] = $stat[key($id)];
+			empty($logged[$ip]) || $response['loggedin'] = $logged[$ip];
+		} else {
+			// Multiple responses.
+			foreach ($stat as $ip => $st) {
+				$tmp = Array();
+				$tmp['id'] = (int)$id[$ip];
+				$tmp['ip'] = $ip;
+				$tmp['status'] = $stat[$ip];
+				empty($logged[$ip]) || $tmp['loggedin'] = $logged[$ip];
+				array_push($response, $tmp);
+			}
+		}
+		jsonResponse(200, $response);
 	}
 	$rs->Cerrar(); 
 }
