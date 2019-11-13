@@ -4961,7 +4961,7 @@ static int og_client_state_process_payload_rest(struct og_client *cli)
 		json_decref(root);
 
 	if (err < 0)
-		return err;
+		return og_client_bad_request(cli);
 
 	err = og_client_ok(cli, buf_reply);
 	if (err < 0) {
