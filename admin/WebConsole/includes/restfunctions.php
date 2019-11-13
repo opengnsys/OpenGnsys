@@ -20,7 +20,7 @@ define('OG_REST_CMD_HARDWARE', 'hardware');
 define('OG_REST_CMD_SOFTWARE', 'software');
 define('OG_REST_CMD_CREATE_IMAGE', 'image/create');
 define('OG_REST_CMD_RESTORE_IMAGE', 'image/restore');
-define('OG_REST_CMD_SETUP', 'image/setup');
+define('OG_REST_CMD_SETUP', 'setup');
 define('OG_REST_CMD_CREATE_BASIC_IMAGE', 'image/create/basic');
 define('OG_REST_CMD_CREATE_INCREMENTAL_IMAGE', 'image/create/incremental');
 define('OG_REST_CMD_RESTORE_BASIC_IMAGE', 'image/restore/basic');

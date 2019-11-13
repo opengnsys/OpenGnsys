@@ -4228,7 +4228,7 @@ static int og_cmd_restore_image(json_t *element, struct og_msg_params *params)
 	return 0;
 }
 
-static int og_cmd_setup_image(json_t *element, struct og_msg_params *params)
+static int og_cmd_setup(json_t *element, struct og_msg_params *params)
 {
 	char buf[4096] = {};
 	int err = 0, len;
@@ -4933,7 +4933,7 @@ static int og_client_state_process_payload_rest(struct og_client *cli)
 			return og_client_bad_request(cli);
 		}
 		err = og_cmd_restore_image(root, &params);
-	} else if (!strncmp(cmd, "image/setup", strlen("image/setup"))) {
+	} else if (!strncmp(cmd, "setup", strlen("setup"))) {
 		if (method != OG_METHOD_POST)
 			return og_client_method_not_found(cli);
 
@@ -4941,7 +4941,7 @@ static int og_client_state_process_payload_rest(struct og_client *cli)
 			syslog(LOG_ERR, "command create with no payload\n");
 			return og_client_bad_request(cli);
 		}
-		err = og_cmd_setup_image(root, &params);
+		err = og_cmd_setup(root, &params);
 	} else if (!strncmp(cmd, "run/schedule", strlen("run/schedule"))) {
 		if (method != OG_METHOD_POST)
 			return og_client_method_not_found(cli);

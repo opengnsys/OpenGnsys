@@ -1,10 +1,10 @@
 import requests
 import unittest
 
-class TestPostSetupImageMethods(unittest.TestCase):
+class TestPostSetupMethods(unittest.TestCase):
 
     def setUp(self):
-        self.url = 'http://localhost:8888/image/setup'
+        self.url = 'http://localhost:8888/setup'
         self.headers = {'Authorization' : '07b3bfe728954619b58f0107ad73acc1'}
         self.json = { 'clients' : [ '192.168.2.1', '192.168.2.2' ],
                       'disk' : '1',
