@@ -16,5 +16,9 @@ class TestPostClientsMethods(unittest.TestCase):
         returned = requests.post(self.url, headers=self.headers, json=None)
         self.assertEqual(returned.status_code, 400)
 
+    def test_malformed_payload(self):
+        returned = requests.post(self.url, headers=self.headers, json={})
+        self.assertEqual(returned.status_code, 400)
+
 if __name__ == '__main__':
     unittest.main()
