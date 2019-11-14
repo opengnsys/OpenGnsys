@@ -33,7 +33,7 @@ function tablaConfiguracionesIniciarSesion($cmd,$idambito,$ambito){
         $cabeceraTabla.='</tr>'.chr(13);
 	// Mensaje si no existen datos en la base de datos.
         $tablaSinConfiguracion='<table id="tabla_conf" width="95%" class="tabla_listados_sin" align="center" border="0" cellpadding="0" cellspacing="1">'.chr(13);
-        $tablaSinConfiguracion.='<tr><th align="center" >'.$TbMsg["CONFIG_NOCONFIG"].'</th><tr>'.chr(13).'</table>'.chr(13);
+        $tablaSinConfiguracion.='<tr><th align="center" >'.$TbMsg["CONFIG_NOOS"].'</th><tr>'.chr(13).'</table>'.chr(13);
 
 	// CONSULTA BD: grupo de equipos con iguales sistemas operativos: idordenadores,configuracion
         $cmd->texto="";

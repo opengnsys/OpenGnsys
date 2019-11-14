@@ -45,6 +45,7 @@ $TbMsg["INCREMENTAL_IMAGE_REPOSITORY"]='Imagen Incremental / Repositorio';
 
 $TbMsg["CONFIG_NOCONFIG"]='Sin configuraci&oacute;n: cliente no conectado al servidor.';
 $TbMsg["CONFIG_NODISK1MSDOS"]='Aviso: este comando solo trata el disco 1 con tabla de particiones MSDOS.';
+$TbMsg["CONFIG_NOOS"]='No se ha detectado ningún sistema operativo en el equipo.';
 
 $TbMsg["SYNC_METHOD"]='Método';
 $TbMsg["SYNC1_DIR"]='Basada en directorio';

@@ -45,6 +45,7 @@ $TbMsg["INCREMENTAL_IMAGE_REPOSITORY"]='Imagen Incremental / Repositorio';
 
 $TbMsg["CONFIG_NOCONFIG"]='Sense configuració: client no connectat al servidor.';
 $TbMsg["CONFIG_NODISK1MSDOS"]='Avís: aquest comandament sol tracta el disc 1 amb taula de particions MSDOS.';
+$TbMsg["CONFIG_NOOS"]='No se ha detectado ningún sistema operativo en el equipo.';
 
 $TbMsg["SYNC_METHOD"]='Método';
 $TbMsg["SYNC1_DIR"]='Basada en directorio';
