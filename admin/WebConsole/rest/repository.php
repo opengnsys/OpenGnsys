@@ -6,18 +6,18 @@
  * @note    Some ideas are based on article "How to create REST API for Android app using PHP, Slim and MySQL" by Ravi Tamada, thanx.
  * @license GNU GPLv3+
  * @author  Juan Manuel Bardallo SIC Universidad de Huelva
- * @version 1.0
+ * @version 1.1.0
  * @date    2016-04-06
  */
 
 
-// Auxiliar functions.
+// Auxiliary functions.
 /**
  * @brief    Validate API key included in "Authorization" HTTP header.
  * @return   JSON response on error.
  */
 function validateRepositoryApiKey() {
-	$response = array();
+	$response = [];
 	$app = \Slim\Slim::getInstance();
 
 	// Assign user id. that match this key to global variable.
@@ -55,18 +55,17 @@ function commandExist($cmd) {
 }
 
 
-// Define REST routes.
+// REST routes.
 
 
 /**
  * @brief    List all images in the repository
  * @note     Route: /repository/images, Method: GET
- * @param    no
- * @return   JSON object with directory, images array, ous array and disk data.
+ * @return   string  JSON object with directory, images array, ous array and disk data.
  */
 $app->get('/repository/images(/)', 'validateRepositoryApiKey', 
     function() use ($app) {
-	$response = array();
+	$response = [];
 	// Read repository information file.
 	$cfgFile = '/opt/opengnsys/etc/repoinfo.json';
 	$response = json_decode(@file_get_contents($cfgFile), true);
@@ -123,13 +122,12 @@ $app->get('/repository/images(/)', 'validateRepositoryApiKey',
 /**
  * @brief    List image data
  * @note     Route: /repository/image/:imagename, Method: GET
- * @param    no
- * @return   JSON object with image data.
+ * @return   string  JSON object with image data.
  */
 $app->get('/repository/image(/:ouname)/:imagename(/)', 'validateRepositoryApiKey', 
     function($ouname="/", $imagename) use ($app) {
-	$images = array();
-	$response = array();
+	$images = [];
+	$response = [];
 	// Search image name in repository information file.
 	$cfgFile = '/opt/opengnsys/etc/repoinfo.json';
 	$json = json_decode(@file_get_contents($cfgFile), true);
@@ -180,11 +178,12 @@ $app->get('/repository/image(/:ouname)/:imagename(/)', 'validateRepositoryApiKey
 /**
  * @brief    Power on a pc or group of pcs with the MAC specified in POST parameters
  * @note     Route: /poweron, Method: POST
- * @param    macs      OU id.
- * @return   JSON string ok if the power on command was sent
+ * @param    array   Array of MAC addresses
+ * @return   string  JSON string ok if the power on command was sent
  */
 $app->post('/repository/poweron', 'validateRepositoryApiKey',
     function() use($app) {
+		$response = [];
 		// The macs parameter must come in the post (JSON object with array of MACs)
 		$data = json_decode($app->request()->getBody());
 		if (empty($data->macs)) {
@@ -195,6 +194,9 @@ $app->post('/repository/poweron', 'validateRepositoryApiKey',
 			// Execute local wakeonlan command (may be installed)
 			if(commandExist("wakeonlan")) {
 				$strMacs = trim(implode(' ', $data->macs));
+				if(stristr($strMacs, ':') === false) {
+					$strMacs = implode(':', str_split($strMacs, 2));
+				}
 				$response["output"] = "Executing wakeonlan ".$strMacs."\n";
 				$response["output"] .= shell_exec("wakeonlan ".$strMacs);
 				jsonResponse(200, $response);
