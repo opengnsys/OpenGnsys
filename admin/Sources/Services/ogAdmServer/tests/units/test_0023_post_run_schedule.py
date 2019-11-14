@@ -16,6 +16,10 @@ class TestPostRunScheduleMethods(unittest.TestCase):
         returned = requests.post(self.url, headers=self.headers, json=None)
         self.assertEqual(returned.status_code, 400)
 
+    def test_malformed_payload(self):
+        returned = requests.post(self.url, headers=self.headers, json={})
+        self.assertEqual(returned.status_code, 400)
+
     def test_get(self):
         returned = requests.get(self.url, headers=self.headers)
         self.assertEqual(returned.status_code, 405)
