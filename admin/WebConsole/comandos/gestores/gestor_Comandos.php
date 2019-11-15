@@ -35,6 +35,53 @@ define('OG_CMD_ID_CREATE_INCREMENTAL_IMAGE', 14);
 define('OG_CMD_ID_RESTORE_INCREMENTAL_IMAGE', 15);
 define('OG_CMD_ID_SENDMESSAGE', 16);
 
+function run_command($idcomando, $cadenaip, $atributos) {
+	switch ($idcomando) {
+		case OG_CMD_ID_WAKEUP:
+			include("wakeonlan_repo.php");
+			break;
+		case OG_CMD_ID_SETUP:
+			setup($cadenaip, $atributos);
+			break;
+		case OG_CMD_ID_SESSION:
+			session($cadenaip, $atributos);
+			break;
+		case OG_CMD_ID_CREATE_BASIC_IMAGE:
+			create_basic_image($cadenaip, $atributos);
+			break;
+		case OG_CMD_ID_CREATE_INCREMENTAL_IMAGE:
+			create_incremental_image($cadenaip, $atributos);
+			break;
+		case OG_CMD_ID_RESTORE_BASIC_IMAGE:
+			restore_basic_image($cadenaip, $atributos);
+			break;
+		case OG_CMD_ID_RESTORE_INCREMENTAL_IMAGE:
+			restore_incremental_image($cadenaip, $atributos);
+			break;
+		case OG_CMD_ID_POWEROFF:
+			poweroff($cadenaip);
+			break;
+		case OG_CMD_ID_CREATE_IMAGE:
+			create_image($cadenaip, $atributos);
+			break;
+		case OG_CMD_ID_RESTORE_IMAGE:
+			restore_image($cadenaip, $atributos);
+			break;
+		case OG_CMD_ID_REBOOT:
+			reboot($cadenaip);
+			break;
+		case OG_CMD_ID_HARDWARE:
+			hardware($cadenaip);
+			break;
+		case OG_CMD_ID_SOFTWARE:
+			software($cadenaip, $atributos);
+			break;
+		case OG_CMD_ID_SCRIPT:
+			shell(3, $cadenaip, $atributos);
+			break;
+	}
+}
+
 // Recoge parametros de seguimiento
 $sw_ejya="";
 $sw_seguimiento="";
@@ -183,51 +230,11 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 		$ValorParametros=extrae_parametros($parametros,chr(13),'=');
 		$script=@urldecode($ValorParametros["scp"]);
 		if($sw_ejya=='on'){
-			/* PARCHE UHU heredado de la version 1.1.0: Si la accion a realizar es Arrancar incluimos una pagina para arrancar desde el repo */
-			switch ($idcomando) {
-				case OG_CMD_ID_WAKEUP:
-					include("wakeonlan_repo.php");
-					break;
-				case OG_CMD_ID_SETUP:
-					setup($cadenaip, $atributos);
-					break;
-				case OG_CMD_ID_SESSION:
-					session($cadenaip, $atributos);
-					break;
-				case OG_CMD_ID_CREATE_BASIC_IMAGE:
-					create_basic_image($cadenaip, $atributos);
-					break;
-				case OG_CMD_ID_CREATE_INCREMENTAL_IMAGE:
-					create_incremental_image($cadenaip, $atributos);
-					break;
-				case OG_CMD_ID_RESTORE_BASIC_IMAGE:
-					restore_basic_image($cadenaip, $atributos);
-					break;
-				case OG_CMD_ID_RESTORE_INCREMENTAL_IMAGE:
-					restore_incremental_image($cadenaip, $atributos);
-					break;
-				case OG_CMD_ID_POWEROFF:
-					poweroff($cadenaip);
-					break;
-				case OG_CMD_ID_CREATE_IMAGE:
-					create_image($cadenaip, $atributos);
-					break;
-				case OG_CMD_ID_RESTORE_IMAGE:
-					restore_image($cadenaip, $atributos);
-					break;
-				case OG_CMD_ID_REBOOT:
-					reboot($cadenaip);
-					break;
-				case OG_CMD_ID_HARDWARE:
-					hardware($cadenaip);
-					break;
-				case OG_CMD_ID_SOFTWARE:
-					software($cadenaip, $atributos);
-					break;
-				case OG_CMD_ID_SCRIPT:
-					shell(3, $cadenaip, $atributos);
-					break;
-			}
+			if ($sw_seguimiento == 1 || $sw_ejprg == "on")
+				run_schedule($cadenaip);
+			else
+				run_command($idcomando, $cadenaip, $atributos);
+
 			// En agente nuevo devuelvo siempre correcto
 			$resulhidra = 1;
 
