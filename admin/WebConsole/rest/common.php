@@ -68,14 +68,10 @@ function jsonResponse($status, $response, $opts=0) {
  * @return  string          JSON response.
  */
 function jsonResponseNow($status, $response, $opts=0) {
-	// Flush buffer.
-	ob_end_clean();
-	ob_end_flush();
-	header("Connection: close");
 	// Compose headers and content.
+	ignore_user_abort();
 	http_response_code((int)$status);
 	header('Content-type: application/json; charset=utf-8');
-	ignore_user_abort();
 	ob_start();
 	echo json_encode($response, $opts);
 	$size = ob_get_length();
@@ -88,12 +84,12 @@ function jsonResponseNow($status, $response, $opts=0) {
 
 /**
  * @brief    Validate API key included in "Authorization" HTTP header.
- * @return   JSON response on error.
+ * @return   string  JSON response on error.
  */
 function validateApiKey() {
 	global $cmd;
 	global $userid;
-	$response = array();
+	$response = [];
 	$app = \Slim\Slim::getInstance();
 	// Read Authorization HTTP header.
 	if (! empty($_SERVER['HTTP_AUTHORIZATION'])) {
@@ -110,8 +106,8 @@ function validateApiKey() {
 				// Fetch user id.
 				$userid = $rs->campos["idusuario"];
 			} else {
-                		// Credentials error.
-                		$response['message'] = 'Login failed. Incorrect credentials';
+				// Credentials error.
+				$response['message'] = 'Login failed, incorrect credentials';
 				jsonResponse(401, $response);
 				$app->stop();
 			}
@@ -135,6 +131,7 @@ function validateApiKey() {
  * @return   boolean         "false" if parameter is null, otherwise "true".
  */
 function checkParameter($param) {
+	$response = [];
 	if (isset($param)) {
 		return true;
 	} else {
@@ -151,7 +148,7 @@ function checkParameter($param) {
  * @return   boolean         "true" if all ids are int>0, otherwise "false".
  */
 function checkIds() {
-	$opts = Array('options' => Array('min_range' => 1));	// Check for int>0
+	$opts = ['options' => ['min_range' => 1]];	// Check for int>0
 	foreach (func_get_args() as $id) {
 		if (filter_var($id, FILTER_VALIDATE_INT, $opts) === false) {
 			return false;
@@ -163,19 +160,11 @@ function checkIds() {
 /**
  * @brief   Show custom message for "not found" error (404).
  */
-$app->notFound(function() {
-	echo "REST route not found.";
+$app->notFound(
+    function() {
+        $response['message'] = 'REST route not found';
+        jsonResponse(404, $response);
    }
-);
-
-/**
- * @brief   Hook to write a REST init log message, if debug is enabled.
- * @warning Message will be written in REST log file.
- */
-$app->hook('slim.before', function() use ($app) {
-	if ($app->settings['debug'])
-		writeRestLog("Init.");
-    }
 );
 
 /**
@@ -196,7 +185,7 @@ $app->hook('slim.after', function() use ($app) {
 				 substr($app->response->getBody(), 0, 100));
 	}
 	if ($app->settings['debug'])
-		writeRestLog("Exit.");
+		writeRestLog(substr($app->response->getBody(), 0, 30));
    }
 );
 
@@ -206,8 +195,7 @@ $app->hook('slim.after', function() use ($app) {
 /**
  * @brief    Get general server information 
  * @note     Route: /info, Method: GET
- * @param    no
- * @return   JSON object with basic server information (version, services, etc.)
+ * @return   string  JSON object with basic server information (version, services, etc.)
  */
 $app->get('/info', function() {
       $hasOglive = false;
@@ -221,7 +209,7 @@ $app->get('/info', function() {
       }
       // Getting actived services.
       @$services = parse_ini_file('/etc/default/opengnsys');
-      $response->services = Array();
+      $response->services = [];
       if (@$services["RUN_OGADMSERVER"] === "yes") {
           array_push($response->services, "server");
           $hasOglive = true;
@@ -242,10 +230,10 @@ $app->get('/info', function() {
 /**
  * @brief    Get the server status
  * @note     Route: /status, Method: GET
- * @param    no
- * @return   JSON object with all data collected from server status (RAM, %CPU, etc.).
+ * @return   string  JSON object with all data collected from server status (RAM, %CPU, etc.).
  */
 $app->get('/status', function() {
+      $response = [];
       // Getting memory and CPU information.
       exec("awk '$1~/Mem/ {print $2}' /proc/meminfo",$memInfo);
       $memInfo = array("total" => $memInfo[0], "used" => $memInfo[1]);
