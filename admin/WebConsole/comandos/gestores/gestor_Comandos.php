@@ -36,6 +36,7 @@ define('OG_CMD_ID_RESTORE_INCREMENTAL_IMAGE', 15);
 define('OG_CMD_ID_SENDMESSAGE', 16);
 
 function run_command($idcomando, $cadenaip, $cadenamac, $atributos) {
+	global $cmd;
 	switch ($idcomando) {
 		case OG_CMD_ID_WAKEUP:
 			include("wakeonlan_repo.php");
