@@ -640,8 +640,6 @@ function TomaPropiedades($cmd,$ida)
 		if(count(explode(",",$idrepositorio))>1) $idrepositorio=0;
 		$idperfilhard=$rs->campos["idperfileshard"];		
 		if(count(explode(",",$idperfilhard))>1) $idperfilhard=0;
-		$idmenu=$rs->campos["idmenus"];
-		if(count(explode(",",$idmenu))>1) $idmenu=0;
 		$idprocedimiento=$rs->campos["idprocedimientos"];
 		if(count(explode(",",$idprocedimiento))>1) $idprocedimiento=0;
 	
