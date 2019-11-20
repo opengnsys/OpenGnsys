@@ -164,7 +164,7 @@ function tablaConfiguracionesInventarioSoftware($cmd,$idordenador){
         if ( $tablaHtml == "" ) {
                 // Equipo sin configuracion en base de datos.
 		$tablaHtml='<table id="tabla_conf" width="95%" class="tabla_listados_sin" align="center" border="0" cellpadding="0" cellspacing="1">'.chr(13);
-		$tablaHtml.='<tr><th align="center" >'.$TbMsg["CONFIG_NOCONFIG"].'</th><tr>'.chr(13);
+		$tablaHtml.='<tr><th align="center" >'.$TbMsg["CONFIG_NOOS"].'</th><tr>'.chr(13);
         }
        else
         {
