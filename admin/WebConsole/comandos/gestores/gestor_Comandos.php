@@ -35,7 +35,7 @@ define('OG_CMD_ID_CREATE_INCREMENTAL_IMAGE', 14);
 define('OG_CMD_ID_RESTORE_INCREMENTAL_IMAGE', 15);
 define('OG_CMD_ID_SENDMESSAGE', 16);
 
-function run_command($idcomando, $cadenaip, $atributos) {
+function run_command($idcomando, $cadenaip, $cadenamac, $atributos) {
 	switch ($idcomando) {
 		case OG_CMD_ID_WAKEUP:
 			include("wakeonlan_repo.php");
@@ -233,7 +233,7 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 			if ($sw_seguimiento == 1 || $sw_ejprg == "on")
 				run_schedule($cadenaip);
 			else
-				run_command($idcomando, $cadenaip, $atributos);
+				run_command($idcomando, $cadenaip, $cadenamac, $atributos);
 
 			// En agente nuevo devuelvo siempre correcto
 			$resulhidra = 1;
