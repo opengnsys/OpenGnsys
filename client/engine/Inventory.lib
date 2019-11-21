@@ -109,7 +109,8 @@ fi
 
 # Obtener nº de serie (ignorar los no especificados).
 SERIALNO=$(dmidecode -s system-serial-number | egrep -vi "(^[ 0]+$|not specified|to be filled|invalid entry|default string)")
-# Truncar cadena si >25 caracteres.
+# Quitar espacios y truncar cadena si >25 caracteres.
+SERIALNO="${SERIALNO// /}"
 [ ${#SERIALNO} -gt 25 ] && SERIALNO="${SERIALNO:0:22}..."
 [ -n "$SERIALNO" ] && echo "$SERIALNO"
 return 0
