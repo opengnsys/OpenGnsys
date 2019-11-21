@@ -663,9 +663,10 @@ bool actualizaConfiguracion(Database db, Table tbl, char *cfg, int ido)
 					cpt, tam, uso, idsfi, idsoi, ido, disk, par);
 			} else {  // Actualizar porcentaje de uso.
 				sprintf(sqlstr, "UPDATE ordenadores_particiones SET "
+					" codpar=0x%s,"
 					" uso=%s"
 					" WHERE idordenador=%d AND numdisk=%s AND numpar=%s",
-					uso, ido, disk, par);
+					cpt, uso, ido, disk, par);
 			}
 			if (!db.Execute(sqlstr, tbl)) {
 				db.GetErrorErrStr(msglog);
