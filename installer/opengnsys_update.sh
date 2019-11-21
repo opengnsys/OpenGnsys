@@ -118,7 +118,7 @@ function autoConfigure()
 	# Configuración según la distribución de Linux.
 	if [ -f /etc/debian_version ]; then
 		# Distribución basada en paquetes Deb.
-		DEPENDENCIES=( curl rsync btrfs-tools procps arp-scan realpath php-curl gettext moreutils jq wakeonlan udpcast libev-dev libjansson-dev shim-signed grub-efi-amd64-signed php-fpm gawk )
+		DEPENDENCIES=( curl rsync btrfs-tools procps arp-scan realpath php-curl gettext moreutils jq wakeonlan udpcast libev-dev libjansson-dev libssl-dev shim-signed grub-efi-amd64-signed php-fpm gawk )
 		# Paquete correcto para realpath.
 		[ -z "$(apt-cache pkgnames realpath)" ] && DEPENDENCIES=( ${DEPENDENCIES[@]//realpath/coreutils} )
 		UPDATEPKGLIST="add-apt-repository -y ppa:ondrej/php; apt-get update"
