@@ -7,6 +7,7 @@
 // Nombre del fichero: propiedades_repositorios.php
 // Descripción :
 //		 Presenta el formulario de captura de datos de un repositorio para insertar,modificar y eliminar
+// Version 1.1.1: Si las OU están separadas por directorios, sólo muestra las imágenes del subdir definido
 // **********************************************************************************************************
 include_once("../includes/ctrlacc.php");
 include_once("../includes/opciones.php");
@@ -28,11 +29,14 @@ $grupoid=0;
 $comentarios="";
 $ordenadores=0; // Número de ordenador a los que da servicio
 $numordenadores=0; // Número de ordenador a los que da servicio
+$dirOU=""; // Directorio de la unidad organizativa
 
 if (isset($_GET["opcion"])) $opcion=$_GET["opcion"]; // Recoge parametros
 if (isset($_GET["idrepositorio"])) $idrepositorio=$_GET["idrepositorio"];
 if (isset($_GET["grupoid"])) $grupoid=$_GET["grupoid"];
 if (isset($_GET["identificador"])) $idrepositorio=$_GET["identificador"];
+$idcentro = (isset($_SESSION["widcentro"])) ? $_SESSION["widcentro"] : "";
+
 //________________________________________________________________________________________________________
 $cmd=CreaComando($cadenaconexion); // Crea objeto comando
 if (!$cmd)
@@ -42,6 +46,9 @@ if  ($opcion!=$op_alta){
 	if (!$resul)
 		Header('Location: '.$pagerror.'?herror=3'); // Error de recuperaci�n de datos.
 }
+// Obtenemos directorio de la Unidad Organizativa
+if ($idcentro != "") TomaDirectorioOU($cmd,$idcentro);
+
 //________________________________________________________________________________________________________
 //#########################################################################
 
@@ -161,10 +168,13 @@ if($apiKeyRepo != ""){
                 </TR>
                 <?php
 				// Si tenemos informacion del repositorio remoto, mostramos las imagenes
-				if($repoWithApi == true && is_array($repoImages)){
-					echo "<tr class='tabla_listados_sin'><th colspan='4'>".$TbMsg['MSG_CONTENT']." $repodir</th></tr>\n";
+				if ($repoWithApi == true) {
+					$cabeceraTabla= "<tr class='tabla_listados_sin'><th colspan='4'>".$TbMsg['MSG_CONTENT']." $repodir</th></tr>\n".
+							"<tr><td>".$TbMsg['MSG_IMAGE']." (".$TbMsg['MSG_TYPE'].")</td><td>".$TbMsg['MSG_SIZE']."</td><td>".$TbMsg['MSG_MODIFIED']."</td><td>".$TbMsg['MSG_PERMISSIONS']."</td></tr>\n";
 
-echo "<tr><td>".$TbMsg['MSG_IMAGE']." (".$TbMsg['MSG_TYPE'].")</td><td>".$TbMsg['MSG_SIZE']."</td><td>".$TbMsg['MSG_MODIFIED']."</td><td>".$TbMsg['MSG_PERMISSIONS']."</td></tr>\n";
+				    if ($dirOU == "" && is_array($repoImages) && !empty($repoImages)) {
+					echo $cabeceraTabla;
+					$cabeceraTabla = "";
 		   			foreach($repoImages as $image){
 		   				echo "<tr class='tabla_listados_sin'>";
 		   				echo "<td>".$image->name." (".$image->type.")</td>";
@@ -173,16 +183,20 @@ echo "<tr><td>".$TbMsg['MSG_IMAGE']." (".$TbMsg['MSG_TYPE'].")</td><td>".$TbMsg[
 		   				echo "<td>".$image->mode."</td>";
 		   				echo "</tr>\n";
 		   			}
-		   			foreach($repoOus as $ou) {
+				    }
+				    foreach($repoOus as $ou) {
+						if ($dirOU != "" && $ou->subdir != $dirOU) continue;
+						echo $cabeceraTabla;
+						$cabeceraTabla = "";
 		   				foreach($ou->images as $image) {
 		   					echo "<tr class='tabla_listados_sin'>";
 		   					echo "<td>".$ou->subdir." / ".$image->name." (".$image->type.")</td>";
-		   					echo "<td>".$image->size." bytes</td>";
+							echo "<td>".humanSize($image->size)."</td>";
 		   					echo "<td>".$image->modified."</td>";
 		   					echo "<td>".$image->mode."</td>";
 		   					echo "</tr>\n";
 		   				}
-		   			}
+				    }
 		   		}
 		   	?>
 		<?php }else { ?>
@@ -233,6 +247,30 @@ EOT;
 		$comentarios=$rs->campos["comentarios"];
 		$apiKeyRepo=$rs->campos["apikey"];
 		$ordenadores=$rs->campos["numordenadores"];
+	}
+	$rs->Cerrar();
+	return(true);
+}
+
+//______________________________________________________________________________
+//	Recupera directorio de la unidad organizativa (si no están separados '')
+//		Parametros:
+//		- cmd: Una comando ya operativo (con conexión abierta)
+//		- id: El identificador del repositorio
+//________________________________________________________________________________________________________
+function TomaDirectorioOU($cmd,$idOU){
+	global $dirOU;
+	$cmd->texto=<<<EOT
+SELECT if(ogunit=1, directorio, "") AS dirOU
+  FROM entidades, centros
+ WHERE idcentro='$idOU';
+EOT;
+	$rs=new Recordset;
+	$rs->Comando=&$cmd;
+	if (!$rs->Abrir()) return(true); // Error al abrir recordset
+	$rs->Primero();
+	if (!$rs->EOF){
+		$dirOU=$rs->campos["dirOU"];
 	}
 	$rs->Cerrar();
 	return(true);
