@@ -19,6 +19,8 @@ include_once("../includes/RecopilaIpesMacs.php");
 include_once("../includes/restfunctions.php");
 //________________________________________________________________________________________________________
 
+define('OG_CMD_ID_WAKEUP', 1);
+
 $opcion=0; // Inicializa parametros
 
 $idprocedimiento=0;
@@ -155,8 +157,12 @@ function ejecucionTarea($idtarea)
 //________________________________________________________________________________________________________
 function recorreProcedimientos($idprocedimiento,$ambito,$idambito)
 {		
-	global $cmd;
+	global $cadenamac;
+	global $cadenaip;
 	global $sesion;
+	global $cmd;
+
+	$wol_params;
 
 	$cmd->texto="SELECT   idcomando,procedimientoid,parametros
 			 FROM procedimientos_acciones
@@ -183,11 +189,19 @@ function recorreProcedimientos($idprocedimiento,$ambito,$idambito)
 			$sesion=$nwsesion;
 			$cmd->ParamSetValor("@sesion",$sesion);
 			// Fin ticket 681.
+			if ($idcomando == OG_CMD_ID_WAKEUP)
+				$wol_params = $parametros;
 			if(!insertaComando($idcomando,$parametros,$idprocedimiento,$ambito,$idambito)) 
 				return(false);	
 		}
 		$rs->Siguiente();
 	}
+
+	if (isset($wol_params)) {
+		$atributos = substr(trim($wol_params), -1);
+		include("../comandos/gestores/wakeonlan_repo.php");
+	}
+
 	return(true);
 }
 //________________________________________________________________________________________________________
