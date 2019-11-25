@@ -1127,6 +1127,11 @@ static bool respuestaEstandar(TRAMA *ptrTrama, char *iph, char *ido, Database db
 	
 	liberaMemoria(der);
 
+	if (atoi(res) == ACCION_FALLIDA) {
+		liberaMemoria(res);
+		return false;
+	}
+
 	liberaMemoria(res);
 	return true;
 }
