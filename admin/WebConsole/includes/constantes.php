@@ -136,13 +136,6 @@ $ACCION_DETENIDA=2; // Acción momentanemente parada
 $ACCION_FINALIZADA=3; // Acción finalizada
 $ACCION_PROGRAMADA=4; // Acción programada
 
-// Nombre y path del fichero de intercambio de parametros entre páginas 
-//  Ha sido necesario porque cuando los parametros enviados execedían de cierta longitud
-//  ocurria una excepción al llamar a la página por GET.
-
-$fileparam="../includes/PRM_".$usuario;
-$pathfileco="/opt/opengnsys/log/clients"; // Path del fichero de eco de consola 
-
 // Máxima longitud de los parametros enviados entre páginas
 $MAXLONPRM=16000;
 $MAXLONVISUSCRIPT=1024; // Longitud máxima de visualización del script en las colas de acciones
