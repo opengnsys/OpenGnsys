@@ -149,7 +149,7 @@ case "${1,,}" in
 		exit 1
 		;;
 esac
-BRANCH="devel"
+BRANCH="master"
 GITURL="https://api.github.com/repos/opengnsys/OpenGnsys/commits?sha=$BRANCH&path=/client"
 GITRELEASE=$(curl -s "$GITURL" | jq -r '"r" + (.[0].commit.committer.date | split("-") | join("")[:8]) + "." + (.[0].sha[:7])')
 NAMEISOCLIENT="$VERSIONBOOTTOOLS-$OSCODENAME-$OSRELEASE-$OSARCH-$GITRELEASE"

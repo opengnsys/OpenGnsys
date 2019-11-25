@@ -29,7 +29,7 @@ echo "yes" | ./configure -opensource -embedded x86 -webkit -openssl -qt-gfx-vnc 
 make
 make install
 # Compile the Browser.
-BRANCH="devel"
+BRANCH="master"
 svn export "https://github.com/opengnsys/OpenGnsys/branches/$BRANCH/client/browser" ../browser
 cd ../browser
 qmake browser.pro

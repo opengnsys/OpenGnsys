@@ -73,7 +73,7 @@ if [ -d "$PROGRAMDIR/../installer" ]; then
 else
 	REMOTE=1
 fi
-BRANCH="devel"
+BRANCH="master"
 CODE_URL="https://codeload.github.com/opengnsys/OpenGnsys/zip/$BRANCH"
 API_URL="https://api.github.com/repos/opengnsys/OpenGnsys/branches/$BRANCH"
 RAW_URL="https://raw.githubusercontent.com/opengnsys/OpenGnsys/$BRANCH"

@@ -24,7 +24,8 @@ apt-get install -y jq subversion syslinux syslinux-efi syslinux-utils
 groupadd opengnsys
 mkdir -p /opt/opengnsys/client /tmp/opengnsys_installer/opengnsys
 ln -fs /var/lib/tftpboot /opt/opengnsys
-svn export https://github.com/opengnsys/OpenGnsys/branches/devel/client /tmp/opengnsys_installer/opengnsys/client
+BRANCH="master"
+svn export https://github.com/opengnsys/OpenGnsys/branches/$BRANCH/client /tmp/opengnsys_installer/opengnsys/client
 echo "Connect to this VM, launch boot-tools generation script and follow instructions:"
 echo "    sudo /tmp/opengnsys_installer/opengnsys/client/boot-tools/boottoolsgenerator.sh"
 echo "Warning: this process may take a long time."

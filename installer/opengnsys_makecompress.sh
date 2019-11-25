@@ -21,7 +21,7 @@ for PROG in jq unzip; do
 done
 
 # Variables.
-BRANCH="devel"
+BRANCH="master"
 CODE_URL="https://codeload.github.com/opengnsys/OpenGnsys/zip/$BRANCH"
 API_URL="https://api.github.com/repos/opengnsys/OpenGnsys/branches/$BRANCH"
 REVISION=$(curl -s "$API_URL" | jq '"r" + (.commit.commit.committer.date | split("-") | join("")[:8]) + "." + (.commit.sha[:7])')
