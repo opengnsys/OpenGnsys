@@ -51,7 +51,7 @@ bool enviaComando(TRAMA *ptrTrama,const char*);
 bool Levanta(char**, char**, int, char*);
 bool WakeUp(int,char*,char*,char*);
 void PasaHexBin(char *,char *);
-bool actualizaCreacionImagen(Database,Table,char*,char*,char*,char*,char*,char*);
+bool actualizaCreacionImagen(struct og_dbi *,char*,char*,char*,char*,char*,char*);
 bool actualizaRestauracionImagen(struct og_dbi *,char*,char*,char*,char*,char*);
 bool actualizaHardware(Database, Table,char* ,char*,char*,char*);
 bool cuestionPerfilHardware(Database,Table,char*,char*,int,char*,char*,int *,int);

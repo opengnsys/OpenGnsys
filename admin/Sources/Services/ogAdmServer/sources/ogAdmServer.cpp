@@ -1460,26 +1460,15 @@ static bool RESPUESTA_Apagar(TRAMA* ptrTrama, struct og_client *cli)
 // ________________________________________________________________________________________________________
 static bool RESPUESTA_CrearImagen(TRAMA* ptrTrama, struct og_client *cli)
 {
-	char msglog[LONSTD];
-	Database db;
-	Table tbl;
 	char *iph, *dsk, *par, *cpt, *ipr, *ido;
 	struct og_dbi *dbi;
 	char *idi;
 	bool res;
 
-	if (!db.Open(usuario, pasguor, datasource, catalog)) {
-		db.GetErrorErrStr(msglog);
-		syslog(LOG_ERR, "cannot open connection database (%s:%d) %s\n",
-		       __func__, __LINE__, msglog);
-		return false;
-	}
-
 	dbi = og_dbi_open(&dbi_config);
 	if (!dbi) {
 		syslog(LOG_ERR, "cannot open connection database (%s:%d)\n",
 		       __func__, __LINE__);
-		db.Close();
 		return false;
 	}
 
@@ -1501,7 +1490,7 @@ static bool RESPUESTA_CrearImagen(TRAMA* ptrTrama, struct og_client *cli)
 	cpt = copiaParametro("cpt",ptrTrama);
 	ipr = copiaParametro("ipr",ptrTrama);
 
-	res=actualizaCreacionImagen(db, tbl, idi, dsk, par, cpt, ipr, ido);
+	res=actualizaCreacionImagen(dbi, idi, dsk, par, cpt, ipr, ido);
 
 	liberaMemoria(idi);
 	liberaMemoria(par);
@@ -1511,8 +1500,6 @@ static bool RESPUESTA_CrearImagen(TRAMA* ptrTrama, struct og_client *cli)
 
 	if (!res)
 		syslog(LOG_ERR, "Problem processing update\n");
-
-	db.Close(); // Cierra conexión
 
 	return res;
 }
@@ -1534,76 +1521,89 @@ static bool RESPUESTA_CrearImagen(TRAMA* ptrTrama, struct og_client *cli)
 //		true: Si el proceso es correcto
 //		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-bool actualizaCreacionImagen(Database db, Table tbl, char *idi, char *dsk,
+bool actualizaCreacionImagen(struct og_dbi *dbi, char *idi, char *dsk,
 			     char *par, char *cpt, char *ipr, char *ido)
 {
-	char msglog[LONSTD], sqlstr[LONSQL];
+	const char *msglog;
+	dbi_result result;
 	int idr,ifs;
 
 	/* Toma identificador del repositorio correspondiente al ordenador modelo */
-	snprintf(sqlstr, LONSQL,
+	result = dbi_conn_queryf(dbi->conn,
 			"SELECT repositorios.idrepositorio"
 			"  FROM repositorios"
 			"  LEFT JOIN ordenadores USING (idrepositorio)"
 			" WHERE repositorios.ip='%s' AND ordenadores.idordenador=%s", ipr, ido);
 
-	if (!db.Execute(sqlstr, tbl)) {
-		db.GetErrorErrStr(msglog);
+	if (!result) {
+		dbi_conn_error(dbi->conn, &msglog);
 		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
 		       __func__, __LINE__, msglog);
 		return false;
 	}
-	if (!tbl.Get("idrepositorio", idr)) { // Toma dato
-		tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-		og_info(msglog);
+	if (!dbi_result_next_row(result)) {
+		syslog(LOG_ERR,
+		       "repository does not exist in database (%s:%d)\n",
+		       __func__, __LINE__);
+		dbi_result_free(result);
 		return false;
 	}
+	idr = dbi_result_get_uint(result, "idrepositorio");
+	dbi_result_free(result);
 
 	/* Toma identificador del perfilsoftware */
-	snprintf(sqlstr, LONSQL,
+	result = dbi_conn_queryf(dbi->conn,
 			"SELECT idperfilsoft"
 			"  FROM ordenadores_particiones"
 			" WHERE idordenador=%s AND numdisk=%s AND numpar=%s", ido, dsk, par);
 
-	if (!db.Execute(sqlstr, tbl)) {
-		db.GetErrorErrStr(msglog);
+	if (!result) {
+		dbi_conn_error(dbi->conn, &msglog);
 		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
 		       __func__, __LINE__, msglog);
 		return false;
 	}
-	if (!tbl.Get("idperfilsoft", ifs)) { // Toma dato
-		tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-		og_info(msglog);
+	if (!dbi_result_next_row(result)) {
+		syslog(LOG_ERR,
+		       "software profile does not exist in database (%s:%d)\n",
+		       __func__, __LINE__);
+		dbi_result_free(result);
 		return false;
 	}
+	ifs = dbi_result_get_uint(result, "idperfilsoft");
+	dbi_result_free(result);
 
 	/* Actualizar los datos de la imagen */
-	snprintf(sqlstr, LONSQL,
+	result = dbi_conn_queryf(dbi->conn,
 		"UPDATE imagenes"
 		"   SET idordenador=%s, numdisk=%s, numpar=%s, codpar=%s,"
 		"       idperfilsoft=%d, idrepositorio=%d,"
 		"       fechacreacion=NOW(), revision=revision+1"
 		" WHERE idimagen=%s", ido, dsk, par, cpt, ifs, idr, idi);
 
-	if (!db.Execute(sqlstr, tbl)) {
-		db.GetErrorErrStr(msglog);
+	if (!result) {
+		dbi_conn_error(dbi->conn, &msglog);
 		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
 		       __func__, __LINE__, msglog);
 		return false;
 	}
+	dbi_result_free(result);
+
 	/* Actualizar los datos en el cliente */
-	snprintf(sqlstr, LONSQL,
+	result = dbi_conn_queryf(dbi->conn,
 		"UPDATE ordenadores_particiones"
 		"   SET idimagen=%s, revision=(SELECT revision FROM imagenes WHERE idimagen=%s),"
 		"       fechadespliegue=NOW()"
 		" WHERE idordenador=%s AND numdisk=%s AND numpar=%s",
 		idi, idi, ido, dsk, par);
-	if (!db.Execute(sqlstr, tbl)) {
-		db.GetErrorErrStr(msglog);
+	if (!result) {
+		dbi_conn_error(dbi->conn, &msglog);
 		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
 		       __func__, __LINE__, msglog);
 		return false;
 	}
+	dbi_result_free(result);
+
 	return true;
 }
 // ________________________________________________________________________________________________________
