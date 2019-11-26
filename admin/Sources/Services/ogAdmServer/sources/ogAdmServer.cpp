@@ -61,7 +61,7 @@ static bool tomaConfiguracion(const char *filecfg)
 		return false;
 	}
 
-	servidoradm[0] = (char) NULL; //inicializar variables globales
+	servidoradm[0] = '\0'; //inicializar variables globales
 
 	line = fgets(buf, sizeof(buf), fcfg);
 	while (line != NULL) {
@@ -1191,7 +1191,7 @@ bool respuestaConsola(int socket_c, TRAMA *ptrTrama, int res)
 bool Levanta(char *ptrIP[], char *ptrMacs[], int lon, char *mar)
 {
 	unsigned int on = 1;
-	sockaddr_in local;
+	struct sockaddr_in local;
 	int i, res;
 	int s;
 
@@ -1260,7 +1260,7 @@ static bool wake_up_broadcast(int sd, struct sockaddr_in *client,
 	freeifaddrs(ifaddr);
 
 	ret = sendto(sd, msg, sizeof(*msg), 0,
-		     (sockaddr *)client, sizeof(*client));
+		     (struct sockaddr *)client, sizeof(*client));
 	if (ret < 0) {
 		syslog(LOG_ERR, "failed to send broadcast wol\n");
 		return false;
@@ -1278,7 +1278,7 @@ static bool wake_up_unicast(int sd, struct sockaddr_in *client,
 	client->sin_addr.s_addr = addr->s_addr;
 
 	ret = sendto(sd, msg, sizeof(*msg), 0,
-		     (sockaddr *)client, sizeof(*client));
+		     (struct sockaddr *)client, sizeof(*client));
 	if (ret < 0) {
 		syslog(LOG_ERR, "failed to send unicast wol\n");
 		return false;
