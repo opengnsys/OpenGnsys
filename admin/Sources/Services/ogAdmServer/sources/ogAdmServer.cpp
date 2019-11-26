@@ -2641,36 +2641,35 @@ static bool recibeArchivo(TRAMA *ptrTrama, struct og_client *cli)
 static bool envioProgramacion(TRAMA *ptrTrama, struct og_client *cli)
 {
 	char *ptrIP[MAXIMOS_CLIENTES],*ptrMacs[MAXIMOS_CLIENTES];
-	char sqlstr[LONSQL], msglog[LONSTD];
-	char *idp,iph[LONIP],mac[LONMAC];
-	Database db;
-	Table tbl;
+	char *idp, *iph, *mac;
 	int idx,idcomando,lon;
+	const char *msglog;
+	struct og_dbi *dbi;
+	dbi_result result;
 
-	if (!db.Open(usuario, pasguor, datasource, catalog)) {
-		db.GetErrorErrStr(msglog);
-		syslog(LOG_ERR, "cannot open connection database (%s:%d) %s\n",
-		       __func__, __LINE__, msglog);
+	dbi = og_dbi_open(&dbi_config);
+	if (!dbi) {
+		syslog(LOG_ERR, "cannot open connection database (%s:%d)\n",
+		       __func__, __LINE__);
 		return false;
 	}
 
 	idp = copiaParametro("idp",ptrTrama); // Toma identificador de la programación de la tabla acciones
 
-	sprintf(sqlstr, "SELECT ordenadores.ip,ordenadores.mac,acciones.idcomando FROM acciones "\
+	result = dbi_conn_queryf(dbi->conn,
+			"SELECT ordenadores.ip,ordenadores.mac,acciones.idcomando FROM acciones "\
 			" INNER JOIN ordenadores ON ordenadores.ip=acciones.ip"\
 			" WHERE acciones.idprogramacion=%s",idp);
-	
+
 	liberaMemoria(idp);
 
-	if (!db.Execute(sqlstr, tbl)) {
-		db.GetErrorErrStr(msglog);
+	if (!result) {
+		dbi_conn_error(dbi->conn, &msglog);
 		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
 		       __func__, __LINE__, msglog);
+		og_dbi_close(dbi);
 		return false;
 	}
-	db.Close();
-	if(tbl.ISEOF())
-		return true; // No existen registros
 
 	/* Prepara la trama de actualizacion */
 
@@ -2678,36 +2677,27 @@ static bool envioProgramacion(TRAMA *ptrTrama, struct og_client *cli)
 	ptrTrama->tipo=MSG_COMANDO;
 	sprintf(ptrTrama->parametros, "nfn=Actualizar\r");
 
-	while (!tbl.ISEOF()) { // Recorre particiones
-		if (!tbl.Get("ip", iph)) {
-			tbl.GetErrorErrStr(msglog);
-			syslog(LOG_ERR, "cannot find ip column in table: %s\n",
-			       msglog);
-			return false;
-		}
-		if (!tbl.Get("idcomando", idcomando)) {
-			tbl.GetErrorErrStr(msglog);
-			syslog(LOG_ERR, "cannot find idcomando column in table: %s\n",
-			       msglog);
-			return false;
-		}
-		if(idcomando==1){ // Arrancar
-			if (!tbl.Get("mac", mac)) {
-				tbl.GetErrorErrStr(msglog);
-				syslog(LOG_ERR, "cannot find mac column in table: %s\n",
-				       msglog);
-				return false;
-			}
+	while (dbi_result_next_row(result)) {
+		iph = (char *)dbi_result_get_string(result, "ip");
+		idcomando = dbi_result_get_uint(result, "idcomando");
 
+		if (idcomando == 1){ // Arrancar
+			mac = (char *)dbi_result_get_string(result, "mac");
 			lon = splitCadena(ptrIP, iph, ';');
 			lon = splitCadena(ptrMacs, mac, ';');
 
 			// Se manda por broadcast y por unicast
-			if (!Levanta(ptrIP, ptrMacs, lon, (char*)"1"))
+			if (!Levanta(ptrIP, ptrMacs, lon, (char*)"1")) {
+				dbi_result_free(result);
+				og_dbi_close(dbi);
 				return false;
+			}
 
-			if (!Levanta(ptrIP, ptrMacs, lon, (char*)"2"))
+			if (!Levanta(ptrIP, ptrMacs, lon, (char*)"2")) {
+				dbi_result_free(result);
+				og_dbi_close(dbi);
 				return false;
+			}
 
 		}
 		if (clienteDisponible(iph, &idx)) { // Si el cliente puede recibir comandos
@@ -2720,8 +2710,10 @@ static bool envioProgramacion(TRAMA *ptrTrama, struct og_client *cli)
 			}
 			//close(tbsockets[idx].sock); // Cierra el socket del cliente hasta nueva disponibilidad
 		}
-		tbl.MoveNext();
 	}
+	dbi_result_free(result);
+	og_dbi_close(dbi);
+
 	return true; // No existen registros
 }
 

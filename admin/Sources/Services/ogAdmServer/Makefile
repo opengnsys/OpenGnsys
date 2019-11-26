@@ -15,7 +15,7 @@ CPPFLAGS := $(CFLAGS)
 LDFLAGS := -Wl,--no-as-needed $(shell mysql_config --libs) -lev -ljansson -ldbi
 
 # Ficheros objetos
-OBJS := ../../Includes/Database.o sources/ogAdmServer.o sources/dbi.o
+OBJS := sources/ogAdmServer.o sources/dbi.o
 
 
 all: $(PROYECTO)
