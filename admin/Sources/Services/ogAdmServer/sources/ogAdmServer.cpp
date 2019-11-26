@@ -1658,25 +1658,16 @@ static bool RESPUESTA_CrearImagenBasica(TRAMA* ptrTrama, struct og_client *cli)
 // ________________________________________________________________________________________________________
 static bool RESPUESTA_CrearSoftIncremental(TRAMA* ptrTrama, struct og_client *cli)
 {
-	Database db;
-	Table tbl;
 	char *iph,*par,*ido,*idf;
 	int ifs;
-	char msglog[LONSTD],sqlstr[LONSQL];
+	const char *msglog;
 	struct og_dbi *dbi;
-
-	if (!db.Open(usuario, pasguor, datasource, catalog)) {
-		db.GetErrorErrStr(msglog);
-		syslog(LOG_ERR, "cannot open connection database (%s:%d) %s\n",
-		       __func__, __LINE__, msglog);
-		return false;
-	}
+	dbi_result result;
 
 	dbi = og_dbi_open(&dbi_config);
 	if (!dbi) {
 		syslog(LOG_ERR, "cannot open connection database (%s:%d)\n",
 		       __func__, __LINE__);
-		db.Close();
 		return false;
 	}
 
@@ -1694,37 +1685,49 @@ static bool RESPUESTA_CrearSoftIncremental(TRAMA* ptrTrama, struct og_client *cl
 	par = copiaParametro("par",ptrTrama);
 
 	/* Toma identificador del perfilsoftware creado por el inventario de software */
-	sprintf(sqlstr,"SELECT idperfilsoft FROM ordenadores_particiones WHERE idordenador=%s AND numpar=%s",ido,par);
-	
+	result = dbi_conn_queryf(dbi->conn,
+				 "SELECT idperfilsoft FROM ordenadores_particiones WHERE idordenador=%s AND numpar=%s",
+				 ido, par);
 	liberaMemoria(iph);
 	liberaMemoria(ido);	
 	liberaMemoria(par);	
 
-	if (!db.Execute(sqlstr, tbl)) {
-		db.GetErrorErrStr(msglog);
+	if (!result) {
+		dbi_conn_error(dbi->conn, &msglog);
 		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
 		       __func__, __LINE__, msglog);
+		og_dbi_close(dbi);
 		return false;
 	}
-	if (!tbl.Get("idperfilsoft", ifs)) { // Toma dato
-		tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-		og_info(msglog);
+	if (!dbi_result_next_row(result)) {
+		syslog(LOG_ERR,
+		       "software profile does not exist in database (%s:%d)\n",
+		       __func__, __LINE__);
+		dbi_result_free(result);
+		og_dbi_close(dbi);
 		return false;
 	}
+	ifs = dbi_result_get_uint(result, "idperfilsoft");
+	dbi_result_free(result);
 
 	/* Actualizar los datos de la imagen */
-	idf = copiaParametro("idf",ptrTrama);
-	sprintf(sqlstr,"UPDATE imagenes SET idperfilsoft=%d WHERE idimagen=%s",ifs,idf);
+	idf = copiaParametro("idf", ptrTrama);
+	result = dbi_conn_queryf(dbi->conn,
+				 "UPDATE imagenes SET idperfilsoft=%d WHERE idimagen=%s",
+				 ifs, idf);
 	liberaMemoria(idf);	
 
-	if (!db.Execute(sqlstr, tbl)) {
-		db.GetErrorErrStr(msglog);
+	if (!result) {
+		dbi_conn_error(dbi->conn, &msglog);
 		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
 		       __func__, __LINE__, msglog);
+		og_dbi_close(dbi);
 		return false;
 	}
+	dbi_result_free(result);
+
 	og_dbi_close(dbi);
-	db.Close(); // Cierra conexión
+
 	return true;
 }
 // ________________________________________________________________________________________________________
