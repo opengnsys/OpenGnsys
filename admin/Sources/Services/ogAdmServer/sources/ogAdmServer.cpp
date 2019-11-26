@@ -1931,25 +1931,14 @@ static bool RESPUESTA_EjecutarScript(TRAMA* ptrTrama, struct og_client *cli)
 // ________________________________________________________________________________________________________
 static bool RESPUESTA_InventarioHardware(TRAMA* ptrTrama, struct og_client *cli)
 {
-	char msglog[LONSTD];
-	Database db;
-	Table tbl;
 	bool res;
 	char *iph, *ido, *idc, *npc, *hrd, *buffer;
 	struct og_dbi *dbi;
-
-	if (!db.Open(usuario, pasguor, datasource, catalog)) {
-		db.GetErrorErrStr(msglog);
-		syslog(LOG_ERR, "cannot open connection database (%s:%d) %s\n",
-		       __func__, __LINE__, msglog);
-		return false;
-	}
 
 	dbi = og_dbi_open(&dbi_config);
 	if (!dbi) {
 		syslog(LOG_ERR, "cannot open connection database (%s:%d)\n",
 		       __func__, __LINE__);
-		db.Close();
 		return false;
 	}
 
@@ -1971,7 +1960,7 @@ static bool RESPUESTA_InventarioHardware(TRAMA* ptrTrama, struct og_client *cli)
 	idc = copiaParametro("idc",ptrTrama); // Toma identificador del Centro
 	
 	if (buffer) 
-		res=actualizaHardware(db, tbl, buffer, ido, npc, idc);
+		res=actualizaHardware(dbi, buffer, ido, npc, idc);
 	
 	liberaMemoria(iph);
 	liberaMemoria(ido);			
@@ -1982,8 +1971,6 @@ static bool RESPUESTA_InventarioHardware(TRAMA* ptrTrama, struct og_client *cli)
 
 	if (!res)
 		syslog(LOG_ERR, "Problem updating client configuration\n");
-
-	db.Close(); // Cierra conexión
 
 	return res;
 }
@@ -2001,31 +1988,37 @@ static bool RESPUESTA_InventarioHardware(TRAMA* ptrTrama, struct og_client *cli)
 //			- idc: Identificador del centro o Unidad organizativa
 // ________________________________________________________________________________________________________
 //
-bool actualizaHardware(Database db, Table tbl, char *hrd, char *ido, char *npc,
+bool actualizaHardware(struct og_dbi *dbi, char *hrd, char *ido, char *npc,
 		       char *idc)
 {
-	char msglog[LONSTD], sqlstr[LONSQL];
+	const char *msglog;
 	int idtipohardware, idperfilhard;
 	int lon, i, j, aux;
 	bool retval;
 	char *whard;
 	int tbidhardware[MAXHARDWARE];
-	char *tbHardware[MAXHARDWARE],*dualHardware[2], descripcion[250], strInt[LONINT], *idhardwares;
+	char *tbHardware[MAXHARDWARE],*dualHardware[2], strInt[LONINT], *idhardwares;
+	dbi_result result;
 
 	/* Toma Centro (Unidad Organizativa) */
-	sprintf(sqlstr, "SELECT * FROM ordenadores WHERE idordenador=%s", ido);
-
-	if (!db.Execute(sqlstr, tbl)) {
-		db.GetErrorErrStr(msglog);
+	result = dbi_conn_queryf(dbi->conn,
+				 "SELECT idperfilhard FROM ordenadores WHERE idordenador=%s",
+				 ido);
+	if (!result) {
+		dbi_conn_error(dbi->conn, &msglog);
 		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
 		       __func__, __LINE__, msglog);
 		return false;
 	}
-	if (!tbl.Get("idperfilhard", idperfilhard)) { // Toma dato
-		tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-		og_info(msglog);
+	if (!dbi_result_next_row(result)) {
+		syslog(LOG_ERR, "client does not exist in database (%s:%d)\n",
+		       __func__, __LINE__);
+		dbi_result_free(result);
 		return false;
 	}
+	idperfilhard = dbi_result_get_uint(result, "idperfilhard");
+	dbi_result_free(result);
+
 	whard=escaparCadena(hrd); // Codificar comillas simples
 	if(!whard)
 		return false;
@@ -2045,72 +2038,52 @@ bool actualizaHardware(Database db, Table tbl, char *hrd, char *ido, char *npc,
 		//RegistraLog(msglog,false);
 		//sprintf(msglog,"valor: %s",dualHardware[1]);
 		//RegistraLog(msglog,false);
-		sprintf(sqlstr, "SELECT idtipohardware,descripcion FROM tipohardwares "
-			" WHERE nemonico='%s'", dualHardware[0]);
-		if (!db.Execute(sqlstr, tbl)) {
-			db.GetErrorErrStr(msglog);
+		result = dbi_conn_queryf(dbi->conn,
+					 "SELECT idtipohardware,descripcion FROM tipohardwares WHERE nemonico='%s'",
+					 dualHardware[0]);
+		if (!result) {
+			dbi_conn_error(dbi->conn, &msglog);
 			syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
 			       __func__, __LINE__, msglog);
 			return false;
 		}
-		if (tbl.ISEOF()) { //  Tipo de Hardware NO existente
-			sprintf(msglog, "%s: %s)", tbErrores[54], dualHardware[0]);
-			og_info(msglog);
+		if (!dbi_result_next_row(result)) { //	Tipo de Hardware NO existente
+			dbi_result_free(result);
 			return false;
 		} else { //  Tipo de Hardware Existe
-			if (!tbl.Get("idtipohardware", idtipohardware)) { // Toma dato
-				tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-				og_info(msglog);
-				return false;
-			}
-			if (!tbl.Get("descripcion", descripcion)) { // Toma dato
-				tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-				og_info(msglog);
-				return false;
-			}
+			idtipohardware = dbi_result_get_uint(result, "idtipohardware");
+			dbi_result_free(result);
 
-			sprintf(sqlstr, "SELECT idhardware FROM hardwares "
-				" WHERE idtipohardware=%d AND descripcion='%s'",
-					idtipohardware, dualHardware[1]);
+			result = dbi_conn_queryf(dbi->conn,
+						 "SELECT idhardware FROM hardwares WHERE idtipohardware=%d AND descripcion='%s'",
+						 idtipohardware, dualHardware[1]);
 
-			if (!db.Execute(sqlstr, tbl)) {
-				db.GetErrorErrStr(msglog);
+			if (!result) {
+				dbi_conn_error(dbi->conn, &msglog);
 				syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
 				       __func__, __LINE__, msglog);
 				return false;
 			}
 
-			if (tbl.ISEOF()) { //  Hardware NO existente
-				sprintf(sqlstr, "INSERT hardwares (idtipohardware,descripcion,idcentro,grupoid) "
+			if (!dbi_result_next_row(result)) { //	Hardware NO existente
+				dbi_result_free(result);
+				result = dbi_conn_queryf(dbi->conn,
+							"INSERT hardwares (idtipohardware,descripcion,idcentro,grupoid) "
 							" VALUES(%d,'%s',%s,0)", idtipohardware,
 						dualHardware[1], idc);
-				if (!db.Execute(sqlstr, tbl)) { // Error al insertar
-					db.GetErrorErrStr(msglog); // Error al acceder al registro
-					og_info(msglog);
-					return false;
-				}
-				// Recupera el identificador del hardware
-				sprintf(sqlstr, "SELECT LAST_INSERT_ID() as identificador");
-				if (!db.Execute(sqlstr, tbl)) {
-					db.GetErrorErrStr(msglog);
+				if (!result) {
+					dbi_conn_error(dbi->conn, &msglog);
 					syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
 					       __func__, __LINE__, msglog);
 					return false;
 				}
-				if (!tbl.ISEOF()) { // Si existe registro
-					if (!tbl.Get("identificador", tbidhardware[i])) {
-						tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-						og_info(msglog);
-						return false;
-					}
-				}
+
+				// Recupera el identificador del hardware
+				tbidhardware[i] = dbi_conn_sequence_last(dbi->conn, NULL);
 			} else {
-				if (!tbl.Get("idhardware", tbidhardware[i])) { // Toma dato
-					tbl.GetErrorErrStr(msglog); // Error al acceder al registro
-					og_info(msglog);
-					return false;
-				}
+				tbidhardware[i] = dbi_result_get_uint(result, "idhardware");
 			}
+			dbi_result_free(result);
 		}
 	}
 	// Ordena tabla de identificadores para cosultar si existe un pefil con esas especificaciones
@@ -2136,7 +2109,7 @@ bool actualizaHardware(Database db, Table tbl, char *hrd, char *ido, char *npc,
 	for (i = 1; i < lon; i++)
 		aux += sprintf(idhardwares + aux, ",%d", tbidhardware[i]);
 
-	if (!cuestionPerfilHardware(db, tbl, idc, ido, idperfilhard, idhardwares,
+	if (!cuestionPerfilHardware(dbi, idc, ido, idperfilhard, idhardwares,
 			npc, tbidhardware, lon)) {
 		syslog(LOG_ERR, "Problem updating client hardware\n");
 		retval=false;
@@ -2162,21 +2135,18 @@ bool actualizaHardware(Database db, Table tbl, char *hrd, char *ido, char *npc,
 //			- con: Número de componentes detectados para configurar un el perfil hardware
 //			- npc: Nombre del cliente
 // ________________________________________________________________________________________________________
-bool cuestionPerfilHardware(Database db, Table tbl, char *idc, char *ido,
+bool cuestionPerfilHardware(struct og_dbi *dbi, char *idc, char *ido,
 		int idperfilhardware, char *idhardwares, char *npc, int *tbidhardware,
 		int lon)
 {
-	char msglog[LONSTD], *sqlstr;
+	const char *msglog;
+	dbi_result result;
 	int i;
 	int nwidperfilhard;
 
-	sqlstr = reservaMemoria(strlen(idhardwares)+LONSQL); // Reserva para escribir sentencia SQL
-	if (sqlstr == NULL) {
-		syslog(LOG_ERR, "%s:%d OOM\n", __FILE__, __LINE__);
-		return false;
-	}
 	// Busca perfil hard del ordenador que contenga todos los componentes hardware encontrados
-	sprintf(sqlstr, "SELECT idperfilhard FROM"
+	result = dbi_conn_queryf(dbi->conn,
+		"SELECT idperfilhard FROM"
 		" (SELECT perfileshard_hardwares.idperfilhard as idperfilhard,"
 		"	group_concat(cast(perfileshard_hardwares.idhardware AS char( 11) )"
 		"	ORDER BY perfileshard_hardwares.idhardware SEPARATOR ',' ) AS idhardwares"
@@ -2184,98 +2154,96 @@ bool cuestionPerfilHardware(Database db, Table tbl, char *idc, char *ido,
 		" GROUP BY perfileshard_hardwares.idperfilhard) AS temp"
 		" WHERE idhardwares LIKE '%s'", idhardwares);
 
-	if (!db.Execute(sqlstr, tbl)) {
-		db.GetErrorErrStr(msglog);
+	if (!result) {
+		dbi_conn_error(dbi->conn, &msglog);
 		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
 		       __func__, __LINE__, msglog);
-		liberaMemoria(sqlstr);
 		return false;
 	}
-	if (tbl.ISEOF()) { // No existe un perfil hardware con esos componentes de componentes hardware, lo crea
-		sprintf(sqlstr, "INSERT perfileshard  (descripcion,idcentro,grupoid)"
+	if (!dbi_result_next_row(result)) {
+		// No existe un perfil hardware con esos componentes de componentes hardware, lo crea
+		dbi_result_free(result);
+		result = dbi_conn_queryf(dbi->conn,
+				"INSERT perfileshard  (descripcion,idcentro,grupoid)"
 				" VALUES('Perfil hardware (%s) ',%s,0)", npc, idc);
-		if (!db.Execute(sqlstr, tbl)) { // Error al insertar
-			db.GetErrorErrStr(msglog);
-			og_info(msglog);
-			liberaMemoria(sqlstr);
+		if (!result) {
+			dbi_conn_error(dbi->conn, &msglog);
+			syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+			       __func__, __LINE__, msglog);
 			return false;
 		}
+		dbi_result_free(result);
+
 		// Recupera el identificador del nuevo perfil hardware
-		sprintf(sqlstr, "SELECT LAST_INSERT_ID() as identificador");
-		if (!db.Execute(sqlstr, tbl)) { // Error al leer
-			db.GetErrorErrStr(msglog);
-			og_info(msglog);
-			liberaMemoria(sqlstr);
-			return false;
-		}
-		if (!tbl.ISEOF()) { // Si existe registro
-			if (!tbl.Get("identificador", nwidperfilhard)) {
-				tbl.GetErrorErrStr(msglog);
-				og_info(msglog);
-				liberaMemoria(sqlstr);
-				return false;
-			}
-		}
+		nwidperfilhard = dbi_conn_sequence_last(dbi->conn, NULL);
+
 		// Crea la relación entre perfiles y componenetes hardware
 		for (i = 0; i < lon; i++) {
-			sprintf(sqlstr, "INSERT perfileshard_hardwares  (idperfilhard,idhardware)"
+			result = dbi_conn_queryf(dbi->conn,
+					"INSERT perfileshard_hardwares  (idperfilhard,idhardware)"
 						" VALUES(%d,%d)", nwidperfilhard, tbidhardware[i]);
-			if (!db.Execute(sqlstr, tbl)) { // Error al insertar
-				db.GetErrorErrStr(msglog);
-				og_info(msglog);
-				liberaMemoria(sqlstr);
+			if (!result) {
+				dbi_conn_error(dbi->conn, &msglog);
+				syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+				       __func__, __LINE__, msglog);
 				return false;
 			}
+			dbi_result_free(result);
 		}
 	} else { // Existe un perfil con todos esos componentes
-		if (!tbl.Get("idperfilhard", nwidperfilhard)) {
-			tbl.GetErrorErrStr(msglog);
-			og_info(msglog);
-			liberaMemoria(sqlstr);
-			return false;
-		}
+		nwidperfilhard = dbi_result_get_uint(result, "idperfilhard");
+		dbi_result_free(result);
 	}
 	if (idperfilhardware != nwidperfilhard) { // No coinciden los perfiles
 		// Actualiza el identificador del perfil hardware del ordenador
-		sprintf(sqlstr, "UPDATE ordenadores SET idperfilhard=%d"
+		result = dbi_conn_queryf(dbi->conn,
+			"UPDATE ordenadores SET idperfilhard=%d"
 			" WHERE idordenador=%s", nwidperfilhard, ido);
-		if (!db.Execute(sqlstr, tbl)) { // Error al insertar
-			db.GetErrorErrStr(msglog);
-			og_info(msglog);
-			liberaMemoria(sqlstr);
+		if (!result) {
+			dbi_conn_error(dbi->conn, &msglog);
+			syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+			       __func__, __LINE__, msglog);
 			return false;
 		}
+		dbi_result_free(result);
 	}
 	/* Eliminar Relación de hardwares con Perfiles hardware que quedan húerfanos */
-	sprintf(sqlstr, "DELETE FROM perfileshard_hardwares WHERE idperfilhard IN "
+	result = dbi_conn_queryf(dbi->conn,
+		"DELETE FROM perfileshard_hardwares WHERE idperfilhard IN "
 		" (SELECT idperfilhard FROM perfileshard WHERE idperfilhard NOT IN"
 		" (SELECT DISTINCT idperfilhard from ordenadores))");
-	if (!db.Execute(sqlstr, tbl)) { // Error al insertar
-		db.GetErrorErrStr(msglog);
-		og_info(msglog);
-		liberaMemoria(sqlstr);
+	if (!result) {
+		dbi_conn_error(dbi->conn, &msglog);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
 		return false;
 	}
+	dbi_result_free(result);
 
 	/* Eliminar Perfiles hardware que quedan húerfanos */
-	sprintf(sqlstr, "DELETE FROM perfileshard WHERE idperfilhard NOT IN"
+	result = dbi_conn_queryf(dbi->conn,
+			"DELETE FROM perfileshard WHERE idperfilhard NOT IN"
 			" (SELECT DISTINCT idperfilhard FROM ordenadores)");
-	if (!db.Execute(sqlstr, tbl)) { // Error al insertar
-		db.GetErrorErrStr(msglog);
-		og_info(msglog);
-		liberaMemoria(sqlstr);
+	if (!result) {
+		dbi_conn_error(dbi->conn, &msglog);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
 		return false;
 	}
+	dbi_result_free(result);
+
 	/* Eliminar Relación de hardwares con Perfiles hardware que quedan húerfanos */
-	sprintf(sqlstr, "DELETE FROM perfileshard_hardwares WHERE idperfilhard NOT IN"
+	result = dbi_conn_queryf(dbi->conn,
+			"DELETE FROM perfileshard_hardwares WHERE idperfilhard NOT IN"
 			" (SELECT idperfilhard FROM perfileshard)");
-	if (!db.Execute(sqlstr, tbl)) { // Error al insertar
-		db.GetErrorErrStr(msglog);
-		og_info(msglog);
-		liberaMemoria(sqlstr);
+	if (!result) {
+		dbi_conn_error(dbi->conn, &msglog);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
 		return false;
 	}
-	liberaMemoria(sqlstr);
+	dbi_result_free(result);
+
 	return true;
 }
 // ________________________________________________________________________________________________________

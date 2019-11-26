@@ -53,8 +53,8 @@ bool WakeUp(int,char*,char*,char*);
 void PasaHexBin(char *,char *);
 bool actualizaCreacionImagen(struct og_dbi *,char*,char*,char*,char*,char*,char*);
 bool actualizaRestauracionImagen(struct og_dbi *,char*,char*,char*,char*,char*);
-bool actualizaHardware(Database, Table,char* ,char*,char*,char*);
-bool cuestionPerfilHardware(Database,Table,char*,char*,int,char*,char*,int *,int);
+bool actualizaHardware(struct og_dbi *dbi, char* ,char*,char*,char*);
+bool cuestionPerfilHardware(struct og_dbi *dbi,char*,char*,int,char*,char*,int *,int);
 bool actualizaSoftware(struct og_dbi *, char* , char* , char*,char*,char*);
 bool cuestionPerfilSoftware(struct og_dbi *, char*, char*,int,int,char*,char*,char*,int *,int);
 
