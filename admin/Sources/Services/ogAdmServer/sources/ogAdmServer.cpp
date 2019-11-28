@@ -2053,59 +2053,6 @@ static bool Configurar(TRAMA* ptrTrama, struct og_client *cli)
 	return true;
 }
 // ________________________________________________________________________________________________________
-// Función: RESPUESTA_Configurar
-//
-//	Descripción:
-//		Respuesta del cliente al comando Configurar
-//	Parámetros:
-//		- socket_c: Socket del cliente que envió el mensaje
-//		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
-//	Devuelve:
-//		true: Si el proceso es correcto
-//		false: En caso de ocurrir algún error
-// ________________________________________________________________________________________________________
-//
-static bool RESPUESTA_Configurar(TRAMA* ptrTrama, struct og_client *ci)
-{
-	char msglog[LONSTD];
-	Database db;
-	Table tbl;
-	bool res;
-	char *iph, *ido,*cfg;
-
-	if (!db.Open(usuario, pasguor, datasource, catalog)) {
-		db.GetErrorErrStr(msglog);
-		syslog(LOG_ERR, "cannot open connection database (%s:%d) %s\n",
-		       __func__, __LINE__, msglog);
-		return false;
-	}
-
-	iph = copiaParametro("iph",ptrTrama); // Toma dirección ip
-	ido = copiaParametro("ido",ptrTrama); // Toma identificador del ordenador
-
-	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
-		liberaMemoria(iph);
-		liberaMemoria(ido);
-		syslog(LOG_ERR, "failed to register notification\n");
-		return false;
-	}
-
-	cfg = copiaParametro("cfg",ptrTrama); // Toma configuración de particiones
-	res=actualizaConfiguracion(db, tbl, cfg, atoi(ido)); // Actualiza la configuración del ordenador
-	
-	liberaMemoria(iph);
-	liberaMemoria(ido);	
-	liberaMemoria(cfg);	
-
-	if(!res){
-		syslog(LOG_ERR, "Problem updating client configuration\n");
-		return false;
-	}
-
-	db.Close(); // Cierra conexión
-	return true;
-}
-// ________________________________________________________________________________________________________
 // Función: EjecutarScript
 //
 //	Descripción:
@@ -2144,6 +2091,7 @@ static bool RESPUESTA_EjecutarScript(TRAMA* ptrTrama, struct og_client *cli)
 	Database db;
 	Table tbl;
 	char *iph, *ido,*cfg;
+	bool res = true;
 
 	if (!db.Open(usuario, pasguor, datasource, catalog)) {
 		db.GetErrorErrStr(msglog);
@@ -2164,14 +2112,18 @@ static bool RESPUESTA_EjecutarScript(TRAMA* ptrTrama, struct og_client *cli)
 	
 	cfg = copiaParametro("cfg",ptrTrama); // Toma configuración de particiones
 	if(cfg){
-		actualizaConfiguracion(db, tbl, cfg, atoi(ido)); // Actualiza la configuración del ordenador
+		res = actualizaConfiguracion(db, tbl, cfg, atoi(ido)); // Actualiza la configuración del ordenador
 		liberaMemoria(cfg);	
 	}
 
 	liberaMemoria(iph);
 	liberaMemoria(ido);
 
-	
+	if (!res) {
+		syslog(LOG_ERR, "Problem updating client configuration\n");
+		return false;
+	}
+
 	db.Close(); // Cierra conexión
 	return true;
 }
@@ -3064,7 +3016,7 @@ static struct {
 	{ "RestaurarSoftIncremental",		RestaurarSoftIncremental, },
 	{ "RESPUESTA_RestaurarSoftIncremental",	RESPUESTA_RestaurarSoftIncremental, },
 	{ "Configurar",				Configurar,		},
-	{ "RESPUESTA_Configurar",		RESPUESTA_Configurar,	},
+	{ "RESPUESTA_Configurar",		RESPUESTA_EjecutarScript, },
 	{ "EjecutarScript",			EjecutarScript,		},
 	{ "RESPUESTA_EjecutarScript",		RESPUESTA_EjecutarScript, },
 	{ "RESPUESTA_InventarioHardware",	RESPUESTA_InventarioHardware, },
