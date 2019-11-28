@@ -1478,98 +1478,6 @@ static bool RESPUESTA_Apagar(TRAMA* ptrTrama, struct og_client *cli)
 	return true;
 }
 // ________________________________________________________________________________________________________
-// Función: RESPUESTA_Reiniciar
-//
-//	Descripción:
-//		Respuesta del cliente al comando Reiniciar
-//	Parámetros:
-//		- socket_c: Socket del cliente que envió el mensaje
-//		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
-//	Devuelve:
-//		true: Si el proceso es correcto
-//		false: En caso de ocurrir algún error
-// ________________________________________________________________________________________________________
-static bool RESPUESTA_Reiniciar(TRAMA* ptrTrama, struct og_client *cli)
-{
-	char msglog[LONSTD];
-	Database db;
-	Table tbl;
-	int i;
-	char *iph, *ido;
-
-	if (!db.Open(usuario, pasguor, datasource, catalog)) {
-		db.GetErrorErrStr(msglog);
-		syslog(LOG_ERR, "cannot open connection database (%s:%d) %s\n",
-		       __func__, __LINE__, msglog);
-		return false;
-	}
-
-	iph = copiaParametro("iph",ptrTrama); // Toma dirección ip
-	ido = copiaParametro("ido",ptrTrama); // Toma identificador del ordenador
-
-	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
-		liberaMemoria(iph);
-		liberaMemoria(ido);
-		syslog(LOG_ERR, "failed to register notification\n");
-		return false; // Error al registrar notificacion
-	}
-
-	if (clienteExistente(iph, &i)) // Actualiza estado
-		strcpy(tbsockets[i].estado, CLIENTE_APAGADO);
-	
-	liberaMemoria(iph);
-	liberaMemoria(ido);
-
-	db.Close(); // Cierra conexión
-	return true;
-}
-// ________________________________________________________________________________________________________
-// Función: RESPUESTA_IniciarSesion
-//
-//	Descripción:
-//		Respuesta del cliente al comando Iniciar Sesión
-//	Parámetros:
-//		- socket_c: Socket del cliente que envió el mensaje
-//		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
-//	Devuelve:
-//		true: Si el proceso es correcto
-//		false: En caso de ocurrir algún error
-// ________________________________________________________________________________________________________
-static bool RESPUESTA_IniciarSesion(TRAMA* ptrTrama, struct og_client *cli)
-{
-	char msglog[LONSTD];
-	Database db;
-	Table tbl;
-	int i;
-	char *iph, *ido;
-
-	if (!db.Open(usuario, pasguor, datasource, catalog)) {
-		db.GetErrorErrStr(msglog);
-		syslog(LOG_ERR, "cannot open connection database (%s:%d) %s\n",
-		       __func__, __LINE__, msglog);
-		return false;
-	}
-
-	iph = copiaParametro("iph",ptrTrama); // Toma dirección ip
-	ido = copiaParametro("ido",ptrTrama); // Toma identificador del ordenador
-
-	if (!respuestaEstandar(ptrTrama, iph, ido, db, tbl)) {
-		liberaMemoria(iph);
-		liberaMemoria(ido);
-		syslog(LOG_ERR, "failed to register notification\n");
-		return false; // Error al registrar notificacion
-	}
-
-	if (clienteExistente(iph, &i)) // Actualiza estado
-		strcpy(tbsockets[i].estado, CLIENTE_APAGADO);
-		
-	liberaMemoria(iph);
-	liberaMemoria(ido);
-		
-	db.Close(); // Cierra conexión
-	return true;
-}
-// ________________________________________________________________________________________________________
 // Función: RESPUESTA_CrearImagen
 //
 //	Descripción:
@@ -3003,8 +2911,8 @@ static struct {
 	{ "DisponibilidadComandos",		DisponibilidadComandos, },
 	{ "RESPUESTA_Arrancar",			RESPUESTA_Arrancar,	},
 	{ "RESPUESTA_Apagar",			RESPUESTA_Apagar,	},
-	{ "RESPUESTA_Reiniciar",		RESPUESTA_Reiniciar,	},
-	{ "RESPUESTA_IniciarSesion",		RESPUESTA_IniciarSesion, },
+	{ "RESPUESTA_Reiniciar",		RESPUESTA_Apagar,	},
+	{ "RESPUESTA_IniciarSesion",		RESPUESTA_Apagar, },
 	{ "RESPUESTA_CrearImagen",		RESPUESTA_CrearImagen,	},
 	{ "CrearImagenBasica",			CrearImagenBasica,	},
 	{ "RESPUESTA_CrearImagenBasica",	RESPUESTA_CrearImagenBasica, },
