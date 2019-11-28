@@ -1667,28 +1667,6 @@ static bool RESPUESTA_CrearImagenBasica(TRAMA* ptrTrama, struct og_client *cli)
 	return RESPUESTA_CrearImagen(ptrTrama, cli);
 }
 // ________________________________________________________________________________________________________
-// Función: CrearSoftIncremental
-//
-//	Descripción:
-//		Crea una imagen incremental entre una partición de un disco y una imagen ya creada guardandola en el
-//		mismo repositorio y en la misma carpeta donde está la imagen básica
-//	Parámetros:
-//		- socket_c: Socket de la consola al envió el mensaje
-//		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
-//	Devuelve:
-//		true: Si el proceso es correcto
-//		false: En caso de ocurrir algún error
-// ________________________________________________________________________________________________________
-static bool CrearSoftIncremental(TRAMA* ptrTrama, struct og_client *cli)
-{
-	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
-		respuestaConsola(og_client_socket(cli), ptrTrama, false);
-		return false;
-	}
-	respuestaConsola(og_client_socket(cli), ptrTrama, true);
-	return true;
-}
-// ________________________________________________________________________________________________________
 // Función: RESPUESTA_CrearSoftIncremental
 //
 //	Descripción:
@@ -1758,48 +1736,6 @@ static bool RESPUESTA_CrearSoftIncremental(TRAMA* ptrTrama, struct og_client *cl
 		return false;
 	}
 	db.Close(); // Cierra conexión
-	return true;
-}
-// ________________________________________________________________________________________________________
-// Función: RestaurarImagenBasica
-//
-//	Descripción:
-//		Restaura una imagen básica en una partición
-//	Parámetros:
-//		- socket_c: Socket de la consola al envió el mensaje
-//		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
-//	Devuelve:
-//		true: Si el proceso es correcto
-//		false: En caso de ocurrir algún error
-// ________________________________________________________________________________________________________
-static bool RestaurarImagenBasica(TRAMA* ptrTrama, struct og_client *cli)
-{
-	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
-		respuestaConsola(og_client_socket(cli), ptrTrama, false);
-		return false;
-	}
-	respuestaConsola(og_client_socket(cli), ptrTrama, true);
-	return true;
-}
-// ________________________________________________________________________________________________________
-// Función: RestaurarSoftIncremental
-//
-//	Descripción:
-//		Restaura una imagen básica junto con software incremental en una partición
-//	Parámetros:
-//		- socket_c: Socket de la consola al envió el mensaje
-//		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
-//	Devuelve:
-//		true: Si el proceso es correcto
-//		false: En caso de ocurrir algún error
-// ________________________________________________________________________________________________________
-static bool RestaurarSoftIncremental(TRAMA* ptrTrama, struct og_client *cli)
-{
-	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
-		respuestaConsola(og_client_socket(cli), ptrTrama, false);
-		return false;
-	}
-	respuestaConsola(og_client_socket(cli), ptrTrama, true);
 	return true;
 }
 // ________________________________________________________________________________________________________
@@ -1937,48 +1873,6 @@ bool actualizaRestauracionImagen(Database db, Table tbl, char *idi,
 		       __func__, __LINE__, msglog);
 		return false;
 	}
-	return true;
-}
-// ________________________________________________________________________________________________________
-// Función: Configurar
-//
-//	Descripción:
-//		Configura la tabla de particiones
-//	Parámetros:
-//		- socket_c: Socket de la consola al envió el mensaje
-//		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
-//	Devuelve:
-//		true: Si el proceso es correcto
-//		false: En caso de ocurrir algún error
-// ________________________________________________________________________________________________________
-static bool Configurar(TRAMA* ptrTrama, struct og_client *cli)
-{
-	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
-		respuestaConsola(og_client_socket(cli), ptrTrama, false);
-		return false;
-	}
-	respuestaConsola(og_client_socket(cli), ptrTrama, true);
-	return true;
-}
-// ________________________________________________________________________________________________________
-// Función: EjecutarScript
-//
-//	Descripción:
-//		Ejecuta un script de código
-//	Parámetros:
-//		- socket_c: Socket de la consola al envió el mensaje
-//		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
-//	Devuelve:
-//		true: Si el proceso es correcto
-//		false: En caso de ocurrir algún error
-// ________________________________________________________________________________________________________
-static bool EjecutarScript(TRAMA* ptrTrama, struct og_client *cli)
-{
-	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
-		respuestaConsola(og_client_socket(cli), ptrTrama, false);
-		return false;
-	}
-	respuestaConsola(og_client_socket(cli), ptrTrama, true);
 	return true;
 }
 // ________________________________________________________________________________________________________
@@ -2916,16 +2810,16 @@ static struct {
 	{ "RESPUESTA_CrearImagen",		RESPUESTA_CrearImagen,	},
 	{ "CrearImagenBasica",			CrearImagenBasica,	},
 	{ "RESPUESTA_CrearImagenBasica",	RESPUESTA_CrearImagenBasica, },
-	{ "CrearSoftIncremental",		CrearSoftIncremental,	},
+	{ "CrearSoftIncremental",		CrearImagenBasica,	},
 	{ "RESPUESTA_CrearSoftIncremental",	RESPUESTA_CrearSoftIncremental, },
 	{ "RESPUESTA_RestaurarImagen",		RESPUESTA_RestaurarImagen },
-	{ "RestaurarImagenBasica",		RestaurarImagenBasica, },
+	{ "RestaurarImagenBasica",		CrearImagenBasica, },
 	{ "RESPUESTA_RestaurarImagenBasica",	RESPUESTA_RestaurarImagenBasica, },
-	{ "RestaurarSoftIncremental",		RestaurarSoftIncremental, },
+	{ "RestaurarSoftIncremental",		CrearImagenBasica, },
 	{ "RESPUESTA_RestaurarSoftIncremental",	RESPUESTA_RestaurarSoftIncremental, },
-	{ "Configurar",				Configurar,		},
+	{ "Configurar",				CrearImagenBasica,	},
 	{ "RESPUESTA_Configurar",		RESPUESTA_EjecutarScript, },
-	{ "EjecutarScript",			EjecutarScript,		},
+	{ "EjecutarScript",			CrearImagenBasica,	},
 	{ "RESPUESTA_EjecutarScript",		RESPUESTA_EjecutarScript, },
 	{ "RESPUESTA_InventarioHardware",	RESPUESTA_InventarioHardware, },
 	{ "RESPUESTA_InventarioSoftware",	RESPUESTA_InventarioSoftware, },
