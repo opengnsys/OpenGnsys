@@ -1,5 +1,5 @@
-Instalación de OpenGnsys Server 1.1.0
-=====================================
+Instalación de OpenGnsys Server 1.1.1 (Espeto)
+==============================================
 
 Notas iniciales
 ---------------
@@ -22,16 +22,16 @@ La instalación de OpenGnsys se realiza ejecutando el script de instalación ope
 
 Ejemplos de descompresión del programa:
 
-	tar xvzf opengnsys-Version.tar.gz
+	tar xvzf opengnsys-VERSION.tar.gz
 	cd opengnsys/installer
 
 Ejemplos de descarga con varias herramientas:
 
     * Descargar con wget.
-	wget https://raw.githubusercontent.com/opengnsys/OpenGnsys/master/installer/opengnsys_installer.sh
+	wget https://raw.githubusercontent.com/opengnsys/OpenGnsys/VERSION/installer/opengnsys_installer.sh
 
     * Descargar con curl.
-	curl https://raw.githubusercontent.com/opengnsys/OpenGnsys/master/installer/opengnsys_installer.sh -o opengnsys_installer.sh
+	curl https://raw.githubusercontent.com/opengnsys/OpenGnsys/VERSION/installer/opengnsys_installer.sh -o opengnsys_installer.sh
 
 
 El script de instalación debe ser ejecutado como usuario root:
@@ -70,6 +70,8 @@ Una vez finalizada la ejecución del instalador, puede empezarse a trabajar con 
 
 Actualización
 -------------
+
+Nota importante: si se va a actualizar OpenGnsys desde una versión anterior a la 1.1.1 (Espeto), debe actualizarse antes la distribución de Ubuntu a la versión 18.04 LTS y reiniciar el servidor.
 
 Se dispone de un script de auto-actualización del sistema, con las siguientes características:
     * Es necesario conexión a Internet para obtener las últimas actualizaciones.

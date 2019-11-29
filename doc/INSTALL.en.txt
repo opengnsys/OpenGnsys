@@ -1,10 +1,10 @@
-Installing OpenGnsys Server 1.1.0
-=================================
+Installing OpenGnsys Server 1.1.1 (Espeto)
+==========================================
 
 Before installation
 -------------------
 
-OpenGnsys Server 1.1.1 (Espeto) is meant to be installed under Ubuntu Server 18.04 LTS or newer (some tests have been done on CentOS 7-based systems).
+OpenGnsys Server 1.1.1 (codename Espeto) is meant to be installed under Ubuntu Server 18.04 LTS or newer (some tests have been done on CentOS 7-based systems).
 
 Network connection is needed in order to download the required packages, the source code and the preconfigured client.
 
@@ -22,16 +22,16 @@ Installing
 To install OpenGnsys, run opengnsys_installer.sh script after unpacking the release file (opengnsys-release.tar.gz) or after downloading it directly from https://raw.githubusercontent.com/opengnsys/OpenGnsys/master/installer/opengnsys_installer.sh
 
 Unpacking example:
-	tar xvzf opengnsys-Version.tar.gz
+	tar xvzf opengnsys-VERSION.tar.gz
 	cd opengnsys/installer
 
 Downloading examples:
 
     * Download with wget.
-	wget https://raw.githubusercontent.com/opengnsys/OpenGnsys/master/installer/opengnsys_installer.sh
+	wget https://raw.githubusercontent.com/opengnsys/OpenGnsys/VERSION/installer/opengnsys_installer.sh
 
     * Download with curl.
-	curl https://raw.githubusercontent.com/opengnsys/OpenGnsys/master/installer/opengnsys_installer.sh -o opengnsys_installer.sh
+	curl https://raw.githubusercontent.com/opengnsys/OpenGnsys/VERSION/installer/opengnsys_installer.sh -o opengnsys_installer.sh
 
 
 You must be root to run the installation script:
@@ -70,6 +70,8 @@ Once the installation process is finished, you can start working with the system
 
 Updating / upgrading
 --------------------
+
+Warning: if you are going to upgrade OpenGnsys from a version earlier than 1.1.1 (Espeto), you must first upgrade Ubuntu to version 18.04 LTS and restart the server.
 
 There is a system self-upgrading script with the following features:
     * Network connection is needed to obtain the latest updates / upgrades.

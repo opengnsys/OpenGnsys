@@ -1,6 +1,6 @@
+
 LISTA DE CAMBIOS	CHANGELOG.es.txt
 ========================================
-
 
 
 Lista de cambios incluidos en OpenGnsys 1.1.1 (Espeto)
@@ -20,6 +20,7 @@ Tickets resueltos en módulo OpenGnsys Cloning Engine:
 #920	Error al guardar en la BD el número de serie (corrección)
 #923	Mejora de control de errores en deployImagen (corrección)
 #926	bootOsCustom soportará varios discos y una partición de datos
+#931	Fallo en el inventario Software (corrección)
 
 Tickets resueltos en módulo OpenGnsys Client:
 #847	La ISO del ogLive debe de utilzar la revisión de Git y no de SVN
@@ -49,7 +50,8 @@ Tickets resueltos en módulo OpenGnsys Server:
 #896	Enviar Wake On Lan por la interfaz correcta
 #899	Eliminar código obsoleto en ogAdmLib
 #900	Fichero de configuración unificado (duplicado de #140)
-#915	API REST para ogAdmServer
+#915	API REST para ogAdmServer (tarea)
+#924	ogAdmServer: Aunque la restauración falle se modifica la configuración del equipo (corrección)
 #925	Script para generar API tokens de servicios
 #929	Autenticación de clave pública entre los ogLive
 
@@ -64,6 +66,7 @@ Tickets resueltos en módulo OpenGnsys Web Admin Console:
 #903	Formulario "Añadir Nuevo Ordenador" no valida dirección MAC (corrección)
 #921	Cola de acciones: no muestra nada (corrección)
 #928	Multicast: ampliar el rango de puertos posibles (mejora)
+#932	Remote PC no arranca equipos en repositorio secundario
 
 Tickets resueltos en módulo OpenGnsys Installer:
 #784	Mejorar rendimiento de PHP sobre Apache

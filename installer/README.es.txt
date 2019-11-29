@@ -25,5 +25,3 @@ eliminar el Proyecto OpenGnsys.
 - vagrant                    directorio con ficheros de configuración para despliegue
                              de entornos de prueba y desarrollo con Vagrant
 
-- install_ticket_wolunicast.sh  programa de instalación del parche para ejecutar
-                                arranque Wake-On-Lan por IP usando protocolo Unicast
