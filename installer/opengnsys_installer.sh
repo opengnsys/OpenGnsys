@@ -132,9 +132,9 @@ function globalSetup ()
 	else
 		REMOTE=1
 	fi
-	BRANCH="master"
+	BRANCH="opengnsys-1.1.1"
 	CODE_URL="https://codeload.github.com/opengnsys/OpenGnsys/zip/$BRANCH"
-	API_URL="https://api.github.com/repos/opengnsys/OpenGnsys/branches/$BRANCH"
+	API_URL="https://api.github.com/repos/opengnsys/OpenGnsys"
 
 	# Directorios de instalación y destino de OpenGnsys.
 	WORKDIR=/tmp/opengnsys_installer
@@ -1568,8 +1568,10 @@ function installationSummary()
 	# de código o si no está incluida en el fichero de versión.
 	if [ $REMOTE -eq 1 ] || [ -z "$(jq -r '.release' $VERSIONFILE)" ]; then
 		# Revisión: rAñoMesDía.Gitcommit (8 caracteres de fecha y 7 primeros de commit).
-		REVISION=$(curl -s "$API_URL" | jq '"r" + (.commit.commit.committer.date | split("-") | join("")[:8]) + "." + (.commit.sha[:7])')
-		jq ".release=$REVISION" $VERSIONFILE | sponge $VERSIONFILE
+		RELEASE=$(curl -s "$API_URL/branches/$BRANCH" | jq -r '"r" + (.commit.commit.committer.date | split("-") | join("")[:8]) + "." + (.commit.sha[:7])' 2>/dev/null)
+		# Obtener revisión para etiqueta de versión en vez de rama de código.
+		[ -z "$RELEASE" ] && RELEASE=$(curl -s $(curl -s "$API_URL/tags" | jq -r ".[] | select(.name==\"$BRANCH\").commit.url" 2>/dev/null) | jq -r '"r" + (.commit.committer.date | split("-") | join("")[:8]) + "." + (.commit.tree.sha[:7])' 2>/dev/null)
+		jq ".release=\"$RELEASE\"" $VERSIONFILE | sponge $VERSIONFILE
 	fi
 	VERSION="$(jq -r '[.project, .version, .codename, .release] | join(" ")' $VERSIONFILE 2>/dev/null)"
 
