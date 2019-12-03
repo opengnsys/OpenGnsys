@@ -231,7 +231,8 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 		$ValorParametros=extrae_parametros($parametros,chr(13),'=');
 		$script=@urldecode($ValorParametros["scp"]);
 		if($sw_ejya=='on'){
-			if ($sw_seguimiento == 1 || $sw_ejprg == "on")
+			if (($sw_seguimiento == 1 || $sw_ejprg == "on") &&
+			    $idcomando != OG_CMD_ID_WAKEUP)
 				run_schedule($cadenaip);
 			else
 				run_command($idcomando, $cadenaip, $cadenamac, $atributos);
