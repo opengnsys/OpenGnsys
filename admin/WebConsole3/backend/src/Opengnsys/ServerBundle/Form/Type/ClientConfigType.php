@@ -8,14 +8,14 @@
  *
  */
 
-namespace Opengnsys\ServerBundle\Form\Type\Api;
+namespace Opengnsys\ServerBundle\Form\Type;
 
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class CommandExecuteType extends AbstractType
+class ClientConfigType extends AbstractType
 {
     /**
      * @param FormBuilderInterface $builder
@@ -24,11 +24,8 @@ class CommandExecuteType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('id', TextType::class)
-            ->add('script', TextType::class)
-            ->add('type', TextType::class)
-            ->add('sendConfig', TextType::class)
-            ->add('clients', TextType::class)
+            ->add('ip', TextType::class)
+            ->add('config', TextType::class)
         ;
     }
 

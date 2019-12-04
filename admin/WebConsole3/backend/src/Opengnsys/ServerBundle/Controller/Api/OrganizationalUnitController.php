@@ -12,7 +12,7 @@ namespace Opengnsys\ServerBundle\Controller\Api;
 
 use FOS\RestBundle\Context\Context;
 use Opengnsys\ServerBundle\Entity\OrganizationalUnit;
-use Opengnsys\ServerBundle\Form\Type\Api\OrganizationalUnitType;
+use Opengnsys\ServerBundle\Form\Type\OrganizationalUnitType;
 use Opengnsys\ServerBundle\OpengnsysServerBundle;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -177,7 +177,7 @@ class OrganizationalUnitController extends ApiController
 	 * @ApiDoc(
 	 *   resource = true,
 	 *   description = "Creates a new object from the submitted data.",
-	 *   input = {"class" = "Opengnsys\ServerBundle\Form\Type\Api\OrganizationalUnitType", "name" = ""},
+	 *   input = {"class" = "Opengnsys\ServerBundle\Form\Type\OrganizationalUnitType", "name" = ""},
 	 *   statusCodes = {
 	 *     200 = "Returned when successful",
 	 *     400 = "Returned when the form has errors"
@@ -223,7 +223,7 @@ class OrganizationalUnitController extends ApiController
 	 *
 	 * @ApiDoc(
 	 *   resource = true,
-	 *   input = {"class" = "Opengnsys\ServerBundle\Form\Type\Api\OrganizationalUnitType", "name" = ""},
+	 *   input = {"class" = "Opengnsys\ServerBundle\Form\Type\OrganizationalUnitType", "name" = ""},
 	 *   statusCodes = {
 	 *     204 = "Returned when successful",
 	 *     400 = "Returned when the form has errors"

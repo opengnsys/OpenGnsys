@@ -8,14 +8,14 @@
  *
  */
 
-namespace Opengnsys\ServerBundle\Form\Type\Api;
+namespace Opengnsys\ServerBundle\Form\Type;
 
-use Opengnsys\ServerBundle\Entity\Image;
+use Opengnsys\ServerBundle\Entity\SoftwareProfile;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class ImageType extends AbstractType
+class SoftwareProfileType extends AbstractType
 {
 	/**
      * @param FormBuilderInterface $builder
@@ -24,19 +24,9 @@ class ImageType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('canonicalName')
             ->add('description')
-            ->add('comments', null, array('required'=>false))
-            //->add('path', null, array('required'=>false))
-            //->add('filesystem', null, array('required'=>false))
-            //->add('partitionCode', null, array('required'=>false))
-            //->add('osType', null, array('required'=>false))
-            ->add('client', null, array('required'=>false))
-            ->add('parent', null, array('required'=>false))
-            ->add('type', null, array('required'=>false))
-            ->add('repository', null, array('required'=>true))
-            //->add('softwareProfile', null, array('required'=>false))
-
+            ->add('comments')
+            ->add('softwares')
         ;
     }
     
@@ -46,7 +36,7 @@ class ImageType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
-            'data_class' => Image::class,
+            'data_class' => SoftwareProfile::class,
             'csrf_protection' => false,
             'allow_extra_fields' => true
         ));
@@ -57,7 +47,7 @@ class ImageType extends AbstractType
      */
     public function getName()
     {
-        return 'opengnsys_server__api_form_type_image';
+        return 'opengnsys_server__api_form_type_software_profile';
     }
 
     /**

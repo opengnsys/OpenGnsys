@@ -15,8 +15,8 @@ use Opengnsys\ServerBundle\Entity\Enum\ClientStatus;
 use Opengnsys\ServerBundle\Entity\Trace;
 use Opengnsys\ServerBundle\Entity\Client;
 use Opengnsys\ServerBundle\Entity\Command;
-use Opengnsys\ServerBundle\Form\Type\Api\CommandExecuteType;
-use Opengnsys\ServerBundle\Form\Type\Api\CommandType;
+use Opengnsys\ServerBundle\Form\Type\CommandExecuteType;
+use Opengnsys\ServerBundle\Form\Type\CommandType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -210,7 +210,7 @@ class CommandController extends ApiController
      * @ApiDoc(
      *   resource = true,
      *   description = "Creates a new object from the submitted data.",
-     *   input = {"class" = "Opengnsys\ServerBundle\Form\Type\Api\CommandExecuteType", "name" = ""},
+     *   input = {"class" = "Opengnsys\ServerBundle\Form\Type\CommandExecuteType", "name" = ""},
      *   statusCodes = {
      *     200 = "Returned when successful",
      *     400 = "Returned when the form has errors"

@@ -8,14 +8,14 @@
  *
  */
 
-namespace Opengnsys\ServerBundle\Form\Type\Api;
+namespace Opengnsys\ServerBundle\Form\Type;
 
-use Opengnsys\ServerBundle\Entity\Partition;
+use Opengnsys\ServerBundle\Entity\Menu;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class PartitionType extends AbstractType
+class MenuType extends AbstractType
 {
 	/**
      * @param FormBuilderInterface $builder
@@ -24,12 +24,12 @@ class PartitionType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('numDisk')
-            ->add('numPartition')
-            ->add('size')
-            ->add('cacheContent')
-            ->add('filesystem')
-            ->add('partitionCode')
+            ->add('title')
+            ->add('resolution')
+            ->add('description')
+            ->add('comments')
+            ->add('publicUrl')
+            ->add('privateUrl')
         ;
     }
     
@@ -39,7 +39,7 @@ class PartitionType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
-            'data_class' => Partition::class,
+            'data_class' => Menu::class,
             'csrf_protection' => false,
             'allow_extra_fields' => true
         ));
@@ -50,7 +50,7 @@ class PartitionType extends AbstractType
      */
     public function getName()
     {
-        return 'opengnsys_server__api_form_type_partition';
+        return 'opengnsys_server__api_form_type_menu';
     }
 
     /**

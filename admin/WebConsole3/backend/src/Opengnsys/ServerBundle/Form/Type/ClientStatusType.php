@@ -8,14 +8,14 @@
  *
  */
 
-namespace Opengnsys\ServerBundle\Form\Type\Api;
+namespace Opengnsys\ServerBundle\Form\Type;
 
-use Opengnsys\ServerBundle\Entity\Command;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class CommandType extends AbstractType
+class ClientStatusType extends AbstractType
 {
     /**
      * @param FormBuilderInterface $builder
@@ -24,11 +24,8 @@ class CommandType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('title')
-            ->add('script')
-            ->add('parameters')
-            ->add('type')
-            //->add('clients', )
+            ->add('ip', TextType::class)
+            ->add('status', TextType::class)
         ;
     }
 
@@ -38,7 +35,6 @@ class CommandType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
-            'data_class' => Command::class,
             'csrf_protection' => false,
         	'allow_extra_fields' => true
         ));
@@ -49,7 +45,7 @@ class CommandType extends AbstractType
      */
     public function getName()
     {
-        return 'opengnsys_server__api_form_type_command';
+        return '';
     }
 
     /**

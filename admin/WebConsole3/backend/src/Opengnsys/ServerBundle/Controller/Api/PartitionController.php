@@ -10,7 +10,7 @@
  
 namespace Opengnsys\ServerBundle\Controller\Api;
 
-use Opengnsys\ServerBundle\Form\Type\Api\PartitionType;
+use Opengnsys\ServerBundle\Form\Type\PartitionType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -125,7 +125,7 @@ class PartitionController extends ApiController
 	 * @ApiDoc(
 	 *   resource = true,
 	 *   description = "Creates a new object from the submitted data.",
-	 *   input = {"class" = "Opengnsys\ServerBundle\Form\Type\Api\PartitionType", "name" = ""},
+	 *   input = {"class" = "Opengnsys\ServerBundle\Form\Type\PartitionType", "name" = ""},
 	 *   statusCodes = {
 	 *     200 = "Returned when successful",
 	 *     400 = "Returned when the form has errors"
@@ -171,7 +171,7 @@ class PartitionController extends ApiController
 	 *
 	 * @ApiDoc(
 	 *   resource = true,
-	 *   input = {"class" = "Opengnsys\ServerBundle\Form\Type\Api\PartitionType", "name" = ""},
+	 *   input = {"class" = "Opengnsys\ServerBundle\Form\Type\PartitionType", "name" = ""},
 	 *   statusCodes = {
 	 *     204 = "Returned when successful",
 	 *     400 = "Returned when the form has errors"

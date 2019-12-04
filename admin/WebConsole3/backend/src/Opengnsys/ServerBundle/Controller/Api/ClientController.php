@@ -11,7 +11,7 @@
 namespace Opengnsys\ServerBundle\Controller\Api;
 
 use Opengnsys\ServerBundle\Entity\Client;
-use Opengnsys\ServerBundle\Form\Type\Api\ClientType;
+use Opengnsys\ServerBundle\Form\Type\ClientType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -157,7 +157,7 @@ class ClientController extends ApiController
 	 * @ApiDoc(
 	 *   resource = true,
 	 *   description = "Creates a new object from the submitted data.",
-	 *   input = {"class" = "Opengnsys\ServerBundle\Form\Type\Api\ClientType", "name" = ""},
+	 *   input = {"class" = "Opengnsys\ServerBundle\Form\Type\ClientType", "name" = ""},
 	 *   statusCodes = {
 	 *     200 = "Returned when successful",
 	 *     400 = "Returned when the form has errors"
@@ -205,7 +205,7 @@ class ClientController extends ApiController
 	 *
 	 * @ApiDoc(
 	 *   resource = true,
-	 *   input = {"class" = "Opengnsys\ServerBundle\Form\Type\Api\ClientType", "name" = ""},
+	 *   input = {"class" = "Opengnsys\ServerBundle\Form\Type\ClientType", "name" = ""},
 	 *   statusCodes = {
 	 *     204 = "Returned when successful",
 	 *     400 = "Returned when the form has errors"
@@ -318,7 +318,7 @@ class ClientController extends ApiController
      * @ApiDoc(
      *   resource = true,
      *   description = "Creates a new object from the submitted data.",
-     *   input = {"class" = "Opengnsys\ServerBundle\Form\Type\Api\ClientStatusType", "name" = ""},
+     *   input = {"class" = "Opengnsys\ServerBundle\Form\Type\ClientStatusType", "name" = ""},
      *   statusCodes = {
      *     200 = "Returned when successful",
      *     400 = "Returned when the form has errors"
@@ -356,7 +356,7 @@ class ClientController extends ApiController
      * @ApiDoc(
      *   resource = true,
      *   description = "Creates a new object from the submitted data.",
-     *   input = {"class" = "Opengnsys\ServerBundle\Form\Type\Api\ClientConfigType", "name" = ""},
+     *   input = {"class" = "Opengnsys\ServerBundle\Form\Type\ClientConfigType", "name" = ""},
      *   statusCodes = {
      *     200 = "Returned when successful",
      *     400 = "Returned when the form has errors"
@@ -394,9 +394,15 @@ class ClientController extends ApiController
 
         //$client->setStatus($status);
 
-        array_shift($config);
+        //array_shift($config);
+        // Quitar el último elemento
         array_pop($config);
+
+
+        $partitionsCount = count($client->getPartitions());
+        $logger->info("Client - Partitions: " . $partitionsCount );
         foreach ($config as $key => $part){
+            //$logger->info("key: " . $key. " - part: ". $part );
             $part = explode(':', $part);
             $partition = $client->getPartition($key);
             $partition->setNumDisk($part[0]);
@@ -406,6 +412,8 @@ class ClientController extends ApiController
             $partition->setOsName($part[4]);
             $partition->setSize(intval(($part[5]=='')?'0':$part[5]));
             $partition->setUsage(floatval(($part[6]=='')?'0':$part[6]));
+
+            $logger->info("PARTITION ADD/UPDATE - key: ".$key." - id: " . $partition->getId(). " - disk". $partition->getNumDisk(). " - partition ".$partition->getNumPartition(). "  - filesystem: ".$partition->getFilesystem() );
 
             // Si el Filesystem / PartitionCode es Cache leer la información del contenido de la cache.
             if($partition->getFilesystem() === "CACHE"){
@@ -429,7 +437,15 @@ class ClientController extends ApiController
                     $partition->setCacheContent($data);
                 }
             }
+            $em->persist($partition);
         }
+        // Borrar las particiones que ya no existe
+        for($index = $key+1; $index < $partitionsCount; $index++){
+            $partition = $client->getPartition($index);
+            $em->remove($partition);
+            $logger->info("PARTITION REMOVE - key: ". $index." - id: " . $partition->getId(). " - disk". $partition->getNumDisk(). " - partition ".$partition->getNumPartition(). "  - filesystem: ".$partition->getFilesystem() );
+        }
+
         $em->flush();
 
         return $this->view($client, Response::HTTP_NO_CONTENT);

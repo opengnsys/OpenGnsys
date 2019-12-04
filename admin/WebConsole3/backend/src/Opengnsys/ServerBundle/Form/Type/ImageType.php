@@ -8,14 +8,14 @@
  *
  */
 
-namespace Opengnsys\ServerBundle\Form\Type\Api;
+namespace Opengnsys\ServerBundle\Form\Type;
 
-use Opengnsys\ServerBundle\Entity\HardwareProfile;
+use Opengnsys\ServerBundle\Entity\Image;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class HardwareProfileType extends AbstractType
+class ImageType extends AbstractType
 {
 	/**
      * @param FormBuilderInterface $builder
@@ -24,9 +24,19 @@ class HardwareProfileType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
+            ->add('canonicalName')
             ->add('description')
-            ->add('comments')
-            ->add('hardwares')
+            ->add('comments', null, array('required'=>false))
+            //->add('path', null, array('required'=>false))
+            //->add('filesystem', null, array('required'=>false))
+            //->add('partitionCode', null, array('required'=>false))
+            //->add('osType', null, array('required'=>false))
+            ->add('client', null, array('required'=>false))
+            ->add('parent', null, array('required'=>false))
+            ->add('type', null, array('required'=>false))
+            ->add('repository', null, array('required'=>true))
+            //->add('softwareProfile', null, array('required'=>false))
+
         ;
     }
     
@@ -36,7 +46,7 @@ class HardwareProfileType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
-            'data_class' => HardwareProfile::class,
+            'data_class' => Image::class,
             'csrf_protection' => false,
             'allow_extra_fields' => true
         ));
@@ -47,7 +57,7 @@ class HardwareProfileType extends AbstractType
      */
     public function getName()
     {
-        return 'opengnsys_server__api_form_type_hardware_profile';
+        return 'opengnsys_server__api_form_type_image';
     }
 
     /**

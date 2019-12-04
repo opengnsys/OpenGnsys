@@ -8,14 +8,14 @@
  *
  */
 
-namespace Opengnsys\ServerBundle\Form\Type\Api;
+namespace Opengnsys\ServerBundle\Form\Type;
 
-use Opengnsys\ServerBundle\Entity\Netboot;
+use Opengnsys\ServerBundle\Entity\Client;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class NetbootType extends AbstractType
+class ClientType extends AbstractType
 {
     /**
      * @param FormBuilderInterface $builder
@@ -25,9 +25,18 @@ class NetbootType extends AbstractType
     {
         $builder
             ->add('name', null, array('required'=>true))
-            ->add('filename', null, array('required'=>true))
-            ->add('template', null, array('required'=>true))
-
+            ->add('serialno', null, array('required'=>false))
+            ->add('netiface', null, array('required'=>true))
+            ->add('netdriver', null, array('required'=>true))
+            ->add('mac', null, array('required'=>true))
+            ->add('ip', null, array('required'=>true))
+            ->add('cache', null, array('required'=>false))
+            ->add('idproautoexec', null, array('required'=>false))
+            ->add('organizationalUnit', null, array('required'=>true))
+            ->add('repository', null, array('required'=>true))
+            ->add('hardwareProfile', null, array('required'=>false))
+            ->add('oglive', null, array('required'=>false))
+            ->add('netboot', null, array('required'=>false))
         ;
     }
 
@@ -37,7 +46,7 @@ class NetbootType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
-            'data_class' => Netboot::class,
+            'data_class' => Client::class,
             'csrf_protection' => false,
             'allow_extra_fields' => true
         ));
@@ -48,7 +57,7 @@ class NetbootType extends AbstractType
      */
     public function getName()
     {
-        return 'opengnsys_server__api_form_type_netboot';
+        return 'opengnsys_server__api_form_type_client';
     }
 
     /**

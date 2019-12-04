@@ -19,7 +19,7 @@ use Opengnsys\ServerBundle\Entity\Partition;
 use Opengnsys\ServerBundle\Entity\Software;
 use Opengnsys\ServerBundle\Entity\SoftwareProfile;
 use Opengnsys\ServerBundle\Entity\Trace;
-use Opengnsys\ServerBundle\Form\Type\Api\TraceType;
+use Opengnsys\ServerBundle\Form\Type\TraceType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;

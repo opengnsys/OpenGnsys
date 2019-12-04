@@ -8,14 +8,14 @@
  *
  */
 
-namespace Opengnsys\ServerBundle\Form\Type\Api;
+namespace Opengnsys\ServerBundle\Form\Type;
 
-use Opengnsys\ServerBundle\Entity\NetworkSettings;
+use Opengnsys\ServerBundle\Entity\Hardware;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class NetworkSettingsType extends AbstractType
+class HardwareType extends AbstractType
 {
 	/**
      * @param FormBuilderInterface $builder
@@ -24,17 +24,8 @@ class NetworkSettingsType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('proxy')
-            ->add('dns')
-            ->add('netmask')
-            ->add('router')
-            ->add('ntp')
-            ->add('p2pTime')
-            ->add('p2pMode')
-            ->add('mcastIp')
-            ->add('mcastSpeed')
-            ->add('mcastPort')
-            ->add('mcastMode')
+            ->add('description')
+            ->add('type')
         ;
     }
     
@@ -44,7 +35,7 @@ class NetworkSettingsType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
-            'data_class' => NetworkSettings::class,
+            'data_class' => Hardware::class,
             'csrf_protection' => false,
             'allow_extra_fields' => true
         ));
@@ -55,7 +46,7 @@ class NetworkSettingsType extends AbstractType
      */
     public function getName()
     {
-        return 'opengnsys_server__api_form_type_network_settings';
+        return 'opengnsys_server__api_form_type_hardware';
     }
 
     /**

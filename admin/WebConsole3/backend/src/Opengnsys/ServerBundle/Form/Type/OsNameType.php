@@ -8,14 +8,14 @@
  *
  */
 
-namespace Opengnsys\ServerBundle\Form\Type\Api;
+namespace Opengnsys\ServerBundle\Form\Type;
 
-use Opengnsys\ServerBundle\Entity\ValidationSettings;
+use Opengnsys\ServerBundle\Entity\OsName;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class ValidationSettingsType extends AbstractType
+class OsNameType extends AbstractType
 {
 	/**
      * @param FormBuilderInterface $builder
@@ -24,9 +24,8 @@ class ValidationSettingsType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('loginpage')
-            ->add('validationpage')
-            ->add('validation')
+            ->add('name')
+            ->add('type')
         ;
     }
     
@@ -36,7 +35,7 @@ class ValidationSettingsType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
-            'data_class' => ValidationSettings::class,
+            'data_class' => OsName::class,
             'csrf_protection' => false,
             'allow_extra_fields' => true
         ));
@@ -47,6 +46,14 @@ class ValidationSettingsType extends AbstractType
      */
     public function getName()
     {
-        return 'opengnsys_server__api_form_type_validation_settings';
-    }    
+        return 'opengnsys_server__api_form_type_os_name';
+    }
+
+    /**
+     * @return string
+     */
+    public function getBlockPrefix()
+    {
+        return $this->getName();
+    }
 }

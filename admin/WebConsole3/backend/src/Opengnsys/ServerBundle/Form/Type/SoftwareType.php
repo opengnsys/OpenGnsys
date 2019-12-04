@@ -8,35 +8,37 @@
  *
  */
 
-namespace Opengnsys\ServerBundle\Form\Type\Api;
+namespace Opengnsys\ServerBundle\Form\Type;
 
+use Opengnsys\ServerBundle\Entity\Software;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class ClientStatusType extends AbstractType
+class SoftwareType extends AbstractType
 {
-    /**
+	/**
      * @param FormBuilderInterface $builder
      * @param array $options
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('ip', TextType::class)
-            ->add('status', TextType::class)
+            ->add('description')
+            ->add('type')
+            //->add('osType')
         ;
     }
-
+    
     /**
      * @param OptionsResolver $resolver
      */
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
+            'data_class' => Software::class,
             'csrf_protection' => false,
-        	'allow_extra_fields' => true
+            'allow_extra_fields' => true
         ));
     }
 
@@ -45,7 +47,7 @@ class ClientStatusType extends AbstractType
      */
     public function getName()
     {
-        return '';
+        return 'opengnsys_server__api_form_type_software';
     }
 
     /**

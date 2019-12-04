@@ -17,3 +17,7 @@ Opengnsys\ServerBundle\Entity\Netboot:
             groups: [opengnsys_server__netboot_get, opengnsys_server__netboot_cget]
             expose: true
             serialized_name: template
+        type:
+            groups: [opengnsys_server__netboot_get, opengnsys_server__netboot_cget]
+            expose: true
+            serialized_name: type

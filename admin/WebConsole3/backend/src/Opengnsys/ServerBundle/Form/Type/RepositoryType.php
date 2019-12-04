@@ -8,14 +8,14 @@
  *
  */
 
-namespace Opengnsys\ServerBundle\Form\Type\Api;
+namespace Opengnsys\ServerBundle\Form\Type;
 
-use Opengnsys\ServerBundle\Entity\Menu;
+use Opengnsys\ServerBundle\Entity\Repository;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class MenuType extends AbstractType
+class RepositoryType extends AbstractType
 {
 	/**
      * @param FormBuilderInterface $builder
@@ -24,12 +24,11 @@ class MenuType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('title')
-            ->add('resolution')
+            ->add('name')
+            ->add('ip')
             ->add('description')
-            ->add('comments')
-            ->add('publicUrl')
-            ->add('privateUrl')
+            ->add('secret')
+            ->add('randomId')
         ;
     }
     
@@ -39,7 +38,7 @@ class MenuType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
-            'data_class' => Menu::class,
+            'data_class' => Repository::class,
             'csrf_protection' => false,
             'allow_extra_fields' => true
         ));
@@ -50,7 +49,7 @@ class MenuType extends AbstractType
      */
     public function getName()
     {
-        return 'opengnsys_server__api_form_type_menu';
+        return 'opengnsys_server__api_form_type_repository';
     }
 
     /**

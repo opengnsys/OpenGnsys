@@ -12,6 +12,7 @@
         <field name="name" type="string" column="name" length="30" nullable="false"/>
         <field name="filename" type="string" column="filename" length="120" nullable="false"/>
         <field name="template" type="text" column="template" nullable="false"/>
+        <field name="type" column="type" type="string" length="64" nullable="true"/>
 
     </entity>
 </doctrine-mapping>

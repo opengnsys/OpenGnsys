@@ -26,10 +26,10 @@
 
             <join-table name="og_server__software_profiles_softwares">
                 <join-columns>
-                    <join-column name="software_profile_id" referenced-column-name="id"/>
+                    <join-column name="software_profile_id" referenced-column-name="id" on-delete="CASCADE"/>
                 </join-columns>
                 <inverse-join-columns>
-                    <join-column name="software_id" referenced-column-name="id" unique="false"/>
+                    <join-column name="software_id" referenced-column-name="id" unique="false" on-delete="CASCADE"/>
                 </inverse-join-columns>
             </join-table>
         </many-to-many>

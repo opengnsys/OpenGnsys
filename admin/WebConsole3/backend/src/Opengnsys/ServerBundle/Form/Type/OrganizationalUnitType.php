@@ -8,14 +8,14 @@
  *
  */
 
-namespace Opengnsys\ServerBundle\Form\Type\Api;
+namespace Opengnsys\ServerBundle\Form\Type;
 
-use Opengnsys\ServerBundle\Entity\Software;
+use Opengnsys\ServerBundle\Entity\OrganizationalUnit;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class SoftwareType extends AbstractType
+class OrganizationalUnitType extends AbstractType
 {
 	/**
      * @param FormBuilderInterface $builder
@@ -24,9 +24,11 @@ class SoftwareType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
+            ->add('name')
             ->add('description')
-            ->add('type')
-            //->add('osType')
+            ->add('parent', null, array('required'=>false))
+            ->add('networkSettings', NetworkSettingsType::class, array('required'=>false))
+
         ;
     }
     
@@ -36,7 +38,7 @@ class SoftwareType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
-            'data_class' => Software::class,
+            'data_class' => OrganizationalUnit::class,
             'csrf_protection' => false,
             'allow_extra_fields' => true
         ));
@@ -47,7 +49,7 @@ class SoftwareType extends AbstractType
      */
     public function getName()
     {
-        return 'opengnsys_server__api_form_type_software';
+        return 'opengnsys_server__api_form_type_organizational_unit';
     }
 
     /**

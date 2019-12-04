@@ -8,14 +8,14 @@
  *
  */
 
-namespace Opengnsys\ServerBundle\Form\Type\Api;
+namespace Opengnsys\ServerBundle\Form\Type;
 
-use Opengnsys\ServerBundle\Entity\OsName;
+use Opengnsys\ServerBundle\Entity\Partition;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class OsNameType extends AbstractType
+class PartitionType extends AbstractType
 {
 	/**
      * @param FormBuilderInterface $builder
@@ -24,8 +24,12 @@ class OsNameType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('name')
-            ->add('type')
+            ->add('numDisk')
+            ->add('numPartition')
+            ->add('size')
+            ->add('cacheContent')
+            ->add('filesystem')
+            ->add('partitionCode')
         ;
     }
     
@@ -35,7 +39,7 @@ class OsNameType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
-            'data_class' => OsName::class,
+            'data_class' => Partition::class,
             'csrf_protection' => false,
             'allow_extra_fields' => true
         ));
@@ -46,7 +50,7 @@ class OsNameType extends AbstractType
      */
     public function getName()
     {
-        return 'opengnsys_server__api_form_type_os_name';
+        return 'opengnsys_server__api_form_type_partition';
     }
 
     /**

@@ -8,14 +8,14 @@
  *
  */
 
-namespace Opengnsys\ServerBundle\Form\Type\Api;
+namespace Opengnsys\ServerBundle\Form\Type;
 
-use Opengnsys\ServerBundle\Entity\SoftwareProfile;
+use Opengnsys\ServerBundle\Entity\HardwareProfile;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class SoftwareProfileType extends AbstractType
+class HardwareProfileType extends AbstractType
 {
 	/**
      * @param FormBuilderInterface $builder
@@ -26,7 +26,7 @@ class SoftwareProfileType extends AbstractType
         $builder
             ->add('description')
             ->add('comments')
-            ->add('softwares')
+            ->add('hardwares')
         ;
     }
     
@@ -36,7 +36,7 @@ class SoftwareProfileType extends AbstractType
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
-            'data_class' => SoftwareProfile::class,
+            'data_class' => HardwareProfile::class,
             'csrf_protection' => false,
             'allow_extra_fields' => true
         ));
@@ -47,7 +47,7 @@ class SoftwareProfileType extends AbstractType
      */
     public function getName()
     {
-        return 'opengnsys_server__api_form_type_software_profile';
+        return 'opengnsys_server__api_form_type_hardware_profile';
     }
 
     /**

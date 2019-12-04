@@ -170,7 +170,7 @@ class MigrateCommand extends ContainerAwareCommand
             }
             $repository->setName($repositorio->getNombrerepositorio());
             $repository->setIp($repositorio->getIp());
-            $repository->setPassword($repositorio->getPassguor());
+            //$repository->setPassword($repositorio->getPassguor());
             $repository->setConfigurationpath("-");
             $repository->setAdminpath("-");
             $repository->setPxepath("-");
@@ -296,10 +296,7 @@ class MigrateCommand extends ContainerAwareCommand
 
             // Netboot
 
-            // ValidationSettings
             //$migrateId = ""
-            //$validationSettings = $validationSettingsRepository->findOneByNotes($migrateId);
-            //$client->setValidationSettings($validationSettings);
 
             // HardwareProfile
             $migrateId = "perfilHardware:".$ordenador->getIdperfilhard();

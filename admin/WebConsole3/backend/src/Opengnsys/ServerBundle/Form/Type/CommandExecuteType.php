@@ -8,36 +8,38 @@
  *
  */
 
-namespace Opengnsys\ServerBundle\Form\Type\Api;
+namespace Opengnsys\ServerBundle\Form\Type;
 
-use Opengnsys\ServerBundle\Entity\Hardware;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class HardwareType extends AbstractType
+class CommandExecuteType extends AbstractType
 {
-	/**
+    /**
      * @param FormBuilderInterface $builder
      * @param array $options
      */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('description')
-            ->add('type')
+            ->add('id', TextType::class)
+            ->add('script', TextType::class)
+            ->add('type', TextType::class)
+            ->add('sendConfig', TextType::class)
+            ->add('clients', TextType::class)
         ;
     }
-    
+
     /**
      * @param OptionsResolver $resolver
      */
     public function configureOptions(OptionsResolver $resolver)
     {
         $resolver->setDefaults(array(
-            'data_class' => Hardware::class,
             'csrf_protection' => false,
-            'allow_extra_fields' => true
+        	'allow_extra_fields' => true
         ));
     }
 
@@ -46,7 +48,7 @@ class HardwareType extends AbstractType
      */
     public function getName()
     {
-        return 'opengnsys_server__api_form_type_hardware';
+        return '';
     }
 
     /**

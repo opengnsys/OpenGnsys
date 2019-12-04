@@ -46,10 +46,6 @@ software_profile:
     type: rest
     resource: Opengnsys\ServerBundle\Controller\Api\SoftwareProfileController
     name_prefix: opengnsys_server__api_
-#validation_settings:
-#    type: rest
-#    resource: Opengnsys\ServerBundle\Controller\Api\ValidationSettingsController
-#    name_prefix: opengnsys_server__api_
 command:
     type: rest
     resource: Opengnsys\ServerBundle\Controller\Api\CommandController

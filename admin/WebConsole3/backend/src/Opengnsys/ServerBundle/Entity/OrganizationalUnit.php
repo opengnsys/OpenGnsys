@@ -44,11 +44,6 @@ class OrganizationalUnit extends BaseEntity
     private $parent;
 
     /**
-     * @var \Opengnsys\ServerBundle\Entity\ValidationSettings
-     */
-    private $validationSettings;
-
-    /**
      * @var \Opengnsys\ServerBundle\Entity\NetworkSettings
      */
     private $networkSettings;
@@ -238,30 +233,6 @@ class OrganizationalUnit extends BaseEntity
     public function getParent()
     {
         return $this->parent;
-    }
-
-    /**
-     * Set validationSettings.
-     *
-     * @param \Opengnsys\ServerBundle\Entity\ValidationSettings|null $validationSettings
-     *
-     * @return OrganizationalUnit
-     */
-    public function setValidationSettings(\Opengnsys\ServerBundle\Entity\ValidationSettings $validationSettings = null)
-    {
-        $this->validationSettings = $validationSettings;
-
-        return $this;
-    }
-
-    /**
-     * Get validationSettings.
-     *
-     * @return \Opengnsys\ServerBundle\Entity\ValidationSettings|null
-     */
-    public function getValidationSettings()
-    {
-        return $this->validationSettings;
     }
 
     /**

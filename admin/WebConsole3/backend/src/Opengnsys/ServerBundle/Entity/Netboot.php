@@ -24,6 +24,11 @@ class Netboot extends BaseEntity
     private $template;
 
     /**
+     * @var string|null
+     */
+    private $type;
+
+    /**
      * @var integer
      */
     private $id;
@@ -109,5 +114,29 @@ class Netboot extends BaseEntity
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * Set type.
+     *
+     * @param string|null $type
+     *
+     * @return Netboot
+     */
+    public function setType($type = null)
+    {
+        $this->type = $type;
+
+        return $this;
+    }
+
+    /**
+     * Get type.
+     *
+     * @return string|null
+     */
+    public function getType()
+    {
+        return $this->type;
     }
 }
