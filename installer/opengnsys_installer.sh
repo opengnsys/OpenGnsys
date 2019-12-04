@@ -1620,6 +1620,12 @@ if [ "$(whoami)" != 'root' ]; then
 fi
 
 globalSetup
+# Comprobar instalación previa.
+if cat $INSTALL_TARGET/doc/VERSION.* &>/dev/null; then
+	echo "ERROR: OpenGnsys is already installed. Run \"$INSTALL_TARGET/lib/opengnsys_update.sh\" as root to update."
+	exit 2
+fi
+
 echoAndLog "OpenGnsys installation begins at $(date)"
 # Introducir datos de configuración y establecer variables globales.
 userData
