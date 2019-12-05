@@ -44,7 +44,8 @@ source $OPENGNSYS/lib/ogfunctions.sh
 [ $# -ne 3 ] && raiseError usage
 # Comprobar si el usuario es "root" o el del servicio web.
 WEBUSER=$(ps axho user,comm|awk '!/root/ && /httpd|apache/ {print $1; exit;}')
-[ "$USER" != "root" -a "$USER" != "$WEBUSER" ] && raiseError access "Need to be root (or webserver user)"
+CALLER=$(getCaller)
+[ "$USER" != "root" -a "$USER" != "$WEBUSER" -a "$CALLER" != "ogAdmServerAux" ] && raiseError access "Need to be root (or webserver user)"
 # El acceso a mysql por las variables pasadas o por el fichero de configuarción.
 if  [ -z "$USUARIO" ] || [ -z "$PASSWORD" ] || [ -z "$CATALOG" ]; then
 	[ ! -r "$SERVERCONF" ] && raiseError access "Cannot read access configuration file"
@@ -93,6 +94,10 @@ for MAC in $ETHERNET; do
 	PXEFILE[0]=01-${MACFILE:0:2}-${MACFILE:2:2}-${MACFILE:4:2}-${MACFILE:6:2}-${MACFILE:8:2}-${MACFILE:10:2}
 	MACFILE="${MAC,,}"
 	PXEFILE[1]=01-${MACFILE:0:2}:${MACFILE:2:2}:${MACFILE:4:2}:${MACFILE:6:2}:${MACFILE:8:2}:${MACFILE:10:2}
+	# Renombra el fichero PXE original
+	[ -e ${PXEDIR[0]}/${PXEFILE[0]} ] && mv ${PXEDIR[0]}/${PXEFILE[0]} ${PXEDIR[0]}/${PXEFILE[0]}.netboot
+	[ -e ${PXEDIR[1]}/${PXEFILE[1]} ] && mv ${PXEDIR[1]}/${PXEFILE[1]} ${PXEDIR[1]}/${PXEFILE[1]}.netboot
+
 	if [ "$1" != "default" ]; then
 		# Si no está definida la variable LANG, usar idioma inglés por defecto.
 		[ -z "$LANG" -o "$LANG" == "C" ] && LANG="en"
