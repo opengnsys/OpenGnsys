@@ -27,7 +27,7 @@ function cancelar(){
 //________________________________________________________________________________________________________
 function resultado_insertar_ordenadores(resul,descrierror,nwid,tablanodo){
 	farbol.resultado_insertar(resul,descrierror,nwid,tablanodo);
-	selfclose();
+	//selfclose();
 }
 //________________________________________________________________________________________________________
 //	
@@ -40,7 +40,7 @@ function resultado_insertar_ordenadores(resul,descrierror,nwid,tablanodo){
 //________________________________________________________________________________________________________
 function resultado_modificar_ordenadores(resul,descrierror,lit){
 	farbol.resultado_modificar(resul,descrierror,lit);
-	selfclose();
+	//selfclose();
 }
 //________________________________________________________________________________________________________
 //	
@@ -53,11 +53,11 @@ function resultado_modificar_ordenadores(resul,descrierror,lit){
 //________________________________________________________________________________________________________
 function resultado_eliminar_ordenadores(resul,descrierror,id){
 	farbol.resultado_eliminar(resul,descrierror,id);
-	selfclose();
+	//selfclose();
 }
 //________________________________________________________________________________________________________
 function selfclose(){
-	//document.location.href="../nada.php";
+	document.location.href="../nada.php";
 }
 //________________________________________________________________________________________________________
 //	
