@@ -8,14 +8,14 @@ set ISODIR=ogLive
 
 
 title firsboot
-find --set-root --ignore-floppies --ignore-cd /ogboot.me
+find --set-root --ignore-floppies --ignore-cd /ogboot.me checkrange 0x07 parttype > nul
 cmp /ogboot.me /ogboot.firstboot || ls FALLBACK
 write /ogboot.firstboot iniciado
 chainloader +1
 boot
 
 title secondboot
-find --set-root --ignore-floppies --ignore-cd /ogboot.me
+find --set-root --ignore-floppies --ignore-cd /ogboot.me checkrange 0x07 parttype > nul
 cmp /ogboot.me /ogboot.secondboot || ls FALLBACK
 write /ogboot.secondboot iniciado
 chainloader +1
