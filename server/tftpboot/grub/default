@@ -15,6 +15,15 @@ if [ "$rootGrub" != "" ]; then
 }
 fi
 
+echo "Searching rEFInd"
+search --file --set rootRefind /EFI/refind/shimx64.efi.signed
+if [ "$rootRefind" != "" ]; then
+    menuentry "rEFInd" {
+        root="$rootRefind"
+        chainloader /EFI/refind/shimx64.efi.signed
+}
+fi
+
 echo "Searching Part-01-02"
 search --file --set rootP2 /EFI/Part-01-02/Boot/ogloader.efi
 if [ "$rootP2" != "" ]; then
