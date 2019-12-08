@@ -7,8 +7,7 @@ $diskPartIndex = 0;
 // Recorremos todas las configuraciones y vamos creando un array con disco - particion
 for($cfgIndex = 0; $cfgIndex < $conKeys; $cfgIndex++){
 	if($tbKeys[$cfgIndex]["numpar"] != 0 && $tbKeys[$cfgIndex]["clonable"] == 1){
-		$disksPartitions[$diskPartIndex]["text"] = "Disco ".$tbKeys[$cfgIndex]["numdisk"]." - Part ".$tbKeys[$cfgIndex]["numpar"];
-		$disksPartitions[$diskPartIndex]["value"] = $tbKeys[$cfgIndex]["numdisk"].";".$tbKeys[$cfgIndex]["numpar"].";".$tbKeys[$cfgIndex]["tipopar"];
+		$disksPartitions["Disco " . $tbKeys[$cfgIndex]["numdisk"] . " - Part " .$tbKeys[$cfgIndex]["numpar"] ] = $tbKeys[$cfgIndex]["numdisk"].";".$tbKeys[$cfgIndex]["numpar"].";".$tbKeys[$cfgIndex]["tipopar"];
 		$diskPartIndex++;
 	}
 }
@@ -27,8 +26,8 @@ for($cfgIndex = 0; $cfgIndex < $conKeys; $cfgIndex++){
 	    <?php echo $TbMsg["WDI20"] ?> 
 		<select name="idparticion" id="idparticion" style="width:220px">
 				<?php
-				foreach($disksPartitions as $diskPartition){
-					echo "<option value='".$diskPartition["value"]."'>".$diskPartition["text"]." </option>";
+				foreach($disksPartitions as $key => $value){
+					echo "<option value='".$value."'>".$key." </option>";
 				}
 				?>
 		</select>
