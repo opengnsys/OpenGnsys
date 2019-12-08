@@ -31,6 +31,7 @@ switch($litambito){
 		break;
 	case "gruposordenadores":
 		$seleccion= "and grupoid=" .  $idambito . "";
+		break;
 	default:
 		$seleccion="";
 	break;
