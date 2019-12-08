@@ -19,6 +19,13 @@ include_once("../includes/CreaComando.php");
 include_once("../includes/HTMLSELECT.php");
 include_once("../idiomas/php/".$idioma."/comandos/ejecutarscripts_".$idioma.".php");
 include_once("../idiomas/php/".$idioma."/comandos/opcionesacciones_".$idioma.".php");
+
+include_once("../includes/HTMLCTESELECT.php");
+include_once("../includes/TomaDato.php");
+include_once("../includes/ConfiguracionesParticiones.php");
+include_once("../includes/RecopilaIpesMacs.php");
+include_once("./includes/asistentes/AyudanteFormularios.php");
+
 //________________________________________________________________________________________________________
 include_once("./includes/capturaacciones.php");
 //________________________________________________________________________________________________________
@@ -74,6 +81,10 @@ switch($ambito){
 	echo '<p align=center><span class=cabeceras>'.$TbMsg["WCRP31"].'&nbsp;</span><br>';
 	echo '<IMG src="'.$urlimg.'">&nbsp;&nbsp;<span align=center class=subcabeceras>
 				<U>'.$TbMsg[6].': '.$textambito.','.$nombreambito.'</U></span>&nbsp;&nbsp;</span></p>';
+
+	$sws=$fk_sysFi | $fk_nombreSO | $fk_tamano | $fk_imagen | $fk_perfil | $fk_cache;
+	pintaConfiguraciones($cmd,$idambito,$ambito,9,$sws,false);
+
 	?>	
 
 
