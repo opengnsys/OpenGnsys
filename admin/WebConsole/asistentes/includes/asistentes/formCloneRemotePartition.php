@@ -1,4 +1,16 @@
+<?php
 
+$disksPartitions = array();
+$diskPartIndex = 0;
+// Recorremos todas las configuraciones y vamos creando un array con disco - particion
+for($cfgIndex = 0; $cfgIndex < $conKeys; $cfgIndex++){
+	if($tbKeys[$cfgIndex]["numpar"] != 0 && $tbKeys[$cfgIndex]["clonable"] == 1){
+		$disksPartitions["Disco " . $tbKeys[$cfgIndex]["numdisk"] . " - Part " .$tbKeys[$cfgIndex]["numpar"] ] = $tbKeys[$cfgIndex]["numdisk"].";".$tbKeys[$cfgIndex]["numpar"].";".$tbKeys[$cfgIndex]["tipopar"];
+		$diskPartIndex++;
+	}
+}
+
+?>
 
 
 <tr>
@@ -15,10 +27,11 @@
 		<br />
 		<?php echo $TbMsg["WCRP34"] ?> 
 		<select name="targetpart" id="targetpart" style="width:220px;">
-			<option value="1 1"> 1er disco - 1ª particion </option>
-			<option value="1 2"> 1er disco - 2ª particion </option>
-			<option value="1 3"> 1er disco - 3ª particion </option>
-			<option value="1 4"> 1er disco - 4ª particion </option>
+		<?php
+				foreach($disksPartitions as $key => $value){
+					echo "<option value='".$value."'>".$key." </option>";
+				}
+		?>
 		</select>
 		<br />
 		<?php echo $TbMsg["WCRP35"] ?>
