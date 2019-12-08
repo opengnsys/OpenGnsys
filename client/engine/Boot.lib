@@ -1609,7 +1609,7 @@ function ogBurgInstallMbr ()
 {
  
 # Variables locales.
-local PART DISK FIRSTAGE SECONSTAGE PREFIXSECONDSTAGE CHECKOS KERNELPARAM BACKUPNAME FILECFG
+local BINARYAVAILABLE PART DISK FIRSTAGE SECONSTAGE PREFIXSECONDSTAGE CHECKOS KERNELPARAM BACKUPNAME FILECFG
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -1622,6 +1622,15 @@ fi
 # Error si no se reciben 2 parametros.
 [ $# -ge 2 ] || return $(ogRaiseError $OG_ERR_FORMAT; echo $?)
 
+#Error si no tenemos el binario burg
+BINARYAVAILABLE=$(burg-install  -v &>/dev/null && echo "YES" ||echo "NO")
+if [ "$BINARYAVAILABLE" == NO ]; then
+    if [ -e $OGLIB/burg/burg.tgz ]; then
+        cd / ; tar xzvf $OGLIB/burg/burg.tgz --strip 1 &>/dev/null
+    else
+        return $(ogRaiseError $OG_ERR_NOTEXEC "Binary burg not found"; echo $?) 
+    fi
+fi
 
 DISK=$1; PART=$2;
 CHECKOS=${3:-"FALSE"}
@@ -1639,7 +1648,7 @@ FIRSTSTAGE=$(ogDiskToDev 1)
 SECONDSTAGE=$(ogMount $DISK $PART)
 
 # prepara el directorio principal de la segunda etapa (y copia los binarios)
-[ -d ${SECONDSTAGE}/boot/burg/ ]  || mkdir -p ${SECONDSTAGE}/boot/burg/; cp -prv /boot/burg/*  ${SECONDSTAGE}/boot/burg/ 2>&1>/dev/null; cp -prv $OGLIB/burg/*  ${SECONDSTAGE}/boot/burg/ 2>&1>/dev/null; #*/ ## (comentario Dogygen) #*/ ## (comentario Dogygen)
+[ -d ${SECONDSTAGE}/boot/burg/ ]  || mkdir -p ${SECONDSTAGE}/boot/burg/; cp -prv /boot/burg/*  ${SECONDSTAGE}/boot/burg/ 2>&1>/dev/null; cp -prv $OGLIB/burg/themes  ${SECONDSTAGE}/boot/burg/ 2>&1>/dev/null; #*/ ## (comentario Dogygen) #*/ ## (comentario Dogygen)
 
 #Copiamos el tema 
 mkdir -p  ${SECONDSTAGE}/boot/burg/themes/OpenGnsys
@@ -1649,7 +1658,7 @@ cp -prv "$OGLIB/burg/themes" "${SECONDSTAGE}/boot/burg/" 2>&1>/dev/null
 #PREFIXSECONDSTAGE="/boot/burg/"
 
 # Si Reconfigurar segunda etapa (grub.cfg) == FALSE
-if [ -f ${SECONDSTAGE}/boot/burg/burg.cfg -o -f ${SECONDSTAGE}/boot/burg/burg.cfg$BACKUPNAME ]
+if [ -f ${SECONDSTAGE}/boot/burg/burg.cfg -o -f ${SECONDSTAGE}/boot/burg/burg.cfg$BACKUPNAME ];
 then 
     if [ "$CHECKOS" == "false" -o "$CHECKOS" == "FALSE" ]
     then
