@@ -245,6 +245,7 @@ case "$CODE" in
      $OG_ERR_NOTDIFFERENT)	MSG="$MSG_ERR_NOTDIFFERENT \"$2\"" ;;
      $OG_ERR_SYNCHRONIZING)	MSG="$MSG_ERR_SYNCHRONIZING \"$2\"" ;;
      $OG_ERR_NOTUEFI)		MSG="$MSG_ERR_NOTUEFI \"$2\"" ;;
+     $OG_ERR_NOMSDOS)		MSG="$MSG_ERR_NOMSDOS \"$2\"" ;;
      *)                  MSG="$MSG_ERR_GENERIC"; CODE=$OG_ERR_GENERIC ;;
 esac
 

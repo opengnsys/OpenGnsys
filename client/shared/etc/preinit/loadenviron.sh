@@ -118,6 +118,7 @@ export OG_ERR_FILESYS=20	# Sistema de archivos desconocido o no se puede montar
 export OG_ERR_CACHE=21 		# Error en partición de caché local
 export OG_ERR_NOGPT=22		# El disco indicado no contiene una particion GPT
 export OG_ERR_REPO=23		# Error al montar el repositorio de imagenes
+export OG_ERR_NOMSDOS=24    # El disco indicado no contienen una particion MSDOS 
 
 export OG_ERR_IMGSIZEPARTITION=30    # Error al restaurar partición más pequeña que la imagen
 export OG_ERR_UPDATECACHE=31	# Error al realizar el comando updateCache
