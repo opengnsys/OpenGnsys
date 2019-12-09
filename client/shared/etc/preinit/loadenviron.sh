@@ -144,3 +144,4 @@ export OG_ERR_NOTDIFFERENT=73	# No se detectan diferencias entre la imagen basic
 export OG_ERR_SYNCHRONIZING=74  # Error al sincronizar, puede afectar la creacion/restauracion de la imagen
 
 export OG_ERR_NOTUEFI=80	# La interfaz UEFI no está activa
+export OG_ERR_NOTBIOS=81   # La interfaz BIOS legacy no está activa 
