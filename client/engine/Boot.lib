@@ -1609,7 +1609,7 @@ function ogBurgInstallMbr ()
 {
  
 # Variables locales.
-local BINARYAVAILABLE PART DISK FIRSTAGE SECONSTAGE PREFIXSECONDSTAGE CHECKOS KERNELPARAM BACKUPNAME FILECFG
+local BINARYAVAILABLE PART DISK DEVICE MOUNTDISK FIRSTAGE SECONSTAGE PREFIXSECONDSTAGE CHECKOS KERNELPARAM BACKUPNAME FILECFG
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
@@ -1637,27 +1637,30 @@ CHECKOS=${3:-"FALSE"}
 KERNELPARAM=$4
 BACKUPNAME=".backup.og"
 
-#Error si no es linux.
-ogCheckStringInGroup $(ogGetFsType $DISK $PART) "CACHE EXT4 EXT3 EXT2" || return $(ogRaiseError $OG_ERR_PARTITION "burg no soporta esta particion"; echo $?)
+#Controlar disco no uefi
+ogIsEfiActive && return $(ogRaiseError $OG_ERR_NOTBIOS " : grub4dos solo soporta PC con bios legacy"; echo $?)
+#Controlar particionado tipo msdos
+ogCheckStringInGroup $(ogGetPartitionTableType $DISK) "MSDOS" || return $(ogRaiseError $OG_ERR_NOMSDOS ": grub2dos requiere particionado tipo MSDOS"; echo $?)
+#Controlar existencia de disco y particion
+DEVICE=$(ogDiskToDev $DISK) || ogRaiseError $OG_ERR_NOTFOUND || return $?
+MOUNTDISK=$(ogMount $DISK $PART) || ogRaiseError $OG_ERR_PARTITION "$MSG_ERROR " || return $?
+#Controlar particion segunda etapa del burg
+ogCheckStringInGroup $(ogGetFsType $DISK $PART) "CACHE EXT4 EXT3 EXT2" || return $(ogRaiseError $OG_ERR_PARTITION "burg.cfg soporta solo particiones linux"; echo $?)
+#Controlar acceso de escritura a la particion segunda etapa del burg
+ogIsReadonly $DISK $PART &&  return $(ogRaiseError $OG_ERR_NOTWRITE ": $DISK $PART" || echo $?)
 
-
-#La primera etapa del grub se fija en el primer disco duro 
+#Asigar la primera etapa del grub en el primer disco duro 
 FIRSTSTAGE=$(ogDiskToDev 1)
-
-#localizar disco segunda etapa del grub
+#Localizar disco segunda etapa del grub
 SECONDSTAGE=$(ogMount $DISK $PART)
 
-# prepara el directorio principal de la segunda etapa (y copia los binarios)
+#Preparar el directorio principal de la segunda etapa (y copia los binarios)
 [ -d ${SECONDSTAGE}/boot/burg/ ]  || mkdir -p ${SECONDSTAGE}/boot/burg/; cp -prv /boot/burg/*  ${SECONDSTAGE}/boot/burg/ 2>&1>/dev/null; cp -prv $OGLIB/burg/themes  ${SECONDSTAGE}/boot/burg/ 2>&1>/dev/null; #*/ ## (comentario Dogygen) #*/ ## (comentario Dogygen)
-
-#Copiamos el tema 
+#Copiar el tema de opengnsys
 mkdir -p  ${SECONDSTAGE}/boot/burg/themes/OpenGnsys
 cp -prv "$OGLIB/burg/themes" "${SECONDSTAGE}/boot/burg/" 2>&1>/dev/null
 
-#Localizar directorio segunda etapa del grub   
-#PREFIXSECONDSTAGE="/boot/burg/"
-
-# Si Reconfigurar segunda etapa (grub.cfg) == FALSE
+# No configurar la segunda etapa (grub.cfg). Parámetro FALSE 
 if [ -f ${SECONDSTAGE}/boot/burg/burg.cfg -o -f ${SECONDSTAGE}/boot/burg/burg.cfg$BACKUPNAME ];
 then 
     if [ "$CHECKOS" == "false" -o "$CHECKOS" == "FALSE" ]
@@ -1667,24 +1670,19 @@ then
     fi
 fi
 
-# SI Reconfigurar segunda etapa (burg.cfg) == TRUE 
+# Configurrar la segunda etapa (burg.cfg) == tercer parámetro TRUE 
 
-#llamada a updateBootCache para que aloje la primera fase del ogLive
+#llamar a updateBootCache para que aloje la primera fase del ogLive
 updateBootCache
 
 #Configur la sintaxis grub para evitar menus de "recovery" en el OGLive
 echo "GRUB_DISABLE_RECOVERY=\"true\"" >> /etc/default/grub
 echo "GRUB_DISABLE_LINUX_UUID=\"true\"" >> /etc/default/grub
 
-
 #Preparar configuración segunda etapa: crear ubicacion
 mkdir -p ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot/burg/
-
 #Preparar configuración segunda etapa: crear cabecera del fichero
-#/etc/burg.d/00_header > ${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot/burg/burg.cfg
-
 FILECFG=${SECONDSTAGE}${PREFIXSECONDSTAGE}/boot/burg/burg.cfg
-
 #/* ## (comentario Dogygen)
 cat > "$FILECFG" << EOF
 
@@ -1772,7 +1770,6 @@ EOF
 
 #Preparar configuración segunda etapa: crear entrada del sistema operativo
 grubSyntax "$KERNELPARAM" >> "$FILECFG" 
-
 #Instalar el burg 
 burg-install --force --root-directory=${SECONDSTAGE} $FIRSTSTAGE 2>&1>/dev/null
 }
