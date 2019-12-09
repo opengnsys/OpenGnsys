@@ -2805,3 +2805,79 @@ else
     fi
 fi
 }
+
+#/**
+#         ogGrub4dosInstallMbr int_ndisk
+#@brief   Genera un nuevo Codigo de arranque en el MBR del disco indicado, compatible con los SO tipo Windows, Linux.
+#@param   int_ndisk      nÂº de orden del disco
+#@param   int_ndisk      nÂº de orden del particion
+#@return  
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_NOTFOUND  Tipo de particiÃ³n desconocido o no se puede montar.
+#@exception  OG_ERR_NOTBIOS Equipo no firmware BIOS legacy
+#@exception  OG_ERR_NOMSDOS Disco duro no particioniado en modo msdos
+#@exception  OG_ERR_NOTWRITE  Particion no modificable.
+#@version 1.1.1 - Adaptacion a OpenGnSys.
+#@author  Alberto GarcÃ­a Padilla / Antonio J. Doblas Viso. Universidad de Malaga
+#@date    2009-10-17
+#*/ ##
+
+function ogGrub4dosInstallMbr ()
+{
+# Variables locales.
+local DISK PART  DEVICE MOUNTDISK GRUBDISK BINBDIR
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_part " \
+           "$FUNCNAME 1 1 "
+    return
+fi
+# Error si no se recibe 2 parámetros.
+[ $# == 2 ] || return $(ogRaiseError $OG_ERR_FORMAT; echo $?) 
+
+DISK="$1" 
+PART="$2"
+
+#Controlar existencia de disco y particion
+DEVICE=$(ogDiskToDev $DISK) || ogRaiseError $OG_ERR_NOTFOUND || return $?
+MOUNTDISK=$(ogMount $DISK $PART) || ogRaiseError $OG_ERR_PARTITION "$MSG_ERROR " || return $?
+#Controlar acceso de escritura a la particion
+ogIsReadonly $DISK $PART &&  return $(ogRaiseError $OG_ERR_NOTWRITE ": $DISK $PART" || echo $?)
+#Controlar disco no uefi
+ogIsEfiActive && return $(ogRaiseError $OG_ERR_NOTBIOS " : grub4dos solo soporta PC con bios legacy"; echo $?)
+#Controlar particionado tipo msdos
+ogCheckStringInGroup $(ogGetPartitionTableType $DISK) "MSDOS" || return $(ogRaiseError $OG_ERR_NOMSDOS ": grub2dos requiere particionado tipo MSDOS"; echo $?)
+#Controlar la existencia del grub4dos con acceso a ntfs
+BINDIR="${OGLIB}/grub4dos/grub4dos-0.4.6a"
+[ -f ${BINDIR}/bootlace.com  ] || ogRaiseError $OG_ERR_NOTFOUND ": ${BINDIR}/bootlace.com" || return $?
+
+#instalar el bootloader de grlrd en el MBR
+${BINDIR}/bootlace64.com $DEVICE &>/dev/null
+#copiar grld a la particion           
+cp ${BINDIR}/grldr $MOUNTDISK
+#Instalar y configurar grub4dos
+if [[ -f $MOUNTDISK/Boot/ ]]; then
+	GRUBDIR="$MOUNTDISK/Boot/grub/"
+fi
+if [[ -f $MOUNTDISK/Boot/grub/menu.lst ]]; then
+	rm $MOUNTDISK/Boot/grub/menu.lst
+	rmdir /$MOUNTDISK/Boot/grub
+fi
+if [[ ! -f $MOUNTDISK/Boot/grub/menu.lst ]]; then
+	mkdir -p /$MOUNTDISK/Boot/grub
+	touch /$MOUNTDISK/Boot/grub/menu.lst
+	
+	GRUBDISK=$[$1-1]
+	
+cat << EOT >/$MOUNTDISK/Boot/grub/menu.lst
+##NO-TOCAR-ESTA-LINEA MBR
+timeout 0
+title  MBR
+root (hd$GRUBDISK,0)
+chainloader (hd$GRUBDISK,0)+1
+boot
+EOT
+	
+fi
+}
