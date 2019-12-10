@@ -21,6 +21,7 @@ Tickets resueltos en módulo OpenGnsys Cloning Engine:
 #923	Mejora de control de errores en deployImagen (corrección)
 #926	bootOsCustom soportará varios discos y una partición de datos
 #931	Fallo en el inventario Software (corrección)
+#935	ogGrub4dosInstallMbr nueva función para arranques de MBR y discos PCIe (NVMe)
 
 Tickets resueltos en módulo OpenGnsys Client:
 #847	La ISO del ogLive debe de utilzar la revisión de Git y no de SVN
@@ -66,7 +67,10 @@ Tickets resueltos en módulo OpenGnsys Web Admin Console:
 #903	Formulario "Añadir Nuevo Ordenador" no valida dirección MAC (corrección)
 #921	Cola de acciones: no muestra nada (corrección)
 #928	Multicast: ampliar el rango de puertos posibles (mejora)
-#932	Remote PC no arranca equipos en repositorio secundario
+#932	Remote PC no arranca equipos en repositorio secundario (corrección)
+#934	Netboot Avanzado no filtra correctamente el ámbito grupo de ordenadores (corrección) 
+#936	Asistente deploy muestra particiones destino duplicadas (corrección) 
+#937	Particiones remotas debe soportar la clonación de particiones en en un segundo disco duro
 
 Tickets resueltos en módulo OpenGnsys Installer:
 #784	Mejorar rendimiento de PHP sobre Apache
@@ -79,6 +83,7 @@ Tickets genéricos resueltos:
 #802	Gestión equipos UEFI (tarea)
 #914	Liberar versión OpenGnsys 1.1.1 Espeto (tarea)
 #917	Problemas de compatibilidad con Ubuntu 18.04 (corrección)
+#939	Subir documentación curso básico 1.1.0a
 
 
 Lista de cambios incluidos en OpenGnsys 1.1.0a (versión de mantenimiento)
