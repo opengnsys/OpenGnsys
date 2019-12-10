@@ -1147,6 +1147,9 @@ function updateSummary()
 		echoAndLog " - MySQL must be reconfigured, run next code as DB root user and restart service:"
 		echoAndLog "      $MYSQLCONFIG"
 	fi
+	echoAndLog " - If you want to use BURG as boot manager, run following command as root:"
+	echoAndLog "      curl $DOWNLOADURL/burg.tgz -o $INSTALL_TARGET/client/lib/burg.tgz"
+
 	echo
 }
 

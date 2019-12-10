@@ -1600,6 +1600,8 @@ function installationSummary()
 	echoAndLog "It's strongly recommended to synchronize this server with an NTP server."
 	echoAndLog "Review or edit all configuration files."
 	echoAndLog "Insert DHCP configuration data and restart service."
+	echoAndLog "Optional: If you want to use BURG as boot manager, run"
+	echoAndLog "   \"curl $DOWNLOADURL/burg.tgz -o $INSTALL_TARGET/client/lib/burg.tgz\" as root."
 	echoAndLog "Optional: Log-in as Web Console admin user."
 	echoAndLog " - Review default Organization data and assign access to users."
 	echoAndLog "Log-in as Web Console organization user."
