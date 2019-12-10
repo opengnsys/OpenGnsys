@@ -5,7 +5,7 @@ $diskPartIndex = 0;
 // Recorremos todas las configuraciones y vamos creando un array con disco - particion
 for($cfgIndex = 0; $cfgIndex < $conKeys; $cfgIndex++){
 	if($tbKeys[$cfgIndex]["numpar"] != 0 && $tbKeys[$cfgIndex]["clonable"] == 1){
-		$disksPartitions["Disco " . $tbKeys[$cfgIndex]["numdisk"] . " - Part " .$tbKeys[$cfgIndex]["numpar"] ] = $tbKeys[$cfgIndex]["numdisk"].";".$tbKeys[$cfgIndex]["numpar"].";".$tbKeys[$cfgIndex]["tipopar"];
+		$disksPartitions["Disco " . $tbKeys[$cfgIndex]["numdisk"] . " - Part " .$tbKeys[$cfgIndex]["numpar"] ] = $tbKeys[$cfgIndex]["numdisk"]." ".$tbKeys[$cfgIndex]["numpar"];
 		$diskPartIndex++;
 	}
 }
