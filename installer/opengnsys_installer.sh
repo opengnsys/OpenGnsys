@@ -1328,7 +1328,7 @@ function servicesCompilation ()
 	# Compilar OpenGnsys Server
 	echoAndLog "${FUNCNAME}(): Compiling OpenGnsys Admin Server"
 	pushd $WORKDIR/opengnsys/admin/Sources/Services/ogAdmServer
-	make && mv ogAdmServer $INSTALL_TARGET/sbin
+	autoreconf -fi && ./configure && make && mv ogAdmServer $INSTALL_TARGET/sbin
 	if [ $? -ne 0 ]; then
 		echoAndLog "${FUNCNAME}(): error while compiling OpenGnsys Admin Server"
 		hayErrores=1
