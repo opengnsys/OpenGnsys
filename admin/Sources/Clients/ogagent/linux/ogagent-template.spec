@@ -11,7 +11,7 @@ Release: %{release}
 Summary: OpenGnsys Agent for Operating Systems
 License: BSD3
 Group: Admin
-Requires: chkconfig initscripts python-six python-requests PyQt4 libXScrnSaver
+Requires: chkconfig initscripts python-six python-requests python-distro PyQt4 libXScrnSaver
 Vendor: OpenGnsys Project
 URL: https://opengnsys.es/
 Provides: ogagent

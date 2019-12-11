@@ -47,4 +47,4 @@ else:
     else:
         from .linux.operations import *  # @UnusedWildImport
         os_type = 'Linux'
-        os_version = getLinuxVersion().replace(',', '')
+        os_version = getLinuxVersion()

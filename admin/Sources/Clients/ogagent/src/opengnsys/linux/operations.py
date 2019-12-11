@@ -42,6 +42,7 @@ import subprocess
 import struct
 import array
 import six
+import distro
 from opengnsys import utils
 from .renamer import rename
 
@@ -139,8 +140,10 @@ def getDomainName():
 
 
 def getLinuxVersion():
-    lv = platform.linux_distribution()
-    return lv[0] + ', ' + lv[1]
+    """
+    Returns the version of the Linux distribution
+    """
+    return distro.os_release_attr('pretty_name')
 
 
 def reboot(flags=0):
