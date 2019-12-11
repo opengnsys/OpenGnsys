@@ -1961,7 +1961,9 @@ static bool RESPUESTA_InventarioHardware(TRAMA* ptrTrama, struct og_client *cli)
 	
 	if (buffer) 
 		res=actualizaHardware(dbi, buffer, ido, npc, idc);
-	
+	else
+		res = false;
+
 	liberaMemoria(iph);
 	liberaMemoria(ido);			
 	liberaMemoria(npc);			
@@ -2290,6 +2292,8 @@ static bool RESPUESTA_InventarioSoftware(TRAMA* ptrTrama, struct og_client *cli)
 	buffer = rTrim(leeArchivo(sft));
 	if (buffer)
 		res=actualizaSoftware(dbi, buffer, par, ido, npc, idc);
+	else
+		res = false;
 
 	liberaMemoria(iph);
 	liberaMemoria(ido);	
@@ -2366,6 +2370,7 @@ bool actualizaSoftware(struct og_dbi *dbi, char *sft, char *par,char *ido,
 	if (lon > MAXSOFTWARE)
 		lon = MAXSOFTWARE; // Limita el número de componentes software
 
+	idnombreso = 0;
 	for (i = 0; i < lon; i++) {
 		// Primera línea es el sistema operativo: se obtiene identificador
 		if (i == 0) {
