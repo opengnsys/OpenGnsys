@@ -46,10 +46,10 @@ ogEcho log session "$MSG_INTERFACE_START $0 $*"
 PATH=$PATH:$(dirname $0)
 PROG=$(basename $0)
 CALLER=$(ogGetCaller)
-if [ "$CALLER" != "ogAdmClient" ]; then
-	ogRaiseError $OG_ERR_NOTEXEC "$CALLER -> $PROG"
-	exit $?
-fi
+#if [ "$CALLER" != "ogAdmClient" ]; then
+#	ogRaiseError $OG_ERR_NOTEXEC "$CALLER -> $PROG"
+#	exit $?
+#fi
 
 # Valor por defecto para el repositorio.
 REPO=${4:-"REPO"}

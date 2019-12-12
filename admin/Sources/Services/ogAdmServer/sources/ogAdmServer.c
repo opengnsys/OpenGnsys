@@ -131,12 +131,19 @@ enum og_client_state {
 	OG_CLIENT_PROCESSING_REQUEST,
 };
 
-#define OG_MSG_REQUEST_MAXLEN	16384
+#define OG_MSG_REQUEST_MAXLEN	65536
+#define OG_CMD_MAXLEN		64
 
 /* Shut down connection if there is no complete message after 10 seconds. */
 #define OG_CLIENT_TIMEOUT	10
 
+/* Agent client operation might take longer, shut down after 30 seconds. */
+#define OG_AGENT_CLIENT_TIMEOUT	30
+
+static LIST_HEAD(client_list);
+
 struct og_client {
+	struct list_head	list;
 	struct ev_io		io;
 	struct ev_timer		timer;
 	struct sockaddr_in	addr;
@@ -146,8 +153,11 @@ struct og_client {
 	unsigned int		msg_len;
 	int			keepalive_idx;
 	bool			rest;
+	bool			agent;
 	int			content_length;
 	char			auth_token[64];
+	const char		*status;
+	char			last_cmd[OG_CMD_MAXLEN];
 };
 
 static inline int og_client_socket(const struct og_client *cli)
@@ -2868,6 +2878,7 @@ static void og_client_release(struct ev_loop *loop, struct og_client *cli)
 		tbsockets[cli->keepalive_idx].cli = NULL;
 	}
 
+	list_del(&cli->list);
 	ev_io_stop(loop, &cli->io);
 	close(cli->io.fd);
 	free(cli);
@@ -2973,11 +2984,14 @@ static int og_client_state_process_payload(struct og_client *cli)
 #define OG_PARTITION_MAX 4
 
 struct og_partition {
+	const char	*disk;
 	const char	*number;
 	const char	*code;
 	const char	*size;
 	const char	*filesystem;
 	const char	*format;
+	const char	*os;
+	const char	*used_size;
 };
 
 struct og_sync_params {
@@ -3018,6 +3032,15 @@ struct og_msg_params {
 	uint64_t	flags;
 };
 
+#define OG_COMPUTER_NAME_MAXLEN	100
+
+struct og_computer {
+	unsigned int	id;
+	unsigned int	center;
+	unsigned int	room;
+	char		name[OG_COMPUTER_NAME_MAXLEN + 1];
+};
+
 #define OG_REST_PARAM_ADDR			(1UL << 0)
 #define OG_REST_PARAM_MAC			(1UL << 1)
 #define OG_REST_PARAM_WOL_TYPE			(1UL << 2)
@@ -3050,6 +3073,85 @@ struct og_msg_params {
 #define OG_REST_PARAM_SYNC_METHOD		(1UL << 29)
 #define OG_REST_PARAM_ECHO			(1UL << 30)
 #define OG_REST_PARAM_TASK			(1UL << 31)
+
+enum og_rest_method {
+	OG_METHOD_GET	= 0,
+	OG_METHOD_POST,
+};
+
+static struct og_client *og_client_find(const char *ip)
+{
+	struct og_client *client;
+	struct in_addr addr;
+	int res;
+
+	res = inet_aton(ip, &addr);
+	if (!res) {
+		syslog(LOG_ERR, "Invalid IP string: %s\n", ip);
+		return NULL;
+	}
+
+	list_for_each_entry(client, &client_list, list) {
+		if (client->addr.sin_addr.s_addr == addr.s_addr && client->agent) {
+			return client;
+		}
+	}
+
+	return NULL;
+}
+
+static int og_send_request(const char *cmd,
+			   const enum og_rest_method method,
+			   const struct og_msg_params *params,
+			   const json_t *data)
+{
+	const char *content_type = "Content-Type: application/json";
+	char content [OG_MSG_REQUEST_MAXLEN - 700] = {};
+	char buf[OG_MSG_REQUEST_MAXLEN] = {};
+	unsigned int content_length;
+	char method_str[5] = {};
+	struct og_client *cli;
+	unsigned int i;
+	int client_sd;
+
+	if (method == OG_METHOD_GET)
+		snprintf(method_str, 5, "GET");
+	else if (method == OG_METHOD_POST)
+		snprintf(method_str, 5, "POST");
+	else
+		return -1;
+
+	if (!data)
+		content_length = 0;
+	else
+		content_length = json_dumpb(data, content,
+					    OG_MSG_REQUEST_MAXLEN - 700,
+					    JSON_COMPACT);
+
+	snprintf(buf, OG_MSG_REQUEST_MAXLEN,
+		 "%s /%s HTTP/1.1\r\nContent-Length: %d\r\n%s\r\n\r\n%s",
+		 method_str, cmd, content_length, content_type, content);
+
+	for (i = 0; i < params->ips_array_len; i++) {
+		cli = og_client_find(params->ips_array[i]);
+		if (!cli)
+			continue;
+
+		client_sd = cli->io.fd;
+		if (client_sd < 0) {
+			syslog(LOG_INFO, "Client %s not conected\n",
+			       params->ips_array[i]);
+			continue;
+		}
+
+		if (send(client_sd, buf, strlen(buf), 0) < 0)
+			continue;
+
+		strncpy(cli->last_cmd, cmd, OG_CMD_MAXLEN);
+	}
+
+	return 0;
+}
 
 static bool og_msg_params_validate(const struct og_msg_params *params,
 				   const uint64_t flags)
@@ -3157,12 +3259,14 @@ static int og_json_parse_sync_params(json_t *element,
 #define OG_PARAM_PART_FILESYSTEM		(1UL << 2)
 #define OG_PARAM_PART_SIZE			(1UL << 3)
 #define OG_PARAM_PART_FORMAT			(1UL << 4)
+#define OG_PARAM_PART_DISK			(1UL << 5)
+#define OG_PARAM_PART_OS			(1UL << 6)
+#define OG_PARAM_PART_USED_SIZE			(1UL << 7)
 
 static int og_json_parse_partition(json_t *element,
-				   struct og_msg_params *params,
-				   unsigned int i)
+				   struct og_partition *part,
+				   uint64_t required_flags)
 {
-	struct og_partition *part = &params->partition_setup[i];
 	uint64_t flags = 0UL;
 	const char *key;
 	json_t *value;
@@ -3184,20 +3288,23 @@ static int og_json_parse_partition(json_t *element,
 		} else if (!strcmp(key, "format")) {
 			err = og_json_parse_string(value, &part->format);
 			flags |= OG_PARAM_PART_FORMAT;
+		} else if (!strcmp(key, "disk")) {
+			err = og_json_parse_string(value, &part->disk);
+			flags |= OG_PARAM_PART_DISK;
+		} else if (!strcmp(key, "os")) {
+			err = og_json_parse_string(value, &part->os);
+			flags |= OG_PARAM_PART_OS;
+		} else if (!strcmp(key, "used_size")) {
+			err = og_json_parse_string(value, &part->used_size);
+			flags |= OG_PARAM_PART_USED_SIZE;
 		}
 
 		if (err < 0)
 			return err;
 	}
 
-	if (flags != (OG_PARAM_PART_NUMBER |
-		      OG_PARAM_PART_CODE |
-		      OG_PARAM_PART_FILESYSTEM |
-		      OG_PARAM_PART_SIZE |
-		      OG_PARAM_PART_FORMAT))
+	if (flags != required_flags)
 		return -1;
-
-	params->flags |= (OG_REST_PARAM_PART_0 << i);
 
 	return err;
 }
@@ -3217,32 +3324,17 @@ static int og_json_parse_partition_setup(json_t *element,
 		if (json_typeof(k) != JSON_OBJECT)
 			return -1;
 
-		if (og_json_parse_partition(k, params, i) != 0)
+		if (og_json_parse_partition(k, &params->partition_setup[i],
+					    OG_PARAM_PART_NUMBER |
+					    OG_PARAM_PART_CODE |
+					    OG_PARAM_PART_FILESYSTEM |
+					    OG_PARAM_PART_SIZE |
+					    OG_PARAM_PART_FORMAT) < 0)
 			return -1;
+
+		params->flags |= (OG_REST_PARAM_PART_0 << i);
 	}
 	return 0;
-}
-
-static int og_cmd_legacy_send(struct og_msg_params *params, const char *cmd,
-			      const char *state)
-{
-	char buf[4096] = {};
-	int len, err = 0;
-	TRAMA *msg;
-
-	len = snprintf(buf, sizeof(buf), "nfn=%s\r", cmd);
-
-	msg = og_msg_alloc(buf, len);
-	if (!msg)
-		return -1;
-
-	if (!og_send_cmd((char **)params->ips_array, params->ips_array_len,
-			 state, msg))
-		err = -1;
-
-	og_msg_free(msg);
-
-	return err;
 }
 
 static int og_cmd_post_clients(json_t *element, struct og_msg_params *params)
@@ -3265,7 +3357,7 @@ static int og_cmd_post_clients(json_t *element, struct og_msg_params *params)
 	if (!og_msg_params_validate(params, OG_REST_PARAM_ADDR))
 		return -1;
 
-	return og_cmd_legacy_send(params, "Sondeo", CLIENTE_APAGADO);
+	return og_send_request("probe", OG_METHOD_POST, params, NULL);
 }
 
 struct og_buffer {
@@ -3287,17 +3379,17 @@ static int og_cmd_get_clients(json_t *element, struct og_msg_params *params,
 			      char *buffer_reply)
 {
 	json_t *root, *array, *addr, *state, *object;
+	struct og_client *client;
 	struct og_buffer og_buffer = {
 		.data	= buffer_reply,
 	};
-	int i;
 
 	array = json_array();
 	if (!array)
 		return -1;
 
-	for (i = 0; i < MAXIMOS_CLIENTES; i++) {
-		if (tbsockets[i].ip[0] == '\0')
+	list_for_each_entry(client, &client_list, list) {
+		if (!client->agent)
 			continue;
 
 		object = json_object();
@@ -3305,22 +3397,20 @@ static int og_cmd_get_clients(json_t *element, struct og_msg_params *params,
 			json_decref(array);
 			return -1;
 		}
-		addr = json_string(tbsockets[i].ip);
+		addr = json_string(inet_ntoa(client->addr.sin_addr));
 		if (!addr) {
 			json_decref(object);
 			json_decref(array);
 			return -1;
 		}
 		json_object_set_new(object, "addr", addr);
-
-		state = json_string(tbsockets[i].estado);
+		state = json_string(client->status);
 		if (!state) {
 			json_decref(object);
 			json_decref(array);
 			return -1;
 		}
 		json_object_set_new(object, "state", state);
-
 		json_array_append_new(array, object);
 	}
 	root = json_pack("{s:o}", "clients", array);
@@ -3458,12 +3548,10 @@ static int og_json_parse_run(json_t *element, struct og_msg_params *params)
 
 static int og_cmd_run_post(json_t *element, struct og_msg_params *params)
 {
-	char buf[4096] = {}, iph[4096] = {};
-	int err = 0, len;
+	json_t *value, *clients;
 	const char *key;
 	unsigned int i;
-	json_t *value;
-	TRAMA *msg;
+	int err = 0;
 
 	if (json_typeof(element) != JSON_OBJECT)
 		return -1;
@@ -3487,31 +3575,10 @@ static int og_cmd_run_post(json_t *element, struct og_msg_params *params)
 					    OG_REST_PARAM_ECHO))
 		return -1;
 
-	for (i = 0; i < params->ips_array_len; i++) {
-		len = snprintf(iph + strlen(iph), sizeof(iph), "%s;",
-			       params->ips_array[i]);
-	}
+	clients = json_copy(element);
+	json_object_del(clients, "clients");
 
-	if (params->echo) {
-		len = snprintf(buf, sizeof(buf),
-			       "nfn=ConsolaRemota\riph=%s\rscp=%s\r",
-			       iph, params->run_cmd);
-	} else {
-		len = snprintf(buf, sizeof(buf),
-			       "nfn=EjecutarScript\riph=%s\rscp=%s\r",
-			       iph, params->run_cmd);
-	}
-
-	msg = og_msg_alloc(buf, len);
-	if (!msg)
-		return -1;
-
-	if (!og_send_cmd((char **)params->ips_array, params->ips_array_len,
-			 CLIENTE_OCUPADO, msg))
-		err = -1;
-
-	og_msg_free(msg);
-
+	err = og_send_request("shell/run", OG_METHOD_POST, params, clients);
 	if (err < 0)
 		return err;
 
@@ -3612,12 +3679,9 @@ static int og_cmd_run_get(json_t *element, struct og_msg_params *params,
 
 static int og_cmd_session(json_t *element, struct og_msg_params *params)
 {
-	char buf[4096], iph[4096];
-	int err = 0, len;
+	json_t *clients, *value;
 	const char *key;
-	unsigned int i;
-	json_t *value;
-	TRAMA *msg;
+	int err = 0;
 
 	if (json_typeof(element) != JSON_OBJECT)
 		return -1;
@@ -3642,25 +3706,10 @@ static int og_cmd_session(json_t *element, struct og_msg_params *params)
 					    OG_REST_PARAM_PARTITION))
 		return -1;
 
-	for (i = 0; i < params->ips_array_len; i++) {
-		snprintf(iph + strlen(iph), sizeof(iph), "%s;",
-			 params->ips_array[i]);
-	}
-	len = snprintf(buf, sizeof(buf),
-		       "nfn=IniciarSesion\riph=%s\rdsk=%s\rpar=%s\r",
-		       iph, params->disk, params->partition);
+	clients = json_copy(element);
+	json_object_del(clients, "clients");
 
-	msg = og_msg_alloc(buf, len);
-	if (!msg)
-		return -1;
-
-	if (!og_send_cmd((char **)params->ips_array, params->ips_array_len,
-			 CLIENTE_APAGADO, msg))
-		err = -1;
-
-	og_msg_free(msg);
-
-	return 0;
+	return og_send_request("session", OG_METHOD_POST, params, clients);
 }
 
 static int og_cmd_poweroff(json_t *element, struct og_msg_params *params)
@@ -3683,7 +3732,7 @@ static int og_cmd_poweroff(json_t *element, struct og_msg_params *params)
 	if (!og_msg_params_validate(params, OG_REST_PARAM_ADDR))
 		return -1;
 
-	return og_cmd_legacy_send(params, "Apagar", CLIENTE_OCUPADO);
+	return og_send_request("poweroff", OG_METHOD_POST, params, NULL);
 }
 
 static int og_cmd_refresh(json_t *element, struct og_msg_params *params)
@@ -3706,7 +3755,7 @@ static int og_cmd_refresh(json_t *element, struct og_msg_params *params)
 	if (!og_msg_params_validate(params, OG_REST_PARAM_ADDR))
 		return -1;
 
-	return og_cmd_legacy_send(params, "Actualizar", CLIENTE_APAGADO);
+	return og_send_request("refresh", OG_METHOD_GET, params, NULL);
 }
 
 static int og_cmd_reboot(json_t *element, struct og_msg_params *params)
@@ -3729,7 +3778,7 @@ static int og_cmd_reboot(json_t *element, struct og_msg_params *params)
 	if (!og_msg_params_validate(params, OG_REST_PARAM_ADDR))
 		return -1;
 
-	return og_cmd_legacy_send(params, "Reiniciar", CLIENTE_OCUPADO);
+	return og_send_request("reboot", OG_METHOD_POST, params, NULL);
 }
 
 static int og_cmd_stop(json_t *element, struct og_msg_params *params)
@@ -3752,7 +3801,7 @@ static int og_cmd_stop(json_t *element, struct og_msg_params *params)
 	if (!og_msg_params_validate(params, OG_REST_PARAM_ADDR))
 		return -1;
 
-	return og_cmd_legacy_send(params, "Purgar", CLIENTE_APAGADO);
+	return og_send_request("stop", OG_METHOD_POST, params, NULL);
 }
 
 static int og_cmd_hardware(json_t *element, struct og_msg_params *params)
@@ -3775,17 +3824,14 @@ static int og_cmd_hardware(json_t *element, struct og_msg_params *params)
 	if (!og_msg_params_validate(params, OG_REST_PARAM_ADDR))
 		return -1;
 
-	return og_cmd_legacy_send(params, "InventarioHardware",
-				  CLIENTE_OCUPADO);
+	return og_send_request("hardware", OG_METHOD_GET, params, NULL);
 }
 
 static int og_cmd_software(json_t *element, struct og_msg_params *params)
 {
-	char buf[4096] = {};
-	int err = 0, len;
+	json_t *clients, *value;
 	const char *key;
-	json_t *value;
-	TRAMA *msg;
+	int err = 0;
 
 	if (json_typeof(element) != JSON_OBJECT)
 		return -1;
@@ -3811,29 +3857,17 @@ static int og_cmd_software(json_t *element, struct og_msg_params *params)
 					    OG_REST_PARAM_PARTITION))
 		return -1;
 
-	len = snprintf(buf, sizeof(buf),
-		       "nfn=InventarioSoftware\rdsk=%s\rpar=%s\r",
-		       params->disk, params->partition);
+	clients = json_copy(element);
+	json_object_del(clients, "clients");
 
-	msg = og_msg_alloc(buf, len);
-	if (!msg)
-		return -1;
-
-	og_send_cmd((char **)params->ips_array, params->ips_array_len,
-		    CLIENTE_OCUPADO, msg);
-
-	og_msg_free(msg);
-
-	return 0;
+	return og_send_request("software", OG_METHOD_POST, params, clients);
 }
 
 static int og_cmd_create_image(json_t *element, struct og_msg_params *params)
 {
-	char buf[4096] = {};
-	int err = 0, len;
+	json_t *value, *clients;
 	const char *key;
-	json_t *value;
-	TRAMA *msg;
+	int err = 0;
 
 	if (json_typeof(element) != JSON_OBJECT)
 		return -1;
@@ -3874,30 +3908,17 @@ static int og_cmd_create_image(json_t *element, struct og_msg_params *params)
 					    OG_REST_PARAM_REPO))
 		return -1;
 
-	len = snprintf(buf, sizeof(buf),
-			"nfn=CrearImagen\rdsk=%s\rpar=%s\rcpt=%s\ridi=%s\rnci=%s\ripr=%s\r",
-			params->disk, params->partition, params->code,
-			params->id, params->name, params->repository);
+	clients = json_copy(element);
+	json_object_del(clients, "clients");
 
-	msg = og_msg_alloc(buf, len);
-	if (!msg)
-		return -1;
-
-	og_send_cmd((char **)params->ips_array, params->ips_array_len,
-		    CLIENTE_OCUPADO, msg);
-
-	og_msg_free(msg);
-
-	return 0;
+	return og_send_request("image/create", OG_METHOD_POST, params, clients);
 }
 
 static int og_cmd_restore_image(json_t *element, struct og_msg_params *params)
 {
-	char buf[4096] = {};
-	int err = 0, len;
+	json_t *clients, *value;
 	const char *key;
-	json_t *value;
-	TRAMA *msg;
+	int err = 0;
 
 	if (json_typeof(element) != JSON_OBJECT)
 		return -1;
@@ -3942,32 +3963,17 @@ static int og_cmd_restore_image(json_t *element, struct og_msg_params *params)
 					    OG_REST_PARAM_ID))
 		return -1;
 
-	len = snprintf(buf, sizeof(buf),
-		       "nfn=RestaurarImagen\ridi=%s\rdsk=%s\rpar=%s\rifs=%s\r"
-		       "nci=%s\ripr=%s\rptc=%s\r",
-		       params->id, params->disk, params->partition,
-		       params->profile, params->name,
-		       params->repository, params->type);
+	clients = json_copy(element);
+	json_object_del(clients, "clients");
 
-	msg = og_msg_alloc(buf, len);
-	if (!msg)
-		return -1;
-
-	og_send_cmd((char **)params->ips_array, params->ips_array_len,
-		    CLIENTE_OCUPADO, msg);
-
-	og_msg_free(msg);
-
-	return 0;
+	return og_send_request("image/restore", OG_METHOD_POST, params, clients);
 }
 
 static int og_cmd_setup(json_t *element, struct og_msg_params *params)
 {
-	char buf[4096] = {};
-	int err = 0, len;
+	json_t *value, *clients;
 	const char *key;
-	json_t *value;
-	TRAMA *msg;
+	int err = 0;
 
 	if (json_typeof(element) != JSON_OBJECT)
 		return -1;
@@ -4002,28 +4008,10 @@ static int og_cmd_setup(json_t *element, struct og_msg_params *params)
 					    OG_REST_PARAM_PART_3))
 		return -1;
 
-	len = snprintf(buf, sizeof(buf),
-			"nfn=Configurar\rdsk=%s\rcfg=dis=%s*che=%s*tch=%s!",
-			params->disk, params->disk, params->cache, params->cache_size);
+	clients = json_copy(element);
+	json_object_del(clients, "clients");
 
-	for (unsigned int i = 0; i < OG_PARTITION_MAX; ++i) {
-		const struct og_partition *part = &params->partition_setup[i];
-
-		len += snprintf(buf + strlen(buf), sizeof(buf),
-			"par=%s*cpt=%s*sfi=%s*tam=%s*ope=%s%%",
-			part->number, part->code, part->filesystem, part->size, part->format);
-	}
-
-	msg = og_msg_alloc(buf, len + 1);
-	if (!msg)
-		return -1;
-
-	og_send_cmd((char **)params->ips_array, params->ips_array_len,
-			CLIENTE_OCUPADO, msg);
-
-	og_msg_free(msg);
-
-	return 0;
+	return og_send_request("setup", OG_METHOD_POST, params, clients);
 }
 
 static int og_cmd_run_schedule(json_t *element, struct og_msg_params *params)
@@ -4043,9 +4031,7 @@ static int og_cmd_run_schedule(json_t *element, struct og_msg_params *params)
 	if (!og_msg_params_validate(params, OG_REST_PARAM_ADDR))
 		return -1;
 
-	og_cmd_legacy_send(params, "EjecutaComandosPendientes", CLIENTE_OCUPADO);
-
-	return 0;
+	return og_send_request("run/schedule", OG_METHOD_GET, params, NULL);
 }
 
 static int og_cmd_create_basic_image(json_t *element, struct og_msg_params *params)
@@ -4705,7 +4691,7 @@ static int og_cmd_task_post(json_t *element, struct og_msg_params *params)
 	list_for_each_entry(cmd, &cmd_list, list)
 		params->ips_array[params->ips_array_len++] = cmd->ip;
 
-	return og_cmd_legacy_send(params, "Actualizar", CLIENTE_OCUPADO);
+	return og_send_request("run/schedule", OG_METHOD_GET, params, NULL);
 }
 
 static int og_client_method_not_found(struct og_client *cli)
@@ -4787,11 +4773,6 @@ static int og_client_ok(struct og_client *cli, char *buf_reply)
 
 	return err;
 }
-
-enum og_rest_method {
-	OG_METHOD_GET	= 0,
-	OG_METHOD_POST,
-};
 
 static int og_client_state_process_payload_rest(struct og_client *cli)
 {
@@ -5072,18 +5053,16 @@ static int og_client_state_recv_hdr_rest(struct og_client *cli)
 	return 1;
 }
 
-static void og_client_read_cb(struct ev_loop *loop, struct ev_io *io, int events)
+static int og_client_recv(struct og_client *cli, int events)
 {
-	struct og_client *cli;
+	struct ev_io *io = &cli->io;
 	int ret;
-
-	cli = container_of(io, struct og_client, io);
 
 	if (events & EV_ERROR) {
 		syslog(LOG_ERR, "unexpected error event from client %s:%hu\n",
 			       inet_ntoa(cli->addr.sin_addr),
 			       ntohs(cli->addr.sin_port));
-		goto close;
+		return 0;
 	}
 
 	ret = recv(io->fd, cli->buf + cli->buf_len,
@@ -5097,8 +5076,22 @@ static void og_client_read_cb(struct ev_loop *loop, struct ev_io *io, int events
 			syslog(LOG_DEBUG, "closed connection by %s:%hu\n",
 			       inet_ntoa(cli->addr.sin_addr), ntohs(cli->addr.sin_port));
 		}
-		goto close;
+		return ret;
 	}
+
+	return ret;
+}
+
+static void og_client_read_cb(struct ev_loop *loop, struct ev_io *io, int events)
+{
+	struct og_client *cli;
+	int ret;
+
+	cli = container_of(io, struct og_client, io);
+
+	ret = og_client_recv(cli, events);
+	if (ret <= 0)
+		goto close;
 
 	if (cli->keepalive_idx >= 0)
 		return;
@@ -5170,6 +5163,720 @@ close:
 	og_client_release(loop, cli);
 }
 
+enum og_agent_state {
+	OG_AGENT_RECEIVING_HEADER	= 0,
+	OG_AGENT_RECEIVING_PAYLOAD,
+	OG_AGENT_PROCESSING_RESPONSE,
+};
+
+static int og_agent_state_recv_hdr_rest(struct og_client *cli)
+{
+	char *ptr;
+
+	ptr = strstr(cli->buf, "\r\n\r\n");
+	if (!ptr)
+		return 0;
+
+	cli->msg_len = ptr - cli->buf + 4;
+
+	ptr = strstr(cli->buf, "Content-Length: ");
+	if (ptr) {
+		sscanf(ptr, "Content-Length: %i[^\r\n]", &cli->content_length);
+		if (cli->content_length < 0)
+			return -1;
+		cli->msg_len += cli->content_length;
+	}
+
+	return 1;
+}
+
+static void og_agent_reset_state(struct og_client *cli)
+{
+	cli->state = OG_AGENT_RECEIVING_HEADER;
+	cli->buf_len = 0;
+	cli->content_length = 0;
+	memset(cli->buf, 0, sizeof(cli->buf));
+}
+
+static int og_dbi_get_computer_info(struct og_computer *computer,
+				    struct in_addr addr)
+{
+	const char *msglog;
+	struct og_dbi *dbi;
+	dbi_result result;
+
+	dbi = og_dbi_open(&dbi_config);
+	if (!dbi) {
+		syslog(LOG_ERR, "cannot open connection database (%s:%d)\n",
+		       __func__, __LINE__);
+		return -1;
+	}
+	result = dbi_conn_queryf(dbi->conn,
+				 "SELECT ordenadores.idordenador,"
+				 "       ordenadores.nombreordenador,"
+				 "       ordenadores.idaula,"
+				 "       centros.idcentro FROM ordenadores "
+				 "INNER JOIN aulas ON aulas.idaula=ordenadores.idaula "
+				 "INNER JOIN centros ON centros.idcentro=aulas.idcentro "
+				 "WHERE ordenadores.ip='%s'", inet_ntoa(addr));
+	if (!result) {
+		dbi_conn_error(dbi->conn, &msglog);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
+		return -1;
+	}
+	if (!dbi_result_next_row(result)) {
+		syslog(LOG_ERR, "client does not exist in database (%s:%d)\n",
+		       __func__, __LINE__);
+		dbi_result_free(result);
+		return -1;
+	}
+
+	computer->id = dbi_result_get_uint(result, "idordenador");
+	computer->center = dbi_result_get_uint(result, "idcentro");
+	computer->room = dbi_result_get_uint(result, "idaula");
+	strncpy(computer->name,
+		dbi_result_get_string(result, "nombreordenador"),
+		OG_COMPUTER_NAME_MAXLEN);
+
+	dbi_result_free(result);
+	og_dbi_close(dbi);
+
+	return 0;
+}
+
+static int og_resp_probe(struct og_client *cli, json_t *data)
+{
+	bool status = false;
+	const char *key;
+	json_t *value;
+	int err = 0;
+
+	if (json_typeof(data) != JSON_OBJECT)
+		return -1;
+
+	json_object_foreach(data, key, value) {
+		if (!strcmp(key, "status")) {
+			err = og_json_parse_string(value, &cli->status);
+			if (err < 0)
+				return err;
+
+			status = true;
+		} else {
+			return -1;
+		}
+	}
+
+	return status ? 0 : -1;
+}
+
+static int og_resp_shell_run(struct og_client *cli, json_t *data)
+{
+	const char *output = NULL;
+	char filename[4096];
+	const char *key;
+	json_t *value;
+	int err = -1;
+	FILE *file;
+
+	if (json_typeof(data) != JSON_OBJECT)
+		return -1;
+
+	json_object_foreach(data, key, value) {
+		if (!strcmp(key, "out")) {
+			err = og_json_parse_string(value, &output);
+			if (err < 0)
+				return err;
+		} else {
+			return -1;
+		}
+	}
+
+	if (!output) {
+		syslog(LOG_ERR, "%s:%d: malformed json response\n",
+		       __FILE__, __LINE__);
+		return -1;
+	}
+
+	sprintf(filename, "/tmp/_Seconsola_%s", inet_ntoa(cli->addr.sin_addr));
+	file = fopen(filename, "wt");
+	if (!file) {
+		syslog(LOG_ERR, "cannot open file %s: %s\n",
+		       filename, strerror(errno));
+		return -1;
+	}
+
+	fprintf(file, "%s", output);
+	fclose(file);
+
+	return 0;
+}
+
+#define OG_DB_INT_MAXLEN	11
+
+struct og_computer_legacy  {
+	char center[OG_DB_INT_MAXLEN + 1];
+	char id[OG_DB_INT_MAXLEN + 1];
+	char hardware[8192];
+};
+
+static int og_resp_hardware(json_t *data, struct og_client *cli)
+{
+	struct og_computer_legacy legacy = {};
+	const char *hardware = NULL;
+	struct og_computer computer;
+	struct og_dbi *dbi;
+	const char *key;
+	json_t *value;
+	int err = 0;
+	bool res;
+
+	if (json_typeof(data) != JSON_OBJECT)
+		return -1;
+
+	json_object_foreach(data, key, value) {
+		if (!strcmp(key, "hardware")) {
+			err = og_json_parse_string(value, &hardware);
+			if (err < 0)
+				return -1;
+		} else {
+			return -1;
+		}
+	}
+
+	if (!hardware) {
+		syslog(LOG_ERR, "malformed response json\n");
+		return -1;
+	}
+
+	err = og_dbi_get_computer_info(&computer, cli->addr.sin_addr);
+	if (err < 0)
+		return -1;
+
+	snprintf(legacy.center, sizeof(legacy.center), "%d", computer.center);
+	snprintf(legacy.id, sizeof(legacy.id), "%d", computer.id);
+	snprintf(legacy.hardware, sizeof(legacy.hardware), "%s", hardware);
+
+	dbi = og_dbi_open(&dbi_config);
+	if (!dbi) {
+		syslog(LOG_ERR, "cannot open connection database (%s:%d)\n",
+		       __func__, __LINE__);
+		return -1;
+	}
+
+	res = actualizaHardware(dbi, legacy.hardware, legacy.id, computer.name,
+				legacy.center);
+	og_dbi_close(dbi);
+
+	if (!res) {
+		syslog(LOG_ERR, "Problem updating client configuration\n");
+		return -1;
+	}
+
+	return 0;
+}
+
+#define OG_DB_SMALLINT_MAXLEN	6
+
+struct og_software_legacy {
+	char software[8192];
+	char center[OG_DB_INT_MAXLEN + 1];
+	char part[OG_DB_SMALLINT_MAXLEN + 1];
+	char id[OG_DB_INT_MAXLEN + 1];
+};
+
+static int og_resp_software(json_t *data, struct og_client *cli)
+{
+	struct og_software_legacy legacy = {};
+	const char *partition = NULL;
+	const char *software = NULL;
+	struct og_computer computer;
+	struct og_dbi *dbi;
+	const char *key;
+	json_t *value;
+	int err = 0;
+	bool res;
+
+	if (json_typeof(data) != JSON_OBJECT)
+		return -1;
+
+	json_object_foreach(data, key, value) {
+		if (!strcmp(key, "software"))
+			err = og_json_parse_string(value, &software);
+		else if (!strcmp(key, "partition"))
+			err = og_json_parse_string(value, &partition);
+		else
+			return -1;
+
+		if (err < 0)
+			return -1;
+	}
+
+	if (!software || !partition) {
+		syslog(LOG_ERR, "malformed response json\n");
+		return -1;
+	}
+
+	err = og_dbi_get_computer_info(&computer, cli->addr.sin_addr);
+	if (err < 0)
+		return -1;
+
+	snprintf(legacy.software, sizeof(legacy.software), "%s", software);
+	snprintf(legacy.part, sizeof(legacy.part), "%s", partition);
+	snprintf(legacy.id, sizeof(legacy.id), "%d", computer.id);
+	snprintf(legacy.center, sizeof(legacy.center), "%d", computer.center);
+
+	dbi = og_dbi_open(&dbi_config);
+	if (!dbi) {
+		syslog(LOG_ERR, "cannot open connection database (%s:%d)\n",
+		       __func__, __LINE__);
+		return -1;
+	}
+
+	res = actualizaSoftware(dbi, legacy.software, legacy.part, legacy.id,
+				computer.name, legacy.center);
+	og_dbi_close(dbi);
+
+	if (!res) {
+		syslog(LOG_ERR, "Problem updating client configuration\n");
+		return -1;
+	}
+
+	return 0;
+}
+
+#define OG_PARAMS_RESP_REFRESH	(OG_PARAM_PART_DISK |		\
+				 OG_PARAM_PART_NUMBER |		\
+				 OG_PARAM_PART_CODE |		\
+				 OG_PARAM_PART_FILESYSTEM |	\
+				 OG_PARAM_PART_OS |		\
+				 OG_PARAM_PART_SIZE |		\
+				 OG_PARAM_PART_USED_SIZE)
+
+static int og_json_parse_partition_array(json_t *value,
+					 struct og_partition *partitions)
+{
+	json_t *element;
+	int i, err;
+
+	if (json_typeof(value) != JSON_ARRAY)
+		return -1;
+
+	for (i = 0; i < json_array_size(value) && i < OG_PARTITION_MAX; i++) {
+		element = json_array_get(value, i);
+
+		err = og_json_parse_partition(element, &partitions[i],
+					      OG_PARAMS_RESP_REFRESH);
+		if (err < 0)
+			return err;
+	}
+
+	return 0;
+}
+
+static int og_resp_refresh(json_t *data, struct og_client *cli)
+{
+	struct og_partition partitions[OG_PARTITION_MAX] = {};
+	const char *serial_number = NULL;
+	struct og_partition disk_setup;
+	struct og_computer computer;
+	char cfg[1024] = {};
+	struct og_dbi *dbi;
+	const char *key;
+	unsigned int i;
+	json_t *value;
+	int err = 0;
+	bool res;
+
+	if (json_typeof(data) != JSON_OBJECT)
+		return -1;
+
+	json_object_foreach(data, key, value) {
+		if (!strcmp(key, "disk_setup")) {
+			err = og_json_parse_partition(value,
+						      &disk_setup,
+						      OG_PARAMS_RESP_REFRESH);
+		} else if (!strcmp(key, "partition_setup")) {
+			err = og_json_parse_partition_array(value, partitions);
+		} else if (!strcmp(key, "serial_number")) {
+			err = og_json_parse_string(value, &serial_number);
+		} else {
+			return -1;
+		}
+
+		if (err < 0)
+			return err;
+	}
+
+	err = og_dbi_get_computer_info(&computer, cli->addr.sin_addr);
+	if (err < 0)
+		return -1;
+
+	if (strlen(serial_number) > 0)
+		snprintf(cfg, sizeof(cfg), "ser=%s\n", serial_number);
+
+	if (!disk_setup.disk || !disk_setup.number || !disk_setup.code ||
+	    !disk_setup.filesystem || !disk_setup.os || !disk_setup.size ||
+	    !disk_setup.used_size)
+		return -1;
+
+	snprintf(cfg + strlen(cfg), sizeof(cfg) - strlen(cfg),
+		 "disk=%s\tpar=%s\tcpt=%s\tfsi=%s\tsoi=%s\ttam=%s\tuso=%s\n",
+		 disk_setup.disk, disk_setup.number, disk_setup.code,
+		 disk_setup.filesystem, disk_setup.os, disk_setup.size,
+		 disk_setup.used_size);
+
+	for (i = 0; i < OG_PARTITION_MAX; i++) {
+		if (!partitions[i].disk || !partitions[i].number ||
+		    !partitions[i].code || !partitions[i].filesystem ||
+		    !partitions[i].os || !partitions[i].size ||
+		    !partitions[i].used_size)
+			continue;
+
+		snprintf(cfg + strlen(cfg), sizeof(cfg) - strlen(cfg),
+			 "disk=%s\tpar=%s\tcpt=%s\tfsi=%s\tsoi=%s\ttam=%s\tuso=%s\n",
+			 partitions[i].disk, partitions[i].number,
+			 partitions[i].code, partitions[i].filesystem,
+			 partitions[i].os, partitions[i].size,
+			 partitions[i].used_size);
+	}
+
+	dbi = og_dbi_open(&dbi_config);
+	if (!dbi) {
+		syslog(LOG_ERR, "cannot open connection database (%s:%d)\n",
+				  __func__, __LINE__);
+		return -1;
+	}
+	res = actualizaConfiguracion(dbi, cfg, computer.id);
+	og_dbi_close(dbi);
+
+	if (!res) {
+		syslog(LOG_ERR, "Problem updating client configuration\n");
+		return -1;
+	}
+
+	return 0;
+}
+
+static int og_resp_setup(struct og_client *cli)
+{
+	struct og_msg_params params;
+
+	params.ips_array[0] = inet_ntoa(cli->addr.sin_addr);
+	params.ips_array_len = 1;
+
+	return og_send_request("refresh", OG_METHOD_GET, &params, NULL);
+}
+
+#define OG_DB_IMAGE_NAME_MAXLEN	50
+#define OG_DB_IP_MAXLEN		15
+#define OG_DB_INT8_MAXLEN	8
+
+struct og_image_legacy {
+	char software_id[OG_DB_INT_MAXLEN + 1];
+	char image_id[OG_DB_INT_MAXLEN + 1];
+	char name[OG_DB_IMAGE_NAME_MAXLEN + 1];
+	char repo[OG_DB_IP_MAXLEN + 1];
+	char part[OG_DB_SMALLINT_MAXLEN + 1];
+	char disk[OG_DB_SMALLINT_MAXLEN + 1];
+	char code[OG_DB_INT8_MAXLEN + 1];
+};
+
+static int og_resp_image_create(json_t *data, struct og_client *cli)
+{
+	struct og_software_legacy soft_legacy;
+	struct og_image_legacy img_legacy;
+	const char *partition = NULL;
+	const char *software = NULL;
+	const char *image_id = NULL;
+	struct og_computer computer;
+	const char *disk = NULL;
+	const char *code = NULL;
+	const char *name = NULL;
+	const char *repo = NULL;
+	struct og_dbi *dbi;
+	const char *key;
+	json_t *value;
+	int err = 0;
+	bool res;
+
+	if (json_typeof(data) != JSON_OBJECT)
+		return -1;
+
+	json_object_foreach(data, key, value) {
+		if (!strcmp(key, "software"))
+			err = og_json_parse_string(value, &software);
+		else if (!strcmp(key, "partition"))
+			err = og_json_parse_string(value, &partition);
+		else if (!strcmp(key, "disk"))
+			err = og_json_parse_string(value, &disk);
+		else if (!strcmp(key, "code"))
+			err = og_json_parse_string(value, &code);
+		else if (!strcmp(key, "id"))
+			err = og_json_parse_string(value, &image_id);
+		else if (!strcmp(key, "name"))
+			err = og_json_parse_string(value, &name);
+		else if (!strcmp(key, "repository"))
+			err = og_json_parse_string(value, &repo);
+		else
+			return -1;
+
+		if (err < 0)
+			return err;
+	}
+
+	if (!software || !partition || !disk || !code || !image_id || !name ||
+	    !repo) {
+		syslog(LOG_ERR, "malformed response json\n");
+		return -1;
+	}
+
+	err = og_dbi_get_computer_info(&computer, cli->addr.sin_addr);
+	if (err < 0)
+		return -1;
+
+	snprintf(soft_legacy.center, sizeof(soft_legacy.center), "%d",
+		 computer.center);
+	snprintf(soft_legacy.software, sizeof(soft_legacy.software), "%s",
+		 software);
+	snprintf(img_legacy.image_id, sizeof(img_legacy.image_id), "%s",
+		 image_id);
+	snprintf(soft_legacy.id, sizeof(soft_legacy.id), "%d", computer.id);
+	snprintf(img_legacy.part, sizeof(img_legacy.part), "%s", partition);
+	snprintf(img_legacy.disk, sizeof(img_legacy.disk), "%s", disk);
+	snprintf(img_legacy.code, sizeof(img_legacy.code), "%s", code);
+	snprintf(img_legacy.name, sizeof(img_legacy.name), "%s", name);
+	snprintf(img_legacy.repo, sizeof(img_legacy.repo), "%s", repo);
+
+	dbi = og_dbi_open(&dbi_config);
+	if (!dbi) {
+		syslog(LOG_ERR, "cannot open connection database (%s:%d)\n",
+		       __func__, __LINE__);
+		return -1;
+	}
+
+	res = actualizaSoftware(dbi,
+				soft_legacy.software,
+				img_legacy.part,
+				soft_legacy.id,
+				computer.name,
+				soft_legacy.center);
+	if (!res) {
+		og_dbi_close(dbi);
+		syslog(LOG_ERR, "Problem updating client configuration\n");
+		return -1;
+	}
+
+	res = actualizaCreacionImagen(dbi,
+				      img_legacy.image_id,
+				      img_legacy.disk,
+				      img_legacy.part,
+				      img_legacy.code,
+				      img_legacy.repo,
+				      soft_legacy.id);
+	og_dbi_close(dbi);
+
+	if (!res) {
+		syslog(LOG_ERR, "Problem updating client configuration\n");
+		return -1;
+	}
+
+	return 0;
+}
+
+static int og_resp_image_restore(json_t *data, struct og_client *cli)
+{
+	struct og_software_legacy soft_legacy;
+	struct og_image_legacy img_legacy;
+	const char *partition = NULL;
+	const char *image_id = NULL;
+	struct og_computer computer;
+	const char *disk = NULL;
+	dbi_result query_result;
+	struct og_dbi *dbi;
+	const char *key;
+	json_t *value;
+	int err = 0;
+	bool res;
+
+	if (json_typeof(data) != JSON_OBJECT)
+		return -1;
+
+	json_object_foreach(data, key, value) {
+		if (!strcmp(key, "partition"))
+			err = og_json_parse_string(value, &partition);
+		else if (!strcmp(key, "disk"))
+			err = og_json_parse_string(value, &disk);
+		else if (!strcmp(key, "image_id"))
+			err = og_json_parse_string(value, &image_id);
+		else
+			return -1;
+
+		if (err < 0)
+			return err;
+	}
+
+	if (!partition || !disk || !image_id) {
+		syslog(LOG_ERR, "malformed response json\n");
+		return -1;
+	}
+
+	err = og_dbi_get_computer_info(&computer, cli->addr.sin_addr);
+	if (err < 0)
+		return -1;
+
+	snprintf(img_legacy.image_id, sizeof(img_legacy.image_id), "%s",
+		 image_id);
+	snprintf(img_legacy.part, sizeof(img_legacy.part), "%s", partition);
+	snprintf(img_legacy.disk, sizeof(img_legacy.disk), "%s", disk);
+	snprintf(soft_legacy.id, sizeof(soft_legacy.id), "%d", computer.id);
+
+	dbi = og_dbi_open(&dbi_config);
+	if (!dbi) {
+		syslog(LOG_ERR, "cannot open connection database (%s:%d)\n",
+		       __func__, __LINE__);
+		return -1;
+	}
+
+	query_result = dbi_conn_queryf(dbi->conn,
+				       "SELECT idperfilsoft FROM imagenes "
+				       " WHERE idimagen='%s'",
+				       image_id);
+	if (!query_result) {
+		og_dbi_close(dbi);
+		syslog(LOG_ERR, "failed to query database\n");
+		return -1;
+	}
+	if (!dbi_result_next_row(query_result)) {
+		dbi_result_free(query_result);
+		og_dbi_close(dbi);
+		syslog(LOG_ERR, "software profile does not exist in database\n");
+		return -1;
+	}
+	snprintf(img_legacy.software_id, sizeof(img_legacy.software_id),
+		 "%d", dbi_result_get_uint(query_result, "idperfilsoft"));
+	dbi_result_free(query_result);
+
+	res = actualizaRestauracionImagen(dbi,
+					  img_legacy.image_id,
+					  img_legacy.disk,
+					  img_legacy.part,
+					  soft_legacy.id,
+					  img_legacy.software_id);
+	og_dbi_close(dbi);
+
+	if (!res) {
+		syslog(LOG_ERR, "Problem updating client configuration\n");
+		return -1;
+	}
+
+	return 0;
+}
+
+static int og_agent_state_process_response(struct og_client *cli)
+{
+	json_error_t json_err;
+	json_t *root;
+	int err = -1;
+	char *body;
+
+	if (strncmp(cli->buf, "HTTP/1.0 200 OK", strlen("HTTP/1.0 200 OK")))
+		return -1;
+
+	if (!cli->content_length)
+		return 0;
+
+	body = strstr(cli->buf, "\r\n\r\n") + 4;
+
+	root = json_loads(body, 0, &json_err);
+	if (!root) {
+		syslog(LOG_ERR, "%s:%d: malformed json line %d: %s\n",
+		       __FILE__, __LINE__, json_err.line, json_err.text);
+		return -1;
+	}
+
+	if (!strncmp(cli->last_cmd, "probe", strlen("probe")))
+		err = og_resp_probe(cli, root);
+	else if (!strncmp(cli->last_cmd, "shell/run", strlen("shell/run")))
+		err = og_resp_shell_run(cli, root);
+	else if (!strncmp(cli->last_cmd, "hardware", strlen("hardware")))
+		err = og_resp_hardware(root, cli);
+	else if (!strncmp(cli->last_cmd, "software", strlen("software")))
+		err = og_resp_software(root, cli);
+	else if (!strncmp(cli->last_cmd, "refresh", strlen("refresh")))
+		err = og_resp_refresh(root, cli);
+	else if (!strncmp(cli->last_cmd, "setup", strlen("setup")))
+		err = og_resp_setup(cli);
+	else if (!strncmp(cli->last_cmd, "image/create", strlen("image/create")))
+		err = og_resp_image_create(root, cli);
+	else if (!strncmp(cli->last_cmd, "image/restore", strlen("image/restore")))
+		err = og_resp_image_restore(root, cli);
+	else
+		err = -1;
+
+	return err;
+}
+
+static void og_agent_read_cb(struct ev_loop *loop, struct ev_io *io, int events)
+{
+	struct og_client *cli;
+	int ret;
+
+	cli = container_of(io, struct og_client, io);
+
+	ret = og_client_recv(cli, events);
+	if (ret <= 0)
+		goto close;
+
+	ev_timer_again(loop, &cli->timer);
+
+	cli->buf_len += ret;
+	if (cli->buf_len >= sizeof(cli->buf)) {
+		syslog(LOG_ERR, "client request from %s:%hu is too long\n",
+		       inet_ntoa(cli->addr.sin_addr), ntohs(cli->addr.sin_port));
+		goto close;
+	}
+
+	switch (cli->state) {
+	case OG_AGENT_RECEIVING_HEADER:
+		ret = og_agent_state_recv_hdr_rest(cli);
+		if (ret < 0)
+			goto close;
+		if (!ret)
+			return;
+
+		cli->state = OG_AGENT_RECEIVING_PAYLOAD;
+		/* Fall through. */
+	case OG_AGENT_RECEIVING_PAYLOAD:
+		/* Still not enough data to process request. */
+		if (cli->buf_len < cli->msg_len)
+			return;
+
+		cli->state = OG_AGENT_PROCESSING_RESPONSE;
+		/* fall through. */
+	case OG_AGENT_PROCESSING_RESPONSE:
+		ret = og_agent_state_process_response(cli);
+		if (ret < 0) {
+			syslog(LOG_ERR, "Failed to process HTTP request from %s:%hu\n",
+			       inet_ntoa(cli->addr.sin_addr),
+			       ntohs(cli->addr.sin_port));
+			goto close;
+		}
+		syslog(LOG_DEBUG, "leaving client %s:%hu in keepalive mode\n",
+		       inet_ntoa(cli->addr.sin_addr),
+		       ntohs(cli->addr.sin_port));
+		og_agent_reset_state(cli);
+		break;
+	default:
+		syslog(LOG_ERR, "unknown state, critical internal error\n");
+		goto close;
+	}
+	return;
+close:
+	ev_timer_stop(loop, &cli->timer);
+	og_client_release(loop, cli);
+}
+
 static void og_client_timer_cb(struct ev_loop *loop, ev_timer *timer, int events)
 {
 	struct og_client *cli;
@@ -5185,7 +5892,42 @@ static void og_client_timer_cb(struct ev_loop *loop, ev_timer *timer, int events
 	og_client_release(loop, cli);
 }
 
-static int socket_s, socket_rest;
+static void og_agent_send_probe(struct og_client *cli)
+{
+	json_t *id, *name, *center, *room, *object;
+	struct og_msg_params params;
+	struct og_computer computer;
+	int err;
+
+	err = og_dbi_get_computer_info(&computer, cli->addr.sin_addr);
+	if (err < 0)
+		return;
+
+	params.ips_array[0] = inet_ntoa(cli->addr.sin_addr);
+	params.ips_array_len = 1;
+
+	id = json_integer(computer.id);
+	center = json_integer(computer.center);
+	room = json_integer(computer.room);
+	name = json_string(computer.name);
+
+	object = json_object();
+	json_object_set_new(object, "id", id);
+	json_object_set_new(object, "name", name);
+	json_object_set_new(object, "center", center);
+	json_object_set_new(object, "room", room);
+
+	err = og_send_request("probe", OG_METHOD_POST, &params, object);
+	if (err < 0) {
+		syslog(LOG_ERR, "Can't send probe to: %s\n",
+		       params.ips_array[0]);
+	} else {
+		syslog(LOG_INFO, "Sent probe to: %s\n",
+		       params.ips_array[0]);
+	}
+}
+
+static int socket_s, socket_rest, socket_agent_rest;
 
 static void og_server_accept_cb(struct ev_loop *loop, struct ev_io *io,
 				int events)
@@ -5210,18 +5952,37 @@ static void og_server_accept_cb(struct ev_loop *loop, struct ev_io *io,
 		return;
 	}
 	memcpy(&cli->addr, &client_addr, sizeof(client_addr));
-	cli->keepalive_idx = -1;
+	if (io->fd == socket_agent_rest)
+		cli->keepalive_idx = 0;
+	else
+		cli->keepalive_idx = -1;
 
 	if (io->fd == socket_rest)
 		cli->rest = true;
+	else if (io->fd == socket_agent_rest)
+		cli->agent = true;
 
 	syslog(LOG_DEBUG, "connection from client %s:%hu\n",
 	       inet_ntoa(cli->addr.sin_addr), ntohs(cli->addr.sin_port));
 
-	ev_io_init(&cli->io, og_client_read_cb, client_sd, EV_READ);
+	if (io->fd == socket_agent_rest)
+		ev_io_init(&cli->io, og_agent_read_cb, client_sd, EV_READ);
+	else
+		ev_io_init(&cli->io, og_client_read_cb, client_sd, EV_READ);
+
 	ev_io_start(loop, &cli->io);
-	ev_timer_init(&cli->timer, og_client_timer_cb, OG_CLIENT_TIMEOUT, 0.);
+	if (io->fd == socket_agent_rest) {
+		ev_timer_init(&cli->timer, og_client_timer_cb,
+			      OG_AGENT_CLIENT_TIMEOUT, 0.);
+	} else {
+		ev_timer_init(&cli->timer, og_client_timer_cb,
+			      OG_CLIENT_TIMEOUT, 0.);
+	}
 	ev_timer_start(loop, &cli->timer);
+	list_add(&cli->list, &client_list);
+
+	if (io->fd == socket_agent_rest)
+		og_agent_send_probe(cli);
 }
 
 static int og_socket_server_init(const char *port)
@@ -5253,7 +6014,7 @@ static int og_socket_server_init(const char *port)
 
 int main(int argc, char *argv[])
 {
-	struct ev_io ev_io_server, ev_io_server_rest;
+	struct ev_io ev_io_server, ev_io_server_rest, ev_io_agent_rest;
 	struct ev_loop *loop = ev_default_loop(0);
 	int i;
 
@@ -5295,6 +6056,13 @@ int main(int argc, char *argv[])
 
 	ev_io_init(&ev_io_server_rest, og_server_accept_cb, socket_rest, EV_READ);
 	ev_io_start(loop, &ev_io_server_rest);
+
+	socket_agent_rest = og_socket_server_init("8889");
+	if (socket_agent_rest < 0)
+		exit(EXIT_FAILURE);
+
+	ev_io_init(&ev_io_agent_rest, og_server_accept_cb, socket_agent_rest, EV_READ);
+	ev_io_start(loop, &ev_io_agent_rest);
 
 	infoLog(1); // Inicio de sesión
 
