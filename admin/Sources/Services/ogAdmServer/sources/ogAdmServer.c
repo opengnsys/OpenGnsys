@@ -1607,27 +1607,6 @@ bool actualizaCreacionImagen(struct og_dbi *dbi, char *idi, char *dsk,
 	return true;
 }
 // ________________________________________________________________________________________________________
-// Función: CrearImagenBasica
-//
-//	Descripción:
-//		Crea una imagen basica usando sincronización
-//	Parámetros:
-//		- socket_c: Socket de la consola al envió el mensaje
-//		- ptrTrama: Trama recibida por el servidor con el contenido y los parámetros
-//	Devuelve:
-//		true: Si el proceso es correcto
-//		false: En caso de ocurrir algún error
-// ________________________________________________________________________________________________________
-static bool CrearImagenBasica(TRAMA* ptrTrama, struct og_client *cli)
-{
-	if (!enviaComando(ptrTrama, CLIENTE_OCUPADO)) {
-		respuestaConsola(og_client_socket(cli), ptrTrama, false);
-		return false;
-	}
-	respuestaConsola(og_client_socket(cli), ptrTrama, true);
-	return true;
-}
-// ________________________________________________________________________________________________________
 // Función: RESPUESTA_CrearImagenBasica
 //
 //	Descripción:
@@ -2737,18 +2716,12 @@ static struct {
 	{ "RESPUESTA_Reiniciar",		RESPUESTA_Apagar,	},
 	{ "RESPUESTA_IniciarSesion",		RESPUESTA_Apagar, },
 	{ "RESPUESTA_CrearImagen",		RESPUESTA_CrearImagen,	},
-	{ "CrearImagenBasica",			CrearImagenBasica,	},
 	{ "RESPUESTA_CrearImagenBasica",	RESPUESTA_CrearImagenBasica, },
-	{ "CrearSoftIncremental",		CrearImagenBasica,	},
 	{ "RESPUESTA_CrearSoftIncremental",	RESPUESTA_CrearSoftIncremental, },
 	{ "RESPUESTA_RestaurarImagen",		RESPUESTA_RestaurarImagen },
-	{ "RestaurarImagenBasica",		CrearImagenBasica, },
 	{ "RESPUESTA_RestaurarImagenBasica",	RESPUESTA_RestaurarImagenBasica, },
-	{ "RestaurarSoftIncremental",		CrearImagenBasica, },
 	{ "RESPUESTA_RestaurarSoftIncremental",	RESPUESTA_RestaurarSoftIncremental, },
-	{ "Configurar",				CrearImagenBasica,	},
 	{ "RESPUESTA_Configurar",		RESPUESTA_EjecutarScript, },
-	{ "EjecutarScript",			CrearImagenBasica,	},
 	{ "RESPUESTA_EjecutarScript",		RESPUESTA_EjecutarScript, },
 	{ "RESPUESTA_InventarioHardware",	RESPUESTA_InventarioHardware, },
 	{ "RESPUESTA_InventarioSoftware",	RESPUESTA_InventarioSoftware, },
