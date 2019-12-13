@@ -28,7 +28,12 @@ $TbMsg[495]="Content Cache";
 $TbMsg[4951]="Cache Free";
 // AGP
 $TbMsg['COMM_DEFOGLIVE']="Assigned by administrator";
-$TbMsg["PROP_SERIALNO"]="Serial No.";
+$TbMsg["LABEL_SERIALNO"]="Serial No.";
 $TbMsg["WARN_NOREPO"]="<em>WARNING: no repository assigned.</em>";
 $TbMsg["WARN_NOTDETECTED"]="<em>(not detected)</em>";
 $TbMsg['WARN_PROFESSOR']="teacher";
+$TbMsg["LABEL_LOCATION"]="Location in the lab.";
+$TbMsg["PROP_ROW"]="Row";
+$TbMsg["PROP_COLUMN"]="Column";
+$TbMsg["VAL_UNSPECIFIED"]="Unspecified";
+

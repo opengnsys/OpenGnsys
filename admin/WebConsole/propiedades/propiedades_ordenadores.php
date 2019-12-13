@@ -130,7 +130,7 @@ function abrir_ventana(URL){
 		</tr>	
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<tr>
-			<th align="center">&nbsp;<?php echo $TbMsg["PROP_SERIALNO"]?>&nbsp;</th>
+			<th align="center">&nbsp;<?php echo $TbMsg["LABEL_SERIALNO"]?>&nbsp;</th>
 			<?php	if ($opcion==$op_eliminacion) {
 					echo '<td>'.(isset($numserie)?$numserie:$TbMsg["WARN_NOTDETECTED"]).'</td>';
 				} else {
@@ -144,19 +144,19 @@ function abrir_ventana(URL){
 		</tr>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<tr>
-			<th align="center">&nbsp;<?php echo "Localización en aula"?>&nbsp;</th>
+			<th align="center">&nbsp;<?php echo $TbMsg["LABEL_LOCATION"] ?>&nbsp;</th>
 			<?php	if ($opcion==$op_eliminacion) {
 					echo '<td>'.$n_row.', '.$n_col.'</td>';
 				} else {
 					echo "<td>\n";
-					$row="0=No especificar".chr(13);
-					foreach (range(1, 10) as $n) {
-						$row.="$n=Fila $n".chr(13);
+					$row="0=".$TbMsg["VAL_UNSPECIFIED"].chr(13);
+					foreach (range(1, 15) as $n) {
+						$row.="$n=".$TbMsg["PROP_ROW"]." $n".chr(13);
 					}
 					echo HTMLCTESELECT($row,"n_row","estilodesple","",$n_row,100);
-					$col="0=No especificar".chr(13);
-					foreach (range(1, 10) as $n) {
-						$col.="$n=Columna $n".chr(13);
+					$col="0=".$TbMsg["VAL_UNSPECIFIED"].chr(13);
+					foreach (range(1, 15) as $n) {
+						$col.="$n=".$TbMsg["PROP_COLUMN"]." $n".chr(13);
 					}
 					echo HTMLCTESELECT($col,"n_col","estilodesple","",$n_col,100);
 					echo "</td>\n";

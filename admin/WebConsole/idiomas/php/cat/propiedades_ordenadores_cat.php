@@ -29,7 +29,12 @@ $TbMsg[495]="Data/Caché";
 $TbMsg[4951]="Caché lliure";
 // AGP
 $TbMsg['COMM_DEFOGLIVE']="Assignat per l'administrador";
-$TbMsg["PROP_SERIALNO"]="N&ordm; de serie";
+$TbMsg["LABEL_SERIALNO"]="N&ordm; de serie";
 $TbMsg["WARN_NOTREPO"]="<em>AVISO: sin repositorio asignado.</em>";
 $TbMsg["WARN_NOTDETECTED"]="<em>(no detectado)</em>";
 $TbMsg['WARN_PROFESSOR']="profesor";
+$TbMsg["LABEL_LOCATION"]="Localización en el aula";
+$TbMsg["PROP_ROW"]="Fila";
+$TbMsg["PROP_COLUMN"]="Columna";
+$TbMsg["VAL_UNSPECIFIED"]="No especificado";
+

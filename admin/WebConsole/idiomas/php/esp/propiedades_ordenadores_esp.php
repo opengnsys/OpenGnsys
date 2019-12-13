@@ -34,7 +34,11 @@ $TbMsg[495]="Fecha/Cach&eacute;";
 $TbMsg[4951]="Cach&eacute; libre";
 //AGP
 $TbMsg['COMM_DEFOGLIVE']="Asignado por el administrador";
-$TbMsg["PROP_SERIALNO"]="N&ordm; de serie";
+$TbMsg["LABEL_SERIALNO"]="N&ordm; de serie";
 $TbMsg["WARN_NOREPO"]="<em>AVISO: sin repositorio asignado.</em>";
 $TbMsg["WARN_NOTDETECTED"]="<em>(no detectado)</em>";
 $TbMsg['WARN_PROFESSOR']="profesor";
+$TbMsg["LABEL_LOCATION"]="Localización en el aula";
+$TbMsg["PROP_ROW"]="Fila";
+$TbMsg["PROP_COLUMN"]="Columna";
+$TbMsg["VAL_UNSPECIFIED"]="No especificado";
