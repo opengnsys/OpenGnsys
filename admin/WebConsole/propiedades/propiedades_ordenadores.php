@@ -26,6 +26,8 @@ $idordenador=0;
 $ordprofesor=false;
 $nombreordenador="";
 $numserie="";
+$n_row=0;
+$n_col=0;
 $ip="";
 $mac="";
 $idperfilhard=0;
@@ -99,7 +101,7 @@ function abrir_ventana(URL){
 				$fotomenu=$fotoordenador;
 				$dirfotos="../images/fotos";
 			?>
-			<td colspan="2" valign="top" align="left" rowspan="4">
+			<td colspan="2" valign="top" align="left" rowspan="5">
 			<img border="2" style="border-color:#63676b" src="<?php echo $dirfotos.'/'.$fotoordenador?>" />
 			<?php	if ($opcion!=$op_eliminacion) {
 				echo '<br />(150X110)-(jpg - gif - png) ---- '.$TbMsg[5091].'><br />';
@@ -140,6 +142,27 @@ function abrir_ventana(URL){
 				}
 			?>
 		</tr>
+<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+		<tr>
+			<th align="center">&nbsp;<?php echo "Localización en aula"?>&nbsp;</th>
+			<?php	if ($opcion==$op_eliminacion) {
+					echo '<td>'.$n_row.', '.$n_col.'</td>';
+				} else {
+					echo "<td>\n";
+					$row="0=No especificar".chr(13);
+					foreach (range(1, 10) as $n) {
+						$row.="$n=Fila $n".chr(13);
+					}
+					echo HTMLCTESELECT($row,"n_row","estilodesple","",$n_row,100);
+					$col="0=No especificar".chr(13);
+					foreach (range(1, 10) as $n) {
+						$col.="$n=Columna $n".chr(13);
+					}
+					echo HTMLCTESELECT($col,"n_col","estilodesple","",$n_col,100);
+					echo "</td>\n";
+				}
+			?>
+		</tr>				
 		<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
 			<th align=center>&nbsp;<?php echo $TbMsg[509]?>&nbsp;</th>
@@ -355,6 +378,8 @@ function TomaPropiedades($cmd,$id){
 	global $ordprofesor;
 	global $nombreordenador;
 	global $numserie;
+	global $n_row;
+	global $n_col;
 	global $ip;
 	global $mac;
 	global $fotoordenador;
@@ -400,7 +425,8 @@ EOD;
                 $paginavalidacion=$rs->campos["paginavalidacion"];
 ########################### Ramón
                 $arranque=$rs->campos["arranque"];
-
+		$n_row=$rs->campos["n_row"];
+		$n_col=$rs->campos["n_col"];
 		$rs->Cerrar();
 		return(true);
 	}
