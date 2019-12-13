@@ -29,6 +29,9 @@
 #@version 1.1.0 - Instalación de API REST y configuración de zona horaria.
 #@author  Ramón Gómez - ETSII Univ. Sevilla
 #@date    2015/11/09
+#@version 1.1.1a - Elegir versión a actualizar.
+#@author  Ramón Gómez - ETSII Univ. Sevilla
+#@date    2019/12/13
 #*/
 
 
@@ -73,10 +76,6 @@ if [ -d "$PROGRAMDIR/../installer" ]; then
 else
 	REMOTE=1
 fi
-BRANCH="master"
-CODE_URL="https://codeload.github.com/opengnsys/OpenGnsys/zip/$BRANCH"
-API_URL="https://api.github.com/repos/opengnsys/OpenGnsys/branches/$BRANCH"
-RAW_URL="https://raw.githubusercontent.com/opengnsys/OpenGnsys/$BRANCH"
 
 WORKDIR=/tmp/opengnsys_update
 mkdir -p $WORKDIR
@@ -175,6 +174,49 @@ function autoConfigure()
 	for service in dhcpd dhcpd3-server isc-dhcp-server; do
 		if $SERVICESTATUS &>/dev/null; then DHCPSERV="$service"; fi
 	done
+}
+
+
+# Choose an available version to update.
+function chooseVersion()
+{
+    local RELEASES DOWNLOADS INSTVERSION INSTRELEASE
+
+    # Development branch.
+    BRANCH="master"
+    API_URL="https://api.github.com/repos/opengnsys/OpenGnsys/branches/$BRANCH"
+    RELEASES=( "$BRANCH" )
+    DOWNLOADS=( "$API_URL" )
+    # If updating from a local or very old version, use the default data.
+    if [ $REMOTE -eq 1 ] && which jq &>/dev/null && [ -f $INSTALL_TARGET/doc/VERSION.json ]; then
+        # Installed release.
+        read -pe INSTVERSION INSTRELEASE <<< $(jq -r '.version+" "+.release' $INSTALL_TARGET/doc/VERSION.json)
+        # Fetch tags (releases) data from GitHub.
+        while read -pe TAG URL; do
+            if [[ $TAG =~ ^opengnsys- ]]; then
+                [ "${TAG#opengnsys-}" \< "${INSTVERSION%pre}" ] && break
+                RELEASES+=( "${TAG}" )
+	        DOWNLOADS+=( "$URL" )
+                #RELDATE=$(curl -s "$URL" | jq -r '.commit.committer.date | split("-") | join("")[:8]')
+            fi
+        done <<< $(curl -s "$API_URL/../../tags" | jq -r '.[] | .name+" "+.commit.url')
+        # Show selection menu, if needed.
+        if [ ${#RELEASES} > 1 ]; then
+            echo "Installed version: $INSTVERSION $INSTRELEASE"
+            echo "Versions available for update (\"$BRANCH\" is the last development branch):"
+            PS3="Enter a number: "
+            select opt in "${RELEASES[@]}"; do
+                if [ -n "$opt" ]; then
+                    BRANCH="$opt"
+                    API_URL="${DOWNLOADS[REPLY-1]}"
+                    break
+                fi
+            done
+        fi
+    fi
+    # Download URLs.
+    CODE_URL="https://codeload.github.com/opengnsys/OpenGnsys/zip/$BRANCH"
+    RAW_URL="https://raw.githubusercontent.com/opengnsys/OpenGnsys/$BRANCH"
 }
 
 
@@ -1175,7 +1217,8 @@ if [ $? -ne 0 ]; then
 fi
 getNetworkSettings
 
-# Comprobar si se intanta actualizar a una versión anterior.
+# Elegir versión y comprobar si se intanta actualizar a una versión anterior.
+chooseVersion
 checkVersion
 if [ $? -ne 0 ]; then
 	errorAndLog "Cannot downgrade to an older version ($OLDVERSION to $NEWVERSION)"
