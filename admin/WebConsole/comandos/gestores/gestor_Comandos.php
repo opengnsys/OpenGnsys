@@ -29,6 +29,7 @@ define('OG_CMD_ID_SOFTWARE', 7);
 define("OG_CMD_ID_SCRIPT", 8);
 define('OG_CMD_ID_SESSION', 9);
 define('OG_CMD_ID_SETUP', 10);
+define('OG_CMD_ID_DELETE_CACHED_IMAGE', 11);
 define('OG_CMD_ID_CREATE_BASIC_IMAGE', 12);
 define('OG_CMD_ID_RESTORE_BASIC_IMAGE', 13);
 define('OG_CMD_ID_CREATE_INCREMENTAL_IMAGE', 14);
@@ -78,6 +79,7 @@ function run_command($idcomando, $cadenaip, $cadenamac, $atributos) {
 			software($cadenaip, $atributos);
 			break;
 		case OG_CMD_ID_SCRIPT:
+		case OG_CMD_ID_DELETE_CACHED_IMAGE:
 			shell(3, $cadenaip, $atributos);
 			break;
 	}
