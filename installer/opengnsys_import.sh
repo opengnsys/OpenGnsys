@@ -258,24 +258,15 @@ password=$PASSWORD
 EOT
 fi
 
-# Si la BD tiene no definido el trigger necesitamos permisos de root
-mysql --defaults-extra-file=$MYCNF -e "SHOW TRIGGERS FROM $CATALOG;" |grep "Trigger" &>/dev/null
-if [ $? -eq 0 ]; then
-    # Existe el trigger: eliminamos líneas del trigger en $CATALOG.sql
-    read -d\n INI END <<< $(grep -n -e TRIGGER -e "END.*;;" $MYSQLFILE |cut -d: -f1)
-    [ -n "$INI" ] && sed -i "$INI,${END}d" $MYSQLFILE
-else
-    # No existe: necesitamos privilegios de root
-    grep "user=root" $MYCNF &>/dev/null || mysqlPassword
-fi
-
 # Si la versión es diferente usamos una tabla auxiliar para actualizar el .sql
 [ "$DIFFVERSION" == TRUE ] &&  updateSqlFile
 
 # Eliminamos las tablas que no importamos: repositorios, entorno
+#     definimos usuario creador de los "triggers
 #     y añadimos los usuarios, sólo si no existen.
 sed -i -e '/Table structure.* `repositorios`/,/Table structure/d' \
        -e '/Table structure.* `entornos`/,/Table structure/d' \
+       -e "s/\(DEFINER=\`\)[^\`]*\(\`.* TRIGGER\)/\1$USUARIO\2/" \
        -e '/Table structure.*`usuarios`/,/CHARSET/d' \
        -e '/usuarios/s/IGNORE//g' \
        -e '/usuarios/s/^INSERT /\nALTER TABLE usuarios ADD UNIQUE (usuario);\n\nINSERT IGNORE /g' $MYSQLFILE
