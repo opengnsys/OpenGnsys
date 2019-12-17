@@ -18,7 +18,6 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <stdbool.h>
-#include </usr/include/mysql/mysql.h>
 #include "ogAdmLib.h"
 // ________________________________________________________________________________________________________
 // Variables globales
