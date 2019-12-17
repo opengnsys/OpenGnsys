@@ -9,6 +9,7 @@
 #include "ogAdmServer.h"
 #include "ogAdmLib.c"
 #include "dbi.h"
+#include "list.h"
 #include <ev.h>
 #include <syslog.h>
 #include <sys/ioctl.h>
@@ -853,6 +854,76 @@ bool recorreProcedimientos(struct og_dbi *dbi, char *parametros, FILE *fileexe, 
 
 	return true;
 }
+
+struct og_task {
+	uint32_t	procedure_id;
+	uint32_t	type_scope;
+	uint32_t	scope;
+	const char	*filtered_scope;
+	const char	*params;
+};
+
+struct og_cmd {
+	struct list_head list;
+	uint32_t	client_id;
+	const char	*params;
+	const char	*ip;
+	const char	*mac;
+};
+
+static LIST_HEAD(cmd_list);
+
+static const struct og_cmd *og_cmd_find(char *client_ip)
+{
+	struct og_cmd *cmd, *next;
+
+	list_for_each_entry_safe(cmd, next, &cmd_list, list) {
+		if (strcmp(cmd->ip, client_ip))
+			continue;
+
+		list_del(&cmd->list);
+		return cmd;
+	}
+
+	return NULL;
+}
+
+static void og_cmd_free(const struct og_cmd *cmd)
+{
+	free((void *)cmd->params);
+	free((void *)cmd->ip);
+	free((void *)cmd->mac);
+	free((void *)cmd);
+}
+
+static TRAMA *og_msg_alloc(char *data, unsigned int len);
+static void og_msg_free(TRAMA *ptrTrama);
+
+static int og_deliver_pending_command(const struct og_cmd *cmd, int *socket,
+				      int idx)
+{
+	char buf[4096];
+	TRAMA *msg;
+	int len;
+
+	len = snprintf(buf, sizeof(buf), "%s\r", cmd->params);
+
+	msg = og_msg_alloc(buf, len);
+	if (!msg)
+		return false;
+
+	strcpy(tbsockets[idx].estado, CLIENTE_OCUPADO);
+	if (!mandaTrama(socket, msg)) {
+		syslog(LOG_ERR, "failed to send response to %s reason=%s\n",
+				cmd->ip, strerror(errno));
+		return false;
+	}
+	og_msg_free(msg);
+	og_cmd_free(cmd);
+
+	return true;
+}
+
 // ________________________________________________________________________________________________________
 // Función: ComandosPendientes
 //
@@ -869,6 +940,7 @@ static bool ComandosPendientes(TRAMA *ptrTrama, struct og_client *cli)
 {
 	int socket_c = og_client_socket(cli);
 	char *ido,*iph,pids[LONPRM];
+	const struct og_cmd *cmd;
 	int ids, idx;
 
 	iph = copiaParametro("iph",ptrTrama); // Toma dirección IP
@@ -880,7 +952,13 @@ static bool ComandosPendientes(TRAMA *ptrTrama, struct og_client *cli)
 		syslog(LOG_ERR, "client does not exist\n");
 		return false;
 	}
-	if (buscaComandos(ido, ptrTrama, &ids)) { // Existen comandos pendientes
+
+	cmd = og_cmd_find(iph);
+	if (cmd) {
+		liberaMemoria(iph);
+		liberaMemoria(ido);
+		return og_deliver_pending_command(cmd, &socket_c, idx);
+	} else if (buscaComandos(ido, ptrTrama, &ids)) { // Existen comandos pendientes
 		ptrTrama->tipo = MSG_COMANDO;
 		sprintf(pids, "\rids=%d\r", ids);
 		strcat(ptrTrama->parametros, pids);
@@ -2936,6 +3014,7 @@ struct og_msg_params {
 	bool		echo;
 	struct og_partition	partition_setup[OG_PARTITION_MAX];
 	struct og_sync_params sync_setup;
+	const char	*task_id;
 	uint64_t	flags;
 };
 
@@ -2970,6 +3049,7 @@ struct og_msg_params {
 #define OG_REST_PARAM_SYNC_PATH			(1UL << 28)
 #define OG_REST_PARAM_SYNC_METHOD		(1UL << 29)
 #define OG_REST_PARAM_ECHO			(1UL << 30)
+#define OG_REST_PARAM_TASK			(1UL << 31)
 
 static bool og_msg_params_validate(const struct og_msg_params *params,
 				   const uint64_t flags)
@@ -4306,6 +4386,328 @@ static int og_cmd_restore_incremental_image(json_t *element, struct og_msg_param
 	return 0;
 }
 
+static int og_queue_task_command(struct og_dbi *dbi, const struct og_task *task,
+				 char *query)
+{
+	struct og_cmd *cmd;
+	const char *msglog;
+	dbi_result result;
+
+	result = dbi_conn_queryf(dbi->conn, query);
+	if (!result) {
+		dbi_conn_error(dbi->conn, &msglog);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
+		return -1;
+	}
+
+	while (dbi_result_next_row(result)) {
+		cmd = (struct og_cmd *)calloc(1, sizeof(struct og_cmd));
+		if (!cmd) {
+			dbi_result_free(result);
+			return -1;
+		}
+
+		cmd->client_id	= dbi_result_get_uint(result, "idordenador");
+		cmd->params	= task->params;
+
+		cmd->ip		= strdup(dbi_result_get_string(result, "ip"));
+		cmd->mac	= strdup(dbi_result_get_string(result, "mac"));
+
+		list_add_tail(&cmd->list, &cmd_list);
+
+	}
+
+	dbi_result_free(result);
+
+	return 0;
+}
+
+static int og_queue_task_group_clients(struct og_dbi *dbi, struct og_task *task,
+				       char *query)
+{
+
+	const char *msglog;
+	dbi_result result;
+
+	result = dbi_conn_queryf(dbi->conn, query);
+	if (!result) {
+		dbi_conn_error(dbi->conn, &msglog);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
+		return -1;
+	}
+
+	while (dbi_result_next_row(result)) {
+		uint32_t group_id = dbi_result_get_uint(result, "idgrupo");
+
+		sprintf(query, "SELECT idgrupo FROM gruposordenadores "
+				"WHERE grupoid=%d", group_id);
+		if (og_queue_task_group_clients(dbi, task, query)) {
+			dbi_result_free(result);
+			return -1;
+		}
+
+		sprintf(query,"SELECT ip, mac, idordenador FROM ordenadores "
+			      "WHERE grupoid=%d", group_id);
+		if (og_queue_task_command(dbi, task, query)) {
+			dbi_result_free(result);
+			return -1;
+		}
+
+	}
+
+	dbi_result_free(result);
+
+	return 0;
+}
+
+static int og_queue_task_classrooms(struct og_dbi *dbi, struct og_task *task,
+				    char *query)
+{
+
+	const char *msglog;
+	dbi_result result;
+
+	result = dbi_conn_queryf(dbi->conn, query);
+	if (!result) {
+		dbi_conn_error(dbi->conn, &msglog);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
+		return -1;
+	}
+
+	while (dbi_result_next_row(result)) {
+		uint32_t classroom_id = dbi_result_get_uint(result, "idaula");
+
+		sprintf(query, "SELECT idgrupo FROM gruposordenadores "
+				"WHERE idaula=%d AND grupoid=0", classroom_id);
+		if (og_queue_task_group_clients(dbi, task, query)) {
+			dbi_result_free(result);
+			return -1;
+		}
+
+		sprintf(query,"SELECT ip, mac, idordenador FROM ordenadores "
+				"WHERE idaula=%d AND grupoid=0", classroom_id);
+		if (og_queue_task_command(dbi, task, query)) {
+			dbi_result_free(result);
+			return -1;
+		}
+
+	}
+
+	dbi_result_free(result);
+
+	return 0;
+}
+
+static int og_queue_task_group_classrooms(struct og_dbi *dbi,
+					  struct og_task *task, char *query)
+{
+
+	const char *msglog;
+	dbi_result result;
+
+	result = dbi_conn_queryf(dbi->conn, query);
+	if (!result) {
+		dbi_conn_error(dbi->conn, &msglog);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
+		return -1;
+	}
+
+	while (dbi_result_next_row(result)) {
+		uint32_t group_id = dbi_result_get_uint(result, "idgrupo");
+
+		sprintf(query, "SELECT idgrupo FROM grupos "
+				"WHERE grupoid=%d AND tipo=%d", group_id, AMBITO_GRUPOSAULAS);
+		if (og_queue_task_group_classrooms(dbi, task, query)) {
+			dbi_result_free(result);
+			return -1;
+		}
+
+		sprintf(query,"SELECT idaula FROM aulas WHERE grupoid=%d", group_id);
+		if (og_queue_task_classrooms(dbi, task, query)) {
+			dbi_result_free(result);
+			return -1;
+		}
+
+	}
+
+	dbi_result_free(result);
+
+	return 0;
+}
+
+static int og_queue_task_center(struct og_dbi *dbi, struct og_task *task,
+				char *query)
+{
+
+	sprintf(query,"SELECT idgrupo FROM grupos WHERE idcentro=%i AND grupoid=0 AND tipo=%d",
+		task->scope, AMBITO_GRUPOSAULAS);
+	if (og_queue_task_group_classrooms(dbi, task, query))
+		return -1;
+
+	sprintf(query,"SELECT idaula FROM aulas WHERE idcentro=%i AND grupoid=0",
+		task->scope);
+	if (og_queue_task_classrooms(dbi, task, query))
+		return -1;
+
+	return 0;
+}
+
+static int og_queue_task_clients(struct og_dbi *dbi, struct og_task *task)
+{
+	char query[4096];
+
+	switch (task->type_scope) {
+		case AMBITO_CENTROS:
+			return og_queue_task_center(dbi, task, query);
+		case AMBITO_GRUPOSAULAS:
+			sprintf(query, "SELECT idgrupo FROM grupos "
+				       "WHERE idgrupo=%i AND tipo=%d",
+				       task->scope, AMBITO_GRUPOSAULAS);
+			return og_queue_task_group_classrooms(dbi, task, query);
+		case AMBITO_AULAS:
+			sprintf(query, "SELECT idaula FROM aulas "
+				       "WHERE idaula = %d", task->scope);
+			return og_queue_task_classrooms(dbi, task, query);
+		case AMBITO_GRUPOSORDENADORES:
+			sprintf(query, "SELECT idgrupo FROM gruposordenadores "
+				       "WHERE idgrupo = %d", task->scope);
+			return og_queue_task_group_clients(dbi, task, query);
+		case AMBITO_ORDENADORES:
+			sprintf(query, "SELECT ip, mac, idordenador "
+				       "FROM ordenadores "
+				       "WHERE idordenador = %d", task->scope);
+			return og_queue_task_command(dbi, task, query);
+	}
+	return 0;
+}
+
+static int og_queue_procedure(struct og_dbi *dbi, struct og_task *task)
+{
+	uint32_t procedure_id;
+	const char *msglog;
+	dbi_result result;
+
+	result = dbi_conn_queryf(dbi->conn,
+			"SELECT parametros, procedimientoid "
+			"FROM procedimientos_acciones "
+			"WHERE idprocedimiento=%d ORDER BY orden", task->procedure_id);
+	if (!result) {
+		dbi_conn_error(dbi->conn, &msglog);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
+		return -1;
+	}
+
+	while (dbi_result_next_row(result)) {
+		procedure_id = dbi_result_get_uint(result, "procedimientoid");
+		if (procedure_id > 0) {
+			task->procedure_id = procedure_id;
+			if (og_queue_procedure(dbi, task))
+				return -1;
+			continue;
+		}
+
+		task->params	= strdup(dbi_result_get_string(result, "parametros"));
+		if (og_queue_task_clients(dbi, task))
+			return -1;
+	}
+
+	dbi_result_free(result);
+
+	return 0;
+}
+
+static int og_queue_task(struct og_dbi *dbi, uint32_t task_id)
+{
+	struct og_task task = {};
+	uint32_t task_id_next;
+	const char *msglog;
+	dbi_result result;
+
+	result = dbi_conn_queryf(dbi->conn,
+			"SELECT tareas_acciones.orden, "
+				"tareas_acciones.idprocedimiento, "
+				"tareas_acciones.tareaid, "
+				"tareas.ambito, "
+				"tareas.idambito, "
+				"tareas.restrambito "
+			" FROM tareas"
+				" INNER JOIN tareas_acciones ON tareas_acciones.idtarea=tareas.idtarea"
+                        " WHERE tareas_acciones.idtarea=%u ORDER BY tareas_acciones.orden ASC", task_id);
+	if (!result) {
+		dbi_conn_error(dbi->conn, &msglog);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
+		return -1;
+	}
+
+	while (dbi_result_next_row(result)) {
+		task_id_next = dbi_result_get_uint(result, "procedimientoid");
+
+		if (task_id_next > 0) {
+			if (og_queue_task(dbi, task_id_next))
+				return -1;
+
+			continue;
+		}
+		task.procedure_id = dbi_result_get_uint(result, "idprocedimiento");
+		task.type_scope = dbi_result_get_uint(result, "ambito");
+		task.scope = dbi_result_get_uint(result, "idambito");
+		task.filtered_scope = dbi_result_get_string(result, "restrambito");
+
+		og_queue_procedure(dbi, &task);
+
+	}
+
+	dbi_result_free(result);
+
+	return 0;
+}
+
+static int og_cmd_task_post(json_t *element, struct og_msg_params *params)
+{
+	struct og_cmd *cmd;
+	struct og_dbi *dbi;
+	const char *key;
+	json_t *value;
+	int err;
+
+	if (json_typeof(element) != JSON_OBJECT)
+		return -1;
+
+	json_object_foreach(element, key, value) {
+		if (!strcmp(key, "task")) {
+			err = og_json_parse_string(value, &params->task_id);
+			params->flags |= OG_REST_PARAM_TASK;
+		}
+
+		if (err < 0)
+			break;
+	}
+
+	if (!og_msg_params_validate(params, OG_REST_PARAM_TASK))
+		return -1;
+
+	dbi = og_dbi_open(&dbi_config);
+	if (!dbi) {
+		syslog(LOG_ERR, "cannot open connection database (%s:%d)\n",
+			   __func__, __LINE__);
+		return -1;
+	}
+
+	og_queue_task(dbi, atoi(params->task_id));
+	og_dbi_close(dbi);
+
+	list_for_each_entry(cmd, &cmd_list, list)
+		params->ips_array[params->ips_array_len++] = cmd->ip;
+
+	return og_cmd_legacy_send(params, "Actualizar", CLIENTE_OCUPADO);
+}
+
 static int og_client_method_not_found(struct og_client *cli)
 {
 	/* To meet RFC 7231, this function MUST generate an Allow header field
@@ -4615,6 +5017,15 @@ static int og_client_state_process_payload_rest(struct og_client *cli)
 		}
 
 		err = og_cmd_run_schedule(root, &params);
+	} else if (!strncmp(cmd, "task/run", strlen("task/run"))) {
+		if (method != OG_METHOD_POST)
+			return og_client_method_not_found(cli);
+
+		if (!root) {
+			syslog(LOG_ERR, "command task with no payload\n");
+			return og_client_bad_request(cli);
+		}
+		err = og_cmd_task_post(root, &params);
 	} else {
 		syslog(LOG_ERR, "unknown command: %.32s ...\n", cmd);
 		err = og_client_not_found(cli);
