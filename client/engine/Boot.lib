@@ -2054,6 +2054,69 @@ echo "${!MSG%%\.}: $@"
 
 
 #/**
+#         ogGrubSecurity int_disk_GRUBCFG int_partition_GRUBCFG [MBR|PART] [user] [password]
+#@brief   Configura grub.cfg para que sólo permita editar entrada o acceder a línea de comandos al usuario especificado
+#@param   int_disk_SecondStage
+#@param   int_part_SecondStage
+#@param   type [MBR|PART]
+#@param   user (default root)
+#@param   password (default "", no puede entrar)
+#@return  (nada)
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_PARTITION Tipo de partición desconocido o no se puede montar (ogMount).
+#@exception OG_ERR_NOTFOUND  No encuentra archivo de configuración del grub.
+#@author  Irina Gomez, ETSII Universidad de Sevilla
+#@date    2019-12-17
+#*/ ##
+function ogGrubSecurity ()
+{
+# Variables locales.
+local SECONDSTAGE GRUBGFC USER PASSWD ENCRYPTPASSWD
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndiskSecondStage int_partitionSecondStage [MBR|PART] [USER] [PASSWORD]" \
+           "$FUNCNAME 1 1 MBR " \
+           "$FUNCNAME 1 2 PART "
+    return
+fi
+
+# Error si no se reciben 3 parámetros.
+[ $# -ge 3 ] || ogRaiseError $OG_ERR_FORMAT "$FUNCNAME int_ndiskSecondStage int_partitionSecondStage [MBR|PART] [USER] [PASSWORD]"|| return  $?
+
+#localizar disco segunda etapa del grub
+SECONDSTAGE=$(ogMount "$1" "$2") || return $?
+
+case ${3^^} in
+    MBR) GRUBGFC="$SECONDSTAGE/boot/grubMBR/boot/grub/grub.cfg"
+    ;;
+    PART) GRUBGFC="$SECONDSTAGE/boot/grubPARTITION/boot/grub/grub.cfg"
+    ;;
+    *) ogRaiseError $OG_ERR_FORMAT "${3^^}: $FUNCNAME int_ndiskSecondStage int_partitionSecondStage [MBR|PART] [USER] [PASSWORD]" || return $?
+    ;;
+esac
+
+# comprobamos que exista el archivo de configuración.
+[ -f $GRUBGFC ] || ogRaiseError $OG_ERR_NOTFOUND "$GRUBGFC" || return $?
+
+USER=${4:-root}
+PASSWD=${5:-""}
+
+ENCRYPTPASSWD=$(echo -e "$PASSWD\n$PASSWD"|grub-mkpasswd-pbkdf2|sed -e 1,2d -e s/^.*grub/grub/)
+
+# Eliminamos configuración anterior
+sed -i -e /superusers/d -e /password_pbkdf2/d $GRUBGFC
+
+# Configuramos grub.cfg para que sólo permita editar o entrar en línea de comandos al usuario especificado
+[ "$PASSWD" == "" ] || sed -i "1i\password_pbkdf2 $USER $ENCRYPTPASSWD" $GRUBGFC
+sed -i "1i\set superusers=\"$USER\"" $GRUBGFC
+
+# Permitimos que se seleccionen las entradas
+sed -i /menuentry/s/"{"/"--unrestricted {"/ $GRUBGFC
+}
+
+
+#/**
 # ogGrubSetTheme num_disk num_part str_theme
 #@brief ver ogBootLoaderSetTheme
 #@see ogBootLoaderSetTheme
