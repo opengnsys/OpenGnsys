@@ -7,6 +7,7 @@
 // Mensajes.
 if (empty ($TbMsg)) $TbMsg=array();
 $TbMsg["HELP_TITLE"]='Ayuda';
+$TbMsg["OU_STATS"]='Estadísticas de la Unidad Organizativa';
 $TbMsg["MANUAL"]='Manual de usuario';
 $TbMsg["API"]='Documentación de la API del Motor de Clonaci&oacute;n';
 $TbMsg["CFG"]='Configuración de los clientes';

@@ -7,6 +7,7 @@
 // Mensajes.
 if (empty ($TbMsg)) $TbMsg=array();
 $TbMsg["HELP_TITLE"]='Help';
+$TbMsg["OU_STATS"]='Statistics of the Organizational Unit';
 $TbMsg["MANUAL"]='User Manual';
 $TbMsg["API"]='Engine API documentation';
 $TbMsg["CFG"]='Client configuration';

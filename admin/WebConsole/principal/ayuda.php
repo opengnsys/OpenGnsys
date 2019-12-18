@@ -25,6 +25,7 @@ $version=(empty($data->project)) ? "OpenGnsys" : @$data->project.' '.@$data->ver
 </div>
 
 <div style="margin-left: 20%">
+    <p class=subcabeceras><a class="help_menu" href="estadisticas.php"> <?php echo $TbMsg["OU_STATS"] ?> </a> </p>
     <p class=subcabeceras><a class="help_menu" href="manual.php"> <?php echo $TbMsg["MANUAL"] ?> </a> </p>
     <p class=subcabeceras><a class="help_menu" href="../api/index.html"> <?php echo $TbMsg["API"] ?> </a></p>
     <p class=subcabeceras><a class="help_menu" href="engine.php"> <?php echo $TbMsg["CFG"] ?> </a> </p>
