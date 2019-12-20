@@ -119,7 +119,7 @@ function Gestiona(){
 	$cmd->CreaParametro("@identidad",$identidad,1);
 	$cmd->CreaParametro("@nombreentidad",$nombreentidad,0);
 	$cmd->CreaParametro("@comentarios",$comentarios,0);
-	$cmd->CreaParametro("@ogunit",$ogunit,0);
+	$cmd->CreaParametro("@ogunit",$ogunit,1);
 	
 	switch($opcion){
 		case $op_alta :
