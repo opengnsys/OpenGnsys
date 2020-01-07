@@ -534,7 +534,6 @@ function getNetworkSettings()
 	local DEVICES
 	local dev
 
-	echoAndLog "${FUNCNAME}(): Detecting network parameters"
 	SERVERIP="$ServidorAdm"
 	DEVICES="$(ip -o link show up | awk '!/loopback/ {sub(/:.*/,"",$2); print $2}')"
 	for dev in $DEVICES; do
@@ -1150,7 +1149,11 @@ function updateSummary()
 	# Obtener revisión.
 	if [ $REMOTE -eq 1 ]; then
 		# Revisión: rAñoMesDía.Gitcommit (8 caracteres de fecha y 7 primeros de commit).
-		REVISION=$(curl -s "$API_URL" | jq '"r" + (.commit.commit.committer.date | split("-") | join("")[:8]) + "." + (.commit.sha[:7])')
+		if [ "$BRANCH" = "master" ]; then
+			REVISION=$(curl -s "$API_URL" | jq '"r" + (.commit.commit.committer.date | split("-") | join("")[:8]) + "." + (.commit.sha[:7])')
+		else
+			REVISION=$(curl -s "$API_URL" | jq '"r" + (.commit.committer.date | split("-") | join("")[:8]) + "." + (.sha[:7])')
+		fi
 	else
 		# Parámetro "release" del fichero JSON.
 		REVISION=$(jq -r '.release' $PROGRAMDIR/../doc/VERSION.json 2>/dev/null)
@@ -1202,10 +1205,6 @@ function updateSummary()
 #####################################################################
 
 
-echoAndLog "OpenGnsys update begins at $(date)"
-
-pushd $WORKDIR
-
 # Comprobar si hay conexión y detectar parámetros de red por defecto.
 checkNetworkConnection
 if [ $? -ne 0 ]; then
@@ -1225,6 +1224,9 @@ if [ $? -ne 0 ]; then
 	errorAndLog "You must to uninstall OpenGnsys and install desired release"
 	exit 1
 fi
+
+echoAndLog "OpenGnsys update begins at $(date)"
+pushd $WORKDIR
 
 # Comprobar auto-actualización del programa.
 if [ "$PROGRAMDIR" != "$INSTALL_TARGET/bin" ]; then
