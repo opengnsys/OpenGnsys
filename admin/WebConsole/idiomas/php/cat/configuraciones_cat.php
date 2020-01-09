@@ -1,8 +1,8 @@
 <?php
 //____________________________________________________
 //
-//	Fitxer d'idiomes php: configuraciones_cat.php 
-//      Idioma: Català
+//	Fitxer d'idiomes php: configuraciones_cat.php
+//	Idioma: Català
 //____________________________________________________
 if (empty ($TbMsg)) $TbMsg=array();
 $TbMsg[0]='Configuracions';
@@ -61,4 +61,10 @@ $TbMsg[45]='Afegeixi Perfil per obtenir dades';
 $TbMsg[495]='Data/Caché';
 $TbMsg[4951]='Caché lliure';
 
+$TbMsg["SECT_SESSIONS"]='Sesiones';
+$TbMsg["SESS_DATETIME"]='Fecha y Hora';
+$TbMsg["SESS_OPERATION"]='Operaci&oacute;n';
+$TbMsg["SESS_OPSYS"]='Sistema Operativo';
+$TbMsg["SESS_USER"]='Usuario';
+$TbMsg["SESS_NOSESSIONS"]='No hay sesiones registradas.';
 

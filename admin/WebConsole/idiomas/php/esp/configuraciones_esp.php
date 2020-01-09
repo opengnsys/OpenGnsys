@@ -1,7 +1,7 @@
 <?php
 //______________________________________________________
 //
-//	Fichero de idiomas php: configuraciones_esp.php 
+//	Fichero de idiomas php: configuraciones_esp.php
 //	Idioma: Español
 //______________________________________________________
 if (empty ($TbMsg)) $TbMsg=array();
@@ -43,7 +43,7 @@ $TbMsg[29]='Desconocido';
 $TbMsg[30]='Sistema de Ficheros';
 $TbMsg[31]='Nombre del S.O.';
 $TbMsg[32]='Tama&ntilde;o de partici&oacute;n';
-$TbMsg[33]='Nombre de la Imagen ';
+$TbMsg[33]='Nombre de la Imagen';
 $TbMsg[34]='Perfil software';
 $TbMsg[35]='Disco';
 $TbMsg[36]='Particiones Primarias';
@@ -61,4 +61,10 @@ $TbMsg[45]='Agregue perfil para obtener datos';
 $TbMsg[495]='Fecha/Cach&eacute;';
 $TbMsg[4951]='Cach&eacute; libre';
 
+$TbMsg["SECT_SESSIONS"]='Sesiones';
+$TbMsg["SESS_DATETIME"]='Fecha y Hora';
+$TbMsg["SESS_OPERATION"]='Operaci&oacute;n';
+$TbMsg["SESS_OPSYS"]='Sistema Operativo';
+$TbMsg["SESS_USER"]='Usuario';
+$TbMsg["SESS_NOSESSIONS"]='No hay sesiones registradas.';
 

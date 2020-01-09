@@ -16,6 +16,8 @@ include_once("../includes/constantes.php");
 include_once("../idiomas/php/".$idioma."/configuraciones_".$idioma.".php");
 include_once("../includes/ConfiguracionesParticiones.php");
 
+define("LOG_FILE", "/opt/opengnsys/log/ogagent.log");
+
 //________________________________________________________________________________________________________
 //
 // Captura parámetros
@@ -53,13 +55,13 @@ if (!$cmd)
 	Header('Location: '.$pagerror.'?herror=2'); // Error de conexión con servidor B.D.
 //________________________________________________________________________________________________________
 ?>
-<HTML>
-<TITLE>Administración web de aulas</TITLE>
-<HEAD>
-	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
-<LINK rel="stylesheet" type="text/css" href="../estilos.css">
-</HEAD>
-<BODY>
+<html lang="es">
+<head>
+    <title>Administración web de aulas</title>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<link rel="stylesheet" type="text/css" href="../estilos.css">
+</head>
+<body>
 <?php
 	switch($ambito){
 			case $AMBITO_AULAS :
@@ -137,10 +139,13 @@ if (!$cmd)
 <?php
 	}
 	$sws=$fk_sysFi | $fk_nombreSO | $fk_tamano | $fk_imagen | $fk_perfil | $fk_cache;	
-	pintaConfiguraciones($cmd,$idambito,$ambito,9,$sws,false);	
+	pintaConfiguraciones($cmd,$idambito,$ambito,9,$sws,false);
+	if ($ambito == $AMBITO_ORDENADORES) {
+	    datos_sesiones($cmd, $idambito);
+    }
 ?>
-</BODY>
-</HTML>
+</body>
+</html>
 
 <?php
 //________________________________________________________________________________________________________
@@ -329,5 +334,93 @@ function datosGruposOrdenadores($cmd,$idgrupo)
 	</TABLE>
 <?php
 }
-?>	
+
+/**
+ * @param object $cmd
+ * @param int $idordenador
+ */
+function datos_sesiones($cmd, $idordenador)
+{
+    global $TbMsg;
+    $os_color = ['Windows' => "blue", 'Linux' => "magenta", 'MacOS' => "orange"];
+    $html = "";
+    $ip = "";
+
+    $cmd->texto = "SELECT ip FROM ordenadores WHERE idordenador = $idordenador";
+    $rs = new Recordset;
+    $rs->Comando=&$cmd;
+    if ($rs->Abrir()){
+        $rs->Primero();
+        $ip = $rs->campos["ip"];
+        $rs->Cerrar();
+    }
+    if ($ip) {
+        foreach (file(LOG_FILE) as $line) {
+            if (strstr($line, "ip=$ip")) {
+                $fields = preg_split("/[:,=]/", rtrim($line, ". \t\n\r\0\x0B"));
+                $date_time = str_replace("T", " ", $fields[0]) . ":" . $fields[1] . ":" .
+                    preg_replace("/\+.*$/", "", $fields[2]);
+                $operation = trim($fields[3]);
+                $username = $os_type = $os_version = "";
+                switch ($operation) {
+                    case "OGAgent started":
+                        $operation = "Iniciar";
+                        $os_type = $fields[14] ?? "";
+                        $os_version = trim($fields[15] ?? "");
+                        break;
+                    case "OGAgent stopped":
+                        $operation = "Apagar";
+                        $os_type = $fields[14] ?? "";
+                        $os_version = trim($fields[15] ?? "");
+                        break;
+                    case "User logged in":
+                        $operation = "Entrar";
+                        $username = $fields[7] ?? "";
+                        $os_type = $fields[11] ?? "";
+                        $os_version = trim($fields[12] ?? "");
+                        break;
+                    case "User logged out":
+                        $operation = "Salir";
+                        $username = $fields[7] ?? "-";
+                        break;
+                    default:
+                        $operation = "ERROR";
+                }
+                $color = $os_color[$os_type] ?? "";
+                $html .= <<<EOT
+  <tr>
+    <td>$date_time</td>
+    <td>$operation</td>
+    <td style="background-color: $color; color: white;">$os_version</td>
+    <td>$username</td>
+  </tr>
+EOT;
+            }
+        }
+        if (!empty($html)) {
+            echo <<<EOT
+<table class="tabla_datos" style="margin-left: auto; margin-right: auto;">
+  <tr>
+    <th colspan="5">${TbMsg["SECT_SESSIONS"]}</th>
+  </tr>
+  <tr>
+    <th>${TbMsg["SESS_DATETIME"]}</th>
+    <th>${TbMsg["SESS_OPERATION"]}</th>
+    <th>${TbMsg["SESS_OPSYS"]}</th>
+    <th>${TbMsg["SESS_USER"]}</th>
+  </tr>
+$html
+</table>
+EOT;
+        } else {
+            echo <<<EOT
+<table class="tabla_datos" style="margin-left: auto; margin-right: auto;">
+  <tr>
+    <th>${TbMsg["SESS_NOSESSIONS"]}</th>
+  </tr>
+</table>
+EOT;
+        }
+    }
+}
 

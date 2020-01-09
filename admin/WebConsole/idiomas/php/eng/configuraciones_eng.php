@@ -60,3 +60,11 @@ $TbMsg[44]='Host without hardware profile';
 $TbMsg[45]='Add Profile to obtain data';
 $TbMsg[495]='Cache data';
 $TbMsg[4951]='Free cache';
+
+$TbMsg["SECT_SESSIONS"]='Sessions';
+$TbMsg["SESS_DATETIME"]='Date and Time';
+$TbMsg["SESS_OPERATION"]='Operation';
+$TbMsg["SESS_OPSYS"]='Operating System';
+$TbMsg["SESS_USER"]='User';
+$TbMsg["SESS_NOSESSIONS"]='No sessions logged.';
+
