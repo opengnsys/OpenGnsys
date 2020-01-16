@@ -236,7 +236,7 @@ if [ $OLDVERSION != $NEWVERSION ] ; then
         exit 0
     fi
     # Nos bajamos los archivos de actualización de la base de datos
-    svn checkout "$SVN_URL" $TMPDIR/Database
+    svn export "$SVN_URL" $TMPDIR/Database
     [ $? -ne 0 ] && errorAndLog "$PROG: Error getting code from $SVN_URL" && exit 6
     
     # Solicitamos la clave de mysql.
