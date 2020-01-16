@@ -25,6 +25,7 @@ $swf=0;
 $idaula=0; 
 $nombreaula="";
 $contenido="";
+$reload="";
 
 if (isset($_GET["idaula"])) $idaula=$_GET["idaula"]; 
 if (isset($_GET["nombreaula"])) $nombreaula=$_GET["nombreaula"]; 
@@ -40,6 +41,8 @@ $idrepositorio = idrepoOU($cmd,$idaula);
 
 if(!empty($contenido)){ // Se ha introducido contenido en lugar de fichero
 	$resul=procesaLineas($cmd,$idaula,$contenido);
+	// Recargamos el arbol de ordenadores del frame izquierdo.
+	if ($resul==3) $reload='onload="recargar_arbol();"';
 }
 //___________________________________________________________________________________________________
 ?>
@@ -57,9 +60,15 @@ if(!empty($contenido)){ // Se ha introducido contenido en lugar de fichero
 	    }
 	    document.fdatos.submit();
 	}
+	function cancelar(){
+		document.location.href="../nada.php";
+	}
+	function recargar_arbol(){
+		parent.frame_arbol.location.reload()
+	}
     </SCRIPT>
 </HEAD>
-<BODY>
+<BODY <?php echo $reload?>>
 <FORM action="incorporaordenadores.php" method="post" name="fdatos">
 	<INPUT type="hidden" name="swf" value="1">
 	<INPUT type="hidden" name="idaula" value="<?php echo $idaula?>">
@@ -82,7 +91,7 @@ if(!empty($contenido)){ // Se ha introducido contenido en lugar de fichero
  </FORM>
 <TABLE align=center>
 	<TR>
-		<TD><IMG src="../images/boton_cancelar.gif" style="cursor:hand"  onclick=""></TD>
+		<TD><IMG src="../images/boton_cancelar.gif" style="cursor:hand"  onclick="cancelar();"></TD>
 		<TD width=20></TD>
 		<TD><IMG src="../images/boton_confirmar.gif" style="cursor:hand"  onclick="confirmar();"></TD>
 	</TR>
