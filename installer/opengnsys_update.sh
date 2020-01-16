@@ -185,8 +185,9 @@ function chooseVersion()
     # Development branch.
     BRANCH="master"
     API_URL="https://api.github.com/repos/opengnsys/OpenGnsys/branches/$BRANCH"
-    RELEASES=( "$BRANCH" )
-    DOWNLOADS=( "$API_URL" )
+
+    RELEASES=( )
+    DOWNLOADS=( )
     # If updating from a local or very old version, use the default data.
     if [ $REMOTE -eq 1 ] && which jq &>/dev/null && [ -f $INSTALL_TARGET/doc/VERSION.json ]; then
         # Installed release.
@@ -200,10 +201,13 @@ function chooseVersion()
                 #RELDATE=$(curl -s "$URL" | jq -r '.commit.committer.date | split("-") | join("")[:8]')
             fi
         done <<< $(curl -s "$API_URL/../../tags" | jq -r '.[] | .name+" "+.commit.url')
+        # Add development (master) branch.
+        RELEASES+=( "$BRANCH" )
+        DOWNLOADS+=( "$API_URL" )
         # Show selection menu, if needed.
         if [ ${#RELEASES} > 1 ]; then
             echo "Installed version: $INSTVERSION $INSTRELEASE"
-            echo "Versions available for update (\"$BRANCH\" is the last development branch):"
+            echo "Versions available for update (\"$BRANCH\" is the latest development branch):"
             PS3="Enter a number: "
             select opt in "${RELEASES[@]}"; do
                 if [ -n "$opt" ]; then
