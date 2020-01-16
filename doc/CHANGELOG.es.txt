@@ -8,14 +8,24 @@ Lista de cambios incluidos en OpenGnsys 1.1.1a (versión de mantenimiento)
 
 Tickets resueltos en módulo OpenGnsys Cloning Engine:
 #935	ogGrub4dosInstallMbr nueva función para arranques de MBR y discos PCIe (NVMe)
+#938	ogBurgInstallMbr() solo en equipos con BIOS y posibilidad de usar el binario desde el repo
 
 Tickets resueltos en módulo OpenGnsys Web Admin Console:
-#934	Netboot Avanzado no filtra correctamente el ámbito grupo de ordenadores (corrección) 
-#936	Asistente deploy muestra particiones destino duplicadas (corrección) 
-#937	Particiones remotas debe soportar la clonación de particiones en en un segundo disco duro
+#934	Netboot Avanzado no filtra correctamente el ámbito grupo de ordenadores (corrección)
+#936	Asistente deploy muestra particiones destino duplicadas (corrección)
+#937	Particiones remotas debe soportar la clonación de particiones en en un segundo disco duro (corrección)
+#947	Estadísticas básicas de la unidad organizativa
+#948	Corregir fallo al crear unidad organizativa (corrección)
+#949	Mostrar datos de sesiones de sistemas operativos en propiedades de ordenador
+
+Tickets resueltos en módulo OpenGnsys Installer:
+#943	Elegir versión a la que se quiere actualizar
+#945	Script de importación no guarda los triggers de la base de datos (corrección)
+#950	GitHub ya no permite obtener la copia de trabajo con Subversion (corrección)
 
 Tickets genéricos resueltos:
 #939	Subir documentación curso básico 1.1.0a
+#946	Liberar versión de mantenimiento OpenGnsys 1.1.1a
 
 
 Lista de cambios incluidos en OpenGnsys 1.1.1 (Espeto)
