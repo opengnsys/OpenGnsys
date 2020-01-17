@@ -169,6 +169,21 @@ function updateSqlFile()
                 [ $? != 0 ] && errorAndLog "${FUNCNAME}: Can't create database $AUXCATALOG" && exit 5
                 mysql --defaults-extra-file=$MYCNF -D "$AUXCATALOG" < $MYSQLFILE &>/dev/null
                 [ $? != 0 ] && errorAndLog "${FUNCNAME}: Can't import $MYSQLFILE in  $AUXCATALOG" && exit 5
+		# Reasignar valores para campos no nulos con nulo por defecto.
+                mysql --defaults-extra-file=$MYCNF -D "$AUXCATALOG" -e \
+			"$(mysql --defaults-extra-file=$MYCNF -Nse "
+SELECT CASE WHEN DATA_TYPE LIKE '%int' THEN
+	         CONCAT_WS(' ', 'ALTER TABLE', TABLE_NAME, 'ALTER', COLUMN_NAME, 'SET DEFAULT 0;')
+	    WHEN DATA_TYPE LIKE '%char' THEN
+	         CONCAT_WS(' ', 'ALTER TABLE', TABLE_NAME, 'ALTER', COLUMN_NAME, 'SET DEFAULT \'\';')
+	    WHEN DATA_TYPE = 'text' THEN
+	         CONCAT_WS(' ', 'ALTER TABLE', TABLE_NAME, 'MODIFY', COLUMN_NAME, 'TEXT NOT NULL;')
+       END
+  FROM information_schema.columns
+ WHERE TABLE_SCHEMA='$AUXCATALOG'
+   AND IS_NULLABLE='NO'
+   AND COLUMN_DEFAULT IS NULL
+   AND COLUMN_KEY='';")"
 
                 for file in $FILES; do
                         importSqlFile $DBDIR/$file
