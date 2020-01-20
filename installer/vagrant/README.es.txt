@@ -20,8 +20,8 @@ Requisitos previos.
 
 El entorno de trabajo de OpenGnsys.
 
- - ogAdministrator: MV para servidor OpenGnsys basada en Ubuntu 16.04 y 2º disco para repositorio.
- - pc11: MV cliente mlodelo con Ubuntu 16.04 instalado.
+ - ogAdministrator: MV para servidor OpenGnsys basada en Ubuntu Server y 2º disco para repositorio.
+ - pc11: MV cliente mlodelo con Ubuntu Server instalado.
  - pc12 - pcX: MV clientes para restaurar con disco vacío.
 
 
@@ -33,12 +33,13 @@ Ejecutar el entorno virtual (Vagrantfile-prod-vbox y Vagrantfile-devel-vbox).
    - LANGUAGE: idioma (se aceptan es_ES, ca_ES y en_GB).
    - NCLIENTS: nº de clientes a generar (de 2 a 9).
    - REPODISK, REPOSIZE: fichero y tamaño (en GB) del disco virtual para el repositorio de imágenes.
-   - SERVERMEM, CLIENTMEM: memoria virtual (en MB) para servidor y clientes (mínimo 256 MB).
+   - SERVERMEM, CLIENTMEM: memoria virtual (en MB) para servidor y clientes (mínimo 512 MB).
    - NETPREFIX: prefijo para las direcciones IP de la red virtual.
    - MACPREFIX: prefijo para las direcciones MAC de los clientes.
    - SERVERIP: dirección IP del servidor OpenGnsys
-   - LOCALWEBPORT: puerto local para acceder al web de administración del servidor.
- - Opcional: para una definición automática del aula virtual con sus clientes, descomentar las líneas del fichero Vagrantfile de los comandos "mysql" y "setclientmode".
+   - LOCALWEBPORT: puerto local para acceder a la web de administración del servidor.
+ - Opcional: para una definición automática del aula virtual con sus clientes, descomentar las líneas del fichero Vagrantfile de los comandos "mysql", "setclientmode" y relacionados.
+ - Opcional: para instalar automáticamente el agente de sistema operativo en la MV modelo (pc11), descomentar las líneas del fichero Vagrantfile de los comandos "apt", y relacionados.
 
  - Iniciar la MV del servidor:
 	vagrant up
@@ -49,9 +50,9 @@ Ejecutar el entorno virtual (Vagrantfile-prod-vbox y Vagrantfile-devel-vbox).
 	vagrant up pcX     (siendo X de 12 al nº máximo definido + 10)
 
 Notas:
- - Los procesos de inicio pueden tardar varios minutos en la primera ejecución, porque descargan y configuran las máquinas virtuales.
+ - Los procesos de inicio pueden tardar varios minutos en la primera ejecución porque descargan y configuran las máquinas virtuales.
  - Si se producen errores al instalar paquetes en el servidor, volver a aprovisionarlo ejecutando "vagrant provision" (o "vagrant up --provision", si la MV está parada).
- - Antes de iniciar las MV de los clientes, debe accederse a la web de OpenGnsys para crear el aula e incorporar los equipos (o revisar que los datos son correctos).
+ - Antes de iniciar las MV de los clientes debe accederse a la web de OpenGnsys para crear el aula e incorporar los equipos (o revisar que los datos son correctos).
  - Ignorar los errores de conexión de Vagrant con los clientes vacíos.
 
 
@@ -71,5 +72,4 @@ Descripción de las MV.
    - Ignorar los posibles errores de conexión de Vagrant.
    - Usar VirtualBox para deshabilitar la interfaz 1 de la MV del cliente modelo.
    - Una vez desplegadas las MV deberán ser controladas directamente con VirtaulBox.
-
 
