@@ -84,6 +84,12 @@ EOT
     rm -f "$MYCNF"
 }
 
+# Returns parent process name (program or script)
+function getcaller () {
+    basename "$(COLUMNS=200 ps hp $PPID -o args | \
+                awk '{if ($1~/bash/ && $2!="") { print $2; }
+                      else { sub(/^-/,"",$1); print $1; } }')"
+}
 
 ### Meta-functions and private functions.
 
