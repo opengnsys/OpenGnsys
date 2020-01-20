@@ -173,11 +173,12 @@ function updateSqlFile()
                 mysql --defaults-extra-file=$MYCNF -D "$AUXCATALOG" -e \
 			"$(mysql --defaults-extra-file=$MYCNF -Nse "
 SELECT CASE WHEN DATA_TYPE LIKE '%int' THEN
-	         CONCAT_WS(' ', 'ALTER TABLE', TABLE_NAME, 'ALTER', COLUMN_NAME, 'SET DEFAULT 0;')
-	    WHEN DATA_TYPE LIKE '%char' THEN
-	         CONCAT_WS(' ', 'ALTER TABLE', TABLE_NAME, 'ALTER', COLUMN_NAME, 'SET DEFAULT \'\';')
-	    WHEN DATA_TYPE = 'text' THEN
-	         CONCAT_WS(' ', 'ALTER TABLE', TABLE_NAME, 'MODIFY', COLUMN_NAME, 'TEXT NOT NULL;')
+                 CONCAT_WS(' ', 'ALTER TABLE', TABLE_NAME, 'ALTER', COLUMN_NAME, 'SET DEFAULT 0;')
+            WHEN DATA_TYPE LIKE '%char' THEN
+                 CONCAT_WS(' ', 'ALTER TABLE', TABLE_NAME, 'ALTER', COLUMN_NAME, 'SET DEFAULT \'\';')
+            WHEN DATA_TYPE = 'text' THEN
+                 CONCAT_WS(' ', 'ALTER TABLE', TABLE_NAME, 'MODIFY', COLUMN_NAME, 'TEXT NOT NULL;')
+            ELSE ''
        END
   FROM information_schema.columns
  WHERE TABLE_SCHEMA='$AUXCATALOG'
