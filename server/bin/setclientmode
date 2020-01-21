@@ -44,7 +44,7 @@ source $OPENGNSYS/lib/ogfunctions.sh
 [ $# -ne 3 ] && raiseError usage
 # Comprobar si el usuario es "root" o el del servicio web.
 WEBUSER=$(ps axho user,comm|awk '!/root/ && /httpd|apache/ {print $1; exit;}')
-CALLER=$(getCaller)
+CALLER=$(getcaller)
 [ "$USER" != "root" -a "$USER" != "$WEBUSER" -a "$CALLER" != "ogAdmServerAux" ] && raiseError access "Need to be root (or webserver user)"
 # El acceso a mysql por las variables pasadas o por el fichero de configuarción.
 if  [ -z "$USUARIO" ] || [ -z "$PASSWORD" ] || [ -z "$CATALOG" ]; then
