@@ -146,7 +146,7 @@ function updateSqlFile()
                         $CATALOG-$OLDVERSION-*.sql)
                                 # Actualización de versión n a n+1.
                                 FILES="$FILES $file"
-                                OLDVERSION="$(echo $file | cut -f3 -d-)"
+                                OLDVERSION="$(echo ${file%.*} | cut -f3 -d-)"
                                 ;;
                         $CATALOG-*-$NEWVERSION.sql)
                                 # Última actualización de versión final-1 a final.
