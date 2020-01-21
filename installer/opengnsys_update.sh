@@ -875,7 +875,7 @@ function updateDatabase()
 			$OPENGNSYS_DATABASE-$OLDVERSION-*.sql)
 				# Actualización de versión n a n+1.
 				FILES="$FILES $file"
-				OLDVERSION="$(echo $file | cut -f3 -d-)"
+				OLDVERSION="$(echo ${file%.*} | cut -f3 -d-)"
 				;;
 			$OPENGNSYS_DATABASE-*-$NEWVERSION.sql)
 				# Última actualización de versión final-1 a final.
