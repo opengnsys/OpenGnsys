@@ -169,22 +169,6 @@ function updateSqlFile()
                 [ $? != 0 ] && errorAndLog "${FUNCNAME}: Can't create database $AUXCATALOG" && exit 5
                 mysql --defaults-extra-file=$MYCNF -D "$AUXCATALOG" < $MYSQLFILE &>/dev/null
                 [ $? != 0 ] && errorAndLog "${FUNCNAME}: Can't import $MYSQLFILE in  $AUXCATALOG" && exit 5
-		# Reasignar valores para campos no nulos con nulo por defecto.
-                mysql --defaults-extra-file=$MYCNF -D "$AUXCATALOG" -e \
-			"$(mysql --defaults-extra-file=$MYCNF -Nse "
-SELECT CASE WHEN DATA_TYPE LIKE '%int' THEN
-                 CONCAT_WS(' ', 'ALTER TABLE', TABLE_NAME, 'ALTER', COLUMN_NAME, 'SET DEFAULT 0;')
-            WHEN DATA_TYPE LIKE '%char' THEN
-                 CONCAT_WS(' ', 'ALTER TABLE', TABLE_NAME, 'ALTER', COLUMN_NAME, 'SET DEFAULT \'\';')
-            WHEN DATA_TYPE = 'text' THEN
-                 CONCAT_WS(' ', 'ALTER TABLE', TABLE_NAME, 'MODIFY', COLUMN_NAME, 'TEXT NOT NULL;')
-            ELSE ''
-       END
-  FROM information_schema.columns
- WHERE TABLE_SCHEMA='$AUXCATALOG'
-   AND IS_NULLABLE='NO'
-   AND COLUMN_DEFAULT IS NULL
-   AND COLUMN_KEY='';")"
 
                 for file in $FILES; do
                         importSqlFile $DBDIR/$file
@@ -278,14 +262,20 @@ fi
 [ "$DIFFVERSION" == TRUE ] &&  updateSqlFile
 
 # Eliminamos las tablas que no importamos: repositorios, entorno
-#     definimos usuario creador de los "triggers
-#     y añadimos los usuarios, sólo si no existen.
+#     definimos usuario creador de los "triggers,
+#     añadimos los usuarios, sólo si no existen, y
+#     definimos valores adecuados por defecto.
 sed -i -e '/Table structure.* `repositorios`/,/Table structure/d' \
        -e '/Table structure.* `entornos`/,/Table structure/d' \
        -e "s/\(DEFINER=\`\)[^\`]*\(\`.* TRIGGER\)/\1$USUARIO\2/" \
        -e '/Table structure.*`usuarios`/,/CHARSET/d' \
        -e '/usuarios/s/IGNORE//g' \
-       -e '/usuarios/s/^INSERT /\nALTER TABLE usuarios ADD UNIQUE (usuario);\n\nINSERT IGNORE /g' $MYSQLFILE
+       -e '/usuarios/s/^INSERT /\nALTER TABLE usuarios ADD UNIQUE (usuario);\n\nINSERT IGNORE /g' \
+       -e "s/\(\` [a-z]*int([0-9]*) NOT NULL\),/\1 DEFAULT 0,/" \
+       -e "s/\(\` [a-z]*char([0-9]*) NOT NULL\),/\1 DEFAULT '',/" \
+       -e "s/\(\` datetime NOT NULL DEFAULT \)'0000-00-00 00:00:00',/\1'1970-01-01 00:00:00',/" \
+       -e "s/\` text NOT NULL,/\` text,/" \
+       $MYSQLFILE
 
 # Copia de seguridad del estado de la base de datos
 mysqldump --defaults-extra-file=$MYCNF --opt $CATALOG > $MYSQLBCK
