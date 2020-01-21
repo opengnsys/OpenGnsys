@@ -312,7 +312,7 @@ done
 echo "   * Guardamos los ficheros PXE de los clientes."
 for BOOTLOADER in menu.lst grub; do
     if [ -d $TMPDIR/$BOOTLOADER ]; then
-        mkdir $OPENGNSYS/tftpboot/$BOOTLOADER-$DATE
+        mkdir -p $OPENGNSYS/tftpboot/$BOOTLOADER-$DATE
         mv $OPENGNSYS/tftpboot/$BOOTLOADER/{01-*,templates,examples} $OPENGNSYS/tftpboot/$BOOTLOADER-$DATE 2>/dev/null
         cp -r $TMPDIR/$BOOTLOADER/{01-*,templates,examples}  $OPENGNSYS/tftpboot/$BOOTLOADER 2>/dev/null
         chown -R www-data:www-data $OPENGNSYS/tftpboot/$BOOTLOADER
@@ -343,10 +343,10 @@ cp -r $TMPDIR/menus $OPENGNSYS/www
 # Script personalizados
 echo "   * Guardamos los scripts personalizados."
 if ls $OPENGNSYS/client/scripts/*Custom &>/dev/null; then
-    mkdir $OPENGNSYS/client/scripts/Custom-$DATE
+    mkdir -p $OPENGNSYS/client/scripts/Custom-$DATE
     mv $OPENGNSYS/client/scripts/*Custom $OPENGNSYS/client/scripts/Custom-$DATE
 fi
-cp -r $TMPDIR/*Custom $OPENGNSYS/client/scripts 
+cp -r $TMPDIR/*Custom $OPENGNSYS/client/scripts &>/dev/null
 
 echo -e "Se ha terminado de importar los datos del backup. \n\nSe han realizado copias de seguridad de los archivos antiguos:" 
 echo    "  - /etc/default/opengnsys-$DATE"
