@@ -21,3 +21,4 @@ curl -X POST -H "Authorization: $API_KEY" http://127.0.0.1:8888/image/restore/ba
 curl -X POST -H "Authorization: $API_KEY" http://127.0.0.1:8888/image/restore/incremental -d @restore_incremental_image.json
 curl -X POST -H "Authorization: $API_KEY" http://127.0.0.1:8888/run/schedule -d @run_schedule.json
 curl -X POST -H "Authorization: $API_KEY" http://127.0.0.1:8888/task/run -d @task.json
+curl -X POST -H "Authorization: $API_KEY" http://127.0.0.1:8888/schedule/create -d @create_schedule.json
