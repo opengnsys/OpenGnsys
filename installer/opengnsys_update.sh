@@ -205,7 +205,7 @@ function chooseVersion()
         RELEASES+=( "$BRANCH" )
         DOWNLOADS+=( "$API_URL" )
         # Show selection menu, if needed.
-        if [ ${#RELEASES} > 1 ]; then
+        if [ ${#RELEASES[@]} -gt 1 ]; then
             echo "Installed version: $INSTVERSION $INSTRELEASE"
             echo "Versions available for update (\"$BRANCH\" is the latest development branch):"
             PS3="Enter a number: "
