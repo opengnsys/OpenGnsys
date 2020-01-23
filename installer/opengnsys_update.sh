@@ -830,7 +830,7 @@ function createDirs()
 	for f in grub-mknetdir grub2-mknetdir; do
 		if which $f &>/dev/null; then MKNETDIR=$f; fi
 	done
-	$MKNETDIR --net-directory=$TFTPCFGDIR --subdir=grub
+	$MKNETDIR --net-directory=${INSTALL_TARGET}/tftpboot --subdir=grub
 
 	# Crear usuario ficticio.
 	if id -u $OPENGNSYS_CLIENTUSER &>/dev/null; then
@@ -913,6 +913,8 @@ function updateServerFiles()
 			admin/Sources/Services/ogAdmServerAux \
 			admin/Sources/Services/ogAdmRepoAux \
 			server/tftpboot \
+			/usr/lib/shim/shimx64.efi.signed \
+			/usr/lib/grub/x86_64-efi-signed/grubnetx64.efi.signed \
 			installer/opengnsys_uninstall.sh \
 			installer/opengnsys_export.sh \
 			installer/opengnsys_import.sh \
@@ -923,6 +925,8 @@ function updateServerFiles()
 			sbin/ogAdmServerAux \
 			sbin/ogAdmRepoAux \
 			tftpboot \
+			tftpboot/shimx64.efi.signed \
+			tftpboot/grubx64.efi \
 			lib/opengnsys_uninstall.sh \
 			lib/opengnsys_export.sh \
 			lib/opengnsys_import.sh \
@@ -948,6 +952,18 @@ function updateServerFiles()
 	if grep -q 'pxelinux.0' /etc/dhcp*/dhcpd*.conf; then
 		echoAndLog "${FUNCNAME}(): updating DHCP files"
 		perl -pi -e 's/pxelinux.0/grldr/' /etc/dhcp*/dhcpd*.conf
+		service=$DHCPSERV; $STARTSERVICE
+		NEWFILES="/etc/dhcp*/dhcpd*.conf"
+	fi
+	if ! grep -q 'shimx64.efi.signed' /etc/dhcp*/dhcpd*.conf; then
+		echoAndLog "${FUNCNAME}(): updating DHCP files for UEFI computers"
+		UEFICFG="    # 0007 == x64 EFI boot\n"\
+"    if option arch = 00:07 {\n"\
+"        filename \"shimx64.efi.signed\";\n"\
+"    } else {\n"\
+"        filename \"grldr\";\n"\
+"    }"
+		sed -i -e 2i"option arch code 93 = unsigned integer 16;" -e s@"^.*grldr\"\;"@"$UEFICFG"@g /etc/dhcp*/dhcpd*.conf
 		service=$DHCPSERV; $STARTSERVICE
 		NEWFILES="/etc/dhcp*/dhcpd*.conf"
 	fi
