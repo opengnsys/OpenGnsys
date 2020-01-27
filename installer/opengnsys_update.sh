@@ -365,6 +365,22 @@ function importSqlFile()
 user=$dbuser
 password=$dbpassword
 EOT
+	# Antes de actualizar, reasignar valores para campos no nulos con nulo por defecto.
+	mysql --defaults-extra-file=$MYCNF -D "$database" -e \
+		"$(mysql --defaults-extra-file=$MYCNF -Nse "
+SELECT CASE WHEN DATA_TYPE LIKE '%int' THEN
+                 CONCAT_WS(' ', 'ALTER TABLE', TABLE_NAME, 'ALTER', COLUMN_NAME, 'SET DEFAULT 0;')
+            WHEN DATA_TYPE LIKE '%char' THEN
+                 CONCAT_WS(' ', 'ALTER TABLE', TABLE_NAME, 'ALTER', COLUMN_NAME, 'SET DEFAULT \'\';')
+            WHEN DATA_TYPE = 'text' THEN
+                 CONCAT_WS(' ', 'ALTER TABLE', TABLE_NAME, 'MODIFY', COLUMN_NAME, 'TEXT NOT NULL;')
+            ELSE ''
+       END
+  FROM information_schema.COLUMNS
+ WHERE TABLE_SCHEMA='$database'
+   AND IS_NULLABLE='NO'
+   AND COLUMN_DEFAULT IS NULL
+   AND COLUMN_KEY='';")"
 	# Ejecutar actualización y borrar fichero de credenciales.
 	mysql --defaults-extra-file=$mycnf --default-character-set=utf8 -D "$database" < $tmpfile
 	status=$?
