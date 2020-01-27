@@ -496,7 +496,7 @@ CREATE TABLE `nombresos` (
 DROP TABLE IF EXISTS `ogagent_queue`;
 CREATE TABLE `ogagent_queue` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `clientid` int(11) NOT NULL,
+  `clientid` int(11) NOT NULL DEFAULT 0,
   `exectime` datetime DEFAULT NULL,
   `operation` varchar(25),
 --  `parameters` varchar(100),
@@ -788,7 +788,7 @@ CREATE TABLE `programaciones` (
 
 DROP TABLE IF EXISTS `remotepc`;
 CREATE TABLE `remotepc` (
-  `id` int(11) NOT NULL,
+  `id` int(11) NOT NULL DEFAULT 0,
   `reserved` datetime DEFAULT NULL,
   `urllogin` varchar(100),
   `urllogout` varchar(100),
@@ -1010,7 +1010,7 @@ INSERT INTO `tiposos` (`idtiposo`, `tiposo`, `idplataforma`) VALUES
 
 DROP TABLE IF EXISTS `tipospar`;
 CREATE TABLE `tipospar` (
-  `codpar` int(8) NOT NULL,
+  `codpar` int(8) NOT NULL DEFAULT 0,
   `tipopar` varchar(250) NOT NULL DEFAULT '',
   `clonable` tinyint(4) NOT NULL DEFAULT '0',
   UNIQUE KEY `codpar` (`codpar`)
