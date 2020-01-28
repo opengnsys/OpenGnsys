@@ -17,13 +17,24 @@
 
 <h2>Instalar los agentes</h2>
 
+<p>Para descargar el fichero con el agente OGAgent, acceder a la web del servidor OpenGnsys, entrar en la pantalla "Propiedades" de cualquier ordenador y elegir el paquete correspondiente al sistema operativo del cliente en el desplegable de la sección "Descargas disponibles".</p>
+
 <h3>Ubuntu, Debian y derivados:</h3>
 <ul>
   <li>Ejecutar los comandos desde una terminal.</li>
-  <li>Descargar el fichero e instalar el agente con sus dependencias:
-    <pre>
+  <li>Instalar el agente con sus dependencias:
+    <ul>
+     <li>Para escritorios GNOME:
+      <pre>
 	sudo apt update
-	sudo apt install <em>DirectorioDescarga</em>/ogagent_<em>Version</em>_all.deb</pre></li>
+	sudo apt install <em>DirectorioDescarga</em>/ogagent_<em>Version</em>_all.deb</pre>
+     </li>
+     <li>Para escrigorios KDE:
+      <pre>
+	sudo apt update
+	sudo apt install --no-install-recommends <em>DirectorioDescarga</em>/ogagent_<em>Version</em>_all.deb</pre>
+    </ul>
+  </li>
   <li>Configurar el agente:
     <pre>	sudo sed -i "0,/remote=/ s,remote=.*,remote=https://<em>IPServidorOpenGnsys</em>/opengnsys/rest/," /usr/share/OGAgent/cfg/ogagent.cfg</pre></li>
   <li>Para sistemas con GNOME 3: ejecutar GNOME Tweaks y habilitar la extensión TopIcons Plus.</li>
@@ -34,7 +45,7 @@
 <h3>Red Hat, Fedora y derivados (como root):</h3>
 <ul>
   <li>Ejecutar los comandos desde una terminal.</li>
-  <li>Descargar el fichero e instalar el agente con sus dependencias:
+  <li>Instalar el agente con sus dependencias:
     <pre>	yum install ogagent-<em>Version</em>.noarch.rpm</pre></li>
   <li>Configurar el agente:
     <pre>	sed -i "0,/remote=/ s,remote=.*,remote=https://<em>IPServidorOpenGnsys</em>/opengnsys/rest/," /usr/share/OGAgent/cfg/ogagent.cfg</pre></li>
@@ -60,7 +71,7 @@
     <pre>
 	sudo easy_install pip
 	sudo pip install -U --ignore-installed netifaces requests six</pre></li>
-  <li>Descargar el fichero e instalar el agente:
+  <li>Instalar el agente:
     <pre>	sudo installer -pkg OGAgentInstaller-<em>Version</em>.pkg -target /</pre></li>
   <li>Configurar el agente:
     <pre>
@@ -72,7 +83,7 @@
 
 <h3>Windows (como usuario administrador):</h3>
 <ul>
-  <li>Descargar el fichero e instalar el agente ejecutando <code>OGAgentSetup-<em>Version</em>.exe</code></li>
+  <li>Instalar el agente ejecutando <code>OGAgentSetup-<em>Version</em>.exe</code></li>
   <li>Seguir las instrucciones del instalador.</li>
   <li>Editar el fichero de configuación <code>C:\Program Files\OGAgent\cfg\ogagent.cfg</code> (o <code>C:\Archivos de programa\OGAgent\cfg\ogagent.cfg</code>) y modificar el valor de la cláusula <code>remote</code> de la sección <code>[OGAgent]</code> inclyendo la dirección IP del servidor OpenGnsys.</li>
   <li>Reiniciar el equipo o ejecutar el servicio <em>(se iniciará automáticamente en el proceso de arranque)</em>:
@@ -85,7 +96,7 @@
 
 
 <h2>Actualizar los agentes</h2>
-<p>Se recomienda desinstalar el agente OGAgent, reiniciar el equipo e instalar una nueva versión del programa.</p>
+<p>Es necesario desinstalar el agente OGAgent, reiniciar el equipo e instalar una nueva versión del programa.</p>
 
 </body>
 </html>
