@@ -27,6 +27,8 @@ define('OG_REST_CMD_RESTORE_BASIC_IMAGE', 'image/restore/basic');
 define('OG_REST_CMD_RESTORE_INCREMENTAL_IMAGE', 'image/restore/incremental');
 define('OG_REST_CMD_RUN_SCHEDULE', 'run/schedule');
 define('OG_REST_CMD_RUN_TASK', 'task/run');
+define('OG_REST_CMD_CREATE_SCHEDULE', 'schedule/create');
+define('OG_REST_CMD_DELETE_SCHEDULE', 'schedule/delete');
 
 define('OG_REST_PARAM_CLIENTS', 'clients');
 define('OG_REST_PARAM_ADDR', 'addr');
@@ -61,6 +63,13 @@ define('OG_REST_PARAM_DIFF_NAME', 'diff_name');
 define('OG_REST_PARAM_METHOD', 'method');
 define('OG_REST_PARAM_ECHO', 'echo');
 define('OG_REST_PARAM_TASK', 'task');
+define('OG_REST_PARAM_TIME_PARAMS', 'time_params');
+define('OG_REST_PARAM_YEARS', 'years');
+define('OG_REST_PARAM_MONTHS', 'months');
+define('OG_REST_PARAM_DAYS', 'days');
+define('OG_REST_PARAM_HOURS', 'hours');
+define('OG_REST_PARAM_AM_PM', 'am_pm');
+define('OG_REST_PARAM_MINUTES', 'minutes');
 
 $conf_file = parse_ini_file(__DIR__ . '/../../etc/ogAdmServer.cfg');
 define('OG_REST_API_TOKEN', 'Authorization: ' . $conf_file['APITOKEN']);
@@ -549,6 +558,34 @@ function run_schedule($string_ips) {
 function run_task($task_id) {
 	$data = array(OG_REST_PARAM_TASK => $task_id);
 	return common_request(OG_REST_CMD_RUN_TASK, POST, $data);
+}
+
+function create_schedule($task_id, $name, $years, $months, $days, $hours,
+			$am_pm, $minutes) {
+
+	$data = array (
+		OG_REST_PARAM_TASK => $task_id,
+		OG_REST_PARAM_NAME => $name,
+		OG_REST_PARAM_TIME_PARAMS => array (
+			OG_REST_PARAM_YEARS => intval($years),
+			OG_REST_PARAM_MONTHS => intval($months),
+			OG_REST_PARAM_DAYS => intval($days),
+			OG_REST_PARAM_HOURS => intval($hours),
+			OG_REST_PARAM_AM_PM => intval($am_pm),
+			OG_REST_PARAM_MINUTES => intval($minutes)
+		)
+	);
+
+	return common_request(OG_REST_CMD_CREATE_SCHEDULE, POST, $data);
+}
+
+function delete_schedule($schedule_id) {
+
+	$data = array (
+		OG_REST_PARAM_ID => $schedule_id,
+	);
+
+	return common_request(OG_REST_CMD_DELETE_SCHEDULE, POST, $data);
 }
 
 /*

@@ -12,6 +12,7 @@ include_once("../includes/ctrlacc.php");
 include_once("../includes/CreaComando.php");
 include_once("../clases/AdoPhp.php");
 include_once("../includes/comunes.php");
+include_once("../includes/restfunctions.php");
 //________________________________________________________________________________________________________
 $op_alta=1;
 $op_modificacion=2;
@@ -76,40 +77,30 @@ if($wsw_sus=='true')
 else
 	$psw_sus=0 ;
 
-$cmd=CreaComando($cadenaconexion); // Crea objeto comando
-$resul=false;
-if ($cmd){
-	$resul=Gestiona();
-	$cmd->Conexion->Cerrar();
-}
 if($pswop!=$op_suspension){
-	if (!$resul){ // Ha ocurrido algún error
-		$reporerr=$cmd->UltimoError();
-		$repordes=$cmd->DescripUltimoError();
-		echo "error_programacion()";
+	$result;
+	$idr=$pidprogramacion;
+	switch($pswop){
+		case $op_modificacion :
+			$swop=$op_modificacion;
+			break;
+		case $op_alta:
+			$result = create_schedule($pidentificador,
+				$pnombrebloque, $pannos, $pmeses, $pdiario,
+				$phoras, $pampm, $pminutos);
+			$swop=$op_alta;
+			break;
+		case $op_eliminacion :
+			$result = delete_schedule($pidprogramacion);
+			$swop=$op_eliminacion;
+			break;
+		default:
+			break;
 	}
-	else{ // programacion registrada correctamente
-		switch($pswop){
-			case $op_modificacion :
-				$idr=$pidprogramacion; // Identificador de la programacion modificada
-				$swop=$op_modificacion;
-				break;
-			case $op_alta:		
-				$idr=$pidprogramacion; // Identificador de la programacion nueva
-				$swop=$op_alta;
-				break;
-			case $op_eliminacion :
-				$idr=$pidprogramacion; // Identificador de la programacion eliminada
-				$swop=$op_eliminacion;
-				break;
-			default:
-				break;
-		}
-		echo 'registro_programacion('.$idr.',"'.$pnombrebloque.'",'.$swop.')';
-	}
+	echo 'registro_programacion('.$idr.',"'.$pnombrebloque.'",'.$swop.')';
 }
 else{
-	if (!$resul){ // Ha ocurrido algún error
+	if ($resul) { // Ha ocurrido algún error
 		$reporerr=0;
 		$repordes="Error al suspender la programación";
 		echo 'error_programacion()';
