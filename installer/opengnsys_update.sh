@@ -1086,7 +1086,7 @@ function compileServices()
 	popd
 	# Generar un API token de ogAdmServer si no existe en el fichero de configuración.
 	grep -q "APITOKEN=" $INSTALL_TARGET/etc/ogAdmServer.cfg || \
-		$INSTALL_TARGET/bin/settoken server <<<"y"
+		$INSTALL_TARGET/bin/settoken -f
 
 	return $hayErrores
 }
