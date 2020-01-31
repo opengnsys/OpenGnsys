@@ -77,8 +77,8 @@ if [ -n "$SERVERIP" ]; then
 	done
 	# Restarting DHCP service if its configuration has changed.
 	if [ $CHANGE == 1 ]; then
-		for f in /etc/init.d/{isc-dhcp-server,dhcp3-server,dhcpd}; do
-			[ -x $f ] && $f restart
+		for s in isc-dhcp-server dhcp3-server dhcpd; do
+			restart $s &>/dev/null && break
 		done
 	else
 		echo "DHCP configuration has not changed."
@@ -92,6 +92,7 @@ if [ -n "$SERVERIP" ]; then
 	for f in $OPENGNSYS/{etc/{ogAdmServer,ogAdmRepo,ogAdmAgent}.cfg,www/controlacceso.php,client/etc/ogAdmClient.cfg}; do
 		# Updating configuration variables (if URL does not contain "localhost").
 		sed -e "s,\(ServidorAdm\|IPlocal\)=.*,\1=$SERVERIP," \
+		    -e "s,INTERFACE=.*,INTERFACE=$SERVERDEV," \
 		    -e "s,UrlMenu=https?://\([^/]*\)/\(.*\),UrlMenu=https://$SERVERIP/\2," \
 		    -e '/localhost/!s,https\?://[^/]*/\(.*\),https://'$SERVERIP'/\1,' $f >$tmpfile
 		file="${f/./-$SERVERDEV.}"
@@ -106,7 +107,8 @@ if [ -n "$SERVERIP" ]; then
 	# Processing when something has changed.
 	if [ $CHANGE == 1 ]; then
 		# Restart OpenGnsys services.
-		/etc/init.d/opengnsys restart
+		echo "Restarting services..."
+		restart opengnsys >/dev/null
 		source $DEFAULTFILE
 		# If OpenGnsys Server is active, updating the database.
 		if [ "$RUN_OGADMSERVER" == "yes" ]; then
@@ -139,7 +141,7 @@ Default server interface set to: $SERVERDEV ($SERVERIP)
 Manual tasks:
 - Check DHCP configuration file and restart service, if needed.
 - Check PXE files.
-- Log-in as Web Console user: 
+- Log-in as Web Console user:
   - Check menu URLs.
 - Note: Run "settoken" script to update authentication tokens.
 EOT
