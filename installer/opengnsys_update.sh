@@ -979,7 +979,7 @@ function updateServerFiles()
 "    } else {\n"\
 "        filename \"grldr\";\n"\
 "    }"
-		sed -i -e 2i"option arch code 93 = unsigned integer 16;" -e s@"^.*grldr\"\;"@"$UEFICFG"@g /etc/dhcp*/dhcpd*.conf
+		sed -i -e 1i"option arch code 93 = unsigned integer 16;" -e s@"^.*grldr\"\;"@"$UEFICFG"@g /etc/dhcp*/dhcpd*.conf
 		service=$DHCPSERV; $STARTSERVICE
 		NEWFILES="/etc/dhcp*/dhcpd*.conf"
 	fi
@@ -1014,7 +1014,6 @@ function updateServerFiles()
 	[ ! -f /etc/cron.d/torrenttracker ] && echo "5 * * * *   root   [ -x $INSTALL_TARGET/bin/torrent-tracker ] && $INSTALL_TARGET/bin/torrent-tracker" > /etc/cron.d/torrenttracker
 	[ ! -f /etc/cron.d/imagedelete ] && echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/deletepreimage ] && $INSTALL_TARGET/bin/deletepreimage" > /etc/cron.d/imagedelete
 	[ ! -f /etc/cron.d/ogagentqueue ] && echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/ogagentqueue.cron ] && $INSTALL_TARGET/bin/ogagentqueue.cron" > /etc/cron.d/ogagentqueue
-	echoAndLog "${FUNCNAME}(): server files successfully updated"
 
 	# Se modifican los nombres de las plantilla PXE por compatibilidad con los equipos UEFI.
 	if [ -f $INSTALL_TARGET/tftpboot/menu.lst/templates/01 ]; then
@@ -1022,6 +1021,7 @@ function updateServerFiles()
 	    mv $BIOSPXEDIR/01 $BIOSPXEDIR/10
 	    sed -i "s/\bMBR\b/1hd/" $BIOSPXEDIR/10
 	fi
+	echoAndLog "${FUNCNAME}(): server files successfully updated"
 }
 
 ####################################################################
@@ -1084,6 +1084,9 @@ function compileServices()
 		hayErrores=1
 	fi
 	popd
+	# Generar un API token de ogAdmServer si no existe en el fichero de configuración.
+	grep -q "APITOKEN=" $INSTALL_TARGET/etc/ogAdmServer.cfg || \
+		$INSTALL_TARGET/bin/settoken server <<<"y"
 
 	return $hayErrores
 }
