@@ -2056,11 +2056,10 @@ echo "${!MSG%%\.}: $@"
 
 
 #/**
-#         ogGrubSecurity int_disk_GRUBCFG int_partition_GRUBCFG [MBR|PART] [user] [password]
+#         ogGrubSecurity int_disk_GRUBCFG int_partition_GRUBCFG [user] [password]
 #@brief   Configura grub.cfg para que sólo permita editar entrada o acceder a línea de comandos al usuario especificado
 #@param   int_disk_SecondStage
 #@param   int_part_SecondStage
-#@param   type [MBR|PART]
 #@param   user (default root)
 #@param   password (default "", no puede entrar)
 #@return  (nada)
@@ -2073,48 +2072,43 @@ echo "${!MSG%%\.}: $@"
 function ogGrubSecurity ()
 {
 # Variables locales.
-local SECONDSTAGE GRUBGFC USER PASSWD ENCRYPTPASSWD
+local SECONDSTAGE GRUBGFC FILE USER PASSWD ENCRYPTPASSWD
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    ogHelp "$FUNCNAME" "$FUNCNAME int_ndiskSecondStage int_partitionSecondStage [MBR|PART] [USER] [PASSWORD]" \
-           "$FUNCNAME 1 1 MBR " \
-           "$FUNCNAME 1 2 PART "
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndiskSecondStage int_partitionSecondStage  [USER] [PASSWORD]" \
+           "$FUNCNAME 1 1 " \
+           "$FUNCNAME 1 2 user clave"
     return
 fi
 
-# Error si no se reciben 3 parámetros.
-[ $# -ge 3 ] || ogRaiseError $OG_ERR_FORMAT "$FUNCNAME int_ndiskSecondStage int_partitionSecondStage [MBR|PART] [USER] [PASSWORD]"|| return  $?
+# Error si no se reciben 2 parámetros.
+[ $# -ge 2 ] || ogRaiseError $OG_ERR_FORMAT "$FUNCNAME int_ndiskSecondStage int_partitionSecondStage [USER] [PASSWORD]"|| return  $?
 
 #localizar disco segunda etapa del grub
 SECONDSTAGE=$(ogMount "$1" "$2") || return $?
 
-case ${3^^} in
-    MBR) GRUBGFC="$SECONDSTAGE/boot/grubMBR/boot/grub/grub.cfg"
-    ;;
-    PART) GRUBGFC="$SECONDSTAGE/boot/grubPARTITION/boot/grub/grub.cfg"
-    ;;
-    *) ogRaiseError $OG_ERR_FORMAT "${3^^}: $FUNCNAME int_ndiskSecondStage int_partitionSecondStage [MBR|PART] [USER] [PASSWORD]" || return $?
-    ;;
-esac
+GRUBGFC=$(ls $SECONDSTAGE/{,boot/}{{grubMBR,grubPARTITION}/boot/,}{grub{,2},{,efi/}EFI/*}/{menu.lst,grub.cfg,grub.cfg.backup.og} 2>/dev/null)
 
 # comprobamos que exista el archivo de configuración.
-[ -f $GRUBGFC ] || ogRaiseError $OG_ERR_NOTFOUND "$GRUBGFC" || return $?
+[ -n "$GRUBGFC" ] || ogRaiseError $OG_ERR_NOTFOUND "grub.cfg" || return $?
 
-USER=${4:-root}
-PASSWD=${5:-""}
+USER=${3:-root}
+PASSWD=${4:-""}
 
 ENCRYPTPASSWD=$(echo -e "$PASSWD\n$PASSWD"|grub-mkpasswd-pbkdf2|sed -e 1,2d -e s/^.*grub/grub/)
 
-# Eliminamos configuración anterior
-sed -i -e /superusers/d -e /password_pbkdf2/d $GRUBGFC
+for FILE in $GRUBGFC; do
+    # Eliminamos configuración anterior
+    sed -i -e /superusers/d -e /password_pbkdf2/d $FILE
 
-# Configuramos grub.cfg para que sólo permita editar o entrar en línea de comandos al usuario especificado
-[ "$PASSWD" == "" ] || sed -i "1i\password_pbkdf2 $USER $ENCRYPTPASSWD" $GRUBGFC
-sed -i "1i\set superusers=\"$USER\"" $GRUBGFC
+    # Configuramos grub.cfg para que sólo permita editar o entrar en línea de comandos al usuario especificado
+    [ "$PASSWD" == "" ] || sed -i "1i\password_pbkdf2 $USER $ENCRYPTPASSWD" $FILE
+    sed -i "1i\set superusers=\"$USER\"" $FILE
 
-# Permitimos que se seleccionen las entradas
-sed -i /menuentry/s/"{"/"--unrestricted {"/ $GRUBGFC
+    # Permitimos que se seleccionen las entradas
+    sed -i /"menuentry "/s/"{"/"--unrestricted {"/ $FILE
+done
 }
 
 
@@ -2922,20 +2916,17 @@ ${BINDIR}/bootlace64.com $DEVICE &>/dev/null
 #copiar grld a la particion           
 cp ${BINDIR}/grldr $MOUNTDISK
 #Instalar y configurar grub4dos
-if [[ -f $MOUNTDISK/Boot/ ]]; then
-	GRUBDIR="$MOUNTDISK/Boot/grub/"
+if [[ -f $MOUNTDISK/boot/grub/menu.lst ]]; then
+	rm $MOUNTDISK/boot/grub/menu.lst
+	rmdir /$MOUNTDISK/boot/grub
 fi
-if [[ -f $MOUNTDISK/Boot/grub/menu.lst ]]; then
-	rm $MOUNTDISK/Boot/grub/menu.lst
-	rmdir /$MOUNTDISK/Boot/grub
-fi
-if [[ ! -f $MOUNTDISK/Boot/grub/menu.lst ]]; then
-	mkdir -p /$MOUNTDISK/Boot/grub
-	touch /$MOUNTDISK/Boot/grub/menu.lst
+if [[ ! -f $MOUNTDISK/boot/grub/menu.lst ]]; then
+	mkdir -p /$MOUNTDISK/boot/grub
+	touch /$MOUNTDISK/boot/grub/menu.lst
 	
 	GRUBDISK=$[$1-1]
 	
-cat << EOT >/$MOUNTDISK/Boot/grub/menu.lst
+cat << EOT >/$MOUNTDISK/boot/grub/menu.lst
 ##NO-TOCAR-ESTA-LINEA MBR
 timeout 0
 title  MBR
