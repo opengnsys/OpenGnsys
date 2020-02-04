@@ -33,6 +33,6 @@ initrd (pd)/%ISODIR%/oginitrd.img
 boot
 
 title OpenGnsys-NET default
-kernel (pd)/ogLive/ogvmlinuz  ro boot=oginit oglivedir=ogLive quiet splash vga=788 irqpoll acpi=on og2nd=sqfs ogprotocol=smb ogactiveadmin=false ogdebug=false ogtmpfs=15 oglivedir=ogLive INFOHOST
+kernel (pd)/ogLive/ogvmlinuz  ro boot=oginit quiet splash vga=788 irqpoll acpi=on og2nd=sqfs ogprotocol=smb ogactiveadmin=false ogdebug=false ogtmpfs=15 oglivedir=ogLive INFOHOST
 initrd (pd)/ogLive/oginitrd.img
 boot
