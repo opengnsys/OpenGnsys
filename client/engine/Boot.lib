@@ -1316,8 +1316,9 @@ function ogGrubHidePartitions ()
 {
     # Si se solicita, mostrar ayuda.
     if [ "$*" == "help" ]; then
-        ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
-               "$FUNCNAME 1 6"
+        ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition [ num_disk_partdata num_partdata ]" \
+               "$FUNCNAME 1 2" \
+               "$FUNCNAME 1 2 1 3"
         return
     fi
     ogBootLoaderHidePartitions $@
@@ -1333,8 +1334,9 @@ function ogBurgHidePartitions ()
 {
     # Si se solicita, mostrar ayuda.
     if [ "$*" == "help" ]; then
-        ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition" \
-               "$FUNCNAME 1 6"
+        ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition [ num_disk_partdata num_partdata ]" \
+               "$FUNCNAME 1 2" \
+               "$FUNCNAME 1 2 1 3"
         return
     fi
     ogBootLoaderHidePartitions $@
@@ -1386,7 +1388,7 @@ function ogBootLoaderHidePartitions ()
 
     # Archivo de configuracion del grub
     DIRMOUNT=$(ogMount $1 $2)
-    # La función debe ser llamanda desde ogGrubHidePartitionsCdc or ogBurgHidePartitionsCdc.
+    # La función debe ser llamanda desde ogGrubHidePartitions or ogBurgHidePartitions.
     case "$FUNC" in
         ogGrubHidePartitions)
             CFGFILE="$DIRMOUNT/boot/grubMBR/boot/grub/grub.cfg"
@@ -1395,7 +1397,7 @@ function ogBootLoaderHidePartitions ()
             CFGFILE="$DIRMOUNT/boot/burg/burg.cfg"
             ;;
         *)
-            ogRaiseError $OG_ERR_FORMAT "Use ogGrubHidePartitionsCdc or ogBurgHidePartitionsCdc."
+            ogRaiseError $OG_ERR_FORMAT "Use ogGrubHidePartitions or ogBurgHidePartitions."
             return $?
             ;;
     esac
