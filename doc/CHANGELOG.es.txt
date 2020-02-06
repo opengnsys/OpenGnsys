@@ -9,6 +9,7 @@ Lista de cambios incluidos en OpenGnsys 1.1.1a (versión de mantenimiento)
 Tickets resueltos en módulo OpenGnsys Cloning Engine:
 #935	ogGrub4dosInstallMbr nueva función para arranques de MBR y discos PCIe (NVMe)
 #938	ogBurgInstallMbr() solo en equipos con BIOS y posibilidad de usar el binario desde el repo
+#952	Añadir seguridad a los menús del Grub
 
 Tickets resueltos en módulo OpenGnsys Web Admin Console:
 #934	Netboot Avanzado no filtra correctamente el ámbito grupo de ordenadores (corrección)
