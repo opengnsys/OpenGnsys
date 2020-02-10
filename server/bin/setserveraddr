@@ -92,7 +92,7 @@ if [ -n "$SERVERIP" ]; then
 	for f in $OPENGNSYS/{etc/{ogAdmServer,ogAdmRepo,ogAdmAgent}.cfg,www/controlacceso.php,client/etc/ogAdmClient.cfg}; do
 		# Updating configuration variables (if URL does not contain "localhost").
 		sed -e "s,\(ServidorAdm\|IPlocal\)=.*,\1=$SERVERIP," \
-		    -e "s,INTERFACE=.*,INTERFACE=$SERVERDEV," \
+		    -e "s,^INTERFACE=.*,INTERFACE=$SERVERDEV," \
 		    -e "s,UrlMenu=https?://\([^/]*\)/\(.*\),UrlMenu=https://$SERVERIP/\2," \
 		    -e '/localhost/!s,https\?://[^/]*/\(.*\),https://'$SERVERIP'/\1,' $f >$tmpfile
 		file="${f/./-$SERVERDEV.}"
