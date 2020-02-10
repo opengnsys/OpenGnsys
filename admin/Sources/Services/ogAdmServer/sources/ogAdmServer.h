@@ -36,19 +36,11 @@ SOCKETCL tbsockets[MAXIMOS_CLIENTES];
 
 struct og_dbi;
 
-bool registraCliente(char *);
-bool procesoInclusionClienteWinLnx(int socket, TRAMA*,int*,char*);
-bool procesoInclusionCliente(struct og_client *, TRAMA*);
 bool clienteExistente(char *,int *);
 bool clienteDisponible(char *,int *);
 bool actualizaConfiguracion(struct og_dbi *,char* ,int);
-bool recorreProcedimientos(struct og_dbi *,char* ,FILE*,char*);
-bool buscaComandos(char *,TRAMA *,int *);
-bool respuestaConsola(int socket, TRAMA *,int);
-bool enviaComando(TRAMA *ptrTrama,const char*);
 bool Levanta(char**, char**, int, char*);
 bool WakeUp(int,char*,char*,char*);
-void PasaHexBin(char *,char *);
 bool actualizaCreacionImagen(struct og_dbi *,char*,char*,char*,char*,char*,char*);
 bool actualizaRestauracionImagen(struct og_dbi *,char*,char*,char*,char*,char*);
 bool actualizaHardware(struct og_dbi *dbi, char* ,char*,char*,char*);
