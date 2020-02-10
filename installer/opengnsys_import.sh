@@ -35,8 +35,8 @@ MYSQLFILE="$TMPDIR/$CATALOG.sql"
 MYSQLBCK="$OPENGNSYS/doc/$CATALOG.sql-$DATE"
 
 LOG_FILE=$OPENGNSYS/log/${PROG%.sh}.log
-BRANCH="master"
-SVN_URL="https://github.com/opengnsys/OpenGnsys/branches/$BRANCH/admin/Database"
+BRANCH="tags/opengnsys-1.1.1a"
+SVN_URL="https://github.com/opengnsys/OpenGnsys/$BRANCH/admin/Database"
 DEFAULT_MYSQL_ROOT_PASSWORD="passwordroot"      # Clave por defecto root de MySQL
 
 # Si se solicita, mostrar ayuda.
