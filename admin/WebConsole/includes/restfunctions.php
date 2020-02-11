@@ -117,7 +117,8 @@ function shell($case, $string_ips, $command) {
 
 	switch ($case) {
 		case 3:
-			$command = substr($command, 4);
+			$decoded_cmds = rawurldecode(substr($command, 4));
+			$command = substr($decoded_cmds, 0, -2);
 			$data = array(OG_REST_PARAM_CLIENTS => $ips,
 				      OG_REST_PARAM_RUN => $command,
 				      OG_REST_PARAM_ECHO => false);
