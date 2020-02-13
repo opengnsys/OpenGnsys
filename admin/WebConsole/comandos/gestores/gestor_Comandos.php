@@ -354,7 +354,10 @@ if($sw_mkprocedimiento=='on' || $sw_mktarea=='on'){
 		$cmd->ParamSetValor("@idprocedimiento",$idprocedimiento);
 		$cmd->ParamSetValor("@idcomando",$idcomando);
 		$cmd->ParamSetValor("@ordprocedimiento",$ordprocedimiento);
-		$parametros=$funcion.$atributos;
+		if ($idcomando == OG_CMD_ID_SCRIPT)
+			$parametros=$funcion.substr(rawurldecode($atributos), 0, -2);
+		else
+			$parametros=$funcion.$atributos;
 		$cmd->ParamSetValor("@parametros",$parametros);
 		$cmd->texto="INSERT INTO procedimientos_acciones(idprocedimiento,orden,idcomando,parametros) 
 				    VALUES (@idprocedimiento,@ordprocedimiento,@idcomando,@parametros)";
