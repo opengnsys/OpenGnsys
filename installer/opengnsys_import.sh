@@ -25,8 +25,8 @@
 PROG="$(basename $0)"
 
 DATE=$(date +%Y%m%d)
-BACKUPFILE=$1
-TMPDIR=/tmp/opengnsys_export
+PREFIX="opengnsys_export"
+TMPDIR="/tmp/$PREFIX"
 OPENGNSYS="/opt/opengnsys"
 MYCNF=$(mktemp /tmp/.my.cnf.XXXXX)
 CATALOG="ogAdmBD"
@@ -41,41 +41,56 @@ DEFAULT_MYSQL_ROOT_PASSWORD="passwordroot"      # Clave por defecto root de MySQ
 
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
-    echo -e "$PROG: Importa los datos de OpenGnsys desde un archivo de backup:" \
-           " dhcp, pxe, páginas de inicio y configuración de la consola.\n" \
-           "    Formato: $PROG backup_file\n" \
-           "    Ejemplo: $PROG backup.tgz"
+    cat << EOT
+$PROG: Importa los datos de OpenGnsys desde un archivo de backup:
+  dhcp, pxe, páginas de inicio y configuración de la consola.
+    Formato: $PROG [--check] | [--exclude-logs] [--exclude-repos] [--exclude-users] Backup_File
+    Opciones:
+      --check: comprueba los datos incluidos en el fichero de backup (opcional)
+      --exclude-logs: no restaura los ficheros de log (opcional)
+      --exclude-repos: no recupera los repositorios definidos (opcional)
+      --exclude-users: no recupera los usuarios definidos (opcional)
+      Backup_File: camino del fichero de backup a restaurar
+    Ejemplo: $PROG backup.tgz
+EOT
     exit
 fi
 
-# Comprobamos número de parámetros
-if [ $# -ne 1 ]; then
-    echo "$PROG: ERROR: Error de formato: $PROG backup_file"
-    exit 1
-fi
-
-# Comprobar parámetros.
-if [ "$USER" != "root" ]; then
-        echo "$PROG: Error: solo ejecutable por root." >&2
-        exit 2
-fi
-
-# Comprobamos acceso al fichero de backup
-if ! [ -r $BACKUPFILE ]; then
-    echo "$PROG: ERROR: Sin acceso al fichero de backup." | tee -a $FILESAL
-    exit 3
-fi
-
-# Comprobamos  acceso a ficheros de configuración
-if ! [ -r $OPENGNSYS/etc/ogAdmServer.cfg ]; then
-    echo "$PROG: ERROR: Sin acceso a la configuración de OpenGnsys." | tee -a $FILESAL
-    exit 4
-fi
-
-# Si existe el directorio auxiliar lo borramos
-[ -d $TMPDIR ] && rm -rf $TMPDIR
 
 ####### Funciones ##############################################
+
+# Procesar parámetros de entrada.
+function process_params() {
+    local options error
+    # Retrieve options.
+    options=$(getopt -n "$PROG" -l check,exclude-logs,exclude-repos,exclude-users -o '' -- "$@") || error=1
+    set -- $options
+    # Process options and set flags.
+    while [ "$1" ]; do
+        case "$1" in
+            --check)
+                CHECK=1; shift ;;
+            --exclude-logs)
+                NOLOGS=1; shift ;;
+            --exclude-repos)
+                NOREPOS=1; shift ;;
+            --exclude-users)
+                NOUSERS=1; shift ;;
+            --)
+                shift; break ;;
+            *)
+                error=1; break ;;
+        esac
+    done
+    [ $# -ne 1 ] && error=1
+    if [ "$error" ]; then
+        echo "$PROG: ERROR: Usage error: Type \"$PROG help\"" >&2
+        exit 1
+    fi
+    # Backup file.
+    eval BACKUPFILE="$1"
+}
+
 # Al salir elimina archivos y base de datos temporal
 function clean()
 {
@@ -207,12 +222,84 @@ function importSqlFile()
         return 0
 }
 
+# Comprobar los datos incluidos en el archivo de backup.
+function checkArchive()
+{
+    local CONFIG FILES f
+    local BACKUPFILE="$1"
+    if [ -z "$(command -v jq)" ]; then
+        echo "$PROG: Error: command not found, please install \"jq\"" >&2
+        exit 2
+    fi
+    # Define content items.
+    CONFIG=$(cat << EOT | jq '.[].detected=false'
+[
+  { "path": "/ogAdmBD.sql", "comment": "Database file" },
+  { "path": "/VERSION.json", "comment": "Version file" },
+  { "path": "/VERSION.txt", "comment": "Old version file" },
+  { "path": "/ogliveinfo.json", "comment": "Installed ogLive info" },
+  { "path": "/engine.json", "comment": "Engine config file" },
+  { "path": "/engine.cfg", "comment": "Old engine config file" },
+  { "path": "/default/opengnsys", "comment": "Default config file" },
+  { "path": "/dhcpd.conf", "comment": "DHCP file" },
+  { "path": "Custom", "comment": "Customization scripts" },
+  { "path": "/menu.lst/", "comment": "PXE directory" },
+  { "path": "/menus/", "comment": "Menu directory" },
+  { "path": "/log/", "comment": "Log directory" }
+]
+EOT
+    )
+    # Turn on the detected flag if the item is in the archive.
+    echo "Checking archive content..."
+    FILES=$(tar tzf "$BACKUPFILE") || exit 1
+    for f in $FILES; do
+        CONFIG=$(jq '[ .[] as $p | if "'"${f#$PREFIX}"'" | endswith($p.path) then $p | .detected |= true else $p end ]' <<<"$CONFIG")
+    done
+    # Show comment and detected flag for each defined item.
+    echo $CONFIG | jq -r '.[] as $f | $f.comment + ": " + (if $f.detected then "OK" else "FAIL" end)' | column -ts:
+}
+
+
 ##################################################################
+
+# Comprobamos parámetros de entrada.
+process_params "$@"
+
+# Comprobar parámetros.
+if [ "$USER" != "root" ]; then
+    echo "$PROG: Error: solo ejecutable por root." >&2
+    exit 3
+fi
+
+# Comprobamos acceso al fichero de backup
+if ! [ -r $BACKUPFILE ]; then
+    echo "$PROG: ERROR: Sin acceso al fichero de backup." | tee -a $FILESAL
+    exit 3
+fi
+
+# Comprobamos  acceso a ficheros de configuración
+if ! [ -r $OPENGNSYS/etc/ogAdmServer.cfg ]; then
+    echo "$PROG: ERROR: Sin acceso a la configuración de OpenGnsys." | tee -a $FILESAL
+    exit 3
+fi
+
+# Si existe el directorio auxiliar lo borramos
+[ -d $TMPDIR ] && rm -rf $TMPDIR
+
 # Al salir borramos MYCNF y la db tamporal
 trap "clean" 1 2 3 6 9 14 15 EXIT
 
+# Comprobar contenido del archivo.
+if [ "$CHECK" ]; then
+    checkArchive $BACKUPFILE
+    exit
+fi
+
+# Parámetros especiales de restauración.
+[ "$NOLOGS" ] && TARPARMS="--exclude=$PREFIX/log/"
+
 # Descomprimimos backup
-tar -xvzf $BACKUPFILE --directory /tmp &>/dev/null
+tar -xvzf $BACKUPFILE --directory /tmp $TARPARAMS &>/dev/null
 
 # Comprueba que opengnsys_export sea compatible
 grep "CREATE TABLE.*usuarios" $MYSQLFILE &>/dev/null
@@ -265,12 +352,14 @@ fi
 #     definimos usuario creador de los "triggers,
 #     añadimos los usuarios, sólo si no existen, y
 #     definimos valores adecuados por defecto.
-sed -i -e '/Table structure.* `repositorios`/,/Table structure/d' \
-       -e '/Table structure.* `entornos`/,/Table structure/d' \
+# Excluding repository table import, if needed.
+[ "$NOREPOS" ] && sed -i -e '/Table structure.* `repositorios`/,/Table structure/d' $MYSQLFILE
+[ "$NOUSERS" ] && sed -i -e '/Table structure.*`usuarios`/,/CHARSET/d' \
+                         -e '/usuarios/s/IGNORE//g' \
+                         -e '/usuarios/s/^INSERT /\nALTER TABLE usuarios ADD UNIQUE (usuario);\n\nINSERT IGNORE /g' \
+                         $MYSQLFILE
+sed -i -e '/Table structure.* `entornos`/,/Table structure/d' \
        -e "s/\(DEFINER=\`\)[^\`]*\(\`.* TRIGGER\)/\1$USUARIO\2/" \
-       -e '/Table structure.*`usuarios`/,/CHARSET/d' \
-       -e '/usuarios/s/IGNORE//g' \
-       -e '/usuarios/s/^INSERT /\nALTER TABLE usuarios ADD UNIQUE (usuario);\n\nINSERT IGNORE /g' \
        -e "s/\(\` [a-z]*int([0-9]*) NOT NULL\),/\1 DEFAULT 0,/" \
        -e "s/\(\` [a-z]*char([0-9]*) NOT NULL\),/\1 DEFAULT '',/" \
        -e "s/\(\` datetime NOT NULL DEFAULT \)'0000-00-00 00:00:00',/\1'1970-01-01 00:00:00',/" \
@@ -348,9 +437,21 @@ if ls $OPENGNSYS/client/scripts/*Custom &>/dev/null; then
 fi
 cp -r $TMPDIR/*Custom $OPENGNSYS/client/scripts &>/dev/null
 
+# Log files.
+if [ -d $TMPDIR/log ]; then
+    echo "   * Guardamos los ficheros de log."
+    cp -a $TMPDIR/log/* $OPENGNSYS/log
+fi
+
+if [ -f $TMPDIR/ogliveinfo.json ]; then
+    mv $OPENGNSYS/etc/ogliveinfo.json $OPENGNSYS/etc/ogliveinfo.json-$DATE
+    cp $TMPDIR/ogliveinfo.json $OPENGNSYS/etc
+fi
+
 echo -e "Se ha terminado de importar los datos del backup. \n\nSe han realizado copias de seguridad de los archivos antiguos:" 
 echo    "  - /etc/default/opengnsys-$DATE"
 echo    "  - $DHCPCFGDIR/dhcpd.conf-$DATE"
+echo    "  - $OPENGNSYS/etc/ogliveinfo.json-$DATE"
 echo    "  - $OPENGNSYS/tftpboot/menu.lst-$DATE"
 echo    "  - $OPENGNSYS/tftpboot/grub-$DATE"
 echo    "  - $OPENGNSYS/client/etc/engine.cfg-$DATE"
@@ -361,3 +462,6 @@ echo -e "  - $MYSQLBCK \n"
 echo "Hay que revisar la configuración del dhcp. En la consola es necesario configurar los valores de las ips de repositorios, servidores ntp, etc y lanzar el \"netBoot Avanzado\" a todas las aulas"
 
 echo "Es necesario probar todos los procedimientos y en caso de error borrarlos y generarlos de nuevo."
+
+oglivecli check &>/dev/null || \
+    echo "AVISO: Ejecutar como root \"oglivecli check\" para comprobar si hay que instalar algún cliente ogLive."
