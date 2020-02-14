@@ -57,6 +57,12 @@ function help() {
     exit 0
 }
 
+# Showing script version number.
+function version() {
+    awk '/^#@version/ {v=$2} END {if (v) print v}' "$0"
+    exit 0
+}
+
 # Functions to manage a service.
 function restart() {
     _service restart "$1"
