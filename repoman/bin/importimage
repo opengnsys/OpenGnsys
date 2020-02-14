@@ -20,7 +20,6 @@ REPODIR="$OPENGNSYS/images"
 REPOCONF="$OPENGNSYS/etc/ogAdmRepo.cfg"
 SERVERCONF="$OPENGNSYS/etc/ogAdmServer.cfg"
 DEFAULTFILE="/etc/default/opengnsys"
-MYCNF=$(mktemp /tmp/.my.cnf.XXXXX)
 let BACKUP=0
 source $DEFAULTFILE
 source $REPOCONF &>/dev/null
@@ -81,7 +80,7 @@ if [ -e "$IMAGEPATH" ]; then
 fi
 
 # Trapping signal to unlock image before exit.
-trap "rm -f $LOCKFILE $MYCNF" 1 2 3 6 9 15
+trap "rm -f $LOCKFILE" 1 2 3 6 9 15
 # Creating lock file.
 touch $LOCKFILE
 # Backing up local image.
@@ -93,9 +92,7 @@ if [ $BACKUP -eq 1 ]; then
 fi
 # Downloading image file.
 [[ $IMAGEPATH =~ / ]] && mkdir -p "$(dirname "$IMAGEPATH")"
-scp "$USERNAME@$REPO:$IMAGEPATH" $REPODIR
-ERRCODE=$?
-if [ $ERRCODE -eq 0 ]; then
+if scp "$USERNAME@$REPO:$IMAGEPATH" $REPODIR; then
     # Cheking image size.
     DOWNLOADSIZE=$(stat -c "%s" "$IMAGEPATH")
     [ $IMAGESIZE -ne $DOWNLOADSIZE ] && echo "Warning: image sizes differ: source=$IMAGESIZE, target=$DOWNLOADSIZE."
@@ -103,28 +100,17 @@ if [ $ERRCODE -eq 0 ]; then
     jq -r '.clonator+":"+.compressor+":"+.filesystem+":"+(.datasize|tostring)+":"' <<<"$IMAGEINFO" > "$IMAGEPATH.info"
     # Updating the database when the repo is also configured as Administration Server.
     if [ "$RUN_OGADMSERVER" == "yes" ]; then
-        # Creating credentials file.
-        cat << EOT > $MYCNF
-[client]
-user=$USUARIO
-password=$PASSWORD
-EOT
         if [ $BACKUP -eq 1 ]; then
             # If the image exists, increase its revision number.
-            mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -e \
-                    "UPDATE imagenes
-                        SET revision = revision + 1
-                      WHERE nombreca='$IMAGE';" || \
-                            echo "Warning: database cannot be updated."
+            dbexec "UPDATE imagenes SET revision = revision + 1 WHERE nombreca = '$IMAGE';"
 	else
             # Obtaining defined Organizational Units.
             while read -re DATA; do 
                 OUS[${#OUS[@]}]="$DATA" 
-            done <<<$(mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -Nse \
-                              "SELECT idcentro, nombrecentro FROM centros;")
+            done <<<$(dbexec "SELECT idcentro, nombrecentro FROM centros;")
 	    if [ ${#OUS[@]} -eq 1 ]; then
                 # Only 1 OU is defined.
-                let OUID="${OUS%% *}"
+                let OUID="${OUS%%	*}"
 	    else
                 # Choose image OU.
                 echo "Choose Organization Unit:"
@@ -134,21 +120,22 @@ EOT
                 done
 	    fi
             # Creating a new image associated with an empty software profile.
-            mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -e \
-                    "SET @repoid = (SELECT idrepositorio FROM repositorios
-                                     WHERE ip='$IPlocal' LIMIT 1),
-                         @profname = '$IMAGE imported from $REPO';
-                     INSERT INTO perfilessoft (descripcion, idcentro, grupoid)
-                            SELECT @profname, '$OUID', 0 FROM DUAL
-                             WHERE NOT EXISTS
-                                   (SELECT descripcion FROM perfilessoft
-                                     WHERE descripcion=@profname AND idcentro='$OUID')
-                             LIMIT 1;
-                     SET @profid = LAST_INSERT_ID();
-                     INSERT INTO imagenes
-                            (nombreca, revision, idperfilsoft, idcentro, comentarios, grupoid, idrepositorio, fechacreacion)
-                     VALUES ('$IMAGE', 1, @profid, '$OUID', 'Image imported from repo $REPO', 0, @repoid, NOW());" || \
-                            echo "Warning: database cannot be updated."
+            dbexec "
+SET @repoid = (SELECT idrepositorio FROM repositorios
+                WHERE ip='$IPlocal' LIMIT 1),
+    @profname = '$IMAGE imported from $REPO';
+INSERT INTO perfilessoft (descripcion, idcentro, grupoid)
+       SELECT @profname, '$OUID', 0
+         FROM DUAL
+        WHERE NOT EXISTS
+              (SELECT descripcion
+	         FROM perfilessoft
+                WHERE descripcion = @profname AND idcentro = '$OUID')
+        LIMIT 1;
+SET @profid = LAST_INSERT_ID();
+INSERT INTO imagenes
+            (nombreca, revision, idperfilsoft, idcentro, comentarios, grupoid, idrepositorio, fechacreacion)
+       VALUES ('$IMAGE', 1, @profid, '$OUID', 'Image imported from repo $REPO', 0, @repoid, NOW());"
         fi
     fi
 else
@@ -163,5 +150,5 @@ else
 fi
 
 # Unlocking image and removing temporary file.
-rm -f $LOCKFILE $MYCNF
+rm -f $LOCKFILE
 
