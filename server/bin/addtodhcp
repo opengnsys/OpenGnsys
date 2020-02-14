@@ -1,0 +1,97 @@
+#!/bin/bash
+#@file    addtodhcp
+#@brief   Append a "host" section for each defined computer to the DHCP configuration file.
+#@usage   addtodhcp [-f FILE] [-r] [-e] [ {LABNAME|COMPUTERNAME} ...]
+#@param   -f, --file FILE   DHCP configuration file (/etc/dhcp/dhcpd.conf, by default)
+#@param   -r, --restart     restart DHCP service
+#@param   -e, --exam        assign to alternative network ("exam mode" from Universidad de Sevilla)
+#@param   LABNAME           only add computers defined in this lab
+#@param   COMPUTERNAME      only add a single computer data
+#@version 1.1.1b - Initial version.
+#@author  Ramón M. Gómez - ETSII Univ. Sevilla
+#@date    2020-02-03
+
+
+# Variables.
+PROG="$(basename "$0")"
+OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
+SERVERCONF=$OPENGNSYS/etc/ogAdmServer.cfg
+DHCPCONF=/etc/dhcp/dhcpd.conf
+DHCPCONFBCK="$DHCPCONF-$(date +"%Y%m%d")"
+
+source $OPENGNSYS/lib/ogfunctions.sh || exit 1
+
+# Show help
+[ "$*" == "help" ] && help
+# Error control.
+[ "$USER" != "root" ] && raiseError access "Need to be root"
+source $SERVERCONF 2>/dev/null || raiseError access "Cannot read OpenGnsys Server configuration file"
+
+# Processing parameters.
+RESOURCES="$*"
+opts=$(getopt -n "$PROG" -l exam,file:,restart -o 'ef:r' -- "$@" ) || raiseError usage
+set -- $opts
+while [ "$1" ]; do
+    case "$1" in
+        -e|--exam)
+            EXAM=1
+            shift ;;
+        -f|--file)
+            eval DHCPCONF=$2
+            shift 2 ;;
+        -r|--restart)
+            RESTART=1
+            shift ;;
+        --)
+            shift; break ;;
+    esac
+done
+[ -f $DHCPCONF ] || raiseError access "Cannot access DHCP configuration file"
+grep -q "^[ 	]*\bsubnet\b" $DHCPCONF || raiseError access "Cannot detect any \"group\" clauses in DHCP configuration file"
+grep -q "^[ 	]*\bgroup\b" $DHCPCONF && raiseError access "Cannot modify DHCP configuration file with \"group\" clauses"
+
+[ "$*" ] && WHEREEXPR="WHERE $(echo ${*//\'/\'} | sed -e "s/\('[^']*'\)/nombreaula=\1 OR nombreordenador=\1 OR/g")"
+WHEREEXPR="${WHEREEXPR% OR}"
+
+# Looking for data.
+SEDEXPR=""
+while read -pe NAME IP MAC ROUTER LAB; do
+    [ "$LAB" ] || break
+    if [ "$EXAM" ]; then
+        IP="${IP/10.1./192.168.}"
+        ROUTER="${ROUTER/10.1./192.168.}"
+    fi
+    # Find any "host" clause.
+    SEDEXPR+="/\bhost $NAME\b/"
+    if ! grep -q "host $NAME.*}" $DHCPCONF; then
+        SEDEXPR+=",/}/"
+    fi
+    if [ "$LAB" != "$LABBCK" ]; then
+        NEWLAB="\\\n"
+	LABBCK="$LAB"
+    else
+        NEWLAB=""
+    fi
+    # Delete the found "host" clause and add a new one.
+    SEDEXPR+="d
+/^[[:space:]]*option[[:space:]]+routers[[:space:]]+\b$ROUTER\b/a ${NEWLAB}host $NAME { hardware ethernet $MAC; fixed-address $IP; }  # $LAB
+"
+done <<<$(dbexec "
+SELECT nombreordenador, ip, 
+       CONCAT_WS('', SUBSTR(mac, 1, 2), ':', SUBSTR(mac, 3, 2), ':', SUBSTR(mac, 5, 2), ':',
+                     SUBSTR(mac, 7, 2), ':', SUBSTR(mac, 9, 2), ':', SUBSTR(mac, 11, 2)),
+       ordenadores.router, nombreaula
+  FROM ordenadores
+  JOIN aulas USING (idaula)
+ $WHEREEXPR
+ ORDER BY nombreaula ASC, idordenador ASC;" 2>/dev/null)
+
+# Edit DHCP configuration file.
+[ "$SEDEXPR" ] || raiseError notfound "$RESOURCES"
+cp -a $DHCPCONF $DHCPCONFBCK || raiseError access "Cannot back-up DHCP configuration file"
+sed -i -re "$SEDEXPR" $DHCPCONF
+# Delete duplicate empty lines.
+perl -0777pi -e "s/\n{3,}/\n\n/g" $DHCPCONF
+# Restart the service, if needed.
+[ "$RESTART" ] && restart isc-dhcp-server
+
