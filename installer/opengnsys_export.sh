@@ -99,12 +99,15 @@ echo $ServidorAdm > $TMPDIR/IPSERVER.txt
 echo "Creamos un archivo comprimido con los datos: $BACKUPFILE."
 CUSTOMFILES=$(find $OPENGNSYS/client/scripts -name "*Custom" -exec basename {} \;)
 tar -cvzf $BACKUPFILE --transform="s!^!$BACKUPPREFIX/!" \
+          --exclude "log/opengnsys_installer.log" \
           -C $(dirname $MYSQLFILE) $(basename $MYSQLFILE) \
           -C $TMPDIR IPSERVER.txt \
           -C $DHCPDIR dhcpd.conf \
           -C $OPENGNSYS/client/etc engine.cfg engine.json \
           -C $OPENGNSYS/client/scripts $CUSTOMFILES \
           -C $OPENGNSYS/doc VERSION.txt VERSION.json \
+          -C $OPENGNSYS/etc ogliveinfo.json \
+          -C $OPENGNSYS log \
           -C $OPENGNSYS/tftpboot menu.lst grub \
           -C $OPENGNSYS/www menus \
           -C /etc default/opengnsys &>/dev/null
