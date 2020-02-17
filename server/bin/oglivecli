@@ -1,15 +1,40 @@
 #!/bin/bash
 
 #/**
-#         oglivecli command [options ...]
 #@file    oglivecli
 #@brief   Command line tool to manage ogLive clients.
-#@param   $1 command  Command to execute.
-#@param   $2 options  Parameters and options.
-#@warning This script uses "jq" command.
+#@usage   oglivecli Command [Options ...]
+#@usage   Commands:
+#@usage     help                show this help
+#@usage     version             show script version
+#@usage     config              show configuration parameters
+#@usage     check               check system consistency
+#@usage     convert             convert old ogclient to new default ogLive client
+#@usage     list                list installed ogLive clients
+#@usage     show all            show JSON information about all installed ogLive clients
+#@usage     show default        show JSON information about ogLive client marked as default
+#@usage     show Index|Dir      show JSON information about an installed ogLive client
+#@usage     search Index|Dir    show corresponding index or directory
+#@usage     download            show a menu to download an ogLive ISO image from the OpenGnsys website
+#@usage     download Iso        download an specific ogLive ISO image from the OpenGnsys website
+#@usage     install Iso         install a new ogLive client from a downloaded ISO image
+#@usage     uninstall Iso       remove ISO image and uninstall its ogLive client
+#@usage     uninstall Index|Dir uninstall an ogLive client
+#@usage     get-default         get index value for default ogLive client
+#@usage     set-default Index   set default ogLive client
+#@usage     rebuild             rebuild a lost configuration file
+#@usage     assign Iso Index    assign an ISO file to a JSON entry
+#@usage   Options:
+#@usage     Index   a number, starting by 0
+#@usage     Dir     directory (relative to installation directory)
+#@usage     Iso     ISO file name (relative to download URL or download directory)
+#@warning This script needs "jq" command.
 #@version 1.1.0 - Initial version.
 #@author  Ramón M. Gómez - ETSII Univ. Sevilla
 #@date    2016-12-05
+#@version 1.1.1b - Use global functions.
+#@author  Ramón M. Gómez - ETSII Univ. Sevilla
+#@date    2020-01-17
 #*/ ##
 
 
@@ -24,15 +49,9 @@ MINREL=20190601						# Mininum ogLive compatibility release.
 INFOFILE=$OPENGNSYS/etc/ogliveinfo.json			# Configuration file.
 
 
-# Auxiliar functions.
+# Global and secondary functions.
 
-# Metafunction to check if JSON result exists.
-function jq() {
-    local OUTPUT
-    OUTPUT=$($JQ "$@") || return $?
-    [[ "$OUTPUT" = "null" ]] && return 1
-    echo "$OUTPUT"
-}
+source $OPENGNSYS/lib/ogfunctions.sh || exit 1
 
 # Create/edit JSON file about installed ogLive clients.
 function addToJson() {
@@ -65,59 +84,7 @@ EOT
     fi
 }
 
-# Show an error message.
-function raiseError() {
-    case "$1" in
-        usage)
-            echo "$PROG: Usage error: Type \"$PROG help\"" >&2
-            exit 1 ;;
-        notfound)
-            echo "$PROG: Resource not found: $2" >&2
-            exit 2 ;;
-        access)
-            echo "$PROG: Access error: $2" >&2
-            exit 3 ;;
-        download)
-            echo "$PROG: Download error: $2" >&2
-            exit 4 ;;
-        *)
-            echo "$PROG: Unknown error" >&2
-            exit 1 ;;
-    esac
-}
-
 # Command functions.
-
-# Show help message.
-function help() {
-    cat << EOT
-$PROG: manage ogLive cleints.
-Usage: $PROG command [options]
-Commands:
-  help                show this help
-  config              show configuration parameters
-  check               check system consistency
-  convert             convert old ogclient to new default ogLive client
-  list                list installed ogLive clients
-  show all            show JSON information about all installed ogLive clients
-  show default        show JSON information about ogLive client marked as default
-  show Index|Dir      show JSON information about an installed ogLive client
-  search Index|Dir    show corresponding index or directory
-  download            show a menu to download an ogLive ISO image from the OpenGnsys website
-  download Iso        download an specific ogLive ISO image from the OpenGnsys website
-  install Iso         install a new ogLive client from a downloaded ISO image
-  uninstall Iso       remove ISO image and uninstall its ogLive client
-  uninstall Index|Dir uninstall an ogLive client
-  get-default         get index value for default ogLive client
-  set-default Index   set default ogLive client
-  rebuild             rebuild a lost configuration file
-  assign Iso Index    assign an ISO file to a JSON entry
-Parameters:
-  Index   a number, starting by 0
-  Dir     directory (relative to installation directory)
-  Iso     ISO file name (relative to download URL or download directory)
-EOT
-}
 
 # Convert default ogclient to a new ogLive format.
 function convert() {
@@ -470,12 +437,11 @@ local ISOFILE DIR
 [ "$USER" = "root" ] && ACCESS="root"
 [ -z "$ACCESS" ] && raiseError access "Need to be root."
 # Check dependencies.
-JQ=$(which jq 2>/dev/null) || raiseError notfound "Need to install \"jq\"."
 which sponge &>/dev/null || raiseError notfound "Need to install \"moreutils\"."
 # Commands control.
 shopt -s extglob
 case "$ACCESS" in
-    root)   CMDS='+(help|convert|config|check|list|show|search|download|install|uninstall|get-default|set-default|rebuild|assign)' ;;
+    root)   CMDS='+(help|version|convert|config|check|list|show|search|download|install|uninstall|get-default|set-default|rebuild|assign)' ;;
     web)    CMDS='+(list|show|search|get-default)' ;;
 esac
 case "$1" in
