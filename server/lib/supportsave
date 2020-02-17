@@ -1,14 +1,16 @@
 #!/bin/bash
-########################################################################
-#                                                                      #
-# This script creates a tarball containing all logs and necesary files #
-# in order to debug a remote system. Initially the tarball would be    #
-# manually sent by the final user to the support team. On a second     #
-# stage this support save would be inclued in the GUI.                 #
-#                                                                      #
-# Autor: Fredy <aluque@soleta.eu>  2018 Q1                             #
-#                                                                      #
-########################################################################
+
+#/**
+#@file    supportsave
+#@brief   This script creates a tarball containing all logs and necesary files in order to debug a remote system.
+#@brief   Initially the tarball would be manually sent by the final user to the support team.
+#@brief   On a second stage this support save would be inclued in the GUI.
+#@usage   supportsave
+#@version 1.1.0
+#@author  Fredy <aluque@soleta.eu>
+#@date    2018-03-01
+#*/ ##
+
 
 # Basic structure
 # Date, Hostname and Paths
@@ -17,11 +19,6 @@
 # Final compression
 
 PATH=/bin:/sbin:/usr/bin:/usr/sbin
-
-if [ "$(whoami)" != "root" ]; then
-    echo "ERROR: Need to be root." >&2
-    exit 1
-fi
 
 tmp_name=`date +%Y%m%d_%H%M`
 hostname=`hostname`
@@ -33,6 +30,13 @@ if [ ! -d ${home_dir} ]; then
     echo "ERROR: The OpenGnsys directory does not exist." >&2
     exit 1
 fi
+
+source ${home_dir}/lib/ogfunctions.sh || exit 1
+
+[ "$*" == "help" ] && help
+[ "$*" == "version" ] && version
+[ "$*" ] && raiseError usage
+[ "$(whoami)" != "root" ] && raiseError access "Need to be root."
 
 if [ -d "$1" ]; then
     prefix=${1}
@@ -51,10 +55,10 @@ echo "Saving system information:"
 #################################
 
 echo "- System version"
-if which lsb_release &>/dev/null; then
-    lsb_release -a                      >> $backup_dir/operating_system.txt 2>&1
-elif [ -r /etc/os-release ]; then
+if [ -r /etc/os-release ]; then
     cat /etc/os-release                 >> $backup_dir/operating_system.txt 2>&1
+elif which lsb_release &>/dev/null; then
+    lsb_release -a                      >> $backup_dir/operating_system.txt 2>&1
 elif [ -r /etc/system-release ]; then
     cat /etc/system-release             >> $backup_dir/operating_system.txt 2>&1
 fi
@@ -76,8 +80,10 @@ echo "--- uname -a ---"                 >> $backup_dir/kernel.txt
 uname -a                                >> $backup_dir/kernel.txt 2>&1
 echo -e "\n--- lsmod ---"               >> $backup_dir/kernel.txt
 lsmod                                   >> $backup_dir/kernel.txt 2>&1
+echo -e "\n--- Boot parameters ---"     >> $backup_dir/kernel.txt
+cat /proc/cmdline                       >> $backup_dir/kernel.txt 2>&1
 echo "- Kernel boot messages"
-echo "--- dmesg ---"                    >> $backup_dir/kernel.txt
+echo -e "\n--- dmesg ---"                    >> $backup_dir/kernel.txt
 dmesg                                   >> $backup_dir/kernel.txt 2>&1
 
 echo "- Packages"

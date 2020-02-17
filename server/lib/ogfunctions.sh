@@ -43,6 +43,7 @@ function help() {
          USAGE=$(grep "^#@usage" "$0" | cut -f2- -d" ")
          [ -n "$USAGE" ] && PARAMS=$(awk '$1=="#@param" {sub($1,""); print "\t",$0}' "$0")
     fi
+    [ "$PROG" ] || PROG="$(basename "$0")"
     # Showing help.
     echo "$PROG: ${DESCRIPTION:-"no description"}"
     echo "Usage: ${USAGE:-"no usage info"}"
