@@ -10,6 +10,9 @@
 #@version 1.1.1 - Initial version
 #@author  Ramón M. Gómez, ETSII Universidad de Sevilla
 #@date    2018-10-08
+#@version 1.1.1b - Fix some bugs.
+#@author  Ramón M. Gómez, ETSII Universidad de Sevilla
+#@date    2020-02-17
 #*/
 
 
@@ -134,8 +137,10 @@ INSERT INTO perfilessoft (descripcion, idcentro, grupoid)
         LIMIT 1;
 SET @profid = LAST_INSERT_ID();
 INSERT INTO imagenes
-            (nombreca, revision, idperfilsoft, idcentro, comentarios, grupoid, idrepositorio, fechacreacion)
-       VALUES ('$IMAGE', 1, @profid, '$OUID', 'Image imported from repo $REPO', 0, @repoid, NOW());"
+            (nombreca, revision, descripcion, idperfilsoft, idcentro,
+             comentarios, grupoid, idrepositorio, tipo, fechacreacion)
+       VALUES ('$IMAGE', 1, '$IMAGE imported', @profid, '$OUID',
+               'Image imported from repo $REPO', 0, @repoid, 1, NOW());"
         fi
     fi
 else
