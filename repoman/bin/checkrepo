@@ -183,6 +183,8 @@ function checkremoved() {
 
 
 # Main progrram.
+[ "$*" == "help" ] && help
+[ "$*" == "version" ] && version
 
 # Check dependencies.
 [ -w "$(dirname "$INFOFILE")" ] || raiseError access "$INFOFILE"
