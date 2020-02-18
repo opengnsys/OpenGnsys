@@ -1,51 +1,43 @@
 #!/bin/bash
-# listclientmode: Lista la plantilla de arranque PXE para los clientes, 
-#	ya sea un equipo o un aula.
-# Nota: Si no existe un enlace entre el fichero PXE con la Ethernet del equipo y su
-#	 archivo plantilla, se considera que la plantilla por omisión es "default".
-# Uso:	listclienmode NombrePC | NombreAula
-# Autores: Irina Gomez y Ramon Gomez - Univ. Sevilla, noviembre 2010
+#/**
+#@file    listclientmode
+#@brief   Lista la plantilla de arranque PXE para los clientes, ya sea un equipo o un aula.
+#@usage   listclientmode Ambito
+#@param   Ambito    nombre de ordenador o nombre de aula
+#@version 1.0.1 - Versión inicial.
+#@author  Irina Gómez, Univ. Sevilla
+#@date    2010-11-29
+#@version 1.0.5 - Mejor acceso a la BD.
+#@author  Ramon M. Gómez, Univ. Sevilla
+#@date    2013-03-11
+#**/
 
 
 # Variables.
-PROG=$(basename $0)
 OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
 SERVERCONF=$OPENGNSYS/etc/ogAdmServer.cfg
 TMPLDIR=$OPENGNSYS/tftpboot/menu.lst/templates
-MYCNF=/tmp/.my.cnf.$$
+
+source $OPENGNSYS/lib/ogfunctions.sh || exit 1
 
 # Control básico de errores.
-if [ $# -ne 1 ]; then
-	echo "$PROG: Error de ejecución"
-	echo "Formato: $PROG [NOMBRE_PC|NOMBRE_AULA]"
-	exit 1
-fi
-if [ ! -r $SERVERCONF ]; then
-	echo "$PROG: Sin acceso a fichero de configuración"
-	exit 2
-fi
+[ "$*" == "help" ] && help
+[ "$*" == "version" ] && version
+[ $# -eq 1 ] || raiseError usage
+[ "$USER" != "root" ] && raiseError access "Need to be root"
+source $SERVERCONF 2>/dev/null || raiseError access "Sin acceso a fichero de configuración"
 
 # Obtener datos de acceso a la Base de datos.
 source $SERVERCONF
 # Sustituir caracteres ' por \' para evitar inyección SQL.
-RESOURCE="${1//\'/\'}"
-# Componer fichero con credenciales de conexión.
-touch $MYCNF
-chmod 600 $MYCNF
-cat << EOT > $MYCNF
-[client]
-user=$USUARIO
-password=$PASSWORD
-EOT
-# Borrar el fichero temporal si termina el proceso.
-trap "rm -f $MYCNF" 0 1 2 3 6 9 15
+RESOURCE="${1//\'/\\\'}"
 # Obtener nombre de ordenador individual o todos los de una aula e indicar su plantilla asociada.
-mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -s -N -e \
-		"SELECT nombreordenador, arranque FROM ordenadores
-		   JOIN aulas USING (idaula)
-		  WHERE aulas.nombreaula='$RESOURCE'
-		     OR nombreordenador='$RESOURCE';" | \
-	while read PC TMPL; do
-		echo "Equipo \"$PC\" asociado a arranque tipo \"$(head -1 $TMPLDIR/$TMPL |cut -f2 -d" ")\" (fichero $TMPL)"
-	done
+dbexec "SELECT nombreordenador, arranque
+          FROM ordenadores
+          JOIN aulas USING (idaula)
+         WHERE aulas.nombreaula='$RESOURCE'
+            OR nombreordenador='$RESOURCE';" | \
+        while read PC TMPL; do
+            echo "Equipo \"$PC\" asociado a arranque tipo \"$(head -1 $TMPLDIR/$TMPL | cut -f2 -d" ")\" (fichero $TMPL)"
+        done
 
