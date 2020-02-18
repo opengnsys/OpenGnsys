@@ -4,30 +4,30 @@
 #@file    oglivecli
 #@brief   Command line tool to manage ogLive clients.
 #@usage   oglivecli Command [Options ...]
-#@usage   Commands:
-#@usage     help                show this help
-#@usage     version             show script version
-#@usage     config              show configuration parameters
-#@usage     check               check system consistency
-#@usage     convert             convert old ogclient to new default ogLive client
-#@usage     list                list installed ogLive clients
-#@usage     show all            show JSON information about all installed ogLive clients
-#@usage     show default        show JSON information about ogLive client marked as default
-#@usage     show Index|Dir      show JSON information about an installed ogLive client
-#@usage     search Index|Dir    show corresponding index or directory
-#@usage     download            show a menu to download an ogLive ISO image from the OpenGnsys website
-#@usage     download Iso        download an specific ogLive ISO image from the OpenGnsys website
-#@usage     install Iso         install a new ogLive client from a downloaded ISO image
-#@usage     uninstall Iso       remove ISO image and uninstall its ogLive client
-#@usage     uninstall Index|Dir uninstall an ogLive client
-#@usage     get-default         get index value for default ogLive client
-#@usage     set-default Index   set default ogLive client
-#@usage     rebuild             rebuild a lost configuration file
-#@usage     assign Iso Index    assign an ISO file to a JSON entry
-#@usage   Options:
-#@usage     Index   a number, starting by 0
-#@usage     Dir     directory (relative to installation directory)
-#@usage     Iso     ISO file name (relative to download URL or download directory)
+#@param   Command:
+#@param     help                show this help
+#@param     version             show script version
+#@param     config [Parameter]  show configuration parameters
+#@param     check               check system consistency
+#@param     convert             convert old ogclient to new default ogLive client
+#@param     list                list installed ogLive clients
+#@param     show all            show JSON information about all installed ogLive clients
+#@param     show default        show JSON information about ogLive client marked as default
+#@param     show Index|Dir      show JSON information about an installed ogLive client
+#@param     search Index|Dir    show corresponding index or directory
+#@param     download            show a menu to download an ogLive ISO image from the OpenGnsys website
+#@param     download Iso        download an specific ogLive ISO image from the OpenGnsys website
+#@param     install Iso         install a new ogLive client from a downloaded ISO image
+#@param     uninstall Iso       remove ISO image and uninstall its ogLive client
+#@param     uninstall Index|Dir uninstall an ogLive client
+#@param     get-default         get index value for default ogLive client
+#@param     set-default Index   set default ogLive client
+#@param     rebuild             rebuild a lost configuration file
+#@param     assign Iso Index    assign an ISO file to a JSON entry
+#@param   Options:
+#@param     Index   a number, starting by 0
+#@param     Dir     directory (relative to installation directory)
+#@param     Iso     ISO file name (relative to download URL or download directory)
 #@warning This script needs "jq" command.
 #@version 1.1.0 - Initial version.
 #@author  Ramón M. Gómez - ETSII Univ. Sevilla
@@ -94,7 +94,7 @@ function convert() {
     [ ! -w $(dirname $INFOFILE) ] && raiseError access "Configuration file."
     [ -n "$(stat -c "%N" $TFTPDIR/ogclient | awk '$3~/'$DEFOGLIVE'/ {print}')" ] && raiseError access "ogLive is already converted."
     pushd $TFTPDIR >/dev/null || raiseError access "Installation directory."
-    [ ! -f $OGCLIENT/ogvmlinuz ] && raiseError notfound "ogclient"
+    [ ! -f $OGCLIENT/ogvmlinuz ] && raiseError notfound "\"ogclient\"."
     # Add entry to JSON file using ogclient kernel version.
     OGLIVEKRNL=$(file -bkr $OGCLIENT/ogvmlinuz | awk '/Linux/ {for(i=1;i<=NF;i++) if($i~/version/) {v=$(i+1);sub(/-.*/,"",v);print v}}')
     OGLIVEDIR=$DEFOGLIVE-$OGLIVEKRNL
@@ -114,27 +114,26 @@ function convert() {
 
 # Show script configuration parameters.
 function config() {
+    local DATA
+    DATA=$(cat << EOT
+[
+  { "param": "config-file", "description": "Configuration file", "value": "$INFOFILE" },
+  { "param": "download-url", "description": "ogLive download URL", "value": "$DOWNLOADURL" },
+  { "param": "download-dir", "description": "ogLive download directory", "value": "$DOWNLOADDIR" },
+  { "param": "install-dir", "description": "ogLive installation directory", "value": "$TFTPDIR" },
+  { "param": "default-name", "description": "Default ogLive name", "value": "$DEFOGLIVE" },
+  { "param": "min-release", "description": "Mainimum compatibility release", "value": "r$MINREL" }
+]"
+EOT
+    )
     case $# in
         0)  # Show all parameters.
-            cat << EOT
-Configuration file:             $INFOFILE
-ogLive download URL:            $DOWNLOADURL
-ogLive download directory:      $DOWNLOADDIR
-ogLive installation directory:  $TFTPDIR
-Default ogLive name:            $DEFOGLIVE
-Mainimum compatibility release: r$MINREL
-EOT
+            echo $DATA | jq -r '.[] | .description + " (" + .param+ ")," + .value' | column -ts,
             ;;
         1)  # Show specified parameter.
-            case "$1" in
-                config-file)    echo "$INFOFILE" ;;
-                download-url)   echo "$DOWNLOADURL" ;;
-                download-dir)   echo "$DOWNLOADDIR" ;;
-                install-dir)    echo "$TFTPDIR" ;;
-                default-name)   echo "$DEFOGLIVE" ;;
-                min-release)    echo "r$MINREL" ;;
-                *)              raiseError notfound "$1" ;;
-            esac
+            DATA=$(echo $DATA | jq -r ".[] | select(.param==\"$1\").value")
+            [ "$DATA" ] || raiseError notfound "\"$1\"."
+            echo "$DATA"
             ;;
 	*)  # Usage error.
             raiseError usage
@@ -219,16 +218,16 @@ function search() {
     [ $# -ne 1 ] && raiseError usage
     [ ! -r $INFOFILE ] && raiseError access "Configuration file."
     # Show corresponding index or directory.
-    list | awk -v d="$1" '{if ($2==d) print $1; if ($1==d) print $2}' | grep . || raiseError notfound "Index/Directory \"$1\""
+    list | awk -v d="$1" '{if ($2==d) print $1; if ($1==d) print $2}' | grep . || raiseError notfound "Index/Directory \"$1\"."
 }
 
 # Show a menu to select and download an ogLive ISO image from the OpenGnsys website.
 function download() {
-    local OGLIVE NISOS i SOURCELENGTH TARGETFILE
+    local OGLIVE NISOS i HTTPCODE TARGETFILE
     local ISOREL
     [ $# -gt 1 ] && raiseError usage
-    [ ! -d $DOWNLOADDIR ] && raiseError notfound "Download directory"
-    [ ! -w $DOWNLOADDIR ] && raiseError access "Download directory"
+    [ ! -d $DOWNLOADDIR ] && raiseError notfound "Download directory."
+    [ ! -w $DOWNLOADDIR ] && raiseError access "Download directory."
     # Check parameter.
     if [ -n "$1" ]; then
         # ogLive to download.
@@ -248,12 +247,11 @@ function download() {
         done
     fi
     # Get download size.
-    SOURCELENGTH=$(curl --head --silent $DOWNLOADURL/$OGLIVEFILE | awk -F: '/Content-Length:/ {print $2}')
-    [ -n "$SOURCELENGTH" ] || raiseError download "$OGLIVEFILE"
+    HTTPCODE=$(curl --head --silent $DOWNLOADURL/$OGLIVEFILE | awk '/HTTP\// {print $2}')
+    [ "$HTTPCODE" != "200" ] && raiseError download "\"$OGLIVEFILE\"."
     # Download ogLive.
     TARGETFILE=$DOWNLOADDIR/$OGLIVEFILE
-    trap "rm -f $TARGETFILE" 1 2 3 6 9 15
-    curl $DOWNLOADURL/$OGLIVEFILE -o $TARGETFILE || raiseError download "$OGLIVEFILE"
+    curl $DOWNLOADURL/$OGLIVEFILE -o $TARGETFILE || raiseError download "\"$OGLIVEFILE\"."
 }
 
 # Install an ogLive client from a previously downloaded ISO image.
