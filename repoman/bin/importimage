@@ -1,11 +1,11 @@
 #!/bin/bash
 #/**
 #@file    importimage
-#@usage   importimage [str_user] str_repo str_imagename
+#@usage   importimage [User] Repo ImageName
 #@brief   Imports an image file from other repository
-#@param   str_user      username to access the remote repository (local user, by default)
-#@param   str_repo      repository IP address or hostaname
-#@param   str_imagename image name to download
+#@param   User       username to access the remote repository (local user, by default)
+#@param   Repo       repository IP address or hostaname
+#@param   ImageName  image name to download
 #@warning Program will request the repository REST token.
 #@version 1.1.1 - Initial version
 #@author  Ramón M. Gómez, ETSII Universidad de Sevilla
@@ -17,8 +17,7 @@
 
 
 # Variables.
-PROG="$(basename "$0")"
-OPENGNSYS="/opt/opengnsys"
+OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
 REPODIR="$OPENGNSYS/images"
 REPOCONF="$OPENGNSYS/etc/ogAdmRepo.cfg"
 SERVERCONF="$OPENGNSYS/etc/ogAdmServer.cfg"
@@ -29,7 +28,7 @@ source $REPOCONF &>/dev/null
 [ "$RUN_OGADMSERVER" == "yes" ] && source $SERVERCONF &>/dev/null
 
 # Functions.
-source $OPENGNSYS/lib/ogfunctions.sh
+source $OPENGNSYS/lib/ogfunctions.sh || exit 1
 
 
 # Main program.
@@ -42,7 +41,7 @@ source $OPENGNSYS/lib/ogfunctions.sh
 case $# in
     2)  USERNAME="$SUDO_USER"; REPO="$1"; IMAGE="$2" ;;
     3)  USERNAME="$1"; REPO="$2"; IMAGE="$3" ;;
-    *)  [ "$*" == "help" ] && help || raiseError usage
+    *)  [[ $* =~ ^(help|version)$ ]] && $* || raiseError usage
 esac
 [ "${REPO,,}" == "${HOSTNAME,,}" ] || [ "${REPO,,}" == "localhost" ] || [[ ${REPO} =~ ^127\. ]] || [ "${REPO,,}" == "${IPlocal,,}" ] && raiseError access "Cannot import from local repository."
 
