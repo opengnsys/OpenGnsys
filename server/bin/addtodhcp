@@ -50,7 +50,7 @@ done
 grep -q "^[ 	]*\bsubnet\b" $DHCPCONF || raiseError access "Cannot detect any \"group\" clauses in DHCP configuration file"
 grep -q "^[ 	]*\bgroup\b" $DHCPCONF && raiseError access "Cannot modify DHCP configuration file with \"group\" clauses"
 
-[ "$*" ] && WHEREEXPR="WHERE $(echo ${*//\'/\'} | sed -e "s/\('[^']*'\)/nombreaula=\1 OR nombreordenador=\1 OR/g")"
+[ "$*" ] && WHEREEXPR="WHERE $(echo ${*//\'/\\\'} | sed -e "s/\('[^']*'\)/nombreaula=\1 OR nombreordenador=\1 OR/g")"
 WHEREEXPR="${WHEREEXPR% OR}"
 
 # Looking for data.

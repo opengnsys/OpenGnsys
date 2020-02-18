@@ -2,11 +2,12 @@
 #/**
 #@file    listclientlive
 #@brief   Lista la distribución ogLive asociada a los clientes, ya sea un equipo o un aula.
-#@usage   listclienlive Ambito
-#@param   Ambito     nombre de ordenador o nombre de aula
+#@usage   listclientlive Ambito
+#@param   Ambito    nombre de ordenador o nombre de aula
 #@version 1.1.0 - Versión inicial basada en el script "listclientmode"
 #@author  Ramón M. Gómez, ETSII Universidad de Sevilla
 #@date    2017-06-01
+#**/
 
 
 # Variables.
@@ -24,7 +25,7 @@ source $OPENGNSYS/lib/ogfunctions.sh || exit 1
 source $SERVERCONF 2>/dev/null || raiseError access "Sin acceso a fichero de configuración"
 
 # Sustituir caracteres ' por \' para evitar inyección SQL.
-RESOURCE="${1//\'/\'}"
+RESOURCE="${1//\'/\\\'}"
 # Obtener nombre de ordenador individual o todos los de una aula e indicar su plantilla asociada.
 dbexec "SELECT CONCAT_WS('', 'Equipo \"', ord.nombreordenador, '\" asociado a cliente \"',
                ord.oglivedir, '\"  $([ -e $TFTPDIR/$OGLIVE ] || echo "(inexistente)")')
