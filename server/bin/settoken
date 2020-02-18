@@ -4,18 +4,17 @@
 #@file    settoken
 #@brief   Generate a new security token for the specified service or user.
 #@usage   settoken [[-f] [Service]] | User
-#@param   -f: force server restart without prompting (ask by default)
-#@param   Service: may be "server", "repo" or "services" (for all services, by default)
-#@param   User: OpenGnsys-defined username
+#@param   -f         force server restart without prompting (ask by default)
+#@param   Service    may be "server", "repo" or "services" (for all services, by default)
+#@param   User       OpenGnsys-defined username
 #@warning This script uses "php" command.
 #@version 1.1.1 - Initial version.
 #@author  Ramón M. Gómez - ETSII Univ. Sevilla
 #@date    2019-09-25
 #*/ ##
 
-# Global constants definition.
-PROG=$(basename "$(realpath "$0")")                     # Program name.
-OPENGNSYS=/opt/opengnsys                                # OpenGnsys main directory.
+# Global constants.
+OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
 SERVERCFG=$OPENGNSYS/etc/ogAdmServer.cfg                # Configuration files.
 REPOCFG=$OPENGNSYS/etc/ogAdmRepo.cfg
 
@@ -27,15 +26,16 @@ function new_token() {
 }
 
 # Error control.
-[ "$USER" != "root" ] && raiseError access "Need to be root"
 if [ "$1" == "-f" ]; then
     FORCE=1
     shift
 fi
 [ $# -gt 1 ] && raiseError usage
 case "${1,,}" in
-    help)
+    help)           # Show help.
         help ;;
+    version)        # Show version number.
+        version ;;
     server)         # Generate server token.
         SERVER=1 ;;
     repo)           # Generate repository token.
@@ -43,8 +43,9 @@ case "${1,,}" in
     ""|services)    # Generate server and repo tokens.
         SERVER=1; REPO=1 ;;
     *)              # Generate user token.
-        OGUSER="$1" ;;
+        OGUSER="${1//\'/\\\'}" ;;
 esac
+[ "$USER" != "root" ] && raiseError access "Need to be root"
 [ -w $SERVERCFG ] || raiseError access "Server configuration file"
 source $SERVERCFG
 
