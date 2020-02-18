@@ -1,50 +1,35 @@
 #!/bin/bash
-# listclientlive: Lista la distribución ogLive asociada a los clientes, 
-#	ya sea un equipo o un aula.
-# Uso:	listclienlive NombrePC | NombreAula
-# Autor: Ramón M. Gómez - Univ. Sevilla, junio 2017
+#/**
+#@file    listclientlive
+#@brief   Lista la distribución ogLive asociada a los clientes, ya sea un equipo o un aula.
+#@usage   listclienlive Ambito
+#@param   Ambito     nombre de ordenador o nombre de aula
+#@version 1.1.0 - Versión inicial basada en el script "listclientmode"
+#@author  Ramón M. Gómez, ETSII Universidad de Sevilla
+#@date    2017-06-01
 
 
 # Variables.
-PROG=$(basename "$0")
 OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
 SERVERCONF=$OPENGNSYS/etc/ogAdmServer.cfg
 TFTPDIR=$OPENGNSYS/tftpboot
-MYCNF=/tmp/.my.cnf.$$
+
+source $OPENGNSYS/lib/ogfunctions.sh || exit 1
 
 # Control básico de errores.
-if [ $# -ne 1 ]; then
-	echo "$PROG: Error de ejecución" >&2
-	echo "Formato: $PROG [NOMBRE_PC|NOMBRE_AULA]" >&2
-	exit 1
-fi
-if [ ! -r $SERVERCONF ]; then
-	echo "$PROG: Sin acceso a fichero de configuración" >&2
-	exit 2
-fi
+[ "$*" == "help" ] && help
+[ "$*" == "version" ] && version
+[ $# -eq 1 ] || raiseError usage
+[ "$USER" != "root" ] && raiseError access "Need to be root"
+source $SERVERCONF 2>/dev/null || raiseError access "Sin acceso a fichero de configuración"
 
-# Obtener datos de acceso a la Base de datos.
-source $SERVERCONF
 # Sustituir caracteres ' por \' para evitar inyección SQL.
 RESOURCE="${1//\'/\'}"
-# Componer fichero con credenciales de conexión.
-touch $MYCNF
-chmod 600 $MYCNF
-cat << EOT > $MYCNF
-[client]
-user=$USUARIO
-password=$PASSWORD
-EOT
-# Borrar el fichero temporal si termina el proceso.
-trap "rm -f $MYCNF" 0 1 2 3 6 9 15
 # Obtener nombre de ordenador individual o todos los de una aula e indicar su plantilla asociada.
-mysql --defaults-extra-file="$MYCNF" -D "$CATALOG" -s -N -e \
-		"SELECT ord.nombreordenador, ord.oglivedir
-		   FROM ordenadores AS ord
-		   JOIN aulas USING (idaula)
-		  WHERE aulas.nombreaula='$RESOURCE'
-		     OR ord.nombreordenador='$RESOURCE';" | \
-	while read -r PC OGLIVE; do
-		echo "Equipo \"$PC\" asociado a cliente \"$OGLIVE\"  $([ -e $TFTPDIR/$OGLIVE ] || echo "(inexistente)")"
-	done
+dbexec "SELECT CONCAT_WS('', 'Equipo \"', ord.nombreordenador, '\" asociado a cliente \"',
+               ord.oglivedir, '\"  $([ -e $TFTPDIR/$OGLIVE ] || echo "(inexistente)")')
+          FROM ordenadores AS ord
+          JOIN aulas USING (idaula)
+         WHERE aulas.nombreaula='$RESOURCE'
+            OR ord.nombreordenador='$RESOURCE';"
 

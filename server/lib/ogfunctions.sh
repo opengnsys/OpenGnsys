@@ -10,6 +10,7 @@
 
 # Showing an error message.
 function raiseError() {
+    [ "$PROG" ] || PROG="$(basename "$0")"
     case "$1" in
         usage)
             echo "$PROG: Usage error: Type \"$PROG help\"" >&2
