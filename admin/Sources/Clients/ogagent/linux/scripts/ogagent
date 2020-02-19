@@ -1,6 +1,14 @@
 #!/bin/sh
 
+for p in python python2; do
+    [ -z "$PYTHON" ] && [ $($p -c 'import sys; print(sys.version_info[0])') -eq 2 ] && PYTHON=$p
+done
+if [ -z "$PYTHON" ]; then
+    echo "ERROR: OGAgent needs Python 2" &>2
+    exit 1
+fi
+
 FOLDER=/usr/share/OGAgent
 
 cd $FOLDER
-python -m opengnsys.linux.OGAgentService $@
+$PYTHON -m opengnsys.linux.OGAgentService $@
