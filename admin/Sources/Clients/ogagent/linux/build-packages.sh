@@ -1,24 +1,26 @@
 #!/bin/bash
 
 cd $(dirname "$0")
-top=`pwd`
+top=$(pwd)
 
-[ -r ../src/VERSION ] && VERSION="$(cat ../src/VERSION)" || VERSION="1.1.0"
+VERSION="$(cat ../src/VERSION 2>/dev/null)" || VERSION="1.1.1"
 RELEASE="1"
 
 # Debian based
 dpkg-buildpackage -b -d
 
-cat ogagent-template.spec | 
-  sed -e s/"version 0.0.0"/"version ${VERSION}"/g |
-  sed -e s/"release 1"/"release ${RELEASE}"/g > ogagent-$VERSION.spec
+# Fix version number.
+sed -e "s/version 0.0.0/version ${VERSION}/g" \
+    -e "s/release 1/release ${RELEASE}/g" ogagent-template.spec > ogagent-$VERSION.spec
   
 # Now fix dependencies for opensuse
-cat ogagent-template.spec | 
-  sed -e s/"version 0.0.0"/"version ${VERSION}"/g |
-  sed -e s/"name ogagent"/"name ogagent-opensuse"/g |
-  sed -e s/"PyQt4"/"python-qt4"/g |
-  sed -e s/"libXScrnSaver"/"libXss1"/g > ogagent-opensuse-$VERSION.spec
+sed -e "s/name ogagent/name ogagent-opensuse/g" \
+    -e "s/version 0.0.0/version ${VERSION}/g" \
+    -e "s/release 1/release ${RELEASE}/g" \
+    -e "s/chkconfig//g" \
+    -e "s/initscripts/insserv/g" \
+    -e "s/PyQt4/python-qt4/g" \
+    -e "s/libXScrnSaver/libXss1/g" ogagent-template.spec > ogagent-opensuse-$VERSION.spec
 
 
 # Right now, ogagent-xrdp-1.7.0.spec is not needed
