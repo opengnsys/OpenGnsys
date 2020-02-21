@@ -11,4 +11,4 @@ fi
 FOLDER=/usr/share/OGAgent
 
 cd $FOLDER
-python OGAgentUser.py $@
+$PYTHON OGAgentUser.py $@
