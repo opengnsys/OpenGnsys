@@ -39,7 +39,7 @@
     <pre>	sudo sed -i "0,/remote=/ s,remote=.*,remote=https://<em>IPServidorOpenGnsys</em>/opengnsys/rest/," /usr/share/OGAgent/cfg/ogagent.cfg</pre></li>
   <li>Para sistemas con GNOME 3: ejecutar GNOME Tweaks y habilitar la extensión TopIcons Plus.</li>
   <li>Reiniciar el equipo o ejecutar el servicio <em>(se iniciará automáticamente en el proceso de arranque)</em>:
-    <pre>	sudo service ogagent start</pre></li>
+    <pre>	sudo systemctl start ogagent</pre></li>
 </ul>
 
 <h3>Red Hat, Fedora y derivados (como root):</h3>
@@ -58,11 +58,21 @@
       <li>Ejecutar GNOME Tweaks y habilitar la extensión TopIcons Plus.</li>
     </ul>
   <li>Reiniciar el equipo o ejecutar el servicio <em>(se iniciará automáticamente en el proceso de arranque)</em>:
-    <pre>	service ogagent start</pre></li>
+    <pre>	systemctl start ogagent</pre></li>
 </ul>
 
 <h3>OpenSuSE:</h3>
-<p><em>(en preparación)</em></p>
+<ul>
+  <li>Ejecutar los comandos desde una terminal.</li>
+  <li>Instalar el agente con sus dependencias:
+    <pre>	sudo zypper install -f ogagent-opensuse-<em>Version</em>.noarch.rpm</pre></li>
+  <li>Configurar el agente:
+    <pre>	sudo sed -i "0,/remote=/ s,remote=.*,remote=https://<em>IPServidorOpenGnsys</em>/opengnsys/rest/," /usr/share/OGAgent/cfg/ogagent.cfg</pre></li>
+  <li>Puede ser necesario habilitar el acceso al agente en el cortafuegos del sistema:
+    <pre>	sudo firewall-cmd --permanent --add-port=8000/tcp --zone=public; sudo firewall-cmd --reload</pre></li>
+  <li>Reiniciar el equipo o ejecutar el servicio <em>(se iniciará automáticamente en el proceso de arranque)</em>:
+    <pre>	sudo systemctl start ogagent</pre></li>
+</ul>
 
 <h3>macOS X:</h3>
 <ul>
