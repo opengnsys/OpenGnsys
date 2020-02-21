@@ -1915,7 +1915,7 @@ if [ "$(basename $CFGFILE)" == "refind.conf" ]; then
 else
     # En grub y burg las líneas empiezan a contar desde cero
     let MENUENTRY=$MENUENTRY-1
-    sed --regexp-extended -i  s/"set default=\"?[0-9]*\"?"/"set default=\"$MENUENTRY\""/g $CFGFILE
+    sed --regexp-extended -i  s/"set default=\"?[0-9]*\"?$"/"set default=\"$MENUENTRY\""/g $CFGFILE
 fi
 MSG="MSG_HELP_$FUNC"
 echo "${!MSG%%\.}: $@"
