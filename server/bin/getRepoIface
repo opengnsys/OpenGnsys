@@ -1,9 +1,0 @@
-#!/bin/bash
-
-# This script takes the IPlocal variable of the repository
-# and returns the system interface
-# Alfredo Luque <aluque@soleta.eu>
-
-source /opt/opengnsys/etc/ogAdmRepo.cfg
-
-ip addr show | grep $IPlocal | cut -f2 | awk '{ print $NF }'
