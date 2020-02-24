@@ -3,6 +3,17 @@ LISTA DE CAMBIOS	CHANGELOG.es.txt
 ========================================
 
 
+Lista de cambios incluidos en OpenGnsys 1.1.1b (versión de mantenimiento)
+----------------------------------------------
+
+Tickets resueltos en módulo OpenGnsys Server:
+#955	Añadir ordenadores definidos al DHCP local
+
+Tickets resueltos en módulo OpenGnsys Installer:
+#954	Ignorar datos de importación (mejora)
+#956	Ampliar los datos de exportación (mejora)
+
+
 Lista de cambios incluidos en OpenGnsys 1.1.1a (versión de mantenimiento)
 ----------------------------------------------
 
