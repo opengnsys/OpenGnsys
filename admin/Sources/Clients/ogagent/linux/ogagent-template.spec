@@ -63,3 +63,21 @@ This package provides the required components to allow this machine to work on a
 /usr/bin/OGAgentTool
 /usr/share/OGAgent/*
 /usr/share/autostart/OGAgentTool.desktop
+
+%changelog
+* Fri Feb 07 2020 Ramón M. Gómez <ramongomez@us.es> - 1.1.1b-1
+- Use python-distro to detect the distribution version
+
+* Thu May 23 2019 Ramón M. Gómez <ramongomez@us.es> - 1.1.1-1
+- Set connection timeout
+- Compatibility with "Exam Mode" from the University of Seville
+
+* Wed May 22 2019 Ramón M. Gómez <ramongomez@us.es> - 1.1.0a-1
+- Fix a bug when activating the agent with some network devices
+
+* Tue Oct 13 2016 Ramón M. Gómez <ramongomez@us.es> - 1.1.0-1
+- Functional OpenGnsys Agent interacting with OpenGnsys Server 1.1.0
+
+* Tue Jul 18 2015 Adolfo Gómez García <agomez@virtualcable.es> - 1.0.0-1
+- Initial release for OpenGnsys Agent
+

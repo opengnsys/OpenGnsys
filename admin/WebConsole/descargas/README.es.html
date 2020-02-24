@@ -68,6 +68,7 @@
     <pre>	sudo zypper install -f ogagent-opensuse-<em>Version</em>.noarch.rpm</pre></li>
   <li>Configurar el agente:
     <pre>	sudo sed -i "0,/remote=/ s,remote=.*,remote=https://<em>IPServidorOpenGnsys</em>/opengnsys/rest/," /usr/share/OGAgent/cfg/ogagent.cfg</pre></li>
+  <li>Para sistemas con GNOME 3: instalar y habilitar la extensión TopIcons Plus.</li>
   <li>Puede ser necesario habilitar el acceso al agente en el cortafuegos del sistema:
     <pre>	sudo firewall-cmd --permanent --add-port=8000/tcp --zone=public; sudo firewall-cmd --reload</pre></li>
   <li>Reiniciar el equipo o ejecutar el servicio <em>(se iniciará automáticamente en el proceso de arranque)</em>:

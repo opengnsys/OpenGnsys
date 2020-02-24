@@ -1,4 +1,10 @@
-ogagent (1.1.1) unstable; urgency=medium
+ogagent (1.1.1b) stable; urgency=medium
+
+  * Use python-distro to detect the distribution version
+
+ -- Ramón M. Gómez <ramongomez@us.es>  Fri, 7 Feb 2020 12:00:00 +0100
+
+ogagent (1.1.1) stable; urgency=medium
 
   * Set connection timeout
   * Compatibility with "Exam Mode" from the University of Seville
