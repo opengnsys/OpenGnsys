@@ -887,6 +887,9 @@ echo $MNTDIR
 #@version 1.0.6 - Integrar código de antigua función "ogReduceFsCheck".
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
 #@date    2014-10-28
+#@version 1.1.1b - Detectar metadispositivos.
+#@author  Ramon Gomez, ETSII Universidad de Sevilla
+#@date    2020-02-24
 #*/ ##
 function ogReduceFs ()
 {
@@ -903,26 +906,20 @@ fi
 [ $# == 2 ] || ogRaiseError $OG_ERR_FORMAT || return $?
 
 # Obtener partición.
-PART="$(ogDiskToDev $1 $2)" || return $?
+PART="$(readlink -f "$(ogDiskToDev $1 $2)")" || return $?
 
 # Redimensionar según el tipo de particion.
 case "$(ogGetFsType $1 $2)" in
     EXT[234])
-        ogUnmount $1 $2 2>/dev/null
-        # Ext2/3/4: Tamaño de los bloques del sistema de archivos
-        BLKS=$(tune2fs -l $PART | awk '/Block size/ {print int($3/512)}')
-        # Traduce el num. en sectores de 512B a tamano en MB.
-        #SIZE=$(resize2fs -P $PART 2>/dev/null | \
-		#       awk -v B=$BLKS '/minimum size/ {print int($7*1.1*B/2048)}')
-        #resize2fs -fp $PART "${SIZE}M" &>/dev/null || ogRaiseError $OG_ERR_PARTITION "$1,$2" || return $?
+        ogUnmount $1 $2 &>/dev/null
         resize2fs -fpM $PART  &>/dev/null || ogRaiseError $OG_ERR_PARTITION "$1,$2" || return $?
         ;;
 
     BTRFS)
         MNTDIR=$(ogMount $1 $2)
         # Calcular tamaño ocupado + 10%, redondeado + 1 (incluyendo letra de unidad).
-        SIZE=$(btrfs filesystem show $MNTDIR | awk -v P=$PART '{ if ($8==P) printf ("%d%s", $6*1.1+1, substr($6,match($6,/[A-Z]/),1)) }')
-        btrfs filesystem resize ${SIZE} $MNTDIR 2>/dev/null
+        SIZE=$(btrfs filesystem show $MNTDIR | awk -v P=$PART '{ d=""; "readlink -f "$8" 2>/dev/null"|getline d; if(d==P) printf("%d%s", $6*1.1+1, substr($6,match($6,/[A-Z]/),1)) }')
+        btrfs filesystem resize ${SIZE} $MNTDIR &>/dev/null
         ;;
     REISERFS|REISER4)
         # Calcular tamaño ocupado + 10%.
@@ -963,7 +960,12 @@ case "$(ogGetFsType $1 $2)" in
         ;;
 
     EXFAT)  ;;          # No se reduce (por el momento).
-    FAT32|FAT16)  ;;    # No se reduce (probar "fatresize").
+    FAT32|FAT16)        # Se deja comentado por no haber un método seguro para extender el SF.
+        # Calcular tamaño ocupado + 10%.
+        #ogUnmount $1 $2 &>/dev/null
+        #SIZE=$(fatresize --info $PART | awk -F: '/Min size/ {printf("%d", $2*1.1)}')
+        #[ "$SIZE" ] && fatresize --size $SIZE $PART &>/dev/null
+        ;;
     HFS|HFSPLUS)  ;;    # No se reduce (por el momento).
     UFS)    ;;          # No se reduce (por el momento).
 
@@ -1089,7 +1091,7 @@ fi
 #@warning No se desmonta la partición marcada como caché local.
 #@version 0.9 - Versión para OpenGnSys.
 #@author  Ramon Gomez, ETSII Universidad de Sevilla
-#@date    2009/10/07
+#@date    2009-10-07
 #*/ ##
 function ogUnmountAll ()
 {
@@ -1120,9 +1122,9 @@ done
 #@param   int_npart      nº de orden de partición
 #@return  Nada
 #@exception OG_ERR_FORMAT    Formato incorrecto.
-#@version 0.1 - Versión para OpenGnSys.
+#@version 1.1.0 - Versión para OpenGnsys.
 #@author  Carmelo Cabezuelo, ASIC Universidad Politécnica de Valencia
-#@date    2016/04/20
+#@date    2016-04-20
 #*/ ##
 function ogUnsetDirtyBit ()
 {
