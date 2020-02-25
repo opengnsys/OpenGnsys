@@ -15,32 +15,15 @@ PROG=$(basename "$0")
 OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
 SERVERCONF=$OPENGNSYS/etc/ogAdmServer.cfg
 LOGFILE=$OPENGNSYS/log/remotepc.log
-MYCNF=/tmp/.my.cnf.$$
+
+source $OPENGNSYS/lib/ogfunctions.sh || exit 1
 
 # Basic error control
-if [ ! -r "$SERVERCONF" ]; then
-    echo "$PROG: Cannot access to configuration file." >&2
-    exit 2
-fi
-if ! touch "$LOGFILE"; then
-    echo "$PROG: Cannot write to log file." >&2
-    exit 2
-fi
+source $SERVERCONF 2> /dev/null || raiseError access "Server configuration file"
+touch "$LOGFILE" 2> /dev/null || raiseError access "Cannot write in the log file" 
 
-# Fetching database access data.
-source "$SERVERCONF"
-# Composing connection credentils file.
-touch $MYCNF 
-chmod 600 $MYCNF 
-cat << EOT > $MYCNF 
-[client] 
-user=$USUARIO 
-password=$PASSWORD 
-EOT
-# Trap to delete temporal file if process ends.
-trap "rm -f $MYCNF" 0 1 2 3 6 9 15 
 # Reading pending operations.
-mysql --defaults-extra-file="$MYCNF" -D "$CATALOG" -Nse "
+dbexec "
 SELECT ogagent_queue.id, ogagent_queue.exectime, ogagent_queue.operation,
        ordenadores.idordenador, ordenadores.ip, ordenadores.agentkey, remotepc.language
   FROM ogagent_queue
@@ -52,21 +35,21 @@ SELECT ogagent_queue.id, ogagent_queue.exectime, ogagent_queue.operation,
         # Preparing operation data.
         case "$OPER" in
             popup-10)   # Message: 10 min. before power off.
-                AGNTURL=https://$AGNTIP:8000/opengnsys/popup
+                AGNTURL="https://$AGNTIP:8000/opengnsys/popup"
                 case "$LANGUAGE" in
                     es)     DATA='{"title":"Apagado en 10 min.","message":"Fin del tiempo de acceso remoto.\nEl ordenador se apagará automáticamente dentro de 10 minutos."}' ;;
                     *)      DATA='{"title":"Shutdown after 10 min.","message":"Remote access time is ended.\nComputer will be powered off automaticly after 10 minutes."}' ;;
                 esac
                 ;;
             popup-5)    # Message: 5 min. before power off.
-                AGNTURL=https://$AGNTIP:8000/opengnsys/popup
+                AGNTURL="https://$AGNTIP:8000/opengnsys/popup"
                 case "$LANGUAGE" in
                     es)     DATA='{"title":"Apagado en 5 min.","message":"El ordenador se apagará automáticamente dentro de 5 minutos.\nATENCIÓN: Este es el último aviso."}' ;;
                     *)      DATA='{"title":"Shutdown after 5 min.","message":"The computer will be powered off automaticly after 5 minutes.\nATTENTION: This is the last warning."}'
                 esac
                 ;;
             poweroff)   # Power off client.
-                AGNTURL=https://$AGNTIP:8000/opengnsys/poweroff
+                AGNTURL="https://$AGNTIP:8000/opengnsys/poweroff"
                 DATA=
                 ;;
             *)          # Unknown operation.
@@ -87,14 +70,14 @@ SELECT ogagent_queue.id, ogagent_queue.exectime, ogagent_queue.operation,
         else	# Unknown operation.
             echo "$(date +"%FT%T%z"): $PROG: Unknown operation: client=$AGNTIP, oper=$OPER" >> $LOGFILE
         fi
-        # Deleting operation from database.
+        # Deleting operation from the database.
         SQL="DELETE FROM ogagent_queue WHERE id='$OPERID';"
-        [ "$OPER" == "poweroff" ] && SQL="$SQL
+        [ "$OPER" == "poweroff" ] && SQL+="
 UPDATE remotepc
    SET reserved = NOW() - INTERVAL 1 SECOND, urllogin=NULL, urllogout=NULL, language=NULL
  WHERE id = '$CNLTID';
 DELETE FROM acciones
  WHERE idordenador = '$CLNTID'
    AND descriaccion = 'RemotePC Session';"
-        mysql --defaults-extra-file="$MYCNF" -D "$CATALOG" -Nse "$SQL"
+        dbexec "$SQL"
     done
