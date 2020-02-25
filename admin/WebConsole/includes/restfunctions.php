@@ -116,14 +116,6 @@ function shell($case, $string_ips, $command) {
 	$ips = explode(';',$string_ips);
 
 	switch ($case) {
-		case 3:
-			$decoded_cmds = rawurldecode(substr($command, 4));
-			$command = substr($decoded_cmds, 0, -2);
-			$data = array(OG_REST_PARAM_CLIENTS => $ips,
-				      OG_REST_PARAM_RUN => $command,
-				      OG_REST_PARAM_ECHO => false);
-			$command = OG_REST_CMD_RUN;
-			break;
 		case 1:
 			$data = array(OG_REST_PARAM_CLIENTS => $ips,
 				      OG_REST_PARAM_RUN => $command,
@@ -134,6 +126,22 @@ function shell($case, $string_ips, $command) {
 		case 2:
 			$data = array(OG_REST_PARAM_CLIENTS => $ips);
 			$command = OG_REST_CMD_OUTPUT;
+			break;
+		case 3:
+			$decoded_cmds = rawurldecode(substr($command, 4));
+			$command = substr($decoded_cmds, 0, -2);
+			$data = array(OG_REST_PARAM_CLIENTS => $ips,
+				      OG_REST_PARAM_RUN => $command,
+				      OG_REST_PARAM_ECHO => false);
+			$command = OG_REST_CMD_RUN;
+			break;
+		case 4:
+			$decoded_cmds = rawurldecode(substr($command, 4));
+			$command = substr($decoded_cmds, 0, -1);
+			$data = array(OG_REST_PARAM_CLIENTS => $ips,
+				      OG_REST_PARAM_RUN => $command,
+				      OG_REST_PARAM_ECHO => false);
+			$command = OG_REST_CMD_RUN;
 	}
 
 	$result = common_request($command, POST,
