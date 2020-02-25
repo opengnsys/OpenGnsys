@@ -79,8 +79,10 @@ function run_command($idcomando, $cadenaip, $cadenamac, $atributos) {
 			software($cadenaip, $atributos);
 			break;
 		case OG_CMD_ID_SCRIPT:
-		case OG_CMD_ID_DELETE_CACHED_IMAGE:
 			shell(3, $cadenaip, $atributos);
+			break;
+		case OG_CMD_ID_DELETE_CACHED_IMAGE:
+			shell(4, $cadenaip, $atributos);
 			break;
 	}
 }
