@@ -35,7 +35,7 @@ PXEDIR[0]=$OPENGNSYS/tftpboot/menu.lst
 PXEDIR[1]=$OPENGNSYS/tftpboot/grub
 LOGFILE=$OPENGNSYS/log/opengnsys.log
 
-source $OPENGNSYS/lib/ogfunctions.sh
+source $OPENGNSYS/lib/ogfunctions.sh || exit 1
 
 # Mostrar ayuda.
 [ "$*" == "help" ] && help
