@@ -1,9 +1,10 @@
 #!/bin/bash
 
 #/**
-#         setsmbpass
 #@file    setsmbpass [ogLive]
-#@brief   Cambia la contraseña del usuario del cliente para acceder a los servicios Samba.
+#@brief   Cambia la contraseña de los clientes para acceder a los servicios principales.
+#@usage   setsmbpass [ogLive]
+#@param   ogLive    solo modifica la clave del cliente indicado (puede crear inconsistencias)
 #@warning Se modifica el Initrd del cliente y se cambia la clave en el servidor.
 #@warning No se modifica el usuario de acceso (usuario "opengnsys").
 #@version 1.0.2 - Versión inicial.
@@ -15,21 +16,22 @@
 #*/ ##
 
 
-# Variables.
-PROG=$(basename "$0")
-PATH=$PATH:$(dirname "$(realpath "$0")")
+# Variables y funciones globales.
+PROG="$(basename "$0")"
 OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
+PATH=$PATH:$OPENGNSYS/bin
 SAMBAUSER="opengnsys"				# Usuario por defecto.
 TFTPDIR=$OPENGNSYS/tftpboot
 INITRD=oginitrd.img
 TMPDIR=/tmp/oglive$$
 let CHANGES=0
 
-# Control básico de errores.
-if [ "$USER" != "root" ]; then
-    echo "$PROG: Error: solo ejecutable por root" >&2
-    exit 1
-fi
+source /tmp/ogfunctions.sh || exit 1
+
+# Control de parámetros.
+[ "$*" == "help" ] && help
+[ "$*" == "version" ] && version
+[ "$USER" != "root" ] && raiseError access "Debe ser root"
 case $# in
     0)  # Cambios en todos los clientes ogLive instalados.
         if which oglivecli &>/dev/null; then
@@ -40,9 +42,7 @@ case $# in
     1)  # Cambios en único ogLive (AVISO: puede crear inconsistencias con otros ogLive).
         LIST="$1" ;;
     *)	# Error de formato.
-        echo "$PROG: Error de ejecución" >&2
-        echo "Formato: $PROG ogLive"
-        exit 1 ;;
+        raiseError usage ;;
 esac
 
 # Recuperar eco de consola si se corta el proceso.
@@ -60,9 +60,8 @@ for OGLIVE in $LIST; do
 	    # Solo se deben aceptar números y letras para la clave de acceso.
 	    if [[ "$SAMBAPASS" =~ [^a-zA-Z0-9] ]]; then
 		echo
-		echo "$PROG: Error: la clave solo debe contener caracteres alfanuméricos" >&2
 		stty echo 2>/dev/null
-		exit 2
+		raiseError cancel "La clave solo debe contener caracteres alfanuméricos"
 	    fi
 	    echo
 	    # Obtener confirmación clave sin eco en pantalla.
@@ -70,16 +69,13 @@ for OGLIVE in $LIST; do
 	    read -r SAMBAPASS2
 	    echo
 	    stty echo 2>/dev/null
-	    if [ "$SAMBAPASS" != "$SAMBAPASS2" ]; then
-		echo "$PROG: Error: las claves no coinciden" >&2
-		exit 2
-	    fi
+	    [ "$SAMBAPASS" != "$SAMBAPASS2" ] && raiseError cancel "Las claves no coinciden"
 	fi
 	# Editar la parte de acceso del cliente:
 	#    descomprimir Initrd, sustituir clave y recomprimir Initrd).
 	echo "Configurando cliente \"$OGLIVE\" ..."
 	mkdir -p $TMPDIR
-	cd $TMPDIR || exit 3
+	cd $TMPDIR || ogRaiseError access "Directorio temporal"
 	gzip -dc "$CLIENTINITRD" | cpio -im
 	if [ -f scripts/ogfunctions ]; then
 		sed -i "s/OPTIONS=\(.*\)user=\w*\(.*\)pass=\w*\(.*\)/OPTIONS=\1user=$SAMBAUSER\2pass=$SAMBAPASS\3/" scripts/ogfunctions
