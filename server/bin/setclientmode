@@ -2,12 +2,12 @@
 
 #/**
 #@file    setclientmode
-#@brief   Configura el archivo de arranque de PXE para los clientes, ya sea un equipo o un aula, generando enlaces a archivos usados como plantilla. 
+#@brief   Configura el archivo de arranque de PXE para los clientes, ya sea un equipo o un aula, generando enlaces a archivos usados como plantilla.
 #@usage   setclientmode Plantilla Ambito Modo
 #@warning El archivo PXE por defecto "default" se deja en modo de ejecución "user" y se eliminan los enlaces para equipos con la plantilla por defecto.
-#@param   Plantilla: nombre de plantilla PXE
-#@param   Ambito: nombre de cliente o aula
-#@param   Modo: "TEMP" (temporal) o "PERM" (permanente)
+#@param   Plantilla  nombre de plantilla PXE
+#@param   Ambito     nombre de ordenador o nombre de aula
+#@param   Modo       "TEMP" (temporal) o "PERM" (permanente)
 #@version 1.0 - Versión inicial.
 #@author  Irina Gomez y Ramon Gomez - Univ. Sevilla, noviembre 2010
 #@version 1.0.1 - Identificacion de la plantilla por nombre en consola = en primera linea de la plantilla
@@ -27,19 +27,19 @@
 #@date    2019-02-13
 #*/ ##
 
-# Variables.
-PROG=$(basename $0)
+# Variables y funciones globales.
+PROG="$(basename "$0")"
 OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
 SERVERCONF=$OPENGNSYS/etc/ogAdmServer.cfg
 PXEDIR[0]=$OPENGNSYS/tftpboot/menu.lst
 PXEDIR[1]=$OPENGNSYS/tftpboot/grub
 LOGFILE=$OPENGNSYS/log/opengnsys.log
-MYCNF=/tmp/.my.cnf.$$
 
 source $OPENGNSYS/lib/ogfunctions.sh
 
 # Mostrar ayuda.
 [ "$*" == "help" ] && help
+[ "$*" == "version" ] && version
 # Control básico de errores.
 [ $# -ne 3 ] && raiseError usage
 # Comprobar si el usuario es "root" o el del servicio web.
@@ -48,8 +48,7 @@ CALLER=$(getcaller)
 [ "$USER" != "root" -a "$USER" != "$WEBUSER" -a "$CALLER" != "ogAdmServerAux" ] && raiseError access "Need to be root (or webserver user)"
 # El acceso a mysql por las variables pasadas o por el fichero de configuarción.
 if  [ -z "$USUARIO" ] || [ -z "$PASSWORD" ] || [ -z "$CATALOG" ]; then
-	[ ! -r "$SERVERCONF" ] && raiseError access "Cannot read access configuration file"
-	source $SERVERCONF
+	source $SERVERCONF 2>/dev/null || raiseError access "Server configuration file"
 fi
 TEMPLATE[0]=$(grep -l "^#.* $1 *$" ${PXEDIR[0]}/templates/* 2>/dev/null)
 TEMPLATE[1]=$(grep -l "^#.* $1 *$" ${PXEDIR[1]}/templates/* 2>/dev/null)
@@ -62,24 +61,14 @@ case "${3^^}" in
 esac
 
 # Sustituir caracteres ' por \' para evitar inyección SQL.
-BOOTMODE="${1//\'/\'}"
-RESOURCE="${2//\'/\'}"
-# Componer fichero con credenciales de conexión. 
-touch $MYCNF 
-chmod 600 $MYCNF 
-cat << EOT > $MYCNF 
-[client] 
-user=$USUARIO 
-password=$PASSWORD 
-EOT
-# Borrar el fichero temporal si termina el proceso. 
-trap "rm -f $MYCNF" 0 1 2 3 6 9 15 
+BOOTMODE="${1//\'/\\\'}"
+RESOURCE="${2//\'/\\\'}"
 # Buscar ordenador individual o todos los de una aula.
-ETHERNET=$(mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -s -N -e \
-		"SELECT mac FROM ordenadores 
- 		   JOIN aulas USING (idaula) 
- 		  WHERE aulas.nombreaula='$RESOURCE' 
- 		     OR nombreordenador='$RESOURCE';")
+ETHERNET=$(dbexec "
+		 SELECT mac FROM ordenadores
+		   JOIN aulas USING (idaula)
+		  WHERE aulas.nombreaula ='$RESOURCE'
+		     OR nombreordenador = '$RESOURCE';")
 if [ -z "$ETHERNET" ]; then
 	date +"%b %d %T $PROG: No existe aula o equipo con el nombre \"$2\"" >> $LOGFILE
 	raiseError notfound "Client or lab name \"$2\""
@@ -102,38 +91,38 @@ for MAC in $ETHERNET; do
 		# Si no está definida la variable LANG, usar idioma inglés por defecto.
 		[ -z "$LANG" -o "$LANG" == "C" ] && LANG="en"
 		# Obtener de la BD los parámetros de arranque asociados (separador es TAB).
-		DATOS=$(mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -s -N -e \
-			"SELECT ' LANG=$LANG',
-				' ip=', CONCAT_WS(':', ordenadores.ip,
-				    (SELECT (@serverip:=ipserveradm) FROM entornos LIMIT 1),
-				    aulas.router, aulas.netmask,
-				    ordenadores.nombreordenador, ordenadores.netiface, 'none'),
-				' group=', REPLACE(TRIM(aulas.nombreaula), ' ', '_'),
-				' ogrepo=', (@repoip:=IFNULL(repositorios.ip, '')),
-				' oglive=', @serverip,
-				' oglog=', @serverip,
-				' ogshare=', @serverip,
-				' oglivedir=', ordenadores.oglivedir,
-				' ogprof=', IF(ordenadores.idordenador=aulas.idordprofesor, 'true', 'false'),
-				IF(perfileshard.descripcion<>'', CONCAT(' hardprofile=', REPLACE(TRIM(perfileshard.descripcion), ' ', '_')), ''),
-				IF(aulas.ntp<>'', CONCAT(' ogntp=', aulas.ntp), ''),
-				IF(aulas.dns<>'', CONCAT(' ogdns=', aulas.dns), ''),
-				IF(aulas.proxy<>'', CONCAT(' ogproxy=', aulas.proxy), ''),
-				IF(entidades.ogunit=1 AND NOT centros.directorio='', CONCAT(' ogunit=', centros.directorio), ''),
-				CASE
-				    WHEN menus.resolucion IS NULL THEN ''
-				    WHEN menus.resolucion <= '999' THEN CONCAT(' vga=', menus.resolucion)
-				    WHEN menus.resolucion LIKE '%:%' THEN CONCAT(' video=', menus.resolucion)
-				    ELSE menus.resolucion
-				END
-				FROM ordenadores 
-				JOIN aulas USING(idaula)
-				JOIN centros USING(idcentro)
-				JOIN entidades USING(identidad)
-				LEFT JOIN repositorios USING(idrepositorio)
-				LEFT JOIN perfileshard USING(idperfilhard)
-				LEFT JOIN menus USING(idmenu)
-				WHERE ordenadores.mac='$MAC';")
+		DATOS=$(dbexec "
+SELECT ' LANG=$LANG',
+       ' ip=', CONCAT_WS(':', ordenadores.ip,
+           (SELECT (@serverip:=ipserveradm) FROM entornos LIMIT 1),
+           aulas.router, aulas.netmask,
+           ordenadores.nombreordenador, ordenadores.netiface, 'none'),
+       ' group=', REPLACE(TRIM(aulas.nombreaula), ' ', '_'),
+       ' ogrepo=', (@repoip:=IFNULL(repositorios.ip, '')),
+       ' oglive=', @serverip,
+       ' oglog=', @serverip,
+       ' ogshare=', @serverip,
+       ' oglivedir=', ordenadores.oglivedir,
+       ' ogprof=', IF(ordenadores.idordenador=aulas.idordprofesor, 'true', 'false'),
+       IF(perfileshard.descripcion<>'', CONCAT(' hardprofile=', REPLACE(TRIM(perfileshard.descripcion), ' ', '_')), ''),
+       IF(aulas.ntp<>'', CONCAT(' ogntp=', aulas.ntp), ''),
+       IF(aulas.dns<>'', CONCAT(' ogdns=', aulas.dns), ''),
+       IF(aulas.proxy<>'', CONCAT(' ogproxy=', aulas.proxy), ''),
+       IF(entidades.ogunit=1 AND NOT centros.directorio='', CONCAT(' ogunit=', centros.directorio), ''),
+       CASE
+           WHEN menus.resolucion IS NULL THEN ''
+           WHEN menus.resolucion <= '999' THEN CONCAT(' vga=', menus.resolucion)
+           WHEN menus.resolucion LIKE '%:%' THEN CONCAT(' video=', menus.resolucion)
+           ELSE menus.resolucion
+       END
+  FROM ordenadores
+  JOIN aulas USING(idaula)
+  JOIN centros USING(idcentro)
+  JOIN entidades USING(identidad)
+  LEFT JOIN repositorios USING(idrepositorio)
+  LEFT JOIN perfileshard USING(idperfilhard)
+  LEFT JOIN menus USING(idmenu)
+ WHERE ordenadores.mac='$MAC';")
 		# Quitar tabuladores, sustituir acentos y dejar resolución por defecto.
 		DATOS=$(echo ${DATOS//	/} | tr 'áéíóúñçÁÉÍÓÚÑÇ' 'aeiouncAEIOUNC')
 		[[ "$DATOS" =~ (vga|video) ]] || DATOS="$DATOS vga=788"
@@ -160,7 +149,6 @@ for MAC in $ETHERNET; do
 			[ -n "$WEBUSER" ] && chown $WEBUSER:$WEBGROUP ${PXEDIR[$BOOTTYPE]}/${PXEFILEE[$BOOTTYPE]}
 		done
 
-
 		# Si el modo de trabajo es temporal (0) mete un retardo, restaura el fichero PXE a su estado original y no toca la base de datos
 		if [ "$MODE" == "TEMP" ]; then
 			sleep 60
@@ -178,10 +166,10 @@ for MAC in $ETHERNET; do
 			# Si no existe la plantilla de tipo BIOS tomo el nombre de la UEFI
 			[ -z "${TEMPLATE[0]}" ] && TEMPLATE[0]=${TEMPLATE[1]}
 
-			mysql --defaults-extra-file=$MYCNF -D "$CATALOG" -e \
-				"UPDATE ordenadores SET arranque='$(basename ${TEMPLATE[0]})' WHERE mac='$MAC';"
+			dbexec "UPDATE ordenadores SET arranque='$(basename ${TEMPLATE[0]})' WHERE mac='$MAC';"
 		fi
 	fi
 	let NPC=NPC+1
 done
 date +"%b %d %T $PROG: $NPC equipo(s) configurado(s)" | tee -a $LOGFILE
+

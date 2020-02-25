@@ -1,73 +1,52 @@
 #!/bin/bash
 
 #/**
-# 	  setclientlive DirOGLive | IndiceOGLive { NombrePC | NombreAula } Modo_trabajo
 #@file	  setclientlive
-#@brief   Configura el archivo de arranque de PXE para asignar el cliente ogLive, ya sea a un equipo o a un aula
-#@param   $1 DirOGLive, IndiceOGLive o "default" (según script "oglivecli")
-#@param   $2 Ámbito { NombrePC | NombreAula }
+#@brief   Asignar un cliente de inicio ogLive a un ordenador o a un aula
+#@usage   setclientlive { DirOGLive | IndiceOGLive } Ambito
+#@param   DirOGLive      subdirectorio del cliente ogLive ("default" para definido por defecto)
+#@param   IndiceOGLive   nº de índice de cliente ogLive (según script "oglivecli")
+#@param   Ámbito         nombre de ordenador o nombre de aula
 #warning  No se admiten cambios temporales.
 #@version 1.1.0 - Versión inicial basada en script "setclientmode".
 #@author  Ramón M. Gómez - Univ. Sevilla, junio 2017
 #*/ ##
 
 
-# Variables.
-PROG=$(basename "$0")
-PATH=$PATH:$(dirname $(realpath "$0"))
+# Variables y funciones globales.
+PROG="$(basename "$0")"
 OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
+PATH=$PATH:$OPENGNSYS/bin
 SERVERCONF=$OPENGNSYS/etc/ogAdmServer.cfg
 TFTPDIR=$OPENGNSYS/tftpboot
 LOGFILE=$OPENGNSYS/log/opengnsys.log
-MYCNF=/tmp/.my.cnf.$$
+
+source $OPENGNSYS/lib/ogfunctions.sh || exit 1
 
 # Control básico de errores.
-if [ $# -ne 2 ]; then
-	echo "$PROG: Error de ejecución" >&2
-	echo "Formato: $PROG {DIR_OGLIVE|INDICE_OGLIVE|default} {NOMBRE_PC|NOMBRE_AULA}" >&2
-	exit 1
-fi
-if [ ! -r $SERVERCONF ]; then
-	echo "$PROG: Sin acceso a fichero de configuración" >&2
-	exit 2
-fi
-case "$1" in
-	[0-9]*)     DIR=$(oglivecli search $1 2>/dev/null) ;;
-	"default")  DIR="ogLive" ;;
-	*)          if oglivecli search "$1" 2>/dev/null; then DIR="$1"; fi ;;
-esac
-if [ -z "$DIR" ]; then
-	echo "$PROG: ogLive no ecncontrado, listar ejecutando \"oglivecli list\"" >&2
-	exit 1
-fi
-if [ ! -e "$TFTPDIR/$DIR" ]; then
-	echo "$PROG: directorio de ogLive no ecncontrado: \"DIR\"" >&2
-	exit 1
-fi
+[ "$*" == "help" ] && help
+[ "$*" == "version" ] && version
+[ $# -eq 2 ] || raiseError usage
+[ "$USER" != "root" ] && raiseError access "Need to be root"
+source $SERVERCONF 2>/dev/null || raiseError access "Sin acceso a fichero de configuración"
 
-# Obtener datos de acceso a la Base de datos.
-source $SERVERCONF
+case "$1" in
+    [0-9]*)     DIR=$(oglivecli search $1 2>/dev/null) ;;
+    "default")  DIR="ogLive" ;;
+    *)          if oglivecli search "$1" &>/dev/null; then DIR="$1"; fi ;;
+esac
+[ "$DIR" ] || raiseError notfound "Cliente ogLive \"$1\", listar ejecutando \"oglivecli list\""
+[ -e "$TFTPDIR/$DIR" ] || raiseError notfound "Directorio de ogLive \"$DIR\""
+
 # Sustituir caracteres ' por \' para evitar inyección SQL.
-OGLIVEDIR="${DIR//\'/\'}"
-RESOURCE="${2//\'/\'}"
-# Componer fichero con credenciales de conexión. 
-touch $MYCNF 
-chmod 600 $MYCNF 
-cat << EOT > $MYCNF 
-[client] 
-user=$USUARIO 
-password=$PASSWORD 
-EOT
-# Borrar el fichero temporal si termina el proceso. 
-trap "rm -f $MYCNF" 0 1 2 3 6 9 15 
+OGLIVEDIR="${DIR//\'/\\\'}"
+RESOURCE="${2//\'/\\\'}"
 # Actualizar ogLive asignado al aula.
-mysql --defaults-extra-file="$MYCNF" -D "$CATALOG" -e \
-		"UPDATE aulas SET oglivedir='$OGLIVEDIR' WHERE nombreaula='$RESOURCE';"
+dbexec "UPDATE aulas SET oglivedir='$OGLIVEDIR' WHERE nombreaula='$RESOURCE';"
 # Actualizar ogLive para todos los clientes y reasignar plantilla PXE.
 listclientmode "$RESOURCE" | awk -F\" '{print $2,$4}' | \
         while read -r PC BOOTMODE; do
-		date +"%b %d %T $PROG: Configurando \"$PC\" con cliente \"$OGLIVEDIR\"" | tee -a $LOGFILE
-		mysql --defaults-extra-file="$MYCNF" -D "$CATALOG" -e \
-				"UPDATE ordenadores SET oglivedir='$OGLIVEDIR' WHERE nombreordenador='$PC';"
-		setclientmode "$BOOTMODE" "$PC" PERM >/dev/null
-	done
+            date +"%b %d %T $PROG: Configurando \"$PC\" con cliente \"$OGLIVEDIR\"" | tee -a $LOGFILE
+            dbexec "UPDATE ordenadores SET oglivedir='$OGLIVEDIR' WHERE nombreordenador = '$PC';"
+            setclientmode "$BOOTMODE" "$PC" PERM >/dev/null
+        done
