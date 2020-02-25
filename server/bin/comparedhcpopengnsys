@@ -1,43 +1,37 @@
 #!/bin/bash
-# Descripcion: scrit compara la configuración de los equipos en el dhcp y la base de datos de opengnsys
-# utiliza dos archivos temporales, uno de cada servicio, con el formato nombre;mac;ip.
-# El formato depende de que el fichero dhcpd.conf este en el orden "correcto"
-# Uso:	comparedhcpopengnsys	(fichero DHCP por defecto: /etc/dhcp/dhcpd.conf)
-#	DHCPFILE=/camino/fichero/dhcpd.conf comparedhcpopengnsys
-# Autora: Irina Gómez, Univ. Sevilla.
-# Fecha: 2012-02-08
+
+#/**
+#@file    comparedhcpopengnsys
+#@brief   Compara la configuración de los equipos en el dhcp y la base de datos de opengnsys
+#@brief   Definir la variable "DHCPFILE" para indicar un fichero DHCP alternativo.
+#@usage   comparedhcpopengnsys
+#@usage   DHCPFILE=/camino/fichero/dhcpd.conf comparedhcpopengnsys
+#@warning El script utiliza dos archivos temporales, uno de cada servicio, con el formato nombre;mac;ip.
+#@warning El formato depende de que el fichero dhcpd.conf este en el orden "correcto"
+#@version 1.0.4
+#@author  Irina Gómez, Univ. Sevilla.
+#@date    2012-02-08
+#*/ ##
 
 
-PROG=$(basename $0)
+PROG="$(basename "$0")"
+OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
+SERVERCONF=$OPENGNSYS/etc/ogAdmServer.cfg
 DHCPFILE=${DHCPFILE:-/etc/dhcp/dhcpd.conf}
 TMP_DHCP=/tmp/$PROG-dhcp$$
 TMP_MYSQL=/tmp/$PROG-mysql$$
-TMP_MYCNF=/tmp/.my.cnf.$$
 
-OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
-SERVERCONF=$OPENGNSYS/etc/ogAdmServer.cfg
+source $OPENGNSYS/lib/ogfunctions.sh || exit 1
 
-if [ "$USER" != "root" ]; then
-        echo "$PROG: Error: solo ejecutable por root" >&2
-        exit 1
-fi
-if [ ! -r $DHCPFILE ] ; then
-	echo "$PROG: No tenemos acceso al fichero de configuracion del dhcp"
-	exit 2
-fi
+[ "$*" == "help" ] && help
+[ "$*" == "version" ] && version
+[ "$USER" != "root" ] && raiseError access "Solo ejecutable por root"
+[ -r $DHCPFILE ] || raiseError access "No tenemos acceso al fichero de configuracion del dhcp"
 
 # Obtener datos de acceso a la Base de datos.
-source $SERVERCONF
-# Componer fichero con credenciales de conexión.
-touch $TMP_MYCNF
-chmod 600 $TMP_MYCNF
-cat << EOT > $TMP_MYCNF
-[client]
-user=$USUARIO
-password=$PASSWORD
-EOT
+source $SERVERCONF 2> /dev/null || raiseError access "Fichero de configuración del servidor"
 
-trap "rm -f $TMP_DHCP $TMP_MYSQL $TMP_MYCNF" 1 2 3 9 15
+trap "rm -f $TMP_DHCP $TMP_MYSQL" 1 2 3 9 15
 # Creo fichero temporal del dhcp
 grep -v "#" $DHCPFILE |egrep -e "host " -e "hardware ethernet" -e fixed-address | sed -e 's/.$//' \
         | sed -e s/"^.*host[[:space:]]*"//g -e s/\{/\;/g -e s/"^.*hardware ethernet[[:space:]]*"/=/g -e  s/"^.*fixed-address[[:space:]]*"/=/g \
@@ -46,13 +40,11 @@ grep -v "#" $DHCPFILE |egrep -e "host " -e "hardware ethernet" -e fixed-address 
 
 
 # Creo fichero temporal del mysql, de la base de datos de opengnsys
-mysql --defaults-extra-file=$TMP_MYCNF -D "$CATALOG" -N -e \
-	"select  CONCAT_WS (';', nombreordenador,  mac, ip) from ordenadores order by nombreordenador;" > $TMP_MYSQL
+dbexec "select CONCAT_WS (';', nombreordenador, mac, ip) from ordenadores order by nombreordenador;" > $TMP_MYSQL
 
 # Comparo los ficheros
 echo "Comparamos las configuraciones: < dhcp y > mysql"
-diff -bi $TMP_DHCP $TMP_MYSQL 
-[ $? == 0 ] && echo "El fichero del servicio dhcp y la base de datos de ogAdmBD tienen la misma configuracion"
+diff -bi $TMP_DHCP $TMP_MYSQL && echo "El fichero del servicio dhcp y la base de datos de ogAdmBD tienen la misma configuracion"
 
-rm -f $TMP_DHCP $TMP_MYSQL $TMP_MYCNF
+rm -f $TMP_DHCP $TMP_MYSQL
 

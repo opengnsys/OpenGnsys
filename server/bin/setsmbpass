@@ -26,12 +26,12 @@ INITRD=oginitrd.img
 TMPDIR=/tmp/oglive$$
 let CHANGES=0
 
-source /tmp/ogfunctions.sh || exit 1
+source $OPENGNSYS/lib/ogfunctions.sh || exit 1
 
 # Control de parámetros.
 [ "$*" == "help" ] && help
 [ "$*" == "version" ] && version
-[ "$USER" != "root" ] && raiseError access "Debe ser root"
+[ "$USER" != "root" ] && raiseError access "Solo ejecutable por root"
 case $# in
     0)  # Cambios en todos los clientes ogLive instalados.
         if which oglivecli &>/dev/null; then
