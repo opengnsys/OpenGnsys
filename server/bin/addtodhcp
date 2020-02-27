@@ -21,8 +21,9 @@ DHCPCONFBCK="$DHCPCONF-$(date +"%Y%m%d")"
 
 source $OPENGNSYS/lib/ogfunctions.sh || exit 1
 
-# Show help
+# Show help or version number.
 [ "$*" == "help" ] && help
+[ "$*" == "version" ] && version
 # Error control.
 [ "$USER" != "root" ] && raiseError access "Need to be root"
 source $SERVERCONF 2>/dev/null || raiseError access "Cannot read OpenGnsys Server configuration file"
@@ -61,9 +62,13 @@ while read -pe NAME IP MAC ROUTER LAB; do
         IP="${IP/10.1./192.168.}"
         ROUTER="${ROUTER/10.1./192.168.}"
     fi
+    # Check if router is defined.
+    if ! grep -Eq "routers[[:space:]]+$ROUTER" $DHCPCONF; then
+        raiseError notfound "Router \"$ROUTER\" not defined in DHCP configuration file"
+    fi
     # Find any "host" clause.
     SEDEXPR+="/\bhost $NAME\b/"
-    if ! grep -q "host $NAME.*}" $DHCPCONF; then
+    if ! grep -Eq "host[[:space:]]+$NAME[[:space:]]*}" $DHCPCONF; then
         SEDEXPR+=",/}/"
     fi
     if [ "$LAB" != "$LABBCK" ]; then
