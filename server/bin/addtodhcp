@@ -29,7 +29,6 @@ source $OPENGNSYS/lib/ogfunctions.sh || exit 1
 source $SERVERCONF 2>/dev/null || raiseError access "Cannot read OpenGnsys Server configuration file"
 
 # Processing parameters.
-RESOURCES="$*"
 opts=$(getopt -n "$PROG" -l exam,file:,restart -o 'ef:r' -- "$@" ) || raiseError usage
 set -- $opts
 while [ "$1" ]; do
@@ -47,11 +46,12 @@ while [ "$1" ]; do
             shift; break ;;
     esac
 done
+RESOURCES="$*"
 [ -f $DHCPCONF ] || raiseError access "Cannot access DHCP configuration file"
 grep -q "^[ 	]*\bsubnet\b" $DHCPCONF || raiseError access "Cannot detect any \"group\" clauses in DHCP configuration file"
 grep -q "^[ 	]*\bgroup\b" $DHCPCONF && raiseError access "Cannot modify DHCP configuration file with \"group\" clauses"
 
-[ "$*" ] && WHEREEXPR="WHERE $(echo ${*//\'/\\\'} | sed -e "s/\('[^']*'\)/nombreaula=\1 OR nombreordenador=\1 OR/g")"
+[ "$*" ] && WHEREEXPR="WHERE $(sed -e "s/\('[^']*'\)/nombreaula=\1 OR nombreordenador=\1 OR/g" <<< "$*")"
 WHEREEXPR="${WHEREEXPR% OR}"
 
 # Looking for data.
