@@ -81,18 +81,21 @@ if($pswop!=$op_suspension){
 	$result;
 	$idr=$pidprogramacion;
 	switch($pswop){
-		case $op_modificacion :
-			$swop=$op_modificacion;
-			break;
 		case $op_alta:
 			$result = create_schedule($pidentificador,
 				$pnombrebloque, $pannos, $pmeses, $pdiario,
 				$phoras, $pampm, $pminutos);
 			$swop=$op_alta;
 			break;
-		case $op_eliminacion :
+		case $op_eliminacion:
 			$result = delete_schedule($pidprogramacion);
 			$swop=$op_eliminacion;
+			break;
+		case $op_modificacion:
+			$result = update_schedule($pidprogramacion,
+				$pidentificador, $pnombrebloque, $pannos,
+				$pmeses, $pdiario, $phoras, $pampm, $pminutos);
+			$swop = $op_modificacion;
 			break;
 		default:
 			break;
