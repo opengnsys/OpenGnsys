@@ -32,12 +32,35 @@ source $OPENGNSYS/lib/ogfunctions.sh || exit 1
 source $SERVERCONF 2> /dev/null || raiseError access "Fichero de configuración del servidor"
 
 trap "rm -f $TMP_DHCP $TMP_MYSQL" 1 2 3 9 15
-# Creo fichero temporal del dhcp
-grep -v "#" $DHCPFILE |egrep -e "host " -e "hardware ethernet" -e fixed-address | sed -e 's/.$//' \
-        | sed -e s/"^.*host[[:space:]]*"//g -e s/\{/\;/g -e s/"^.*hardware ethernet[[:space:]]*"/=/g -e  s/"^.*fixed-address[[:space:]]*"/=/g \
-        | sed -e :a -e '$!N;s/\n=/ \;/;ta' -e 'P;D'\
-        | sed -e s/\ //g -e s/://g -e s/\;$//g -e s/\;\;/\;/g |sort > $TMP_DHCP
-
+# Genero fichero temporal de dhcp recorriendo la configuración del dhcp cadena a cadena.
+# Quito comentarios del fichero
+CONTENIDO=$(sed  's/#.*$//' $DHCPFILE)
+OLDLINE=""
+HOST=""
+IP=""
+MAC=""
+for LINE in ${CONTENIDO} ; do
+    case $LINE in
+        "host")           OLDLINE="host" && continue ;;
+        "hardware")       OLDLINE="hardware" && continue ;;
+        "ethernet")       [ "$OLDLINE" == "hardware" ] && OLDLINE="hardware ethernet" && continue ;;
+        "fixed-address")  OLDLINE="fixed-address" && continue ;;
+        "}")              [ "$HOST" == "" ] || echo "$HOST;${MAC%%;};${IP%%;}" >> $TMP_DHCP
+                          HOST=""
+                          IP=""
+                          MAC=""
+                          continue
+                          ;;
+    esac
+    case "$OLDLINE" in
+        "host")              HOST=$LINE ;;
+        "hardware ethernet") MAC=$(echo $LINE|sed s/://g)  ;;
+        "fixed-address")     IP=$LINE ;;
+    esac
+    OLDLINE=""
+done
+# Ordeno el fichero
+sort -o $TMP_DHCP $TMP_DHCP
 
 # Creo fichero temporal del mysql, de la base de datos de opengnsys
 dbexec "select CONCAT_WS (';', nombreordenador, mac, ip) from ordenadores order by nombreordenador;" > $TMP_MYSQL
