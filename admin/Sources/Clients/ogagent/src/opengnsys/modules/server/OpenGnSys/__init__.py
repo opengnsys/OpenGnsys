@@ -282,7 +282,8 @@ class OpenGnSysWorker(ServerWorker):
         logger.debug('Processing script request')
         # Decoding script
         script = urllib.unquote(post_params.get('script').decode('base64')).decode('utf8')
-        script = 'import subprocess; subprocess.check_output("""{}""",shell=True)'.format(script)
+        script = 'import subprocess;' +\
+                 ';'.join(['subprocess.check_output({},shell=True)'.format(c) for c in script.split('\n')])
         # Executing script.
         if post_params.get('client', 'false') == 'false':
             thr = ScriptExecutorThread(script)
