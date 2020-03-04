@@ -32,7 +32,7 @@
 #@version 1.1.0 - Initial version.
 #@author  Ramón M. Gómez - ETSII Univ. Sevilla
 #@date    2016-12-05
-#@version 1.1.1b - Use global functions.
+#@version 1.1.1b - Use reduced directory names.
 #@author  Ramón M. Gómez - ETSII Univ. Sevilla
 #@date    2020-01-17
 #*/ ##
@@ -270,9 +270,11 @@ function install() {
     [ ! -w $(dirname $INFOFILE) ] && raiseError access "Configuration directory."
     [ ! -w $TFTPDIR ] && raiseError access "Installation directory."
     [ -z "$(file -b $OGLIVEFILE | grep "ISO.*ogClient")" ] && raiseError access "File is not an ogLive ISO image."
-    # Working directory (ogLive-Distribution-KernelVersion-Architecture-CodeRevision).
+    # Working directory:
+    #   64-bit: ogLive-KernelVersion-rCodeRelease
+    #   32-bit: ogLive-KernelVersion-i386-rCodeRelease
     OGLIVEDIST="$(echo $OGLIVEFILE|cut -f2 -d-)"
-    OGLIVEREV="${OGLIVEFILE##*-}"; OGLIVEREV="${OGLIVEREV%.*}"
+    OGLIVEREV="${OGLIVEFILE##*-}"; OGLIVEREV="${OGLIVEREV%%.*}"
     OGLIVEKRNL="$(echo $OGLIVEFILE|cut -f3- -d-)"; OGLIVEKRNL="${OGLIVEKRNL%-$OGLIVEREV.*}"
     OGLIVEARCH="$(echo $OGLIVEFILE|awk -F- '{print $(NF-1)}')"
     case "$OGLIVEARCH" in
@@ -281,7 +283,8 @@ function install() {
         *)          # 32-bit by default.
             OGLIVEARCH="i386" ;;
     esac
-    OGLIVEDIR="$TFTPDIR/$DEFOGLIVE-$OGLIVEDIST-${OGLIVEKRNL%%-*}-$OGLIVEARCH-$OGLIVEREV"
+    OGLIVEDIR="$TFTPDIR/$DEFOGLIVE-${OGLIVEKRNL%%-*}-$OGLIVEARCH-$OGLIVEREV"
+    OGLIVEDIR="${OGLIVEDIR/amd64-/}"
     # Get current or default Samba key.
     OGINITRD=$OGLIVEDIR/oginitrd.img
     [ ! -r $OGINITRD ] && OGINITRD=$TFTPDIR/$DEFOGLIVE/oginitrd.img
