@@ -6,7 +6,6 @@ not-authoritative;
 
 subnet NETIP netmask NETMASK {
     option domain-name-servers DNSIP;
-    option routers ROUTERIP;
     option broadcast-address NETBROAD;
     default-lease-time 600;
     max-lease-time 7200;
@@ -18,22 +17,17 @@ subnet NETIP netmask NETMASK {
         filename "grldr";
     }
     use-host-decl-names on;
+    option routers ROUTERIP;
 
 # Ejemplo para PC.
-#    host HOSTNAME1 {
-#        hardware ethernet HOSTMAC1;
-#        fixed-address HOSTIP1;
-#   }
+#    host HOSTNAME1 { hardware ethernet HOSTMAC1; fixed-address HOSTIP1; }
 
 # Ejemplo para Mac.
 #    group {
 #        option tftp-server-name="SERVERIP";
 #        option bootfile-name "grldr";
-#        host MACOSHOST1 {
-#            hardware ethernet MACOSHOSTMAC1;
-#            fixed-address MACOSHOSTIP1;
-#       }
-#   }
+#        host MACOSHOST1 { hardware ethernet MACOSHOSTMAC1; fixed-address MACOSHOSTIP1; }
+#    }
 
 }
 
