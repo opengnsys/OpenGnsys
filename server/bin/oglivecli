@@ -55,7 +55,7 @@ source $OPENGNSYS/lib/ogfunctions.sh || exit 1
 
 # Create/edit JSON file about installed ogLive clients.
 function addToJson() {
-    local DATA OGLIVEDIST="$1" OGLIVEKRNL="$2" OGLIVEARCH="$3" OGLIVEREV="$4"
+    local i DATA OGLIVEDIST="$1" OGLIVEKRNL="$2" OGLIVEARCH="$3" OGLIVEREV="$4"
     local OGLIVEDIR=$(basename $5 2>/dev/null) OGLIVEISO=$(basename $6 2>/dev/null)
     # JSON data for installed ogLive.
     DATA=$(cat << EOT | jq .
@@ -135,7 +135,7 @@ EOT
             [ "$DATA" ] || raiseError notfound "\"$1\"."
             echo "$DATA"
             ;;
-	*)  # Usage error.
+        *)  # Usage error.
             raiseError usage
             ;;
 esac
@@ -196,7 +196,7 @@ function list() {
             awk '{system("echo -n "$0"; test -d '$TFTPDIR'/"$2" || echo -n \" (missing)\"; echo")}' | column -t
 }
 
-# Show information about an installed ogLive client. 
+# Show information about an installed ogLive client.
 function show() {
     local INDEX
     [ $# -ne 1 ] && raiseError usage
@@ -329,7 +329,7 @@ function install() {
     if [ -z "$RSYNCSERV" -o ${RSYNCSERV:-0} -gt ${RSYNCCLNT:-1} ]; then
         [ -e $OPENGNSYS/client/bin/rsync-$RSYNCSERV ] && mv -f $OPENGNSYS/client/bin/rsync-$RSYNCSERV $OPENGNSYS/client/bin/rsync
     else
-	# Else, rename compiled file using Rsync protocol number.
+        # Else, rename compiled file using Rsync protocol number.
         [ -e $OPENGNSYS/client/bin/rsync ] && mv -f $OPENGNSYS/client/bin/rsync $OPENGNSYS/client/bin/rsync-$($OPENGNSYS/client/bin/rsync --version 2>/dev/null | awk '/protocol/ {print $6}')
     fi
     # Unmount SquashFS.
@@ -401,7 +401,7 @@ function setdefault() {
 
 # Rebuild a lost configuration file.
 function rebuild() {
-    local INST i NF DEF
+    local i INST NF DEF
     [ $# -ne 0 ] && raiseError usage
     [ -f $INFOFILE ] && raiseError access "Configuration file exists."
     INST=$(find $TFTPDIR/ -type d -name "$DEFOGLIVE-*" -a ! -name "*.old" -printf "%f\n" | sort)
@@ -409,8 +409,9 @@ function rebuild() {
         NF=$(echo $i | awk -F- '{print NF-1}')
         case $NF in
             1)  addToJson "" "$(echo $i|cut -f2 -d-)" "i386" "" "$i" "" ;;
-            4)  addToJson $(echo $i | awk -F- '{printf "%s %s i386 %s %s '""'",$2,$3,$4,$0}') ;;
-            5)  addToJson $(echo $i | awk -F- '{printf "%s %s %s %s %s '""'",$2,$3,$4,$5,$0}') ;;
+            2)  eval addToJson $(echo $i | awk -F- '{printf "\"\" %s amd64 %s %s \"\"",$2,$3,$0}') ;;
+            3)  eval addToJson $(echo $i | awk -F- '{if ($3=="i386") printf "\"\" %s %s %s %s \"\"",$2,$3,$4,$0; else printf "%s %s i386 %s %s \"\"",$2,$3,$4,$0}') ;;
+            4)  eval addToJson $(echo $i | awk -F- '{printf "%s %s %s %s %s \"\"",$2,$3,$4,$5,$0}') ;;
         esac
         # Check for is default oglive.
         [ -n "$(stat -c "%N" $TFTPDIR/$DEFOGLIVE | awk '$3~/'$i'/ {print}')" ] && DEF="$i"
@@ -424,7 +425,7 @@ function assign() {
 local ISOFILE DIR
     [ $# -ne 2 ] && raiseError usage
     [ ! -w $INFOFILE ] && raiseError access "Configuration file."
-    # Check if exist ISO file and index directory.
+    # Check if ISO file and index directory exist.
     ISOFILE=$DOWNLOADFILE/$1
     [ ! -f $DOWNLOADDIR/$ISOFILE ] && raiseError notfound "ISO file \"$1\"."
     DIR=$(search $2 2>/dev/null)
