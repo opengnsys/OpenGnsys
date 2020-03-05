@@ -86,6 +86,8 @@ if($pswop!=$op_suspension){
 				$pnombrebloque, $pannos, $pmeses, $pdiario,
 				$phoras, $pampm, $pminutos);
 			$swop=$op_alta;
+			$schedule = get_schedule($pidentificador);
+			$idr = max(array_keys($schedule));
 			break;
 		case $op_eliminacion:
 			$result = delete_schedule($pidprogramacion);

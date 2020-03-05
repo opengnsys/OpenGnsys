@@ -30,6 +30,7 @@ define('OG_REST_CMD_RUN_TASK', 'task/run');
 define('OG_REST_CMD_CREATE_SCHEDULE', 'schedule/create');
 define('OG_REST_CMD_DELETE_SCHEDULE', 'schedule/delete');
 define('OG_REST_CMD_UPDATE_SCHEDULE', 'schedule/update');
+define('OG_REST_CMD_SCHEDULE', 'schedule');
 
 define('OG_REST_PARAM_CLIENTS', 'clients');
 define('OG_REST_PARAM_ADDR', 'addr');
@@ -616,6 +617,16 @@ function update_schedule($schedule_id, $task_id, $name, $years, $months, $days,
 	);
 
 	return common_request(OG_REST_CMD_UPDATE_SCHEDULE, POST, $data);
+}
+
+function get_schedule($task_id = null) {
+	if (isset($task_id))
+		$data = array(OG_REST_PARAM_TASK => strval($task_id));
+	else
+		$data = null;
+
+	$result = common_request(OG_REST_CMD_SCHEDULE, POST, $data);
+	return $result;
 }
 
 /*
