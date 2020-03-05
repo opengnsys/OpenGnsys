@@ -4908,6 +4908,111 @@ static int og_dbi_schedule_delete(struct og_dbi *dbi, uint32_t id)
 	return 0;
 }
 
+struct og_db_schedule {
+	uint32_t		id;
+	uint32_t		task_id;
+	const char		*name;
+	struct og_schedule_time	time;
+	uint32_t		week_days;
+	uint32_t		weeks;
+	uint32_t		suspended;
+	uint32_t		session;
+};
+
+static int og_dbi_schedule_get_json(struct og_dbi *dbi, json_t *root,
+				    const char *task_id, const char *schedule_id)
+{
+	struct og_db_schedule schedule;
+	json_t *obj, *array;
+	const char *msglog;
+	dbi_result result;
+	int err = 0;
+
+	if (task_id) {
+		result = dbi_conn_queryf(dbi->conn,
+					 "SELECT idprogramacion,"
+					 "	 identificador, nombrebloque,"
+					 "	 annos, meses, diario, dias,"
+					 "	 semanas, horas, ampm,"
+					 "	 minutos,suspendida, sesion "
+					 "FROM programaciones "
+					 "WHERE identificador=%d",
+					 atoi(task_id));
+	} else if (schedule_id) {
+		result = dbi_conn_queryf(dbi->conn,
+					 "SELECT idprogramacion,"
+					 "	 identificador, nombrebloque,"
+					 "	 annos, meses, diario, dias,"
+					 "	 semanas, horas, ampm,"
+					 "	 minutos,suspendida, sesion "
+					 "FROM programaciones "
+					 "WHERE idprogramacion=%d",
+					 atoi(schedule_id));
+	} else {
+		result = dbi_conn_queryf(dbi->conn,
+					 "SELECT idprogramacion,"
+					 "	 identificador, nombrebloque,"
+					 "	 annos, meses, diario, dias,"
+					 "	 semanas, horas, ampm,"
+					 "	 minutos,suspendida, sesion "
+					 "FROM programaciones");
+	}
+
+	if (!result) {
+		dbi_conn_error(dbi->conn, &msglog);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
+		return -1;
+	}
+
+	array = json_array();
+	if (!array)
+		return -1;
+
+	while (dbi_result_next_row(result)) {
+		schedule.id = dbi_result_get_uint(result, "idprogramacion");
+		schedule.task_id = dbi_result_get_uint(result, "identificador");
+		schedule.name = dbi_result_get_string(result, "nombrebloque");
+		schedule.time.years = dbi_result_get_uint(result, "annos");
+		schedule.time.months = dbi_result_get_uint(result, "meses");
+		schedule.time.days = dbi_result_get_uint(result, "diario");
+		schedule.time.hours = dbi_result_get_uint(result, "horas");
+		schedule.time.am_pm = dbi_result_get_uint(result, "ampm");
+		schedule.time.minutes = dbi_result_get_uint(result, "minutos");
+		schedule.week_days = dbi_result_get_uint(result, "dias");
+		schedule.weeks = dbi_result_get_uint(result, "semanas");
+		schedule.suspended = dbi_result_get_uint(result, "suspendida");
+		schedule.session = dbi_result_get_uint(result, "sesion");
+
+		obj = json_object();
+		if (!obj) {
+			err = -1;
+			break;
+		}
+		json_object_set_new(obj, "id", json_integer(schedule.id));
+		json_object_set_new(obj, "task", json_integer(schedule.task_id));
+		json_object_set_new(obj, "name", json_string(schedule.name));
+		json_object_set_new(obj, "years", json_integer(schedule.time.years));
+		json_object_set_new(obj, "months", json_integer(schedule.time.months));
+		json_object_set_new(obj, "days", json_integer(schedule.time.days));
+		json_object_set_new(obj, "hours", json_integer(schedule.time.hours));
+		json_object_set_new(obj, "am_pm", json_integer(schedule.time.am_pm));
+		json_object_set_new(obj, "minutes", json_integer(schedule.time.minutes));
+		json_object_set_new(obj, "week_days", json_integer(schedule.week_days));
+		json_object_set_new(obj, "weeks", json_integer(schedule.weeks));
+		json_object_set_new(obj, "suspended", json_integer(schedule.suspended));
+		json_object_set_new(obj, "session", json_integer(schedule.session));
+
+		json_array_append_new(array, obj);
+	}
+
+	json_object_set_new(root, "schedule", array);
+
+	dbi_result_free(result);
+
+	return err;
+}
+
 static struct ev_loop *og_loop;
 
 static int og_cmd_schedule_create(json_t *element, struct og_msg_params *params)
@@ -4928,7 +5033,7 @@ static int og_cmd_schedule_create(json_t *element, struct og_msg_params *params)
 		} else if (!strcmp(key, "name")) {
 			err = og_json_parse_string(value, &params->name);
 			params->flags |= OG_REST_PARAM_NAME;
-		} else if (!strcmp(key, "time_params"))
+		} else if (!strcmp(key, "when"))
 			err = og_json_parse_time_params(value, params);
 
 		if (err < 0)
@@ -4984,7 +5089,7 @@ static int og_cmd_schedule_update(json_t *element, struct og_msg_params *params)
 		} else if (!strcmp(key, "name")) {
 			err = og_json_parse_string(value, &params->name);
 			params->flags |= OG_REST_PARAM_NAME;
-		} else if (!strcmp(key, "time_params"))
+		} else if (!strcmp(key, "when"))
 			err = og_json_parse_time_params(value, params);
 
 		if (err < 0)
@@ -5058,6 +5163,62 @@ static int og_cmd_schedule_delete(json_t *element, struct og_msg_params *params)
 	og_dbi_close(dbi);
 
 	og_schedule_delete(og_loop, atoi(params->id));
+
+	return err;
+}
+
+static int og_cmd_schedule_get(json_t *element, struct og_msg_params *params,
+			       char *buffer_reply)
+{
+	struct og_buffer og_buffer = {
+		.data	= buffer_reply,
+	};
+	json_t *schedule_root;
+	struct og_dbi *dbi;
+	const char *key;
+	json_t *value;
+	int err;
+
+	if (element) {
+		if (json_typeof(element) != JSON_OBJECT)
+			return -1;
+
+		json_object_foreach(element, key, value) {
+			if (!strcmp(key, "task")) {
+				err = og_json_parse_string(value,
+							   &params->task_id);
+			} else if (!strcmp(key, "id")) {
+				err = og_json_parse_string(value, &params->id);
+			} else {
+				return -1;
+			}
+
+			if (err < 0)
+				break;
+		}
+	}
+
+	dbi = og_dbi_open(&dbi_config);
+	if (!dbi) {
+		syslog(LOG_ERR, "cannot open connection database (%s:%d)\n",
+			   __func__, __LINE__);
+		return -1;
+	}
+
+	schedule_root = json_object();
+	if (!schedule_root) {
+		og_dbi_close(dbi);
+		return -1;
+	}
+
+	err = og_dbi_schedule_get_json(dbi, schedule_root,
+				       params->task_id, params->id);
+	og_dbi_close(dbi);
+
+	if (err >= 0)
+		json_dump_callback(schedule_root, og_json_dump_clients, &og_buffer, 0);
+
+	json_decref(schedule_root);
 
 	return err;
 }
@@ -5405,6 +5566,12 @@ static int og_client_state_process_payload_rest(struct og_client *cli)
 			return og_client_bad_request(cli);
 		}
 		err = og_cmd_schedule_update(root, &params);
+	} else if (!strncmp(cmd, "schedule/get",
+			    strlen("schedule/get"))) {
+		if (method != OG_METHOD_POST)
+			return og_client_method_not_found(cli);
+
+		err = og_cmd_schedule_get(root, &params, buf_reply);
 	} else {
 		syslog(LOG_ERR, "unknown command: %.32s ...\n", cmd);
 		err = og_client_not_found(cli);
