@@ -26,29 +26,24 @@
 # CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-'''
+"""
 @author: Adolfo Gómez, dkmaster at dkmon dot com
-'''
+"""
 from __future__ import unicode_literals
 
 import sys
 import time
-import signal
 import json
 import six
 import atexit
-from PyQt4 import QtGui
-from PyQt4 import QtCore
+from PyQt4 import QtCore, QtGui  # @UnresolvedImport
 
-from opengnsys import ipc
-from opengnsys import utils
+from opengnsys import VERSION, ipc, operations, utils
 from opengnsys.log import logger
 from opengnsys.service import IPC_PORT
-from opengnsys import operations
 from about_dialog_ui import Ui_OGAAboutDialog
 from message_dialog_ui import Ui_OGAMessageDialog
 from opengnsys.scriptThread import ScriptExecutorThread
-from opengnsys import VERSION
 from opengnsys.config import readConfig
 from opengnsys.loader import loadModules
 
@@ -59,14 +54,11 @@ if hasattr(sys, 'setdefaultencoding'):
 
 trayIcon = None
 
+
 def sigAtExit():
     if trayIcon:
         trayIcon.quit()
 
-#def sigTerm(sigNo, stackFrame):
-#    logger.debug("Exec sigTerm")
-#    if trayIcon:
-#        trayIcon.quit()
 
 # About dialog
 class OGAAboutDialog(QtGui.QDialog):
@@ -95,7 +87,6 @@ class OGAMessageDialog(QtGui.QDialog):
 
 
 class MessagesProcessor(QtCore.QThread):
-
     logoff = QtCore.pyqtSignal(name='logoff')
     message = QtCore.pyqtSignal(tuple, name='message')
     script = QtCore.pyqtSignal(QtCore.QString, name='script')
@@ -196,7 +187,6 @@ class OGASystemTray(QtGui.QSystemTrayIcon):
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.timerFnc)
 
-
         self.stopped = False
 
         self.ipc.message.connect(self.message)
@@ -246,9 +236,9 @@ class OGASystemTray(QtGui.QSystemTrayIcon):
         pass
 
     def message(self, msg):
-        '''
+        """
         Processes the message sent asynchronously, msg is an QString
-        '''
+        """
         try:
             logger.debug('msg: {}, {}'.format(type(msg), msg))
             module, message, data = msg
@@ -308,7 +298,7 @@ class OGASystemTray(QtGui.QSystemTrayIcon):
                 pass
 
     def quit(self):
-        #logger.debug("Exec quit {}".format(self.stopped))
+        # logger.debug("Exec quit {}".format(self.stopped))
         if self.stopped is False:
             self.cleanup()
             self.app.quit()
@@ -317,6 +307,7 @@ class OGASystemTray(QtGui.QSystemTrayIcon):
         logger.debug("Exec closeEvent")
         event.accept()
         self.quit()
+
 
 if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
@@ -332,7 +323,8 @@ if __name__ == '__main__':
         trayIcon = OGASystemTray(app)
     except Exception as e:
         logger.exception()
-        logger.error('OGA Service is not running, or it can\'t contact with OGA Server. User Tools stopped: {}'.format(utils.exceptionToMessage(e)))
+        logger.error('OGA Service is not running, or it can\'t contact with OGA Server. User Tools stopped: {}'.format(
+            utils.exceptionToMessage(e)))
         sys.exit(1)
 
     try:
@@ -347,7 +339,6 @@ if __name__ == '__main__':
     trayIcon.show()
 
     # Catch kill and logout user :)
-    #signal.signal(signal.SIGTERM, sigTerm)
     atexit.register(sigAtExit)
 
     res = app.exec_()

@@ -25,9 +25,9 @@
 # CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-'''
+"""
 @author: Ramón M. Gómez, ramongomez at us dot es
-'''
+"""
 from __future__ import unicode_literals
 
 from opengnsys.workers import ClientWorker
@@ -36,28 +36,34 @@ from opengnsys import operations
 from opengnsys.log import logger
 from opengnsys.scriptThread import ScriptExecutorThread
 
+
 class OpenGnSysWorker(ClientWorker):
     name = 'opengnsys'
 
-    def onActivation(self):
+    @staticmethod
+    def onActivation():
         logger.debug('Activate invoked')
         
-    def onDeactivation(self):
+    @staticmethod
+    def onDeactivation():
         logger.debug('Deactivate invoked')
     
     # Processes script execution
-    def process_script(self, jsonParams):
-        logger.debug('Processed message: script({})'.format(jsonParams))
-        thr = ScriptExecutorThread(jsonParams['code'])
+    @staticmethod
+    def process_script(json_params):
+        logger.debug('Processed message: script({})'.format(json_params))
+        thr = ScriptExecutorThread(json_params['code'])
         thr.start()
         #self.sendServerMessage('script', {'op', 'launched'})
 
-    def process_logoff(self, jsonParams):
-        logger.debug('Processed message: logoff({})'.format(jsonParams))
+    @staticmethod
+    def process_logoff(json_params):
+        logger.debug('Processed message: logoff({})'.format(json_params))
         operations.logoff()
 
-    def process_popup(self, jsonParams):
-        logger.debug('Processed message: popup({})'.format(jsonParams))
-        ret = operations.showPopup(jsonParams['title'], jsonParams['message'])
+    @staticmethod
+    def process_popup(json_params):
+        logger.debug('Processed message: popup({})'.format(json_params))
+        ret = operations.showPopup(json_params['title'], json_params['message'])
         #self.sendServerMessage('popup', {'op', ret})
 

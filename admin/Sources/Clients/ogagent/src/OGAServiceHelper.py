@@ -45,10 +45,10 @@ try:
             'ResetPeriod': 864000,  # Time in ms after which to reset the failure count to zero.
             'RebootMsg': u'',  # Not using reboot option
             'Command': u'',  # Not using run-command option
-      	    'Actions': [
+            'Actions': [
                 (win32service.SC_ACTION_RESTART, 5000),  # action, delay in ms
                 (win32service.SC_ACTION_RESTART, 5000)
-      	     ]
+            ]
         }
         win32service.ChangeServiceConfig2(hs, win32service.SERVICE_CONFIG_FAILURE_ACTIONS, service_failure_actions)
     finally:
