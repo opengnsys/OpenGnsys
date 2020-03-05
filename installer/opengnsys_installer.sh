@@ -217,6 +217,7 @@ case "$OSDISTRIB" in
 		INETDSERV=xinetd
 		INETDCFGDIR=/etc/xinetd.d
 		MYSQLSERV=mysql
+		MYSQLCFGDIR=/etc/mysql/mysql.conf.d
 		MARIADBSERV=mariadb
 		PHPFPMSERV=php-fpm
 		RSYNCSERV=rsync
@@ -1743,6 +1744,8 @@ INSTVERSION=$(jq -r '.version' $INSTALL_TARGET/doc/VERSION.json)
 # Instalar base de datos de OpenGnsys Admin.
 isInArray notinstalled "mysql-server" || isInArray notinstalled "mariadb-server"
 if [ $? -eq 0 ]; then
+	# Copiar plantilla de configuración de MySQL.
+	cp $WORKDIR/opengnsys/server/etc/mysqld-og.conf $MYSQLCFGDIR 2>/dev/null
 	# Habilitar gestor de base de datos (MySQL, si falla, MariaDB).
 	service=$MYSQLSERV
 	$ENABLESERVICE
