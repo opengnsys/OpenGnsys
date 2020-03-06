@@ -83,8 +83,8 @@ if($pswop!=$op_suspension){
 	switch($pswop){
 		case $op_alta:
 			$result = create_schedule($pidentificador,
-				$pnombrebloque, $pannos, $pmeses, $pdiario,
-				$phoras, $pampm, $pminutos);
+				$pnombrebloque, $pannos, $pmeses, $psemanas,
+				$pdias, $pdiario, $phoras, $pampm, $pminutos);
 			$swop=$op_alta;
 			$schedule = get_schedule($pidentificador);
 			$idr = max(array_column($schedule['schedule'], OG_REST_PARAM_ID));
