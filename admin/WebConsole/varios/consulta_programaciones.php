@@ -12,21 +12,30 @@ include_once("../includes/ctrlacc.php");
 include_once("../clases/AdoPhp.php");
 include_once("../includes/comunes.php");
 include_once("../includes/CreaComando.php");
+include_once("../includes/restfunctions.php");
 //_________________________________________________________________________________________________________
  // Toma parametros
  $idprogramacion=0;
  if (isset($_POST["idprogramacion"])) $idprogramacion=$_POST["idprogramacion"];
 
-// Abre conexiones
-$cmd=CreaComando($cadenaconexion); // Crea objeto comando
-$rs=new Recordset; // Recupero acciones anidadas
-$cmd->texto="SELECT * FROM programaciones WHERE idprogramacion=".$idprogramacion;
-$rs->Comando=&$cmd; 
-if ($rs->Abrir()){ // Error al abrir recordset
-	$cadena_campos=$rs->campos[0];
-	for($i=1;$i<$rs->numerodecampos;$i++)
-		$cadena_campos.=";".$rs->campos[$i]; // Usa el caracter ; para delimitar
-	echo $cadena_campos;
-}
-$rs->Cerrar();
+$schedule = get_schedule(null, $idprogramacion);
+$task = $schedule['schedule'][0];
+$cadena_campos = "null;null;null";
+$cadena_campos.= ";".$task[OG_REST_PARAM_NAME];
+$cadena_campos.= ";".$task[OG_REST_PARAM_YEARS];
+$cadena_campos.= ";".$task[OG_REST_PARAM_MONTHS];
+$cadena_campos.= ";".$task[OG_REST_PARAM_DAYS];
+$cadena_campos.= ";".$task['week_days'];
+$cadena_campos.= ";".$task['weeks'];
+$cadena_campos.= ";".$task[OG_REST_PARAM_HOURS];
+$cadena_campos.= ";".$task[OG_REST_PARAM_AM_PM];
+$cadena_campos.= ";".$task[OG_REST_PARAM_MINUTES];
+$cadena_campos.= ";null";
+$cadena_campos.= ";null";
+$cadena_campos.= ";null";
+$cadena_campos.= ";null";
+$cadena_campos.= ";null";
+$cadena_campos.= ";null";
+$cadena_campos.= ";null";
 
+echo $cadena_campos;
