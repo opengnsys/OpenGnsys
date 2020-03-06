@@ -68,6 +68,8 @@ define('OG_REST_PARAM_TASK', 'task');
 define('OG_REST_PARAM_TIME_PARAMS', 'time_params');
 define('OG_REST_PARAM_YEARS', 'years');
 define('OG_REST_PARAM_MONTHS', 'months');
+define('OG_REST_PARAM_WEEKS', 'weeks');
+define('OG_REST_PARAM_WEEK_DAYS', 'week_days');
 define('OG_REST_PARAM_DAYS', 'days');
 define('OG_REST_PARAM_HOURS', 'hours');
 define('OG_REST_PARAM_AM_PM', 'am_pm');
@@ -571,8 +573,8 @@ function run_task($task_id) {
 	return common_request(OG_REST_CMD_RUN_TASK, POST, $data);
 }
 
-function create_schedule($task_id, $name, $years, $months, $days, $hours,
-			$am_pm, $minutes) {
+function create_schedule($task_id, $name, $years, $months, $weeks, $week_days,
+			$days, $hours, $am_pm, $minutes) {
 
 	$data = array (
 		OG_REST_PARAM_TASK => $task_id,
@@ -580,6 +582,8 @@ function create_schedule($task_id, $name, $years, $months, $days, $hours,
 		OG_REST_PARAM_TIME_PARAMS => array (
 			OG_REST_PARAM_YEARS => intval($years),
 			OG_REST_PARAM_MONTHS => intval($months),
+			OG_REST_PARAM_WEEKS => intval($weeks),
+			OG_REST_PARAM_WEEK_DAYS => intval($week_days),
 			OG_REST_PARAM_DAYS => intval($days),
 			OG_REST_PARAM_HOURS => intval($hours),
 			OG_REST_PARAM_AM_PM => intval($am_pm),
