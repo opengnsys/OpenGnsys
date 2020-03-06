@@ -1554,10 +1554,12 @@ struct og_computer {
 #define OG_REST_PARAM_TASK			(1UL << 31)
 #define OG_REST_PARAM_TIME_YEARS		(1UL << 32)
 #define OG_REST_PARAM_TIME_MONTHS		(1UL << 33)
-#define OG_REST_PARAM_TIME_DAYS			(1UL << 34)
-#define OG_REST_PARAM_TIME_HOURS		(1UL << 35)
-#define OG_REST_PARAM_TIME_AM_PM		(1UL << 36)
-#define OG_REST_PARAM_TIME_MINUTES		(1UL << 37)
+#define OG_REST_PARAM_TIME_WEEKS		(1UL << 34)
+#define OG_REST_PARAM_TIME_WEEK_DAYS		(1UL << 35)
+#define OG_REST_PARAM_TIME_DAYS			(1UL << 36)
+#define OG_REST_PARAM_TIME_HOURS		(1UL << 37)
+#define OG_REST_PARAM_TIME_AM_PM		(1UL << 38)
+#define OG_REST_PARAM_TIME_MINUTES		(1UL << 39)
 
 enum og_rest_method {
 	OG_METHOD_GET	= 0,
@@ -1793,6 +1795,12 @@ static int og_json_parse_time_params(json_t *element,
 		} else if (!strcmp(key, "months")) {
 			err = og_json_parse_uint(value, &params->time.months);
 			params->flags |= OG_REST_PARAM_TIME_MONTHS;
+		} else if (!strcmp(key, "weeks")) {
+			err = og_json_parse_uint(value, &params->time.weeks);
+			params->flags |= OG_REST_PARAM_TIME_WEEKS;
+		} else if (!strcmp(key, "week_days")) {
+			err = og_json_parse_uint(value, &params->time.week_days);
+			params->flags |= OG_REST_PARAM_TIME_WEEK_DAYS;
 		} else if (!strcmp(key, "days")) {
 			err = og_json_parse_uint(value, &params->time.days);
 			params->flags |= OG_REST_PARAM_TIME_DAYS;
@@ -3742,12 +3750,15 @@ static int og_dbi_schedule_create(struct og_dbi *dbi,
 	result = dbi_conn_queryf(dbi->conn,
 				 "INSERT INTO programaciones (tipoaccion,"
 				 " identificador, nombrebloque, annos, meses,"
-				 " diario, horas, ampm, minutos, suspendida) VALUES (%d,"
-				 " %s, '%s', %d, %d, %d, %d, %d, %d, %d)", type,
-				 params->task_id, params->name, params->time.years,
-				 params->time.months, params->time.days,
-				 params->time.hours, params->time.am_pm,
-				 params->time.minutes, suspended);
+				 " semanas, dias, diario, horas, ampm, minutos,"
+				 " suspendida) VALUES (%d, %s, '%s', %d, %d,"
+				 " %d, %d, %d, %d, %d, %d, %d)", type,
+				 params->task_id, params->name,
+				 params->time.years, params->time.months,
+				 params->time.weeks, params->time.week_days,
+				 params->time.days, params->time.hours,
+				 params->time.am_pm, params->time.minutes,
+				 suspended);
 	if (!result) {
 		dbi_conn_error(dbi->conn, &msglog);
 		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
@@ -3946,6 +3957,8 @@ static int og_cmd_schedule_create(json_t *element, struct og_msg_params *params)
 					    OG_REST_PARAM_NAME |
 					    OG_REST_PARAM_TIME_YEARS |
 					    OG_REST_PARAM_TIME_MONTHS |
+					    OG_REST_PARAM_TIME_WEEKS |
+					    OG_REST_PARAM_TIME_WEEK_DAYS |
 					    OG_REST_PARAM_TIME_DAYS |
 					    OG_REST_PARAM_TIME_HOURS |
 					    OG_REST_PARAM_TIME_MINUTES |

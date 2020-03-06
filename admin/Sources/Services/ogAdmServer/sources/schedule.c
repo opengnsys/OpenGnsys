@@ -128,13 +128,9 @@ static void get_last_week(struct tm *tm, int *days, int *j)
 		days[(*j)++] = tm->tm_mday;
 
 
-		syslog(LOG_ERR, "TM_WDAY: %d", tm->tm_wday);//XXX
-		syslog(LOG_ERR, "TM_MDAY: %d", tm->tm_mday);//XXX
 		/* Last day of this week? */
-		if (tm->tm_wday == 1) {
-			syslog(LOG_ERR, "break week");//XXX
+		if (tm->tm_wday == 1)
 			break;
-		}
 
 		tm->tm_mday--;
 	}
@@ -199,17 +195,140 @@ static void og_schedule_remove_duplicates()
 	}
 }
 
+static void og_schedule_create_weekdays(int month, int year,
+					int *hours, int minutes, int week_days,
+					uint32_t task_id, uint32_t schedule_id)
+{
+	struct og_schedule *schedule;
+	int month_days[5];
+	int n_month_days;
+	uint32_t wday;
+	struct tm tm;
+	int k, l;
+
+	for (wday = 0; wday < 7; wday++) {
+		if (!((1 << wday) & week_days))
+			continue;
+
+		memset(&tm, 0, sizeof(tm));
+		tm.tm_mon = month;
+		tm.tm_year = year;
+
+		n_month_days = 0;
+		memset(month_days, 0, sizeof(month_days));
+		get_days_from_weekday(&tm, wday, month_days, &n_month_days);
+
+		for (k = 0; month_days[k] != 0 && k < n_month_days; k++) {
+			for (l = 0; hours[l] != 0 && l < 31; l++) {
+				schedule = (struct og_schedule *)
+					calloc(1, sizeof(struct og_schedule));
+				if (!schedule)
+					return;
+
+				memset(&tm, 0, sizeof(tm));
+				tm.tm_year = year;
+				tm.tm_mon = month;
+				tm.tm_mday = month_days[k];
+				tm.tm_hour = hours[l] - 1;
+				tm.tm_min = minutes;
+
+				schedule->seconds = mktime(&tm);
+				schedule->task_id = task_id;
+				schedule->schedule_id = schedule_id;
+				og_schedule_add(schedule);
+			}
+		}
+	}
+}
+
+static void og_schedule_create_weeks(int month, int year,
+				     int *hours, int minutes, int weeks,
+				     uint32_t task_id, uint32_t schedule_id)
+{
+	struct og_schedule *schedule;
+	int month_days[7];
+	int n_month_days;
+	struct tm tm;
+	int week;
+	int k, l;
+
+	for (week = 0; week < 5; week++) {
+		if (!((1 << week) & weeks))
+			continue;
+
+		memset(&tm, 0, sizeof(tm));
+		tm.tm_mon = month;
+		tm.tm_year = year;
+
+		n_month_days = 0;
+		memset(month_days, 0, sizeof(month_days));
+		if (week == 5)
+			get_last_week(&tm, month_days, &n_month_days);
+		else
+			get_days_from_week(&tm,  week, month_days, &n_month_days);
+
+		for (k = 0; month_days[k] != 0 && k < n_month_days; k++) {
+			for (l = 0; hours[l] != 0 && l < 31; l++) {
+				schedule = (struct og_schedule *)
+					calloc(1, sizeof(struct og_schedule));
+				if (!schedule)
+					return;
+
+				memset(&tm, 0, sizeof(tm));
+				tm.tm_year = year;
+				tm.tm_mon = month;
+				tm.tm_mday = month_days[k];
+				tm.tm_hour = hours[l] - 1;
+				tm.tm_min = minutes;
+
+				schedule->seconds = mktime(&tm);
+				schedule->task_id = task_id;
+				schedule->schedule_id = schedule_id;
+				og_schedule_add(schedule);
+			}
+		}
+	}
+}
+
+static void og_schedule_create_days(int month, int year,
+				    int *hours, int minutes, int *days,
+				    uint32_t task_id, uint32_t schedule_id)
+{
+	struct og_schedule *schedule;
+	struct tm tm;
+	int k, l;
+
+	for (k = 0; days[k] != 0 && k < 31; k++) {
+		for (l = 0; hours[l] != 0 && l < 31; l++) {
+			schedule = (struct og_schedule *)
+				calloc(1, sizeof(struct og_schedule));
+			if (!schedule)
+				return;
+
+			memset(&tm, 0, sizeof(tm));
+			tm.tm_year = year;
+			tm.tm_mon = month;
+			tm.tm_mday = days[k];
+			tm.tm_hour = hours[l] - 1;
+			tm.tm_min = minutes;
+
+			schedule->seconds = mktime(&tm);
+			schedule->task_id = task_id;
+			schedule->schedule_id = schedule_id;
+			og_schedule_add(schedule);
+		}
+	}
+}
+
 void og_schedule_create(unsigned int schedule_id, unsigned int task_id,
 			struct og_schedule_time *time)
 {
-	struct og_schedule *schedule;
+	int year, month, minutes;
 	int months[12] = {};
 	int years[12] = {};
 	int hours[12] = {};
 	int days[31] = {};
-	struct tm tm = {};
-	int i, j, k, l = 0;
-	int minutes;
+	int i, j;
 
 	og_parse_years(time->years, years);
 	og_parse_months(time->months, months);
@@ -219,105 +338,29 @@ void og_schedule_create(unsigned int schedule_id, unsigned int task_id,
 
 	for (i = 0; years[i] != 0 && i < 12; i++) {
 		for (j = 0; months[j] != 0 && j < 12; j++) {
-			memset(&tm, 0, sizeof(tm));
-			tm.tm_year = years[i];
-			tm.tm_mon = months[j] - 1;
-			if (time->week_days) {
-				for (int wday = 0; wday < 7; wday++) {
-					if ((1 << wday) & time->week_days) {
-						int specific_month_days[5] = {};
-						int n_month_days = 0;
-						get_days_from_weekday(&tm,
-								      wday,
-								      specific_month_days,
-								      &n_month_days);
+			month = months[j] - 1;
+			year = years[i];
 
-						for (k = 0; specific_month_days[k] != 0 && k < n_month_days; k++) {
-							for (l = 0; hours[l] != 0 && l < 31; l++) {
-								schedule = (struct og_schedule *)
-									calloc(1, sizeof(struct og_schedule));
-								if (!schedule)
-									return;
+			if (time->week_days)
+				og_schedule_create_weekdays(month, year,
+							    hours, minutes,
+							    time->week_days,
+							    task_id,
+							    schedule_id);
 
-								memset(&tm, 0, sizeof(tm));
-								tm.tm_year = years[i];
-								tm.tm_mon = months[j] - 1;
-								tm.tm_mday = specific_month_days[k];
-								tm.tm_hour = hours[l] - 1;
-								tm.tm_min = minutes;
+			if (time->weeks)
+				og_schedule_create_weeks(month, year,
+							 hours, minutes,
+							 time->weeks,
+							 task_id,
+							 schedule_id);
 
-								schedule->seconds = mktime(&tm);
-								schedule->task_id = task_id;
-								schedule->schedule_id = schedule_id;
-								og_schedule_add(schedule);
-							}
-						}
-					}
-				}
-			}
-
-			if (time->weeks) {
-				for (int week = 0; week < 5; week++) {
-					if ((1 << week) & time->weeks) {
-						int specific_month_days[7] = {};
-						int n_month_days = 0;
-
-						if (week == 5)
-							get_last_week(&tm,
-								      specific_month_days,
-								      &n_month_days);
-						else
-							get_days_from_week(&tm,
-									   week,
-									   specific_month_days,
-									   &n_month_days);
-
-						for (k = 0; specific_month_days[k] != 0 && k < n_month_days; k++) {
-							for (l = 0; hours[l] != 0 && l < 31; l++) {
-								schedule = (struct og_schedule *)
-									calloc(1, sizeof(struct og_schedule));
-								if (!schedule)
-								  return;
-
-								memset(&tm, 0, sizeof(tm));
-								tm.tm_year = years[i];
-								tm.tm_mon = months[j] - 1;
-								tm.tm_mday = specific_month_days[k];
-								tm.tm_hour = hours[l] - 1;
-								tm.tm_min = minutes;
-
-								schedule->seconds = mktime(&tm);
-								schedule->task_id = task_id;
-								schedule->schedule_id = schedule_id;
-								og_schedule_add(schedule);
-							}
-						}
-					}
-				}
-			}
-
-			if (time->days) {
-				for (k = 0; days[k] != 0 && k < 31; k++) {
-					for (l = 0; hours[l] != 0 && l < 31; l++) {
-						schedule = (struct og_schedule *)
-							calloc(1, sizeof(struct og_schedule));
-						if (!schedule)
-							return;
-
-						memset(&tm, 0, sizeof(tm));
-						tm.tm_year = years[i];
-						tm.tm_mon = months[j] - 1;
-						tm.tm_mday = days[k];
-						tm.tm_hour = hours[l] - 1;
-						tm.tm_min = minutes;
-
-						schedule->seconds = mktime(&tm);
-						schedule->task_id = task_id;
-						schedule->schedule_id = schedule_id;
-						og_schedule_add(schedule);
-					}
-				}
-			}
+			if (time->days)
+				og_schedule_create_days(month, year,
+							hours, minutes,
+							days,
+							task_id,
+							schedule_id);
 		}
 	}
 
