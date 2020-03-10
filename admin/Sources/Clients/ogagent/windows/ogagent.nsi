@@ -84,6 +84,7 @@ Section -Main SEC0000
     SetOverwrite on
     File /r bin\*.*
     File vcredist_x86.exe
+    File src\VERSION
     WriteRegStr HKLM "${REGKEY}\Components" Main 1
 SectionEnd
 
@@ -139,8 +140,10 @@ done${UNSECTION_ID}:
 
 # Uninstaller sections
 Section /o -un.Main UNSEC0000
+    nsExec::Exec "taskkill /F /IM OGAgentUser.exe /T"
     nsExec::Exec /OEM "$INSTDIR\OGAgentService.exe stop" # Stops the service prior uninstall
     nsExec::Exec /OEM "$INSTDIR\OGAgentService.exe remove" # Removes the service prior uninstall 
+    nsExec::Exec "taskkill /F /IM OGAgentService.exe /T"
     Delete /REBOOTOK "$INSTDIR\*.*"
     DeleteRegValue HKLM "${REGKEY}\Components" Main
     DeleteRegValue HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Run" OGAgentTool
@@ -162,11 +165,7 @@ Section -un.post UNSEC0001
     DeleteRegKey /IfEmpty HKLM "${REGKEY}"
     RmDir /REBOOTOK $SMPROGRAMS\$StartMenuGroup
     SetShellVarContext all
-    RmDir /REBOOTOK $INSTDIR
-    SetRebootFlag true
-    MessageBox MB_YESNO "$(^RebootMessage)" IDNO donotreboot
-        Reboot # Reboot is needed after uninstalling, so new installs works fine
-    donotreboot:
+    RmDir /r /REBOOTOK $INSTDIR
 SectionEnd
 
 # Installer functions
@@ -191,7 +190,3 @@ LangString ^UninstallLink ${LANG_ENGLISH} "Uninstall $(^Name)"
 LangString ^UninstallLink ${LANG_SPANISH} "Desinstalar $(^Name)"
 LangString ^UninstallLink ${LANG_FRENCH} "D�sinstaller $(^Name)"
 LangString ^UninstallLink ${LANG_GERMAN} "deinstallieren $(^Name)"
-LangString ^RebootMessage ${LANG_ENGLISH} "Reboot the system to complete uninstall process?$\nNote: for a new $(^Name) installation, you will need to reboot."
-LangString ^RebootMessage ${LANG_SPANISH} "¿Reiniciar el sistema para completar el proceso?$\nNota: es necesario reiniciar para instalar un nuevo $(^Name)."
-LangString ^RebootMessage ${LANG_FRENCH} "Reboot the system to complete uninstall process?$\nNote: for a new $(^Name) installation, you will ned to reboot."
-LangString ^RebootMessage ${LANG_GERMAN} "Reboot the system to complete uninstall process?$\nNote: for a new $(^Name) installation, you will ned to reboot."
