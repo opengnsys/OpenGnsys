@@ -51,13 +51,13 @@ load $HIVE
 cd \\Software\\Microsoft\\Windows\\CurrentVersion\\RunOnce
 setval 1
 Install OGAgent
-string:C:\\Windows\\Temp\\$OGAGENTFILE"
+string:C:\\Windows\\Temp\\$OGAGENTFILE /S /server $(ogGetServerIp)
 commit
 close
 exit
 EOT
                     echo "Scheduled OGAgent installation after \"$3\" logon"
-                    echo "  (edit config file after finish)."
+                    echo "  (for connection problems, check configuration file)."
                 else
                     ogRaiseError $OG_ERR_NOTWRITE "$1 $2 .../$3/NTUSER.DAT"
                     exit $OG_ERR_NOTWRITE
