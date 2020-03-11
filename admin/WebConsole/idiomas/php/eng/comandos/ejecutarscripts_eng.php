@@ -20,11 +20,10 @@
 	$TbMsg[12]='&nbsp;Execution mode *&nbsp;';
 	$TbMsg[13]='System';
 	$TbMsg[14]='User';
-	$TbMsg[15]="Warning:  Execution mode is only applied to new OS agents: <br>\n
+	$TbMsg[15]="Warning:
 		    * User mode is only valid if a graphic mode session is started.<br>\n
 		    * Script language to send must correspond with the client status.<br>\n
-		    * For Windows you have to escape backslash.";
-
+		    * OGAgent for Windows prior to 1.1.1b only: you must escape backslash (\\\\).";
 	$TbMsg["WDI10"]='Modify code';
 	$TbMsg["WDI11"]='Deploy Image Wizard';
 	$TbMsg["WDI12"]='Generate OG Code';
