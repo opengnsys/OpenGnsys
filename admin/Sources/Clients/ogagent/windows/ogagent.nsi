@@ -51,8 +51,8 @@ Var SERVERIP_VALUE
 
 # Installer pages
 !insertmacro MUI_PAGE_WELCOME
-Page custom "ParamsPage" "ParamsPageLeave" "Parámetros"
 !insertmacro MUI_PAGE_LICENSE src\license.txt
+Page custom "ParamsPage" "ParamsPageLeave"
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
 !insertmacro MUI_PAGE_FINISH
@@ -197,12 +197,13 @@ FunctionEnd
 
 # Parameters dialog box
 Function ParamsPage
-    nsDialogs::Create 1018
+    !insertmacro MUI_HEADER_TEXT "$(PARAMS_TITLE)" ""
+    nsDialogs::Create /NOUNLOAD 1018
     Pop $0
     ${If} $0 == error
         Abort
     ${EndIf}
-    ${NSD_CreateLabel} 0 0 100% 12u "$(ServerLabel):"
+    ${NSD_CreateLabel} 0 0 100% 12u "$(SERVER_LABEL):"
     Pop $0
     ${NSD_CreateText} 10% 20u 80% 12u "$SERVERIP_VALUE"
     Pop $SERVERIP
@@ -223,10 +224,14 @@ Function GetParameters
 FunctionEnd
 
 # Installer Language Strings
-LangString ServerLabel ${LANG_ENGLISH} "OpenGnsys Server IP Address"
-LangString ServerLabel ${LANG_SPANISH} "Direccion IP del Servidor OpenGnsys"
-LangString ServerLabel ${LANG_FRENCH} "Dirección IP del Servidor OpenGnsys"
-LangString ServerLabel ${LANG_GERMAN} "Dirección IP del Servidor OpenGnsys"
+LangString PARAMS_TITLE ${LANG_ENGLISH} "Setup parameters"
+LangString PARAMS_TITLE ${LANG_SPANISH} "Parametros de configuracion"
+LangString PARAMS_TITLE ${LANG_FRENCH} "Parametres de configuration"
+LangString PARAMS_TITLE ${LANG_GERMAN} "Setup-Parameter"
+LangString SERVER_LABEL ${LANG_ENGLISH} "OpenGnsys Server IP Address"
+LangString SERVER_LABEL ${LANG_SPANISH} "Direccion IP del Servidor OpenGnsys"
+LangString SERVER_LABEL ${LANG_FRENCH} "Adresse IP du Serveur OpenGnsys"
+LangString SERVER_LABEL ${LANG_GERMAN} "OpenGnsys-Server-IP-Adresse"
 LangString ^UninstallLink ${LANG_ENGLISH} "Uninstall $(^Name)"
 LangString ^UninstallLink ${LANG_SPANISH} "Desinstalar $(^Name)"
 LangString ^UninstallLink ${LANG_FRENCH} "D�sinstaller $(^Name)"
