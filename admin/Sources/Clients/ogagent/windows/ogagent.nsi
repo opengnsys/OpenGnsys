@@ -95,7 +95,7 @@ Section -Main SEC0000
 SectionEnd
 
 Section -post SEC0001
-    WriteIniStr $INSTDIR\${CONFIGFILE} "opengnsys" "remote" "https://$SERVERIP_VALUE:8000/opengnsys/rest"
+    WriteIniStr $INSTDIR\${CONFIGFILE} "opengnsys" "remote" "https://$SERVERIP_VALUE/opengnsys/rest"
     SetShellVarContext current
     WriteRegStr HKLM "${REGKEY}" Path $INSTDIR
     SetOutPath $INSTDIR
@@ -130,6 +130,8 @@ Section -post SEC0001
     nsExec::Exec /OEM "$INSTDIR\OGAgentService.exe --startup auto install" # Add service after installation
     # Update recovery options
     nsExec::Exec /OEM "$INSTDIR\OGAServiceHelper.exe" 
+    Exec "net start ogagent"
+    Exec "$INSTDIR\OGAgentUser.exe"
 SectionEnd
 
 # Macro for selecting uninstaller sections
@@ -178,6 +180,7 @@ SectionEnd
 # Installer functions
 Function .onInit
     InitPluginsDir
+    Call GetParameters
     StrCpy $StartMenuGroup "OpenGnsys Agent"
     
     !insertmacro MUI_LANGDLL_DISPLAY
@@ -192,13 +195,8 @@ Function un.onInit
     !insertmacro SELECT_UNSECTION Main ${UNSEC0000}
 FunctionEnd
 
-# Server IP dialog box
+# Parameters dialog box
 Function ParamsPage
-    # Get input parameter
-    ${GetOptions} $CMDLINE "/server" $SERVERIP_VALUE
-    ${If} $SERVERIP_VALUE == ""
-        StrCpy $SERVERIP_VALUE "192.168.2.10"
-    ${EndIf}
     nsDialogs::Create 1018
     Pop $0
     ${If} $0 == error
@@ -211,9 +209,17 @@ Function ParamsPage
     nsDialogs::Show
 FunctionEnd
 
-# Get server IP
+# Get parameters from the dialog
 Function ParamsPageLeave
     ${NSD_GetText} $SERVERIP $SERVERIP_VALUE
+FunctionEnd
+
+# Assign input parameters or default values to variables
+Function GetParameters
+    ${GetOptions} $CMDLINE "/server" $SERVERIP_VALUE
+    ${If} $SERVERIP_VALUE == ""
+        StrCpy $SERVERIP_VALUE "192.168.2.10"
+    ${EndIf}
 FunctionEnd
 
 # Installer Language Strings
