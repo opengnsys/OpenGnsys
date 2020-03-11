@@ -95,7 +95,7 @@ LOG_FILE=/tmp/$(basename $OGLOGFILE)
 # - OSDISTRIB - distribución Linux
 # - DEPENDENCIES - array de dependencias que deben estar instaladas
 # - UPDATEPKGLIST, INSTALLPKGS, CHECKPKG - comandos para gestión de paquetes
-# - APACHECFGDIR, APACHESERV, PHPFPMSERV, DHCPSERV, INETDCFGDIR - configuración y servicios
+# - APACHECFGDIR, APACHESERV, PHPFPMSERV, DHCPSERV, MYSQLSERV, MYSQLCFGDIR, INETDCFGDIR - configuración y servicios
 
 function autoConfigure()
 {
@@ -138,6 +138,8 @@ function autoConfigure()
 		APACHEDISABLEMODS="php"
 		APACHEUSER="www-data"
 		APACHEGROUP="www-data"
+		MYSQLCFGDIR=/etc/mysql/mysql.conf.d
+		MYSQLSERV="mysql"
 		PHPFPMSERV="php-fpm"
 		INETDCFGDIR=/etc/xinetd.d
 	elif [ -f /etc/redhat-release ]; then
@@ -161,6 +163,8 @@ function autoConfigure()
 		fi
 		APACHEUSER="apache"
 		APACHEGROUP="apache"
+		MYSQLCFGDIR=/etc/my.cnf.d
+		MYSQLSERV="mariadb"
 		PHPFPMSERV="php-fpm"
 		INETDCFGDIR=/etc/xinetd.d
 	else
@@ -396,27 +400,10 @@ SELECT CASE WHEN DATA_TYPE LIKE '%int' THEN
 # Comprobar configuración de MySQL y recomendar cambios necesarios.
 function checkMysqlConfig()
 {
-	if [ $# -ne 2 ]; then
-		errorAndLog "${FNCNAME}(): invalid number of parameters"
-		exit 1
-	fi
-
-	local dbuser="$1"
-	local dbpassword="$2"
-	local mycnf=/tmp/.my.cnf.$$
-
 	echoAndLog "${FUNCNAME}(): checking MySQL configuration"
-	touch $mycnf
-	cat << EOT > $mycnf
-[client]
-user=$dbuser
-password=$dbpassword
-EOT
-	# Check if scheduler is active.
-	if [ "$(mysql --defaults-extra-file=$mycnf -Nse 'SELECT @@GLOBAL.event_scheduler;')" = "OFF" ]; then
-		MYSQLCONFIG="SET GLOBAL event_scheduler = ON; "
-	fi
-	rm -f $mycnf
+
+	cp -a $WORKDIR/opengnsys/server/etc/mysqld-og.cnf $MYSQLCFGDIR 2>/dev/null
+	service=$MYSQLSERV; $STARTSERVICE
 
         echoAndLog "${FUNCNAME}(): MySQL configuration has checked"
         return 0
@@ -1227,10 +1214,6 @@ function updateSummary()
 	echoAndLog " - Run \"settoken\" script to update authentication tokens"
 	if [ -n "$INSTALLEDOGLIVE" ]; then
 		echoAndLog " - Installed new ogLive Client: $INSTALLEDOGLIVE"
-	fi
-	if [ -n "$MYSQLCONFIG" ]; then
-		echoAndLog " - MySQL must be reconfigured, run next code as DB root user and restart service:"
-		echoAndLog "      $MYSQLCONFIG"
 	fi
 	echoAndLog " - If you want to use BURG as boot manager, run following command as root:"
 	echoAndLog "      curl $DOWNLOADURL/burg.tgz -o $INSTALL_TARGET/client/lib/burg.tgz"
