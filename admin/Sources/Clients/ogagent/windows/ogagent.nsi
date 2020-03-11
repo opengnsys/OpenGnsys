@@ -15,10 +15,10 @@ Name "OpenGnsys Agent"
 !endif
 !define COMPANY "OpenGnsys Project"
 !define URL https://opengnsys.es
+!define CONFIGFILE "cfg\ogagent.cfg"
 
 # MultiUser Symbol Definitions
 !define MULTIUSER_EXECUTIONLEVEL Admin
-#!define MULTIUSER_INSTALLMODE_DEFAULT_CURRENTUSER
 !define MULTIUSER_INSTALLMODE_COMMANDLINE
 !define MULTIUSER_INSTALLMODE_INSTDIR OGAgent
 !define MULTIUSER_INSTALLMODE_INSTDIR_REGISTRY_KEY "${REGKEY}"
@@ -37,15 +37,21 @@ Name "OpenGnsys Agent"
 !include MultiUser.nsh
 !include Sections.nsh
 !include MUI2.nsh
+!include nsDialogs.nsh
+!include LogicLib.nsh
+!include Filefunc.nsh
 
 # Reserved Files
 !insertmacro MUI_RESERVEFILE_LANGDLL
 
 # Variables
 Var StartMenuGroup
+Var SERVERIP
+Var SERVERIP_VALUE
 
 # Installer pages
 !insertmacro MUI_PAGE_WELCOME
+Page custom "ParamsPage" "ParamsPageLeave" "Parámetros"
 !insertmacro MUI_PAGE_LICENSE src\license.txt
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
@@ -89,6 +95,7 @@ Section -Main SEC0000
 SectionEnd
 
 Section -post SEC0001
+    WriteIniStr $INSTDIR\${CONFIGFILE} "opengnsys" "remote" "https://$SERVERIP_VALUE:8000/opengnsys/rest"
     SetShellVarContext current
     WriteRegStr HKLM "${REGKEY}" Path $INSTDIR
     SetOutPath $INSTDIR
@@ -185,7 +192,35 @@ Function un.onInit
     !insertmacro SELECT_UNSECTION Main ${UNSEC0000}
 FunctionEnd
 
+# Server IP dialog box
+Function ParamsPage
+    # Get input parameter
+    ${GetOptions} $CMDLINE "/server" $SERVERIP_VALUE
+    ${If} $SERVERIP_VALUE == ""
+        StrCpy $SERVERIP_VALUE "192.168.2.10"
+    ${EndIf}
+    nsDialogs::Create 1018
+    Pop $0
+    ${If} $0 == error
+        Abort
+    ${EndIf}
+    ${NSD_CreateLabel} 0 0 100% 12u "$(ServerLabel):"
+    Pop $0
+    ${NSD_CreateText} 10% 20u 80% 12u "$SERVERIP_VALUE"
+    Pop $SERVERIP
+    nsDialogs::Show
+FunctionEnd
+
+# Get server IP
+Function ParamsPageLeave
+    ${NSD_GetText} $SERVERIP $SERVERIP_VALUE
+FunctionEnd
+
 # Installer Language Strings
+LangString ServerLabel ${LANG_ENGLISH} "OpenGnsys Server IP Address"
+LangString ServerLabel ${LANG_SPANISH} "Direccion IP del Servidor OpenGnsys"
+LangString ServerLabel ${LANG_FRENCH} "Dirección IP del Servidor OpenGnsys"
+LangString ServerLabel ${LANG_GERMAN} "Dirección IP del Servidor OpenGnsys"
 LangString ^UninstallLink ${LANG_ENGLISH} "Uninstall $(^Name)"
 LangString ^UninstallLink ${LANG_SPANISH} "Desinstalar $(^Name)"
 LangString ^UninstallLink ${LANG_FRENCH} "D�sinstaller $(^Name)"
