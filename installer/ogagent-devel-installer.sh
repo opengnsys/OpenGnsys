@@ -37,7 +37,7 @@ read
 # Importing OGAgent source code.
 svn export --force $SVNURL $PROGDIR || exit 1
 # Downloading Visual C++ Redistributable.
-wget --unlink https://download.microsoft.com/download/5/B/C/5BC5DBB3-652D-4DCE-B14A-475AB85EEF6E/vcredist_x86.exe
+wget --unlink https://download.microsoft.com/download/5/B/C/5BC5DBB3-652D-4DCE-B14A-475AB85EEF6E/vcredist_x86.exe -O $PROGDIR/vcredist_x86.exe
 
 # Update PyQt components.
 pushd ogagent/src >/dev/null

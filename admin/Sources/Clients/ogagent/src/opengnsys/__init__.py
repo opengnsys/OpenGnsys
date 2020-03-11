@@ -38,10 +38,10 @@ import modules
 from RESTApi import REST, RESTError
 
 try:
-    with open('VERSION', 'r') as v:
-        VERSION = v.read()
+    with open('../VERSION', 'r') as v:
+        VERSION = v.read().strip()
 except IOError:
-    VERSION = '1.1.0'
+    VERSION = '1.1.1b'
 
 __title__ = 'OpenGnsys Agent'
 __version__ = VERSION

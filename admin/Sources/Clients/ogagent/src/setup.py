@@ -63,7 +63,7 @@ import sys
 # Reading version file:
 try:
     with open('VERSION', 'r') as v:
-        VERSION = v.read()
+        VERSION = v.read().split()
 except IOError:
     VERSION = '1.1.0'
 
