@@ -161,6 +161,8 @@ $msk_imagen=0x08;
 $msk_perfil=0x10;
 $msk_cache=0x12;
 
+// Número de tipos de imágenes
+$NUM_TIPOS_IMAGENES=3;
 // Tipos de imágenes
 $IMAGENES_MONOLITICAS=0x01;
 $IMAGENES_BASICAS=0x02;

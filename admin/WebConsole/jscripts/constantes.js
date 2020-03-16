@@ -45,6 +45,12 @@ var AMBITO_GRUPOSSERVIDORESDHCP=0x41;
 var AMBITO_GRUPOSSOFTINCREMENTAL=0x43;
 var AMBITO_GRUPOSRESERVAS=0x44;
 
+// En la base de datos el id de los tipos de los grupos son
+// tipo=65 -> grupos de repositorios
+// tipo=70 -> grupos de imágenes monoliticas
+// tipo=71 -> grupos de imágenes básicas
+// tipo=72 -> grupos de imágenes incrementales
+
 // Literales de los ambitos
 var LITAMBITO_CENTROS="centros";
 var LITAMBITO_AULAS="aulas";
@@ -122,3 +128,9 @@ var MSG_INFORMACION=0x05; // Envío de cualquier información sin espera de conf
 var IMAGENES_MONOLITICAS=0x01;
 var IMAGENES_BASICAS=0x02;
 var IMAGENES_INCREMENTALES=0x03;
+
+// Relación tipos de imágenes con literales del tipo
+var littipo = Array;
+littipo[1]="monoliticas";
+littipo[2]="basicas";
+littipo[3]="incrementales";
