@@ -100,6 +100,8 @@ EOT
     # Borrar el fichero temporal de credenciales.
     rm -f $MYCNF
 fi
+# Eliminar plantilla MySQL.
+rm -f /etc/{mysql/mysql.conf.d,my.conf.d}/mysqld-og.cnf
 # Quitar configuración específica de Apache.
 [ -n "$(which a2dissite 2>/dev/null)" ] && a2dissite opengnsys
 rm -f /etc/{apache2/{sites-available,sites-enabled},httpd/conf.d}/opengnsys*
