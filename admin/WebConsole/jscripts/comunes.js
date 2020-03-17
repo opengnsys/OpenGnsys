@@ -24,25 +24,8 @@ var NS=(navigator.appName=="Netscape");
 //	Inserta un nuevo grupo 
 //________________________________________________________________________________________________________
 function insertar_grupos(tipo,literaltipo,swi,idu){
-	console.log(literaltipo);
-	// si tipo = 0 nuevos menús contextuales
-	if (literaltipo == LITAMBITO_GRUPOSIMAGENES) {
-		var id = $("[id^='menu-groups']").attr('id');
-		if (! id.includes("_")) {
-			var id = $("[id^='menu-tipes']").attr('id');
-		}
-		var datos = id.split("_");
-
-		// El tipo de grupo de imagenes son 70, 71 y 72 correspondiendo al tipo de imagen 1, 2 y 3
-		var tipo=parseInt(datos[1]) + 69;
-		literaltipo=literaltipo+littipo[datos[1]];
-		identificador=datos[2];
-
-		ocultar_menu('menu-groups');
-	} else {
-	    reset_contextual(-1,-1); // Oculta menu contextual
-	    var identificador=currentNodo.toma_identificador();
-	}
+	reset_contextual(-1,-1); // Oculta menu contextual
+	var identificador=currentNodo.toma_identificador();
 	if(swi!=null && swi==1) identificador=0;
 	if(identificador==null) identificador=0;
 
@@ -77,20 +60,10 @@ function resultado_insertar_grupos(resul,descrierror,nwid,tablanodo){
 //	
 //	Modifica el nombre de un grupo
 //________________________________________________________________________________________________________
-function modificar_grupos(literaltipo=""){
-	if (literaltipo == LITAMBITO_GRUPOSIMAGENES) {
-	    var id = $("[id^='menu-groups']").attr('id');
-            var datos = id.split("_");
-
-            literaltipo=literaltipo+littipo[datos[1]];
-            identificador=datos[2];
-
-            ocultar_menu('menu-groups');
-	} else {
-	    reset_contextual(-1,-1); // Oculta menu contextual
-	    var identificador=currentNodo.toma_identificador();
-	    var literaltipo=currentNodo.toma_sufijo();
-	}
+function modificar_grupos(){
+	reset_contextual(-1,-1); // Oculta menu contextual
+	var identificador=currentNodo.toma_identificador();
+	var literaltipo=currentNodo.toma_sufijo();
 	wurl="../propiedades/propiedades_grupos.php?opcion="+op_modificacion+"&idgrupo="+identificador+"&literaltipo="+literaltipo;
 	window.open(wurl,"frame_contenidos")
 }
@@ -114,30 +87,14 @@ function resultado_modificar_grupos(resul,descrierror,lit){
 //	
 //	Elimina un grupo
 //________________________________________________________________________________________________________
-function eliminar_grupos(literaltipo=""){
-	if (literaltipo == LITAMBITO_GRUPOSIMAGENES) {
-                var id = $("[id^='menu-groups']").attr('id');
-                var datos = id.split("_");
-
-                literaltipo=literaltipo+littipo[datos[1]];
-                identificador=datos[2];
-
-		// eliminamos grupo del arbol.
-		var elemento=document.getElementById("grupo_"+datos[2]);
-		var padre = elemento.parentNode;
-		padre.removeChild(elemento);
-		console.log("grupo");
-
-                ocultar_menu('menu-groups');
-        } else {
-	    reset_contextual(-1,-1); // Oculta menu contextual
-	    if (currentNodo.TieneHijos()){
-		    var resul=window.confirm(CTbMsg[0]);
-		    if (!resul)return;
-	    }
-	    var identificador=currentNodo.toma_identificador();
-	    var literaltipo=currentNodo.toma_sufijo();
+function eliminar_grupos(){
+	reset_contextual(-1,-1); // Oculta menu contextual
+	if (currentNodo.TieneHijos()){
+		var resul=window.confirm(CTbMsg[0]);
+		if (!resul)return;
 	}
+	var identificador=currentNodo.toma_identificador();
+	var literaltipo=currentNodo.toma_sufijo();
 	wurl="../propiedades/propiedades_grupos.php?opcion="+op_eliminacion+"&idgrupo="+identificador+"&literaltipo="+literaltipo;
 	window.open(wurl,"frame_contenidos");
 }
@@ -150,13 +107,10 @@ function eliminar_grupos(literaltipo=""){
 //			- id: Identificador del registro
 //________________________________________________________________________________________________________
 function resultado_eliminar_grupos(resul,descrierror,id){
-	console.log("comunes");
-	console.log("id: "+id);
 	if (!resul){
 		alert(descrierror);
 		return
 	}
-	console.log(currentNodo);
 	var nvp=currentNodo.PapaNodo();
 	var ncel=nvp.CeldaVista;
 	EliminaNodo(currentNodo); // Elimina el nodo del árbol
@@ -288,57 +242,29 @@ function resultado_eliminar(resul,descrierror,id){
 //		Copia al buffer un nodo para moverlo posteriormente
 //________________________________________________________________________________________________________
 function mover(tipo){
-	var id = $("[id^='menu-images']").attr('id');
-        if (id.includes("_")) {
-            var datos = id.split("_");
-            currentTipo=datos[1];
-	    corte_currentNodo=datos[2];
-        } else {
-	    reset_contextual(-1,-1);
-	    corte_currentNodo=currentNodo;
-	    currentTipo=tipo
-	}
-	    console.log("tipo: "+currentTipo);
-	    console.log(corte_currentNodo);
+	reset_contextual(-1,-1);
+	corte_currentNodo=currentNodo;
+	currentTipo=tipo
 }
 //________________________________________________________________________________________________________
 //	
 //	Mueve de sitio un nodo desde un grupo a otro o a la raiz
 //________________________________________________________________________________________________________
 function colocar(pages,tipo){
-	// Tomamo el identificador del grupo y del tipo
-	var id = $("[id^='menu-groups']").attr('id');
-        if (! id.includes("_")) {
-            var id = $("[id^='menu-tipes']").attr('id');
-        }
-        var datos = id.split("_");
-
-        tipo=parseInt(datos[1]);
-        var identificadorgrupo=datos[2];
-
+	reset_contextual(-1,-1);
 	if (!corte_currentNodo || tipo!=currentTipo) {
 		alert(CTbMsg[7]);
 		corte_currentNodo=null;
 		currentTipo=null;
 		return
 	}
-
+	var identificadorgrupo=currentNodo.toma_identificador();
+	if (!identificadorgrupo) identificadorgrupo=0;
+	var identificador=corte_currentNodo.toma_identificador();
+	if (!identificador) identificador=0; // Se trata de la raiz
 	var wurl=pages;
-	if (identificadorgrupo) {
-	    var identificador=corte_currentNodo;
-	    //var prm='{opcion: "'+op_movida+'", grupoid:"'+identificadorgrupo+'", identificador="'+identificador+'}';
-	    //$.post(wurl,prm,"retornoColocar","frame_contenidos");
-	} else {
-	    reset_contextual(-1,-1);
-	    var identificadorgrupo=currentNodo.toma_identificador();
-	    if (!identificadorgrupo) identificadorgrupo=0;
-	    var identificador=corte_currentNodo.toma_identificador();
-	    if (!identificador) identificador=0; // Se trata de la raiz
-	}
-	    var prm="opcion="+op_movida+"&grupoid="+identificadorgrupo+"&identificador="+identificador;
-	//    CallPage(wurl,prm,"retornoColocar","POST");
-	console.log("url: "+wurl+"?"+prm);
-	window.open(wurl+"?"+prm,"frame_contenidos");
+	var prm="opcion="+op_movida+"&grupoid="+identificadorgrupo+"&identificador="+identificador;
+	CallPage(wurl,prm,"retornoColocar","POST");
 }
 //______________________________________________________________________________________________________
 function retornoColocar(iHTML){
