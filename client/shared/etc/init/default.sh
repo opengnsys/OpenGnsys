@@ -18,9 +18,8 @@ echo "${MSG_LAUNCHCLIENT:-.}"
 # Indicar fichero de teclado de Qt para el idioma especificado (tipo "es.qmap").
 [ -f /usr/local/etc/${LANG%_*}.qmap ] && export QWS_KEYBOARD="TTY:keymap=/usr/local/etc/${LANG%_*}.qmap"
 
-if [ -x "$OPENGNSYS/bin/ogAdmClient" -a "$ogstatus" != "offline"  ]; then
-    # Ejecutar servicio cliente.
-    $OPENGNSYS/bin/ogAdmClient -f $OPENGNSYS/etc/ogAdmClient.cfg -l $OGLOGFILE -d $LOGLEVEL
+if [ "$ogstatus" != "offline"  ]; then
+    python3 /opt/opengnsys/ogClient/main.py
 else
     for FILE in index $OGGROUP $(ogGetIpAddress)
     do
