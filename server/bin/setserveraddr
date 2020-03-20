@@ -33,7 +33,7 @@ source $OPENGNSYS/lib/ogfunctions.sh || exit 1
 [ "$USER" != "root" ] && raiseError access "Need to be root"
 [ $# -ne 1 ] && raiseError usage
 [ -r $DEFAULTFILE ] || raiseError access "Cannot read default configuration file"
-for f in $OPENGNSYS/{etc/{ogAdmServer,ogAdmRepo,ogAdmAgent}.cfg,www/controlacceso.php,client/etc/ogAdmClient.cfg}; do
+for f in $OPENGNSYS/{etc/{ogAdmServer,ogAdmRepo,ogAdmAgent}.cfg,www/controlacceso.php,client/ogClient/cfg/ogclient.cfg}; do
 	[ -w $f ] || raiseError access "Cannot write to file: $f"
 done
 
@@ -88,7 +88,7 @@ if [ -n "$SERVERIP" ]; then
 	OLDSERVERIP=$ServidorAdm
 	# Checking if configuration files need to be modified.
 	CHANGE=0
-	for f in $OPENGNSYS/{etc/{ogAdmServer,ogAdmRepo,ogAdmAgent}.cfg,www/controlacceso.php,client/etc/ogAdmClient.cfg}; do
+	for f in $OPENGNSYS/{etc/{ogAdmServer,ogAdmRepo,ogAdmAgent}.cfg,www/controlacceso.php}; do
 		# Updating configuration variables (if URL does not contain "localhost").
 		sed -e "s,\(ServidorAdm\|IPlocal\)=.*,\1=$SERVERIP," \
 		    -e "s,^INTERFACE=.*,INTERFACE=$SERVERDEV," \
@@ -105,6 +105,10 @@ if [ -n "$SERVERIP" ]; then
 
 	# Processing when something has changed.
 	if [ $CHANGE == 1 ]; then
+		# Config ogClient.
+		sed -i -e "s/^ip=.*/ip=$SERVERIP/g" \
+		    -e "s/^url=https:\/\/[0-9\.]*\//url=https:\/\/$SERVERIP\//g" \
+		    $OPENGNSYS/client/ogClient/cfg/ogclient.cfg
 		# Restart OpenGnsys services.
 		echo "Restarting services..."
 		restart opengnsys >/dev/null

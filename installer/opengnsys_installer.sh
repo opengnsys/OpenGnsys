@@ -1342,15 +1342,6 @@ function servicesCompilation ()
 		echoAndLog "${FUNCNAME}(): error while compiling OpenGnsys Agent"
 		hayErrores=1
 	fi
-	popd	
-	# Compilar OpenGnsys Client
-	echoAndLog "${FUNCNAME}(): Compiling OpenGnsys Admin Client"
-	pushd $WORKDIR/opengnsys/admin/Sources/Clients/ogAdmClient
-	make && mv ogAdmClient ../../../../client/shared/bin
-	if [ $? -ne 0 ]; then
-		echoAndLog "${FUNCNAME}(): error while compiling OpenGnsys Admin Client"
-		hayErrores=1
-	fi
 	popd
 
 	return $hayErrores
@@ -1405,6 +1396,21 @@ function copyClientFiles()
 	else
 		errorAndLog "${FUNCNAME}(): client copy files with errors"
 	fi
+
+	local ogclientUrl="https://codeload.github.com/alvneiayu/ogClient/zip/$BRANCH"
+
+	echoAndLog "${FUNCNAME}(): downloading ogClient code..."
+
+	if ! (curl "${ogclientUrl}" -o ogclient.zip && \
+	     unzip -qo ogclient.zip && \
+	     mv "ogClient-$BRANCH" $INSTALL_TARGET/client/ogClient)
+	then
+		errorAndLog "${FUNCNAME}(): "\
+			    "error getting ogClient code from ${ogclientUrl}"
+		return 1
+	fi
+	rm -f ogclient.zip
+	echoAndLog "${FUNCNAME}(): ogClient code was downloaded"
 
 	return $errstatus
 }
@@ -1505,11 +1511,9 @@ function openGnsysConfigure()
 			    -e "s/DATABASE/$OPENGNSYS_DATABASE/g" \
 			    -e "s/OPENGNSYSURL/${CONSOLEURL//\//\\/}/g" \
 				$INSTALL_TARGET/www/controlacceso.php > $INSTALL_TARGET/www/controlacceso-$dev.php
-			sed -e "s/SERVERIP/${SERVERIP[i]}/g" \
-			    -e "s/OPENGNSYSURL/${CONSOLEURL//\//\\/}/g" \
-				$WORKDIR/opengnsys/admin/Sources/Clients/ogAdmClient/ogAdmClient.cfg > $INSTALL_TARGET/client/etc/ogAdmClient-$dev.cfg
 			if [ "$dev" == "$DEFAULTDEV" ]; then
 				OPENGNSYS_CONSOLEURL="$CONSOLEURL"
+				OPENGNSYS_SERVERIP="${SERVERIP[i]}"
 			fi
 		fi
 		let i++
@@ -1517,7 +1521,6 @@ function openGnsysConfigure()
 	ln -f $INSTALL_TARGET/etc/ogAdmServer-$DEFAULTDEV.cfg $INSTALL_TARGET/etc/ogAdmServer.cfg
 	ln -f $INSTALL_TARGET/etc/ogAdmRepo-$DEFAULTDEV.cfg $INSTALL_TARGET/etc/ogAdmRepo.cfg
 	ln -f $INSTALL_TARGET/etc/ogAdmAgent-$DEFAULTDEV.cfg $INSTALL_TARGET/etc/ogAdmAgent.cfg
-	ln -f $INSTALL_TARGET/client/etc/ogAdmClient-$DEFAULTDEV.cfg $INSTALL_TARGET/client/etc/ogAdmClient.cfg
 	ln -f $INSTALL_TARGET/www/controlacceso-$DEFAULTDEV.php $INSTALL_TARGET/www/controlacceso.php
 
 	# Configuración del motor de clonación.
@@ -1551,6 +1554,11 @@ EOT
 		echoAndLog "${FUNCNAME}(): Starting OpenGnsys services."
 		$STARTSERVICE
 	fi
+
+	echoAndLog "${FUNCNAME}(): Creating ogClient config files."
+	sed -i -e "s/127\.0\.0\.1/$OPENGNSYS_SERVERIP/g" \
+	    -e "s/1234/8889/g" \
+	    $INSTALL_TARGET/client/ogClient/cfg/ogclient.cfg
 }
 
 
