@@ -1,0 +1,6 @@
+parameters:
+    path_client: "/opt/opengnsys/log/clients/"
+    path_images: "/opt/opengnsys/images/"
+    oglivecli: "/opt/opengnsys/bin/oglivecli"
+    pxedir: "/opt/opengnsys/tftpboot/menu.lst"
+    secret: a3820aa7702ad982c9c3a863c1a70d1a57575988

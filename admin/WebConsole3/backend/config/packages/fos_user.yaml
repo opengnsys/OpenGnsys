@@ -1,0 +1,9 @@
+fos_user:
+    db_driver: orm # other valid values are 'mongodb' and 'couchdb'
+    firewall_name: main
+    user_class: Opengnsys\CoreBundle\Entity\User
+    group:
+        group_class: Opengnsys\CoreBundle\Entity\Group
+    from_email:
+        address: opengnsys@localhost.com
+        sender_name: Demo Resetting

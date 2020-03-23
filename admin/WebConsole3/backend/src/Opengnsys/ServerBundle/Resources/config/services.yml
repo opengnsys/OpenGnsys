@@ -19,68 +19,85 @@ services:
     opengnsys_service.netboot:
         class: Opengnsys\ServerBundle\Service\NetbootService
         arguments: ["%pxedir%", '@doctrine.orm.entity_manager']
+        public: true
     opengnsys_service.curl:
         class: Opengnsys\ServerBundle\Service\CurlService
         arguments: ['@doctrine.orm.entity_manager', '@router', '@monolog.logger.og_server']
+        public: true
 
     # MANAGER
     opengnsys_server.client_manager:
         class: Opengnsys\CoreBundle\Domain\ModelExtendedManager
         arguments: ["@doctrine.orm.entity_manager", "@form.factory", Opengnsys\ServerBundle\Form\Type\ClientType, Opengnsys\ServerBundle\Entity\Client]
+        public: true
 
     opengnsys_server.command_manager:
         class: Opengnsys\CoreBundle\Domain\ModelExtendedManager
         arguments: ["@doctrine.orm.entity_manager", "@form.factory", Opengnsys\ServerBundle\Form\Type\CommandType, Opengnsys\ServerBundle\Entity\Command]
+        public: true
 
     opengnsys_server.hardware_manager:
         class: Opengnsys\CoreBundle\Domain\ModelExtendedManager
         arguments: ["@doctrine.orm.entity_manager", "@form.factory", Opengnsys\ServerBundle\Form\Type\HardwareType, Opengnsys\ServerBundle\Entity\Hardware]
+        public: true
 
     opengnsys_server.hardware_profile_manager:
         class: Opengnsys\CoreBundle\Domain\ModelExtendedManager
         arguments: ["@doctrine.orm.entity_manager", "@form.factory", Opengnsys\ServerBundle\Form\Type\HardwareProfileType, Opengnsys\ServerBundle\Entity\HardwareProfile]
+        public: true
 
     opengnsys_server.image_manager:
         class: Opengnsys\CoreBundle\Domain\ModelExtendedManager
         arguments: ["@doctrine.orm.entity_manager", "@form.factory", Opengnsys\ServerBundle\Form\Type\ImageType, Opengnsys\ServerBundle\Entity\Image]
+        public: true
 
     opengnsys_server.menu_manager:
         class: Opengnsys\CoreBundle\Domain\ModelExtendedManager
         arguments: ["@doctrine.orm.entity_manager", "@form.factory", Opengnsys\ServerBundle\Form\Type\MenuType, Opengnsys\ServerBundle\Entity\Menu]
+        public: true
 
     opengnsys_server.network_settings_manager:
         class: Opengnsys\CoreBundle\Domain\ModelExtendedManager
         arguments: ["@doctrine.orm.entity_manager", "@form.factory", Opengnsys\ServerBundle\Form\Type\NetworkSettingsType, Opengnsys\ServerBundle\Entity\NetworkSettings]
+        public: true
 
     opengnsys_server.organizational_unit_manager:
         class: Opengnsys\CoreBundle\Domain\ModelExtendedManager
         arguments: ["@doctrine.orm.entity_manager", "@form.factory", Opengnsys\ServerBundle\Form\Type\OrganizationalUnitType, Opengnsys\ServerBundle\Entity\OrganizationalUnit]
+        public: true
 
     opengnsys_server.os_name_manager:
         class: Opengnsys\CoreBundle\Domain\ModelExtendedManager
         arguments: ["@doctrine.orm.entity_manager", "@form.factory", Opengnsys\ServerBundle\Form\Type\OsNameType, Opengnsys\ServerBundle\Entity\OsName]
+        public: true
 
     opengnsys_server.partition_manager:
         class: Opengnsys\CoreBundle\Domain\ModelExtendedManager
         arguments: ["@doctrine.orm.entity_manager", "@form.factory", Opengnsys\ServerBundle\Form\Type\PartitionType, Opengnsys\ServerBundle\Entity\Partition]
+        public: true
 
     opengnsys_server.repository_manager:
         class: Opengnsys\CoreBundle\Domain\ModelExtendedManager
         arguments: ["@doctrine.orm.entity_manager", "@form.factory", Opengnsys\ServerBundle\Form\Type\RepositoryType, Opengnsys\ServerBundle\Entity\Repository]
+        public: true
 
     opengnsys_server.software_manager:
         class: Opengnsys\CoreBundle\Domain\ModelExtendedManager
         arguments: ["@doctrine.orm.entity_manager", "@form.factory", Opengnsys\ServerBundle\Form\Type\SoftwareType, Opengnsys\ServerBundle\Entity\Software]
+        public: true
 
     opengnsys_server.software_profile_manager:
         class: Opengnsys\CoreBundle\Domain\ModelExtendedManager
         arguments: ["@doctrine.orm.entity_manager", "@form.factory", Opengnsys\ServerBundle\Form\Type\SoftwareProfileType, Opengnsys\ServerBundle\Entity\SoftwareProfile]
+        public: true
 
     opengnsys_server.user_type_manager:
         class: Opengnsys\CoreBundle\Domain\ModelExtendedManager
         arguments: ["@doctrine.orm.entity_manager", "@form.factory", Opengnsys\ServerBundle\Form\Type\UserType, Opengnsys\CoreBundle\Entity\UserType]
+        public: true
 
     opengnsys_server.netboot_manager:
         class: Opengnsys\CoreBundle\Domain\ModelExtendedManager
         arguments: ["@doctrine.orm.entity_manager", "@form.factory", Opengnsys\ServerBundle\Form\Type\NetbootType, Opengnsys\ServerBundle\Entity\Netboot]
+        public: true
 

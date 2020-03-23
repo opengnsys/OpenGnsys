@@ -9,7 +9,7 @@
             <generator strategy="AUTO"/>
         </id>
 
-        <field name="command" type="string" column="command" length="20000" nullable="false"/>
+        <field name="command" type="text" column="command" nullable="false"/>
 
         <field name="script" type="text" column="script" nullable="false"/>
 

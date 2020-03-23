@@ -1,7 +1,0 @@
-imports:
-    # FOS Feature Bundles
-    - { resource: fos/rest/config.yml }
-    - { resource: fos/user/config.yml }
-    - { resource: fos/oauth/config.yml }
-    # Nelmio Feature Bundles
-    - { resource: nelmio/config.yml }

@@ -187,13 +187,13 @@ class ClientController extends ApiController
         }
 
 		try {
+
 			$object = $this->container->get('opengnsys_server.client_manager')->post($parameters);
 
             $serviceNetboot = $this->get('opengnsys_service.netboot');
             $serviceNetboot->createBootMode($object);
 	
 			return $object;
-	
 		} catch (InvalidFormException $exception) {
 	
 			return $exception->getForm();

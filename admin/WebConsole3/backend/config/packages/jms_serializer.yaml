@@ -1,0 +1,19 @@
+jms_serializer:
+    visitors:
+        xml_serialization:
+            format_output: '%kernel.debug%'
+    handlers:
+        datetime:
+            default_format: "Y-m-d H:i:s" #c # ISO8601
+            default_timezone: "UTC" # defaults to whatever timezone set in php.ini or via date_default_timezone_set
+    metadata:
+        directories:
+            OpengnsysCoreBundle:
+                namespace_prefix: "Opengnsys\\CoreBundle"
+                path: "%kernel.root_dir%/../src/Opengnsys/CoreBundle/Resources/config/serializer/OpengnsysCoreBundle"
+            FOSUserBundle:
+                namespace_prefix: "FOS\\UserBundle"
+                path: "%kernel.root_dir%/../src/Opengnsys/CoreBundle/Resources/config/serializer/FOSUserBundle"
+            OpengnsysServerBundle:
+                namespace_prefix: "Opengnsys\\ServerBundle"
+                path: "%kernel.root_dir%/../src/Opengnsys/ServerBundle/Resources/config/serializer/OpengnsysServerBundle"
