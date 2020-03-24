@@ -33,3 +33,12 @@ services:
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+    # COMMAND
+    Opengnsys\CoreBundle\Command\CreateClientCommand:
+        arguments: ['@fos_oauth_server.client_manager.default']
+        tags: [{name: console.command, command: opengnsys:oauth-server:client:create}]
+
+    Opengnsys\MigrationBundle\Command\MigrateCommand:
+        arguments: ['@doctrine.orm.default_entity_manager', '@doctrine.orm.og_1_entity_manager', '@monolog.logger.og_migration']
+        tags: [{name: console.command, command: opengnsys:migration:execute}]

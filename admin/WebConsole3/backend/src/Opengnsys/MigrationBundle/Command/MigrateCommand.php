@@ -2,6 +2,8 @@
 
 namespace Opengnsys\MigrationBundle\Command;
 
+use Doctrine\ORM\EntityManager;
+use Monolog\Logger;
 use Opengnsys\MigrationBundle\Entity\Aulas;
 use Opengnsys\MigrationBundle\Entity\Centros;
 use Opengnsys\MigrationBundle\Entity\Gruposordenadores;
@@ -23,13 +25,25 @@ use Opengnsys\ServerBundle\Entity\OrganizationalUnit;
 use Opengnsys\ServerBundle\Entity\Partition;
 use Opengnsys\ServerBundle\Entity\Repository;
 use Opengnsys\ServerBundle\Entity\SoftwareProfile;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
-use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Command\Command;
+
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class MigrateCommand extends ContainerAwareCommand
+class MigrateCommand extends Command
 {
+    private $em;
+    private $emSlave;
+    private $logger;
+
+    public function __construct(EntityManager $em, EntityManager $emSlave, Logger $logger)
+    {
+        parent::__construct();
+        $this->em = $em;
+        $this->emSlave = $emSlave;
+        $this->logger = $logger;
+    }
+
     protected function configure()
     {
         $this
@@ -40,39 +54,39 @@ class MigrateCommand extends ContainerAwareCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $logger = $this->getContainer()->get('monolog.logger.og_migration');
+        //$logger = $this->getContainer()->get('monolog.logger.og_migration');
         //$logger = $this->getContainer()->get('logger');
 
-        $em = $this->getContainer()->get('doctrine')->getManager();
-        $emSlave = $this->getContainer()->get('doctrine')->getManager('og_1');
+        //$this->em = $this->getContainer()->get('doctrine')->getManager();
+        //$this->emSlave = $this->getContainer()->get('doctrine')->getManager('og_1');
 
         // og_1
-        $centros = $emSlave->getRepository(Centros::class)->findAll();
-        $aulas = $emSlave->getRepository(Aulas::class)->findAll();
-        $grupos = $emSlave->getRepository(Gruposordenadores::class)->findAll();
-        $ordenadores = $emSlave->getRepository(Ordenadores::class)->findAll();
-        $repositorios = $emSlave->getRepository(Repositorios::class)->findAll();
-        $menuses = $emSlave->getRepository(Menus::class)->findAll();
-        $perfileshards = $emSlave->getRepository(Perfileshard::class)->findAll();
-        $perfilessofts = $emSlave->getRepository(Perfilessoft::class)->findAll();
-        $imagenes = $emSlave->getRepository(Imagenes::class)->findAll();
-        $particiones = $emSlave->getRepository(OrdenadoresParticiones::class)->findAll();
+        $centros = $this->emSlave->getRepository(Centros::class)->findAll();
+        $aulas = $this->emSlave->getRepository(Aulas::class)->findAll();
+        $grupos = $this->emSlave->getRepository(Gruposordenadores::class)->findAll();
+        $ordenadores = $this->emSlave->getRepository(Ordenadores::class)->findAll();
+        $repositorios = $this->emSlave->getRepository(Repositorios::class)->findAll();
+        $menuses = $this->emSlave->getRepository(Menus::class)->findAll();
+        $perfileshards = $this->emSlave->getRepository(Perfileshard::class)->findAll();
+        $perfilessofts = $this->emSlave->getRepository(Perfilessoft::class)->findAll();
+        $imagenes = $this->emSlave->getRepository(Imagenes::class)->findAll();
+        $particiones = $this->emSlave->getRepository(OrdenadoresParticiones::class)->findAll();
 
-        $sistemasFicherosRepository = $emSlave->getRepository(Sistemasficheros::class);
-        $tipososRepository = $emSlave->getRepository(Tiposos::class);
+        $sistemasFicherosRepository = $this->emSlave->getRepository(Sistemasficheros::class);
+        $tipososRepository = $this->emSlave->getRepository(Tiposos::class);
 
         // og_3
-        $organizationalUnitRepository = $em->getRepository(OrganizationalUnit::class);
-        $clientRepository = $em->getRepository(Client::class);
-        $repositoryRepository = $em->getRepository(Repository::class);
-        $menuRepository = $em->getRepository(Menu::class);
-        $hardwareProfileRepository = $em->getRepository(HardwareProfile::class);
-        $softwareProfileRepository = $em->getRepository(SoftwareProfile::class);
-        $imageRepository = $em->getRepository(Image::class);
-        $partitionRepository = $em->getRepository(Partition::class);
+        $organizationalUnitRepository = $this->em->getRepository(OrganizationalUnit::class);
+        $clientRepository = $this->em->getRepository(Client::class);
+        $repositoryRepository = $this->em->getRepository(Repository::class);
+        $menuRepository = $this->em->getRepository(Menu::class);
+        $hardwareProfileRepository = $this->em->getRepository(HardwareProfile::class);
+        $softwareProfileRepository = $this->em->getRepository(SoftwareProfile::class);
+        $imageRepository = $this->em->getRepository(Image::class);
+        $partitionRepository = $this->em->getRepository(Partition::class);
 
         /** Centros **/
-        $logger->info("CENTROS TOTAL: ". count($centros));
+        $this->logger->info("CENTROS TOTAL: ". count($centros));
         foreach ($centros as $centro){
             $id = $centro->getIdcentro();
             $migrateId ="centro:".$id;
@@ -81,14 +95,14 @@ class MigrateCommand extends ContainerAwareCommand
             if(!$organizationalUnit){
                 $organizationalUnit = new OrganizationalUnit();
                 $organizationalUnit->setNotes($migrateId);
-                $em->persist($organizationalUnit);
+                $this->em->persist($organizationalUnit);
             }
             $organizationalUnit->setName($centro->getNombrecentro());
         }
-        $em->flush();
+        $this->em->flush();
 
         /** Aulas **/
-        $logger->info("AULAS TOTAL: ". count($aulas));
+        $this->logger->info("AULAS TOTAL: ". count($aulas));
         foreach ($aulas as $aula){
             $id = $aula->getIdaula();
             $migrateId ="aula:".$id;
@@ -99,7 +113,7 @@ class MigrateCommand extends ContainerAwareCommand
             if(!$organizationalUnit){
                 $organizationalUnit = new OrganizationalUnit();
                 $organizationalUnit->setNotes($migrateId);
-                $em->persist($organizationalUnit);
+                $this->em->persist($organizationalUnit);
             }
             $organizationalUnit->setName($aula->getNombreaula());
 
@@ -110,7 +124,7 @@ class MigrateCommand extends ContainerAwareCommand
             if(!$networkSettings){
                 $networkSettings = new NetworkSettings();
                 $organizationalUnit->setNetworkSettings($networkSettings);
-                //$em->persist($networkSettings);
+                //$this->em->persist($networkSettings);
             }
             $networkSettings->setProxy($aula->getProxy());
             $networkSettings->setDns($aula->getDns());
@@ -128,7 +142,7 @@ class MigrateCommand extends ContainerAwareCommand
         }
 
         /** Grupo Ordenador **/
-        $logger->info("GRUPOS TOTAL: ". count($grupos));
+        $this->logger->info("GRUPOS TOTAL: ". count($grupos));
         foreach ($grupos as $grupo){
             $id = $grupo->getIdgrupo();
             $migrateId ="grupo:".$id;
@@ -143,7 +157,7 @@ class MigrateCommand extends ContainerAwareCommand
             if(!$organizationalUnit){
                 $organizationalUnit = new OrganizationalUnit();
                 $organizationalUnit->setNotes($migrateId);
-                $em->persist($organizationalUnit);
+                $this->em->persist($organizationalUnit);
             }
             $organizationalUnit->setName($grupo->getNombregrupoordenador());
             $organizationalUnit->setComments($grupo->getComentarios());
@@ -151,13 +165,13 @@ class MigrateCommand extends ContainerAwareCommand
             $organizationalUnitParent = $organizationalUnitRepository->findOneByNotes($migrateParentId);
             $organizationalUnit->setParent($organizationalUnitParent);
 
-            $em->flush();
+            $this->em->flush();
 
         }
-        $em->flush();
+        $this->em->flush();
 
         /** Repositorios **/
-        $logger->info("REPOSITORIOS TOTAL: ". count($repositorios));
+        $this->logger->info("REPOSITORIOS TOTAL: ". count($repositorios));
         foreach ($repositorios as $repositorio){
             $id = $repositorio->getIdrepositorio();
             $migrateId ="repositorio:".$id;
@@ -166,15 +180,11 @@ class MigrateCommand extends ContainerAwareCommand
             if(!$repository){
                 $repository = new Repository();
                 $repository->setNotes($migrateId);
-                $em->persist($repository);
+                $this->em->persist($repository);
             }
             $repository->setName($repositorio->getNombrerepositorio());
             $repository->setIp($repositorio->getIp());
-            //$repository->setPassword($repositorio->getPassguor());
-            $repository->setConfigurationpath("-");
-            $repository->setAdminpath("-");
-            $repository->setPxepath("-");
-            $repository->setPort($repositorio->getPuertorepo());
+            //$repository->setPort($repositorio->getPuertorepo());
 
             // OrganizationalUnit
             if($repositorio->getGrupoid() == 0){
@@ -185,10 +195,10 @@ class MigrateCommand extends ContainerAwareCommand
             $organizationalUnit = $organizationalUnitRepository->findOneByNotes($migrateId);
             $repository->setOrganizationalUnit($organizationalUnit);
         }
-        $em->flush();
+        $this->em->flush();
 
         /** Perfil Hardware **/
-        $logger->info("PERFIL HARDWARES TOTAL: ". count($perfileshards));
+        $this->logger->info("PERFIL HARDWARES TOTAL: ". count($perfileshards));
         foreach ($perfileshards as $perfileshard){
             $id = $perfileshard->getIdperfilhard();
             $migrateId ="perfilHardware:".$id;
@@ -197,7 +207,7 @@ class MigrateCommand extends ContainerAwareCommand
             if(!$hardwareProfile){
                 $hardwareProfile = new HardwareProfile();
                 $hardwareProfile->setNotes($migrateId);
-                $em->persist($hardwareProfile);
+                $this->em->persist($hardwareProfile);
             }
             $hardwareProfile->setDescription($perfileshard->getDescripcion());
             $hardwareProfile->setComments($perfileshard->getComentarios());
@@ -211,10 +221,10 @@ class MigrateCommand extends ContainerAwareCommand
             $organizationalUnit = $organizationalUnitRepository->findOneByNotes($migrateId);
             $hardwareProfile->setOrganizationalUnit($organizationalUnit);
         }
-        $em->flush();
+        $this->em->flush();
 
         /** Perfil Softwares **/
-        $logger->info("PERFIL SOFTWARES TOTAL: ". count($perfilessofts));
+        $this->logger->info("PERFIL SOFTWARES TOTAL: ". count($perfilessofts));
         foreach ($perfilessofts as $perfilessoft){
             $id = $perfilessoft->getIdperfilsoft();
             $migrateId ="perfilSoftware:".$id;
@@ -223,7 +233,7 @@ class MigrateCommand extends ContainerAwareCommand
             if(!$softwareProfile){
                 $softwareProfile = new SoftwareProfile();
                 $softwareProfile->setNotes($migrateId);
-                $em->persist($softwareProfile);
+                $this->em->persist($softwareProfile);
             }
             $softwareProfile->setDescription($perfilessoft->getDescripcion());
             $softwareProfile->setComments($perfilessoft->getComentarios());
@@ -237,10 +247,10 @@ class MigrateCommand extends ContainerAwareCommand
             $organizationalUnit = $organizationalUnitRepository->findOneByNotes($migrateId);
             $softwareProfile->setOrganizationalUnit($organizationalUnit);
         }
-        $em->flush();
+        $this->em->flush();
 
         /** Menus **/
-        $logger->info("PERFIL MENUS TOTAL: ". count($menuses));
+        $this->logger->info("PERFIL MENUS TOTAL: ". count($menuses));
         foreach ($menuses as $menuse){
             $id = $menuse->getIdmenu();
             $migrateId ="menu:".$id;
@@ -249,15 +259,15 @@ class MigrateCommand extends ContainerAwareCommand
             if(!$menu){
                 $menu = new Menu();
                 $menu->setNotes($migrateId);
-                $em->persist($menu);
+                $this->em->persist($menu);
             }
             $menu->setTitle($menuse->getTitulo());
             $menu->setDescription($menuse->getDescripcion());
             $menu->setComments($menuse->getComentarios());
             $menu->setResolution($menuse->getResolucion());
 
-            $menu->setIdurlimg($menuse->getIdurlimg());
-            $menu->setPublicmenuhtml($menuse->getHtmlmenupub());
+            //$menu->setIdurlimg($menuse->getIdurlimg());
+            //$menu->setPublicmenuhtml($menuse->getHtmlmenupub());
 
             // OrganizationalUnit
             if($menuse->getGrupoid() == 0){
@@ -266,12 +276,12 @@ class MigrateCommand extends ContainerAwareCommand
                 $migrateId = "grupo:".$menuse->getGrupoid();
             }
             $organizationalUnit = $organizationalUnitRepository->findOneByNotes($migrateId);
-            $menu->setOrganizationalUnit($organizationalUnit);
+            //$menu->setOrganizationalUnit($organizationalUnit);
         }
-        $em->flush();
+        $this->em->flush();
 
         /** Ordenadores **/
-        $logger->info("ORDENADORES TOTAL: ". count($ordenadores));
+        $this->logger->info("ORDENADORES TOTAL: ". count($ordenadores));
         foreach ($ordenadores as $ordenador){
             //$ordenador = new Ordenadores();
             $id = $ordenador->getIdordenador();
@@ -281,7 +291,7 @@ class MigrateCommand extends ContainerAwareCommand
             if(!$client){
                 $client = new Client();
                 $client->setNotes($migrateId);
-                $em->persist($client);
+                $this->em->persist($client);
             }
             $client->setName($ordenador->getNombreordenador());
             $client->setSerialno($ordenador->getNumserie());
@@ -323,10 +333,10 @@ class MigrateCommand extends ContainerAwareCommand
             $client->setOrganizationalUnit($organizationalUnit);
 
         }
-        $em->flush();
+        $this->em->flush();
 
         /** Imagen **/
-        $logger->info("PERFIL IMAGENES TOTAL: ". count($imagenes));
+        $this->logger->info("PERFIL IMAGENES TOTAL: ". count($imagenes));
         foreach ($imagenes as $imagen){
             //$imagen = new Imagenes();
             $id = $imagen->getIdimagen();
@@ -336,7 +346,7 @@ class MigrateCommand extends ContainerAwareCommand
             if(!$image){
                 $image = new Image();
                 $image->setNotes($migrateId);
-                $em->persist($image);
+                $this->em->persist($image);
             }
             $image->setCanonicalName($imagen->getNombreca());
             $image->setDescription($imagen->getDescripcion());
@@ -364,10 +374,10 @@ class MigrateCommand extends ContainerAwareCommand
             $image->setRepository($repository);
 
         }
-        $em->flush();
+        $this->em->flush();
 
         /** Particiones **/
-        $logger->info("PARTICIONES TOTAL: ". count($particiones));
+        $this->logger->info("PARTICIONES TOTAL: ". count($particiones));
         foreach ($particiones as $particion){
             //$particion = new OrdenadoresParticiones();
             $ordenadorId = $particion->getIdordenador();
@@ -379,7 +389,7 @@ class MigrateCommand extends ContainerAwareCommand
             if(!$partition){
                 $partition = new Partition();
                 $partition->setNotes($migrateId);
-                $em->persist($partition);
+                $this->em->persist($partition);
             }
             $partition->setNumDisk($particion->getNumdisk());
             $partition->setNumPartition($particion->getNumpar());
@@ -411,13 +421,7 @@ class MigrateCommand extends ContainerAwareCommand
             $client = $clientRepository->findOneByNotes($migrateId);
             $partition->setClient($client);
         }
-        $em->flush();
-
-
-
-
-
-
+        $this->em->flush();
 
         $output->writeln(sprintf('End'));
     }

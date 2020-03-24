@@ -1067,16 +1067,16 @@ echoAndLog "${FUNCNAME}(): Installing backend framework..."
 pushd $INSTALL_TARGET/www3/backend
 sudo -u $OPENGNSYS_CLIENT_USER composer.phar install
 chmod 777 -R var/cache var/logs
-sudo -u $OPENGNSYS_CLIENT_USER php app/console doctrine:database:create --if-not-exists
-sudo -u $OPENGNSYS_CLIENT_USER php app/console doctrine:schema:update --force
-echo yes | php app/console doctrine:fixtures:load
-php app/console fos:user:create "$OPENGNSYS_DB_USER" "${OPENGNSYS_DB_USER}@localhost.localdomain" "$OPENGNSYS_DB_USER"
+sudo -u $OPENGNSYS_CLIENT_USER php bin/console doctrine:database:create --if-not-exists
+sudo -u $OPENGNSYS_CLIENT_USER php bin/console doctrine:schema:update --force
+echo yes | php bin/console doctrine:fixtures:load
+php bin/console fos:user:create "$OPENGNSYS_DB_USER" "${OPENGNSYS_DB_USER}@localhost.localdomain" "$OPENGNSYS_DB_USER"
 # Guardar tokens de seguridad.
 read -e APIID APISECRET <<< \
-	"$(php app/console doctrine:query:sql "SELECT random_id, secret FROM og_core__clients WHERE id=1;" | \
+	"$(php bin/console doctrine:query:sql "SELECT random_id, secret FROM og_core__clients WHERE id=1;" | \
 	   awk -F\" '$2~/^(random_id|secret)$/ {getline; printf("%s ", $2)}')"
 read -e CLIENTID CLIENTSECRET <<< \
-	"$(php app/console opengnsys:oauth-server:client:create --no-ansi \
+	"$(php bin/console opengnsys:oauth-server:client:create --no-ansi \
 			--grant-type="password" --grant-type="refresh_token" \
 			--grant-type="token" \
 			--grant-type="http://opengnsys.es/grants/og_client" | \

@@ -3,7 +3,7 @@
                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
     <entity name="Opengnsys\ServerBundle\Entity\Task" table="og_server__tasks"
-            repository-class="Opengnsys\ServerBundle\Entity\Repository\TaskRepository">
+            repository-class="Opengnsys\ServerBundle\Repository\TaskRepository">
 
         <id name="id" type="integer" column="id">
             <generator strategy="AUTO"/>

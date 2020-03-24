@@ -95,7 +95,7 @@ class RepositoryController extends ApiController
 	 * @ApiDoc(
 	 *   resource = true,
 	 *   description = "Gets a Repository for a given id",
-	 *   output = "Opengnsys\ServerBundle\Entity\Repository",
+	 *   output = "Opengnsys\ServerBundle\Repository",
 	 *   statusCodes = {
 	 *     200 = "Returned when successful",
 	 *     404 = "Returned when the repository is not found"
@@ -213,7 +213,7 @@ class RepositoryController extends ApiController
 	 * @ApiDoc(
 	 *   resource = true,
 	 *   description = "Delete a Repository for a given id",
-	 *   output = "Opengnsys\ServerBundle\Entity\Repository",
+	 *   output = "Opengnsys\ServerBundle\Repository",
 	 *   statusCodes = {
 	 *     200 = "Returned when successful",
 	 *     404 = "Returned when the repository is not found"

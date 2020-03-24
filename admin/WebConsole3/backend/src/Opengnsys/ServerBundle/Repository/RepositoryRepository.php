@@ -8,9 +8,9 @@
  *
  */
 
-namespace Opengnsys\ServerBundle\Entity\Repository;
+namespace Opengnsys\ServerBundle\Repository;
 
-use Opengnsys\CoreBundle\Entity\Repository\BaseRepository;
+use Opengnsys\CoreBundle\Repository\BaseRepository;
 
 /**
  * RepositoryRepository

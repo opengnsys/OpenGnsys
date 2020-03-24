@@ -8,7 +8,7 @@
  *
  */
 
-namespace Opengnsys\CoreBundle\Entity\Repository;
+namespace Opengnsys\CoreBundle\Repository;
 
 class BaseRepository extends \Doctrine\ORM\EntityRepository
 {

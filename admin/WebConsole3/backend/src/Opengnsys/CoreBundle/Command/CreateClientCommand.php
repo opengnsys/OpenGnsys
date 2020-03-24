@@ -2,14 +2,22 @@
 
 namespace Opengnsys\CoreBundle\Command;
 
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
-//use Symfony\Component\Console\Input\InputArgument;
+use FOS\OAuthServerBundle\Model\ClientManagerInterface;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class CreateClientCommand extends ContainerAwareCommand
+class CreateClientCommand extends Command
 {
+    private $clientManager;
+
+    public function __construct(ClientManagerInterface $clientManager)
+    {
+        parent::__construct();
+
+        $this->clientManager = $clientManager;
+    }
     protected function configure()
     {
         $this
@@ -41,11 +49,10 @@ EOT
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $clientManager = $this->getContainer()->get('fos_oauth_server.client_manager.default');
-        $client = $clientManager->createClient();
+        $client = $this->clientManager->createClient();
         $client->setRedirectUris($input->getOption('redirect-uri'));
         $client->setAllowedGrantTypes($input->getOption('grant-type'));
-        $clientManager->updateClient($client);
+        $this->clientManager->updateClient($client);
         $output->writeln(
             sprintf(
                 'Added a new client with public id <info>%s</info>, secret <info>%s</info>',
