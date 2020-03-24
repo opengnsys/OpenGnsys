@@ -709,8 +709,6 @@ int checkDato(struct og_dbi *dbi, char *dato, const char *tabla,
 			og_info((char *)msglog);
 			return (0);
 		}
-		dbi_result_free(result);
-
 		// Recupera el identificador del software
 		identificador = dbi_conn_sequence_last(dbi->conn, NULL);
 	} else {
