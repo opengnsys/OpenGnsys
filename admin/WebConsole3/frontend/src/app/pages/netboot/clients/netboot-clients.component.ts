@@ -129,7 +129,9 @@ export class NetbootClientsComponent implements OnInit {
     this.netbootService.updateFiles(this.assignedNetboots).subscribe(
         (response) => {
           this.toaster.pop({type: 'success', title: this.translate.instant('success'), body: this.translate.instant('successfully_updated')});
-          this.router.navigate(['app.ous']);
+          // borrar selección una vez aplicado el netboot
+          this.ogCommonService.selectedClients = {};
+          this.router.navigate(['/app/ous']);
         },
         (error) => {
           this.toaster.pop({type: 'error', title: 'error', body: error});

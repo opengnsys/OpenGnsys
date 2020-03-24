@@ -1,7 +1,7 @@
 // This file can be replaced during build by using the `fileReplacements` array.
 // `ng build --prod` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
-const url = 'https://SERVERIP/opengnsys3';
+const url = 'https://172.16.140.210/opengnsys3';
 export const environment = {
   production: false,
   BASE_URL: url,
@@ -9,8 +9,8 @@ export const environment = {
   API_PUBLIC_URL: url + '/api',
   API_BASE_URL: '/backend/web/app_dev.php/api',
   OAUTH_DOMAIN: '/backend/web/app_dev.php/oauth/v2/token',
-  OAUTH_CLIENT_ID: 'CLIENTID',
-  OAUTH_CLIENT_SECRET: 'CLIENTSECRET',
+  OAUTH_CLIENT_ID: '1_23amzbdp4kskg80444oscko4w0w8wokocs88k0g8w88o4oggs4',
+  OAUTH_CLIENT_SECRET: '46rttt2trwo4gocgoc4w80k4s8ok48sg8s84kk0cw48csks8o8',
   BASE_DIR: 'opengnsys3',
   clientstatus: ['off', 'initializing', 'oglive', 'busy', 'linux', 'linux_session', 'macos', 'windows', 'windows_session'],
   windowsboots: ['reboot', 'directo (kexec)'],
