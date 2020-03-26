@@ -2372,16 +2372,17 @@ bool actualizaSoftware(struct og_dbi *dbi, char *sft, char *par,char *ido,
 						" VALUES(2,'%s',%s,0)", tbSoftware[i], idc);
 			if (!result) { // Error al insertar
 				dbi_conn_error(dbi->conn, &msglog);
-				og_info((char *)msglog);
+				syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+				       __func__, __LINE__, msglog);
 				return false;
 			}
-			dbi_result_free(result);
 
 			// Recupera el identificador del software
 			tbidsoftware[i] = dbi_conn_sequence_last(dbi->conn, NULL);
 		} else {
 			tbidsoftware[i] = dbi_result_get_uint(result, "idsoftware");
 		}
+		dbi_result_free(result);
 	}
 
 	// Ordena tabla de identificadores para cosultar si existe un pefil con esas especificaciones
