@@ -26,6 +26,7 @@ define('OG_REST_CMD_CREATE_INCREMENTAL_IMAGE', 'image/create/incremental');
 define('OG_REST_CMD_RESTORE_BASIC_IMAGE', 'image/restore/basic');
 define('OG_REST_CMD_RESTORE_INCREMENTAL_IMAGE', 'image/restore/incremental');
 define('OG_REST_CMD_RUN_SCHEDULE', 'run/schedule');
+define('OG_REST_CMD_RUN_TASK', 'task/run');
 
 define('OG_REST_PARAM_CLIENTS', 'clients');
 define('OG_REST_PARAM_ADDR', 'addr');
@@ -59,6 +60,7 @@ define('OG_REST_PARAM_DIFF_ID', 'diff_id');
 define('OG_REST_PARAM_DIFF_NAME', 'diff_name');
 define('OG_REST_PARAM_METHOD', 'method');
 define('OG_REST_PARAM_ECHO', 'echo');
+define('OG_REST_PARAM_TASK', 'task');
 
 $conf_file = parse_ini_file(__DIR__ . '/../../etc/ogAdmServer.cfg');
 define('OG_REST_API_TOKEN', 'Authorization: ' . $conf_file['APITOKEN']);
@@ -542,6 +544,11 @@ function run_schedule($string_ips) {
 	$ips = explode(';',$string_ips);
 	$data = array(OG_REST_PARAM_CLIENTS => $ips);
 	common_request(OG_REST_CMD_RUN_SCHEDULE, POST, $data);
+}
+
+function run_task($task_id) {
+	$data = array(OG_REST_PARAM_TASK => $task_id);
+	return common_request(OG_REST_CMD_RUN_TASK, POST, $data);
 }
 
 /*
