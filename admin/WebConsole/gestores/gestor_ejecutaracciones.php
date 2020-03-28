@@ -95,7 +95,7 @@ if ($cmd){
 			$cmd->ParamSetValor("@idtipoaccion",$idtarea);
 			$cmd->ParamSetValor("@descriaccion",$descritarea);
 			$cmd->ParamSetValor("@idtarea",$idtarea);
-			$resul=ejecucionTarea($idtarea);
+			$resul=run_task($idtarea);
 			$literal="resultado_ejecutar_tareas";
 			break;
 	}
@@ -147,14 +147,6 @@ function ejecucionProcedimiento($idprocedimiento,$ambito,$idambito)
 	return(recorreProcedimientos($idprocedimiento,$ambito,$idambito));						 
 }
 //________________________________________________________________________________________________________
-//
-// Ejecuta una tarea: la registra en acciones y la envía por la red
-//________________________________________________________________________________________________________
-function ejecucionTarea($idtarea)
-{
-	return(recorreTareas($idtarea));						 
-}
-//________________________________________________________________________________________________________
 function recorreProcedimientos($idprocedimiento,$ambito,$idambito)
 {		
 	global $cadenamac;
@@ -202,46 +194,6 @@ function recorreProcedimientos($idprocedimiento,$ambito,$idambito)
 		include("../comandos/gestores/wakeonlan_repo.php");
 	}
 
-	return(true);
-}
-//________________________________________________________________________________________________________
-function recorreTareas($idtarea)
-{		
-	global $cadenaid;
-	global $cadenaip;
-	global $cadenamac;	
-	global $cmd;	
-			 
-	$cmd->texto="SELECT tareas_acciones.orden,tareas_acciones.idprocedimiento,tareas_acciones.tareaid,
-						tareas.ambito,tareas.idambito,tareas.restrambito
-				 FROM tareas
-				 INNER JOIN tareas_acciones ON tareas_acciones.idtarea=tareas.idtarea
-				 WHERE tareas_acciones.idtarea=".$idtarea." 
-				 ORDER BY tareas_acciones.orden";	
-	//echo $cmd->texto;						 			
-	$rs=new Recordset; 
-	$rs->Comando=&$cmd; 
-	if (!$rs->Abrir()) return(false); // Error al abrir recordset
-	while (!$rs->EOF){
-		$tareaid=$rs->campos["tareaid"];
-		if($tareaid>0){ // Tarea recursiva
-			if(!recorreTareas($tareaid)){
-				return(false);
-			}
-		}
-		else{
-			$ambito=$rs->campos["ambito"];
-			$idambito=$rs->campos["idambito"];
-			if($ambito==0 && $idambito==0){ // Ámbito restringido
-				$idambito=$rs->campos["restrambito"];
-			}
-			RecopilaIpesMacs($cmd,$ambito,$idambito); // Recopila Ipes del ámbito		
-			$idprocedimiento=$rs->campos["idprocedimiento"];
-			if(!recorreProcedimientos($idprocedimiento,$ambito,$idambito)) 
-				return(false);	
-		}
-		$rs->Siguiente();
-	}
 	return(true);
 }
 //________________________________________________________________________________________________________
