@@ -87,7 +87,7 @@ if($pswop!=$op_suspension){
 				$phoras, $pampm, $pminutos);
 			$swop=$op_alta;
 			$schedule = get_schedule($pidentificador);
-			$idr = max(array_keys($schedule));
+			$idr = max(array_column($schedule['schedule'], OG_REST_PARAM_ID));
 			break;
 		case $op_eliminacion:
 			$result = delete_schedule($pidprogramacion);
