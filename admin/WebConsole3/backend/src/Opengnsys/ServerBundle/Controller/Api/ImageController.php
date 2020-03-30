@@ -12,7 +12,7 @@ namespace Opengnsys\ServerBundle\Controller\Api;
 
 use FOS\RestBundle\Context\Context;
 use Opengnsys\ServerBundle\Entity\Image;
-use Opengnsys\ServerBundle\Form\Type\Api\ImageType;
+use Opengnsys\ServerBundle\Form\Type\ImageType;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;

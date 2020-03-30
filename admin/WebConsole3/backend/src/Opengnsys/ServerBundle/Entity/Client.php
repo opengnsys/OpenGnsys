@@ -69,11 +69,6 @@ class Client extends BaseEntity
     private $partitions;
 
     /**
-     * @var \Opengnsys\ServerBundle\Entity\ValidationSettings
-     */
-    private $validationSettings;
-
-    /**
      * @var \Opengnsys\ServerBundle\Entity\HardwareProfile
      */
     private $hardwareProfile;
@@ -118,8 +113,8 @@ class Client extends BaseEntity
      */
     public function getPartition($key)
     {
-        $partition = null;
-        if(!$partition = $this->partitions->get($key)){
+        $partition = $this->partitions->get($key);
+        if($partition == null){
             $partition = new Partition();
             $partition->setClient($this);
             $this->partitions[$key] = $partition;
@@ -411,30 +406,6 @@ class Client extends BaseEntity
     public function getPartitions()
     {
         return $this->partitions;
-    }
-
-    /**
-     * Set validationSettings.
-     *
-     * @param \Opengnsys\ServerBundle\Entity\ValidationSettings|null $validationSettings
-     *
-     * @return Client
-     */
-    public function setValidationSettings(\Opengnsys\ServerBundle\Entity\ValidationSettings $validationSettings = null)
-    {
-        $this->validationSettings = $validationSettings;
-
-        return $this;
-    }
-
-    /**
-     * Get validationSettings.
-     *
-     * @return \Opengnsys\ServerBundle\Entity\ValidationSettings|null
-     */
-    public function getValidationSettings()
-    {
-        return $this->validationSettings;
     }
 
     /**

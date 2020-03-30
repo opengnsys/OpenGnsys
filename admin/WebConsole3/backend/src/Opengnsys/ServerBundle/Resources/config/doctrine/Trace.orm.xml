@@ -3,7 +3,7 @@
                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
     <entity name="Opengnsys\ServerBundle\Entity\Trace" table="og_server__traces"
-            repository-class="Opengnsys\ServerBundle\Entity\Repository\TraceRepository">
+            repository-class="Opengnsys\ServerBundle\Repository\TraceRepository">
 
         <id name="id" type="integer" column="id">
             <generator strategy="AUTO"/>
@@ -22,7 +22,7 @@
 
         <many-to-one field="client" target-entity="\Opengnsys\ServerBundle\Entity\Client">
             <join-columns>
-                <join-column name="client_id" referenced-column-name="id"/>
+                <join-column name="client_id" referenced-column-name="id" on-delete="CASCADE"/>
             </join-columns>
         </many-to-one>
 

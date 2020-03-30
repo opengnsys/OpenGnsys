@@ -1,6 +1,3 @@
-opengnsys_core__oauth:
-    resource: "@OpengnsysCoreBundle/Resources/config/routing/fos/oauth.yml"
-
 opengnsys_core__api:
     type: rest
     resource: "@OpengnsysCoreBundle/Resources/config/routing/api.yml"

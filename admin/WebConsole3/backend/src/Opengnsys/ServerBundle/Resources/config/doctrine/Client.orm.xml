@@ -4,7 +4,7 @@
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
 
     <entity name="Opengnsys\ServerBundle\Entity\Client" table="og_server__clients"
-            repository-class="Opengnsys\ServerBundle\Entity\Repository\ClientRepository">
+            repository-class="Opengnsys\ServerBundle\Repository\ClientRepository">
 
         <id name="id" type="integer" column="id">
             <generator strategy="AUTO"/>
@@ -35,15 +35,9 @@
             </cascade>
         </one-to-many>
 
-        <many-to-one field="validationSettings" target-entity="\Opengnsys\ServerBundle\Entity\ValidationSettings">
-            <join-columns>
-                <join-column name="validation_settings_id" referenced-column-name="id"/>
-            </join-columns>
-        </many-to-one>
-
         <many-to-one field="hardwareProfile" target-entity="\Opengnsys\ServerBundle\Entity\HardwareProfile">
             <join-columns>
-                <join-column name="hardware_profile_id" referenced-column-name="id"/>
+                <join-column name="hardware_profile_id" referenced-column-name="id" on-delete="SET NULL"/>
             </join-columns>
         </many-to-one>
 

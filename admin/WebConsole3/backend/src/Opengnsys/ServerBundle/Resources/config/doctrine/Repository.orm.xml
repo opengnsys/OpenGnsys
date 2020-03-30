@@ -3,7 +3,7 @@
                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
     <entity name="Opengnsys\ServerBundle\Entity\Repository" table="og_server__repositories"
-            repository-class="Opengnsys\ServerBundle\Entity\Repository\RepositoryRepository">
+            repository-class="Opengnsys\ServerBundle\Repository\RepositoryRepository">
 
         <id name="id" type="integer" column="id">
             <generator strategy="AUTO"/>

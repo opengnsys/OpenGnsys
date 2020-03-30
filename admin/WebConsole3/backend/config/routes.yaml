@@ -1,0 +1,23 @@
+#index:
+#    path: /
+#    controller: App\Controller\DefaultController::index
+
+NelmioApiDocBundle:
+  resource: "@NelmioApiDocBundle/Resources/config/routing.yml"
+  prefix:   /api/doc
+
+opengnsys_core:
+  resource: "@OpengnsysCoreBundle/Resources/config/routing.yml"
+  prefix:   /
+
+opengnsys_server:
+  resource: "@OpengnsysServerBundle/Resources/config/routing.yml"
+  prefix:   /
+
+opengnsys_repository:
+  resource: "@OpengnsysRepositoryBundle/Resources/config/routing.yml"
+  prefix:   /
+
+# Proporcionar un token como validación
+fos_oauth_server_token:
+  resource: "@FOSOAuthServerBundle/Resources/config/routing/token.xml"

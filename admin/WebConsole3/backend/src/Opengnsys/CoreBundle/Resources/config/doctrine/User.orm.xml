@@ -4,7 +4,7 @@
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
 
     <entity name="Opengnsys\CoreBundle\Entity\User" table="og_core__users"
-            repository-class="Opengnsys\CoreBundle\Entity\Repository\UserRepository">
+            repository-class="Opengnsys\CoreBundle\Repository\UserRepository">
 
         <lifecycle-callbacks>
             <lifecycle-callback type="prePersist" method="setCreatedAtValue"/>

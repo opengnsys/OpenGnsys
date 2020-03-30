@@ -10,7 +10,7 @@
  
 namespace Opengnsys\ServerBundle\Controller\Api;
 
-use Opengnsys\ServerBundle\Form\Type\Api\UserFormType;
+use Opengnsys\ServerBundle\Form\Type\UserFormType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;

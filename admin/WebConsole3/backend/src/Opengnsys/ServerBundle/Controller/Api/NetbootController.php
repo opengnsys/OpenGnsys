@@ -12,7 +12,7 @@ namespace Opengnsys\ServerBundle\Controller\Api;
 
 use Opengnsys\ServerBundle\Entity\Client;
 use Opengnsys\ServerBundle\Entity\Netboot;
-use Opengnsys\ServerBundle\Form\Type\Api\NetbootType;
+use Opengnsys\ServerBundle\Form\Type\NetbootType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -146,7 +146,7 @@ class NetbootController extends ApiController
 	 * @ApiDoc(
 	 *   resource = true,
 	 *   description = "Creates a new object from the submitted data.",
-	 *   input = {"class" = "Opengnsys\ServerBundle\Form\Type\Api\NetbootType", "name" = ""},
+	 *   input = {"class" = "Opengnsys\ServerBundle\Form\Type\NetbootType", "name" = ""},
 	 *   statusCodes = {
 	 *     200 = "Returned when successful",
 	 *     400 = "Returned when the form has errors"
@@ -184,7 +184,7 @@ class NetbootController extends ApiController
 	 *
 	 * @ApiDoc(
 	 *   resource = true,
-	 *   input = {"class" = "Opengnsys\ServerBundle\Form\Type\Api\NetbootType", "name" = ""},
+	 *   input = {"class" = "Opengnsys\ServerBundle\Form\Type\NetbootType", "name" = ""},
 	 *   statusCodes = {
 	 *     204 = "Returned when successful",
 	 *     400 = "Returned when the form has errors"

@@ -3,13 +3,18 @@
                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
     <entity name="Opengnsys\ServerBundle\Entity\Image" table="og_server__images"
-            repository-class="Opengnsys\ServerBundle\Entity\Repository\ImageRepository">
+            repository-class="Opengnsys\ServerBundle\Repository\ImageRepository">
 
         <id name="id" type="integer" column="id">
             <generator strategy="AUTO"/>
         </id>
 
-        <field name="canonicalName" type="string" column="canonical_name" length="50" nullable="false" unique="true"/>
+        <unique-constraints>
+            <unique-constraint columns="canonical_name,repository_id" name="unique1_idx" />
+        </unique-constraints>
+
+
+        <field name="canonicalName" type="string" column="canonical_name" length="50" nullable="false"/>
         <field name="description" type="string" column="description" length="250" nullable="false"/>
 
         <field name="comments" type="text" column="comments" length="65535" nullable="true"/>
@@ -27,7 +32,7 @@
 
         <many-to-one field="softwareProfile" target-entity="\Opengnsys\ServerBundle\Entity\SoftwareProfile">
             <join-columns>
-                <join-column name="sotfware_profile_id" referenced-column-name="id"/>
+                <join-column name="sotfware_profile_id" referenced-column-name="id" on-delete="SET NULL"/>
             </join-columns>
         </many-to-one>
 

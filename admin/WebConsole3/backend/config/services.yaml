@@ -1,0 +1,44 @@
+# This file is the entry point to configure your own services.
+# Files in the packages/ subdirectory configure your dependencies.
+
+# Put parameters here that don't need to change on each machine where the app is deployed
+# https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
+imports:
+    - { resource: parameters.yaml }
+
+services:
+    # default configuration for services in *this* file
+    _defaults:
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+        #public: false
+
+    # makes classes in src/ available to be used as services
+    # this creates a service per class whose id is the fully-qualified class name
+    #App\:
+    #    resource: '../src/*'
+    #    exclude: '../src/{DependencyInjection,Entity,Migrations,Tests,Kernel.php}'
+
+    # controllers are imported separately to make sure services can be injected
+    # as action arguments even if you don't extend any base controller class
+    #Opengnsys\CoreBundle\Controller\:
+    #    resource: '../src/Opengnsys/CoreBundle/Controller'
+    #    tags: ['controller.service_arguments']
+    #Opengnsys\ServerBundle\Controller\:
+    #    resource: '../src/Opengnsys/ServerBundle/Controller'
+    #    tags: ['controller.service_arguments']
+    #Opengnsys\RepositoryBundle\Controller\:
+    #    resource: '../src/Opengnsys/RepositoryBundle/Controller'
+    #    tags: ['controller.service_arguments']
+
+    # add more service definitions when explicit configuration is needed
+    # please note that last definitions always *replace* previous ones
+
+    # COMMAND
+    Opengnsys\CoreBundle\Command\CreateClientCommand:
+        arguments: ['@fos_oauth_server.client_manager.default']
+        tags: [{name: console.command, command: opengnsys:oauth-server:client:create}]
+
+    Opengnsys\MigrationBundle\Command\MigrateCommand:
+        arguments: ['@doctrine.orm.default_entity_manager', '@doctrine.orm.og_1_entity_manager', '@monolog.logger.og_migration']
+        tags: [{name: console.command, command: opengnsys:migration:execute}]

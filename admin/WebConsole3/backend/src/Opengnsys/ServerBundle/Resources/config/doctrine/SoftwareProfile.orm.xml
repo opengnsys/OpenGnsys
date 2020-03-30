@@ -3,7 +3,7 @@
                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
     <entity name="Opengnsys\ServerBundle\Entity\SoftwareProfile" table="og_server__software_profiles"
-            repository-class="Opengnsys\ServerBundle\Entity\Repository\SoftwareProfileRepository">
+            repository-class="Opengnsys\ServerBundle\Repository\SoftwareProfileRepository">
 
 
         <id name="id" type="integer" column="id">
@@ -26,10 +26,10 @@
 
             <join-table name="og_server__software_profiles_softwares">
                 <join-columns>
-                    <join-column name="software_profile_id" referenced-column-name="id"/>
+                    <join-column name="software_profile_id" referenced-column-name="id" on-delete="CASCADE"/>
                 </join-columns>
                 <inverse-join-columns>
-                    <join-column name="software_id" referenced-column-name="id" unique="false"/>
+                    <join-column name="software_id" referenced-column-name="id" unique="false" on-delete="CASCADE"/>
                 </inverse-join-columns>
             </join-table>
         </many-to-many>

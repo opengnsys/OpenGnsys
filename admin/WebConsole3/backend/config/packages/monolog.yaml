@@ -1,0 +1,15 @@
+monolog:
+    channels: ['og_server', 'og_migration']
+    handlers:
+        og_server:
+            type:     rotating_file
+            max_files: 31
+            level:    debug
+            path:     '%kernel.logs_dir%/og_server.log'
+            channels: [og_server]
+        og_migration:
+            type:     rotating_file
+            max_files: 31
+            level:    debug
+            path:     '%kernel.logs_dir%/og_migration.log'
+            channels: [og_migration]

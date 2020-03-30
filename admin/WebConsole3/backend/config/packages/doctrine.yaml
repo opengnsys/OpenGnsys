@@ -1,0 +1,33 @@
+doctrine:
+    dbal:
+        default_connection: default
+        connections:
+            default:
+                url: '%env(DATABASE_URL)%'
+                driver: 'pdo_mysql'
+                server_version: '5.7'
+                charset: UTF8
+            og_1:
+                url: '%env(DATABASE_OG1_URL)%'
+                driver: 'pdo_mysql'
+                server_version: '5.7'
+                charset: UTF8
+    orm:
+        default_entity_manager: default
+        #auto_generate_proxy_classes: true
+        #naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
+        #auto_mapping: true
+        entity_managers:
+            default:
+                connection: default
+                mappings:
+                    OpengnsysServerBundle: ~
+                    OpengnsysRepositoryBundle: ~
+                    OpengnsysCoreBundle: ~
+                    FOSUserBundle: ~
+                    FOSOAuthServerBundle: ~
+                    #OpengnsysMigrationBundle: ~
+            og_1:
+                connection: og_1
+                mappings:
+                    OpengnsysMigrationBundle: ~

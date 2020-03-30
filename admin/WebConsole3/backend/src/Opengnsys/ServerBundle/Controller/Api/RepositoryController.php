@@ -10,7 +10,7 @@
  
 namespace Opengnsys\ServerBundle\Controller\Api;
 
-use Opengnsys\ServerBundle\Form\Type\Api\RepositoryType;
+use Opengnsys\ServerBundle\Form\Type\RepositoryType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -95,7 +95,7 @@ class RepositoryController extends ApiController
 	 * @ApiDoc(
 	 *   resource = true,
 	 *   description = "Gets a Repository for a given id",
-	 *   output = "Opengnsys\ServerBundle\Entity\Repository",
+	 *   output = "Opengnsys\ServerBundle\Repository",
 	 *   statusCodes = {
 	 *     200 = "Returned when successful",
 	 *     404 = "Returned when the repository is not found"
@@ -124,7 +124,7 @@ class RepositoryController extends ApiController
 	 * @ApiDoc(
 	 *   resource = true,
 	 *   description = "Creates a new object from the submitted data.",
-	 *   input = {"class" = "Opengnsys\ServerBundle\Form\Type\Api\RepositoryType", "name" = ""},
+	 *   input = {"class" = "Opengnsys\ServerBundle\Form\Type\RepositoryType", "name" = ""},
 	 *   statusCodes = {
 	 *     200 = "Returned when successful",
 	 *     400 = "Returned when the form has errors"
@@ -170,7 +170,7 @@ class RepositoryController extends ApiController
 	 *
 	 * @ApiDoc(
 	 *   resource = true,
-	 *   input = {"class" = "Opengnsys\ServerBundle\Form\Type\Api\RepositoryType", "name" = ""},
+	 *   input = {"class" = "Opengnsys\ServerBundle\Form\Type\RepositoryType", "name" = ""},
 	 *   statusCodes = {
 	 *     204 = "Returned when successful",
 	 *     400 = "Returned when the form has errors"
@@ -213,7 +213,7 @@ class RepositoryController extends ApiController
 	 * @ApiDoc(
 	 *   resource = true,
 	 *   description = "Delete a Repository for a given id",
-	 *   output = "Opengnsys\ServerBundle\Entity\Repository",
+	 *   output = "Opengnsys\ServerBundle\Repository",
 	 *   statusCodes = {
 	 *     200 = "Returned when successful",
 	 *     404 = "Returned when the repository is not found"
