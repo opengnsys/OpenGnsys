@@ -528,9 +528,11 @@ bool actualizaConfiguracion(struct og_dbi *dbi, char *cfg, int ido)
 						ser, ido);
 				if (!result) {
 					dbi_conn_error(dbi->conn, &msglog);
-					og_info((char *)msglog);
+					syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+					       __func__, __LINE__, msglog);
 					return false;
 				}
+				dbi_result_free(result);
 			}
 			continue;
 		}
@@ -595,7 +597,8 @@ bool actualizaConfiguracion(struct og_dbi *dbi, char *cfg, int ido)
 					ido, disk, par, cpt, tam, uso, idsfi, idsoi);
 			if (!result_update) {
 				dbi_conn_error(dbi->conn, &msglog);
-				og_info((char *)msglog);
+				syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+				       __func__, __LINE__, msglog);
 				return false;
 			}
 			dbi_result_free(result_update);
@@ -643,6 +646,7 @@ bool actualizaConfiguracion(struct og_dbi *dbi, char *cfg, int ido)
 
 			dbi_result_free(result_update);
 		}
+		dbi_result_free(result);
 	}
 	lon += sprintf(tbPar + lon, "(0,0)");
 	// Eliminar particiones almacenadas que ya no existen
