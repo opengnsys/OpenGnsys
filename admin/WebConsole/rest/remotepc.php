@@ -187,20 +187,19 @@ EOD;
 CREATE EVENT e_timeout_$clntid
        ON SCHEDULE AT CURRENT_TIMESTAMP + INTERVAL $timeout DO
        BEGIN
-	    SET @clntid = NULL;
+	    SET @action_id = NULL;
 	    UPDATE acciones
 	       SET estado = $ACCION_FINALIZADA, resultado = $ACCION_FALLIDA,
 		   descrinotificacion = 'Timeout'
 	     WHERE descriaccion = 'RemotePC Session' AND estado = $ACCION_INICIADA
-	       AND idordenador = (SELECT @clntid := '$clntid');
-	    IF @clntid IS NOT NULL THEN
+	       AND idordenador = '$clntid'
+	       AND (SELECT @action_id := idaccion);
+	    IF @action_id IS NOT NULL THEN
 	       UPDATE remotepc
 		  SET reserved=NOW() - INTERVAL 1 SECOND, urllogin=NULL, urllogout=NULL
-		WHERE id = @clntid;
+		WHERE id = '$clntid';
 	       DELETE FROM acciones
-		WHERE idordenador = @clntid
-		  AND descriaccion = 'RemotePC Session'
-		  AND descrinotificacion = 'Timeout';
+		WHERE idaccion = @action_id;
 	    END IF;
        END
 EOD;
