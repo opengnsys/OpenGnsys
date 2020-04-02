@@ -167,12 +167,13 @@ EOD;
 		} else {
 			// Multiple responses.
 			foreach ($stat as $ip => $st) {
-				$tmp = Array();
-				$tmp['id'] = (int)$id[$ip];
-				$tmp['ip'] = $ip;
-				$tmp['status'] = $stat[$ip];
-				empty($logged[$ip]) || $tmp['loggedin'] = $logged[$ip];
-				array_push($response, $tmp);
+				if (isset($id[$ip])) {
+					$tmp = ['id' => (int)$id[$ip],
+					        'ip' => $ip,
+					        'status' => $stat[$ip]];
+					empty($logged[$ip]) || $tmp['loggedin'] = $logged[$ip];
+					array_push($response, $tmp);
+				}
 			}
 		}
 		jsonResponse(200, $response);
