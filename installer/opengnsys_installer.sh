@@ -1745,6 +1745,15 @@ INSTVERSION=$(jq -r '.version' $INSTALL_TARGET/doc/VERSION.json)
 # Instalar base de datos de OpenGnsys Admin.
 isInArray notinstalled "mysql-server" || isInArray notinstalled "mariadb-server"
 if [ $? -eq 0 ]; then
+	# Enable database manager (MySQL, if missing, MariaDB).
+	service=$MYSQLSERV
+	$ENABLESERVICE
+	if [ $? != 0 ]; then
+		service=$MARIADBSERV
+		$ENABLESERVICE
+	fi
+	# Start database manager.
+	$STARTSERVICE
 	# Asignar clave del usuario "root".
 	mysqlSetRootPassword "${MYSQL_ROOT_PASSWORD}"
 else
@@ -1754,14 +1763,7 @@ fi
 
 # Copy MySQL configuration template
 cp $WORKDIR/opengnsys/server/etc/mysqld-og.cnf $MYSQLCFGDIR 2>/dev/null
-# Enable database manager (MySQL, if missing, MariaDB).
-service=$MYSQLSERV
-$ENABLESERVICE
-if [ $? != 0 ]; then
-	service=$MARIADBSERV
-	$ENABLESERVICE
-fi
-# Activar gestor de base de datos.
+# Restart database manager.
 $STARTSERVICE
 
 mysqlTestConnection "${MYSQL_ROOT_PASSWORD}"
