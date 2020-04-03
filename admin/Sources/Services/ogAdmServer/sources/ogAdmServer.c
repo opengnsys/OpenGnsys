@@ -130,7 +130,7 @@ enum og_client_state {
 	OG_CLIENT_PROCESSING_REQUEST,
 };
 
-#define OG_MSG_REQUEST_MAXLEN	4096
+#define OG_MSG_REQUEST_MAXLEN	16384
 
 /* Shut down connection if there is no complete message after 10 seconds. */
 #define OG_CLIENT_TIMEOUT	10
