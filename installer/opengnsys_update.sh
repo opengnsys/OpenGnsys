@@ -996,11 +996,14 @@ function updateServerFiles()
 	fi
 
 	echoAndLog "${FUNCNAME}(): updating cron files"
-	[ ! -f /etc/cron.d/opengnsys ] && echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/opengnsys.cron ] && $INSTALL_TARGET/bin/opengnsys.cron" > /etc/cron.d/opengnsys
 	[ ! -f /etc/cron.d/torrentcreator ] && echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/torrent-creator ] && $INSTALL_TARGET/bin/torrent-creator" > /etc/cron.d/torrentcreator
 	[ ! -f /etc/cron.d/torrenttracker ] && echo "5 * * * *   root   [ -x $INSTALL_TARGET/bin/torrent-tracker ] && $INSTALL_TARGET/bin/torrent-tracker" > /etc/cron.d/torrenttracker
 	[ ! -f /etc/cron.d/imagedelete ] && echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/deletepreimage ] && $INSTALL_TARGET/bin/deletepreimage" > /etc/cron.d/imagedelete
 	[ ! -f /etc/cron.d/ogagentqueue ] && echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/ogagentqueue.cron ] && $INSTALL_TARGET/bin/ogagentqueue.cron" > /etc/cron.d/ogagentqueue
+
+	echoAndLog "${FUNCNAME}(): deleting deprecated cron file"
+	[ -e /etc/cron.d/opengnsys ] && rm -f /etc/cron.d/opengnsys \
+					      $INSTALL_TARGET/bin/opengnsys.cron
 
 	# Se modifican los nombres de las plantilla PXE por compatibilidad con los equipos UEFI.
 	if [ -f $INSTALL_TARGET/tftpboot/menu.lst/templates/01 ]; then
