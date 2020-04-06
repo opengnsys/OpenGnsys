@@ -4358,6 +4358,16 @@ static int og_server_internal_error(struct og_client *cli)
 	return -1;
 }
 
+static int og_client_payload_too_large(struct og_client *cli)
+{
+	char buf[] = "HTTP/1.1 413 Payload Too Large\r\n"
+		     "Content-Length: 0\r\n\r\n";
+
+	send(og_client_socket(cli), buf, strlen(buf), 0);
+
+	return -1;
+}
+
 #define OG_MSG_RESPONSE_MAXLEN	65536
 
 static int og_client_ok(struct og_client *cli, char *buf_reply)
@@ -4688,6 +4698,7 @@ static void og_client_read_cb(struct ev_loop *loop, struct ev_io *io, int events
 	if (cli->buf_len >= sizeof(cli->buf)) {
 		syslog(LOG_ERR, "client request from %s:%hu is too long\n",
 		       inet_ntoa(cli->addr.sin_addr), ntohs(cli->addr.sin_port));
+		og_client_payload_too_large(cli);
 		goto close;
 	}
 
