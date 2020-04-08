@@ -503,16 +503,16 @@ char* copiaParametro(const char*nombre,TRAMA* ptrTrama)
 BOOLEAN contieneIP(char *cadenaiph,char *ipcliente)
 {
 	char *posa,*posb;
-	int lon;
+	int lon, i;
 
 	posa=strstr(cadenaiph,ipcliente);
 	if(posa==NULL) return(FALSE); // No existe la IP en la cadena
 	posb=posa; // Iguala direcciones
-	while(TRUE){
-		posb++;
+	for (i = 0; i < LONIP; i++) {
 		if(*posb==';') break;
 		if(*posb=='\0') break;
 		if(*posb=='\r') break;
+		posb++;
 	}
 	lon=strlen(ipcliente);
 	if((posb-posa)==lon) return(TRUE); // IP encontrada
