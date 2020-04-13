@@ -123,8 +123,8 @@ function HTMLSELECT_imagenes($cmd,$idrepositorio,$idperfilsoft,$disk,$particion,
                 imagenes.idperfilsoft, repositorios.nombrerepositorio, repositorios.ip
 		FROM  imagenes INNER JOIN repositorios USING  (idrepositorio)
 		WHERE imagenes.tipo=".$IMAGENES_MONOLITICAS."
-		AND   repositorios.idrepositorio IN (SELECT idrepositorio FROM ordenadores WHERE ordenadores.ip='".$masterip."')
-		OR repositorios.ip='".$masterip."' ORDER BY imagenes.descripcion";
+		AND   repositorios.idcentro=".$_SESSION["widcentro"]."
+		ORDER BY imagenes.descripcion";
 
 	$rs=new Recordset;
 	$rs->Comando=&$cmd;
