@@ -5371,39 +5371,20 @@ static void og_client_timer_cb(struct ev_loop *loop, ev_timer *timer, int events
 	og_client_release(loop, cli);
 }
 
-static void og_agent_send_probe(struct og_client *cli)
+static void og_agent_send_refresh(struct og_client *cli)
 {
-	json_t *id, *name, *center, *room, *object;
 	struct og_msg_params params;
-	struct og_computer computer;
 	int err;
-
-	err = og_dbi_get_computer_info(&computer, cli->addr.sin_addr);
-	if (err < 0)
-		return;
 
 	params.ips_array[0] = inet_ntoa(cli->addr.sin_addr);
 	params.ips_array_len = 1;
 
-	id = json_integer(computer.id);
-	center = json_integer(computer.center);
-	room = json_integer(computer.room);
-	name = json_string(computer.name);
-
-	object = json_object();
-	if (!object)
-		return;
-	json_object_set_new(object, "id", id);
-	json_object_set_new(object, "name", name);
-	json_object_set_new(object, "center", center);
-	json_object_set_new(object, "room", room);
-
-	err = og_send_request(OG_METHOD_POST, OG_CMD_PROBE, &params, object);
+	err = og_send_request(OG_METHOD_GET, OG_CMD_REFRESH, &params, NULL);
 	if (err < 0) {
-		syslog(LOG_ERR, "Can't send probe to: %s\n",
+		syslog(LOG_ERR, "Can't send refresh to: %s\n",
 		       params.ips_array[0]);
 	} else {
-		syslog(LOG_INFO, "Sent probe to: %s\n",
+		syslog(LOG_INFO, "Sent refresh to: %s\n",
 		       params.ips_array[0]);
 	}
 }
@@ -5462,8 +5443,9 @@ static void og_server_accept_cb(struct ev_loop *loop, struct ev_io *io,
 	ev_timer_start(loop, &cli->timer);
 	list_add(&cli->list, &client_list);
 
-	if (io->fd == socket_agent_rest)
-		og_agent_send_probe(cli);
+	if (io->fd == socket_agent_rest) {
+		og_agent_send_refresh(cli);
+	}
 }
 
 static int og_socket_server_init(const char *port)
