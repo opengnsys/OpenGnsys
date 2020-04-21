@@ -744,7 +744,6 @@ function updateWebFiles()
 # Copiar ficheros en la zona de descargas de OpenGnsys Web Console.
 function updateDownloadableFiles()
 {
-	local NEWVERSION="1.1.1"	### TEMPORAL
 	local FILENAME=ogagentpkgs-$NEWVERSION.tar.gz
 	local TARGETFILE=$WORKDIR/$FILENAME
 
