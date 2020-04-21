@@ -42,15 +42,6 @@ SERVERAUXPORT=2011
 ############# IRINA
 
 #
-# Servidor de tareas programadas
-#
-AGENTNAME=ogAdmAgent
-AGENTDAEMON=$BASEDIR/sbin/$AGENTNAME
-AGENTCFG=$BASEDIR/etc/$AGENTNAME.cfg
-AGENTLOG=$BASEDIR/log/$AGENTNAME.log
-AGENTDAEMON_OPTIONS="-f $AGENTCFG -l $AGENTLOG"
-
-#
 # Opciones Bittorrent
 #
 
@@ -155,14 +146,6 @@ arranca_demonios() {
      faucet $REPOAUXPORT --daemon --in bash -c "$REPOAUXDAEMON"
      [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
   fi
-  if [ $RUN_OGADMSERVER = "yes" ] && [ $RUN_OGADMAGENT = "yes" ]; then
-     sleep 5 # Damos tiempo a que ogAdmServer este funcionando
-  fi
-  if [ $RUN_OGADMAGENT = "yes" ]; then
-     $ACTIONMSG "Iniciando demonio: $AGENTNAME"
-     $DAEMONSTART $AGENTDAEMON $EXTRAOPTS $AGENTDAEMON_OPTIONS $ENDOPTS
-     [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
-  fi    
   if [ $RUN_BTTRACKER = "yes" ]; then
      $ACTIONMSG "Iniciando demonio: $BTTRACK"
      $TRACKERSTART $BTTRACK $EXTRAOPTS $BTTRACK_OPTIONS $ENDOPTS
@@ -189,9 +172,6 @@ para_demonios() {
     [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
     rm -f $BTTRACKPID
   fi 
-  $ACTIONMSG "Parando demonio: $AGENTNAME"
-  $DAEMONSTOP $AGENTNAME
-  [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
   $ACTIONMSG "Parando demonio: $REPOAUXNAME"
   pkill faucet
   [ $? -le 1 ] && $SUCCESSMSG || $FAILMSG

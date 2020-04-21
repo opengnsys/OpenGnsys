@@ -1,6 +1,5 @@
 # RUN_OGADMSERVER defined as OpenGnsys Admin Server
 # RUN_OGADMREPO defined as OpenGnsys Repository Manager
-# RUN_OGADMAGENT run task scheduler service, only if Admin Server is enabled
 # RUN_BTTRACKER run Bittorrent Tracker, only if Repository is enabled
 # RUN_BTSEEDER start seeding of selected torrent files, only if Repository is enabled
 # BTSEEDER_PRIORITY nice priority to seed torrent files; recommended values:
@@ -9,7 +8,6 @@
 #        -8 for Repo with Torrent
 RUN_OGADMSERVER="yes"
 RUN_OGADMREPO="yes"
-RUN_OGADMAGENT="yes"
 RUN_BTTRACKER="yes"
 RUN_BTSEEDER="yes"
 BTSEEDER_PRIORITY=0

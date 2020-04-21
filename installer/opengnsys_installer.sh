@@ -1334,15 +1334,6 @@ function servicesCompilation ()
 		hayErrores=1
 	fi
 	popd
-	# Compilar OpenGnsys Agent
-	echoAndLog "${FUNCNAME}(): Compiling OpenGnsys Agent"
-	pushd $WORKDIR/opengnsys/admin/Sources/Services/ogAdmAgent
-	make && mv ogAdmAgent $INSTALL_TARGET/sbin
-	if [ $? -ne 0 ]; then
-		echoAndLog "${FUNCNAME}(): error while compiling OpenGnsys Agent"
-		hayErrores=1
-	fi
-	popd
 
 	return $hayErrores
 }
@@ -1499,11 +1490,6 @@ function openGnsysConfigure()
 				$WORKDIR/opengnsys/admin/Sources/Services/ogAdmServer/ogAdmServer.cfg > $INSTALL_TARGET/etc/ogAdmServer-$dev.cfg
 			sed -e "s/SERVERIP/${SERVERIP[i]}/g" \
 				$WORKDIR/opengnsys/repoman/etc/ogAdmRepo.cfg.tmpl > $INSTALL_TARGET/etc/ogAdmRepo-$dev.cfg
-			sed -e "s/SERVERIP/${SERVERIP[i]}/g" \
-			    -e "s/DBUSER/$OPENGNSYS_DB_USER/g" \
-			    -e "s/DBPASSWORD/$OPENGNSYS_DB_PASSWD/g" \
-			    -e "s/DATABASE/$OPENGNSYS_DATABASE/g" \
-				$WORKDIR/opengnsys/admin/Sources/Services/ogAdmAgent/ogAdmAgent.cfg > $INSTALL_TARGET/etc/ogAdmAgent-$dev.cfg
 			CONSOLEURL="https://${SERVERIP[i]}/opengnsys"
 			sed -e "s/SERVERIP/${SERVERIP[i]}/g" \
 			    -e "s/DBUSER/$OPENGNSYS_DB_USER/g" \
@@ -1520,7 +1506,6 @@ function openGnsysConfigure()
 	done
 	ln -f $INSTALL_TARGET/etc/ogAdmServer-$DEFAULTDEV.cfg $INSTALL_TARGET/etc/ogAdmServer.cfg
 	ln -f $INSTALL_TARGET/etc/ogAdmRepo-$DEFAULTDEV.cfg $INSTALL_TARGET/etc/ogAdmRepo.cfg
-	ln -f $INSTALL_TARGET/etc/ogAdmAgent-$DEFAULTDEV.cfg $INSTALL_TARGET/etc/ogAdmAgent.cfg
 	ln -f $INSTALL_TARGET/www/controlacceso-$DEFAULTDEV.php $INSTALL_TARGET/www/controlacceso.php
 
 	# Configuración del motor de clonación.

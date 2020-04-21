@@ -55,8 +55,6 @@ fi
 # Cargar configuración de acceso a la base de datos.
 if [ -r $INSTALL_TARGET/etc/ogAdmServer.cfg ]; then
 	source $INSTALL_TARGET/etc/ogAdmServer.cfg
-elif [ -r $INSTALL_TARGET/etc/ogAdmAgent.cfg ]; then
-	source $INSTALL_TARGET/etc/ogAdmAgent.cfg
 fi
 OPENGNSYS_DATABASE=${OPENGNSYS_DATABASE:-"$CATALOG"}		# Base de datos
 OPENGNSYS_DBUSER=${OPENGNSYS_DBUSER:-"$USUARIO"}		# Usuario de acceso
@@ -972,7 +970,11 @@ function updateServerFiles()
 	if ! diff -q $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.init /etc/init.d/opengnsys 2>/dev/null; then
 		echoAndLog "${FUNCNAME}(): updating new init file"
 		backupFile /etc/init.d/opengnsys
+		service="opengnsys"
+		$STOPSERVICE
 		cp -a $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.init /etc/init.d/opengnsys
+		systemctl daemon-reload
+		$STARTSERVICE
 		NEWFILES="$NEWFILES /etc/init.d/opengnsys"
 	fi
 	if ! diff -q $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.default /etc/default/opengnsys >/dev/null; then
@@ -1056,15 +1058,10 @@ function compileServices()
 	popd
 	# Parar antiguo servicio de repositorio.
 	pgrep ogAdmRepo > /dev/null && service="ogAdmRepo" $STOPSERVICE
-	# Compilar OpenGnsys Agent
-	echoAndLog "${FUNCNAME}(): Recompiling OpenGnsys Server Agent"
-	pushd $WORKDIR/opengnsys/admin/Sources/Services/ogAdmAgent
-	make && moveNewService ogAdmAgent $INSTALL_TARGET/sbin
-	if [ $? -ne 0 ]; then
-		echoAndLog "${FUNCNAME}(): error while compiling OpenGnsys Server Agent"
-		hayErrores=1
-	fi
-	popd
+	# Remove OpenGnsys Agent (ogAdmAgent)
+	echoAndLog "${FUNCNAME}(): deleting deprecated OpenGnsys Agent"
+	[ -e $INSTALL_TARGET/sbin/ogAdmAgent ] && \
+		rm -f $INSTALL_TARGET/sbin/ogAdmAgent
 
 	# Compilar OpenGnsys Client
 	echoAndLog "${FUNCNAME}(): Recompiling OpenGnsys Client"
