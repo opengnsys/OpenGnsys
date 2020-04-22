@@ -6,13 +6,20 @@ LISTA DE CAMBIOS	CHANGELOG.es.txt
 Lista de cambios incluidos en OpenGnsys 1.1.1b (versión de mantenimiento)
 ----------------------------------------------
 
+Tickets resueltos en módulo OpenGnsys Cloning Engine:
+#966	Listar nuevos tipos de aplicaciones Linux en inventario de software (mejora)
+
+Tickets resueltos en módulo OpenGnsys Client:
+#963	Generar instalación desatendida de ogagent para Windows (mejora)
+
 Tickets resueltos en módulo OpenGnsys Server:
 #955	Añadir ordenadores definidos al DHCP local
+#958	Evitar inyección de código en los scritps de servidor (corrección)
 
 Tickets resueltos en módulo OpenGnsys Installer:
 #954	Ignorar datos de importación (mejora)
 #956	Ampliar los datos de exportación (mejora)
-
+#964	Incluir párametro en configuración MySQL (corrección)
 
 Lista de cambios incluidos en OpenGnsys 1.1.1a (versión de mantenimiento)
 ----------------------------------------------
