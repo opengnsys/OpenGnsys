@@ -1029,11 +1029,13 @@ function moveNewService()
 	# Comparar los ficheros.
 	if ! diff -q $1 $2/$(basename $1) &>/dev/null; then
 		# Parar los servicios si fuese necesario.
-		[ -z "$NEWSERVICES" ] && service="opengnsys" $STOPSERVICE
+		service="opengnsys"
+		[ -z "$NEWSERVICES" ] && $STOPSERVICE
 		# Nuevo servicio.
 		NEWSERVICES="$NEWSERVICES $(basename $1)"
 		# Mover el nuevo fichero de servicio
 		mv $1 $2
+		$STARTSERVICE
 	fi
 }
 
