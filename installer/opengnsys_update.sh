@@ -1198,25 +1198,12 @@ function updateSummary()
 	echo       "========================"
 	echoAndLog "Project version:                  $VERSION"
 	echoAndLog "Update log file:                  $LOG_FILE"
-	if [ -n "$NEWFILES" ]; then
-		echoAndLog "Check new config files:           $(echo $NEWFILES)"
-	fi
-	if [ -n "$NEWSERVICES" ]; then
-		echoAndLog "New compiled services:            $(echo $NEWSERVICES)"
-		# Indicar si se debe reiniciar servicios manualmente o usando el Cron.
-		[ -f /etc/default/opengnsys ] && source /etc/default/opengnsys
-		if [ "$RUN_CRONJOB" == "no" ]; then
-			echoAndLog "        WARNING: you must to restart OpenGnsys services manually"
-		else
-			echoAndLog "        New OpenGnsys services will be restarted by the cronjob"
-		fi
-	fi
+	[ "$NEWFILES" ] && echoAndLog "Check new config files:           $(echo $NEWFILES)"
+	[ "$NEWSERVICES" ] && echoAndLog "New compiled services:            $(echo $NEWSERVICES)"
 	echoAndLog "Warnings:"
 	echoAndLog " - You must to clear web browser cache before loading OpenGnsys page"
 	echoAndLog " - Run \"settoken\" script to update authentication tokens"
-	if [ -n "$INSTALLEDOGLIVE" ]; then
-		echoAndLog " - Installed new ogLive Client: $INSTALLEDOGLIVE"
-	fi
+	[ "$INSTALLEDOGLIVE" ] && echoAndLog " - Installed new ogLive Client: $INSTALLEDOGLIVE"
 	echoAndLog " - If you want to use BURG as boot manager, run following command as root:"
 	echoAndLog "      curl $DOWNLOADURL/burg.tgz -o $INSTALL_TARGET/client/lib/burg.tgz"
 
@@ -1325,7 +1312,16 @@ updateDownloadableFiles
 makeDoxygenFiles
 
 # Recompilar y actualizar los servicios del sistema
-compileServices
+if compileServices; then
+	# Restart services, if necessary.
+	if [ "$NEWSERVICES" ]; then
+		echoAndLog "Restarting OpenGnsys services"
+		service="opengnsys" $STARTSERVICE
+	fi
+else
+	errorAndLog "Error compiling OpenGnsys services"
+	exit 1
+fi
 
 # Actaulizar ficheros auxiliares del cliente
 updateClient

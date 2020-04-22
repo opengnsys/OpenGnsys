@@ -7,11 +7,9 @@
 #        8 for Admin Server or Repo without Torrent
 #        0 for Admin Server and Repo with Torrent
 #        -8 for Repo with Torrent
-# RUN_CRON run Cron script to check started processes
 RUN_OGADMSERVER="yes"
 RUN_OGADMREPO="yes"
 RUN_OGADMAGENT="yes"
 RUN_BTTRACKER="yes"
 RUN_BTSEEDER="yes"
 BTSEEDER_PRIORITY=0
-RUN_CRONJOB="yes"
