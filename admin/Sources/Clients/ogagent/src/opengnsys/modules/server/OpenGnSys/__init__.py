@@ -82,8 +82,8 @@ class OpenGnSysWorker(ServerWorker):
     REST = None  # REST object
     logged_in = False  # User session flag
     locked = {}
-    random = None     # Random string for secure connections
-    length = 32       # Random string length
+    random = None  # Random string for secure connections
+    length = 32  # Random string length
 
     def onActivation(self):
         """
@@ -280,10 +280,13 @@ class OpenGnSysWorker(ServerWorker):
         :return: JSON object {"op": "launched"}
         """
         logger.debug('Processing script request')
-        # Decoding script
+        # Decoding script (Windows scripts need a subprocess call per line)
         script = urllib.unquote(post_params.get('script').decode('base64')).decode('utf8')
-        script = 'import subprocess;{0}'.format(
-            ';'.join(['subprocess.check_output({0},shell=True)'.format(repr(c)) for c in script.split('\n')]))
+        if operations.os_type == 'Windoes':
+            script = 'import subprocess; {0}'.format(
+                ';'.join(['subprocess.check_output({0},shell=True)'.format(repr(c)) for c in script.split('\n')]))
+        else:
+            script = 'import subprocess; subprocess.check_output("""{0}""",shell=True)'.format(script)
         # Executing script.
         if post_params.get('client', 'false') == 'false':
             thr = ScriptExecutorThread(script)
