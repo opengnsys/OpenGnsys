@@ -3397,45 +3397,6 @@ static int og_queue_task_group_clients(struct og_dbi *dbi, struct og_task *task,
 	return 0;
 }
 
-static int og_queue_task_classrooms(struct og_dbi *dbi, struct og_task *task,
-				    char *query)
-{
-
-	const char *msglog;
-	dbi_result result;
-
-	result = dbi_conn_queryf(dbi->conn, query);
-	if (!result) {
-		dbi_conn_error(dbi->conn, &msglog);
-		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
-		       __func__, __LINE__, msglog);
-		return -1;
-	}
-
-	while (dbi_result_next_row(result)) {
-		uint32_t classroom_id = dbi_result_get_uint(result, "idaula");
-
-		sprintf(query, "SELECT idgrupo FROM gruposordenadores "
-				"WHERE idaula=%d AND grupoid=0", classroom_id);
-		if (og_queue_task_group_clients(dbi, task, query)) {
-			dbi_result_free(result);
-			return -1;
-		}
-
-		sprintf(query,"SELECT ip, mac, idordenador FROM ordenadores "
-				"WHERE idaula=%d AND grupoid=0", classroom_id);
-		if (og_queue_task_command(dbi, task, query)) {
-			dbi_result_free(result);
-			return -1;
-		}
-
-	}
-
-	dbi_result_free(result);
-
-	return 0;
-}
-
 static int og_queue_task_group_classrooms(struct og_dbi *dbi,
 					  struct og_task *task, char *query)
 {
@@ -3461,8 +3422,13 @@ static int og_queue_task_group_classrooms(struct og_dbi *dbi,
 			return -1;
 		}
 
-		sprintf(query,"SELECT idaula FROM aulas WHERE grupoid=%d", group_id);
-		if (og_queue_task_classrooms(dbi, task, query)) {
+		sprintf(query,
+			"SELECT ip,mac,idordenador "
+			"FROM ordenadores INNER JOIN aulas "
+			"WHERE ordenadores.idaula=aulas.idaula "
+			"AND aulas.grupoid=%d",
+			group_id);
+		if (og_queue_task_command(dbi, task, query)) {
 			dbi_result_free(result);
 			return -1;
 		}
@@ -3474,47 +3440,42 @@ static int og_queue_task_group_classrooms(struct og_dbi *dbi,
 	return 0;
 }
 
-static int og_queue_task_center(struct og_dbi *dbi, struct og_task *task,
-				char *query)
-{
-
-	sprintf(query,"SELECT idgrupo FROM grupos WHERE idcentro=%i AND grupoid=0 AND tipo=%d",
-		task->scope, AMBITO_GRUPOSAULAS);
-	if (og_queue_task_group_classrooms(dbi, task, query))
-		return -1;
-
-	sprintf(query,"SELECT idaula FROM aulas WHERE idcentro=%i AND grupoid=0",
-		task->scope);
-	if (og_queue_task_classrooms(dbi, task, query))
-		return -1;
-
-	return 0;
-}
-
 static int og_queue_task_clients(struct og_dbi *dbi, struct og_task *task)
 {
 	char query[4096];
 
 	switch (task->type_scope) {
 		case AMBITO_CENTROS:
-			return og_queue_task_center(dbi, task, query);
+			sprintf(query,
+				"SELECT ip,mac,idordenador "
+				"FROM ordenadores INNER JOIN aulas "
+				"WHERE ordenadores.idaula=aulas.idaula "
+				"AND idcentro=%d",
+				task->scope);
+			return og_queue_task_command(dbi, task, query);
 		case AMBITO_GRUPOSAULAS:
-			sprintf(query, "SELECT idgrupo FROM grupos "
-				       "WHERE idgrupo=%i AND tipo=%d",
-				       task->scope, AMBITO_GRUPOSAULAS);
+			sprintf(query,
+				"SELECT idgrupo FROM grupos "
+				"WHERE idgrupo=%i AND tipo=%d",
+				task->scope, AMBITO_GRUPOSAULAS);
 			return og_queue_task_group_classrooms(dbi, task, query);
 		case AMBITO_AULAS:
-			sprintf(query, "SELECT idaula FROM aulas "
-				       "WHERE idaula = %d", task->scope);
-			return og_queue_task_classrooms(dbi, task, query);
+			sprintf(query,
+				"SELECT ip,mac,idordenador FROM ordenadores "
+				"WHERE idaula=%d",
+				task->scope);
+			return og_queue_task_command(dbi, task, query);
 		case AMBITO_GRUPOSORDENADORES:
-			sprintf(query, "SELECT idgrupo FROM gruposordenadores "
-				       "WHERE idgrupo = %d", task->scope);
+			sprintf(query,
+				"SELECT idgrupo FROM gruposordenadores "
+				"WHERE idgrupo = %d",
+				task->scope);
 			return og_queue_task_group_clients(dbi, task, query);
 		case AMBITO_ORDENADORES:
-			sprintf(query, "SELECT ip, mac, idordenador "
-				       "FROM ordenadores "
-				       "WHERE idordenador = %d", task->scope);
+			sprintf(query,
+				"SELECT ip, mac, idordenador FROM ordenadores "
+				"WHERE idordenador = %d",
+				task->scope);
 			return og_queue_task_command(dbi, task, query);
 	}
 	return 0;
