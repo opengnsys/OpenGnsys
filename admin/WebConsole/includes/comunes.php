@@ -369,7 +369,7 @@
 				$selecHtml=HTMLSELECT($cmd,$idcentro,'aulas',$idambito,'idaula','nombreaula',$wdth);
 				break;
 			case $AMBITO_GRUPOSORDENADORES :
-				$selecHtml=HTMLSELECT($cmd,0,'gruposordenadores',$idambito,'idgrupo ','nombregrupoordenador',$wdth);
+				$selecHtml=HTMLSELECT($cmd,0,'gruposordenadores',$idambito,'idgrupo','nombregrupoordenador',$wdth);
 				break;
 			case $AMBITO_ORDENADORES :
 				$clsWhere=" idaula IN (SELECT idaula FROM aulas WHERE idcentro=".$idcentro.")";
