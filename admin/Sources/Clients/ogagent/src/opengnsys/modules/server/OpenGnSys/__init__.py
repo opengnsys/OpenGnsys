@@ -282,7 +282,7 @@ class OpenGnSysWorker(ServerWorker):
         logger.debug('Processing script request')
         # Decoding script (Windows scripts need a subprocess call per line)
         script = urllib.unquote(post_params.get('script').decode('base64')).decode('utf8')
-        if operations.os_type == 'Windoes':
+        if operations.os_type == 'Windows':
             script = 'import subprocess; {0}'.format(
                 ';'.join(['subprocess.check_output({0},shell=True)'.format(repr(c)) for c in script.split('\n')]))
         else:
