@@ -3543,7 +3543,7 @@ static int og_dbi_queue_task(struct og_dbi *dbi, uint32_t task_id)
 	}
 
 	while (dbi_result_next_row(result)) {
-		task_id_next = dbi_result_get_uint(result, "procedimientoid");
+		task_id_next = dbi_result_get_uint(result, "tareaid");
 
 		if (task_id_next > 0) {
 			if (og_dbi_queue_task(dbi, task_id_next))
