@@ -504,7 +504,11 @@ int checkDato(struct og_dbi *dbi, char *dato, const char *tabla,
 }
 
 struct og_task {
+	uint32_t	task_id;
 	uint32_t	procedure_id;
+	uint32_t	command_id;
+	uint32_t	center_id;
+	uint32_t	schedule_id;
 	uint32_t	type_scope;
 	uint32_t	scope;
 	const char	*filtered_scope;
@@ -2951,6 +2955,7 @@ static int og_cmd_restore_incremental_image(json_t *element, struct og_msg_param
 }
 
 struct og_cmd {
+	uint32_t		id;
 	struct list_head	list;
 	uint32_t		client_id;
 	const char		*ip;
@@ -3322,6 +3327,50 @@ static int og_cmd_legacy(const char *input, struct og_cmd *cmd)
 	return err;
 }
 
+static int og_dbi_add_action(const struct og_dbi *dbi, const struct og_task *task,
+			     struct og_cmd *cmd)
+{
+	char start_date_string[24];
+	struct tm *start_date;
+	const char *msglog;
+	dbi_result result;
+	time_t now;
+
+	time(&now);
+	start_date = localtime(&now);
+
+	sprintf(start_date_string, "%hu/%hhu/%hhu %hhu:%hhu:%hhu",
+		start_date->tm_year + 1900, start_date->tm_mon + 1,
+		start_date->tm_mday, start_date->tm_hour, start_date->tm_min,
+		start_date->tm_sec);
+	result = dbi_conn_queryf(dbi->conn,
+				"INSERT INTO acciones (idordenador, "
+				"tipoaccion, idtipoaccion, descriaccion, ip, "
+				"sesion, idcomando, parametros, fechahorareg, "
+				"estado, resultado, ambito, idambito, "
+				"restrambito, idprocedimiento, idcentro, "
+				"idprogramacion) "
+				"VALUES (%d, %d, %d, '%s', '%s', %d, %d, '%s', "
+				"'%s', %d, %d, %d, %d, '%s', %d, %d, %d)",
+				cmd->client_id, EJECUCION_TAREA, task->task_id,
+				"", cmd->ip, 0, task->command_id,
+				task->params, start_date_string,
+				ACCION_INICIADA, ACCION_SINRESULTADO,
+				task->type_scope, task->scope, "",
+				task->procedure_id, task->center_id,
+				task->schedule_id);
+	if (!result) {
+		dbi_conn_error(dbi->conn, &msglog);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
+		return -1;
+	}
+	cmd->id = dbi_conn_sequence_last(dbi->conn, NULL);
+	dbi_result_free(result);
+
+	return 0;
+}
+
 static int og_queue_task_command(struct og_dbi *dbi, const struct og_task *task,
 				 char *query)
 {
@@ -3349,8 +3398,12 @@ static int og_queue_task_command(struct og_dbi *dbi, const struct og_task *task,
 		cmd->mac	= strdup(dbi_result_get_string(result, "mac"));
 		og_cmd_legacy(task->params, cmd);
 
-		list_add_tail(&cmd->list, &cmd_list);
+		if (og_dbi_add_action(dbi, task, cmd)) {
+			dbi_result_free(result);
+			return -1;
+		}
 
+		list_add_tail(&cmd->list, &cmd_list);
 	}
 
 	dbi_result_free(result);
@@ -3488,7 +3541,7 @@ static int og_dbi_queue_procedure(struct og_dbi *dbi, struct og_task *task)
 	dbi_result result;
 
 	result = dbi_conn_queryf(dbi->conn,
-			"SELECT parametros, procedimientoid "
+			"SELECT parametros, procedimientoid, idcomando "
 			"FROM procedimientos_acciones "
 			"WHERE idprocedimiento=%d ORDER BY orden", task->procedure_id);
 	if (!result) {
@@ -3508,6 +3561,7 @@ static int og_dbi_queue_procedure(struct og_dbi *dbi, struct og_task *task)
 		}
 
 		task->params	= strdup(dbi_result_get_string(result, "parametros"));
+		task->command_id = dbi_result_get_uint(result, "idcomando");
 		if (og_queue_task_clients(dbi, task))
 			return -1;
 	}
@@ -3517,7 +3571,8 @@ static int og_dbi_queue_procedure(struct og_dbi *dbi, struct og_task *task)
 	return 0;
 }
 
-static int og_dbi_queue_task(struct og_dbi *dbi, uint32_t task_id)
+static int og_dbi_queue_task(struct og_dbi *dbi, uint32_t task_id,
+			     uint32_t schedule_id)
 {
 	struct og_task task = {};
 	uint32_t task_id_next;
@@ -3525,10 +3580,14 @@ static int og_dbi_queue_task(struct og_dbi *dbi, uint32_t task_id)
 	const char *msglog;
 	dbi_result result;
 
+	task.schedule_id = schedule_id;
+
 	result = dbi_conn_queryf(dbi->conn,
 			"SELECT tareas_acciones.orden, "
 				"tareas_acciones.idprocedimiento, "
 				"tareas_acciones.tareaid, "
+				"tareas.idtarea, "
+				"tareas.idcentro, "
 				"tareas.ambito, "
 				"tareas.idambito, "
 				"tareas.restrambito "
@@ -3546,11 +3605,13 @@ static int og_dbi_queue_task(struct og_dbi *dbi, uint32_t task_id)
 		task_id_next = dbi_result_get_uint(result, "tareaid");
 
 		if (task_id_next > 0) {
-			if (og_dbi_queue_task(dbi, task_id_next))
+			if (og_dbi_queue_task(dbi, task_id_next, schedule_id))
 				return -1;
 
 			continue;
 		}
+		task.task_id = dbi_result_get_uint(result, "idtarea");
+		task.center_id = dbi_result_get_uint(result, "idcentro");
 		task.procedure_id = dbi_result_get_uint(result, "idprocedimiento");
 		task.type_scope = dbi_result_get_uint(result, "ambito");
 		task.scope = dbi_result_get_uint(result, "idambito");
@@ -3575,7 +3636,7 @@ static int og_dbi_queue_task(struct og_dbi *dbi, uint32_t task_id)
 	return 0;
 }
 
-void og_dbi_schedule_task(unsigned int task_id)
+void og_dbi_schedule_task(unsigned int task_id, unsigned int schedule_id)
 {
 	struct og_msg_params params = {};
 	bool duplicated = false;
@@ -3589,7 +3650,7 @@ void og_dbi_schedule_task(unsigned int task_id)
 		       __func__, __LINE__);
 		return;
 	}
-	og_dbi_queue_task(dbi, task_id);
+	og_dbi_queue_task(dbi, task_id, schedule_id);
 	og_dbi_close(dbi);
 
 	list_for_each_entry(cmd, &cmd_list, list) {
@@ -3641,7 +3702,7 @@ static int og_cmd_task_post(json_t *element, struct og_msg_params *params)
 		return -1;
 	}
 
-	og_dbi_queue_task(dbi, atoi(params->task_id));
+	og_dbi_queue_task(dbi, atoi(params->task_id), 0);
 	og_dbi_close(dbi);
 
 	list_for_each_entry(cmd, &cmd_list, list)
