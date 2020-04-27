@@ -32,6 +32,6 @@ void og_schedule_update(struct ev_loop *loop, unsigned int schedule_id,
 void og_schedule_delete(struct ev_loop *loop, uint32_t schedule_id);
 void og_schedule_next(struct ev_loop *loop);
 void og_schedule_refresh(struct ev_loop *loop);
-void og_dbi_schedule_task(unsigned int task_id);
+void og_dbi_schedule_task(unsigned int task_id, unsigned int schedule_id);
 
 #endif
