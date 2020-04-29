@@ -184,6 +184,7 @@ struct og_client {
 	char			auth_token[64];
 	enum og_client_status	status;
 	enum og_cmd_type	last_cmd;
+	unsigned int		last_cmd_id;
 };
 
 static inline int og_client_socket(const struct og_client *cli)
@@ -5244,6 +5245,52 @@ static int og_resp_image_restore(json_t *data, struct og_client *cli)
 	return 0;
 }
 
+static int og_dbi_update_action(struct og_client *cli, bool success)
+{
+	char end_date_string[24];
+	struct tm *end_date;
+	const char *msglog;
+	struct og_dbi *dbi;
+	uint8_t status = 2;
+	dbi_result result;
+	time_t now;
+
+	if (!cli->last_cmd_id)
+		return 0;
+
+	dbi = og_dbi_open(&dbi_config);
+	if (!dbi) {
+		syslog(LOG_ERR, "cannot open connection database (%s:%d)\n",
+		       __func__, __LINE__);
+		return -1;
+	}
+
+	time(&now);
+	end_date = localtime(&now);
+
+	sprintf(end_date_string, "%hu/%hhu/%hhu %hhu:%hhu:%hhu",
+		end_date->tm_year + 1900, end_date->tm_mon + 1,
+		end_date->tm_mday, end_date->tm_hour, end_date->tm_min,
+		end_date->tm_sec);
+	result = dbi_conn_queryf(dbi->conn,
+				 "UPDATE acciones SET fechahorafin='%s', "
+				 "estado=%d, resultado=%d WHERE idaccion=%d",
+				 end_date_string, ACCION_FINALIZADA,
+				 status - success, cli->last_cmd_id);
+
+	if (!result) {
+		dbi_conn_error(dbi->conn, &msglog);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
+		return -1;
+	}
+	cli->last_cmd_id = 0;
+	dbi_result_free(result);
+	og_dbi_close(dbi);
+
+	return 0;
+}
+
 static int og_agent_state_process_response(struct og_client *cli)
 {
 	json_error_t json_err;
@@ -5251,8 +5298,11 @@ static int og_agent_state_process_response(struct og_client *cli)
 	int err = -1;
 	char *body;
 
-	if (strncmp(cli->buf, "HTTP/1.0 200 OK", strlen("HTTP/1.0 200 OK")))
+	if (strncmp(cli->buf, "HTTP/1.0 200 OK", strlen("HTTP/1.0 200 OK"))) {
+		og_dbi_update_action(cli, false);
 		return -1;
+	}
+	og_dbi_update_action(cli, true);
 
 	if (!cli->content_length) {
 		cli->last_cmd = OG_CMD_UNSPEC;
@@ -5312,6 +5362,7 @@ static void og_agent_deliver_pending_cmd(struct og_client *cli)
 		return;
 
 	og_send_request(cmd->method, cmd->type, &cmd->params, cmd->json);
+	cli->last_cmd_id = cmd->id;
 
 	og_cmd_free(cmd);
 }
