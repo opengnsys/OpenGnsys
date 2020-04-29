@@ -3737,6 +3737,7 @@ static int og_dbi_schedule_get(void)
 		dbi_conn_error(dbi->conn, &msglog);
 		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
 		       __func__, __LINE__, msglog);
+		og_dbi_close(dbi);
 		return -1;
 	}
 
@@ -3757,6 +3758,7 @@ static int og_dbi_schedule_get(void)
 	}
 
 	dbi_result_free(result);
+	og_dbi_close(dbi);
 
 	return 0;
 }
@@ -4720,12 +4722,14 @@ static int og_dbi_get_computer_info(struct og_computer *computer,
 		dbi_conn_error(dbi->conn, &msglog);
 		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
 		       __func__, __LINE__, msglog);
+		og_dbi_close(dbi);
 		return -1;
 	}
 	if (!dbi_result_next_row(result)) {
 		syslog(LOG_ERR, "client does not exist in database (%s:%d)\n",
 		       __func__, __LINE__);
 		dbi_result_free(result);
+		og_dbi_close(dbi);
 		return -1;
 	}
 
@@ -5282,6 +5286,7 @@ static int og_dbi_update_action(struct og_client *cli, bool success)
 		dbi_conn_error(dbi->conn, &msglog);
 		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
 		       __func__, __LINE__, msglog);
+		og_dbi_close(dbi);
 		return -1;
 	}
 	cli->last_cmd_id = 0;
