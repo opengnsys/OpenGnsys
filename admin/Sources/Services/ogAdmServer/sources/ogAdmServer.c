@@ -5303,6 +5303,12 @@ static int og_agent_state_process_response(struct og_client *cli)
 	int err = -1;
 	char *body;
 
+	if (!strncmp(cli->buf, "HTTP/1.0 202 Accepted",
+		     strlen("HTTP/1.0 202 Accepted"))) {
+		og_dbi_update_action(cli, true);
+		return 1;
+	}
+
 	if (strncmp(cli->buf, "HTTP/1.0 200 OK", strlen("HTTP/1.0 200 OK"))) {
 		og_dbi_update_action(cli, false);
 		return -1;
@@ -5416,8 +5422,9 @@ static void og_agent_read_cb(struct ev_loop *loop, struct ev_io *io, int events)
 			       inet_ntoa(cli->addr.sin_addr),
 			       ntohs(cli->addr.sin_port));
 			goto close;
+		} else if (ret == 0) {
+			og_agent_deliver_pending_cmd(cli);
 		}
-		og_agent_deliver_pending_cmd(cli);
 
 		syslog(LOG_DEBUG, "leaving client %s:%hu in keepalive mode\n",
 		       inet_ntoa(cli->addr.sin_addr),
