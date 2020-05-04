@@ -301,6 +301,10 @@ if [ $EVAL -eq 0 ]; then \n \
   ms-sys /dev/sda | grep unknow && ms-sys /dev/sda \n \
   ogExecAndLog command session log ogListPartitions "+n_disk+" \n\
   "+ swapCode +"\
+  if ogFindCache &>/dev/null; then \n\
+    ogMountCache || ogFormatCache \n\
+    updateBootCache \n \
+  fi \n \
 else \n \
   ogEcho session log \"[100] ERROR: $MSG_HELP_ogCreatePartitions\" \n \
   return $EVAL \n \
@@ -401,6 +405,10 @@ if [ $EVAL -eq 0 ]; then \n \
     ogUpdatePartitionTable "+n_disk+" \n \
     ms-sys /dev/sda | grep unknow && ms-sys /dev/sda \n \
     ogExecAndLog command session log ogListPartitions "+n_disk+" \n \
+    if ogFindCache &>/dev/null; then \n\
+      ogMountCache || ogFormatCache \n\
+      updateBootCache \n \
+    fi \n \
 else \n \
     ogEcho session log \"[100] ERROR: $MSG_HELP_ogCreatePartitions\" \n \
     return $EVAL \n \
