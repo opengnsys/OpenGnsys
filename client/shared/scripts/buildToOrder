@@ -13,6 +13,8 @@
 #@version 1.0.4 - Discos ide + SATA.
 #@author 
 #@date   2012-10-05
+#@version 1.1.1b - Funciona para Windows8 y Windows 10. Si la clave no existe (tiene valor vacío) se crea.
+#@date   2020-05-04
 
 
 #Control de parametros.
@@ -36,29 +38,37 @@ case "$OSTYPE" in
 		case "$TYPE" in
 		   *Windows\ XP) 
 				echo "Versión de sistema operativo Windows XP no soportado"
+				exit
 			;;
 		   *Windows\ 7*)  
-		   		echo "Windows 7"
-			   	ogSetRegistryValue $MNTDIR SYSTEM '\ControlSet001\services\intelide\Start' '0' && echo "activado intelide"
-				ogSetRegistryValue $MNTDIR SYSTEM '\ControlSet002\services\intelide\Start' '0'
-			
-				ogSetRegistryValue $MNTDIR SYSTEM '\ControlSet001\services\pciide\Start' '0' && echo "activado pciide"
-				ogSetRegistryValue $MNTDIR SYSTEM '\ControlSet002\services\pciide\Start' '0'
-			
-				ogSetRegistryValue $MNTDIR SYSTEM '\ControlSet001\services\msahci\Start' '0' && echo "activado msahci"
-				ogSetRegistryValue $MNTDIR SYSTEM '\ControlSet002\services\msahci\Start' '0'
-			
-				ogSetRegistryValue $MNTDIR SYSTEM '\ControlSet001\services\iaStorV\Start' '0' && echo "activado iaStorV"
-				ogSetRegistryValue $MNTDIR SYSTEM '\ControlSet002\services\iaStorV\Start' '0'
-			
-				ogSetRegistryValue $MNTDIR SYSTEM '\ControlSet001\services\iaStor\Start' '0' && echo "activado iaStor"
-				ogSetRegistryValue $MNTDIR SYSTEM '\ControlSet002\services\iaStor\Start' '0'
-				
-				ogSetRegistryValue $MNTDIR SYSTEM '\ControlSet001\services\LSI_SAS\Start' '0' && echo "activado iaStor"
-				ogSetRegistryValue $MNTDIR SYSTEM '\ControlSet002\services\LSI_SAS\Start' '0'
+				# Claves a modificar
+				KEYS="intelide pciide msahci iaStorV iaStor LSI_SAS"
 				
 		   	;;
-		 esac
+		    *Windows\ *8*|*10*)
+				# Claves a modificar
+                                KEYS="intelide pciide storahci iaStorV iaStorAC iaStorAVC LSI_SAS"
+			;;
+		esac
+
+        echo "$TYPE"
+        CONTROLSET="ControlSet001 ControlSet002"
+        for C in $CONTROLSET;
+            # Si no existe la rama de registro continuo a la siguiente.
+            [ "$(ogListRegistryKeys $MNTDIR SYSTEM '\'${C})" == "" ] && continue
+
+            for K in $KEYS; do
+                FULLK='\'$C'\Services\'$K'\Start'
+                VALUE=$(ogGetRegistryValue $MNTDIR SYSTEM "$FULLK")
+                # Si el valor está vacío la creo.
+                if [ "$VALUE" == "" ]; then
+	                ogDeleteRegistryValue $MNTDIR SYSTEM "$FULLK"
+	                ogAddRegistryValue $MNTDIR SYSTEM "$FULLK" DWORD
+                fi
+                ogSetRegistryValue $MNTDIR SYSTEM "$FULLK" '0'
+                echo " * $C $K enabled"
+            done
+        done
     ;;
     Linux)
         echo "Versión de Sistema Operativo GNU/Linux no soportado"
