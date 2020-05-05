@@ -505,6 +505,36 @@ rm -f $FILE
 }
 
 
+#/**
+#         ogGetBootMbr int_ndisk
+#@brief   Obtiene el contenido del sector de arranque de un disco.
+#@param   int_ndisk     nº de orden del disco
+#@return  str_MBR       Descripción del contenido del MBR.
+#@exception OG_ERR_FORMAT    Formato incorrecto.
+#@exception OG_ERR_NOTFOUND  Dispositivo de disco no encontrado.
+#@version 1.1.1b - Primera versión
+#@author  Irina Gómez (US). Propuesto por Antonio J. Doblas Viso (UMA)
+#@date    2020-04-05
+#*/ ##
+function ogGetBootMbr ()
+{
+# Variables locales.
+local DISK
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk " \
+           "$FUNCNAME 1"
+    return
+fi
+
+# Error si no se recibe 1 parámetro.
+[ $# == 1 ] || ogRaiseError $OG_ERR_FORMAT "$FUNCNAME int_ndisk" || return $?
+
+DISK="$(ogDiskToDev $1)" || return $?
+
+ms-sys -f $DISK
+}
 
 #/**
 #         ogWindowsBootParameters int_ndisk int_parition

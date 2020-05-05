@@ -298,7 +298,7 @@ if [ $EVAL -eq 0 ]; then \n \
   ogSetPartitionActive "+n_disk+" 1 \n \
   ogEcho log session \"[90] $MSG_HELP_ogListPartitions  "+n_disk+"\"\n \
   ogUpdatePartitionTable "+n_disk+" \n \
-  ms-sys /dev/sda | grep unknow && ms-sys /dev/sda \n \
+  ogGetBootMbr "+n_disk+" | grep unknow && ogBootMbrGeneric "+n_disk+" \n \
   ogExecAndLog command session log ogListPartitions "+n_disk+" \n\
   "+ swapCode +"\
   if ogFindCache &>/dev/null; then \n\
@@ -403,7 +403,7 @@ if [ $EVAL -eq 0 ]; then \n \
     ogSetPartitionActive "+n_disk+" 1 \n \
     ogEcho log session \"[90] $MSG_HELP_ogListPartitions "+n_disk+"\"\n \
     ogUpdatePartitionTable "+n_disk+" \n \
-    ms-sys /dev/sda | grep unknow && ms-sys /dev/sda \n \
+    ogGetBootMbr "+n_disk+" | grep -e unknow -e zeroed && ogBootMbrGeneric "+n_disk+" \n \
     ogExecAndLog command session log ogListPartitions "+n_disk+" \n \
     if ogFindCache &>/dev/null; then \n\
       ogMountCache || ogFormatCache \n\
