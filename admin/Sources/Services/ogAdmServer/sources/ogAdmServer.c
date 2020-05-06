@@ -3953,10 +3953,33 @@ static int og_dbi_schedule_get_json(struct og_dbi *dbi, json_t *root,
 
 static struct ev_loop *og_loop;
 
-static int og_cmd_schedule_create(json_t *element, struct og_msg_params *params)
+static int og_task_schedule_create(struct og_msg_params *params)
 {
 	uint32_t schedule_id;
 	struct og_dbi *dbi;
+	int err;
+
+	dbi = og_dbi_open(&dbi_config);
+	if (!dbi) {
+		syslog(LOG_ERR, "cannot open connection database (%s:%d)\n",
+		       __func__, __LINE__);
+		return -1;
+	}
+
+	err = og_dbi_schedule_create(dbi, params, &schedule_id);
+	if (err < 0) {
+		og_dbi_close(dbi);
+		return -1;
+	}
+	og_schedule_create(schedule_id, atoi(params->task_id), &params->time);
+	og_schedule_refresh(og_loop);
+	og_dbi_close(dbi);
+
+	return 0;
+}
+
+static int og_cmd_schedule_create(json_t *element, struct og_msg_params *params)
+{
 	const char *key;
 	json_t *value;
 	int err;
@@ -3971,8 +3994,12 @@ static int og_cmd_schedule_create(json_t *element, struct og_msg_params *params)
 		} else if (!strcmp(key, "name")) {
 			err = og_json_parse_string(value, &params->name);
 			params->flags |= OG_REST_PARAM_NAME;
-		} else if (!strcmp(key, "when"))
+		} else if (!strcmp(key, "when")) {
 			err = og_json_parse_time_params(value, params);
+		} else if (!strcmp(key, "type")) {
+			err = og_json_parse_string(value, &params->type);
+			params->flags |= OG_REST_PARAM_TYPE;
+		}
 
 		if (err < 0)
 			break;
@@ -3990,23 +4017,7 @@ static int og_cmd_schedule_create(json_t *element, struct og_msg_params *params)
 					    OG_REST_PARAM_TIME_AM_PM))
 		return -1;
 
-	dbi = og_dbi_open(&dbi_config);
-	if (!dbi) {
-		syslog(LOG_ERR, "cannot open connection database (%s:%d)\n",
-			   __func__, __LINE__);
-		return -1;
-	}
-
-	err = og_dbi_schedule_create(dbi, params, &schedule_id);
-	og_dbi_close(dbi);
-
-	if (err < 0)
-		return -1;
-
-	og_schedule_create(schedule_id, atoi(params->task_id), &params->time);
-	og_schedule_refresh(og_loop);
-
-	return err;
+	return og_task_schedule_create(params);
 }
 
 static int og_cmd_schedule_update(json_t *element, struct og_msg_params *params)
