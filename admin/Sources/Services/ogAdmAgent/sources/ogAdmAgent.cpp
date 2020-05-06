@@ -661,16 +661,16 @@ BOOLEAN RecopilaIpesMacs(Database db,int ambito,int idambito,char *restrambito)
 	
 	switch(ambito){
 		case AMBITO_CENTROS :
-			sprintf(sqlstr,"SELECT idcentro FROM centros WHERE idcentro=%d",idambito);
- 			RecorreCentro(db,sqlstr);
+			sprintf(sqlstr,"SELECT ip,mac,idordenador FROM ordenadores INNER JOIN aulas WHERE ordenadores.idaula=aulas.idaula AND idcentro=%d ORDER BY ordenadores.idaula, ordenadores.ip;",idambito);
+			RecorreOrdenadores(db,sqlstr);
 			break;
 		case AMBITO_GRUPOSAULAS :
 			sprintf(sqlstr,"SELECT idgrupo FROM grupos WHERE idgrupo=%d AND tipo=%d",idambito,AMBITO_GRUPOSAULAS);
 			RecorreGruposAulas(db,sqlstr);
 			break;
 		case AMBITO_AULAS :
-			sprintf(sqlstr,"SELECT idaula FROM aulas WHERE idaula=%d",idambito);
-			RecorreAulas(db,sqlstr);
+			sprintf(sqlstr,"SELECT ip,mac,idordenador FROM ordenadores WHERE idaula=%d ORDER BY ip;",idambito);
+			RecorreOrdenadores(db,sqlstr);
 			break;
 		case AMBITO_GRUPOSORDENADORES :
 			sprintf(sqlstr,"SELECT idgrupo FROM gruposordenadores WHERE idgrupo=%d",idambito);
