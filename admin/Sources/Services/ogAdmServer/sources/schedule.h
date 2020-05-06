@@ -17,15 +17,21 @@ struct og_schedule_time {
 	uint32_t	minutes;
 };
 
+enum og_schedule_type {
+	OG_SCHEDULE_TASK,
+};
+
 struct og_schedule {
 	struct list_head	list;
 	struct ev_timer		timer;
 	time_t			seconds;
 	unsigned int		task_id;
 	unsigned int		schedule_id;
+	enum og_schedule_type	type;
 };
 
 void og_schedule_create(unsigned int schedule_id, unsigned int task_id,
+			enum og_schedule_type type,
 			struct og_schedule_time *time);
 void og_schedule_update(struct ev_loop *loop, unsigned int schedule_id,
 			unsigned int task_id, struct og_schedule_time *time);

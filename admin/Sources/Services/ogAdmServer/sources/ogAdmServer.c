@@ -3754,7 +3754,8 @@ static int og_dbi_schedule_get(void)
 		time.am_pm = dbi_result_get_uint(result, "ampm");
 		time.minutes = dbi_result_get_uint(result, "minutos");
 
-		og_schedule_create(schedule_id, task_id, &time);
+		og_schedule_create(schedule_id, task_id, OG_SCHEDULE_TASK,
+				   &time);
 	}
 
 	dbi_result_free(result);
@@ -3971,7 +3972,8 @@ static int og_task_schedule_create(struct og_msg_params *params)
 		og_dbi_close(dbi);
 		return -1;
 	}
-	og_schedule_create(schedule_id, atoi(params->task_id), &params->time);
+	og_schedule_create(schedule_id, atoi(params->task_id), OG_SCHEDULE_TASK,
+			   &params->time);
 	og_schedule_refresh(og_loop);
 	og_dbi_close(dbi);
 

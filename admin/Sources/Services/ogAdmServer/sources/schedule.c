@@ -197,7 +197,8 @@ static void og_schedule_remove_duplicates()
 
 static void og_schedule_create_weekdays(int month, int year,
 					int *hours, int minutes, int week_days,
-					uint32_t task_id, uint32_t schedule_id)
+					uint32_t task_id, uint32_t schedule_id,
+					enum og_schedule_type type)
 {
 	struct og_schedule *schedule;
 	int month_days[5];
@@ -235,6 +236,7 @@ static void og_schedule_create_weekdays(int month, int year,
 				schedule->seconds = mktime(&tm);
 				schedule->task_id = task_id;
 				schedule->schedule_id = schedule_id;
+				schedule->type = type;
 				og_schedule_add(schedule);
 			}
 		}
@@ -243,7 +245,8 @@ static void og_schedule_create_weekdays(int month, int year,
 
 static void og_schedule_create_weeks(int month, int year,
 				     int *hours, int minutes, int weeks,
-				     uint32_t task_id, uint32_t schedule_id)
+				     uint32_t task_id, uint32_t schedule_id,
+				     enum og_schedule_type type)
 {
 	struct og_schedule *schedule;
 	int month_days[7];
@@ -284,6 +287,7 @@ static void og_schedule_create_weeks(int month, int year,
 				schedule->seconds = mktime(&tm);
 				schedule->task_id = task_id;
 				schedule->schedule_id = schedule_id;
+				schedule->type = type;
 				og_schedule_add(schedule);
 			}
 		}
@@ -292,7 +296,8 @@ static void og_schedule_create_weeks(int month, int year,
 
 static void og_schedule_create_days(int month, int year,
 				    int *hours, int minutes, int *days,
-				    uint32_t task_id, uint32_t schedule_id)
+				    uint32_t task_id, uint32_t schedule_id,
+				    enum og_schedule_type type)
 {
 	struct og_schedule *schedule;
 	struct tm tm;
@@ -315,12 +320,14 @@ static void og_schedule_create_days(int month, int year,
 			schedule->seconds = mktime(&tm);
 			schedule->task_id = task_id;
 			schedule->schedule_id = schedule_id;
+			schedule->type = type;
 			og_schedule_add(schedule);
 		}
 	}
 }
 
 void og_schedule_create(unsigned int schedule_id, unsigned int task_id,
+			enum og_schedule_type type,
 			struct og_schedule_time *time)
 {
 	int year, month, minutes;
@@ -346,21 +353,24 @@ void og_schedule_create(unsigned int schedule_id, unsigned int task_id,
 							    hours, minutes,
 							    time->week_days,
 							    task_id,
-							    schedule_id);
+							    schedule_id,
+							    type);
 
 			if (time->weeks)
 				og_schedule_create_weeks(month, year,
 							 hours, minutes,
 							 time->weeks,
 							 task_id,
-							 schedule_id);
+							 schedule_id,
+							 type);
 
 			if (time->days)
 				og_schedule_create_days(month, year,
 							hours, minutes,
 							days,
 							task_id,
-							schedule_id);
+							schedule_id,
+							type);
 		}
 	}
 
@@ -389,7 +399,7 @@ void og_schedule_update(struct ev_loop *loop, unsigned int schedule_id,
 			unsigned int task_id, struct og_schedule_time *time)
 {
 	og_schedule_delete(loop, schedule_id);
-	og_schedule_create(schedule_id, task_id, time);
+	og_schedule_create(schedule_id, task_id, OG_SCHEDULE_TASK, time);
 }
 
 static void og_agent_timer_cb(struct ev_loop *loop, ev_timer *timer, int events)
