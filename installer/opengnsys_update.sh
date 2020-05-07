@@ -977,6 +977,20 @@ function updateServerFiles()
 		$STARTSERVICE
 		NEWFILES="$NEWFILES /etc/init.d/opengnsys"
 	fi
+	if ! diff -q \
+	     $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.service \
+	     /lib/systemd/system/opengnsys.service 2>/dev/null; then
+		echoAndLog "${FUNCNAME}(): updating new service file"
+		backupFile /lib/systemd/system/opengnsys.service
+		service="opengnsys"
+		$STOPSERVICE
+		cp -a \
+		   $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.service \
+		   /lib/systemd/system/opengnsys.service
+		systemctl daemon-reload
+		$STARTSERVICE
+		NEWFILES="$NEWFILES /lib/systemd/system/opengnsys.service"
+	fi
 	if ! diff -q $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.default /etc/default/opengnsys >/dev/null; then
 		echoAndLog "${FUNCNAME}(): updating new default file"
 		backupFile /etc/default/opengnsys

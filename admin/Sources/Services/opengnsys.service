@@ -1,0 +1,25 @@
+# OpenGnsys systemd service file
+
+[Unit]
+Documentation=https://opengnsys.es/trac/wiki/En%3ADocumentacionUsuario
+SourcePath=/etc/init.d/opengnsys
+Description=LSB: OpenGnsys system services
+Before=multi-user.target
+Before=graphical.target
+Requires=mysql.service
+After=mysql.service
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+Type=forking
+Restart=no
+TimeoutSec=5min
+IgnoreSIGPIPE=no
+KillMode=process
+GuessMainPID=no
+RemainAfterExit=yes
+SuccessExitStatus=5 6
+ExecStart=/etc/init.d/opengnsys start
+ExecStop=/etc/init.d/opengnsys stop

@@ -1461,6 +1461,8 @@ function openGnsysConfigure()
 
 	echoAndLog "${FUNCNAME}(): Copying init files."
 	cp -a $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.init /etc/init.d/opengnsys
+	cp -a $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.service \
+	      /lib/systemd/system/opengnsys.service
 	cp -a $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.default /etc/default/opengnsys
 	# Deshabilitar servicios de BitTorrent si no están instalados.
 	if [ ! -e /usr/bin/bttrack ]; then
