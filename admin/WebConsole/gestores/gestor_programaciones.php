@@ -13,6 +13,7 @@ include_once("../includes/CreaComando.php");
 include_once("../clases/AdoPhp.php");
 include_once("../includes/comunes.php");
 include_once("../includes/restfunctions.php");
+include_once("../includes/constantes.php");
 //________________________________________________________________________________________________________
 $op_alta=1;
 $op_modificacion=2;
@@ -71,18 +72,20 @@ if(empty($pminutos)) $pminutos=0;
 if(empty($psegundos)) $psegundos=0;
 if(empty($pminutosini)) $pminutosini=0;
 if(empty($pminutosfin)) $pminutosfin=0;
-
 if($wsw_sus=='true') 
 	$psw_sus=1;
 else
 	$psw_sus=0 ;
+
+if ($ptipoaccion == $EJECUCION_COMANDO)
+	$pidentificador = $psesion;
 
 if($pswop!=$op_suspension){
 	$result;
 	$idr=$pidprogramacion;
 	switch($pswop){
 		case $op_alta:
-			$result = create_schedule($pidentificador,
+			$result = create_schedule($pidentificador, $ptipoaccion,
 				$pnombrebloque, $pannos, $pmeses, $psemanas,
 				$pdias, $pdiario, $phoras, $pampm, $pminutos);
 			$swop=$op_alta;

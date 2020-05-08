@@ -197,7 +197,7 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 	$parametros=$funcion.$atributos;
 	$aplicacion=chr(13)."ido=".$cadenaid.chr(13)."mac=".$cadenamac.chr(13)."iph=".$cadenaip.chr(13);
 	if($sw_seguimiento==1 || $sw_ejprg=="on"){ // Switch de ejecución con seguimiento o comando programado
-		$sesion=time();
+		$sesion = 0;
 		$cmd->ParamSetValor("@tipoaccion",$EJECUCION_COMANDO);
 		$cmd->ParamSetValor("@idtipoaccion",$idcomando);
 		$cmd->ParamSetValor("@descriaccion",$descricomando);
@@ -223,7 +223,14 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 						VALUES (@idordenador,@tipoaccion,@idtipoaccion,@descriaccion,@ip,
 						@sesion,@idcomando,@parametros,@fechahorareg,@estado,@resultado,@ambito,@idambito,@restrambito,@idcentro)";
 			$resul=$cmd->Ejecutar();
+			if ($i == 0) {
+				$sesion = $cmd->Autonumerico();
+				$cmd->ParamSetValor("@sesion",$sesion);
+			}
 		}
+		$cmd->texto = "UPDATE acciones SET sesion=@sesion ".
+			      "WHERE idaccion = @sesion";
+		$resul=$cmd->Ejecutar();
 		$acciones=chr(13)."ids=".$sesion.chr(13); // Para seguimiento
 	}
 	if (!$resul){
