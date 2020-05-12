@@ -3397,11 +3397,16 @@ static int og_queue_task_command(struct og_dbi *dbi, const struct og_task *task,
 		cmd->client_id	= dbi_result_get_uint(result, "idordenador");
 		cmd->ip		= strdup(dbi_result_get_string(result, "ip"));
 		cmd->mac	= strdup(dbi_result_get_string(result, "mac"));
+
 		og_cmd_legacy(task->params, cmd);
 
-		if (og_dbi_add_action(dbi, task, cmd)) {
-			dbi_result_free(result);
-			return -1;
+		if (task->procedure_id) {
+			if (og_dbi_add_action(dbi, task, cmd)) {
+				dbi_result_free(result);
+				return -1;
+			}
+		} else {
+			cmd->id = task->task_id;
 		}
 
 		list_add_tail(&cmd->list, &cmd_list);
@@ -3637,7 +3642,48 @@ static int og_dbi_queue_task(struct og_dbi *dbi, uint32_t task_id,
 	return 0;
 }
 
-void og_dbi_schedule_task(unsigned int task_id, unsigned int schedule_id)
+static int og_dbi_queue_command(struct og_dbi *dbi, uint32_t task_id,
+				uint32_t schedule_id)
+{
+	struct og_task task = {};
+	const char *msglog;
+	dbi_result result;
+	char query[4096];
+
+	result = dbi_conn_queryf(dbi->conn,
+			"SELECT idaccion, idcentro, idordenador, parametros "
+			"FROM acciones "
+			"WHERE sesion = %u", task_id);
+	if (!result) {
+		dbi_conn_error(dbi->conn, &msglog);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
+		return -1;
+	}
+
+	while (dbi_result_next_row(result)) {
+		task.task_id = dbi_result_get_uint(result, "idaccion");
+		task.center_id = dbi_result_get_uint(result, "idcentro");
+		task.scope = dbi_result_get_uint(result, "idordenador");
+		task.params = strdup(dbi_result_get_string(result, "parametros"));
+
+		sprintf(query,
+			"SELECT ip, mac, idordenador FROM ordenadores "
+			"WHERE idordenador = %d",
+			task.scope);
+		if (og_queue_task_command(dbi, &task, query)) {
+			dbi_result_free(result);
+			return -1;
+		}
+	}
+
+	dbi_result_free(result);
+
+	return 0;
+}
+
+void og_schedule_run(unsigned int task_id, unsigned int schedule_id,
+		     enum og_schedule_type type)
 {
 	struct og_msg_params params = {};
 	bool duplicated = false;
@@ -3651,7 +3697,15 @@ void og_dbi_schedule_task(unsigned int task_id, unsigned int schedule_id)
 		       __func__, __LINE__);
 		return;
 	}
-	og_dbi_queue_task(dbi, task_id, schedule_id);
+
+	switch (type) {
+	case OG_SCHEDULE_TASK:
+		og_dbi_queue_task(dbi, task_id, schedule_id);
+		break;
+	case OG_SCHEDULE_COMMAND:
+		og_dbi_queue_command(dbi, task_id, schedule_id);
+		break;
+	}
 	og_dbi_close(dbi);
 
 	list_for_each_entry(cmd, &cmd_list, list) {
@@ -3766,25 +3820,37 @@ static int og_dbi_schedule_get(void)
 
 static int og_dbi_schedule_create(struct og_dbi *dbi,
 				  struct og_msg_params *params,
-				  uint32_t *schedule_id)
+				  uint32_t *schedule_id,
+				  enum og_schedule_type schedule_type)
 {
+	uint8_t suspended = 0;
+	uint32_t session = 0;
 	const char *msglog;
 	dbi_result result;
-	uint8_t suspended = 0;
-	uint8_t type = 3;
+	uint8_t type;
+
+	switch (schedule_type) {
+	case OG_SCHEDULE_TASK:
+		type = 3;
+		break;
+	case OG_SCHEDULE_COMMAND:
+		session = atoi(params->task_id);
+		type = 1;
+		break;
+	}
 
 	result = dbi_conn_queryf(dbi->conn,
 				 "INSERT INTO programaciones (tipoaccion,"
 				 " identificador, nombrebloque, annos, meses,"
 				 " semanas, dias, diario, horas, ampm, minutos,"
-				 " suspendida) VALUES (%d, %s, '%s', %d, %d,"
-				 " %d, %d, %d, %d, %d, %d, %d)", type,
-				 params->task_id, params->name,
+				 " suspendida, sesion) VALUES (%d, %s, '%s',"
+				 " %d, %d, %d, %d, %d, %d, %d, %d, %d, %d)",
+				 type, params->task_id, params->name,
 				 params->time.years, params->time.months,
 				 params->time.weeks, params->time.week_days,
 				 params->time.days, params->time.hours,
 				 params->time.am_pm, params->time.minutes,
-				 suspended);
+				 suspended, session);
 	if (!result) {
 		dbi_conn_error(dbi->conn, &msglog);
 		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
@@ -3956,9 +4022,17 @@ static struct ev_loop *og_loop;
 
 static int og_task_schedule_create(struct og_msg_params *params)
 {
+	enum og_schedule_type type;
 	uint32_t schedule_id;
 	struct og_dbi *dbi;
 	int err;
+
+	if (!strcmp(params->type, "task"))
+		type = OG_SCHEDULE_TASK;
+	else if (!strcmp(params->type, "command"))
+		type = OG_SCHEDULE_COMMAND;
+	else
+		return -1;
 
 	dbi = og_dbi_open(&dbi_config);
 	if (!dbi) {
@@ -3967,12 +4041,12 @@ static int og_task_schedule_create(struct og_msg_params *params)
 		return -1;
 	}
 
-	err = og_dbi_schedule_create(dbi, params, &schedule_id);
+	err = og_dbi_schedule_create(dbi, params, &schedule_id, type);
 	if (err < 0) {
 		og_dbi_close(dbi);
 		return -1;
 	}
-	og_schedule_create(schedule_id, atoi(params->task_id), OG_SCHEDULE_TASK,
+	og_schedule_create(schedule_id, atoi(params->task_id), type,
 			   &params->time);
 	og_schedule_refresh(og_loop);
 	og_dbi_close(dbi);
@@ -4016,7 +4090,8 @@ static int og_cmd_schedule_create(json_t *element, struct og_msg_params *params)
 					    OG_REST_PARAM_TIME_DAYS |
 					    OG_REST_PARAM_TIME_HOURS |
 					    OG_REST_PARAM_TIME_MINUTES |
-					    OG_REST_PARAM_TIME_AM_PM))
+					    OG_REST_PARAM_TIME_AM_PM |
+					    OG_REST_PARAM_TYPE))
 		return -1;
 
 	return og_task_schedule_create(params);

@@ -19,6 +19,7 @@ struct og_schedule_time {
 
 enum og_schedule_type {
 	OG_SCHEDULE_TASK,
+	OG_SCHEDULE_COMMAND,
 };
 
 struct og_schedule {
@@ -38,6 +39,7 @@ void og_schedule_update(struct ev_loop *loop, unsigned int schedule_id,
 void og_schedule_delete(struct ev_loop *loop, uint32_t schedule_id);
 void og_schedule_next(struct ev_loop *loop);
 void og_schedule_refresh(struct ev_loop *loop);
-void og_dbi_schedule_task(unsigned int task_id, unsigned int schedule_id);
+void og_schedule_run(unsigned int task_id, unsigned int schedule_id,
+		     enum og_schedule_type type);
 
 #endif
