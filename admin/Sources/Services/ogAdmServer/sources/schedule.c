@@ -407,7 +407,7 @@ static void og_agent_timer_cb(struct ev_loop *loop, ev_timer *timer, int events)
 	struct og_schedule *current;
 
 	current = container_of(timer, struct og_schedule, timer);
-	og_dbi_schedule_task(current->task_id, current->schedule_id);
+	og_schedule_run(current->task_id, current->schedule_id, current->type);
 
 	ev_timer_stop(loop, timer);
 	list_del(&current->list);
