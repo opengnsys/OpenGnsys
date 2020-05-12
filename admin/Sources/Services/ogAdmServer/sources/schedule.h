@@ -2,6 +2,7 @@
 #define _OG_SCHEDULE_H_
 
 #include <stdint.h>
+#include <stdbool.h>
 #include "dbi.h"
 #include "list.h"
 #include <ev.h>
@@ -15,6 +16,7 @@ struct og_schedule_time {
 	uint32_t	hours;
 	uint32_t	am_pm;
 	uint32_t	minutes;
+	bool		on_start;
 };
 
 enum og_schedule_type {

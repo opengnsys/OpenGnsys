@@ -195,14 +195,27 @@ static void og_schedule_remove_duplicates()
 	}
 }
 
+static bool og_schedule_stale(time_t seconds)
+{
+	time_t now;
+
+	now = time(NULL);
+	if (seconds < now)
+		return true;
+
+	return false;
+}
+
 static void og_schedule_create_weekdays(int month, int year,
 					int *hours, int minutes, int week_days,
 					uint32_t task_id, uint32_t schedule_id,
-					enum og_schedule_type type)
+					enum og_schedule_type type,
+					bool on_start)
 {
 	struct og_schedule *schedule;
 	int month_days[5];
 	int n_month_days;
+	time_t seconds;
 	uint32_t wday;
 	struct tm tm;
 	int k, l;
@@ -221,19 +234,23 @@ static void og_schedule_create_weekdays(int month, int year,
 
 		for (k = 0; month_days[k] != 0 && k < n_month_days; k++) {
 			for (l = 0; hours[l] != 0 && l < 31; l++) {
-				schedule = (struct og_schedule *)
-					calloc(1, sizeof(struct og_schedule));
-				if (!schedule)
-					return;
-
 				memset(&tm, 0, sizeof(tm));
 				tm.tm_year = year;
 				tm.tm_mon = month;
 				tm.tm_mday = month_days[k];
 				tm.tm_hour = hours[l] - 1;
 				tm.tm_min = minutes;
+				seconds = mktime(&tm);
 
-				schedule->seconds = mktime(&tm);
+				if (on_start && og_schedule_stale(seconds))
+					continue;
+
+				schedule = (struct og_schedule *)
+					calloc(1, sizeof(struct og_schedule));
+				if (!schedule)
+					return;
+
+				schedule->seconds = seconds;
 				schedule->task_id = task_id;
 				schedule->schedule_id = schedule_id;
 				schedule->type = type;
@@ -246,11 +263,12 @@ static void og_schedule_create_weekdays(int month, int year,
 static void og_schedule_create_weeks(int month, int year,
 				     int *hours, int minutes, int weeks,
 				     uint32_t task_id, uint32_t schedule_id,
-				     enum og_schedule_type type)
+				     enum og_schedule_type type, bool on_start)
 {
 	struct og_schedule *schedule;
 	int month_days[7];
 	int n_month_days;
+	time_t seconds;
 	struct tm tm;
 	int week;
 	int k, l;
@@ -272,19 +290,23 @@ static void og_schedule_create_weeks(int month, int year,
 
 		for (k = 0; month_days[k] != 0 && k < n_month_days; k++) {
 			for (l = 0; hours[l] != 0 && l < 31; l++) {
-				schedule = (struct og_schedule *)
-					calloc(1, sizeof(struct og_schedule));
-				if (!schedule)
-					return;
-
 				memset(&tm, 0, sizeof(tm));
 				tm.tm_year = year;
 				tm.tm_mon = month;
 				tm.tm_mday = month_days[k];
 				tm.tm_hour = hours[l] - 1;
 				tm.tm_min = minutes;
+				seconds = mktime(&tm);
 
-				schedule->seconds = mktime(&tm);
+				if (on_start && og_schedule_stale(seconds))
+					continue;
+
+				schedule = (struct og_schedule *)
+					calloc(1, sizeof(struct og_schedule));
+				if (!schedule)
+					return;
+
+				schedule->seconds = seconds;
 				schedule->task_id = task_id;
 				schedule->schedule_id = schedule_id;
 				schedule->type = type;
@@ -297,18 +319,15 @@ static void og_schedule_create_weeks(int month, int year,
 static void og_schedule_create_days(int month, int year,
 				    int *hours, int minutes, int *days,
 				    uint32_t task_id, uint32_t schedule_id,
-				    enum og_schedule_type type)
+				    enum og_schedule_type type, bool on_start)
 {
 	struct og_schedule *schedule;
+	time_t seconds;
 	struct tm tm;
 	int k, l;
 
 	for (k = 0; days[k] != 0 && k < 31; k++) {
 		for (l = 0; hours[l] != 0 && l < 31; l++) {
-			schedule = (struct og_schedule *)
-				calloc(1, sizeof(struct og_schedule));
-			if (!schedule)
-				return;
 
 			memset(&tm, 0, sizeof(tm));
 			tm.tm_year = year;
@@ -316,8 +335,17 @@ static void og_schedule_create_days(int month, int year,
 			tm.tm_mday = days[k];
 			tm.tm_hour = hours[l] - 1;
 			tm.tm_min = minutes;
+			seconds = mktime(&tm);
 
-			schedule->seconds = mktime(&tm);
+			if (on_start && og_schedule_stale(seconds))
+				continue;
+
+			schedule = (struct og_schedule *)
+				calloc(1, sizeof(struct og_schedule));
+			if (!schedule)
+				return;
+
+			schedule->seconds = seconds;
 			schedule->task_id = task_id;
 			schedule->schedule_id = schedule_id;
 			schedule->type = type;
@@ -354,7 +382,8 @@ void og_schedule_create(unsigned int schedule_id, unsigned int task_id,
 							    time->week_days,
 							    task_id,
 							    schedule_id,
-							    type);
+							    type,
+							    time->on_start);
 
 			if (time->weeks)
 				og_schedule_create_weeks(month, year,
@@ -362,7 +391,7 @@ void og_schedule_create(unsigned int schedule_id, unsigned int task_id,
 							 time->weeks,
 							 task_id,
 							 schedule_id,
-							 type);
+							 type, time->on_start);
 
 			if (time->days)
 				og_schedule_create_days(month, year,
@@ -370,7 +399,7 @@ void og_schedule_create(unsigned int schedule_id, unsigned int task_id,
 							days,
 							task_id,
 							schedule_id,
-							type);
+							type, time->on_start);
 		}
 	}
 

@@ -3807,6 +3807,7 @@ static int og_dbi_schedule_get(void)
 		time.hours = dbi_result_get_uint(result, "horas");
 		time.am_pm = dbi_result_get_uint(result, "ampm");
 		time.minutes = dbi_result_get_uint(result, "minutos");
+		time.on_start = true;
 
 		og_schedule_create(schedule_id, task_id, OG_SCHEDULE_TASK,
 				   &time);
