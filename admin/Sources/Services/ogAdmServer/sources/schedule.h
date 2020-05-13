@@ -21,6 +21,7 @@ struct og_schedule_time {
 
 enum og_schedule_type {
 	OG_SCHEDULE_TASK,
+	OG_SCHEDULE_PROCEDURE,
 	OG_SCHEDULE_COMMAND,
 };
 
