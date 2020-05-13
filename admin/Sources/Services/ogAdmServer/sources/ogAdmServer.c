@@ -3702,6 +3702,7 @@ void og_schedule_run(unsigned int task_id, unsigned int schedule_id,
 	case OG_SCHEDULE_TASK:
 		og_dbi_queue_task(dbi, task_id, schedule_id);
 		break;
+	case OG_SCHEDULE_PROCEDURE:
 	case OG_SCHEDULE_COMMAND:
 		og_dbi_queue_command(dbi, task_id, schedule_id);
 		break;
@@ -3833,6 +3834,9 @@ static int og_dbi_schedule_create(struct og_dbi *dbi,
 	switch (schedule_type) {
 	case OG_SCHEDULE_TASK:
 		type = 3;
+		break;
+	case OG_SCHEDULE_PROCEDURE:
+		type = 2;
 		break;
 	case OG_SCHEDULE_COMMAND:
 		session = atoi(params->task_id);
@@ -4030,6 +4034,8 @@ static int og_task_schedule_create(struct og_msg_params *params)
 
 	if (!strcmp(params->type, "task"))
 		type = OG_SCHEDULE_TASK;
+	else if (!strcmp(params->type, "procedure"))
+		type = OG_SCHEDULE_PROCEDURE;
 	else if (!strcmp(params->type, "command"))
 		type = OG_SCHEDULE_COMMAND;
 	else

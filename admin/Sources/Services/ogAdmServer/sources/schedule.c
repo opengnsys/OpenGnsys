@@ -14,13 +14,7 @@ static LIST_HEAD(schedule_list);
 static void og_schedule_add(struct og_schedule *new)
 {
 	struct og_schedule *schedule, *next;
-	time_t now;
 
-	now = time(NULL);
-	if (new->seconds < now) {
-		free(new);
-		return;
-	}
 	list_for_each_entry_safe(schedule, next, &schedule_list, list) {
 		if (new->seconds < schedule->seconds) {
 			list_add_tail(&new->list, &schedule->list);
