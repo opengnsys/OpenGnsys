@@ -76,8 +76,10 @@ define('OG_REST_PARAM_AM_PM', 'am_pm');
 define('OG_REST_PARAM_MINUTES', 'minutes');
 
 define('TYPE_COMMAND', 1);
+define('TYPE_PROCEDURE', 2);
 define('TYPE_TASK', 3);
 define('OG_SCHEDULE_COMMAND', 'command');
+define('OG_SCHEDULE_PROCEDURE', 'procedure');
 define('OG_SCHEDULE_TASK', 'task');
 
 $conf_file = parse_ini_file(__DIR__ . '/../../etc/ogAdmServer.cfg');
@@ -585,6 +587,9 @@ function create_schedule($task_id, $type, $name, $years, $months, $weeks,
 	switch ($type) {
 	case TYPE_COMMAND:
 		$type_string = OG_SCHEDULE_COMMAND;
+		break;
+	case TYPE_PROCEDURE:
+		$type_string = OG_SCHEDULE_PROCEDURE;
 		break;
 	case TYPE_TASK:
 	default:
