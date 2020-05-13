@@ -19,6 +19,25 @@ include_once("../includes/RecopilaIpesMacs.php");
 include_once("../includes/restfunctions.php");
 //________________________________________________________________________________________________________
 
+function now_params()
+{
+	$year = intval(date('Y')) - 2010;
+	$month = intval(date('m')) - 1;
+	$day = intval(date('j')) - 1;
+	$hour = intval(date('g'));
+	$am_pm = date('a');
+	$minute = intval(date('i'));
+
+	$params['map_year'] = 1 << $year;
+	$params['map_month'] = 1 << $month;
+	$params['map_day'] = 1 << $day;
+	$params['map_hour'] = 1 << $hour;
+	$params['map_am_pm'] = strcmp($am_pm, 'am') ? 1 : 0;
+	$params['map_minute'] = $minute;
+
+	return $params;
+}
+
 define('OG_CMD_ID_WAKEUP', 1);
 
 $opcion=0; // Inicializa parametros
@@ -59,7 +78,7 @@ if ($cmd){
 		RecopilaIpesMacs($cmd,$ambito,$idambito); // Recopila Ipes del ámbito
 	if(opcion!=$EJECUCION_AUTOEXEC){
 		//Creación parametros para inserción en tabla acciones
-		$sesion=time();
+		$sesion=0;
 		$cmd->CreaParametro("@tipoaccion",$opcion,1);
 		$cmd->CreaParametro("@idtipoaccion",0,1);
 		$cmd->CreaParametro("@descriaccion","",0);
@@ -202,6 +221,7 @@ function recorreProcedimientos($idprocedimiento,$ambito,$idambito)
 //________________________________________________________________________________________________________
 function insertaComando($idcomando,$parametros,$idprocedimiento,$ambito,$idambito)
 {
+	global $EJECUCION_PROCEDIMIENTO;
 	global $cadenaid;
 	global $cadenaip;
 	global $cmd;	
@@ -233,12 +253,21 @@ function insertaComando($idcomando,$parametros,$idprocedimiento,$ambito,$idambit
 		$resul=$cmd->Ejecutar();
 		//echo $cmd->texto;
 		if(!$resul) return(false);
-
-		// Let the clients know they can start executing pending commands.
-		if(empty($vez)){
-			run_schedule($cadenaip);
-			$vez++;
+		if ($i == 0) {
+			$sesion = $cmd->Autonumerico();
+			$cmd->ParamSetValor("@sesion",$sesion);
 		}
+	}
+	$cmd->texto = "UPDATE acciones SET sesion=@sesion ".
+		      "WHERE idaccion = @sesion";
+	$resul=$cmd->Ejecutar();
+	if (resul) {
+		$when = now_params();
+		$resul = create_schedule(strval($sesion), $EJECUCION_PROCEDIMIENTO, "",
+					 $when['map_year'], $when['map_month'],
+					 0, 0, $when['map_day'],
+					 $when['map_hour'], $when['map_am_pm'],
+					 $when['map_minute']);
 	}
 	return(true);
 }
