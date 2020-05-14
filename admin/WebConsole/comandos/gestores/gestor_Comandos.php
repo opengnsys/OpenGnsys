@@ -242,11 +242,20 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 		$ValorParametros=extrae_parametros($parametros,chr(13),'=');
 		$script=@urldecode($ValorParametros["scp"]);
 		if($sw_ejya=='on'){
-			if (($sw_seguimiento == 1 || $sw_ejprg == "on") &&
-			    $idcomando != OG_CMD_ID_WAKEUP)
-				run_schedule($cadenaip);
-			else
+			if ($sw_seguimiento == 1 &&
+			    $idcomando != OG_CMD_ID_WAKEUP) {
+				$when = now_params();
+				$resul = create_schedule(strval($sesion),
+							 $EJECUCION_PROCEDIMIENTO,
+							 "", $when['map_year'],
+							 $when['map_month'],
+							 0, 0, $when['map_day'],
+							 $when['map_hour'],
+							 $when['map_am_pm'],
+							 $when['map_minute']);
+			} else {
 				run_command($idcomando, $cadenaip, $cadenamac, $atributos);
+			}
 
 			// En agente nuevo devuelvo siempre correcto
 			$resulhidra = 1;

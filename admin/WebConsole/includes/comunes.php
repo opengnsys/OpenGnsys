@@ -400,3 +400,21 @@
 		}
 	}
 
+	function now_params()
+	{
+		$year = intval(date('Y')) - 2010;
+		$month = intval(date('m')) - 1;
+		$day = intval(date('j')) - 1;
+		$hour = intval(date('g'));
+		$am_pm = date('a');
+		$minute = intval(date('i'));
+
+		$params['map_year'] = 1 << $year;
+		$params['map_month'] = 1 << $month;
+		$params['map_day'] = 1 << $day;
+		$params['map_hour'] = 1 << $hour;
+		$params['map_am_pm'] = strcmp($am_pm, 'am') ? 1 : 0;
+		$params['map_minute'] = $minute;
+
+		return $params;
+	}
