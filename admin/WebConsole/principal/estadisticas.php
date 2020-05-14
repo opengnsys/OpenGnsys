@@ -74,7 +74,7 @@ SELECT *
   FROM (SELECT nombrecentro AS ou,
                COUNT(DISTINCT idaula) AS labs,
                COUNT(DISTINCT IF(idordprofesor > 0, idaula, NULL)) AS hasprof,
-               COUNT(IF(inremotepc = 1, 1, NULL)) AS remotelab,
+               COUNT(DISTINCT IF(inremotepc = 1, idaula, NULL)) AS remotelab,
                COUNT(idordenador) AS clients,
                COUNT(numserie) AS hasconfig,
                COUNT(IF(idrepositorio > 0, 1, NULL)) AS hasrepo,
