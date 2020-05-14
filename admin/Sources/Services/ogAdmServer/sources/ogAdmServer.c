@@ -185,6 +185,7 @@ struct og_client {
 	enum og_client_status	status;
 	enum og_cmd_type	last_cmd;
 	unsigned int		last_cmd_id;
+	bool			autorun;
 };
 
 static inline int og_client_socket(const struct og_client *cli)
@@ -1523,6 +1524,7 @@ struct og_computer {
 	unsigned int	center;
 	unsigned int	room;
 	char		name[OG_COMPUTER_NAME_MAXLEN + 1];
+	unsigned int	procedure_id;
 };
 
 #define OG_REST_PARAM_ADDR			(1UL << 0)
@@ -4809,6 +4811,7 @@ static int og_dbi_get_computer_info(struct og_computer *computer,
 				 "SELECT ordenadores.idordenador,"
 				 "       ordenadores.nombreordenador,"
 				 "       ordenadores.idaula,"
+				 "       ordenadores.idproautoexec,"
 				 "       centros.idcentro FROM ordenadores "
 				 "INNER JOIN aulas ON aulas.idaula=ordenadores.idaula "
 				 "INNER JOIN centros ON centros.idcentro=aulas.idcentro "
@@ -4831,6 +4834,7 @@ static int og_dbi_get_computer_info(struct og_computer *computer,
 	computer->id = dbi_result_get_uint(result, "idordenador");
 	computer->center = dbi_result_get_uint(result, "idcentro");
 	computer->room = dbi_result_get_uint(result, "idaula");
+	computer->procedure_id = dbi_result_get_uint(result, "idproautoexec");
 	strncpy(computer->name,
 		dbi_result_get_string(result, "nombreordenador"),
 		OG_COMPUTER_NAME_MAXLEN);
@@ -5069,12 +5073,36 @@ static int og_json_parse_partition_array(json_t *value,
 	return 0;
 }
 
+static int og_dbi_queue_autorun(uint32_t computer_id, uint32_t proc_id)
+{
+	struct og_task dummy_task = {
+		.scope		= computer_id,
+		.type_scope	= AMBITO_ORDENADORES,
+		.procedure_id	= proc_id,
+	};
+	struct og_dbi *dbi;
+
+	dbi = og_dbi_open(&dbi_config);
+	if (!dbi) {
+		syslog(LOG_ERR, "cannot open connection database "
+				"(%s:%d)\n", __func__, __LINE__);
+		return -1;
+	}
+	if (og_dbi_queue_procedure(dbi, &dummy_task)) {
+		og_dbi_close(dbi);
+		return -1;
+	}
+	og_dbi_close(dbi);
+
+	return 0;
+}
+
 static int og_resp_refresh(json_t *data, struct og_client *cli)
 {
 	struct og_partition partitions[OG_PARTITION_MAX] = {};
 	const char *serial_number = NULL;
+	struct og_computer computer = {};
 	struct og_partition disk_setup;
-	struct og_computer computer;
 	char cfg[1024] = {};
 	struct og_dbi *dbi;
 	const char *key;
@@ -5148,6 +5176,13 @@ static int og_resp_refresh(json_t *data, struct og_client *cli)
 	if (!res) {
 		syslog(LOG_ERR, "Problem updating client configuration\n");
 		return -1;
+	}
+
+	if (!cli->autorun && computer.procedure_id) {
+		cli->autorun = true;
+
+		if (og_dbi_queue_autorun(computer.id, computer.procedure_id))
+			return -1;
 	}
 
 	return 0;
