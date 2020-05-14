@@ -360,7 +360,7 @@ esac
 
 # Mostrar sistema Operativo y aplicaciones.
 ogGetOsVersion $1 $2 | awk -F: '{print $2}'
-sort $APPS | uniq
+sort $APPS | uniq | iconv -ct utf-8
 rm -f $APPS $TMPFILE
 }
 
