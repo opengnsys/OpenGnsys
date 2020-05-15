@@ -30,5 +30,6 @@ $TbMsg[20]="Creation date";
 $TbMsg[21]='"Description Image file name exists: Enter another Description"';
 $TbMsg[22]="Enter another Description";
 $TbMsg['PROP_OS']="Operating system";
+$TbMsg['DATA_SIZE']="Data size";
 $TbMsg['PROP_REMOTEACCESS']="Remote access";
 $TbMsg['COMM_REMOTEACCESS']="allow remote access management to computers";

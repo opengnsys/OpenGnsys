@@ -30,6 +30,7 @@ $TbMsg[20]="Fecha de creación";
 $TbMsg[21]='"Descripción Nombre fichero-imagen existe : Introduzca otra Descripción"';
 $TbMsg[22]="Introduzca otra Descripción";
 $TbMsg['PROP_OS']="Sistema operativo";
+$TbMsg['DATA_SIZE']="Tamaño de los datos";
 $TbMsg['PROP_REMOTEACCESS']="Acceso remoto";
 $TbMsg['COMM_REMOTEACCESS']="permitir gesti&oacute;n de acceso remoto a los ordenadores";
 

@@ -107,6 +107,7 @@ if  ($opcion!=$op_alta and isset($repokey)) {
 		$result = json_decode($result[0]['data']);
 		$imgpath = (@$result->type==="dir" ? @$result->name : @$result->name.".".@$result->type);
 		$imgsize = humanSize(@$result->size);
+		$imgdatasize = humanSize(@$result->datasize);
 		$imgbackup = @$result->backedup;
 		$imgbksize = isset($result->backupsize) ? humanSize($result->backupsize) : 0;
 		$imglock = @$result->locked;
@@ -282,6 +283,11 @@ if  ($opcion!=$op_alta and isset($repokey)) {
 		<tr>
 			<th align="center">&nbsp;<?php echo $TbMsg['PROP_OS']?>&nbsp;</th>
 			<td>&nbsp;<?php	echo $sistoperativo?> </td>
+		</tr>
+		<!-- Tamaño de los datos -->
+		<tr>
+			<th align="center">&nbsp;<?php echo $TbMsg['DATA_SIZE']?>&nbsp;</th>
+			<td>&nbsp;<?php	echo $imgdatasize?> </td>
 		</tr>
 	    <?php
 		// Datos de imagen en el repositorio
