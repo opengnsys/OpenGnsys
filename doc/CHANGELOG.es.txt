@@ -7,19 +7,38 @@ Lista de cambios incluidos en OpenGnsys 1.1.1b (versión de mantenimiento)
 ----------------------------------------------
 
 Tickets resueltos en módulo OpenGnsys Cloning Engine:
+#953	ogGrubDefaultEntry corrompe el fichero grub.cfg dejando el arranque inoperativo (corrección)
+#960	Soportar sistemas de archivos Btrfs sobre LVM (corrección)
 #966	Listar nuevos tipos de aplicaciones Linux en inventario de software (mejora)
 
 Tickets resueltos en módulo OpenGnsys Client:
-#963	Generar instalación desatendida de ogagent para Windows (mejora)
+#962	El agente de SO no ejecuta varias lineas de script (corrección)
+#963	Generar instalación desatendida de OGAgent para Windows (mejora)
+#965	Recortar nombres de las ISO ogLive en descargas (correción)
 
 Tickets resueltos en módulo OpenGnsys Server:
 #955	Añadir ordenadores definidos al DHCP local
+#957	Adaptar scripts del servidor a la librería de funciones comunes
 #958	Evitar inyección de código en los scritps de servidor (corrección)
+#967	ogAdmServer es código C
+#970	Usar autotools en ogAdmServer
+#977	ogAdmAgent: Caída del servicio al programar tareas en una unidad organizativa (corrección)
+
+Tickets resueltos en módulo OpenGnsys Web Admin Console:
+#841	Asistente particionado para MBR hace uso de ogBootMbrGeneric sin identificador de disco (corrección)
+#911	Asistente particionado no formatea correctamente la caché y la deja en un estado no disponible con ogMount pero sí para ogFindCache (corrección)
+#961	Guardar en datos de imagen el tamaño original
+#972	Eliminar opengnsys.cron
+#974	Formulario de editar tarea falla en grupo de ordenadores (corrección)
 
 Tickets resueltos en módulo OpenGnsys Installer:
 #954	Ignorar datos de importación (mejora)
 #956	Ampliar los datos de exportación (mejora)
 #964	Incluir párametro en configuración MySQL (corrección)
+#973	Reiniciar servicio de OpenGnsys tras actualización (corrección)
+
+Tickets genéricos resueltos:
+#959	Liberar versión de mantenimiento OpenGnsys 1.1.1b
 
 Lista de cambios incluidos en OpenGnsys 1.1.1a (versión de mantenimiento)
 ----------------------------------------------
@@ -175,7 +194,7 @@ Lista de cambios incluidos en OpenGnsys 1.1.0
 Tickets resueltos en módulo OpenGnsys Cloning Engine:
 #141	Reconstruir función ogDiskToDev (resuelto en #748)
 #544	Comprobar si Windows está en dominio antes de cambiar nombre en script de inicio de sesión (no se resolverá)
-#585	Internacionalización mensajes del cliente
+#595	Internacionalización mensajes del cliente
 #676	Soportar sistema de ficheros ZFS
 #678	Unidades organizativas con directorio de imágenes separado (mejora)
 #716	Revisión ogCleanLinuxDevices
@@ -463,7 +482,6 @@ Tickets resueltos en módulo OpenGnSys Client:
 #579	El cliente no inicia cuando se conecta un dispositivo USB
 #563	Configuración WOL del ogLive en determinados equipos provoca que el browser no se muestre
 #587	buildToOrder: activación controladores de disco para Windows 7
-#595	Internacionalización mensajes del cliente
 #604	Agente de sistema operativo Windows bloquea conexión a Internet
 #612	Log en tiempo real no muestra salida de Unicast
 #613	Script reboot con parámetro de tiempo
