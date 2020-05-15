@@ -33,7 +33,7 @@ source $OPENGNSYS/lib/ogfunctions.sh || exit 1
 [ "$USER" != "root" ] && raiseError access "Need to be root"
 [ $# -ne 1 ] && raiseError usage
 [ -r $DEFAULTFILE ] || raiseError access "Cannot read default configuration file"
-for f in $OPENGNSYS/{etc/{ogAdmServer,ogAdmRepo}.cfg,www/controlacceso.php,client/ogClient/cfg/ogclient.cfg}; do
+for f in $OPENGNSYS/{etc/{ogAdmServer,ogAdmRepo}.cfg,www/controlacceso.php,client/ogClient/cfg/ogclient.json}; do
 	[ -w $f ] || raiseError access "Cannot write to file: $f"
 done
 
@@ -106,9 +106,9 @@ if [ -n "$SERVERIP" ]; then
 	# Processing when something has changed.
 	if [ $CHANGE == 1 ]; then
 		# Config ogClient.
-		sed -i -e "s/^ip=.*/ip=$SERVERIP/g" \
-		    -e "s/^url=https:\/\/[0-9\.]*\//url=https:\/\/$SERVERIP\//g" \
-		    $OPENGNSYS/client/ogClient/cfg/ogclient.cfg
+		IP_PATTERN="[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}"
+		sed -i -e "s/$IP_PATTERN/$SERVERIP/g" \
+			  "$OPENGNSYS"/client/ogClient/cfg/ogclient.json
 		# Restart OpenGnsys services.
 		echo "Restarting services..."
 		restart opengnsys >/dev/null
