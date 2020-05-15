@@ -1544,8 +1544,7 @@ EOT
 
 	echoAndLog "${FUNCNAME}(): Creating ogClient config files."
 	sed -i -e "s/127\.0\.0\.1/$OPENGNSYS_SERVERIP/g" \
-	    -e "s/1234/8889/g" \
-	    $INSTALL_TARGET/client/ogClient/cfg/ogclient.cfg
+	    $INSTALL_TARGET/client/ogClient/cfg/ogclient.json
 }
 
 
