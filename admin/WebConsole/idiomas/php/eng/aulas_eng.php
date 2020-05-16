@@ -56,3 +56,4 @@
 	$TbMsg[48]='"Real time log"';
 	$TbMsg[49]='"Synchronization';
 	$TbMsg[50]='"Synchronization 2';
+	$TbMsg[51]='"Moving Classroom Computers';

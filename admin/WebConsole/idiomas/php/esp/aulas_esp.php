@@ -56,5 +56,4 @@
 	$TbMsg[48]='"Log en tiempo real"';
 	$TbMsg[49]='"Sincronización"';	
 	$TbMsg[50]='"Sincronización 2"';	
-
-
+	$TbMsg[51]='"Mover ordenadores de Aula"';	

@@ -78,7 +78,7 @@ $XMLcontextual=ContextualXMLComandos($LITAMBITO_CENTROS,$AMBITO_CENTROS);
 echo $flotante->CreaMenuContextual($XMLcontextual);
 $XMLcontextual=ContextualXMLComandos($LITAMBITO_GRUPOSAULAS,$AMBITO_GRUPOSAULAS);
 echo $flotante->CreaMenuContextual($XMLcontextual);
-$XMLcontextual=ContextualXMLComandos($LITAMBITO_AULAS,$AMBITO_AULAS,$AMBITO_CENTROS);
+$XMLcontextual=ContextualXMLComandos($LITAMBITO_AULAS,$AMBITO_AULAS);
 echo $flotante->CreaMenuContextual($XMLcontextual);
 $XMLcontextual=ContextualXMLComandos($LITAMBITO_GRUPOSORDENADORES,$AMBITO_GRUPOSORDENADORES);
 echo $flotante->CreaMenuContextual($XMLcontextual);
@@ -132,7 +132,7 @@ function CreaArbol($cmd,$idcentro,$nombrecentro){
 	$cadenaXML.=' imagenodo="../images/iconos/centros.gif"';
 	$cadenaXML.=' nodoid='.$LITAMBITO_CENTROS."-".$idcentro;
 	$cadenaXML.=' infonodo="'.$nombrecentro.'"';
-	$cadenaXML.=' clickcontextualnodo="menu_contextual(this,' ."'flo_".$LITAMBITO_CENTROS."'" .')"';
+	$cadenaXML.=' clicksupnodo="menu_contextual(this,' ."'flo_".$LITAMBITO_CENTROS."'" .')"';
 	$cadenaXML.='>';
 	$cadenaXML.=SubarbolXML_grupos_aulas($cmd,$idcentro,0);
 	$cadenaXML.='</CENTRO>';
@@ -153,7 +153,7 @@ function SubarbolXML_grupos_aulas($cmd,$idcentro,$grupoid){
 	while (!$rs->EOF){
 		$cadenaXML.='<GRUPOSAULAS';
 		// Atributos
-		$cadenaXML.=' clickcontextualnodo="menu_contextual(this,'. " 'flo_".$LITAMBITO_GRUPOSAULAS."'" .');"';
+		$cadenaXML.=' clicksupnodo="menu_contextual(this,'. " 'flo_".$LITAMBITO_GRUPOSAULAS."'" .');"';
 		$cadenaXML.=' imagenodo="../images/iconos/carpeta.gif"';
 		$cadenaXML.=' infonodo="'.$rs->campos["nombregrupo"].'"';
 		$cadenaXML.=' nodoid='.$LITAMBITO_GRUPOSAULAS.'-'.$rs->campos["idgrupo"];
@@ -170,7 +170,7 @@ function SubarbolXML_grupos_aulas($cmd,$idcentro,$grupoid){
 	while (!$rs->EOF){
 		$cadenaXML.='<AULA ';
 		// Atributos		
-		$cadenaXML.=' clickcontextualnodo="menu_contextual(this,' ."'flo_".$LITAMBITO_AULAS."'" .')"';
+		$cadenaXML.=' clicksupnodo="menu_contextual(this,' ."'flo_".$LITAMBITO_AULAS."'" .')"';
 		$cadenaXML.=' clicksupnodo="ver_aulas();"';
 		$cadenaXML.=' imagenodo="../images/iconos/aula.gif"';
 		$cadenaXML.=' infonodo="'.$rs->campos["nombreaula"].'"';
@@ -203,7 +203,7 @@ function SubarbolXML_aulas_operadores($cmd,$idaula,$cont){
 		$cadenaXML.='<USUARIO';
 		// Atributos			
 		$cadenaXML.=' imagenodo="../images/iconos/operadores.gif"';
-		$cadenaXML.=' clickcontextualnodo="menu_contextual(this,' ."'flo_".$LITAMBITO_USUARIOS."'" .')"';
+		$cadenaXML.=' clicksupnodo="menu_contextual(this,' ."'flo_".$LITAMBITO_USUARIOS."'" .')"';
 		$cadenaXML.=' infonodo="'.$rs->campos["nombre"].'"';
 		$cadenaXML.=' nodoid='.$LITAMBITO_USUARIOS.'-'.$rs->campos["idusuario"];
 		$cadenaXML.='></USUARIO>';
@@ -226,7 +226,7 @@ function SubarbolXML_aulas_ordenadores($cmd,$idaula,$grupoid){
 	while (!$rs->EOF){
 		$cadenaXML.='<GRUPOSORDENADORES';
 		// Atributos	
-		$cadenaXML.=' clickcontextualnodo="menu_contextual(this,' ."'flo_".$LITAMBITO_GRUPOSORDENADORES."'" .')"';
+		$cadenaXML.=' clicksupnodo="menu_contextual(this,' ."'flo_".$LITAMBITO_GRUPOSORDENADORES."'" .')"';
 		$cadenaXML.=' imagenodo="../images/iconos/carpeta.gif"';
 		$cadenaXML.=' infonodo="'.$rs->campos["nombregrupoordenador"].'"';
 		$cadenaXML.=' nodoid='.$LITAMBITO_GRUPOSORDENADORES.'-'.$rs->campos["idgrupo"];
@@ -246,7 +246,7 @@ function SubarbolXML_aulas_ordenadores($cmd,$idaula,$grupoid){
 		$cadenaXML.=' imagenodo="../images/iconos/ordenador.gif"';
 		$wpages="../propiedades/propiedades_ordenadores.php";
 		$wParam="0,0,0,0,'". $wpages."'";
-		$cadenaXML.=' clickcontextualnodo="menu_contextual(this,' ."'flo_".$LITAMBITO_ORDENADORES."'" .')"';
+		$cadenaXML.=' clicksupnodo="menu_contextual(this,' ."'flo_".$LITAMBITO_ORDENADORES."'" .')"';
 		$cadenaXML.=' clicksupnodo="modificar('.$wParam.')"';
 		$cadenaXML.=' infonodo="'.$rs->campos["nombreordenador"].'"';
 		$cadenaXML.=' nodoid='.$LITAMBITO_ORDENADORES.'-'.$rs->campos["idordenador"];
@@ -262,6 +262,7 @@ function SubarbolXML_aulas_ordenadores($cmd,$idaula,$grupoid){
 //________________________________________________________________________________________________________
 function ContextualXMLCentros(){
 	global $TbMsg;
+	global $AMBITO_CENTROS;
 	global $AMBITO_AULAS;
 	global $AMBITO_GRUPOSAULAS;
 	global $LITAMBITO_GRUPOSAULAS;
@@ -287,7 +288,7 @@ function ContextualXMLCentros(){
 	$layerXML.=' imgitem="../images/iconos/acciones.gif"';
 	$layerXML.=' textoitem='.$TbMsg[6];
 	$layerXML.='></ITEM>';
-
+	
 	$layerXML.='<SEPARADOR>';
 	$layerXML.='</SEPARADOR>';
 
@@ -356,7 +357,6 @@ function ContextualXMLCentros(){
 //________________________________________________________________________________________________________
 function ContextualXMLGruposAulas(){
 	global $TbMsg;
-	global $AMBITO_CENTROS;
 	global $AMBITO_AULAS;
 	global $AMBITO_GRUPOSAULAS;
 	global $LITAMBITO_GRUPOSAULAS;
@@ -465,7 +465,6 @@ function ContextualXMLGruposAulas(){
 //________________________________________________________________________________________________________
 function ContextualXMLAulas(){
 	global $TbMsg;
-	global $AMBITO_CENTROS;
 	global $AMBITO_AULAS;
 	global $LITAMBITO_AULAS;
 	global $RESERVA_CONFIRMADA;

@@ -372,13 +372,28 @@ function ver_boot(){
 }
 function ver_ubicarordenadores(){
 	reset_contextual(-1,-1); // Oculta menu contextual
+	var idcentro;
 	var idambito=currentNodo.toma_identificador();
 	var litambito=currentNodo.toma_sufijo();
 	var nombreambito=currentNodo.toma_infonodo();
-	//alert(idambito);
+	if (litambito==="centros"){idcentro=idambito;}
+	//alert(idcentro);
 	//alert('nombreambito' + nombreambito);
 	//alert('litambito' + litambito);
-	var whref="ubicarordenadores.php?litambito="+litambito+"&idambito="+idambito+"&nombreambito="+nombreambito;
+	var whref="ubicarordenadores.php?idcentro="+idcentro+"&litambito="+litambito+"&idambito="+idambito+"&nombreambito="+nombreambito;
 	 window.open(whref,"frame_contenidos")
 }
-	
+function ver_movordenadoresAulas(){
+	reset_contextual(-1,-1); // Oculta menu contextual
+	var idambito=currentNodo.toma_identificador();
+	var litambito=currentNodo.toma_sufijo();
+	var nombreambito=currentNodo.toma_infonodo();
+	//if (litambito==="centros"){idcentro=idambito;}
+	//alert(idcentro);
+	//alert('nombreambito' + nombreambito);
+	//alert('litambito' + litambito);
+	//alert('idambito = ' + idambito);
+	var whref="../comandos/MoverordenadoresAulas.php?litambito="+litambito+"&idambito="+idambito+"&nombreambito="+nombreambito;
+	//alert(whref);
+	 window.open(whref,"frame_contenidos")
+}
