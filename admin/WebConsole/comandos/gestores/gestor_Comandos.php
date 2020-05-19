@@ -242,8 +242,7 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 		$ValorParametros=extrae_parametros($parametros,chr(13),'=');
 		$script=@urldecode($ValorParametros["scp"]);
 		if($sw_ejya=='on'){
-			if ($sw_seguimiento == 1 &&
-			    $idcomando != OG_CMD_ID_WAKEUP) {
+			if ($sw_seguimiento == 1) {
 				$when = now_params();
 				$resul = create_schedule(strval($sesion),
 							 $EJECUCION_PROCEDIMIENTO,
