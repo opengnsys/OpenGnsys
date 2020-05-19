@@ -3584,7 +3584,6 @@ static int og_dbi_queue_task(struct og_dbi *dbi, uint32_t task_id,
 {
 	struct og_task task = {};
 	uint32_t task_id_next;
-	struct og_cmd *cmd;
 	const char *msglog;
 	dbi_result result;
 
@@ -3630,17 +3629,6 @@ static int og_dbi_queue_task(struct og_dbi *dbi, uint32_t task_id,
 
 	dbi_result_free(result);
 
-	list_for_each_entry(cmd, &cmd_list, list) {
-		if (cmd->type != OG_CMD_WOL)
-			continue;
-
-		if (!Levanta((char **)cmd->params.ips_array,
-			     (char **)cmd->params.mac_array,
-			     cmd->params.ips_array_len,
-			     (char *)cmd->params.wol_type))
-			return -1;
-	}
-
 	return 0;
 }
 
@@ -3684,12 +3672,58 @@ static int og_dbi_queue_command(struct og_dbi *dbi, uint32_t task_id,
 	return 0;
 }
 
+static int og_dbi_update_action(uint32_t id, bool success)
+{
+	char end_date_string[24];
+	struct tm *end_date;
+	const char *msglog;
+	struct og_dbi *dbi;
+	uint8_t status = 2;
+	dbi_result result;
+	time_t now;
+
+	if (!id)
+		return 0;
+
+	dbi = og_dbi_open(&dbi_config);
+	if (!dbi) {
+		syslog(LOG_ERR, "cannot open connection database (%s:%d)\n",
+		       __func__, __LINE__);
+		return -1;
+	}
+
+	time(&now);
+	end_date = localtime(&now);
+
+	sprintf(end_date_string, "%hu/%hhu/%hhu %hhu:%hhu:%hhu",
+		end_date->tm_year + 1900, end_date->tm_mon + 1,
+		end_date->tm_mday, end_date->tm_hour, end_date->tm_min,
+		end_date->tm_sec);
+	result = dbi_conn_queryf(dbi->conn,
+				 "UPDATE acciones SET fechahorafin='%s', "
+				 "estado=%d, resultado=%d WHERE idaccion=%d",
+				 end_date_string, ACCION_FINALIZADA,
+				 status - success, id);
+
+	if (!result) {
+		dbi_conn_error(dbi->conn, &msglog);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
+		og_dbi_close(dbi);
+		return -1;
+	}
+	dbi_result_free(result);
+	og_dbi_close(dbi);
+
+	return 0;
+}
+
 void og_schedule_run(unsigned int task_id, unsigned int schedule_id,
 		     enum og_schedule_type type)
 {
 	struct og_msg_params params = {};
 	bool duplicated = false;
-	struct og_cmd *cmd;
+	struct og_cmd *cmd, *next;
 	struct og_dbi *dbi;
 	unsigned int i;
 
@@ -3726,6 +3760,20 @@ void og_schedule_run(unsigned int task_id, unsigned int schedule_id,
 			duplicated = false;
 	}
 
+	list_for_each_entry_safe(cmd, next, &cmd_list, list) {
+		if (cmd->type != OG_CMD_WOL)
+			continue;
+
+		if (Levanta((char **)cmd->params.ips_array,
+			    (char **)cmd->params.mac_array,
+			    cmd->params.ips_array_len,
+			    (char *)cmd->params.wol_type))
+			og_dbi_update_action(cmd->id, true);
+
+		list_del(&cmd->list);
+		og_cmd_free(cmd);
+	}
+
 	og_send_request(OG_METHOD_GET, OG_CMD_RUN_SCHEDULE, &params, NULL);
 }
 
@@ -3760,7 +3808,7 @@ static int og_cmd_task_post(json_t *element, struct og_msg_params *params)
 		return -1;
 	}
 
-	og_dbi_queue_task(dbi, atoi(params->task_id), 0);
+	og_schedule_run(atoi(params->task_id), 0, OG_SCHEDULE_TASK);
 	og_dbi_close(dbi);
 
 	list_for_each_entry(cmd, &cmd_list, list)
@@ -5379,53 +5427,6 @@ static int og_resp_image_restore(json_t *data, struct og_client *cli)
 	return 0;
 }
 
-static int og_dbi_update_action(struct og_client *cli, bool success)
-{
-	char end_date_string[24];
-	struct tm *end_date;
-	const char *msglog;
-	struct og_dbi *dbi;
-	uint8_t status = 2;
-	dbi_result result;
-	time_t now;
-
-	if (!cli->last_cmd_id)
-		return 0;
-
-	dbi = og_dbi_open(&dbi_config);
-	if (!dbi) {
-		syslog(LOG_ERR, "cannot open connection database (%s:%d)\n",
-		       __func__, __LINE__);
-		return -1;
-	}
-
-	time(&now);
-	end_date = localtime(&now);
-
-	sprintf(end_date_string, "%hu/%hhu/%hhu %hhu:%hhu:%hhu",
-		end_date->tm_year + 1900, end_date->tm_mon + 1,
-		end_date->tm_mday, end_date->tm_hour, end_date->tm_min,
-		end_date->tm_sec);
-	result = dbi_conn_queryf(dbi->conn,
-				 "UPDATE acciones SET fechahorafin='%s', "
-				 "estado=%d, resultado=%d WHERE idaccion=%d",
-				 end_date_string, ACCION_FINALIZADA,
-				 status - success, cli->last_cmd_id);
-
-	if (!result) {
-		dbi_conn_error(dbi->conn, &msglog);
-		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
-		       __func__, __LINE__, msglog);
-		og_dbi_close(dbi);
-		return -1;
-	}
-	cli->last_cmd_id = 0;
-	dbi_result_free(result);
-	og_dbi_close(dbi);
-
-	return 0;
-}
-
 static int og_agent_state_process_response(struct og_client *cli)
 {
 	json_error_t json_err;
@@ -5435,15 +5436,18 @@ static int og_agent_state_process_response(struct og_client *cli)
 
 	if (!strncmp(cli->buf, "HTTP/1.0 202 Accepted",
 		     strlen("HTTP/1.0 202 Accepted"))) {
-		og_dbi_update_action(cli, true);
+		og_dbi_update_action(cli->last_cmd_id, true);
+		cli->last_cmd_id = 0;
 		return 1;
 	}
 
 	if (strncmp(cli->buf, "HTTP/1.0 200 OK", strlen("HTTP/1.0 200 OK"))) {
-		og_dbi_update_action(cli, false);
+		og_dbi_update_action(cli->last_cmd_id, false);
+		cli->last_cmd_id = 0;
 		return -1;
 	}
-	og_dbi_update_action(cli, true);
+	og_dbi_update_action(cli->last_cmd_id, true);
+	cli->last_cmd_id = 0;
 
 	if (!cli->content_length) {
 		cli->last_cmd = OG_CMD_UNSPEC;
