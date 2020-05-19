@@ -1,0 +1,206 @@
+#!/bin/bash
+
+#/**
+#@file    checkrepo
+#@brief   Maintain repository information in a JSON file.
+#@usage   checkrepo
+#@warning This script uses "jq" command.
+#@version 1.1.0 - Initial version.
+#@author  Ramón M. Gómez - ETSII Univ. Sevilla
+#@date    2017-09-27
+#*/ ##
+
+
+# Global constants definition.
+PROG=$(basename "$(realpath "$0")")
+OPENGNSYS=/opt/opengnsys
+IMAGESDIR=$OPENGNSYS/images
+INFOFILE=$OPENGNSYS/etc/repoinfo.json
+
+
+# Functions.
+source $OPENGNSYS/lib/ogfunctions.sh
+
+# Create/edit JSON file about installed ogLive clients.
+function addToJson() {
+    # Parameters and variables.
+    local IMAGENAME="$1" IMAGETYPE="$2" DATA="$3" JSON i j n m OUNAME OUIND IMGIND
+    local CLONATOR COMPRESSOR FSTYPE DATASIZE CLIENT
+    IFS=":" read -r CLONATOR COMPRESSOR FSTYPE DATASIZE CLIENT <<<"$DATA"
+    # Check if image is restricted to an OU (subdir).
+    if [[ $IMAGENAME =~ / ]]; then
+        OUNAME="${IMAGENAME%/*}"
+        IMAGENAME="${IMAGENAME##*/}"
+    fi
+    # Data size must be numeric (in KB).
+    [[ $DATASIZE =~ ^[0-9]*$ ]] || DATASIZE=0
+    # JSON-formatted new entry.
+    JSON=$(cat << EOT | jq .
+{
+  "name":"$IMAGENAME",
+  "type":"${IMAGETYPE,,}",
+  "clientname":"$CLIENT",
+  "clonator":"${CLONATOR,,}",
+  "compressor":"${COMPRESSOR,,}",
+  "filesystem":"${FSTYPE^^}",
+  "datasize":$[ DATASIZE * 1024]
+}
+EOT
+    )
+    # Check JSON file consistency.
+    if [ "$(jq -c keys $INFOFILE 2>/dev/null)" == '["directory","images","ous"]' ]; then
+        # Common image.
+        if [ -z "$OUNAME" ]; then
+            # Check if the image is defined into JSON file.
+            n=$(jq ".images | length" $INFOFILE)
+            for ((i=0; i<n; i++)); do
+                [ "$(jq ".check=$JSON | .check.name==.images[$i].name" $INFOFILE)" == "true" ] && IMGIND=$i
+            done
+	    # Check if it needs to update or insert data.
+            if [ -n "$IMGIND" ]; then
+                # Update if image data changes and info file exists.
+                [ -n "$3" -a "$(jq ".check=$JSON | .check==.images[$IMGIND]" $INFOFILE)" == "false" ] && jq ".images[$IMGIND]=$JSON" $INFOFILE | sponge $INFOFILE
+            else
+                # Append a new entry.
+                jq ".images |= (. + [$JSON])" $INFOFILE | sponge $INFOFILE
+            fi
+        else    # OU image.
+            # Append a new OU entry if it does not exist.
+            if [ -z "$(jq -r ".ous[].subdir" $INFOFILE | grep "^$OUNAME$")" ]; then
+                JSON=$(cat << EOT | jq .
+{ 
+  "subdir": "$OUNAME",
+  "images": [ $JSON ]
+}
+EOT
+                )
+                jq ".ous |= (. + [$JSON])" $INFOFILE | sponge $INFOFILE
+            else
+                # Check if the image is defined in some OU.
+                m=$(jq ".ous | length" $INFOFILE)
+                for ((j=0; j<m; j++)); do
+                    n=$(jq ".ous[$j].images | length" $INFOFILE)
+                    for ((i=0; i<n; i++)); do
+                        [ "$(jq ".check=$JSON | .check.name==.ous[$j].images[$i].name" $INFOFILE)" == "true" ] && OUIND=$j && IMGIND=$i
+                    done
+                done
+                # Check if it needs to update or insert data.
+                if [ -n "$IMGIND" ]; then
+                    # Update if image data changes and info file exists.
+                    [ $# -gt 2 -a "$(jq ".check=$JSON | .check==.ous[$OUIND].images[$IMGIND]" $INFOFILE)" == "false" ] && jq ".ous[$OUIND].images[$IMGIND]=$JSON" $INFOFILE | sponge $INFOFILE
+	        else
+		    # Obtener el índice de la UO donde añadir la nueva entrada. Por acodoner
+		    m=$(jq ".ous | length" $INFOFILE)
+                    for ((j=0; j<m; j++)); do
+                        [ $(jq ".ous[$j].subdir" $INFOFILE | sed s/\"//g) == $OUNAME ] && OUIND=$j 
+                    done
+                    # Append a new entry.
+		    jq ".ous[$OUIND].images |= (. + [$JSON])" $INFOFILE | sponge $INFOFILE
+                fi
+            fi
+        fi
+    else
+        # Create new JSON file.
+        if [ -z "$OUNAME" ]; then
+            cat << EOT | jq . > $INFOFILE
+{"directory":"$IMAGESDIR","images":[${IMAGENAME:+$JSON}],"ous":[]}
+EOT
+        else
+            cat << EOT | jq . > $INFOFILE
+{"directory":"$IMAGESDIR","images":[],"ous":[{"subdir":"$OUNAME","images":[$JSON]}]}
+EOT
+        fi
+    fi
+}
+
+# Check for file-based images to update the repository configuration file.
+function checkfiles() {
+    local IMAGES IMG INFO DATA
+    # File-stored images.
+    IMAGES=$(find $IMAGESDIR -maxdepth 2 -type f \( -name "*.img" -o -name "*.dsk" \) -print)
+    for IMG in $IMAGES; do
+        # Skip locked images.
+        [ -e "$IMG.lock" ] && continue
+        # Retrieve image creation data and delete temporary file.
+        INFO="$IMG.info"
+	[ ! -e "$INFO" ] && continue # Si no existe fichero .info, no hacer nada y pasar al siguiente. Por acodoner
+        [ "$INFO" -ot "$IMG" ] && rm -f "$INFO" && echo "Warning: Deleted outdated file $INFO" && continue # Si el fichero .info es obsoleto, borralo, no hacer nada y pasar al siguiente. Por acodoner
+        DATA=""
+        [ -r "$INFO" ] && DATA=$(cat "$INFO")
+        # Add data to configuration file (name, type and data) and remove image info file.
+        IMG=${IMG#$IMAGESDIR/}
+        addToJson "${IMG%.*}" "${IMG##*.}" "$DATA" && rm -f "$INFO"
+    done
+}
+
+
+# Check for directory-based images to update the repository configuration file.
+function checkdirs() {
+    local IMAGES IMG INFO DATA
+
+    # Directory-based images.
+    IMAGES=$(find $IMAGESDIR -maxdepth 3 -type f -name ogimg.info -print)
+    for INFO in $IMAGES; do
+        IMG="$(dirname "${INFO#$IMAGESDIR/}")"
+        # Skip repository root directory and locked images.
+        [ "$IMG" == "$IMAGESDIR" -o -e "$IMG.lock" ] && continue
+        DATA=$(awk -F= '$1=="# fstype" {fs=$2} $1=="# sizedata" {sz=$2} END {printf "rsync::%s:%s:",fs,sz}' "$INFO")
+        # Add data to configuration file (name, type and data).
+        addToJson "$IMG" "dir" "$DATA"
+    done
+}
+
+# Check if images are removed to update the repository configuration file.
+function checkremoved() {
+    local IMG TYPE OU i j n m
+    [ ! -w "$INFOFILE" ] && raiseError access "$INFOFILE"
+
+    # Check if global images are defined into JSON file.
+    n=$(jq ".images | length" $INFOFILE)
+    for ((i=0; i<n; i++)); do
+        # Image name and type.
+        IMG="$(jq -r ".images[$i].name" $INFOFILE)"
+        TYPE="$(jq -r ".images[$i].type" $INFOFILE)"
+        [ "$TYPE" != "dir" ] && IMG="$IMG.$TYPE"
+        # Delete entry if image does not exist and it's not locked.
+        [ ! -e "$IMAGESDIR/$IMG" -a ! -e "$IMAGESDIR/$IMG.lock" ] && jq "del(.images[$i])" $INFOFILE | sponge $INFOFILE
+    done
+    # Check if OU images are defined into JSON file.
+    m=$(jq ".ous | length" $INFOFILE)
+    for ((j=0; j<m; j++)); do
+        # OU subdir.
+        OU="$(jq -r ".ous[$j].subdir" $INFOFILE)"
+        # Delete OU's entries if its subdir does not exist.
+        if [ ! -e "$IMAGESDIR/$OU" ]; then
+            jq "del(.ous[$j])" $INFOFILE | sponge $INFOFILE
+        else
+            #n=$(jq ".images | length" $INFOFILE)
+            n=$(jq ".ous[$j].images | length" $INFOFILE) #corregido por acodoner
+            for ((i=0; i<n; i++)); do
+                # Image name and type.
+                IMG="$(jq -r ".ous[$j].images[$i].name" $INFOFILE)"
+                TYPE="$(jq -r ".ous[$j].images[$i].type" $INFOFILE)"
+                [ "$TYPE" != "dir" ] && IMG="$IMG.$TYPE"
+                # Delete entry if image does not exist and it's not locked.
+                [ ! -e "$IMAGESDIR/$OU/$IMG" -a ! -e "$IMAGESDIR/$OU/$IMG.lock" ] && jq "del(.ous[$j].images[$i])" $INFOFILE | sponge $INFOFILE
+            done
+        fi
+    done
+}
+
+
+# Main program.
+
+# Comprobar si el proceso ya está en ejecución.
+[ "$(pgrep "$PROG")" != "$$" ] &&  exit
+
+# Check dependencies.
+[ -w "$(dirname "$INFOFILE")" ] || raiseError access "$INFOFILE"
+[ -e "$INFOFILE" ] || addToJson
+which sponge &>/dev/null || raiseError notfound "Need to install \"moreutils\"."
+
+checkfiles
+checkdirs
+checkremoved
+
+
