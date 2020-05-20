@@ -12,4 +12,4 @@
 	$TbMsg[3]='Selecciona el Aula';
 	$TbMsg[4]='Ha seleccionado el mismo Aula';
 	$TbMsg[5]='Selecciona un equipo';
-	$TbMsg[6]='!!! Atención !!! Las Aulas Seleccionada tienen diferentes Mascaras de Red';
+	$TbMsg[6]='!!! Atención !!! Las Aulas Seleccionada tienen diferentes Máscaras de Red';

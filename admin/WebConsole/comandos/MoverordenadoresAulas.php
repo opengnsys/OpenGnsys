@@ -79,7 +79,6 @@ if (!$rs->Abrir()) return(true); // Error al abrir recordset
 <script type="text/javascript">
 
 function aceptar() {document.fdatos.submit();}
-function confirmamover() {var mensaje="<?php echo $TbMsg[1];?>";if(confirm(mensaje)) continue;}
 function comprobaridaula(){	alert( "<?php echo $TbMsg[4]?>" );}
 function comprobarord(){	alert( "<?php echo $TbMsg[5]?>" );}
 function actualiza_frame_principal(){
@@ -107,8 +106,6 @@ function comprobarnetmask(){
 		?>
 <?php
 // Recorremos todos los checkbox del FiltroAmbito
-// <!-- <TR><TD align="center"><INPUT id="chk-'.$idordenador.'" type="checkbox" checked></TD></TR>';  -->
-// comprobarord()
 // ##############################################
 // Comprobamos si hay algun equipo seleccionado
 for ( $i=0; $i<$num; $i++){
