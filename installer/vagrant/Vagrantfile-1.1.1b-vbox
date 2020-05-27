@@ -4,8 +4,7 @@ VAGRANTFILE_API_VERSION = "2"
 # VM provider: Oracle VM VirtualBox.
 ENV['VAGRANT_DEFAULT_PROVIDER'] = "virtualbox"
 # OpenGnsys version and OGAgent version.
-OGVERSION="1.1.1a"
-OGAGENTVERSION="1.1.1"    ### TEMPORARY (should be worth the same)
+OGVERSION="1.1.1b"
 # Language (accepted values: es_ES, ca_ES, en_GB).
 LANGUAGE = "es_ES"
 ENV['LC_ALL'] = LANGUAGE + ".UTF-8"
@@ -80,7 +79,7 @@ EOT
 # Client 1 OS provisioning script.
 MODELSCRIPT = <<EOT
 # Comment out next lines to install and configure OGAgent for Ubuntu.
-#OGAGENTPKG="ogagent_#{OGAGENTVERSION}_all.deb"
+#OGAGENTPKG="ogagent_#{OGVERSION}_all.deb"
 #apt-get update -y
 #apt-get install -y curl
 #curl -ks https://#{SERVERIP}/opengnsys/descargas/$OGAGENTPKG -o /tmp/$OGAGENTPKG
