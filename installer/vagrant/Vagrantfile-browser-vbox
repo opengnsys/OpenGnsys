@@ -30,7 +30,7 @@ make
 make install
 # Compile the Browser.
 BRANCH="master"
-svn export "https://github.com/opengnsys/OpenGnsys/branches/$BRANCH/client/browser" ../browser
+svn export "https://github.com/opengnsys/ogBrowser/branches/$BRANCH/" ../browser
 cd ../browser
 qmake browser.pro
 make

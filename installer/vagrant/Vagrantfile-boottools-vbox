@@ -25,7 +25,7 @@ groupadd opengnsys
 mkdir -p /opt/opengnsys/client /tmp/opengnsys_installer/opengnsys
 ln -fs /var/lib/tftpboot /opt/opengnsys
 BRANCH="master"
-svn export https://github.com/opengnsys/OpenGnsys/branches/$BRANCH/client /tmp/opengnsys_installer/opengnsys/client
+svn export https://github.com/opengnsys/ogLive-Builder/branches/$BRANCH/ /tmp/opengnsys_installer/opengnsys/client/boot-tools
 echo "Connect to this VM, launch boot-tools generation script and follow instructions:"
 echo "    sudo /tmp/opengnsys_installer/opengnsys/client/boot-tools/boottoolsgenerator.sh"
 echo "Warning: this process may take a long time."
