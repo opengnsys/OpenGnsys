@@ -30,6 +30,7 @@ Tickets resueltos en módulo OpenGnsys Web Admin Console:
 #961	Guardar en datos de imagen el tamaño original
 #972	Eliminar opengnsys.cron
 #974	Formulario de editar tarea falla en grupo de ordenadores (corrección)
+#979	Mover ordenadores entre aulas (mejora)
 
 Tickets resueltos en módulo OpenGnsys Installer:
 #954	Ignorar datos de importación (mejora)
@@ -120,6 +121,7 @@ Tickets resueltos en módulo OpenGnsys Server:
 #929	Autenticación de clave pública entre los ogLive
 
 Tickets resueltos en módulo OpenGnsys Web Admin Console:
+#519	Gestion de iconos en parte de administración (no se resolverá)
 #772	Módulo de administración web para dispositivos smartphones y tablets (no se resolverá)
 #804	Conversión de todo el código php de la consola web de administración a Php7 y Mysqli (tarea)
 #816	Marcar ordenador de profesor
