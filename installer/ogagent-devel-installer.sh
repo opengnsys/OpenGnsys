@@ -13,7 +13,7 @@
 # Variables.
 PROGDIR="$PWD/ogagent"
 BRANCH="master"
-SVNURL="https://github.com/opengnsys/OpenGnsys/branches/$BRANCH/admin/Sources/Clients/ogagent"
+SVNURL="https://github.com/opengnsys/ogAgent/branches/$BRANCH/"
 
 # Show prerequisites needed to build the environment.
 mkdir -p $PROGDIR || exit 1
