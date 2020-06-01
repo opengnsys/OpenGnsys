@@ -32,10 +32,13 @@ if (isset($_GET["nombreambito"])) $nombreambito=$_GET["nombreambito"];
 $Midordenador=  Array();
 $Mnombreordenador=  Array();
 $MimgOrdenador=Array();
+$Mrow=[];
+$Mcol=[];
 $Mip= Array();
 $Mmac=  Array();
+$map=[];  // Mapa del aula
 $k=0; // Indice de la Matriz
-	
+
 $cadenaip="";
 $idaula=0;
 $nombreaula="";
@@ -187,7 +190,7 @@ function RecorreAulas($cmd){
 		$idaula=$rs->campos["idaula"];
 		$nombreaula=$rs->campos["nombreaula"];
 		$idordprofesor=(isset($rs->campos["idordprofesor"]) ? $rs->campos["idordprofesor"] : 0);
-		$cmd->texto="SELECT idordenador,nombreordenador,ip,mac FROM ordenadores WHERE  idaula=".$idaula;
+		$cmd->texto="SELECT idordenador,nombreordenador,n_row,n_col,ip,mac FROM ordenadores WHERE  idaula=".$idaula;
 		$k=0;
 		$cadenaip="";
 		RecorreOrdenadores($cmd);
@@ -206,7 +209,7 @@ while (!$rs->EOF){
 		$idgrupo=$rs->campos["idgrupo"];
 		$cmd->texto="SELECT idgrupo,nombregrupoordenador FROM gruposOrdenadores WHERE grupoid=".$idgrupo." ORDER BY nombregrupoordenador";
 		RecorreGruposOrdenadores($cmd);
-		$cmd->texto="SELECT idordenador,nombreordenador,ip,mac FROM ordenadores WHERE  grupoid=".$idgrupo;
+		$cmd->texto="SELECT idordenador,nombreordenador,n_row,n_col,ip,mac FROM ordenadores WHERE  grupoid=".$idgrupo;
 		RecorreOrdenadores($cmd);
 		$rs->Siguiente();
 	}
@@ -217,23 +220,36 @@ function RecorreOrdenadores($cmd){
 	global $Midordenador;
 	global $Mnombreordenador;
 	global $MimgOrdenador;
+	global $Mrow;
+	global $Mcol;
 	global $Mip;
 	global $Mmac;
+	global $map;  // Mapa del aula
+	global $max_col;  // Nº máximo de columnas del aula
 	global $k; // Indice de la Matriz
 	
 	global $cadenaip;
 
-	$cmd->texto.= " ORDER BY nombreordenador";
+	$cmd->texto.= " ORDER BY n_row, n_col";
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
 	if (!$rs->Abrir()) return; // Error al abrir recordset
 	$rs->Primero(); 
-
+	$max_col=0;
 	while (!$rs->EOF){
 		$idordenador=$rs->campos["idordenador"];
 		$Midordenador[$k]=$rs->campos["idordenador"];
 		$Mnombreordenador[$k]=$rs->campos["nombreordenador"];
 		$MimgOrdenador[$k]="ordenador_OFF.png";
+		$Mrow[$k]=$rs->campos["n_row"];
+		$Mcol[$k]=$rs->campos["n_col"];
+		// Calcula nº máximo de columnas para pintar el aula (-1, modo antiguo)
+		if ($max_col === -1 or $Mrow[$k] === 0 or $Mcol[$k] === 0 or isset($map[$Mrow[$k]][$Mcol[$k]])) {
+			$max_col = -1;
+		} else {
+			$max_col = max($max_col, $Mcol[$k]);
+			$map[$Mrow[$k]][$Mcol[$k]]=$k;
+		}
 		$Mip[$k]=$rs->campos["ip"];
 		$Mmac[$k]=$rs->campos["mac"];
 		$cadenaip.=$rs->campos["ip"].";";
@@ -252,6 +268,8 @@ function pintaordenadores(){
 	global $Midordenador;
 	global $Mnombreordenador;
 	global $MimgOrdenador;
+	global $Mrow;
+	global $Mcol;
 	global $Mip;
 	global $Mmac;
 	global $k; // Indice de la Matriz
@@ -261,6 +279,8 @@ function pintaordenadores(){
 	global $idordprofesor;
 	global $servidorhidra,$hidraport;
 	global $TbMsg;
+	global $map;
+	global $max_col;
 
 	$ntr=0; // Numero de ordenadores por fila
 	if ($nombreaula!=""){
@@ -268,35 +288,64 @@ function pintaordenadores(){
 		echo '<p align=center class=cabeceras><img  border=0 nod="'.$LITAMBITO_AULAS.'-'.$idaula.'" value="'.$nombreaula.'"
 				style="cursor:pointer" src="../images/iconos/aula.gif" oncontextmenu="nwmenucontextual(this,' ."'flo_".$LITAMBITO_AULAS."'" .')" >&nbsp;&nbsp;'.$TbMsg[23].'</br><span id="'.$LITAMBITO_AULAS.'-'.$idaula.'" class=subcabeceras>'.$nombreaula.'</span></p>';
 	}
-	echo '<TABLE style="border: 1px solid #d4d0c8;" align="center"><TR>';
-	for($i=0;$i<$k;$i++){ // Vuelve a recorrer los datos de ordenadores para crear HTML
-		$ntr++;
-		echo '<TD>';
-		echo '<table border=0>';
+	echo '<table style="border: 1px solid #d4d0c8;" align="center">';
+	if ($max_col === -1) {  // Modo antiguo
 		echo '<tr>';
-		echo '	<td align=center width=70 height=40>';
-		echo '	<a href="#"><img  id="'.$Mip[$i].'" border=0 sondeo=""  nod="'.$LITAMBITO_ORDENADORES.'-'.$Midordenador[$i].'"
-							 value="'.$Mnombreordenador[$i].'" src="../images/'.$MimgOrdenador[$i].'" oncontextmenu="nwmenucontextual(this,'."'flo_".$LITAMBITO_ORDENADORES."'" .')"  width="32" height="32"></A>';
-		echo '	</td>';
-		echo '</tr>';
-		echo '<tr>';
-		echo '<td align=center  id="'.$LITAMBITO_ORDENADORES.'-'.$Midordenador[$i].'">';
-		echo '	<font color="#003300" size="1" face="Arial, Helvetica, sans-serif">'.$Mnombreordenador[$i].($Midordenador[$i]==$idordprofesor?' *':'').'</font>';
-		echo '	</br>';
-		echo '	<font color="#003300" size="1" face="Arial, Helvetica, sans-serif">';
-		echo '	<strong><font color="#D0A126">'.$Mip[$i].'</font></strong>';			
-		echo '	</br>';
-		echo '	<font color="#003300" size="1" face="Arial, Helvetica, sans-serif">'.$Mmac[$i].'</font>';
-		echo '</td>';
-		echo '</tr>';
-		echo '</table>';
-		echo '</TD>';
-		if ($ntr>4){
-			$ntr=0;
-			echo '</TR><TR>';
+		for($i=0;$i<$k;$i++){ // Vuelve a recorrer los datos de ordenadores para crear HTML
+			$ntr++;
+			echo '<td>';
+			echo '<table border="0">';
+			echo '<tr>';
+			echo '	<td align=center width=70 height=40>';
+			echo '	<a href="#"><img  id="'.$Mip[$i].'" border=0 sondeo=""  nod="'.$LITAMBITO_ORDENADORES.'-'.$Midordenador[$i].'"
+								 value="'.$Mnombreordenador[$i].'" src="../images/'.$MimgOrdenador[$i].'" oncontextmenu="nwmenucontextual(this,'."'flo_".$LITAMBITO_ORDENADORES."'" .')"  width="32" height="32"></a>';
+			echo '	</td>';
+			echo '</tr>';
+			echo '<tr>';
+			echo '<td align=center  id="'.$LITAMBITO_ORDENADORES.'-'.$Midordenador[$i].'">';
+			echo '	<font color="#003300" size="1" face="Arial, Helvetica, sans-serif">'.$Mnombreordenador[$i].($Midordenador[$i]==$idordprofesor?' *':'').'</font>';
+			echo '	</br>';
+			echo '	<font color="#003300" size="1" face="Arial, Helvetica, sans-serif">';
+			echo '	<strong><font color="#D0A126">'.$Mip[$i].'</font></strong>';			
+			echo '	</br>';
+			echo '	<font color="#003300" size="1" face="Arial, Helvetica, sans-serif">'.$Mmac[$i].'</font>';
+			echo '</td>';
+			echo '</tr>';
+			echo '</table>';
+			echo '</td>';
+			if ($ntr>4){
+				$ntr=0;
+				echo '</TR><TR>';
+			}
+		}
+	} else {
+		foreach ($map as $i => $tmp) {
+			echo "<tr>";
+				for ($j=1; $j<=$max_col; $j++) {
+					echo '<td>';
+					echo '<table border="0">';
+					echo '<tr>';
+					echo '	<td align=center width=70 height=40>';
+					if (isset($map[$i][$j])) {
+						$n=$map[$i][$j];
+						echo '<div align="center" id="'.$LITAMBITO_ORDENADORES.'-'.$Midordenador[$n].'">';
+						echo '	<a href="#"><img id="'.$Mip[$n].'" border="0" sondeo=""  nod="'.$LITAMBITO_ORDENADORES.'-'.$Midordenador[$n].'" value="'.$Mnombreordenador[$n].'" src="../images/'.$MimgOrdenador[$n].'" oncontextmenu="nwmenucontextual(this,'."'flo_".$LITAMBITO_ORDENADORES."'" .')"  width="32" height="32"></a>';
+						echo '	</div>';
+						echo '	<font color="#003300" size="1" face="Arial, Helvetica, sans-serif">'.$Mnombreordenador[$n].($Midordenador[$n]==$idordprofesor?' *':'').'</font>';
+						echo '	</br>';
+						echo '	<font color="#003300" size="1" face="Arial, Helvetica, sans-serif">';
+						echo '	<strong><font color="#D0A126">'.$Mip[$n].'</font></strong>';
+						echo '	</br>';
+						echo '	<font color="#003300" size="1" face="Arial, Helvetica, sans-serif">'.$Mmac[$n].'</font>';
+					}
+					echo '</td>';
+					echo '</tr>';
+					echo '</table>';
+					echo '</td>';
+			}
 		}
 	}
-	echo '</TABLE>';
+	echo '</table>';
 	echo '<p>';
 	echo '<table style="border: #d4d0c8 1px solid; background: #eeeeee" align="center">';
 	echo '  <tr align="center" valign="top">';
