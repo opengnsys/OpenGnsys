@@ -534,6 +534,8 @@ CREATE TABLE `ordenadores` (
   `paginavalidacion` varchar(100),
   `agentkey` varchar(32),
   `oglivedir` varchar(50) NOT NULL DEFAULT 'ogLive',
+  `n_row` smallint NOT NULL DEFAULT 0,
+  `n_col` smallint NOT NULL DEFAULT 0,
   PRIMARY KEY (`idordenador`),
   KEY `idaulaip` (`idaula` ASC, `ip` ASC)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;

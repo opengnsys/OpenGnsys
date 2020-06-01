@@ -1,5 +1,5 @@
 ### Fichero de actualización de la base de datos.
-# OpenGnsys 1.1.1
+# OpenGnsys 1.1.1, 1.1.1a, 1.1.1b - OpenGnsys 1.2.0
 #use ogAdmBD
 
 DROP PROCEDURE IF EXISTS addcols;
