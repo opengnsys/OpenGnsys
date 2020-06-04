@@ -1388,7 +1388,7 @@ function copyClientFiles()
 		errorAndLog "${FUNCNAME}(): client copy files with errors"
 	fi
 
-	local ogclientUrl="https://codeload.github.com/alvneiayu/ogClient/zip/$BRANCH"
+	local ogclientUrl="https://codeload.github.com/opengnsys/ogClient/zip/$BRANCH"
 
 	echoAndLog "${FUNCNAME}(): downloading ogClient code..."
 
