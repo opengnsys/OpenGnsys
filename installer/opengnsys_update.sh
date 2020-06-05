@@ -1151,6 +1151,30 @@ function updateClient()
 	fi
 }
 
+# Update ogClient
+function updateOgClient()
+{
+	local ogclientUrl="https://codeload.github.com/opengnsys/ogClient/zip/$BRANCH"
+
+	echoAndLog "${FUNCNAME}(): downloading ogClient code..."
+
+	if ! (curl "${ogclientUrl}" -o ogclient.zip && \
+	     unzip -qo ogclient.zip)
+	then
+		errorAndLog "${FUNCNAME}(): "\
+			    "error getting ogClient code from ${ogclientUrl}"
+		return 1
+	fi
+	if [ -e $INSTALL_TARGET/client/ogClient/cfg/ogclient.json ]; then
+	     rm -f ogClient-"$BRANCH"/cfg/ogclient.json
+	fi
+	mv -f "ogClient-$BRANCH" $INSTALL_TARGET/client/ogClient
+	rm -f ogclient.zip
+	echoAndLog "${FUNCNAME}(): ogClient code was downloaded and updated"
+
+	return 0
+}
+
 # Comprobar permisos y ficheros.
 function checkFiles()
 {
@@ -1340,6 +1364,12 @@ fi
 updateClient
 if [ $? -ne 0 ]; then
 	errorAndLog "Error updating client files"
+	exit 1
+fi
+
+# Update ogClient
+if ! updateOgClient; then
+	errorAndLog "Error updating ogClient files"
 	exit 1
 fi
 
