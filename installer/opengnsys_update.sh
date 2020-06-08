@@ -1003,12 +1003,6 @@ function updateServerFiles()
 		done < $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.default
 		NEWFILES="$NEWFILES /etc/default/opengnsys"
 	fi
-	if egrep -q "(UrlMsg=.*msgbrowser.php)|(UrlMenu=http://)" $INSTALL_TARGET/client/etc/ogAdmClient.cfg 2>/dev/null; then
-		echoAndLog "${FUNCNAME}(): updating new client config file"
-		backupFile $INSTALL_TARGET/client/etc/ogAdmClient.cfg
-		perl -pi -e 's!UrlMsg=.*msgbrowser\.php!UrlMsg=http://localhost/cgi-bin/httpd-log\.sh!g; s!UrlMenu=http://!UrlMenu=https://!g' $INSTALL_TARGET/client/etc/ogAdmClient.cfg
-		NEWFILES="$NEWFILES $INSTALL_TARGET/client/etc/ogAdmClient.cfg"
-	fi
 
 	echoAndLog "${FUNCNAME}(): updating cron files"
 	[ ! -f /etc/cron.d/torrentcreator ] && echo "* * * * *   root   [ -x $INSTALL_TARGET/bin/torrent-creator ] && $INSTALL_TARGET/bin/torrent-creator" > /etc/cron.d/torrentcreator
@@ -1077,15 +1071,6 @@ function compileServices()
 	[ -e $INSTALL_TARGET/sbin/ogAdmAgent ] && \
 		rm -f $INSTALL_TARGET/sbin/ogAdmAgent
 
-	# Compilar OpenGnsys Client
-	echoAndLog "${FUNCNAME}(): Recompiling OpenGnsys Client"
-	pushd $WORKDIR/opengnsys/admin/Sources/Clients/ogAdmClient
-	make && mv ogAdmClient $INSTALL_TARGET/client/bin
-	if [ $? -ne 0 ]; then
-		echoAndLog "${FUNCNAME}(): error while compiling OpenGnsys Client"
-		hayErrores=1
-	fi
-	popd
 	# Generar un API token de ogAdmServer si no existe en el fichero de configuración.
 	grep -q "APITOKEN=" $INSTALL_TARGET/etc/ogAdmServer.cfg || \
 		$INSTALL_TARGET/bin/settoken -f
