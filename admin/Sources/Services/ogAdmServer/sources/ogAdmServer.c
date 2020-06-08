@@ -492,7 +492,8 @@ int checkDato(struct og_dbi *dbi, char *dato, const char *tabla,
 				"INSERT INTO %s (%s) VALUES('%s')", tabla, nomdato, dato);
 		if (!result) {
 			dbi_conn_error(dbi->conn, &msglog);
-			og_info((char *)msglog);
+			syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+			       __func__, __LINE__, msglog);
 			return (0);
 		}
 		// Recupera el identificador del software
@@ -1262,8 +1263,8 @@ bool actualizaSoftware(struct og_dbi *dbi, char *sft, char *par,char *ido,
 	// Comprueba existencia de perfil software y actualización de éste para el ordenador
 	if (!cuestionPerfilSoftware(dbi, idc, ido, idperfilsoft, idnombreso, idsoftwares,
 			npc, par, tbidsoftware, lon)) {
-		syslog(LOG_ERR, "cannot update software\n");
-		og_info((char *)msglog);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
 		retval=false;
 	} else {
 		retval=true;
@@ -1325,7 +1326,8 @@ bool cuestionPerfilSoftware(struct og_dbi *dbi, char *idc, char *ido,
 				" VALUES('Perfil Software (%s, Part:%s) ',%s,0,%i)", npc, par, idc,idnombreso);
 		if (!result) {
 			dbi_conn_error(dbi->conn, &msglog);
-			og_info((char *)msglog);
+			syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+			       __func__, __LINE__, msglog);
 			return false;
 		}
 
@@ -1340,7 +1342,8 @@ bool cuestionPerfilSoftware(struct og_dbi *dbi, char *idc, char *ido,
 						" VALUES(%d,%d)", nwidperfilsoft, tbidsoftware[i]);
 			if (!result) {
 				dbi_conn_error(dbi->conn, &msglog);
-				og_info((char *)msglog);
+				syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+				       __func__, __LINE__, msglog);
 				return false;
 			}
 			dbi_result_free(result);
@@ -1357,7 +1360,8 @@ bool cuestionPerfilSoftware(struct og_dbi *dbi, char *idc, char *ido,
 				" WHERE idordenador=%s AND numpar=%s", nwidperfilsoft, ido, par);
 		if (!result) { // Error al insertar
 			dbi_conn_error(dbi->conn, &msglog);
-			og_info((char *)msglog);
+			syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+			       __func__, __LINE__, msglog);
 			return false;
 		}
 		dbi_result_free(result);
@@ -1373,7 +1377,8 @@ bool cuestionPerfilSoftware(struct og_dbi *dbi, char *idc, char *ido,
 		" (SELECT DISTINCT idperfilsoft from imagenes))");
 	if (!result) {
 		dbi_conn_error(dbi->conn, &msglog);
-		og_info((char *)msglog);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
 		return false;
 	}
 	dbi_result_free(result),
@@ -1385,7 +1390,8 @@ bool cuestionPerfilSoftware(struct og_dbi *dbi, char *idc, char *ido,
 		" (SELECT DISTINCT idperfilsoft from imagenes)");
 	if (!result) {
 		dbi_conn_error(dbi->conn, &msglog);
-		og_info((char *)msglog);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
 		return false;
 	}
 	dbi_result_free(result),
@@ -1396,7 +1402,8 @@ bool cuestionPerfilSoftware(struct og_dbi *dbi, char *idc, char *ido,
 			" (SELECT idperfilsoft from perfilessoft)");
 	if (!result) {
 		dbi_conn_error(dbi->conn, &msglog);
-		og_info((char *)msglog);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
 		return false;
 	}
 	dbi_result_free(result);
