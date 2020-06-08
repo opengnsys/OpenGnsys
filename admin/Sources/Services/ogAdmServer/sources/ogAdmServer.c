@@ -990,7 +990,7 @@ bool actualizaHardware(struct og_dbi *dbi, char *hrd, char *ido, char *npc,
 	/* Crea cadena de identificadores de componentes hardware separados por coma */
 	sprintf(strInt, "%d", tbidhardware[lon - 1]); // Pasa a cadena el último identificador que es de mayor longitud
 	aux = strlen(strInt); // Calcula longitud de cadena para reservar espacio a todos los perfiles
-	idhardwares = reservaMemoria(sizeof(aux) * lon + lon);
+	idhardwares = calloc(1, sizeof(aux) * lon + lon);
 	if (idhardwares == NULL) {
 		syslog(LOG_ERR, "%s:%d OOM\n", __FILE__, __LINE__);
 		return false;
@@ -1250,7 +1250,7 @@ bool actualizaSoftware(struct og_dbi *dbi, char *sft, char *par,char *ido,
 	/* Crea cadena de identificadores de componentes software separados por coma */
 	sprintf(strInt, "%d", tbidsoftware[lon - 1]); // Pasa a cadena el último identificador que es de mayor longitud
 	aux = strlen(strInt); // Calcula longitud de cadena para reservar espacio a todos los perfiles
-	idsoftwares = reservaMemoria((sizeof(aux)+1) * lon + lon);
+	idsoftwares = calloc(1, (sizeof(aux)+1) * lon + lon);
 	if (idsoftwares == NULL) {
 		syslog(LOG_ERR, "%s:%d OOM\n", __FILE__, __LINE__);
 		return false;
@@ -1444,7 +1444,7 @@ static TRAMA *og_msg_alloc(char *data, unsigned int len)
 {
 	TRAMA *ptrTrama;
 
-	ptrTrama = (TRAMA *)reservaMemoria(sizeof(TRAMA));
+	ptrTrama = calloc(1, sizeof(TRAMA));
 	if (!ptrTrama) {
 		syslog(LOG_ERR, "OOM\n");
 		return NULL;
