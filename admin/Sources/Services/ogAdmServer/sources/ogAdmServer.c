@@ -1003,12 +1003,12 @@ bool actualizaHardware(struct og_dbi *dbi, char *hrd, char *ido, char *npc,
 			npc, tbidhardware, lon)) {
 		syslog(LOG_ERR, "Problem updating client hardware\n");
 		retval=false;
-	}
-	else {
+	} else {
 		retval=true;
 	}
-	liberaMemoria(whard);
-	liberaMemoria(idhardwares);
+	free(whard);
+	free(idhardwares);
+
 	return (retval);
 }
 // ________________________________________________________________________________________________________
@@ -1265,13 +1265,13 @@ bool actualizaSoftware(struct og_dbi *dbi, char *sft, char *par,char *ido,
 		syslog(LOG_ERR, "cannot update software\n");
 		og_info((char *)msglog);
 		retval=false;
-	}
-	else {
+	} else {
 		retval=true;
 	}
-	liberaMemoria(wsft);
-	liberaMemoria(idsoftwares);
-	return (retval);
+	free(wsft);
+	free(idsoftwares);
+
+	return retval;
 }
 // ________________________________________________________________________________________________________
 // Función: CuestionPerfilSoftware
@@ -1460,8 +1460,8 @@ static TRAMA *og_msg_alloc(char *data, unsigned int len)
 
 static void og_msg_free(TRAMA *ptrTrama)
 {
-	liberaMemoria(ptrTrama->parametros);
-	liberaMemoria(ptrTrama);
+	free(ptrTrama->parametros);
+	free(ptrTrama);
 }
 
 #define OG_CLIENTS_MAX	4096
