@@ -4,4 +4,5 @@ AM_CFLAGS  = -I../../Includes ${LIBDBI_CFLAGS} ${LIBJANSSON_CFLAGS} ${LIBEVENT_C
 
 ogAdmServer_SOURCES= sources/ogAdmServer.c	\
 		     sources/dbi.c		\
-		     sources/schedule.c
+		     sources/schedule.c		\
+		     sources/utils.c

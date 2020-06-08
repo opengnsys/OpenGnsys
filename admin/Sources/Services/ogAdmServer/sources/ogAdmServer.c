@@ -9,6 +9,7 @@
 #include "ogAdmServer.h"
 #include "ogAdmLib.c"
 #include "dbi.h"
+#include "utils.h"
 #include "list.h"
 #include "schedule.h"
 #include <ev.h>
@@ -75,21 +76,21 @@ static bool tomaConfiguracion(const char *filecfg)
 		key = strtok(line, delim);
 		value = strtok(NULL, delim);
 
-		if (!strcmp(StrToUpper(key), "SERVIDORADM"))
+		if (!strcmp(str_toupper(key), "SERVIDORADM"))
 			snprintf(servidoradm, sizeof(servidoradm), "%s", value);
-		else if (!strcmp(StrToUpper(key), "PUERTO"))
+		else if (!strcmp(str_toupper(key), "PUERTO"))
 			snprintf(puerto, sizeof(puerto), "%s", value);
-		else if (!strcmp(StrToUpper(key), "USUARIO"))
+		else if (!strcmp(str_toupper(key), "USUARIO"))
 			snprintf(usuario, sizeof(usuario), "%s", value);
-		else if (!strcmp(StrToUpper(key), "PASSWORD"))
+		else if (!strcmp(str_toupper(key), "PASSWORD"))
 			snprintf(pasguor, sizeof(pasguor), "%s", value);
-		else if (!strcmp(StrToUpper(key), "DATASOURCE"))
+		else if (!strcmp(str_toupper(key), "DATASOURCE"))
 			snprintf(datasource, sizeof(datasource), "%s", value);
-		else if (!strcmp(StrToUpper(key), "CATALOG"))
+		else if (!strcmp(str_toupper(key), "CATALOG"))
 			snprintf(catalog, sizeof(catalog), "%s", value);
-		else if (!strcmp(StrToUpper(key), "INTERFACE"))
+		else if (!strcmp(str_toupper(key), "INTERFACE"))
 			snprintf(interface, sizeof(interface), "%s", value);
-		else if (!strcmp(StrToUpper(key), "APITOKEN"))
+		else if (!strcmp(str_toupper(key), "APITOKEN"))
 			snprintf(auth_token, sizeof(auth_token), "%s", value);
 
 		line = fgets(buf, sizeof(buf), fcfg);
