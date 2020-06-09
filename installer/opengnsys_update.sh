@@ -182,7 +182,7 @@ function autoConfigure()
 # Choose an available version to update.
 function chooseVersion()
 {
-    local RELEASES DOWNLOADS INSTVERSION INSTRELEASE RELDATE
+    local RELEASES DOWNLOADS INSTVERSION INSTRELEASE
 
     # Development branch.
     BRANCH="master"
@@ -198,9 +198,9 @@ function chooseVersion()
         while read -pe TAG URL; do
             if [[ $TAG =~ ^opengnsys- ]]; then
                 [ "${TAG#opengnsys-}" \< "${INSTVERSION%pre}" ] && break
-                RELDATE=$(curl -s "$URL" | jq -r '.commit.committer.date | split("-") | join("")[:8]')
-                RELEASES+=( "${TAG} ($RELDATE)" )
-                DOWNLOADS+=( "$URL" )
+                RELEASES+=( "${TAG}" )
+	        DOWNLOADS+=( "$URL" )
+                #RELDATE=$(curl -s "$URL" | jq -r '.commit.committer.date | split("-") | join("")[:8]')
             fi
         done <<< $(curl -s "$API_URL/../../tags" | jq -r '.[] | .name+" "+.commit.url')
         # Add development (master) branch.
@@ -210,10 +210,10 @@ function chooseVersion()
         if [ ${#RELEASES[@]} -gt 1 ]; then
             echo "Installed version: $INSTVERSION $INSTRELEASE"
             echo "Versions available for update (\"$BRANCH\" is the latest development branch):"
-            PS3="Enter a number (CTRL-C to exit): "
+            PS3="Enter a number: "
             select opt in "${RELEASES[@]}"; do
                 if [ -n "$opt" ]; then
-                    BRANCH="${opt%% *}"
+                    BRANCH="$opt"
                     API_URL="${DOWNLOADS[REPLY-1]}"
                     break
                 fi
