@@ -3,6 +3,16 @@ LISTA DE CAMBIOS	CHANGELOG.es.txt
 ========================================
 
 
+Lista de cambios incluidos en OpenGnsys 1.1.1c (versión de mantenimiento)
+----------------------------------------------
+
+Tickets resueltos en módulo OpenGnsys Installer:
+#943	Elegir versión a la que se quiere actualizar
+
+Tickets genéricos resueltos:
+#983	Liberar versión de mantenimiento OpenGnsys 1.1.1c
+
+
 Lista de cambios incluidos en OpenGnsys 1.1.1b (versión de mantenimiento)
 ----------------------------------------------
 
@@ -41,6 +51,7 @@ Tickets resueltos en módulo OpenGnsys Installer:
 Tickets genéricos resueltos:
 #959	Liberar versión de mantenimiento OpenGnsys 1.1.1b
 
+
 Lista de cambios incluidos en OpenGnsys 1.1.1a (versión de mantenimiento)
 ----------------------------------------------
 
@@ -58,7 +69,6 @@ Tickets resueltos en módulo OpenGnsys Web Admin Console:
 #949	Mostrar datos de sesiones de sistemas operativos en propiedades de ordenador
 
 Tickets resueltos en módulo OpenGnsys Installer:
-#943	Elegir versión a la que se quiere actualizar
 #945	Script de importación no guarda los triggers de la base de datos (corrección)
 #950	GitHub ya no permite obtener la copia de trabajo con Subversion (corrección)
 #951	Posible problema al actualizar la base de datos con MySQL en modo estricto (corrección)
