@@ -7,7 +7,6 @@
 // Descripción :Este fichero implementa el servicio de administración general del sistema
 // *******************************************************************************************************
 #include "ogAdmServer.h"
-#include "ogAdmLib.c"
 #include "dbi.h"
 #include "utils.h"
 #include "list.h"
