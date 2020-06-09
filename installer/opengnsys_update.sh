@@ -197,7 +197,7 @@ function chooseVersion()
         # Fetch tags (releases) data from GitHub.
         while read -pe TAG URL; do
             if [[ $TAG =~ ^opengnsys- ]]; then
-                [ "${TAG#opengnsys-}" \< "${INSTVERSION%pre}" ] && continue
+                [ "${TAG#opengnsys-}" \< "${INSTVERSION%pre}" ] && break
                 RELDATE=$(curl -s "$URL" | jq -r '.commit.committer.date | split("-") | join("")[:8]')
                 RELEASES+=( "${TAG} ($RELDATE)" )
                 DOWNLOADS+=( "$URL" )
