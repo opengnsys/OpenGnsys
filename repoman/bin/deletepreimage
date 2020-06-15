@@ -21,34 +21,24 @@ LOGFILE="$OPENGNSYS/log/$PROG.log"
 # Procesar ficheros de imágenes.
 trap 'echo "`date` : Proceso interrumpido" >> $LOGFILE; exit ' 1 2 3 6 9 15
 
-#TODO en LOCAL: si existe algún fichero *.delete lo movemos al repositorio
-ls $OPENGNSYS/www/tmp/*.delete &>/dev/null || (checkrepo; exit)
-mv $OPENGNSYS/www/tmp/*.* $OGIMG
+shopt -s nullglob
+TODELETE=( $OPENGNSYS/www/tmp/*.delete )
 
-#TODO: iniciar blucle siempre y cuando haya algun delete
-ls /opt/opengnsys/images/*.delete &>/dev/null || exit
-for IMG in `ls $OGIMG/*.delete`; do
+for IMG in ${TODELETE[@]##*/}; do
 	# Obtenemos el nombre de la imagen
-	DELETEIMAGE=$(echo ${IMG%%.*} | awk -F"$OGIMG/" '{print $2}')
-
-	# Borramos marca .delete para que el próximo cron no trabaje sobre este conjunto.
-	[ -f  $IMG ] &&  rm $IMG
-
-	## Comprobamos si es una imagen de backup
-	DELETEant=$(echo $IMG | awk -F"." '{print $3}')	## .ant
-
+	DELETEIMAGE="${IMG%%.*}"
 	## Si la imagen es un backup se añade la extensión ant
-	if [[ $DELETEant == "ant" ]]; then
-		DELETEIMAGE=$DELETEIMAGE".ant"
-	fi
+	[ "${IMG##*.}" == "ant" ] && DELETEIMAGE+=".ant"
+
 	## si directorio:imagen cambiamos : por /
 	DELETEIMAGE=$(echo $DELETEIMAGE|tr : /)
 
         ## se llama al escript de borrado de imagen.
 	deleteimage $DELETEIMAGE
-
 done
 
+# Eliminar marcas de borrado.
+rm -f ${TODELETE[@]}
 # Actualizar información del repositorio.
 checkrepo
 

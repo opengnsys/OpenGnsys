@@ -16,7 +16,6 @@ BTSEEDERPID="/var/run/btseeder.pid"
 ###################  #######################################
 
 pkill bttrack
-rm $BTTRACKDFILE
+rm -f $BTTRACKDFILE
 sleep 2
 bttrack $BTTRACK_OPTIONS &>> $BTTRACKLOG &
-ps aux | grep bttrack | grep -v grep | awk -F: '{print $3}'
