@@ -1480,6 +1480,8 @@ function openGnsysConfigure()
 	cp -a $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.init /etc/init.d/opengnsys
 	cp -a $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.service \
 	      /lib/systemd/system/opengnsys.service
+	cp -a $WORKDIR/ogServer-$BRANCH/cfg/ogserver.service \
+	      /lib/systemd/system/ogserver.service
 	cp -a $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.default /etc/default/opengnsys
 	# Deshabilitar servicios de BitTorrent si no están instalados.
 	if [ ! -e /usr/bin/bttrack ]; then
@@ -1558,6 +1560,10 @@ EOT
 		echoAndLog "${FUNCNAME}(): Starting OpenGnsys services."
 		$STARTSERVICE
 	fi
+
+	# Enable and start ogServer systemd service
+	service="ogserver"
+	$ENABLESERVICE; $STARTSERVICE
 
 	echoAndLog "${FUNCNAME}(): Creating ogClient config files."
 	sed -i -e "s/127\.0\.0\.1/$OPENGNSYS_SERVERIP/g" \

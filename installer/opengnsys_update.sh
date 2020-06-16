@@ -1092,6 +1092,25 @@ function ogServerCompilation()
 	grep -q "APITOKEN=" $INSTALL_TARGET/etc/ogAdmServer.cfg || \
 		$INSTALL_TARGET/bin/settoken -f
 
+	if ! diff -q \
+	     "$WORKDIR"/ogServer-"$BRANCH"/cfg/ogserver.service \
+	     /lib/systemd/system/ogserver.service 2>/dev/null; then
+		service="opengnsys"
+		$STOPSERVICE
+		echoAndLog "${FUNCNAME}(): updating new service file"
+		backupFile /lib/systemd/system/ogserver.service
+		service="ogadmserver"
+		$STOPSERVICE
+		cp -a \
+		   "$WORKDIR"/ogServer-"$BRANCH"/cfg/ogserver.service \
+		   /lib/systemd/system/ogserver.service
+		systemctl daemon-reload
+		$STARTSERVICE
+		service="opengnsys"
+		$STARTSERVICE
+		NEWFILES="$NEWFILES /lib/systemd/system/ogserver.service"
+	fi
+
 	return $error
 }
 

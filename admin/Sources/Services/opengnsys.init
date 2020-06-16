@@ -22,10 +22,7 @@ CLIENTLOGDIR=$BASEDIR/log/clients
 # Servidor de OpenGnsys
 #
 SERVERNAME=ogAdmServer
-SERVERDAEMON=$BASEDIR/sbin/$SERVERNAME
 SERVERCFG=$BASEDIR/etc/$SERVERNAME.cfg
-SERVERLOG=$BASEDIR/log/$SERVERNAME.log
-SERVERDAEMON_OPTIONS="-f $SERVERCFG -l $SERVERLOG"
 
 #
 # Servidor de Repositorio
@@ -76,9 +73,7 @@ config() {
     case "$OSDISTRIB" in
         ubuntu|debian|linuxmint)
             INITFUNCTIONS=/lib/lsb/init-functions
-            DAEMONSTART="start-stop-daemon --start --quiet --background --exec"
             EXTRAOPTS="--"
-            DAEMONSTOP="start-stop-daemon --stop --quiet --oknodo --name"
             ACTIONMSG="log_daemon_msg"
             SUCCESSMSG="log_end_msg 0"
             FAILMSG="log_end_msg 1"
@@ -90,9 +85,7 @@ config() {
             ;;
         centos|fedora)
             INITFUNCTIONS=/etc/init.d/functions
-            DAEMONSTART="daemon"
             ENDOPTS="&"
-            DAEMONSTOP="killproc"
             ACTIONMSG="echo -n"
             SUCCESSMSG="eval ( success; echo )"
             FAILMSG="eval ( failure; echo )"
@@ -133,9 +126,6 @@ arranca_demonios() {
   fi
   # Arrancar los servicios indicados.
   if [ $RUN_OGADMSERVER = "yes" ]; then
-     $ACTIONMSG "Iniciando demonio: $SERVERNAME"
-     $DAEMONSTART $SERVERDAEMON $EXTRAOPTS $SERVERDAEMON_OPTIONS $ENDOPTS
-     [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
      # Para SetBootmode desde el cliente
      $ACTIONMSG "Iniciando demonio: $SERVERAUXNAME"                    #
      faucet $SERVERAUXPORT --daemon --in bash -c "$SERVERAUXDAEMON"    #   NUEVO
@@ -175,9 +165,6 @@ para_demonios() {
   $ACTIONMSG "Parando demonio: $REPOAUXNAME"
   pkill faucet
   [ $? -le 1 ] && $SUCCESSMSG || $FAILMSG
-  $ACTIONMSG "Parando demonio: $SERVERNAME"
-  $DAEMONSTOP $SERVERNAME
-  [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
 }
 
 config
