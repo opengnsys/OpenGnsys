@@ -37,6 +37,9 @@
 #@version 1.1 - Control de errores en transferencia multicast (ticket #781) 
 #@author  Irina Gomez, ETSII Universidad de Sevilla 
 #@date    2017/04/20 
+#@version 1.2 - Soporta imágenes de disco
+#@author  Irina Gomez, ETSII Universidad de Sevilla
+#@date    2020/06/15
 #**/
 
 
@@ -48,27 +51,52 @@
 
 
 PROG="$(basename $0)"
-if [ $# -lt 4 ]; then
-    ogRaiseError session $OG_ERR_FORMAT "$MSG_FORMAT: $PROG REPO imagen ndisco nparticion [ UNICAST-DIRECT|UNICAST|UNICAST-CACHE|MULTICAST-DIRECT|MULTICAST|MULTICAST-CACHE|TORRENT [opciones protocolo] ]"
+#Load engine configurator from engine.cfg file.
+#Carga el configurador del engine desde el fichero engine.cfg (IMGEXT="img")
+[ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
+
+# Para imagen de partición
+NUMARGS=4
+ARGS=( "${@}" )
+CMDRESTORE="restoreImage"
+# Para imagen de disco
+if [ "$PROG" == "deployDiskImage" ]; then
+    NUMARGS=3
+    # Incluyo un argumento ficticio para la particion
+    ARGS=(  "${ARGS[@]:0:3}" "diskImage" "${ARGS[@]:3}" )
+    CMDRESTORE="restoreDiskImage"
+    IMGEXT="dsk"
+fi
+if [ $# -lt $NUMARGS ]; then
+    [ "$IMGEXT" == "dsk" ] && MSGPART="" || MSGPART="nparticion"
+    ogRaiseError session log $OG_ERR_FORMAT "$MSG_FORMAT: $PROG REPO imagen ndisco $MSGPART [ UNICAST-DIRECT|UNICAST|UNICAST-CACHE|MULTICAST-DIRECT|MULTICAST|MULTICAST-CACHE|TORRENT [opciones protocolo] ]"
     exit $?
 fi
 
 # Asignación de variables (repositorio y protocolo se convierten a mayúsculas).
 TIME1=$SECONDS
-REPO="${1^^}"
+REPO="${ARGS[0]^^}"
 REPO=${REPO:-"REPO"}
-IMGNAME="$2"
-DISK="$3"
-PART="$4"
-PROTO="${5^^}"
+IMGNAME="${ARGS[1]}"
+DISK="${ARGS[2]}"
+PART="${ARGS[3]}"
+PROTO="${ARGS[4]^^}"
 PROTO="${PROTO:-"UNICAST"}"
-PROTOOPT="$6"
+PROTOOPT="${ARGS[5]}"
+# Imagen de disco: para configurar recorremos todas las particiones
+# Imagen de partición: al recorrer las particiones sólo hay una
+if [ "$PROG" == "deployDiskImage" ]; then
+    INIP=1
+    ENDP=$(ogGetPartitionsNumber $DISK)
+    [ -n "$ENDP" ] || exit $OG_ERROR_NOTFOUND
+else
+    INIP=$PART
+    ENDP=$PART
+fi
+
+ogEcho session log "REPO $REPO IMG $IMGNAME DISK $DISK PART $PART PROT $PROTO OPT $PROTOOPT"
 # Unidad organizativa.
 [ "$ogunit" != "" ] && OGUNIT="$ogunit"
-
-#Load engine configurator from engine.cfg file.
-#Carga el configurador del engine desde el fichero engine.cfg
-[ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
 
 # Clear temporary file used as log track by httpdlog
 # Limpia los ficheros temporales usados como log de seguimiento para httpdlog
@@ -78,11 +106,15 @@ echo " " > $OGLOGCOMMAND
 # Registro de inicio de ejecución
 ogEcho log session "[1] $MSG_SCRIPTS_START $0 $*"
 
-# Si el origen(pariticion) esta bloqueada salir.
-ogIsLocked $DISK $PART && exit $(ogRaiseError session $OG_ERR_LOCKED "$MSG_PARTITION, $DISK $PART"; echo $?)
+# Si el origen (pariticion y disco) están bloqueados salir.
+[ "$PROG" == "deployDiskImage" ] && ogIsDiskLocked $DISK && exit $(ogRaiseError session $OG_ERR_LOCKED "$MSG_DISK, $DISK"; echo $?)
+# Recorremos las particiones
+for ((p=$INIP; p<=$ENDP; p++)); do
+    ogIsLocked $DISK $p && exit $(ogRaiseError session $OG_ERR_LOCKED "$MSG_PARTITION, $DISK $p"; echo $?)
 
-ogEcho log session "$MSG_HELP_ogUnmount $DISK $PART"
-ogUnmount $DISK $PART 2>/dev/null
+    ogEcho log session "$MSG_HELP_ogUnmount $DISK $p"
+    ogUnmount $DISK $p 2>/dev/null
+done
 
 # Valor por defecto para el repositorio.
 if [ "$REPO" == "$(ogGetIpAddress)" -o "$REPO" == "CACHE" ]; then
@@ -97,7 +129,7 @@ else
 fi
 
 #Informacioin previa de la imagen
-IMGOS=$(ogGetImageInfo `ogGetPath $MODE $IMGNAME.img`)
+IMGOS=$(ogGetImageInfo `ogGetPath $MODE $IMGNAME.$IMGEXT`)
 case $? in
     0) ;;
     1) ogRaiseError session $OG_ERR_NOTFOUND "$REPO $2" || exit $? ;;
@@ -106,7 +138,7 @@ case $? in
 esac
 IMGSIZE=$(ls -s `ogGetPath $MODE $IMGNAME.img`| cut -f1 -d" ")
 
-ogEcho log session "[1] REPO=$REPO IMG-FILE=$IMGNAME.img  SIZE=$IMGSIZE (KB)   METADATA=$IMGOS"
+ogEcho log session "[1] REPO=$REPO IMG-FILE=$IMGNAME.$IMGEXT  SIZE=$IMGSIZE (KB)   METADATA=$IMGOS"
 
 # Procesar repositorio.
 case "$MODE" in
@@ -126,9 +158,11 @@ case "$MODE" in
             TORRENT|TORRENT-CACHE|MULTICAST|MULTICAST-CACHE|UNICAST|UNICAST-CACHE)
 		# Eliminamos CACHE o DIRECT
                 PROTO=${PROTO%%-*}
-                ogEcho log session "[2] updateCache "$REPO" \"/$IMGNAME.img\" $PROTO $PROTOOPT"
+		# Si imagen es de tipo disco comprobamos que el disco de destino no contenga la cache
+		[ "$PROG" == "deployDiskImage" ] && [[ "$(ogFindCache)" =~ "$DISK " ]] && exit $(ogRaiseError $OG_ERR_GENERIC "Disco de destino Contiene Cache")
+                ogEcho log session "[2] updateCache "$REPO" \"/$IMGNAME.$IMGEXT\" $PROTO $PROTOOPT"
                 TIME2=$SECONDS
-                updateCache "$REPO" "/$IMGNAME.img" "$PROTO" "$PROTOOPT"	 	
+                updateCache "$REPO" "/$IMGNAME.$IMGEXT" "$PROTO" "$PROTOOPT"
                 RETVAL=$?
                 TIME2=$[SECONDS-TIME2]
                 ogEcho log session "   [ ]  $MSG_SCRIPTS_TIME_PARTIAL updateCache $[TIME2/60]m $[TIME2%60]s"
@@ -202,13 +236,18 @@ case "$NEXTOPERATION" in
         PARAMS="$REPO $IMGNAME $DISK $PART $PROTO $PROTOOPT" ;;
 esac
 
+# Si es imagen de disco eliminamos el parámetro particion
+[ "$PROG" == "deployDiskImage" ] && PARAMS=$(echo $PARAMS| awk '{print $1, $2, $3, $5, $6}')
+
 # Si existe, ejecuta script personalizado "restoreImageCustom"; si no, llama al genérico "restoreImage".
-if which restoreImageCustom &>/dev/null; then
-    ogEcho log session "[55] $MSG_HELP_ogRestoreImage: restoreImageCustom $PARAMS"
-    restoreImageCustom $PARAMS
+if which ${CMDRESTORE}Custom &>/dev/null; then
+    ogEcho log session "[55] $MSG_HELP_ogRestoreImage: ${CMDRESTORE}Custom $PARAMS"
+    #restoreImageCustom $PARAMS
+    eval ${CMDRESTORE}Custom $PARAMS
 else
-    ogEcho log session "[55] $MSG_HELP_ogRestoreImage: restoreImage $PARAMS"
-    restoreImage $PARAMS
+    ogEcho log session "[55] $MSG_HELP_ogRestoreImage: ${CMDRESTORE} $PARAMS"
+    #restoreImage $PARAMS
+    eval ${CMDRESTORE} $PARAMS
 fi
 RETVAL=$?
 
@@ -225,15 +264,17 @@ fi
 TIME3=$[SECONDS-TIME3]
 ogEcho log session "   [ ]      $MSG_SCRIPTS_TIME_PARTIAL : $[TIME3/60]m $[TIME3%60]s"
 
-# Si existe, ejecuta script personalizado de postconfiguración "configureOsCustom"; si no, llama al genérico "configureOs".
-if which configureOsCustom &>/dev/null; then
-    ogEcho log session "[90] configureOsCustom"
-    configureOsCustom "$DISK" "$PART" "$REPO" "$IMGNAME"
-else
-    ogEcho log session "[90] $MSG_SCRIPTS_OS_CONFIGURE "
-    configureOs "$DISK" "$PART"
-fi
-
+# Si es imagen de disco hacemos recorremos todas las particiones
+for ((p=$INIP; p<=$ENDP; p++)); do
+    # Si existe, ejecuta script personalizado de postconfiguración "configureOsCustom"; si no, llama al genérico "configureOs".
+    if which configureOsCustom &>/dev/null; then
+        ogEcho log session "[90] configureOsCustom"
+        configureOsCustom "$DISK" "$p" "$REPO" "$IMGNAME"
+    else
+        ogEcho log session "[90] $MSG_SCRIPTS_OS_CONFIGURE $DISK $p"
+        configureOs "$DISK" "$p"
+    fi
+done
 TIME=$[SECONDS-TIME1]
 ogEcho log session "[100] $MSG_SCRIPTS_TIME_TOTAL $[TIME/60]m $[TIME%60]s"
 

@@ -1,0 +1,105 @@
+#!/bin/bash
+#/**
+#@file    restoreDiskImage
+#@brief   Script de ejemplo para restaurar una imagen de disco.
+#@param   $1 Repositorio (CACHE, REPO o dirección IP)
+#@param   $2 Nombre canónico de la imagen (sin extensión)
+#@param   $3 Número de disco
+#@param   $4 Protocolo (UNICAST, UNICAST-DIRECT, MULTICAST o MULTICAST-DIRECT)
+#@param   $5 Opciones del protocolo
+#@exception OG_ERR_FORMAT   1 formato incorrecto.
+#@exception OG_ERR_NOTFOUND  2 cambio de repositorio: repositorio no encontrado
+#@exception OG_ERR_NOTFOUND  2 fichero de imagen o partición no detectados.
+#@exception $OG_ERR_MCASTRECEIVERFILE  57 Error en la recepción Multicast de un fichero
+#@exception $OG_ERR_PROTOCOLJOINMASTER 60 Error en la conexión de una sesión Unicast|Multicast con el Master
+#@version 1.2 - Versión inicial
+#@note    Se toma como base el script restoreImage
+#@author  Irina Gomez, ETSII Universidad de Sevilla
+#@date    2020/05/14
+#**/
+
+TIME1=$SECONDS
+PROG="$(basename $0)"
+if [ $# -lt 3 ]; then
+    ogRaiseError session $OG_ERR_FORMAT "$MSG_FORMAT: $PROG REPO|CACHE imagen ndisco"
+    exit $?
+fi
+
+#Load engine configurator from engine.cfg file.
+#Carga el configurador del engine desde el fichero engine.cfg
+[ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
+
+# Clear temporary file used as log track by httpdlog
+# Limpia los ficheros temporales usados como log de seguimiento para httpdlog
+echo " " > $OGLOGCOMMAND
+ogCheckStringInGroup "$(ogGetCaller)" "deployImage restoreImageCustom" || echo -n "" > $OGLOGSESSION; 
+
+ogEcho log session "[1] $MSG_SCRIPTS_START $0 $*"
+
+# Procesar parámetros de entrada
+REPO="${1^^}"
+IMGNAME="$2"
+DISK="$3"
+PROTO="${4^^}"
+PROTO=${PROTO:-"UNICAST"}
+PROTOOPT="$5"
+# Si MCASTWAIT menos que tiempo de espera del servidor lo aumento
+if [ "${PROTO%-*}" == "MULTICAST" ] && [[ ${PROTOOPT##*:} =~ ^-?[0-9]+$ ]]; then
+    [ ${MCASTWAIT:-0} -lt ${PROTOOPT##*:} ] && let MCASTWAIT=${PROTOOPT##*:}+5
+fi
+IMGEXT="dsk"
+
+# Unidad organizativa
+[ "$ogunit" != "" ] && OGUNIT="$ogunit/"
+
+# Si es una ip y es igual a la del equipo restaura desde cache
+[ "$REPO" == "$(ogGetIpAddress)" ] && REPO="CACHE"
+# Si es una ip y es distinta a la del recurso samba cambiamos de REPO.
+ogCheckIpAddress $REPO 
+if [ $? == 0 -o $REPO == "REPO" ] ; then
+        # Si falla el cambio -> salimos con error repositorio no valido
+        ogChangeRepo $REPO ${OGUNIT%/} || exit $(ogRaiseError $OG_ERR_NOTFOUND '$REPO $OGUNIT'; echo $?)
+        REPO="REPO"
+fi
+
+# Comprobar que existe la imagen del origen.
+IMGFILE=$(ogGetPath "$REPO" "$IMGNAME.$IMGEXT")
+IMGDIR=$(ogGetParentPath "$REPO" "$IMGNAME")
+if [ "$IMGFILE" == "" -o "$IMGDIR" == "" ]; then
+        ogRaiseError session $OG_ERR_NOTFOUND "$REPO, ${IMGNAME%/*}"
+        exit $?
+fi
+
+# Desmontamos todas las particiones del disco
+ogUnmountAll $DISK || exit $?
+
+# Procesar protocolos de transferencia.
+case "$PROTO" in
+    UNICAST|UNICAST-DIRECT)
+        # Restaurar la imagen.
+        ogEcho log session "[40] ogRestoreDiskImage $REPO $IMGNAME $DISK"
+        ogExecAndLog command ogRestoreDiskImage "$REPO" "$IMGNAME" "$DISK"
+        RETVAL=$?
+        ;;
+#    TODO: Crear si es posible función ogMcastReceiverDisk
+#    MULTICAST|MULTICAST-DIRECT)
+#        PORT=$(echo $PROTOOPT | cut -f1 -d":")
+#        TOOL=$(ogGetImageProgram REPO $IMGNAME)
+#        COMPRESS=$(ogGetImageCompressor REPO $IMGNAME)
+#        #TODO comprobar parametros anteriores
+#        ogEcho log session "[40] ogMcastReceiverPartition $DISK $PART $PORT $TOOL $COMPRESS"
+#        ogMcastRequest "$IMGNAME.img" "$PROTOOPT" || exit $?
+#        ogExecAndLog command ogMcastReceiverPartition "$DISK" "$PART" "$PORT" "$TOOL" "$COMPRESS"
+#        RETVAL=$?
+#        ;;
+    *)  # Protocolo desconocido.
+        ogRaiseError session $OG_ERR_FORMAT "$MSG_FORMAT: $PROG REPO|CACHE imagen ndisco [ UNICAST ]"
+        exit $?
+esac
+
+TIME=$[SECONDS-TIME1]
+ogEcho log session "[100] Duracion de la operacion $[TIME/60]m $[TIME%60]s"
+
+# Código de salida del comando prinicpal de restauración.
+exit $RETVAL
+

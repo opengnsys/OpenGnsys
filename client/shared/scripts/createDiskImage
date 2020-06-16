@@ -1,0 +1,138 @@
+#!/bin/bash
+
+#/**
+#@file    createDiskImage
+#@brief   Script de ejemplo para crear una imagen de un disco
+#@brief   Se usa como base para el programa de creación de imágenes de OpenGnsys Admin).
+#@param 1 disco 
+#@param 2 REPO|CACHE
+#@param 3 imagen
+#@return  
+#@exception OG_ERR_FORMAT     # 1 formato incorrecto.
+#@exception OG_ERR_NOTFOUND   # 2 Dispositivo o encontrado (disco)
+#@exception OG_ERR_IMAGE      # 5 Error en funcion ogCreateImage o ogRestoreImage.
+#@exception OG_ERR_NOTWRITE   # 14 error de escritura
+#@exception OG_ERR_NOTCACHE   # 15 si cache no existe 15
+#@exception OG_ERR_CACHESIZE  # 16 si espacio de la cache local o remota no tiene espacio 16
+#@exception OG_ERR_REDUCEFS   # 17 error al reducir sistema de archivos.
+#@exception OG_ERR_EXTENDFS   # 18 Errror al expandir el sistema de archivos.
+#@note  Se toma como base el script createImage 
+#@todo: que hacer, si el tamaño de la cache es sufciente, pero no tiene espacio libre
+#@todo: que hacer, si hay una imagen con igual nombre en la cache
+#@version 1.2 - Versión inicial
+#@author  Irina Gomez - ETSII Universidad de Sevilla 
+#@date    2020-05-14
+#*/ ##
+
+PROG="$(basename $0)"
+if [ $# -ne 3 ]; then
+    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG ndisco REPO|CACHE imagen"
+    exit $?
+fi
+
+TIME1=$SECONDS
+
+#Load engine configurator from engine.cfg file.
+#Carga el configurador del engine desde el fichero engine.cfg
+[ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
+
+# Valores por defecto en etc/engine.cfg
+#IMGCOMP="lzop"
+IMGEXT="dsk"
+#IMGREDUCE="TRUE"
+DISK=$1
+REPO="${2^^}"
+IMGNAME="$3"
+
+# Unidad organizativa
+[ "$ogunit" != "" ] && OGUNIT="$ogunit"
+
+# Clear temporary file used as log track by httpdlog
+# Limpia los ficheros temporales usados como log de seguimiento para httpdlog
+# salvo si es llamado desde createImageCustom
+if [ "$(ogGetCaller)" != "createImageCustom" ]; then
+    echo " " > $OGLOGSESSION; echo " " > $OGLOGCOMMAND; echo " " > ${OGLOGCOMMAND}.tmp
+fi
+
+ogEcho log session "[1] $MSG_SCRIPTS_START $0 $*"
+
+# Si es una ip y es igual a la del equipo restaura desde cache
+[ "$REPO" == "$(ogGetIpAddress)" ] && REPO="CACHE"
+# Si es una ip y es distinta a la del recurso samba cambiamos de REPO.
+ogCheckIpAddress $REPO
+if [ $? == 0 -o $REPO == "REPO" ] ; then
+        # Si falla el cambio -> salimos con error repositorio no valido
+        ogChangeRepo $REPO $OGUNIT || exit $(ogRaiseError $OG_ERR_NOTFOUND '$REPO'; echo $?)
+        REPO="REPO"
+fi
+
+# Si el repositorio es CACHE comprobamos que exista
+if [ "$REPO" == "CACHE" ]; then 
+    ! ogFindCache >/dev/null && exit $(ogRaiseError $OG_ERR_NOTCACHE "CACHE "; echo $?)
+fi
+
+# Obtener información de los parámetros de entrada.
+ogDiskToDev "$DISK" &>/dev/null || exit $(ogRaiseError $OG_ERR_NOTFOUND "$DISK"; echo $?)
+
+#Comprobamos acceso de escritura.
+DIRTEMP=$(date +%Y%m%d-%H%M%S)
+ogMakeDir $REPO /$IMGNAME$DIRTEMP 2>/dev/null || exit $(ogRaiseError $OG_ERR_NOTWRITE "$REPO"; echo $?) && ogDeleteTree $REPO /$IMGNAME$DIRTEMP
+
+IMGDIR=$(ogGetParentPath "$REPO" "/$IMGNAME")
+# Si no existe, crear subdirectorio de la imagen.
+if [ $? != 0 ]; then
+    ogEcho log session "[5] $MSG_HELP_ogMakeDir \"$REPO $(dirname "$IMGNAME")."
+    ogMakeDir "$REPO" $(dirname "/$IMGNAME") || exit $(ogRaiseError $OG_ERR_NOTWRITE "$REPO /$IMGNAME"; echo $?)
+    IMGDIR=$(ogGetParentPath "$REPO" "/$IMGNAME") || exit $(ogRaiseError $OG_ERR_NOTWRITE "$REPO /$IMGNAME"; echo $?)
+fi
+IMGFILE=$IMGDIR/$(basename "/$IMGNAME").$IMGEXT
+
+echo " " > $OGLOGCOMMAND
+# Borramos ficheros de paginacion y configuracion
+for ((part=1; part<=$(ogGetPartitionsNumber $DISK); part++)); do
+    ogCleanOs $DISK $part
+done
+
+#Comprobar espacio que requerira la imagen para ser almacenada
+read SIZEDATA SIZEREQUIRED SIZEFREE ISENOUGHSPACE <<< $(ogGetSizeParameters $DISK "$REPO" "$IMGNAME")
+
+ogEcho log session "[16] $PROG: $MSG_SCRIPTS_CREATE_SIZE $SIZEREQUIRED $SIZEFREE $ISENOUGHSPACE"
+[ "$ISENOUGHSPACE" == "TRUE" ] || exit $(ogRaiseError session $OG_ERR_CACHESIZE "$REPO"; echo $?)
+
+# Comprobar consistencia del sistema de archivos.
+for ((part=1; part<=$(ogGetPartitionsNumber $DISK); part++)); do
+    echo " " > $OGLOGCOMMAND
+    SIZEFS=$(ogGetFsSize  $DISK $part)
+    ogEcho log session "[20] $MSG_HELP_ogCheckFs  $part $SIZEFS (KB)"
+    ogUnmount $DISK $part 2>/dev/null
+    # Muestro mensaje de error pero no me salgo.
+    ogCheckFs $DISK $part
+done
+
+# Renombrar el fichero de imagen si ya existe.
+if [ -f "$IMGFILE" ]; then
+    ogEcho log session "[35] $MSG_SCRIPTS_FILE_RENAME \"$IMGFILE\" ->  \"$IMGFILE.ant\"."
+    mv "$IMGFILE" "$IMGFILE.ant"
+    mv "$IMGFILE.torrent" "$IMGFILE.torrent.ant" 2>/dev/null
+    mv "$IMGFILE.sum" "$IMGFILE.sum.ant" 2>/dev/null
+    mv "$IMGFILE.full.sum" "$IMGFILE.full.sum.ant" 2>/dev/null
+fi
+
+# Crear la imagen.
+echo " " > $OGLOGCOMMAND
+TIME2=$SECONDS
+ogEcho log session "[40] $MSG_HELP_ogCreateDiskImage : ogCreateDiskImage $DISK $REPO $IMGNAME"
+ogExecAndLog command ogCreateDiskImage "$DISK" "$REPO" "/$IMGNAME" &>> $OGLOGCOMMAND || exit $(ogRaiseError $OG_ERR_IMAGE "ogCreateDiskImage"; echo $?)
+RESUMECREATEIMAGE=$(grep "Total Time:" $OGLOGCOMMAND)
+TIMEAUX2=$[SECONDS-TIME2]
+ogEcho log session "      $RESUMECREATEIMAGE "
+ogEcho log session "      $MSG_SCRIPTS_TIME_PARTIAL : $[TIMEAUX2/60]m $[TIMEAUX2%60]s"
+
+#resumen de la operacion
+IMGSIZE=$(ls -s `ogGetPath $REPO /$IMGNAME.$IMGEXT`| cut -f1 -d" ")
+IMGOS=$(ogGetImageInfo `ogGetPath $REPO /$IMGNAME.$IMGEXT`)
+
+TIME=$[SECONDS-TIME1]
+ogEcho log session "[100] $MSG_SCRIPTS_TIME_TOTAL $[TIME/60]m $[TIME%60]s"
+ogEcho log session "      FileSystem $DISK with $NEWSIZEFS KB data created onto file-image as $IMGNAME and used $IMGSIZE KB"
+ogEcho log session "      Image-file $IMGNAME metada: $IMGOS"
