@@ -1101,9 +1101,14 @@ function installWebFiles()
 # Copiar ficheros en la zona de descargas de OpenGnsys Web Console.
 function installDownloadableFiles()
 {
-	local FILENAME=ogagentpkgs-$INSTVERSION.tar.gz
-	local TARGETFILE=$WORKDIR/$FILENAME
- 
+	local VERSIONFILE OGVERSION FILENAME TARGETFILE
+
+	# Obtener versión a descargar.
+	VERSIONFILE="$INSTALL_TARGET/doc/VERSION.json"
+	OGVERSION="$(jq -r ".ogagent // \"$INSTVERSION\"" $VERSIONFILE 2>/dev/null || echo "$INSTVERSION")"
+	FILENAME="ogagentpkgs-$OGVERSION.tar.gz"
+	TARGETFILE=$WORKDIR/$FILENAME
+
 	# Descargar archivo comprimido, si es necesario.
 	if [ -s $PROGRAMDIR/$FILENAME ]; then
 		echoAndLog "${FUNCNAME}(): Moving $PROGRAMDIR/$FILENAME file to $(dirname $TARGETFILE)"
