@@ -1,7 +1,7 @@
 # OpenGnsys systemd service file
 
 [Unit]
-Documentation=https://opengnsys.es/trac/wiki/En%3ADocumentacionUsuario
+Documentation=https://opengnsys.es/trac/wiki/En%%3ADocumentacionUsuario
 SourcePath=/etc/init.d/opengnsys
 Description=LSB: OpenGnsys system services
 Before=multi-user.target
