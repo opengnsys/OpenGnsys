@@ -1326,21 +1326,33 @@ function copyServerFiles ()
 ####################################################################
 
 # Compilar los servicios de OpenGnsys
-function servicesCompilation ()
+function ogServerCompilation ()
 {
-	local hayErrores=0
+	local ogserverUrl="https://codeload.github.com/opengnsys/ogServer/zip/$BRANCH"
+	local error=0
 
-	# Compilar OpenGnsys Server
-	echoAndLog "${FUNCNAME}(): Compiling OpenGnsys Admin Server"
-	pushd $WORKDIR/opengnsys/admin/Sources/Services/ogAdmServer
+	echoAndLog "${FUNCNAME}(): downloading ogServer code..."
+
+	if ! (curl "${ogserverUrl}" -o ogserver.zip && \
+	      unzip -qo "ogserver.zip")
+	then
+		errorAndLog "${FUNCNAME}(): "\
+			    "error getting ogServer code from ${ogserverUrl}"
+		return 1
+	fi
+	rm -f ogserver.zip
+	echoAndLog "${FUNCNAME}(): ogServer code was downloaded"
+
+	echoAndLog "${FUNCNAME}(): Compiling OpenGnsys Server"
+	pushd "$WORKDIR/ogServer-$BRANCH"
 	autoreconf -fi && ./configure && make && mv ogAdmServer $INSTALL_TARGET/sbin
 	if [ $? -ne 0 ]; then
-		echoAndLog "${FUNCNAME}(): error while compiling OpenGnsys Admin Server"
-		hayErrores=1
+		echoAndLog "${FUNCNAME}(): error while compiling OpenGnsys Server"
+		error=1
 	fi
 	popd
 
-	return $hayErrores
+	return $error
 }
 
 ####################################################################
@@ -1494,7 +1506,7 @@ function openGnsysConfigure()
 			    -e "s/DBUSER/$OPENGNSYS_DB_USER/g" \
 			    -e "s/DBPASSWORD/$OPENGNSYS_DB_PASSWD/g" \
 			    -e "s/DATABASE/$OPENGNSYS_DATABASE/g" \
-				$WORKDIR/opengnsys/admin/Sources/Services/ogAdmServer/ogAdmServer.cfg > $INSTALL_TARGET/etc/ogAdmServer-$dev.cfg
+				"$WORKDIR"/ogServer-"$BRANCH"/ogAdmServer.cfg > "$INSTALL_TARGET"/etc/ogAdmServer-"$dev".cfg
 			sed -e "s/SERVERIP/${SERVERIP[i]}/g" \
 				$WORKDIR/opengnsys/repoman/etc/ogAdmRepo.cfg.tmpl > $INSTALL_TARGET/etc/ogAdmRepo-$dev.cfg
 			CONSOLEURL="https://${SERVERIP[i]}/opengnsys"
@@ -1698,7 +1710,7 @@ else
 fi
 
 # Compilar código fuente de los servicios de OpenGnsys.
-servicesCompilation
+ogServerCompilation
 if [ $? -ne 0 ]; then
 	errorAndLog "Error while compiling OpenGnsys services"
 	exit 1

@@ -1056,17 +1056,29 @@ function moveNewService()
 
 
 # Recompilar y actualiza los serivicios y clientes.
-function compileServices()
+function ogServerCompilation()
 {
-	local hayErrores=0
+	local ogserverUrl="https://codeload.github.com/opengnsys/ogServer/zip/$BRANCH"
+	local error=0
 
-	# Compilar OpenGnsys Server
+	echoAndLog "${FUNCNAME}(): downloading ogServer code..."
+
+	if ! (curl "${ogserverUrl}" -o ogserver.zip && \
+	      unzip -qo "ogserver.zip")
+	then
+		errorAndLog "${FUNCNAME}(): "\
+			    "error getting ogServer code from ${ogserverUrl}"
+		return 1
+	fi
+	rm -f ogserver.zip
+	echoAndLog "${FUNCNAME}(): ogServer code was downloaded"
+
 	echoAndLog "${FUNCNAME}(): Recompiling OpenGnsys Admin Server"
-	pushd $WORKDIR/opengnsys/admin/Sources/Services/ogAdmServer
+	pushd "$WORKDIR/ogServer-$BRANCH"
 	autoreconf -fi && ./configure && make && moveNewService ogAdmServer $INSTALL_TARGET/sbin
 	if [ $? -ne 0 ]; then
-		echoAndLog "${FUNCNAME}(): error while compiling OpenGnsys Admin Server"
-		hayErrores=1
+		echoAndLog "${FUNCNAME}(): error while compiling OpenGnsys Server"
+		error=1
 	fi
 	popd
 	# Parar antiguo servicio de repositorio.
@@ -1080,7 +1092,7 @@ function compileServices()
 	grep -q "APITOKEN=" $INSTALL_TARGET/etc/ogAdmServer.cfg || \
 		$INSTALL_TARGET/bin/settoken -f
 
-	return $hayErrores
+	return $error
 }
 
 
@@ -1339,7 +1351,7 @@ updateDownloadableFiles
 makeDoxygenFiles
 
 # Recompilar y actualizar los servicios del sistema
-if compileServices; then
+if ogServerCompilation; then
 	# Restart services, if necessary.
 	if [ "$NEWSERVICES" ]; then
 		echoAndLog "Restarting OpenGnsys services"
