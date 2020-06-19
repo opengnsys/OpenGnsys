@@ -10,6 +10,9 @@
 // Version 1.1.1: Si no existe repositorio asignado al ordenador se muestra un mensaje informativo (ticket-870).
 //     Autora: Irina Gomez, ETSII Universidad de Sevilla
 //     Fecha: 2018-11-08
+// Version 1.2: Soporta imágenes de disco. Nueva función HTMLSELECT_imagenes_disco
+//     Autora: Irina Gomez, ETSII Universidad de Sevilla
+//     Fecha: 2020-06-19
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
 include_once("../clases/AdoPhp.php");
@@ -123,8 +126,8 @@ function HTMLSELECT_imagenes($cmd,$idrepositorio,$idperfilsoft,$disk,$particion,
                 imagenes.idperfilsoft, repositorios.nombrerepositorio, repositorios.ip
 		FROM  imagenes INNER JOIN repositorios USING  (idrepositorio)
 		WHERE imagenes.tipo=".$IMAGENES_MONOLITICAS."
-		AND   repositorios.idcentro=".$_SESSION["widcentro"]."
-		ORDER BY imagenes.descripcion";
+		AND   repositorios.idrepositorio IN (SELECT idrepositorio FROM ordenadores WHERE ordenadores.ip='".$masterip."')
+		OR repositorios.ip='".$masterip."' ORDER BY imagenes.descripcion";
 
 	$rs=new Recordset;
 	$rs->Comando=&$cmd;
@@ -144,6 +147,46 @@ function HTMLSELECT_imagenes($cmd,$idrepositorio,$idperfilsoft,$disk,$particion,
 	$SelectHtml.= '</SELECT>';
 	return($SelectHtml);
 }
+
+/*________________________________________________________________________________________________________
+        Crea la etiqueta html <SELECT> de las imágenes de disco con identificador "despleimagen_"
+________________________________________________________________________________________________________*/
+function HTMLSELECT_imagenes_disco($cmd,$idordenador)
+{
+        global $IMAGENES_DISCO;
+
+        // 1.1 Imagenes de todos los repositorios de la UO.
+        $selectrepo='select repositorios.idrepositorio from repositorios INNER JOIN aulas INNER JOIN ordenadores where repositorios.idcentro=aulas.idcentro AND aulas.idaula=ordenadores.idaula AND idordenador='.$idordenador;
+
+        $SelectHtml="";
+        $cmd->texto="SELECT *,repositorios.ip as iprepositorio, repositorios.nombrerepositorio as nombrerepo FROM imagenes
+                       INNER JOIN repositorios ON repositorios.idrepositorio=imagenes.idrepositorio";
+
+        $cmd->texto.=" AND imagenes.idrepositorio>0";   // La imagene debe existir en el repositorio.
+        $cmd->texto.=" AND imagenes.tipo=".$IMAGENES_DISCO;
+        $cmd->texto.=" AND repositorios.idrepositorio IN (".$selectrepo.") ORDER BY imagenes.descripcion";
+
+
+        $rs=new Recordset;
+        $rs->Comando=&$cmd;
+                $SelectHtml.= '<SELECT class="formulariodatos" id="despleimagen_" style="WIDTH:220">';
+        $SelectHtml.= '    <OPTION value="0"></OPTION>';
+
+        if ($rs->Abrir()){
+                $rs->Primero();
+                while (!$rs->EOF){
+                        $SelectHtml.='<OPTION value="'.$rs->campos["idimagen"]."_".$rs->campos["nombreca"]."_".$rs->campos["iprepositorio"]."_".$rs->campos["idperfilsoft"].'"';
+                        $SelectHtml.='>';
+                        $SelectHtml.= $rs->campos["descripcion"].' ('.$rs->campos["nombrerepo"].') </OPTION>';
+
+                        $rs->Siguiente();
+                }
+                $rs->Cerrar();
+        }
+        $SelectHtml.= '</SELECT>';
+        return($SelectHtml);
+}
+
 
 //____________________________________________________________________________________________________
 //	Devuelve si tiene repositorio asignado o no (true o false)

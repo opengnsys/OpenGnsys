@@ -23,6 +23,10 @@
 #@exception OG_ERR_CACHESIZE  # 16 si espacio de la cache local o remota no tiene espacio 16
 #@exception OG_ERR_REDUCEFS   # 17 error al reducir sistema de archivos.
 #@exception OG_ERR_EXTENDFS   # 18 Errror al expandir el sistema de archivos.
+#@version 1.2 - Soporta imágenes de disco.
+#@author  Irina Gomez, ETSII Universidad de Sevilla.
+#@date    2020/06/19
+
 
 
 #Códigos de error de la funcion ogCreateImage
@@ -72,12 +76,21 @@ then
 	[ $RETVAL -gt 0 ] && exit $RETVAL 	
 fi
 
+# Distinguimos entre imágenes de disco y de partición.
+if [ "$2" == 0 ]; then
+	PARAMS=( "$1" "$4" "$3" )
+	SCRIPTCREATE=createDiskImage
+else
+	PARAMS=( "$1" "$2" "$4" "$3" )
+	SCRIPTCREATE=createImage
+fi
+
 ogEcho	createImage "$1" "$2" "$4" /"$3" 
 # Si existe, ejecuta script personalizado "createImageCustom"; si no, llama al genérico "createImage".
-if which createImageCustom &>/dev/null; then
-	createImageCustom "$1" "$2" "$4" /"$3" &>> $OGLOGCOMMAND
+if which ${SCRIPTCREATE}Custom &>/dev/null; then
+	eval ${SCRIPTCREATE}Custom ${PARAMS[*]} &>> $OGLOGCOMMAND
 else
-	createImage "$1" "$2" "$4" /"$3" &>> $OGLOGCOMMAND
+	eval ${SCRIPTCREATE} ${PARAMS[*]} &>> $OGLOGCOMMAND
 fi
 RETVAL=$?
 

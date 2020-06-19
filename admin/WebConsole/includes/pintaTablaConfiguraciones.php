@@ -185,17 +185,31 @@ function tablaConfiguracionesInventarioSoftware($cmd,$idordenador){
 }
 
 
-/*________________________________________________________________________________________________________
-	Crea la tabla de configuraciones y perfiles a crear
-________________________________________________________________________________________________________*/
+/**
+ * Crea la tabla de configuraciones y perfiles a crear
+ *
+ * @version 1.2 - Permite crear imágenes de disco.
+ * @author  Irina Gomez, ETSII Universidad de Sevilla
+ * @date    2020/06/19
+ */
 function tablaConfiguracionesCrearImagen($cmd,$idordenador,$idrepositorio)
 {
 	global $idcentro;
 	global $TbMsg;
 	$tablaHtml="";
+
+	// Lista de selección de imágenes de disco.
+	$select_imagenes_disco=HTMLSELECT_imagenes_disco($cmd,$idordenador);
+
+	// Tipos de tabla de particionesa (índice codpar)
+	$disktable[1]="MSDOS";
+	$disktable[2]="GPT";
+	$disktable[3]="LVM";
+	$disktable[4]="ZPOOL";
+
 	$cmd->texto="SELECT ordenadores.ip AS masterip,ordenadores_particiones.numdisk, ordenadores_particiones.numpar,ordenadores_particiones.codpar,ordenadores_particiones.tamano,
 				ordenadores_particiones.idnombreso,nombresos.nombreso,tipospar.tipopar,tipospar.clonable,
-				imagenes.nombreca,imagenes.descripcion as imagen,perfilessoft.idperfilsoft,
+				ordenadores_particiones.idimagen, imagenes.nombreca,imagenes.descripcion as imagen,perfilessoft.idperfilsoft,
 				perfilessoft.descripcion as perfilsoft,sistemasficheros.descripcion as sistemafichero
 				FROM ordenadores
 				INNER JOIN ordenadores_particiones ON ordenadores_particiones.idordenador=ordenadores.idordenador
@@ -210,34 +224,77 @@ function tablaConfiguracionesCrearImagen($cmd,$idordenador,$idrepositorio)
 	if (!$rs->Abrir()) 
 		return($tablaHtml."</table>"); // Error al abrir recordset
 	$rs->Primero();
-	$actualDisk = 0;
-	$columns = 5;
+	$columns = 6;
+	$diskcodpar = "";
+	$disktamano = "";
 	while (!$rs->EOF){
-		
-		if($actualDisk != $rs->campos["numdisk"]){
-			$actualDisk = $rs->campos["numdisk"];
-			$tablaHtml.='<TR><td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;<strong>'.$TbMsg["DISK"].'&nbsp;'.$actualDisk.'</strong></td></TR>'.chr(13);
+	    $disk=$rs->campos["numdisk"];
+	    if($rs->campos["numpar"] == 0){
+
+		// Información del disco anterior.
+		if ($diskcodpar != ""){
+			$infodisk ='<tr height="16" class="tabla_listados_sin" >'.chr(13);
+			$infodisk.='<TD> </TD>'.chr(13);
+			$infodisk.='<TD align=center>&nbsp;'.$diskcodpar.'&nbsp;</TD>'.chr(13);
+			$infodisk.='<TD> </TD>'.chr(13);
+			$infodisk.='<TD> </TD>'.chr(13);
+			$infodisk.='<TD align=center><strong> '.$disktamano.' </strong></TD>'.chr(13);
+			$infodisk.='<TD> </TD>'.chr(13);
+			$infodisk.='</TR>'.chr(13);
+
+			$tablaHtml.=$infodisk;
 		}
-		
+
+		$tablaHtml.='<tr height="16">'.chr(13);
+		$tablaHtml.= '<td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">';
+		$tablaHtml.='<input type=radio name="particion" value="'.$disk.'_0_'.$rs->campos["codpar"].'"> <strong>'.$TbMsg["DISK"].'&nbsp;'.$disk.chr(13).'</strong>';
+
+		// Incluimos lista se selección de las imágenes de disco
+		// con los identificadores del disco y la imagen actual en el disco seleccionada.
+		$tablaHtml.='<DIV style="float:right;">'.$TbMsg["IMAGE_REPOSITORY"].' ';
+		$tablaHtml.=str_replace(array("despleimagen_", 'value="'.$rs->campos["idimagen"]),
+					array("despleimagen_".$disk."_0", ' selected value="'.$rs->campos["idimagen"]) ,
+					$select_imagenes_disco);
+		$tablaHtml.='</DIV></TD></TR>'.chr(13);
+
+		// Tipo de tabla de particiones
+		$diskcodpar=isset($disktable[$rs->campos["codpar"]]) ? $disktable[$rs->campos["codpar"]] : "";
+		$disktamano=$rs->campos["tamano"];
+	    } else {
+		// si tipo partitiones EMPTY no la mostramos
+		if ($rs->campos["tipopar"] == "EMPTY"){
+			$rs->Siguiente();
+			continue;
+		}
+		// Compruebo si la partición es clonable
 		$swcc=$rs->campos["clonable"] && !empty($rs->campos["idnombreso"]);
 		$swc=$rs->campos["idperfilsoft"]>0; // Una partición es clonable si posee un identificador de perfil software		
 		$swccc=$swcc && $swcc;
-		$tablaHtml.='<TR>'.chr(13);
-		if($swccc){
-			$tablaHtml.='<TD><input type=radio name="particion" value="'.$rs->campos["numdisk"]."_".$rs->campos["numpar"]."_".$rs->campos["codpar"].'"></TD>'.chr(13);
-			$tablaHtml.='<TD align=center>&nbsp;'.$rs->campos["numpar"].'&nbsp;</TD>'.chr(13);
-			$tablaHtml.='<TD align=center>&nbsp;'.$rs->campos["tipopar"].'&nbsp;</TD>'.chr(13);
-			if(empty($rs->campos["nombreso"]) && !empty($rs->campos["idnombreso"])) // Si el identificador del S.O. no es nulo pero no hay descripción
-				$tablaHtml.='<TD align=center>&nbsp;'.'<span style="FONT-SIZE:10px;	COLOR: red;" >'.$TbMsg[12].'</span></TD>'.chr(13);
-			else
-				$tablaHtml.='<TD>&nbsp;'.$rs->campos["nombreso"].'&nbsp;</TD>'.chr(13);
-	
-			$tablaHtml.='<TD>'.HTMLSELECT_imagenes($cmd,$idrepositorio,$rs->campos["idperfilsoft"],$rs->campos["numdisk"],$rs->campos["numpar"],$rs->campos["masterip"]).'</TD>';
-		}
+		// Si no existe descripción del S.O. muestro mensaje.
+		$nombreso=(empty($rs->campos["nombreso"]) && !empty($rs->campos["idnombreso"])) ? '<span style="FONT-SIZE:10px; COLOR: red;">'.$TbMsg[12].'</span>': $rs->campos["nombreso"];
+
+		$tablaHtml.='<TR class="tabla_listados_sin" >'.chr(13);
+		// Si es clonable muestro input radio para seleccionarlo.
+		$tablaHtml.='<TD>';
+		if($swccc) $tablaHtml.='<input type=radio name="particion" value="'.$rs->campos["numdisk"]."_".$rs->campos["numpar"]."_".$rs->campos["codpar"].'">';
+		$tablaHtml.= '</TD>'.chr(13);
+		$tablaHtml.='<TD align=center>&nbsp;'.$rs->campos["numpar"].'&nbsp;</TD>'.chr(13);
+		$tablaHtml.='<TD align=center>&nbsp;'.$rs->campos["tipopar"].'&nbsp;</TD>'.chr(13);
+		$tablaHtml.='<TD align=center> '.$nombreso.'</TD>'.chr(13);
+		$tablaHtml.='<TD align=center>&nbsp;'.$rs->campos["tamano"].'&nbsp;</TD>'.chr(13);
+		// Si es clonable muestro lista de selección de imágenes.
+		$tablaHtml.='<TD> ';
+		if($swccc) $tablaHtml.=HTMLSELECT_imagenes($cmd,$idrepositorio,$rs->campos["idperfilsoft"],$rs->campos["numdisk"],$rs->campos["numpar"],$rs->campos["masterip"]);
+		$tablaHtml.=' </TD>';
 		$tablaHtml.='</TR>'.chr(13);	
+	    }
 		$rs->Siguiente();
 	}
 	$rs->Cerrar();
+
+	// Info del último disco
+	if ($diskcodpar != "") $tablaHtml.=$infodisk;
+
         if ( $tablaHtml == "" ) {
                 // Equipo sin configuracion en base de datos.
                 $tablaHtml='<table id="tabla_conf" width="95%" class="tabla_listados_sin" align="center" border="0" cellpadding="0" cellspacing="1">'.chr(13);
@@ -253,6 +310,7 @@ function tablaConfiguracionesCrearImagen($cmd,$idordenador,$idrepositorio)
                 $inicioTabla.='                <TH align=center>&nbsp;'. $TbMsg["PARTITION"] .'&nbsp;</TH>'.chr(13);
                 $inicioTabla.='                <TH align=center>&nbsp;'. $TbMsg["PARTITION_TYPE"] .'&nbsp;</TH>'.chr(13);
                 $inicioTabla.='                <TH align=center>&nbsp;'. $TbMsg["SO_NAME"] .'&nbsp;</TH>'.chr(13);
+                $inicioTabla.='                <TH align=center>&nbsp;'. $TbMsg["SIZE"] .'&nbsp;</TH>'.chr(13);
                 $inicioTabla.='                <TH align=center>&nbsp;'. $TbMsg["IMAGE_TO_CREATE"].' -- '.$TbMsg["DESTINATION_REPOSITORY"] .'&nbsp;</TH>'.chr(13);
                 $inicioTabla.='        </TR>'.chr(13);
 
@@ -441,7 +499,6 @@ function tablaConfiguracionesCrearSoftIncremental($idordenador)
 }
 <<<<<<< .mine
 /**/
-
 
 // Devuelve un Array nombres de los sistemas operativos en BD con sus identificadores.
 function SistemaOperativoBD ($cmd) {
