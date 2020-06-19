@@ -1345,7 +1345,7 @@ function ogServerCompilation ()
 
 	echoAndLog "${FUNCNAME}(): Compiling OpenGnsys Server"
 	pushd "$WORKDIR/ogServer-$BRANCH"
-	autoreconf -fi && ./configure && make && mv ogAdmServer $INSTALL_TARGET/sbin
+	autoreconf -fi && ./configure && make && mv ogserver $INSTALL_TARGET/sbin
 	if [ $? -ne 0 ]; then
 		echoAndLog "${FUNCNAME}(): error while compiling OpenGnsys Server"
 		error=1
@@ -1508,7 +1508,7 @@ function openGnsysConfigure()
 			    -e "s/DBUSER/$OPENGNSYS_DB_USER/g" \
 			    -e "s/DBPASSWORD/$OPENGNSYS_DB_PASSWD/g" \
 			    -e "s/DATABASE/$OPENGNSYS_DATABASE/g" \
-				"$WORKDIR"/ogServer-"$BRANCH"/ogAdmServer.cfg > "$INSTALL_TARGET"/etc/ogAdmServer-"$dev".cfg
+				"$WORKDIR"/ogServer-"$BRANCH"/cfg/ogserver.cfg > "$INSTALL_TARGET"/etc/ogserver-"$dev".cfg
 			sed -e "s/SERVERIP/${SERVERIP[i]}/g" \
 				$WORKDIR/opengnsys/repoman/etc/ogAdmRepo.cfg.tmpl > $INSTALL_TARGET/etc/ogAdmRepo-$dev.cfg
 			CONSOLEURL="https://${SERVERIP[i]}/opengnsys"
@@ -1525,7 +1525,7 @@ function openGnsysConfigure()
 		fi
 		let i++
 	done
-	ln -f $INSTALL_TARGET/etc/ogAdmServer-$DEFAULTDEV.cfg $INSTALL_TARGET/etc/ogAdmServer.cfg
+	ln -f $INSTALL_TARGET/etc/ogserver-$DEFAULTDEV.cfg $INSTALL_TARGET/etc/ogserver.cfg
 	ln -f $INSTALL_TARGET/etc/ogAdmRepo-$DEFAULTDEV.cfg $INSTALL_TARGET/etc/ogAdmRepo.cfg
 	ln -f $INSTALL_TARGET/www/controlacceso-$DEFAULTDEV.php $INSTALL_TARGET/www/controlacceso.php
 

@@ -21,7 +21,7 @@ CLIENTLOGDIR=$BASEDIR/log/clients
 #
 # Servidor de OpenGnsys
 #
-SERVERNAME=ogAdmServer
+SERVERNAME=ogserver
 SERVERCFG=$BASEDIR/etc/$SERVERNAME.cfg
 
 #

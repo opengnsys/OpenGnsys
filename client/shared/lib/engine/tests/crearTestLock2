@@ -7,7 +7,7 @@
 # Variables.
 PROG=$(basename $0)
 OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
-SERVERCONF=$OPENGNSYS/etc/ogAdmServer.cfg
+SERVERCONF=$OPENGNSYS/etc/ogserver.cfg
 TESTDIR="$OPENGNSYS/client/lib/engine/tests/Modify"
 TESTFILE="$TESTDIR/Lock2-img$1.shtest "
 # Control básico de errores.

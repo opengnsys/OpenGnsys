@@ -53,8 +53,8 @@ if [ ! -d $INSTALL_TARGET ]; then
         exit 1
 fi
 # Cargar configuración de acceso a la base de datos.
-if [ -r $INSTALL_TARGET/etc/ogAdmServer.cfg ]; then
-	source $INSTALL_TARGET/etc/ogAdmServer.cfg
+if [ -r $INSTALL_TARGET/etc/ogserver.cfg ]; then
+	source $INSTALL_TARGET/etc/ogserver.cfg
 fi
 OPENGNSYS_DATABASE=${OPENGNSYS_DATABASE:-"$CATALOG"}		# Base de datos
 OPENGNSYS_DBUSER=${OPENGNSYS_DBUSER:-"$USUARIO"}		# Usuario de acceso
@@ -1075,7 +1075,7 @@ function ogServerCompilation()
 
 	echoAndLog "${FUNCNAME}(): Recompiling OpenGnsys Admin Server"
 	pushd "$WORKDIR/ogServer-$BRANCH"
-	autoreconf -fi && ./configure && make && moveNewService ogAdmServer $INSTALL_TARGET/sbin
+	autoreconf -fi && ./configure && make && moveNewService ogserver $INSTALL_TARGET/sbin
 	if [ $? -ne 0 ]; then
 		echoAndLog "${FUNCNAME}(): error while compiling OpenGnsys Server"
 		error=1
@@ -1089,7 +1089,7 @@ function ogServerCompilation()
 		rm -f $INSTALL_TARGET/sbin/ogAdmAgent
 
 	# Generar un API token de ogAdmServer si no existe en el fichero de configuración.
-	grep -q "APITOKEN=" $INSTALL_TARGET/etc/ogAdmServer.cfg || \
+	grep -q "APITOKEN=" $INSTALL_TARGET/etc/ogserver.cfg || \
 		$INSTALL_TARGET/bin/settoken -f
 
 	if ! diff -q \
