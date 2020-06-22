@@ -15,7 +15,7 @@
 
 # Global constants.
 OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
-SERVERCFG=$OPENGNSYS/etc/ogAdmServer.cfg                # Configuration files.
+SERVERCFG=$OPENGNSYS/etc/ogserver.cfg                # Configuration files.
 REPOCFG=$OPENGNSYS/etc/ogAdmRepo.cfg
 
 # Functions.

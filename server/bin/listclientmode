@@ -15,7 +15,7 @@
 
 # Variables.
 OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
-SERVERCONF=$OPENGNSYS/etc/ogAdmServer.cfg
+SERVERCONF=$OPENGNSYS/etc/ogserver.cfg
 TMPLDIR=$OPENGNSYS/tftpboot/menu.lst/templates
 
 source $OPENGNSYS/lib/ogfunctions.sh || exit 1

@@ -13,7 +13,7 @@
 # Variables.
 PROG=$(basename "$0")
 OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
-SERVERCONF=$OPENGNSYS/etc/ogAdmServer.cfg
+SERVERCONF=$OPENGNSYS/etc/ogserver.cfg
 LOGFILE=$OPENGNSYS/log/remotepc.log
 
 source $OPENGNSYS/lib/ogfunctions.sh || exit 1

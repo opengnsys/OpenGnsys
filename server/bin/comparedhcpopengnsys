@@ -16,7 +16,7 @@
 
 PROG="$(basename "$0")"
 OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
-SERVERCONF=$OPENGNSYS/etc/ogAdmServer.cfg
+SERVERCONF=$OPENGNSYS/etc/ogserver.cfg
 DHCPFILE=${DHCPFILE:-/etc/dhcp/dhcpd.conf}
 TMP_DHCP=/tmp/$PROG-dhcp$$
 TMP_MYSQL=/tmp/$PROG-mysql$$

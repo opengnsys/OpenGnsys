@@ -1099,7 +1099,7 @@ function ogServerCompilation()
 		$STOPSERVICE
 		echoAndLog "${FUNCNAME}(): updating new service file"
 		backupFile /lib/systemd/system/ogserver.service
-		service="ogadmserver"
+		service="ogserver"
 		$STOPSERVICE
 		cp -a \
 		   "$WORKDIR"/ogServer-"$BRANCH"/cfg/ogserver.service \

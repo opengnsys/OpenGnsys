@@ -20,7 +20,7 @@
 OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
 REPODIR="$OPENGNSYS/images"
 REPOCONF="$OPENGNSYS/etc/ogAdmRepo.cfg"
-SERVERCONF="$OPENGNSYS/etc/ogAdmServer.cfg"
+SERVERCONF="$OPENGNSYS/etc/ogserver.cfg"
 DEFAULTFILE="/etc/default/opengnsys"
 let BACKUP=0
 source $DEFAULTFILE

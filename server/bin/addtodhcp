@@ -15,7 +15,7 @@
 # Variables.
 PROG="$(basename "$0")"
 OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
-SERVERCONF=$OPENGNSYS/etc/ogAdmServer.cfg
+SERVERCONF=$OPENGNSYS/etc/ogserver.cfg
 DHCPCONF=/etc/dhcp/dhcpd.conf
 DHCPCONFBCK="$DHCPCONF-$(date +"%Y%m%d")"
 
