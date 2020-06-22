@@ -31,7 +31,7 @@
 				var protoclonacion=document.getElementById("protoclonacion_"+idradio);
 				
 				if(despleimagenizda.selectedIndex>0) despleimagen=despleimagenizda;
-				if(despleimagendrcha.selectedIndex>0) despleimagen=despleimagendrcha;
+				if (!!despleimagendrcha && despleimagendrcha.selectedIndex>0) despleimagen=despleimagendrcha;
 				var imgcanrepo=despleimagen.value.split("_");
 				atributos+="idi="+imgcanrepo[0]+RC; // Identificador de la imagen
 				atributos+="nci="+imgcanrepo[1]+RC;	// Nombre canónico	
@@ -94,9 +94,9 @@
 				var idradio=ochecks[i].id; // Toma idemtificador del desplegable de imagenes
 				var despleimagenizda=document.getElementById("despleimagen_"+idradio+"_1"); // Desplegable izda.
 				var despleimagendcha=document.getElementById("despleimagen_"+idradio+"_0"); // Desplegable derecha.
-				
+
 				var  p1=despleimagenizda.selectedIndex; // Toma índice seleccionado
-				var  p2=despleimagendcha.selectedIndex; // Toma índice seleccionado
+				var  p2=(!!despleimagendcha) ? despleimagendcha.selectedIndex : 0; // Toma índice seleccionado
 
 				if (p1===0 && p2===0){
 						alert(TbMsg[0]);

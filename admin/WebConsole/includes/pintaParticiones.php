@@ -210,6 +210,9 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 // version 1.1: cliente con varios repositorios -  HTMLSELECT_imagenes: cambia parametros idordenadores por idambito
 // autor: Irina Gomez, Universidad de Sevilla
 // fecha 2015-06-17
+// version 1.2 - Permite crear imágenes de disco.
+// autor: Irina Gomez, Universidad de Sevilla
+// fecha 2020/06/22
 //________________________________________________________________________________________________________
 function pintaParticionesRestaurarImagen($cmd,$configuraciones,$idordenadores,$cc,$ambito,$idambito)
 {
@@ -221,9 +224,37 @@ function pintaParticionesRestaurarImagen($cmd,$configuraciones,$idordenadores,$c
 	// Separamos las configuraciones segun el disco al que pertenezcan
 	$diskConfigs = splitConfigurationsByDisk($configuraciones);
 	
-	$columns=10;
+	// Clonación
+	$metodos="UNICAST=UNICAST-CACHE".chr(13);
+	$metodos.="UNICAST-DIRECT=UNICAST-DIRECT".chr(13);
+	$metodos.="MULTICAST " . mcast_syntax($cmd,$ambito,$idambito) . "=MULTICAST-CACHE".chr(13);
+	$metodos.="MULTICAST-DIRECT " . mcast_syntax($cmd,$ambito,$idambito) . "=MULTICAST-DIRECT".chr(13);
+	$metodos.="TORRENT " . torrent_syntax($cmd,$ambito,$idambito) . "=TORRENT-CACHE";
+
+	$TBmetodos["UNICAST-CACHE"]=1;
+	$TBmetodos["UNICAST-DIRECT"]=2;
+	$TBmetodos["MULTICAST-CACHE"]=3;
+	$TBmetodos["MULTICAST-DIRECT"]=4;
+	$TBmetodos["TORRENT-CACHE"]=5;
+	$idxc=$_SESSION["protclonacion"];
+	if ($idxc == "UNICAST") {
+		$idxc = "UNICAST-DIRECT";
+	}
+
+	// Lista de selección de métodos
+	$select_metodos= HTMLCTESELECT($metodos,"protoclonacion_","estilodesple","",$TBmetodos[$idxc],100);
+
+	// Lista de selección de imágenes (igual para todos los discos)
+	$select_imagenes=HTMLSELECT_imagenes_disco($cmd,$idambito,$ambito);
+
+	// Tipos de tabla de particiones (índice codpar)
+	$disktable[1]="MSDOS";
+	$disktable[2]="GPT";
+	$disktable[3]="LVM";
+	$disktable[4]="ZPOOL";
+
+	$columns=8;
 	echo '<TR>';
-	echo '<TH align=center>&nbsp;&nbsp;</TH>';
 	echo '<th align="center">&nbsp;'.$TbMsg["DISK"].'&nbsp;</th>'; // Número de  disco
 	echo '<TH align=center>&nbsp;'.$TbMsg["PARTITION"].'&nbsp;</TH>';
 	echo '<th align="center">&nbsp;'.$TbMsg["PARTITION_TYPE"].'&nbsp;</th>'; // Tipo de partición
@@ -235,27 +266,37 @@ function pintaParticionesRestaurarImagen($cmd,$configuraciones,$idordenadores,$c
 	echo '<TH align=center>&nbsp;'.$TbMsg["RESTORE_METHOD"].'&nbsp;</TH>';
 	echo '</TR>';
 	
-	
 	// Recorremos todas las configuraciones encontradas para cada disco
-	
 	foreach($diskConfigs as $disk => $diskConfig){
 		$disk = (int)$disk;
-		echo'<tr height="16">'.chr(13);
-		echo '<td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;'.$TbMsg["DISK"].'&nbsp;'.$disk.'</td>'.chr(13);
-	         
 		$auxCfg=explode("@",$diskConfig); // Crea lista de particiones
 		for($i=0;$i<sizeof($auxCfg);$i++){
 			$auxKey=explode(";",$auxCfg[$i]); // Toma clave de configuracion
 			// Para particiones EFI desabilitamos el selector
 			$disabled='';
+
 			for($k=0;$k<$conKeys;$k++){ // Busca los literales para las claves de esa partición
 				if($tbKeys[$k]["cfg"]==$auxCfg[$i]){ // Claves encontradas
-				    if($tbKeys[$k]["numpar"]!=0){    // No es info. del disco (part. 0)
+				    if($tbKeys[$k]["numpar"]==0){    // Info. del disco (part. 0)
+
+					echo'<tr height="16">'.chr(13);
+					echo '<td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;';
+					$icp=$cc."_".$tbKeys[$k]["numdisk"]."_0"; // Identificador de la configuración-partición
+					echo '<input type=radio idcfg="'.$cc.'" id="'.$icp.'" name="particion" value='.$tbKeys[$k]["numdisk"].";".$tbKeys[$k]["numpar"].' '.$disabled.'>'.chr(13);
+					echo $TbMsg["DISK"].'&nbsp;'.$disk.chr(13);
+					echo '<DIV style="float:right;">'.$TbMsg["IMAGE_REPOSITORY"]." ".str_replace("despleimagen_","despleimagen_".$icp."_1",$select_imagenes).' </DIV> '.chr(13);
+					echo '</td>'.chr(13);
+					echo '<TD style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">'.str_replace("protoclonacion_","protoclonacion_".$icp,$select_metodos).'</TD>'.chr(13);
+
+					// Tipo de tabla de particiones y tamaño.
+					$diskcodpar=isset($disktable[$tbKeys[$k]["codpar"]])? $disktable[$tbKeys[$k]["codpar"]] : "";
+					$disksize=tomaTamano('0',$idordenadores,$tbKeys[$k]["numdisk"]);
+
+				    } else {
 					$swcc=$tbKeys[$k]["clonable"];
 					if($swcc){
 						if ($tbKeys[$k]["tipopar"] == 'EFI') $disabled='disabled';
 						echo '<TR>'.chr(13);
-						echo '<TD align=center>&nbsp;&nbsp;</TD>';
 						$icp=$cc."_".$tbKeys[$k]["numdisk"]."_".$tbKeys[$k]["numpar"]; // Identificador de la configuración-partición
 						echo '<TD ><input type=radio idcfg="'.$cc.'" id="'.$icp.'" name="particion" value='.$tbKeys[$k]["numdisk"].";".$tbKeys[$k]["numpar"].' '.$disabled.'></TD>'.chr(13);
 						echo '<TD align=center>&nbsp;'.$tbKeys[$k]["numpar"].'&nbsp;</TD>'.chr(13);
@@ -264,28 +305,11 @@ function pintaParticionesRestaurarImagen($cmd,$configuraciones,$idordenadores,$c
 						echo'<TD align=center>&nbsp;'.tomaSistemasFicheros($tbKeys[$k]["numpar"],$idordenadores,false,$tbKeys[$k]["numdisk"]).'&nbsp;</TD>'.chr(13);
 						echo'<TD align=center>&nbsp;'.tomaTamano($tbKeys[$k]["numpar"],$idordenadores,$tbKeys[$k]["numdisk"]).'&nbsp;</TD>'.chr(13);	
 						if ($tbKeys[$k]["tipopar"] == 'EFI') {
-							echo "<TD></TD>\n<TD></TD>\n<TD></TD>\n";
+							echo "<TD></TD><TD></TD><TD></TD>".chr(13);
 						} else {
-							echo '<TD>'.HTMLSELECT_imagenes($cmd,$tbKeys[$k]["idimagen"],$tbKeys[$k]["numpar"],$tbKeys[$k]["codpar"],$icp,true,$idambito,$ambito).'</TD>';
-							echo '<TD>'.HTMLSELECT_imagenes($cmd,$tbKeys[$k]["idimagen"],$tbKeys[$k]["numpar"],$tbKeys[$k]["codpar"],$icp,false,$idambito,$ambito).'</TD>';
-	
-							//Clonación
-							$metodos="UNICAST=UNICAST-CACHE".chr(13);
-							$metodos.="UNICAST-DIRECT=UNICAST-DIRECT".chr(13);
-							$metodos.="MULTICAST " . mcast_syntax($cmd,$ambito,$idambito) . "=MULTICAST-CACHE".chr(13);
-							$metodos.="MULTICAST-DIRECT " . mcast_syntax($cmd,$ambito,$idambito) . "=MULTICAST-DIRECT".chr(13);
-							$metodos.="TORRENT " . torrent_syntax($cmd,$ambito,$idambito) . "=TORRENT-CACHE";
-	
-							$TBmetodos["UNICAST-CACHE"]=1;
-							$TBmetodos["UNICAST-DIRECT"]=2;
-							$TBmetodos["MULTICAST-CACHE"]=3;
-							$TBmetodos["MULTICAST-DIRECT"]=4;
-							$TBmetodos["TORRENT-CACHE"]=5;
-							$idxc=$_SESSION["protclonacion"];
-							if ($idxc == "UNICAST") {
-								$idxc = "UNICAST-DIRECT";
-							}
-							echo '<TD>'.HTMLCTESELECT($metodos,"protoclonacion_".$icp,"estilodesple","",$TBmetodos[$idxc],100).'</TD>';
+							echo '<TD>'.HTMLSELECT_imagenes($cmd,$tbKeys[$k]["idimagen"],$tbKeys[$k]["numpar"],$tbKeys[$k]["codpar"],$icp,true,$idambito,$ambito).'</TD>'.chr(13);
+							echo '<TD>'.HTMLSELECT_imagenes($cmd,$tbKeys[$k]["idimagen"],$tbKeys[$k]["numpar"],$tbKeys[$k]["codpar"],$icp,false,$idambito,$ambito).'</TD>'.chr(13);
+							echo '<TD>'.HTMLCTESELECT($metodos,"protoclonacion_".$icp,"estilodesple","",$TBmetodos[$idxc],100).'</TD>'.chr(13);
 						}
 						echo '</TR>'.chr(13);
 					}
@@ -293,8 +317,15 @@ function pintaParticionesRestaurarImagen($cmd,$configuraciones,$idordenadores,$c
 				}
 			}
 		}
+		echo '<TR>';
+		echo '<TD></TD>';
+		echo '<TD align=center>&nbsp;'.$diskcodpar.'&nbsp;</TD>';
+		echo '<TD></TD><TD></TD><TD></TD>';
+		echo '<TD align=center><strong>&nbsp;'.$disksize.'&nbsp;</strong></TD>';
+		echo '<TD></TD><TD></TD><TD></TD>';
+		echo '</TR>'.chr(13);
 	}
-	echo '<TR><TD colspan='.$columns.' style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #FFFFFF; height:5px;">&nbsp;</TD></TR>';
+	echo '<TR><TD colspan='.$columns.' style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #FFFFFF; height:5px;">&nbsp;</TD></TR>'.chr(13);
 }
 
 /*________________________________________________________________________________________________________

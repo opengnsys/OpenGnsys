@@ -8,8 +8,15 @@
 # $4 Dirección IP del repositorio
 # $5 Protocolo  UNICAST  MULTICAST  TORRENT
 # $6 Opciones del protocolo
+#@version 1.2 - Soporta imágenes de disco.
+#@author  Irina Gomez, ETSII Universidad de Sevilla.
+#@date    2020/06/22
 #_______________________________________________________________________________________________________________________________
 
 # Llamar al script de despliegue "deployImage".
-deployImage "$4" "$3" "$1" "$2" "$5" "$6" "$7" "$8" || exit $?
 
+if [ $2 -eq 0 ]; then
+	deployDiskImage "$4" "$3" "$1" "$5" "$6" "$7" "$8" || exit $?
+else
+	deployImage "$4" "$3" "$1" "$2" "$5" "$6" "$7" "$8" || exit $?
+fi

@@ -11,6 +11,9 @@
 //	HTMLSELECT_imagenes: Imagenes de todos los repositorios de la UO - Cambia parametro idordenadores por idambito
 // autor: Irina Gomez, Universidad de Sevilla
 // fecha 2015-06-17
+// Version 1.2: Soporta imágenes de disco. Nueva función HTMLSELECT_imagenes_disco
+//     Autora: Irina Gomez, ETSII Universidad de Sevilla
+//     Fecha: 2020-06-22
 // *************************************************************************************************************************************************
 include_once("../includes/ctrlacc.php");
 include_once("../clases/AdoPhp.php");
@@ -200,6 +203,57 @@ function HTMLSELECT_imagenes($cmd,$idimagen,$numpar,$codpar,$icp,$sw,$idambito,$
 	$SelectHtml.= '</SELECT>';
 	return($SelectHtml);
 }
+/*________________________________________________________________________________________________________
+	Crea la etiqueta html <SELECT> de las imágenes de disco
+________________________________________________________________________________________________________*/
+function HTMLSELECT_imagenes_disco($cmd,$idambito,$ambito)
+{
+        global $IMAGENES_DISCO;
+
+        $SelectHtml="";
+        $cmd->texto="SELECT *,repositorios.ip as iprepositorio, repositorios.nombrerepositorio as nombrerepo FROM imagenes
+                                INNER JOIN repositorios ON repositorios.idrepositorio=imagenes.idrepositorio";
+
+        $cmd->texto.=" AND imagenes.idrepositorio>0";   // La imagene debe existir en el repositorio.
+        $cmd->texto.=" AND imagenes.tipo=".$IMAGENES_DISCO;
+
+        // 1.1 Imágenes de todos los repositorios de la UO.
+        switch ($ambito) {
+            case 16:
+                // ambito ordenador
+                $selectrepo='select repositorios.idrepositorio from repositorios INNER JOIN aulas INNER JOIN ordenadores where repositorios.idcentro=aulas.idcentro AND aulas.idaula=ordenadores.idaula AND idordenador='.$idambito;
+                break;
+            case 8:
+                // ambito grupo ordenadores
+                $selectrepo='select idrepositorio  from repositorios INNER JOIN aulas INNER JOIN gruposordenadores where repositorios.idcentro=aulas.idcentro AND aulas.idaula=gruposordenadores.idaula AND idgrupo='.$idambito;
+                break;
+            case 4:
+                // ambito aulas
+                $selectrepo='select idrepositorio from repositorios INNER JOIN aulas where repositorios.idcentro=aulas.idcentro AND idaula='.$idambito;
+                break;
+        }
+        $cmd->texto.=" AND repositorios.idrepositorio IN (".$selectrepo.") ORDER BY imagenes.descripcion";
+
+        $rs=new Recordset;
+	$rs->Comando=&$cmd;
+	        $SelectHtml.= '<SELECT class="formulariodatos" id="despleimagen_" style="WIDTH:220">';
+        $SelectHtml.= '    <OPTION value="0"></OPTION>';
+
+        if ($rs->Abrir()){
+                $rs->Primero();
+                while (!$rs->EOF){
+                        $SelectHtml.='<OPTION value="'.$rs->campos["idimagen"]."_".$rs->campos["nombreca"]."_".$rs->campos["iprepositorio"]."_".$rs->campos["idperfilsoft"].'"';
+                        $SelectHtml.='>';
+                        $SelectHtml.= $rs->campos["descripcion"].' ('.$rs->campos["nombrerepo"].') </OPTION>';
+
+                        $rs->Siguiente();
+                }
+                $rs->Cerrar();
+        }
+        $SelectHtml.= '</SELECT>';
+        return($SelectHtml);
+}
+
 /*________________________________________________________________________________________________________
 	Crea la etiqueta html <SELECT> de los repositorios
 ________________________________________________________________________________________________________*/
