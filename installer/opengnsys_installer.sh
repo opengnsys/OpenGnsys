@@ -200,8 +200,8 @@ case "$OSDISTRIB" in
 			STARTSERVICE="eval /etc/init.d/\$service restart"
 			STOPSERVICE="eval /etc/init.d/\$service stop"
 		fi
-		ENABLESERVICE="eval update-rc.d \$service defaults"
-		DISABLESERVICE="eval update-rc.d \$service disable"
+		ENABLESERVICE="eval systemctl enable \$service.service"
+		DISABLESERVICE="eval systemctl disable \$service.service"
 		APACHESERV=apache2
 		APACHECFGDIR=/etc/apache2
 		APACHESITESDIR=sites-available

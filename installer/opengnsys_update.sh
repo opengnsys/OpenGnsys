@@ -131,7 +131,7 @@ function autoConfigure()
 			STOPSERVICE="eval /etc/init.d/\$service stop"
 			SERVICESTATUS="eval /etc/init.d/\$service status"
 		fi
-		ENABLESERVICE="eval update-rc.d \$service defaults"
+		ENABLESERVICE="eval systemctl enable \$service.service"
 		APACHEENABLEMODS="ssl rewrite proxy_fcgi fastcgi actions alias"
 		APACHEDISABLEMODS="php"
 		APACHEUSER="www-data"
