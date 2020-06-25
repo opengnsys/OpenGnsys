@@ -12,6 +12,7 @@ $TbMsg["STATUS_OFF"]="Apagat";
 $TbMsg["STATUS_OPG"]="OpenGnsys";
 $TbMsg["STATUS_LNX"]="GNU/Linux";
 $TbMsg["STATUS_WXP"]="Windows";
+$TbMsg["STATUS_VDI"]="Virtual";
 // Estats nou agent OGAgent.
 $TbMsg["STATUS_LNXS"]="Sessi&oacute; GNU/Linux";
 $TbMsg["STATUS_OSX"]="macOS";

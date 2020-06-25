@@ -198,6 +198,9 @@ function soIMG(so)
 		case 'OSX':
 			MimgOrdenador="ordenador_OSX.png";  // macOS
 			break;
+		case 'VDI':
+			MimgOrdenador="ordenador_VDI.png";  // macOS
+			break;
 		default:
 			MimgOrdenador="ordenador_OFF.png";  // Apagado
 			break;
@@ -249,6 +252,10 @@ function selector(oSLCT,op,id)
 						break;
 					case 8: // macOS
 						if(estado=="ordenador_OSX.png")
+							oCHK.checked=sw;
+						break;
+					case 9: // Virtual
+						if(estado=="ordenador_VDI.png")
 							oCHK.checked=sw;
 						break;
 				}

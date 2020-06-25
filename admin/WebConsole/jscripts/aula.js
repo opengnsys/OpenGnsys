@@ -135,6 +135,9 @@ function soIMG(so)
 		case 'OSX':
 			MimgOrdenador="ordenador_OSX.png"; // macOS
 			break;
+		case 'VDI':
+			MimgOrdenador="ordenador_VDI.png"; // Virtual
+			break;
 		default:
 			MimgOrdenador="ordenador_OFF.png"; // Apagado
 			break;

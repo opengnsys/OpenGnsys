@@ -12,6 +12,7 @@ $TbMsg["STATUS_OFF"]="Off";
 $TbMsg["STATUS_OPG"]="OpenGnsys";
 $TbMsg["STATUS_LNX"]="GNU/Linux";
 $TbMsg["STATUS_WXP"]="Windows";
+$TbMsg["STATUS_VDI"]="Virtual";
 // New OGAgent states.
 $TbMsg["STATUS_LNXS"]="GNU/Linux session";
 $TbMsg["STATUS_OSX"]="MacOS";

@@ -191,6 +191,9 @@ function RecorriendoOrdenadores($cmd)
 <TD align="center">'.$TbMsg["STATUS_OSX"].'</TD>
 <TD><INPUT  type="checkbox" checked onclick="selector(this,8,'.$cid.')"></TD>
 
+<TD align="center">'.$TbMsg["STATUS_VDI"].'</TD>
+<TD><INPUT  type="checkbox" checked onclick="selector(this,9,'.$cid.')"></TD>
+
 </TR>
 </TABLE>';
 
@@ -312,6 +315,9 @@ function soIMG(so)
 		case 'OSX':
 			MimgOrdenador="ordenador_OSX.png";  // macOS
 			break;
+		case 'VDI':
+			MimgOrdenador="ordenador_VDI.png";  // macOS
+			break;
 		default:
 			MimgOrdenador="ordenador_OFF.png";  // Apagado
 			break;
@@ -363,6 +369,10 @@ function selector(oSLCT,op,id)
 						break;
 					case 8: // macOS
 						if(estado=="ordenador_OSX.png")
+							oCHK.checked=sw;
+						break;
+					case 9: // Virtual
+						if(estado=="ordenador_VDI.png")
 							oCHK.checked=sw;
 						break;
 				}
