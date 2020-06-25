@@ -55,6 +55,8 @@ fi
 # Cargar configuración de acceso a la base de datos.
 if [ -r $INSTALL_TARGET/etc/ogserver.cfg ]; then
 	source $INSTALL_TARGET/etc/ogserver.cfg
+elif [ -r $INSTALL_TARGET/etc/ogAdmServer.cfg ]; then
+	source $INSTALL_TARGET/etc/ogAdmServer.cfg
 fi
 OPENGNSYS_DATABASE=${OPENGNSYS_DATABASE:-"$CATALOG"}		# Base de datos
 OPENGNSYS_DBUSER=${OPENGNSYS_DBUSER:-"$USUARIO"}		# Usuario de acceso
@@ -1055,11 +1057,11 @@ function moveNewService()
 }
 
 
-# Recompilar y actualiza los serivicios y clientes.
+# Compiling and updating OpenGnsys Server service
 function ogServerCompilation()
 {
 	local ogserverUrl="https://codeload.github.com/opengnsys/ogServer/zip/$BRANCH"
-	local error=0
+	local error=0 serv
 
 	echoAndLog "${FUNCNAME}(): downloading ogServer code..."
 
@@ -1081,17 +1083,19 @@ function ogServerCompilation()
 		error=1
 	fi
 	popd
-	# Parar antiguo servicio de repositorio.
-	pgrep ogAdmRepo > /dev/null && service="ogAdmRepo" $STOPSERVICE
-	# Remove OpenGnsys Agent (ogAdmAgent)
-	echoAndLog "${FUNCNAME}(): deleting deprecated OpenGnsys Agent"
-	[ -e $INSTALL_TARGET/sbin/ogAdmAgent ] && \
-		rm -f $INSTALL_TARGET/sbin/ogAdmAgent
-
-	# Generar un API token de ogAdmServer si no existe en el fichero de configuración.
+	# Renaming OpenGnsys Server configuration file, if needed
+	[ -e $INSTALL_TARGET/etc/ogAdmServer.cfg ] && \
+	    mv -v $INSTALL_TARGET/etc/ogAdmServer.cfg $INSTALL_TARGET/etc/ogserver.cfg
+	# Remove old OpenGnsys services
+	for serv in ogAdmAgent ogAdmRepo ogAdmServer; do
+		pgrep $serv > /dev/null && pkill -9 $serv && \
+		    echoAndLog "${FUNCNAME}(): removing deprecated $serv service"
+		rm -f $INSTALL_TARGET/sbin/$serv $INSTALL_TARGET/etc/$serv.cfg
+	done
+	# Generating an ogServer API token, if it does not exist
 	grep -q "APITOKEN=" $INSTALL_TARGET/etc/ogserver.cfg || \
 		$INSTALL_TARGET/bin/settoken -f
-
+	# Updating service file, if needed
 	if ! diff -q \
 	     "$WORKDIR"/ogServer-"$BRANCH"/cfg/ogserver.service \
 	     /lib/systemd/system/ogserver.service 2>/dev/null; then
