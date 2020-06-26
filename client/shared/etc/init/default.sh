@@ -19,7 +19,7 @@ echo "${MSG_LAUNCHCLIENT:-.}"
 [ -f /usr/local/etc/${LANG%_*}.qmap ] && export QWS_KEYBOARD="TTY:keymap=/usr/local/etc/${LANG%_*}.qmap"
 
 if [ "$ogstatus" != "offline"  ]; then
-    python3 /opt/opengnsys/ogClient/main.py
+    python3 /opt/opengnsys/ogClient/ogclient
 else
     for FILE in index $OGGROUP $(ogGetIpAddress)
     do
