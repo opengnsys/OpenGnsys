@@ -178,33 +178,6 @@ class Almanaque{
 
 	}
 
-	/*-------------------------------------------------------------------------------------------
-		This function returns day of the week number:
-			0=sunday 1=monday, 2=tuesday ... 6=saturday
-
-		Input parameter:
-			A string with date format dd/mm/yyyy.
-	----------------------------------------------------------------------------------------------*/
-	function _DiaSemana($fecha){
-		list($dia,$mes,$anno)=explode('[/.-]',$fecha);
-		$cont=0;
-		for ($i=1900;$i<$anno;$i++){
-			if ($this->bisiesto($i)) $dias_anuales=366; else	$dias_anuales=365;
-			$cont+=$dias_anuales;
-		}
-		for ($i=1;$i<$mes;$i++){
-			if ($i!=2)
-				$cont+=$this->dias_meses[$i];
-			else{
-				if ($this->bisiesto($anno))
-					$cont+=29;
-				else
-					$cont+=28;
-			}
-		}
-		$cont+=$dia+$this->desplazamiento_dias;
-		return($cont%7);
-	}
 	/* -------------------------------------------------------------------------------------------
 		These function returns true if last year was a leap-year or false if it was not
 
@@ -232,8 +205,8 @@ class Almanaque{
 		and they are class properties.
 	----------------------------------------------------------------------------------------------*/
 	function MesAnno($mes,$anno){
-		$fecha="1/".$mes."/".$anno;
-		$ds=$this->_DiaSemana($fecha);
+		$fecha="$anno-$mes-1";
+		$ds=date("N", strtotime($fecha));
 		if ($ds==0) $ds=7;
 
 		$swbi=0; // Suma para bisiesto
