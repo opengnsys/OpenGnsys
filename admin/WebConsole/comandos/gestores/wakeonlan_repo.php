@@ -17,8 +17,9 @@ preg_match_all('!\d{1}!', $atributos, $matches);
 // Capturamos todas las ids
 $macs = explode(";",$cadenamac);
 $ips = explode(';',$cadenaip);
+$netmasks = explode(';', $netmasks_string);
 
-wol($matches[0][0], $macs, $ips);
+wol($matches[0][0], $macs, $ips, $netmasks);
 
 // Recorremos las ids y vemos cual es la ip del repositorio
 $repos = array();
