@@ -136,7 +136,7 @@ CREATE TABLE `aulas` (
   `validacion` tinyint(1) DEFAULT '0',
   `paginalogin` varchar(100),
   `paginavalidacion` varchar(100),
-  `inremotepc` tinyint DEFAULT '0',
+  `inremotepc` tinyint NOT NULL DEFAULT 0,
   `oglivedir` varchar(50) NOT NULL DEFAULT 'ogLive',
   PRIMARY KEY (`idaula`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
@@ -446,7 +446,7 @@ CREATE TABLE `imagenes` (
   `imagenid` int NOT NULL DEFAULT '0',
   `ruta` varchar(250) NULL,
   `fechacreacion` datetime DEFAULT NULL,
-  `inremotepc` tinyint DEFAULT '0',
+  `inremotepc` tinyint NOT NULL DEFAULT 0,
   PRIMARY KEY (`idimagen`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
@@ -536,6 +536,8 @@ CREATE TABLE `ordenadores` (
   `oglivedir` varchar(50) NOT NULL DEFAULT 'ogLive',
   `n_row` smallint NOT NULL DEFAULT 0,
   `n_col` smallint NOT NULL DEFAULT 0,
+  `inremotepc` tinyint NOT NULL DEFAULT 0,
+  `maintenance` tinyint NOT NULL DEFAULT 0,
   PRIMARY KEY (`idordenador`),
   KEY `idaulaip` (`idaula` ASC, `ip` ASC)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;

@@ -29,13 +29,14 @@ if (isset($_GET["litambito"])) $litambito=$_GET["litambito"]; // Recoge parametr
 if (isset($_GET["idambito"])) $idambito=$_GET["idambito"]; 
 if (isset($_GET["nombreambito"])) $nombreambito=$_GET["nombreambito"]; 
 
-$Midordenador=  Array();
-$Mnombreordenador=  Array();
-$MimgOrdenador=Array();
+$Midordenador=[];
+$Mnombreordenador=[];
+$MimgOrdenador=[];
 $Mrow=[];
 $Mcol=[];
-$Mip= Array();
-$Mmac=  Array();
+$Mip=[];
+$Mmac=[];
+$Mmaintenance=[];
 $map=[];  // Mapa del aula
 $k=0; // Indice de la Matriz
 
@@ -189,8 +190,8 @@ function RecorreAulas($cmd){
 	while (!$rs->EOF){
 		$idaula=$rs->campos["idaula"];
 		$nombreaula=$rs->campos["nombreaula"];
-		$idordprofesor=(isset($rs->campos["idordprofesor"]) ? $rs->campos["idordprofesor"] : 0);
-		$cmd->texto="SELECT idordenador,nombreordenador,n_row,n_col,ip,mac FROM ordenadores WHERE  idaula=".$idaula;
+		$idordprofesor=$rs->campos["idordprofesor"]??0;
+		$cmd->texto="SELECT * FROM ordenadores WHERE idaula='$idaula'";
 		$k=0;
 		$cadenaip="";
 		RecorreOrdenadores($cmd);
@@ -209,7 +210,7 @@ while (!$rs->EOF){
 		$idgrupo=$rs->campos["idgrupo"];
 		$cmd->texto="SELECT idgrupo,nombregrupoordenador FROM gruposOrdenadores WHERE grupoid=".$idgrupo." ORDER BY nombregrupoordenador";
 		RecorreGruposOrdenadores($cmd);
-		$cmd->texto="SELECT idordenador,nombreordenador,n_row,n_col,ip,mac FROM ordenadores WHERE  grupoid=".$idgrupo;
+		$cmd->texto="SELECT * FROM ordenadores WHERE grupoid='$idgrupo'";
 		RecorreOrdenadores($cmd);
 		$rs->Siguiente();
 	}
@@ -224,6 +225,7 @@ function RecorreOrdenadores($cmd){
 	global $Mcol;
 	global $Mip;
 	global $Mmac;
+	global $Mmaintenance;
 	global $map;  // Mapa del aula
 	global $max_col;  // Nº máximo de columnas del aula
 	global $k; // Indice de la Matriz
@@ -241,8 +243,8 @@ function RecorreOrdenadores($cmd){
 		$Midordenador[$k]=$rs->campos["idordenador"];
 		$Mnombreordenador[$k]=$rs->campos["nombreordenador"];
 		$MimgOrdenador[$k]="ordenador_OFF.png";
-		$Mrow[$k]=$rs->campos["n_row"];
-		$Mcol[$k]=$rs->campos["n_col"];
+		$Mrow[$k]=$rs->campos["n_row"]??0;
+		$Mcol[$k]=$rs->campos["n_col"]??0;
 		// Calcula nº máximo de columnas para pintar el aula (-1, modo antiguo)
 		if ($max_col === -1 or $Mrow[$k] === 0 or $Mcol[$k] === 0 or isset($map[$Mrow[$k]][$Mcol[$k]])) {
 			$max_col = -1;
@@ -253,6 +255,7 @@ function RecorreOrdenadores($cmd){
 		$Mip[$k]=$rs->campos["ip"];
 		$Mmac[$k]=$rs->campos["mac"];
 		$cadenaip.=$rs->campos["ip"].";";
+		$Mmaintenance[$k]=$rs->campos["maintenance"]??0;
 		$k++;
 		$rs->Siguiente();
 	}
@@ -272,6 +275,7 @@ function pintaordenadores(){
 	global $Mcol;
 	global $Mip;
 	global $Mmac;
+	global $Mmaintenance;
 	global $k; // Indice de la Matriz
 	global $cadenaip;
 	global $idaula;
@@ -284,7 +288,7 @@ function pintaordenadores(){
 
 	$ntr=0; // Numero de ordenadores por fila
 	if ($nombreaula!=""){
-		echo '<DIV>';
+		echo '<div>';
 		echo '<p align=center class=cabeceras><img  border=0 nod="'.$LITAMBITO_AULAS.'-'.$idaula.'" value="'.$nombreaula.'"
 				style="cursor:pointer" src="../images/iconos/aula.gif" oncontextmenu="nwmenucontextual(this,' ."'flo_".$LITAMBITO_AULAS."'" .')" >&nbsp;&nbsp;'.$TbMsg[23].'</br><span id="'.$LITAMBITO_AULAS.'-'.$idaula.'" class=subcabeceras>'.$nombreaula.'</span></p>';
 	}
@@ -297,8 +301,8 @@ function pintaordenadores(){
 			echo '<table border="0">';
 			echo '<tr>';
 			echo '	<td align=center width=70 height=40>';
-			echo '	<a href="#"><img  id="'.$Mip[$i].'" border=0 sondeo=""  nod="'.$LITAMBITO_ORDENADORES.'-'.$Midordenador[$i].'"
-								 value="'.$Mnombreordenador[$i].'" src="../images/'.$MimgOrdenador[$i].'" oncontextmenu="nwmenucontextual(this,'."'flo_".$LITAMBITO_ORDENADORES."'" .')"  width="32" height="32"></a>';
+			echo '	<a href="#"><img id="'.$Mip[$i].'" border="0" sondeo="" nod="'.$LITAMBITO_ORDENADORES.'-'.$Midordenador[$i].'"
+				style="opacity: '.(1-0.5*$Mmaintenance[$i]).'" value="'.$Mnombreordenador[$i].'" src="../images/'.$MimgOrdenador[$i].'" oncontextmenu="nwmenucontextual(this,'."'flo_".$LITAMBITO_ORDENADORES."'" .')"  width="32" height="32"></a>';
 			echo '	</td>';
 			echo '</tr>';
 			echo '<tr>';
@@ -365,7 +369,7 @@ function pintaordenadores(){
 	echo '  </tr>';
 	echo '</table>';
 	if ($nombreaula!="")
-		echo '</DIV>';
+		echo '</div>';
 }
 //________________________________________________________________________________________________________
 function ContextualXMLAulas(){
