@@ -31,8 +31,6 @@ $idaula=0;
 $idordenador=0; 
 $nombreordenador="";
 $numserie="";
-$n_row=0;
-$n_col=0;
 $ip="";
 $mac="";
 $idperfilhard=0;
@@ -73,6 +71,7 @@ if (isset($_POST["idordenador"])) $idordenador=$_POST["idordenador"];
 if (isset($_POST["identificador"])) $idordenador=$_POST["identificador"];
 if (isset($_POST["nombreordenador"])) $nombreordenador=$_POST["nombreordenador"];
 if (isset($_POST["numserie"])) $numserie=$_POST["numserie"];
+$maintenance=$_POST["maintenance"]??0;
 $n_row=$_POST["n_row"]??0;
 $n_col=$_POST["n_col"]??0;
 if (isset($_POST["ip"])) $ip=$_POST["ip"];
@@ -211,6 +210,7 @@ function Gestiona(){
 	global $idordenador;
 	global $nombreordenador;
 	global $numserie;
+	global $maintenance;
 	global $n_row;
 	global $n_col;
 	global $ip;
@@ -246,6 +246,7 @@ function Gestiona(){
 	$cmd->CreaParametro("@idordenador",$idordenador,1);
 	$cmd->CreaParametro("@nombreordenador",$nombreordenador,0);
 	$cmd->CreaParametro("@numserie",$numserie,0);
+	$cmd->CreaParametro("@maintenance",$maintenance,1);
 	$cmd->CreaParametro("@n_row",$n_row,1);
 	$cmd->CreaParametro("@n_col",$n_col,1);
 	$cmd->CreaParametro("@ip",$ip,0);
@@ -270,10 +271,18 @@ function Gestiona(){
             $duplicates = checkDuplicates($cmd, $datosduplicados, $idordenador, $nombreordenador, $ip, $mac);
             // Si no hay datos duplicados insertamos el ordenador;
             if (!$duplicates) {
-                $cmd->texto="INSERT INTO ordenadores(nombreordenador,numserie,n_row,n_col,ip,mac,idperfilhard,idrepositorio,oglivedir,
-                    idmenu,idproautoexec,idaula,grupoid,netiface,netdriver,fotoord,validacion,paginalogin,paginavalidacion) VALUES (@nombreordenador,@numserie,@n_row,@n_col,@ip,@mac,@idperfilhard,@idrepositorio,@oglivedir,
-                    @idmenu,@idprocedimiento,@idaula,@grupoid,@netiface,@netdriver,@fotoordenador,@validacion,@paginalogin,@paginavalidacion)";
-             }
+                $cmd->texto = <<<EOD
+INSERT INTO ordenadores
+	 (nombreordenador, numserie, maintenance, n_row, n_col, ip, mac,
+	 idperfilhard, idrepositorio, oglivedir, idmenu, idproautoexec,
+	 idaula, grupoid, netiface, netdriver, fotoord, validacion,
+	 paginalogin, paginavalidacion)
+ VALUES (@nombreordenador, @numserie, @maintenance, @n_row, @n_col, @ip, @mac,
+	 @idperfilhard, @idrepositorio, @oglivedir, @idmenu, @idprocedimiento,
+	 @idaula, @grupoid, @netiface, @netdriver, @fotoordenador, @validacion,
+	 @paginalogin, @paginavalidacion);
+EOD;
+            }
             $resul=$cmd->Ejecutar();
 			if ($resul){ // Crea una tabla nodo para devolver a la página que llamó ésta
 			    $idordenador=$cmd->Autonumerico();
@@ -290,9 +299,16 @@ function Gestiona(){
         case $op_modificacion:
             $duplicates = checkDuplicates($cmd, $datosduplicados, $idordenador, $nombreordenador, $ip, $mac);
             if (!$duplicates) {
-                $cmd->texto="UPDATE ordenadores SET nombreordenador=@nombreordenador,numserie=@numserie,n_row=@n_row,n_col=@n_col,ip=@ip,mac=@mac,idperfilhard=@idperfilhard,
-                idrepositorio=@idrepositorio,oglivedir=@oglivedir,idmenu=@idmenu,idproautoexec=@idprocedimiento,netiface=@netiface,netdriver=@netdriver,fotoord=@fotoordenador,validacion=@validacion,paginalogin=@paginalogin,paginavalidacion=@paginavalidacion
-                WHERE idordenador=@idordenador";
+                $cmd->texto = <<<EOD
+UPDATE ordenadores
+   SET nombreordenador=@nombreordenador, numserie=@numserie, maintenance=@maintenance,
+       n_row=@n_row, n_col=@n_col, ip=@ip, mac=@mac, idperfilhard=@idperfilhard,
+       idrepositorio=@idrepositorio, oglivedir=@oglivedir, idmenu=@idmenu,
+       idproautoexec=@idprocedimiento, netiface=@netiface, netdriver=@netdriver,
+       fotoord=@fotoordenador, validacion=@validacion, paginalogin=@paginalogin,
+       paginavalidacion=@paginavalidacion
+ WHERE idordenador=@idordenador;
+EOD;
             }
 			$resul=$cmd->Ejecutar();
 			// Actualizar fichero TFTP/PXE a partir de la plantilla asociada.

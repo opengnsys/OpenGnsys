@@ -30,6 +30,7 @@ $TbMsg[4951]="Caché lliure";
 // AGP
 $TbMsg['COMM_DEFOGLIVE']="Assignat per l'administrador";
 $TbMsg["LABEL_SERIALNO"]="N&ordm; de serie";
+$TbMsg["LABEL_MAINTENANCE"]="Ordenador en mantenimiento";
 $TbMsg["WARN_NOTREPO"]="<em>AVISO: sin repositorio asignado.</em>";
 $TbMsg["WARN_NOTDETECTED"]="<em>(no detectado)</em>";
 $TbMsg['WARN_PROFESSOR']="profesor";

@@ -26,6 +26,7 @@ $idordenador=0;
 $ordprofesor=false;
 $nombreordenador="";
 $numserie="";
+$maintenance=0;
 $n_row=0;
 $n_col=0;
 $ip="";
@@ -102,7 +103,7 @@ function abrir_ventana(URL){
 				$dirfotos="../images/fotos";
 			?>
 			<td colspan="2" valign="top" align="left" rowspan="5">
-			<img border="2" style="border-color:#63676b" src="<?php echo $dirfotos.'/'.$fotoordenador?>" />
+			<img border="2" style="border-color:#63676b; opacity: <?php echo 1-0.5*$maintenance ?>;" src="<?php echo $dirfotos.'/'.$fotoordenador?>" />
 			<?php	if ($opcion!=$op_eliminacion) {
 				echo '<br />(150X110)-(jpg - gif - png) ---- '.$TbMsg[5091].'><br />';
 				echo '<input name="archivo" type="file" id="archivo" size="16" />';
@@ -144,23 +145,37 @@ function abrir_ventana(URL){
 		</tr>
 <!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<tr>
-			<th align="center">&nbsp;<?php echo $TbMsg["LABEL_LOCATION"] ?>&nbsp;</th>
-			<?php	if ($opcion==$op_eliminacion) {
-					echo '<td>'.$n_row.', '.$n_col.'</td>';
+			<th align="center">&nbsp;<?php echo $TbMsg["LABEL_MAINTENANCE"] ?>&nbsp;</th>
+			<td>
+			<?php   if ($opcion==$op_eliminacion) {
+					echo '<input class="formulariodatos" name="maintenance" type="checkbox" disabled'. ($maintenance ? ' checked' : '') .">\n";
 				} else {
-					echo "<td>\n";
+					echo '<input class="formulariodatos" name="maintenance" type="checkbox" value="1"'. ($maintenance ? ' checked' : '') .">\n";
+				}
+			?>
+			</td>
+		</tr>
+<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+		<tr>
+			<th align="center">&nbsp;<?php echo $TbMsg["LABEL_LOCATION"] ?>&nbsp;</th>
+			<td colspan="3">
+			<?php	if ($opcion==$op_eliminacion) {
+					if ($n_row != 0 and $n_col != 0) {
+						echo $TbMsg["PROP_ROW"]." $n_row, ".$TbMsg["PROP_COLUMN"]." $n_col";
+					}
+				} else {
 					$row="0=".$TbMsg["VAL_UNSPECIFIED"].chr(13);
 					foreach (range(1, 15) as $n) {
 						$row.="$n=".$TbMsg["PROP_ROW"]." $n".chr(13);
 					}
-					echo HTMLCTESELECT($row,"n_row","estilodesple","",$n_row,100);
+					echo HTMLCTESELECT($row,"n_row","estilodesple","",$n_row,150);
 					$col="0=".$TbMsg["VAL_UNSPECIFIED"].chr(13);
 					foreach (range(1, 15) as $n) {
 						$col.="$n=".$TbMsg["PROP_COLUMN"]." $n".chr(13);
 					}
-					echo HTMLCTESELECT($col,"n_col","estilodesple","",$n_col,100);
-					echo "</td>\n";
+					echo HTMLCTESELECT($col,"n_col","estilodesple","",$n_col,150);
 				}
+			</td>
 			?>
 		</tr>				
 		<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
@@ -378,6 +393,7 @@ function TomaPropiedades($cmd,$id){
 	global $ordprofesor;
 	global $nombreordenador;
 	global $numserie;
+	global $maintenance;
 	global $n_row;
 	global $n_col;
 	global $ip;
@@ -425,8 +441,9 @@ EOD;
                 $paginavalidacion=$rs->campos["paginavalidacion"];
 ########################### Ramón
                 $arranque=$rs->campos["arranque"];
-		$n_row=$rs->campos["n_row"];
-		$n_col=$rs->campos["n_col"];
+		$n_row=$rs->campos["n_row"]??0;
+		$n_col=$rs->campos["n_col"]??0;
+		$maintenance=$rs->campos["maintenance"]??0;
 		$rs->Cerrar();
 		return(true);
 	}
