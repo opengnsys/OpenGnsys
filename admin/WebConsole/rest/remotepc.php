@@ -95,6 +95,7 @@ SELECT adm.idusuario, ordenadores.idordenador, ordenadores.nombreordenador, orde
   LEFT JOIN remotepc ON remotepc.id=ordenadores.idordenador
  WHERE adm.idusuario = '$userid'
    AND aulas.idcentro = '$ouid' AND aulas.idaula LIKE '$labid' AND aulas.inremotepc = 1
+   AND ordenadores.maintenance = 0
    AND imagenes.idimagen = '$imageid' AND imagenes.inremotepc = 1
    AND (remotepc.reserved < NOW() OR ISNULL(reserved))
  ORDER BY remotepc.reserved ASC LIMIT 1;
