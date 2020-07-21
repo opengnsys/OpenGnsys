@@ -193,9 +193,10 @@ function chooseVersion()
     RELEASES=( )
     DOWNLOADS=( )
     # If updating from a local or very old version, use the default data.
-    if [ $REMOTE -eq 1 ] && which jq &>/dev/null && [ -f $INSTALL_TARGET/doc/VERSION.json ]; then
+    if [ $REMOTE -eq 1 ] && which jq &>/dev/null && [ -f $INSTALL_TARGET/doc/VERSION.json -o -f $INSTALL_TARGET/doc/VERSION.txt ]; then
         # Installed release.
-        read -pe INSTVERSION INSTRELEASE <<< $(jq -r '.version+" "+.release' $INSTALL_TARGET/doc/VERSION.json)
+        [ -f $INSTALL_TARGET/doc/VERSION.json ] && read -pe INSTVERSION INSTRELEASE <<< $(jq -r '.version+" "+.release' $INSTALL_TARGET/doc/VERSION.json)
+        [ -f $INSTALL_TARGET/doc/VERSION.txt ] && read -pe INSTVERSION INSTRELEASE <<< $(awk '{print $2,$3}' $INSTALL_TARGET/doc/VERSION.txt)
         # Fetch tags (releases) data from GitHub.
         while read -pe TAG URL; do
             if [[ $TAG =~ ^opengnsys- ]]; then
