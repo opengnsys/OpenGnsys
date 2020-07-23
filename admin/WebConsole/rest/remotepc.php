@@ -157,10 +157,12 @@ EOD;
 		$timestamp = time();
 		$cmd->texto = <<<EOD
 INSERT INTO remotepc
-   SET id='$clntid', reserved=NOW() + INTERVAL $maxtime HOUR, urllogin=NULL, urllogout=NULL
+   SET id = '$clntid', reserved = NOW() + INTERVAL $maxtime HOUR,
+       urllogin = NULL, urllogout = NULL, urlrelease = NULL
     ON DUPLICATE KEY UPDATE
-       id=VALUES(id), reserved=VALUES(reserved),
-       urllogin=VALUES(urllogin), urllogout=VALUES(urllogout);
+       id = VALUES(id), reserved = VALUES(reserved),
+       urllogin = VALUES(urllogin), urllogout = VALUES(urllogout),
+       urlrelease = VALUES(urlrelease);
 EOD;
 		$t1 = $cmd->Ejecutar();
 		$cmd->texto = <<<EOD
@@ -197,7 +199,8 @@ CREATE EVENT e_timeout_$clntid
 	       AND (SELECT @action_id := idaccion);
 	    IF @action_id IS NOT NULL THEN
 	       UPDATE remotepc
-		  SET reserved=NOW() - INTERVAL 1 SECOND, urllogin=NULL, urllogout=NULL
+		  SET reserved = NOW() - INTERVAL 1 SECOND,
+		      urllogin = NULL, urllogout = NULL, urlrelease = NULL
 		WHERE id = '$clntid';
 	       DELETE FROM acciones
 		WHERE idaccion = @action_id;
@@ -250,6 +253,7 @@ EOD;
  * @note     Route: /ous/:ouid/labs/:labid/clients/:clntid/events, Method: POST
  * @param    string urlLogin   URL to redirect login notification.
  * @param    string urlLogout  URL to redirect logout notification.
+ * @param    string urlRelease URL to release a session
  * @warning  Events parameters will be stored in a new "remotepc" table.
  */
 $app->post('/ous/:ouid/labs/:labid/clients/:clntid/events', 'validateApiKey',
@@ -272,6 +276,7 @@ $app->post('/ous/:ouid/labs/:labid/clients/:clntid/events', 'validateApiKey',
 		$input = json_decode($app->request()->getBody());
 		$urlLogin = htmlspecialchars($input->urlLogin);
 		$urlLogout = htmlspecialchars($input->urlLogout);
+		$urlRelease = htmlspecialchars($input->urlRelease ?? "");
 		if (filter_var($urlLogin, FILTER_VALIDATE_URL) === false) {
 			throw new Exception("Must be a valid URL for login notification");
 		}
@@ -312,9 +317,10 @@ EOD;
 			// Updating DB if client is reserved.
 			$cmd->CreaParametro("@urllogin", $urlLogin, 0);
 			$cmd->CreaParametro("@urllogout", $urlLogout, 0);
+			$cmd->CreaParametro("@urlrelease", $urlRelease, 0);
 			$cmd->texto = <<<EOD
 UPDATE remotepc
-   SET urllogin=@urllogin, urllogout=@urllogout
+   SET urllogin = @urllogin, urllogout = @urllogout, urlrelease = NULLIF(@urlrelease, '')
  WHERE id='$clntid';
 EOD;
 			if ($cmd->Ejecutar()) {
@@ -509,8 +515,9 @@ EOD;
 			$cmd->Ejecutar();
 			$cmd->texto = <<<EOD
 UPDATE remotepc
-   SET reserved=NOW() - INTERVAL 1 SECOND, urllogin=NULL, urllogout=NULL
- WHERE id='$clntid';
+   SET reserved = NOW() - INTERVAL 1 SECOND,
+       urllogin = NULL, urllogout = NULL, urlrelease = NULL
+ WHERE id = '$clntid';
 EOD;
 			$cmd->Ejecutar();
 			$cmd->texto = <<<EOD
@@ -553,5 +560,4 @@ EOD;
 	$rs->Cerrar();
     }
 );
-
 

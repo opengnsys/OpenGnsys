@@ -22,15 +22,25 @@ CREATE PROCEDURE altercols() BEGIN
 			ADD inremotepc SMALLINT NOT NULL DEFAULT 0,
 			ADD maintenance SMALLINT NOT NULL DEFAULT 0;
 	END IF;
+	# Añadir campo con URL para liberar equipo reservado para acceso remoto (ticket #992).
+	IF NOT EXISTS (SELECT * FROM information_schema.COLUMNS
+			WHERE COLUMN_NAME='urlrelease' AND TABLE_NAME='remotepc' AND TABLE_SCHEMA=DATABASE())
+	THEN
+		ALTER TABLE remotepc
+			ADD urlrelease VARCHAR(100) DEFAULT NULL;
+	END IF;
 END//
 # Ejecutar actualización condicional.
 DELIMITER ';'
 CALL altercols();
 DROP PROCEDURE altercols;
 
-# Redefinir algunos campos como no nulos.
+# Redefinir campos como no nulos.
 ALTER TABLE aulas
 	MODIFY inremotepc SMALLINT NOT NULL DEFAULT 0;
 ALTER TABLE imagenes
 	MODIFY inremotepc SMALLINT NOT NULL DEFAULT 0;
-
+# Redefinir campos como nulos por defecto.
+ALTER TABLE remotepc
+      MODIFY urllogin VARCHAR(100) DEFAULT NULL,
+      MODIFY urllogout VARCHAR(100) DEFAULT NULL;

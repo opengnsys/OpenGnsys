@@ -794,8 +794,9 @@ DROP TABLE IF EXISTS `remotepc`;
 CREATE TABLE `remotepc` (
   `id` int(11) NOT NULL DEFAULT 0,
   `reserved` datetime DEFAULT NULL,
-  `urllogin` varchar(100),
-  `urllogout` varchar(100),
+  `urllogin` varchar(100) DEFAULT NULL,
+  `urllogout` varchar(100) DEFAULT NULL,
+  `urlrelease` varchar(100) DEFAULT NULL,
   `language` varchar(5),
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
