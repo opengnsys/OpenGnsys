@@ -132,7 +132,6 @@ $app->post('/ogagent/stopped',
 $app->post('/ogagent/loggedin',
     function() use ($app) {
 	global $cmd;
-	$osType = $osVersion = "none";
 	$redirto = Array();
 	$result = Array();
 
@@ -141,9 +140,15 @@ $app->post('/ogagent/loggedin',
 		$input = json_decode($app->request()->getBody());
 		$ip = htmlspecialchars($input->ip);
 		$user = htmlspecialchars($input->user);
-		$language = isset($input->language) ? substr($input->language, 0, strpos($input->language, "_")) : "";
-		if (isset($input->ostype))  $osType = htmlspecialchars($input->ostype);
-		if (isset($input->osversion))  $osVersion = str_replace(",", ";", htmlspecialchars($input->osversion));
+		// Remote session contains "rdp", else it's local.
+		if (strpos($input->session ?? "", "rdp") !== false) {
+			$session = "remote";
+		} else {
+			$session = "local";
+		}
+		$language = strstr($input->language ?? "", "_", true);
+		$osType = htmlspecialchars($input->ostype ?? "none");
+		$osVersion = str_replace(",", ";", htmlspecialchars($input->osversion ?? "none"));
 		// Check sender IP address consistency (same as parameter value).
 		if (empty(preg_match('/^python-requests\//', $_SERVER['HTTP_USER_AGENT'])) or $ip !== $_SERVER['REMOTE_ADDR']) {
 		    throw new Exception("Bad OGAgent: ip=$ip, sender=".$_SERVER['REMOTE_ADDR'].", agent=".$_SERVER['HTTP_USER_AGENT']);
@@ -152,7 +157,7 @@ $app->post('/ogagent/loggedin',
 		$cmd->CreaParametro("@ip", $ip, 0);
 		$cmd->texto = <<<EOD
 SELECT ordenadores.idordenador, ordenadores.nombreordenador, remotepc.urllogin,
-       remotepc.reserved > NOW() AS reserved
+       remotepc.urlrelease, remotepc.reserved > NOW() AS reserved
   FROM remotepc
  RIGHT JOIN ordenadores ON remotepc.id=ordenadores.idordenador
  WHERE ordenadores.ip=@ip
@@ -164,7 +169,8 @@ EOD;
 			// Read query data.
 			$rs->Primero();
 			$id = $rs->campos['idordenador'];
-			$redirto[0]['url'] = $rs->campos['urllogin'];
+			$sendlogin[0]['url'] = $rs->campos['urllogin'];
+			$sendrel[0]['url'] = $rs->campos['urlrelease'];
 			$reserved = $rs->campos['reserved'];
 			$rs->Cerrar();
 			if (!is_null($id)) {
@@ -176,9 +182,9 @@ EOD;
 		    		throw new Exception("Client is not in the database: ip=$ip, user=$user");
 			}
 			// Redirect notification to UDS server, if needed.
-			if ($reserved == 1 and !is_null($redirto[0]['url'])) {
-				$redirto[0]['get'] = $app->request()->getBody();
-				$result = multiRequest($redirto);
+			if ($reserved == 1 and !is_null($sendlogin[0]['url'])) {
+				$sendlogin[0]['get'] = $app->request()->getBody();
+				$result = multiRequest($sendlogin);
 				// ... (check response)
 				//if ($result[0]['code'] != 200) {
 				// ...
@@ -189,6 +195,10 @@ UPDATE remotepc
  WHERE id = '$id';
 EOD;
 				$cmd->Ejecutar();
+			}
+			// Release a reserved client if a user opens a local session.
+			if ($reserved == 1 and $session === "local" and ! is_null($sendrel[0]['url'])) {
+				$result = multiRequest($sendrel);
 			}
 		} else {
 			throw new Exception("Database error");
