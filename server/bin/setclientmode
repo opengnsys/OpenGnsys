@@ -5,9 +5,7 @@
 #@brief   Configura el archivo de arranque de PXE para los clientes, ya sea un equipo o un aula, generando enlaces a archivos usados como plantilla.
 #@usage   setclientmode Plantilla Ambito Modo
 #@warning El archivo PXE por defecto "default" se deja en modo de ejecución "user" y se eliminan los enlaces para equipos con la plantilla por defecto.
-#@param   Plantilla  nombre de plantilla PXE
-#@param   Ambito     nombre de ordenador o nombre de aula
-#@param   Modo       "TEMP" (temporal) o "PERM" (permanente)
+#@param   Config file  Path to the configuration file.
 #@version 1.0 - Versión inicial.
 #@author  Irina Gomez y Ramon Gomez - Univ. Sevilla, noviembre 2010
 #@version 1.0.1 - Identificacion de la plantilla por nombre en consola = en primera linea de la plantilla
@@ -36,46 +34,31 @@ PXEDIR[1]=$OPENGNSYS/tftpboot/grub
 LOGFILE=$OPENGNSYS/log/opengnsys.log
 
 source $OPENGNSYS/lib/ogfunctions.sh || exit 1
+source $1 || exit 1
 
 # Mostrar ayuda.
 [ "$*" == "help" ] && help
 [ "$*" == "version" ] && version
-# Control básico de errores.
-[ $# -ne 3 ] && raiseError usage
 # Comprobar si el usuario es "root" o el del servicio web.
-WEBUSER=$(ps axho user,comm|awk '!/root/ && /httpd|apache/ {print $1; exit;}')
+WEBUSER=$(ps axho user,comm|awk '!/root/ && /httpd|apache/ {print $TEMPLATE_NAME; exit;}')
 CALLER=$(getcaller)
-[ "$USER" != "root" -a "$USER" != "$WEBUSER" -a "$CALLER" != "ogAdmServerAux" ] && raiseError access "Need to be root (or webserver user)"
-# El acceso a mysql por las variables pasadas o por el fichero de configuarción.
-if  [ -z "$USUARIO" ] || [ -z "$PASSWORD" ] || [ -z "$CATALOG" ]; then
-	source $SERVERCONF 2>/dev/null || raiseError access "Server configuration file"
-fi
-TEMPLATE[0]=$(grep -l "^#.* $1 *$" ${PXEDIR[0]}/templates/* 2>/dev/null)
-TEMPLATE[1]=$(grep -l "^#.* $1 *$" ${PXEDIR[1]}/templates/* 2>/dev/null)
-[ -z "${TEMPLATE[0]}${TEMPLATE[1]}" ] && raiseError notfound "PXE template file \"$1\""
+[ "$USER" != "root" -a "$USER" != "$WEBUSER" -a "$CALLER" != "ogserver" ] && raiseError access "Need to be root (or webserver user)"
+TEMPLATE[0]="${PXEDIR[0]}/templates/${MODE_FILE}"
+TEMPLATE[1]="${PXEDIR[1]}/templates/${MODE_FILE}"
+[ -z "${TEMPLATE[0]}${TEMPLATE[1]}" ] && raiseError notfound "PXE template file \"$TEMPLATE_NAME\""
 
-case "${3^^}" in
+case "${MODE^^}" in
 	0|TEMP)	MODE="TEMP" ;;
 	1|PERM)	MODE="PERM" ;;
-	*)	raiseError notfound "Unknown mode \"$3\"" ;;
+	*)	raiseError notfound "Unknown mode \"$MODE\"" ;;
 esac
 
 # Sustituir caracteres ' por \' para evitar inyección SQL.
-BOOTMODE="${1//\'/\\\'}"
-RESOURCE="${2//\'/\\\'}"
-# Buscar ordenador individual o todos los de una aula.
-ETHERNET=$(dbexec "
-		 SELECT mac FROM ordenadores
-		   JOIN aulas USING (idaula)
-		  WHERE aulas.nombreaula ='$RESOURCE'
-		     OR nombreordenador = '$RESOURCE';")
-if [ -z "$ETHERNET" ]; then
-	date +"%b %d %T $PROG: No existe aula o equipo con el nombre \"$2\"" >> $LOGFILE
-	raiseError notfound "Client or lab name \"$2\""
-fi
+BOOTMODE="${TEMPLATE_NAME//\'/\\\'}"
+ETHERNET=$MAC
 
 # Copiar fichero de configuración y actualizar base de datos.
-date +"%b %d %T $PROG: Configurando \"$1\" en \"$2\" en modo \"$MODE\"" | tee -a $LOGFILE
+date +"%b %d %T $PROG: Configurando \"$TEMPLATE_NAME\" en \"$2\" en modo \"$MODE\"" | tee -a $LOGFILE
 NPC=0
 for MAC in $ETHERNET; do
 	date +"%b %d %T $PROG: Detectada ethernet \"$MAC\" en \"$2\"" | tee -a $LOGFILE
@@ -87,50 +70,18 @@ for MAC in $ETHERNET; do
 	[ -e ${PXEDIR[0]}/${PXEFILE[0]} ] && mv ${PXEDIR[0]}/${PXEFILE[0]} ${PXEDIR[0]}/${PXEFILE[0]}.netboot
 	[ -e ${PXEDIR[1]}/${PXEFILE[1]} ] && mv ${PXEDIR[1]}/${PXEFILE[1]} ${PXEDIR[1]}/${PXEFILE[1]}.netboot
 
-	if [ "$1" != "default" ]; then
+	if [ "$TEMPLATE_NAME" != "default" ]; then
 		# Si no está definida la variable LANG, usar idioma inglés por defecto.
 		[ -z "$LANG" -o "$LANG" == "C" ] && LANG="en"
-		# Obtener de la BD los parámetros de arranque asociados (separador es TAB).
-		DATOS=$(dbexec "
-SELECT ' LANG=$LANG',
-       ' ip=', CONCAT_WS(':', ordenadores.ip,
-           (SELECT (@serverip:=ipserveradm) FROM entornos LIMIT 1),
-           aulas.router, aulas.netmask,
-           ordenadores.nombreordenador, ordenadores.netiface, 'none'),
-       ' group=', REPLACE(TRIM(aulas.nombreaula), ' ', '_'),
-       ' ogrepo=', (@repoip:=IFNULL(repositorios.ip, '')),
-       ' oglive=', @serverip,
-       ' oglog=', @serverip,
-       ' ogshare=', @serverip,
-       ' oglivedir=', ordenadores.oglivedir,
-       ' ogprof=', IF(ordenadores.idordenador=aulas.idordprofesor, 'true', 'false'),
-       IF(perfileshard.descripcion<>'', CONCAT(' hardprofile=', REPLACE(TRIM(perfileshard.descripcion), ' ', '_')), ''),
-       IF(aulas.ntp<>'', CONCAT(' ogntp=', aulas.ntp), ''),
-       IF(aulas.dns<>'', CONCAT(' ogdns=', aulas.dns), ''),
-       IF(aulas.proxy<>'', CONCAT(' ogproxy=', aulas.proxy), ''),
-       IF(entidades.ogunit=1 AND NOT centros.directorio='', CONCAT(' ogunit=', centros.directorio), ''),
-       CASE
-           WHEN menus.resolucion IS NULL THEN ''
-           WHEN menus.resolucion <= '999' THEN CONCAT(' vga=', menus.resolucion)
-           WHEN menus.resolucion LIKE '%:%' THEN CONCAT(' video=', menus.resolucion)
-           ELSE menus.resolucion
-       END
-  FROM ordenadores
-  JOIN aulas USING(idaula)
-  JOIN centros USING(idcentro)
-  JOIN entidades USING(identidad)
-  LEFT JOIN repositorios USING(idrepositorio)
-  LEFT JOIN perfileshard USING(idperfilhard)
-  LEFT JOIN menus USING(idmenu)
- WHERE ordenadores.mac='$MAC';")
+		DATOS=$DATA
 		# Quitar tabuladores, sustituir acentos y dejar resolución por defecto.
 		DATOS=$(echo ${DATOS//	/} | tr 'áéíóúñçÁÉÍÓÚÑÇ' 'aeiouncAEIOUNC')
 		[[ "$DATOS" =~ (vga|video) ]] || DATOS="$DATOS vga=788"
 		# Obtener directorio ogLive a partir de los datos.
-		OGLIVEDIR=$(echo "$DATOS" | awk -F= 'BEGIN {RS=" "} $1=="oglivedir" {print $2}')
+		OGLIVEDIR=$(echo "$DATOS" | awk -F= 'BEGIN {RS=" "} $TEMPLATE_NAME=="oglivedir" {print $2}')
 
 		# Pondremos como propietario al usuario y grupo de Apache para que se pueda cambiar desde la consola web.
-		WEBGROUP=$(ps axho group,comm|awk '!/root/ && /httpd|apache/ {print $1; exit;}')
+		WEBGROUP=$(ps axho group,comm|awk '!/root/ && /httpd|apache/ {print $TEMPLATE_NAME; exit;}')
 		for BOOTTYPE in 0 1; do
 			# Si no existe la plantilla borramos el archivo PXE anterior continuamos
 			if [ -z "${TEMPLATE[$BOOTTYPE]}" ]; then
@@ -165,11 +116,9 @@ SELECT ' LANG=$LANG',
 			[ -e ${PXEDIR[1]}/${PXEFILE[1]}.netboot ] && rm ${PXEDIR[1]}/${PXEFILE[1]}.netboot
 			# Si no existe la plantilla de tipo BIOS tomo el nombre de la UEFI
 			[ -z "${TEMPLATE[0]}" ] && TEMPLATE[0]=${TEMPLATE[1]}
-
-			dbexec "UPDATE ordenadores SET arranque='$(basename ${TEMPLATE[0]})' WHERE mac='$MAC';"
 		fi
 	fi
 	let NPC=NPC+1
 done
 date +"%b %d %T $PROG: $NPC equipo(s) configurado(s)" | tee -a $LOGFILE
-
+exit 0
