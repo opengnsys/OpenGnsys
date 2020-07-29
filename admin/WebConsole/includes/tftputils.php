@@ -10,6 +10,7 @@
 // Ficheros de inclusión.
 include_once("../includes/ctrlacc.php");
 include_once("../clases/AdoPhp.php");
+include_once("../includes/restfunctions.php");
 
 // Directorio de ficheros PXE.
 define("PXEDIRBIOS", "/opt/opengnsys/tftpboot/menu.lst");
@@ -97,8 +98,7 @@ function createBootMode ($cmd, $bootopt, $hostname, $lang) {
 	// Descripción plantilla PXE
 	$description=exec("awk 'NR==1 {print $2}' ".PXEDIRBIOS."/templates/".$bootopt);
 	if ($description === "") $description=exec("awk 'NR==1 {print $2}' ".PXEDIRUEFI."/templates/".$bootopt);
-	// Llamamos al script setclientmode
-	shell_exec("export LANG=$lang $acceso; /opt/opengnsys/bin/setclientmode $description $hostname PERM");
+	set_mode($hostname, $bootopt);
 }
 
 
