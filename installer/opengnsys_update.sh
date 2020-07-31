@@ -918,7 +918,6 @@ function updateServerFiles()
 	local SOURCES=(	repoman/bin \
 			server/bin \
 			server/lib \
-			admin/Sources/Services/ogAdmServerAux \
 			admin/Sources/Services/ogAdmRepoAux \
 			server/tftpboot \
 			/usr/lib/shim/shimx64.efi.signed \
@@ -930,7 +929,6 @@ function updateServerFiles()
 	local TARGETS=(	bin \
 			bin \
 			lib \
-			sbin/ogAdmServerAux \
 			sbin/ogAdmRepoAux \
 			tftpboot \
 			tftpboot/shimx64.efi.signed \

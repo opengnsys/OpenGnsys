@@ -31,11 +31,6 @@ SERVERCFG=$BASEDIR/etc/$SERVERNAME.cfg
 REPOAUXNAME=ogAdmRepoAux
 REPOAUXDAEMON=$BASEDIR/sbin/$REPOAUXNAME
 REPOAUXPORT=$(awk -F= '/PUERTO/ {print $2+1}' $SERVERCFG 2>/dev/null)
-############## ADV
-############# IRINA # para setBootMode desde el cliente
-SERVERAUXNAME=ogAdmServerAux
-SERVERAUXDAEMON=$BASEDIR/sbin/$SERVERAUXNAME
-SERVERAUXPORT=2011  
 ############# IRINA
 
 #
@@ -125,12 +120,6 @@ arranca_demonios() {
      chgrp $OPENGNSYSUSER $CLIENTLOGDIR
   fi
   # Arrancar los servicios indicados.
-  if [ $RUN_OGADMSERVER = "yes" ]; then
-     # Para SetBootmode desde el cliente
-     $ACTIONMSG "Iniciando demonio: $SERVERAUXNAME"                    #
-     faucet $SERVERAUXPORT --daemon --in bash -c "$SERVERAUXDAEMON"    #   NUEVO
-     [ $? = 0 ] && $SUCCESSMSG || $FAILMSG 
-  fi
   if [ $RUN_OGADMREPO = "yes" ]; then
      $ACTIONMSG "Iniciando demonio: $REPOAUXNAME"
      faucet $REPOAUXPORT --daemon --in bash -c "$REPOAUXDAEMON"

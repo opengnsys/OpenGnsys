@@ -1275,7 +1275,6 @@ function copyServerFiles ()
 			server/bin \
 			repoman/bin \
 			server/lib \
-			admin/Sources/Services/ogAdmServerAux
 			admin/Sources/Services/ogAdmRepoAux
 			installer/opengnsys_uninstall.sh \
 			installer/opengnsys_update.sh \
