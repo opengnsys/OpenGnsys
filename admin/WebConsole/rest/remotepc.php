@@ -83,7 +83,7 @@ $app->post('/ous/:ouid/images/:imageid/reserve(/)', 'validateApiKey',
 	// Choose older not-reserved client with image installed and get ogAdmServer data.
 	$cmd->texto = <<<EOD
 SELECT adm.idusuario, ordenadores.idordenador, ordenadores.nombreordenador, ordenadores.ip,
-       ordenadores.mac, ordenadores.agentkey, par.numdisk, par.numpar,
+       ordenadores.mac, ordenadores.mascara, ordenadores.agentkey, par.numdisk, par.numpar,
        aulas.idaula, aulas.idcentro, repo.ip AS repoip, repo.apikey AS repokey
   FROM ordenadores
   JOIN aulas USING(idaula)
@@ -111,6 +111,7 @@ EOD;
 		$clntname = $rs->campos["nombreordenador"];
 		$clntip = $rs->campos["ip"];
 		$clntmac = $rs->campos["mac"];
+		$clntnetmask = $rs->campos["mascara"];
 		$agentkey = $rs->campos["agentkey"];
 		$disk = $rs->campos["numdisk"];
 		$part = $rs->campos["numpar"];
@@ -128,7 +129,7 @@ EOD;
 			// TODO: if client is busy?????
 			if ($app->settings['debug'])
 				writeRemotepcLog($app->request()->getResourceUri(). ": Send boot command through ogAdmServer: iph=$clntip,mac=$clntmac.");
-			wol(1, [$clntmac], [$clntip]);
+			wol(1, [$clntmac], [$clntip], [$clntnetmask]);
 			// Send WOL command to client repository.
 			$repo[$repoip]['url'] = "https://$repoip/opengnsys/rest/repository/poweron";
 			$repo[$repoip]['header'] = Array("Authorization: ".$repokey);
