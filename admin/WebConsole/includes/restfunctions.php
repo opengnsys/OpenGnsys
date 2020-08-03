@@ -31,7 +31,7 @@ define('OG_REST_CMD_CREATE_SCHEDULE', 'schedule/create');
 define('OG_REST_CMD_DELETE_SCHEDULE', 'schedule/delete');
 define('OG_REST_CMD_UPDATE_SCHEDULE', 'schedule/update');
 define('OG_REST_CMD_GET_SCHEDULE', 'schedule/get');
-define('OG_REST_CMD_MODES', 'modes');
+define('OG_REST_CMD_MODE', 'mode');
 
 define('OG_REST_PARAM_CLIENTS', 'clients');
 define('OG_REST_PARAM_ADDR', 'addr');
@@ -234,7 +234,7 @@ function set_mode($scope_name, $mode) {
 	$data = array(OG_REST_PARAM_SCOPE_NAME => $scope_name,
 		      OG_REST_PARAM_MODE => $mode);
 
-	common_request(OG_REST_CMD_MODES, POST, $data);
+	common_request(OG_REST_CMD_MODE, POST, $data);
 }
 
 function create_image($string_ips, $params) {
