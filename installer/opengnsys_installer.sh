@@ -1288,7 +1288,6 @@ function copyServerFiles ()
 			bin \
 			lib \
 			sbin \
-			sbin \
 			lib \
 			lib \
 			lib \
