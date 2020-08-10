@@ -17,6 +17,8 @@
 #@date    2018-02-14
 #@version 1.1.1 - Incluye scripts personalizados (*Custom)
 #@date    2019-07-25
+#@version 1.2.0 - mysqldump no exporta los tablespaces por compatibilidad con mysql 5.7.31 (no los usamos).
+#@date    2020-08-10
 #*/ ##
 
 # Variables globales.
@@ -83,7 +85,7 @@ user=$USUARIO
 password=$PASSWORD
 EOT
 
-mysqldump --defaults-extra-file=$MYCNF --opt $CATALOG > $MYSQLFILE
+mysqldump --defaults-extra-file=$MYCNF --opt --no-tablespaces $CATALOG > $MYSQLFILE
 chmod 400 $MYSQLFILE
 
 # Borrar fichero temporal
