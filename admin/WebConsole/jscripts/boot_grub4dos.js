@@ -69,7 +69,7 @@ function allSelect()
         parm = parm.replace(patron,'');
 
         for (j=0;j<input[i].length;j++) {
-            saveString = saveString + parm + '|' + input[i].options[j].text + ';';
+            saveString = saveString + parm + '|' + input[i].options[j].value + ';';
         }
     }
     document.forms[0].listOfItems.value = saveString;

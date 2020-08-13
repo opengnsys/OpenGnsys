@@ -72,7 +72,7 @@ function clientKernelVersion () {
  * @author   Irina Gómez - ETSII Universidad de Sevilla
  * @date     2019-03-14
  */
-function createBootMode ($cmd, $bootopt, $hostname, $lang) {
+function createBootMode ($cmd, $bootopt, $ip, $lang) {
 	global $cadenaconexion;
 
 	// Datos para el acceso a mysql
@@ -98,7 +98,7 @@ function createBootMode ($cmd, $bootopt, $hostname, $lang) {
 	// Descripción plantilla PXE
 	$description=exec("awk 'NR==1 {print $2}' ".PXEDIRBIOS."/templates/".$bootopt);
 	if ($description === "") $description=exec("awk 'NR==1 {print $2}' ".PXEDIRUEFI."/templates/".$bootopt);
-	set_mode($hostname, $bootopt);
+	set_mode($ip, $bootopt);
 }
 
 
@@ -142,7 +142,7 @@ function updateBootMode ($cmd, $idfield, $idvalue, $lang) {
 	$idvalue = mysqli_real_escape_string ($cmd->Conexion->controlador, $idvalue);
 
 	// Obtener los ordenadores asociados al aula y sus plantillas de arranque.
-	$cmd->texto = "SELECT nombreordenador AS hostname, arranque AS bootopt
+	$cmd->texto = "SELECT ip, arranque AS bootopt
 			 FROM ordenadores
 			WHERE $idfield=$idvalue";
 	$rs = new Recordset;
@@ -150,12 +150,12 @@ function updateBootMode ($cmd, $idfield, $idvalue, $lang) {
 	if ($rs->Abrir()) {
 		$rs->Primero();
 		while (! $rs->EOF) {
-			$hostname=$rs->campos["hostname"];
+			$ip = $rs->campos["ip"];
 			if (! empty ($hostname)) {
 				$bootopt=$rs->campos["bootopt"];
 
 				// Volver a crear el fichero de arranque.
-				createBootMode ($cmd, $bootopt, $hostname, $lang);
+				createBootMode ($cmd, $bootopt, $ip, $lang);
 			}
 			$rs->Siguiente();
 		}

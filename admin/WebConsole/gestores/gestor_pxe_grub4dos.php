@@ -19,10 +19,10 @@ $cmd=CreaComando($cadenaconexion);
 foreach ($lista as $sublista) {
     if (! empty ($sublista)) {
         $elementos = explode("|",$sublista);
-        $hostname=$elementos[1];
+        $ip = $elementos[1];
         $optboot=$elementos[0];
 
-        createBootMode ($cmd, $optboot, $hostname, $idioma);
+        createBootMode ($cmd, $optboot, $ip, $idioma);
     }
 }
 

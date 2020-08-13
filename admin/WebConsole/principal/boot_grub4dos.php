@@ -201,7 +201,7 @@ for($i=0; $i<count($pn); $i++) {
 // esta funcion genera los elementos de un select(formulario html) donde aparecen los nombres de los ordenadores, según su menu pxe
 function listaequipos($cmd,$menupxe,$seleccion)
 {
-$cmd->texto="SELECT  idordenador, nombreordenador
+$cmd->texto="SELECT  ip, nombreordenador
 		FROM ordenadores
 		WHERE arranque='" . $menupxe ."' " . $seleccion;
 $rs=new Recordset; 
@@ -210,7 +210,7 @@ if (!$rs->Abrir()) echo "error";
 $rs->Primero(); 
 while (!$rs->EOF)
 { 
-	echo "<option value='".$rs->campos["idordenador"]."'>".$rs->campos["nombreordenador"]."</option>";
+	echo "<option value='".$rs->campos["ip"]."'>".$rs->campos["nombreordenador"]."</option>";
 	$rs->Siguiente();
 }
 $rs->Cerrar();

@@ -230,8 +230,8 @@ function session($string_ips, $params) {
 	common_request(OG_REST_CMD_SESSION, POST, $data);
 }
 
-function set_mode($scope_name, $mode) {
-	$data = array(OG_REST_PARAM_SCOPE_NAME => $scope_name,
+function set_mode($ip, $mode) {
+	$data = array(OG_REST_PARAM_CLIENTS => array($ip),
 		      OG_REST_PARAM_MODE => $mode);
 
 	common_request(OG_REST_CMD_MODE, POST, $data);

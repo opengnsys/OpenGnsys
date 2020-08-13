@@ -202,7 +202,7 @@ function Inserta($cmd,$idaula,$nombre,$lamac,$laip)
 	
 	// Crear fichero de arranque PXE con plantilla por defecto.
 	if ($resul) {
-		createBootMode ($cmd, "", $nombreordenador, $idioma);
+		createBootMode ($cmd, "", $ip, $idioma);
 	}
 	return($resul);
 }
