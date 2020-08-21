@@ -121,8 +121,8 @@ case "$TYPE" in
         else
             # Arranque BIOS: configurar kernel Linux con los parámetros leídos de su GRUB.
             kexec -l "${MNTDIR}${KERNEL}" --append="$APPEND" --initrd="${MNTDIR}${INITRD}"
-            pkill ogclient
-            kexec -e &
+            nohup bash -c 'sleep 2 && pkill ogclient' >/dev/null 2>&1 &
+            nohup bash -c 'sleep 3 && kexec -e' >/dev/null 2>&1 &
         fi
         ;;
     Windows)
@@ -154,8 +154,8 @@ case "$TYPE" in
                 # Modo de arranque en caliente (con kexec).
                 cp $OGLIB/grub4dos/* $MNTDIR    # */ (Comentario Doxygen)
                 kexec -l $MNTDIR/grub.exe --append=--config-file="root (hd$[$1-1],$[$2-1]); chainloader (hd$[$1-1],$[$2-1])/$LOADER; tpm --init"
-                pkill ogclient
-                kexec -e &
+                nohup bash -c 'sleep 2 && pkill ogclient' >/dev/null 2>&1 &
+                nohup bash -c 'sleep 3 && kexec -e' >/dev/null 2>&1 &
             else
                 # Modo de arranque por reinicio (con reboot).
                 dd if=/dev/zero of=${MNTDIR}/ogboot.me bs=1024 count=3
