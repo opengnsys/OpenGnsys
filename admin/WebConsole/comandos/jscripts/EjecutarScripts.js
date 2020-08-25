@@ -9,9 +9,7 @@
 // ***********************************************************************************************************
  function confirmar(){
 	if (comprobar_datos()){
-		var RC='@';
-		document.fdatos.codigo.value+="\n";
-		document.fdatosejecucion.atributos.value="scp="+escape(document.fdatos.codigo.value+"\n")+RC;
+		document.fdatosejecucion.atributos.value="scp="+escape(document.fdatos.codigo.value);
 		filtrado();
 		// Incluimos el modo de ejecución en fdatosejecucion.
 		var modoejecucion=document.createElement('input');

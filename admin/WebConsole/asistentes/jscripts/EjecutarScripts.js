@@ -12,9 +12,7 @@
 // ***********************************************************************************************************
  function confirmar(){
 	if (comprobar_datos()){
-		var RC='@';
-		document.fdatosejecucion.atributos.value="scp="+escape(document.fdatos.codigo.value)+RC;
-
+		document.fdatosejecucion.atributos.value="scp="+escape(document.fdatos.codigo.value);
 		// Pedir confirmación si clonación masiva por Unicast.
 		if (document.fdatosejecucion.ambito.value!=16 && document.fdatos.idmetodo !== undefined &&
                    (document.fdatos.idmetodo.value=="UNICAST" || document.fdatos.idmetodo.value=="UNICAST-DIRECT")) {

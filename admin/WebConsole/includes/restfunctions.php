@@ -144,9 +144,8 @@ function shell($case, $string_ips, $command) {
 			break;
 		case 3:
 			$decoded_cmds = rawurldecode(substr($command, 4));
-			$command = substr($decoded_cmds, 0, -2);
 			$data = array(OG_REST_PARAM_CLIENTS => $ips,
-				      OG_REST_PARAM_RUN => $command,
+				      OG_REST_PARAM_RUN => $decoded_cmds,
 				      OG_REST_PARAM_ECHO => false);
 			$command = OG_REST_CMD_RUN;
 			break;
