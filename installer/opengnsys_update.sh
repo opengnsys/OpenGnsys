@@ -1089,7 +1089,10 @@ function ogServerCompilation()
 	for serv in ogAdmAgent ogAdmRepo ogAdmServer; do
 		pgrep $serv > /dev/null && pkill -9 $serv && \
 		    echoAndLog "${FUNCNAME}(): removing deprecated $serv service"
-		rm -f $INSTALL_TARGET/sbin/$serv $INSTALL_TARGET/etc/$serv.cfg
+		rm -f $INSTALL_TARGET/sbin/$serv
+		if [ $serv != ogAdmRepo ]; then
+			rm -f $INSTALL_TARGET/etc/$serv.cfg
+		fi
 	done
 	# Generating an ogServer API token, if it does not exist
 	grep -q "APITOKEN=" $INSTALL_TARGET/etc/ogserver.cfg || \
