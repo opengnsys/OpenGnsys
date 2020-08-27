@@ -1195,7 +1195,7 @@ function updateOgClient()
 	if [ -e $INSTALL_TARGET/client/ogClient/cfg/ogclient.json ]; then
 	     rm -f ogClient-"$BRANCH"/cfg/ogclient.json
 	fi
-	mv -f "ogClient-$BRANCH" $INSTALL_TARGET/client/ogClient
+	rsync -irplt "ogClient-$BRANCH/" $INSTALL_TARGET/client/ogClient
 	rm -f ogclient.zip
 	echoAndLog "${FUNCNAME}(): ogClient code was downloaded and updated"
 
