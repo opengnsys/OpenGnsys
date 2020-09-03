@@ -58,7 +58,8 @@ if [ "$NEWKEY" != "NEW" ]; then
     if [ -r "$CLIENTINITRD" ]; then
         mkdir -p $TMPDIR
 	cd $TMPDIR || exit 3
-        gzip -dc "$CLIENTINITRD" | cpio -im
+        COMPRESS=$(file -b "$CLIENTINITRD" | awk '{print tolower($1);}')
+        $COMPRESS -dc "$CLIENTINITRD" | cpio -im
 	if [ -r scripts/ssl/id_rsa ]; then
             PRIVKEY=$(cat scripts/ssl/id_rsa |grep -v '\-\-\-')
 	    PUBLICKEY=$(cat scripts/ssl/id_rsa.pub)
@@ -94,7 +95,8 @@ for OGLIVE in $LIST; do
 	echo "Configurando cliente \"$OGLIVE\" ..."
 	mkdir -p $TMPDIR
 	cd $TMPDIR || exit 3
-	gzip -dc "$CLIENTINITRD" | cpio -im
+        COMPRESS=$(file -b "$CLIENTINITRD" | awk '{print tolower($1);}')
+        $COMPRESS -dc "$CLIENTINITRD" | cpio -im
 
         # Genero archivos de claves
 	[ -d $TMPDIR/scripts/ssl ] || mkdir -p $TMPDIR/scripts/ssl

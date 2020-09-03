@@ -260,7 +260,7 @@ function download() {
 # Install an ogLive client from a previously downloaded ISO image.
 function install() {
     local OGLIVEFILE OGLIVEDIST OGLIVEREV OGLIVEKRNL OGLIVEDIR OGINITRD OGSQFS OGCLIENT=ogclient
-    local SAMBAPASS TMPDIR RSYNCSERV RSYNCCLNT
+    local COMPRESS SAMBAPASS TMPDIR RSYNCSERV RSYNCCLNT
     [ $# -ne 1 ] && raiseError usage
     OGLIVEFILE=$(realpath $DOWNLOADDIR/$1)
     # Only 1 file in pathname expansion.
@@ -289,10 +289,10 @@ function install() {
     OGINITRD=$OGLIVEDIR/oginitrd.img
     [ ! -r $OGINITRD ] && OGINITRD=$TFTPDIR/$DEFOGLIVE/oginitrd.img
     if [ -r $OGINITRD ]; then
-    SAMBAPASS=$(gzip -dc $OGINITRD | \
-    cpio -i --to-stdout scripts/ogfunctions 2>&1 | \
-            grep "^[ 	].*OPTIONS=" | \
-            sed 's/\(.*\)pass=\(\w*\)\(.*\)/\2/')
+        COMPRESS=$(file -b "$OGINITRD " | awk '{print tolower($1);}')
+        SAMBAPASS=$($COMPRESS -dc $OGINITRD | \
+            cpio -i --to-stdout scripts/ogfunctions 2>&1 | \
+            sed -n '/^[ 	].*OPTIONS=/s/.*pass=\(\w*\).*/\1/p')
     fi
     # Make ogLive backup.
     rm -fr ${OGLIVEDIR}.old
