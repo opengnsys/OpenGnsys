@@ -13,6 +13,9 @@
 #@version 1.1.0 - Soporte para varios clientes ogLive.
 #@author  Ramón M. Gómez - ETSII Univ. Sevilla
 #@date    2017-06-20
+#@version 1.2.0 - Soporte para varios compresores de Initrd.
+#@author  Ramón M. Gómez - ETSII Univ. Sevilla
+#@date    2020-09-02
 #*/ ##
 
 
@@ -76,7 +79,8 @@ for OGLIVE in $LIST; do
 	echo "Configurando cliente \"$OGLIVE\" ..."
 	mkdir -p $TMPDIR
 	cd $TMPDIR || ogRaiseError access "Directorio temporal"
-	gzip -dc "$CLIENTINITRD" | cpio -im
+	COMPRESS=$(file -b "$CLIENTINITRD" | awk '{print tolower($1);}')
+	$COMPRESS -dc "$CLIENTINITRD" | cpio -im
 	if [ -f scripts/ogfunctions ]; then
 		sed -i "s/OPTIONS=\(.*\)user=\w*\(.*\)pass=\w*\(.*\)/OPTIONS=\1user=$SAMBAUSER\2pass=$SAMBAPASS\3/" scripts/ogfunctions
 		# TEMPORAL: solución ticket 554, actualizar cliente en caché (ogLive r3257).
@@ -86,7 +90,7 @@ for OGLIVE in $LIST; do
 		echo "$SAMBAPASS" > scripts/passrsync
 		chown root.root scripts/passrsync
 		chmod 400 scripts/passrsync
-		# Generar Initrd del cliente.
+		# Generar Initrd del cliente (siempre comprimido con gzip).
 		find . | cpio -H newc -oa | gzip -9c > "$CLIENTINITRD"
 	else
 		echo "$PROG: Aviso: no se ha modificado la clave del cliente \"$OGLIVE\"."
