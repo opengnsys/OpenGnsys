@@ -73,8 +73,8 @@ source module.conf || exit
 # Descomprimir Initrd.
 mkdir -p $tmpinit
 cd $tmpinit
-COMPRESS=$(file -b "$CLIENTINITRD" | awk '{print tolower($1);}')
-$COMPRESS -dc $INITRD | cpio -im 2>/dev/null
+COMPRESS=$(file -b "$INITRD" | awk '{print tolower($1);}')
+$COMPRESS -dc "$INITRD" | cpio -im 2>/dev/null
 
 # Versión del Kernel del Initrd.
 KERNEL=$(ls -d lib/modules/[0-9]* | head -1)
