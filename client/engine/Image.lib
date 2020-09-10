@@ -362,6 +362,7 @@ eval $PROGRAM
 ERRCODE=$?
 if [ $ERRCODE == 0 ]; then
     echo "$(ogGetImageInfo $IMGFILE):$(ogGetHostname)" > $IMGFILE.info
+    cp -f $IMGFILE.info /tmp/image.info
 else
     ogRaiseError $OG_ERR_IMAGE "$1 $2 $IMGFILE"
     rm -f "$IMGFILE"

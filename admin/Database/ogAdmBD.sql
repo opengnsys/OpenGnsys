@@ -447,6 +447,10 @@ CREATE TABLE `imagenes` (
   `ruta` varchar(250) NULL,
   `fechacreacion` datetime DEFAULT NULL,
   `inremotepc` tinyint NOT NULL DEFAULT 0,
+  `clonator` varchar(100) NOT NULL DEFAULT '',
+  `compressor` varchar(100) NOT NULL DEFAULT '',
+  `filesystem` varchar(100) NOT NULL DEFAULT '',
+  `datasize` bigint NOT NULL DEFAULT 0,
   PRIMARY KEY (`idimagen`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 

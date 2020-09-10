@@ -29,6 +29,15 @@ CREATE PROCEDURE altercols() BEGIN
 		ALTER TABLE remotepc
 			ADD urlrelease VARCHAR(100) DEFAULT NULL;
 	END IF;
+	IF NOT EXISTS (SELECT * FROM information_schema.COLUMNS
+			WHERE COLUMN_NAME='clonator' AND TABLE_NAME='imagenes' AND TABLE_SCHEMA=DATABASE())
+	THEN
+		ALTER TABLE imagenes
+			ADD clonator varchar(100) NOT NULL DEFAULT '',
+			ADD compressor varchar(100) NOT NULL DEFAULT '',
+			ADD filesystem varchar(100) NOT NULL DEFAULT '',
+			ADD datasize bigint NOT NULL DEFAULT 0;
+	END IF;
 END//
 # Ejecutar actualización condicional.
 DELIMITER ';'
