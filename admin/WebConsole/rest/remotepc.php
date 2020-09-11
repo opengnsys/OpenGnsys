@@ -39,13 +39,13 @@ $app->post('/ous/:ouid/images/:imageid/reserve(/)', 'validateApiKey',
 	global $ACCION_SINRESULTADO;
 	global $ACCION_FALLIDA;
 	global $userid;
-	$response = Array();
-	$ogagent = Array();
-	$repo = Array();
+	$response = [];
+	$ogagent = [];
+	$repo = [];
 
 	if ($app->settings['debug'])
 		writeRemotepcLog($app->request()->getResourceUri(). ": Init.");
-	// Checking parameters. 
+	// Checking parameters.
 	try {
 		if (empty(preg_match('/^python-requests\//', $_SERVER['HTTP_USER_AGENT']))) {
 			throw new Exception("Bad agent: sender=".$_SERVER['REMOTE_ADDR'].", agent=".$_SERVER['HTTP_USER_AGENT']);
@@ -120,35 +120,35 @@ EOD;
 		$repoip = $rs->campos["repoip"];
 		$repokey = $rs->campos["repokey"];
 		// Check client's status.
-		$ogagent[$clntip]['url'] = "https://$clntip:8000/opengnsys/status";
+		$ogagent = [['url' => "https://$clntip:8000/opengnsys/status"]];
 		if ($app->settings['debug'])
-			writeRemotepcLog($app->request()->getResourceUri(). ": OGAgent status, url=".$ogagent[$clntip]['url'].".");
+			writeRemotepcLog($app->request()->getResourceUri(). ": OGAgent status, url=".$ogagent[0]['url'].".");
 		$result = multiRequest($ogagent);
-		if (empty($result[$clntip]['data'])) {
+		if (empty($result[0]['data'])) {
 			// Client is off, send WOL command to ogAdmServer.
 			// TODO: if client is busy?????
 			if ($app->settings['debug'])
 				writeRemotepcLog($app->request()->getResourceUri(). ": Send boot command through ogAdmServer: iph=$clntip,mac=$clntmac.");
 			wol(1, [$clntmac], [$clntip], [$clntnetmask]);
 			// Send WOL command to client repository.
-			$repo[$repoip]['url'] = "https://$repoip/opengnsys/rest/repository/poweron";
-			$repo[$repoip]['header'] = Array("Authorization: ".$repokey);
-			$repo[$repoip]['post'] = '{"macs": ["'.$clntmac.'"], "ips": ["'.$clntip.'"]}';
+			$repo = [['url' => "https://$repoip/opengnsys/rest/repository/poweron",
+			          'header' => ["Authorization: $repokey"],
+			          'post' => '{"macs": ["'.$clntmac.'"], "ips": ["'.$clntip.'"]}']];
 			if ($app->settings['debug'])
-				writeRemotepcLog($app->request()->getResourceUri(). ": Send Boot command through repo: repo=$repoip, ip=$clntip,mac=$clntmac.");
+				writeRemotepcLog($app->request()->getResourceUri(). ": Send Boot command through repo: repo=$repoip,ip=$clntip,mac=$clntmac.");
 			$result = multiRequest($repo);
 			// ... (check response)
-			//if ($result[$repoip]['code'] != 200) {
+			//if ($result[0]['code'] != 200) {
 			// ...
 		} else {
-			// Client is on, send a rieboot command to its OGAgent.
-			$ogagent[$clntip]['url'] = "https://$clntip:8000/opengnsys/reboot";
-			$ogagent[$clntip]['header'] = Array("Authorization: ".$agentkey);
+			// Client is on, send a reboot command to its OGAgent.
+			$ogagent = [['url' => "https://$clntip:8000/opengnsys/reboot",
+			             'header' => ["Authorization: ".$agentkey]]];
 			if ($app->settings['debug'])
-				writeRemotepcLog($app->request()->getResourceUri(). ": OGAgent reboot, url=".$ogagent[$clntip]['url'].".");
+				writeRemotepcLog($app->request()->getResourceUri(). ": OGAgent reboot, url=".$ogagent[0]['url'].".");
 			$result = multiRequest($ogagent);
 			// ... (check response)
-			//if ($result[$clntip]['code'] != 200) {
+			//if ($result[0]['code'] != 200) {
 			// ...
 		}
 		// DB Transaction: mark choosed client as reserved and
@@ -265,7 +265,7 @@ $app->post('/ous/:ouid/labs/:labid/clients/:clntid/events', 'validateApiKey',
 
 	if ($app->settings['debug'])
 		writeRemotepcLog($app->request()->getResourceUri(). ": Init.");
-	// Checking parameters. 
+	// Checking parameters.
 	try {
 		if (empty(preg_match('/^python-requests\//', $_SERVER['HTTP_USER_AGENT']))) {
 			throw new Exception("Bad agent: sender=".$_SERVER['REMOTE_ADDR'].", agent=".$_SERVER['HTTP_USER_AGENT']);
@@ -359,7 +359,7 @@ $app->post('/ous/:ouid/labs/:labid/clients/:clntid/session', 'validateApiKey',
 
 	if ($app->settings['debug'])
 		writeRemotepcLog($app->request()->getResourceUri(). ": Init.");
-	// Checking parameters. 
+	// Checking parameters.
 	try {
 		if (empty(preg_match('/^python-requests\//', $_SERVER['HTTP_USER_AGENT']))) {
 			throw new Exception("Bad agent: sender=".$_SERVER['REMOTE_ADDR'].", agent=".$_SERVER['HTTP_USER_AGENT']);
@@ -463,12 +463,12 @@ $app->delete('/ous/:ouid/labs/:labid/clients/:clntid/unreserve', 'validateApiKey
 	global $cmd;
 	global $userid;
 	global $ACCION_INICIADA;
-	$response = Array();
-	$ogagent = Array();
+	$response = [];
+	$ogagent = [];
 
 	if ($app->settings['debug'])
 		writeRemotepcLog($app->request()->getResourceUri(). ": Init.");
-	// Checking parameters. 
+	// Checking parameters.
 	try {
 		if (empty(preg_match('/^python-requests\//', $_SERVER['HTTP_USER_AGENT']))) {
 			throw new Exception("Bad agent: sender=".$_SERVER['REMOTE_ADDR'].", agent=".$_SERVER['HTTP_USER_AGENT']);
@@ -537,13 +537,13 @@ EOD;
 			$cmd->texto = "COMMIT;";
 			$cmd->Ejecutar();
 			// Send a poweroff command to client's OGAgent.
-			$ogagent[$clntip]['url'] = "https://$clntip:8000/opengnsys/poweroff";
-			$ogagent[$clntip]['header'] = Array("Authorization: ".$agentkey);
+			$ogagent = [['url' => "https://$clntip:8000/opengnsys/poweroff",
+			             'header' => ["Authorization: ".$agentkey]]];
 			if ($app->settings['debug'])
-				writeRemotepcLog($app->request()->getResourceUri(). ": OGAgent poweroff, url=".$ogagent[$clntip]['url'].".");
+				writeRemotepcLog($app->request()->getResourceUri(). ": OGAgent poweroff, url=".$ogagent[0]['url'].".");
 			$result = multiRequest($ogagent);
 			// ... (check response)
-			//if ($result[$clntip]['code'] != 200) {
+			//if ($result[0]['code'] != 200) {
 			// ...
 			// Confirm operation.
 			$response = "";
@@ -556,6 +556,152 @@ EOD;
 	} else {
 		// Error message.
 		$response["message"] = "Client does not exist";
+		jsonResponse(404, $response);
+	}
+	$rs->Cerrar();
+    }
+);
+
+
+/*
+ * @brief    Send an init operation to a client with an image installed.
+ * @note     Route: /ous/:ouid/labs/:labid/clients/:clntid/init, Method: POST
+ * @param    int    image   Image id.
+ */
+$app->post('/ous/:ouid/labs/:labid/clients/:clntid/init', 'validateApiKey',
+    function($ouid, $labid, $clntid) use ($app) {
+        global $cmd;
+        global $userid;
+
+	if ($app->settings['debug'])
+		writeRemotepcLog("{$app->request()->getResourceUri()}: Init.");
+	// Checking parameters.
+	try {
+		if (empty(preg_match('/^python-requests\//', $_SERVER['HTTP_USER_AGENT']))) {
+			throw new Exception("Bad agent: sender=".$_SERVER['REMOTE_ADDR'].", agent=".$_SERVER['HTTP_USER_AGENT']);
+		}
+		if (!checkIds($ouid, $labid, $clntid)) {
+			throw new Exception("Ids. must be positive integers");
+		}
+		// Reading POST parameters in JSON format.
+		$input = json_decode($app->request()->getBody());
+		$imageid = $input->image ?? 0;
+		if (filter_var($imageid, FILTER_VALIDATE_INT, $opts) === false) {
+			throw new Exception("Image id. must be positive integer");
+		}
+	} catch (Exception $e) {
+		// Communication error.
+		$response["message"] = $e->getMessage();
+		if ($app->settings['debug'])
+			writeRemotepcLog("{$app->request()->getResourceUri()}: ERROR: {$response["message"]}.");
+		jsonResponse(400, $response);
+		$app->stop();
+	}
+
+	// Select data to init a session.
+	$cmd->texto = <<<EOD
+SELECT adm.idusuario, ordenadores.ip, ordenadores.mac, ordenadores.mascara, ordenadores.agentkey,
+       par.numdisk, par.numpar, repo.ip AS repoip, repo.apikey AS repokey
+  FROM ordenadores
+  JOIN aulas USING(idaula)
+ RIGHT JOIN administradores_centros AS adm USING(idcentro)
+ RIGHT JOIN usuarios USING(idusuario)
+ RIGHT JOIN ordenadores_particiones AS par USING(idordenador)
+ RIGHT JOIN imagenes USING(idimagen)
+ RIGHT JOIN repositorios AS repo ON repo.idrepositorio = ordenadores.idrepositorio
+  LEFT JOIN remotepc ON remotepc.id=ordenadores.idordenador
+ WHERE adm.idusuario = '$userid'
+   AND aulas.idcentro = '$ouid' AND aulas.idaula LIKE '$labid'
+   AND ordenadores.idordenador = '$clntid' AND ordenadores.maintenance = 0
+   AND imagenes.idimagen = '$imageid'
+ LIMIT 1;
+EOD;
+	$rs=new Recordset;
+	$rs->Comando=&$cmd;
+	if (!$rs->Abrir()) return(false);       // Error opening recordset.
+	// Check if user is admin and client exists.
+	$rs->Primero();
+	if (checkAdmin($rs->campos["idusuario"]) and checkParameter($rs->campos["idordenador"])) {
+		// Read query data.
+		$clntip = $rs->campos["ip"];
+		$clntmac = $rs->campos["mac"];
+		$clntnetmask = $rs->campos["mascara"];
+		$agentkey = $rs->campos["agentkey"];
+		$disk = $rs->campos["numdisk"];
+		$part = $rs->campos["numpar"];
+		$repoip = $rs->campos["repoip"];
+		$repokey = $rs->campos["repokey"];
+		// Check client's status.
+		$ogagent = [['url' => "https://$clntip:8000/opengnsys/status"]];
+		if ($app->settings['debug'])
+			writeRemotepcLog("{$app->request()->getResourceUri()}: OGAgent status, url={$ogagent[0]['url']}.");
+		$result = multiRequest($ogagent);
+		if (empty($result[0]['data'])) {
+			// Client is off, send WOL command to ogAdmServer.
+			// TODO: if client is busy?????
+			if ($app->settings['debug'])
+				writeRemotepcLog("{$app->request()->getResourceUri()}: Send boot command through ogAdmServer: iph=$clntip,mac=$clntmac.");
+			wol(1, [$clntmac], [$clntip], [$clntnetmask]);
+			// Send WOL command to client repository.
+			$repo = [['url' => "https://$repoip/opengnsys/rest/repository/poweron",
+			          'header' => ["Authorization: $repokey"],
+			          'post' => '{"macs": ["'.$clntmac.'"], "ips": ["'.$clntip.'"]}']];
+			if ($app->settings['debug'])
+				writeRemotepcLog("{$app->request()->getResourceUri()}: Send Boot command through repo: repo=$repoip,ip=$clntip,mac=$clntmac.");
+			$result = multiRequest($repo);
+		}
+		// Create an init session on opertions queue.
+		$cmd->texto = <<<EOD
+INSERT INTO acciones
+   SET tipoaccion=$EJECUCION_COMANDO,
+       idtipoaccion=9,
+       idcomando=9,
+       parametros='nfn=IniciarSesion\rdsk=$disk\rpar=$part',
+       descriaccion='RemotePC Session',
+       idordenador=$clntid,
+       ip='$clntip',
+       sesion=$timestamp,
+       fechahorareg=NOW(),
+       estado=$ACCION_INICIADA,
+       resultado=$ACCION_SINRESULTADO,
+       ambito=$AMBITO_ORDENADORES,
+       idambito=$clntid,
+       restrambito='$clntip',
+       idcentro=$ouid;
+EOD;
+		$cmd->Ejecutar();
+		// Create event to remove the operation on timeout (15 min.).
+		$timeout = "15 MINUTE";
+		$cmd->texto = <<<EOD
+CREATE EVENT IF NOT EXISTS e_timeout_$clntid
+       ON SCHEDULE AT CURRENT_TIMESTAMP + INTERVAL $timeout DO
+       BEGIN
+	    SET @action_id = NULL;
+	    UPDATE acciones
+	       SET estado = $ACCION_FINALIZADA, resultado = $ACCION_FALLIDA,
+		   descrinotificacion = 'Timeout'
+	     WHERE descriaccion = 'RemotePC Session' AND estado = $ACCION_INICIADA
+	       AND idordenador = '$clntid'
+	       AND (SELECT @action_id := idaccion);
+	    IF @action_id IS NOT NULL THEN
+	       DELETE FROM acciones
+		WHERE idaccion = @action_id;
+	    END IF;
+       END
+EOD;
+		$cmd->Ejecutar();
+		if ($app->settings['debug'])
+			writeRemotepcLog("{$app->request()->getResourceUri()}: DB tables and events updated, clntid=$clntid.");
+		// Send init session command if client is booted on ogLive.
+		if ($app->settings['debug'])
+			writeRemotepcLog("{$app->request()->getResourceUri()}: Send Init Session command to ogAdmClient, ido=$clntid,iph=$clntip,dsk=$disk,par=$part.");
+		session($clntip, "$disk\r$part");
+		// Confirm operation.
+		$response = [];
+		jsonResponse(200, $response);
+	} else {
+		// Error message.
+		$response["message"] = "Client with this image not found";
 		jsonResponse(404, $response);
 	}
 	$rs->Cerrar();
