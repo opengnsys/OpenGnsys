@@ -181,6 +181,8 @@ EOD;
 			} else {
 		    		throw new Exception("Client is not in the database: ip=$ip, user=$user");
 			}
+			// Compose sentence to store if the user session is local or not.
+			$cmd->texto = "UPDATE remotepc SET islocal = IF('$session' = 'local', 1, 0)";
 			// Redirect notification to UDS server, if needed.
 			if ($reserved == 1 and !is_null($sendlogin[0]['url'])) {
 				$sendlogin[0]['get'] = $app->request()->getBody();
@@ -188,18 +190,16 @@ EOD;
 				// ... (check response)
 				//if ($result[0]['code'] != 200) {
 				// ...
-				// Updating user's session language for messages.
-				$cmd->texto = <<<EOD
-UPDATE remotepc
-   SET language = '$language'
- WHERE id = '$id';
-EOD;
-				$cmd->Ejecutar();
+				// Add user's session language to the SQL sentence.
+				$cmd->texto .= ", language = '$language";
 			}
 			// Release a reserved client if a user opens a local session.
 			if ($reserved == 1 and $session === "local" and ! is_null($sendrel[0]['url'])) {
 				$result = multiRequest($sendrel);
 			}
+			// Update the database.
+			$cmd->texto .= " WHERE id = '$id';";
+			$cmd->Ejecutar();
 		} else {
 			throw new Exception("Database error");
 		}
@@ -268,6 +268,9 @@ EOD;
 				//if ($result[0]['code'] != 200) {
 				// ...
 			}
+			// Disable local session flag.
+			$cmd->texto = "UPDATE remotepc SET islocal = 0 WHERE id = '$id';";
+			$cmd->Ejecutar();
 		} else {
 			throw new Exception("Database error");
 		}
