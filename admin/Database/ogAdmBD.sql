@@ -802,6 +802,7 @@ CREATE TABLE `remotepc` (
   `urllogout` varchar(100) DEFAULT NULL,
   `urlrelease` varchar(100) DEFAULT NULL,
   `language` varchar(5),
+  `islocal` tinyint NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8;
 
