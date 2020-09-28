@@ -407,6 +407,10 @@ EOD;
 					$tmp['name'] = $rs->campos["nombreaula"];
 					$tmp['inremotepc'] = ($rs->campos["inremotepc"] == 1);
 					$tmp['group']['id'] = (int)$rs->campos["grupoid"];
+					$tmp['classroomGroups'] = array();
+					if (isset($rs->campos["nombregrupoordenador"])){
+						$tmp['classroomGroups'] = array(array("id" => (int)$rs->campos["group_id"], "name" => $rs->campos["nombregrupoordenador"], "comments" => $rs->campos["comentarios"], "classroomGroups" => array()));
+					}
 					$tmp['ou']['id'] = (int)$ouid;
 					array_push($response, $tmp);
 				}
