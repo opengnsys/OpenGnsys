@@ -143,10 +143,10 @@ EOD;
 		}
 		// Parse responses.
 		reset($urls);
-		foreach ($result as $res) {
+		foreach ($result as $myKey => $res) {
 			if (!empty($res['data'])) {
 				// Get status and session data.
-				$ip = key($urls);
+				$ip = $myKey;
 				$data = json_decode($res['data']);
 				if (@isset($status[$data->status])) {
 					$stat[$ip] = $status[$data->status];
