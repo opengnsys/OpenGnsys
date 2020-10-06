@@ -86,8 +86,8 @@ define('OG_SCHEDULE_COMMAND', 'command');
 define('OG_SCHEDULE_PROCEDURE', 'procedure');
 define('OG_SCHEDULE_TASK', 'task');
 
-$conf_file = parse_ini_file(__DIR__ . '/../../etc/ogserver.cfg');
-define('OG_REST_API_TOKEN', 'Authorization: ' . $conf_file['APITOKEN']);
+$conf_file = json_decode(file_get_contents(__DIR__ . '/../../etc/ogserver.json'), true);
+define('OG_REST_API_TOKEN', 'Authorization: ' . $conf_file['rest']['api_token']);
 
 function common_request($command, $type, $data = null) {
 
