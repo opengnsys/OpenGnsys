@@ -28,7 +28,6 @@
 # Variables y funciones globales.
 PROG="$(basename "$0")"
 OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
-SERVERCONF=$OPENGNSYS/etc/ogserver.cfg
 PXEDIR[0]=$OPENGNSYS/tftpboot/menu.lst
 PXEDIR[1]=$OPENGNSYS/tftpboot/grub
 LOGFILE=$OPENGNSYS/log/opengnsys.log
