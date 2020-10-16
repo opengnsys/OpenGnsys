@@ -1502,11 +1502,23 @@ function openGnsysConfigure()
 	echoAndLog "${FUNCNAME}(): Creating OpenGnsys config files."
 	for dev in ${DEVICE[*]}; do
 		if [ -n "${SERVERIP[i]}" ]; then
-			sed -e "s/SERVERIP/${SERVERIP[i]}/g" \
-			    -e "s/DBUSER/$OPENGNSYS_DB_USER/g" \
-			    -e "s/DBPASSWORD/$OPENGNSYS_DB_PASSWD/g" \
-			    -e "s/DATABASE/$OPENGNSYS_DATABASE/g" \
-				"$WORKDIR"/ogServer-"$BRANCH"/cfg/ogserver.cfg > "$INSTALL_TARGET"/etc/ogserver-"$dev".cfg
+			echo "{
+				\"rest\" : {
+					\"ip\" : \"${SERVERIP[i]}\",
+					\"port\" : \"8888\",
+					\"api_token\": \"5a5ca1172136299640a9f47469237e0a\"
+				},
+				\"database\" : {
+					\"ip\": \"127.0.0.1\",
+					\"port\": \"3306\",
+					\"name\" : \"$OPENGNSYS_DATABASE\",
+					\"user\" : \"$OPENGNSYS_DB_USER\",
+					\"pass\" : \"$OPENGNSYS_DB_PASSWD\"
+				},
+				\"wol\" : {
+					\"interface\" : \"$dev\"
+				}
+			}" | jq '.' > "$INSTALL_TARGET"/etc/ogserver-"$dev".json
 			sed -e "s/SERVERIP/${SERVERIP[i]}/g" \
 				$WORKDIR/opengnsys/repoman/etc/ogAdmRepo.cfg.tmpl > $INSTALL_TARGET/etc/ogAdmRepo-$dev.cfg
 			CONSOLEURL="https://${SERVERIP[i]}/opengnsys"
@@ -1523,7 +1535,7 @@ function openGnsysConfigure()
 		fi
 		let i++
 	done
-	ln -f $INSTALL_TARGET/etc/ogserver-$DEFAULTDEV.cfg $INSTALL_TARGET/etc/ogserver.cfg
+	ln -f $INSTALL_TARGET/etc/ogserver-$DEFAULTDEV.json $INSTALL_TARGET/etc/ogserver.json
 	ln -f $INSTALL_TARGET/etc/ogAdmRepo-$DEFAULTDEV.cfg $INSTALL_TARGET/etc/ogAdmRepo.cfg
 	ln -f $INSTALL_TARGET/www/controlacceso-$DEFAULTDEV.php $INSTALL_TARGET/www/controlacceso.php
 
