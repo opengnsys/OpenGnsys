@@ -15,7 +15,7 @@
 
 # Global constants.
 OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
-SERVERCFG=$OPENGNSYS/etc/ogserver.cfg                # Configuration files.
+SERVERCFG=$OPENGNSYS/etc/ogserver.json
 REPOCFG=$OPENGNSYS/etc/ogAdmRepo.cfg
 
 # Functions.
@@ -47,7 +47,6 @@ case "${1,,}" in
 esac
 [ "$USER" != "root" ] && raiseError access "Need to be root"
 [ -w $SERVERCFG ] || raiseError access "Server configuration file"
-source $SERVERCFG
 
 # Update user token.
 if [ "$OGUSER" ]; then
@@ -69,7 +68,7 @@ if [ "$SERVER" ]; then
         [ "${ANSWER,,}" != "y" ] && raiseError cancel "API tokens not updated"
     fi
     APIKEY="$(new_token)"
-    sed -i -n -e "/^APITOKEN=/!p" -e "$ a\APITOKEN=$APIKEY" $SERVERCFG || raiseError access "Cannot update server file"
+    sed -i "s/\"api_token\": \".*\"/\"api_token\": \"$APIKEY\"/" $SERVERCFG || raiseError access "Cannot update server file"
 fi
 
 # Update repository token.
