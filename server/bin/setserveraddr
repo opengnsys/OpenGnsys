@@ -33,7 +33,7 @@ source $OPENGNSYS/lib/ogfunctions.sh || exit 1
 [ "$USER" != "root" ] && raiseError access "Need to be root"
 [ $# -ne 1 ] && raiseError usage
 [ -r $DEFAULTFILE ] || raiseError access "Cannot read default configuration file"
-for f in $OPENGNSYS/{etc/{ogserver,ogAdmRepo}.cfg,www/controlacceso.php,client/ogClient/cfg/ogclient.json}; do
+for f in $OPENGNSYS/{etc/ogserver.json,etc/ogAdmRepo.cfg,www/controlacceso.php,client/ogClient/cfg/ogclient.json}; do
 	[ -w $f ] || raiseError access "Cannot write to file: $f"
 done
 
@@ -84,15 +84,17 @@ if [ -n "$SERVERIP" ]; then
 	fi
 
 	# Saving old IP address.
-	source $OPENGNSYS/etc/ogserver.cfg
+	source_json_config $OPENGNSYS/etc/ogserver.json
 	OLDSERVERIP=$ServidorAdm
 	# Checking if configuration files need to be modified.
 	CHANGE=0
-	for f in $OPENGNSYS/{etc/{ogserver,ogAdmRepo}.cfg,www/controlacceso.php}; do
+	for f in $OPENGNSYS/{etc/ogserver.json,etc/ogAdmRepo.cfg,www/controlacceso.php}; do
 		# Updating configuration variables (if URL does not contain "localhost").
 		sed -e "s,\(ServidorAdm\|IPlocal\)=.*,\1=$SERVERIP," \
 		    -e "s,^INTERFACE=.*,INTERFACE=$SERVERDEV," \
 		    -e "s,UrlMenu=https?://\([^/]*\)/\(.*\),UrlMenu=https://$SERVERIP/\2," \
+		    -e "s/\"ip\": \".*\"/\"ip\": \"$SERVERIP\"/" $SERVERCFG \
+		    -e "s/\"interface\": \".*\"/\"interface\": \"$SERVERDEV\"/" $SERVERCFG \
 		    -e '/localhost/!s,https\?://[^/]*/\(.*\),https://'$SERVERIP'/\1,' $f >$tmpfile
 		file="${f/./-$SERVERDEV.}"
 		# Copying updated file, if needed.

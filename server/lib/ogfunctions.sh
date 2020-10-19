@@ -110,6 +110,18 @@ function jq() {
     echo "$OUTPUT"
 }
 
+function source_json_config() {
+    FILE=$1
+    export ServidorAdm=$(jq -r ".rest.ip" $FILE)
+    export PUERTO=$(jq -r ".rest.port" $FILE)
+    export APITOKEN=$(jq -r ".rest.api_token" $FILE)
+    export USUARIO=$(jq -r ".database.user" $FILE)
+    export PASSWORD=$(jq -r ".database.pass" $FILE)
+    export datasource=$(jq -r ".database.ip" $FILE)
+    export CATALOG=$(jq -r ".database.name" $FILE)
+    export INTERFACE=$(jq -r ".wol.interface" $FILE)
+}
+
 # Private function to acts on a service (do not use directly).
 function _service() {
     local ACTION="$1"

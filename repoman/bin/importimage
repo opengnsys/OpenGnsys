@@ -20,16 +20,16 @@
 OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
 REPODIR="$OPENGNSYS/images"
 REPOCONF="$OPENGNSYS/etc/ogAdmRepo.cfg"
-SERVERCONF="$OPENGNSYS/etc/ogserver.cfg"
+SERVERCONF="$OPENGNSYS/etc/ogserver.json"
 DEFAULTFILE="/etc/default/opengnsys"
 let BACKUP=0
 source $DEFAULTFILE
 source $REPOCONF &>/dev/null
-[ "$RUN_OGADMSERVER" == "yes" ] && source $SERVERCONF &>/dev/null
 
 # Functions.
 source $OPENGNSYS/lib/ogfunctions.sh || exit 1
 
+[ "$RUN_OGADMSERVER" == "yes" ] && source_json_config $SERVERCONF &>/dev/null
 
 # Main program.
 

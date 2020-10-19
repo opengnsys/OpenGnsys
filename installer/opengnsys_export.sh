@@ -57,7 +57,7 @@ if ! which realpath &>/dev/null ; then
 fi
 
 # Comprobamos  acceso a ficheros de configuración
-if ! [ -r $OPENGNSYS/etc/ogserver.cfg ]; then
+if ! [ -r $OPENGNSYS/etc/ogserver.json ]; then
     echo "$PROG: ERROR: Sin acceso a la configuración de OpenGnsys." | tee -a $FILESAL
     exit 3
 fi
@@ -74,7 +74,9 @@ done
 
 # Exportar la base de datos
 echo "Exportamos la información de la base de datos."
-source $OPENGNSYS/etc/ogserver.cfg
+source $OPENGNSYS/lib/ogfunctions.sh || exit 1
+source_json_config $OPENGNSYS/etc/ogserver.json
+
 # Crear fichero temporal de acceso a la BD
 MYCNF=$(mktemp /tmp/.my.cnf.XXXXX)
 chmod 600 $MYCNF

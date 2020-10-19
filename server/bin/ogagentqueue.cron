@@ -13,13 +13,13 @@
 # Variables.
 PROG=$(basename "$0")
 OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
-SERVERCONF=$OPENGNSYS/etc/ogserver.cfg
+SERVERCONF=$OPENGNSYS/etc/ogserver.json
 LOGFILE=$OPENGNSYS/log/remotepc.log
 
 source $OPENGNSYS/lib/ogfunctions.sh || exit 1
 
 # Basic error control
-source $SERVERCONF 2> /dev/null || raiseError access "Server configuration file"
+source_json_config $SERVERCONF 2> /dev/null || raiseError access "Server configuration file"
 touch "$LOGFILE" 2> /dev/null || raiseError access "Cannot write in the log file" 
 
 # Reading pending operations.

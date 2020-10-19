@@ -12,7 +12,7 @@
 
 # Variables.
 OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
-SERVERCONF=$OPENGNSYS/etc/ogserver.cfg
+SERVERCONF=$OPENGNSYS/etc/ogserver.json
 TFTPDIR=$OPENGNSYS/tftpboot
 
 source $OPENGNSYS/lib/ogfunctions.sh || exit 1
@@ -22,7 +22,7 @@ source $OPENGNSYS/lib/ogfunctions.sh || exit 1
 [ "$*" == "version" ] && version
 [ $# -eq 1 ] || raiseError usage
 [ "$USER" != "root" ] && raiseError access "Need to be root"
-source $SERVERCONF 2>/dev/null || raiseError access "Sin acceso a fichero de configuración"
+source_json_config $SERVERCONF 2>/dev/null || raiseError access "Sin acceso a fichero de configuración"
 
 # Sustituir caracteres ' por \' para evitar inyección SQL.
 RESOURCE="${1//\'/\\\'}"

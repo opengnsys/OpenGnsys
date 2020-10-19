@@ -52,8 +52,13 @@ if [ ! -d $INSTALL_TARGET ]; then
         echo "ERROR: OpenGnsys is not installed, cannot update!!"
         exit 1
 fi
+
+source $INSTALL_TARGET/lib/ogfunctions.sh || exit 1
+
 # Cargar configuración de acceso a la base de datos.
-if [ -r $INSTALL_TARGET/etc/ogserver.cfg ]; then
+if [ -r $INSTALL_TARGET/etc/ogserver.json ]; then
+	source_json_config $INSTALL_TARGET/etc/ogserver.json
+elif [ -r $INSTALL_TARGET/etc/ogserver.cfg ]; then
 	source $INSTALL_TARGET/etc/ogserver.cfg
 elif [ -r $INSTALL_TARGET/etc/ogAdmServer.cfg ]; then
 	source $INSTALL_TARGET/etc/ogAdmServer.cfg

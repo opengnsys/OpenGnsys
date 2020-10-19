@@ -17,7 +17,7 @@
 PROG="$(basename "$0")"
 OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
 PATH=$PATH:$OPENGNSYS/bin
-SERVERCONF=$OPENGNSYS/etc/ogserver.cfg
+SERVERCONF=$OPENGNSYS/etc/ogserver.json
 TFTPDIR=$OPENGNSYS/tftpboot
 LOGFILE=$OPENGNSYS/log/opengnsys.log
 
@@ -28,7 +28,7 @@ source $OPENGNSYS/lib/ogfunctions.sh || exit 1
 [ "$*" == "version" ] && version
 [ $# -eq 2 ] || raiseError usage
 [ "$USER" != "root" ] && raiseError access "Need to be root"
-source $SERVERCONF 2>/dev/null || raiseError access "Sin acceso a fichero de configuración"
+source_json_config $SERVERCONF 2>/dev/null || raiseError access "Sin acceso a fichero de configuración"
 
 case "$1" in
     [0-9]*)     DIR=$(oglivecli search $1 2>/dev/null) ;;

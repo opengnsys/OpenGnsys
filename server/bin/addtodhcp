@@ -15,7 +15,7 @@
 # Variables.
 PROG="$(basename "$0")"
 OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
-SERVERCONF=$OPENGNSYS/etc/ogserver.cfg
+SERVERCONF=$OPENGNSYS/etc/ogserver.json
 DHCPCONF=/etc/dhcp/dhcpd.conf
 DHCPCONFBCK="$DHCPCONF-$(date +"%Y%m%d")"
 
@@ -26,7 +26,7 @@ source $OPENGNSYS/lib/ogfunctions.sh || exit 1
 [ "$*" == "version" ] && version
 # Error control.
 [ "$USER" != "root" ] && raiseError access "Need to be root"
-source $SERVERCONF 2>/dev/null || raiseError access "Cannot read OpenGnsys Server configuration file"
+source_json_config $SERVERCONF 2>/dev/null || raiseError access "Cannot read OpenGnsys Server configuration file"
 
 # Processing parameters.
 opts=$(getopt -n "$PROG" -l exam,file:,restart -o 'ef:r' -- "$@" ) || raiseError usage

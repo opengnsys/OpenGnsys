@@ -278,7 +278,7 @@ if ! [ -r $BACKUPFILE ]; then
 fi
 
 # Comprobamos  acceso a ficheros de configuración
-if ! [ -r $OPENGNSYS/etc/ogserver.cfg ]; then
+if ! [ -r $OPENGNSYS/etc/ogserver.json ]; then
     echo "$PROG: ERROR: Sin acceso a la configuración de OpenGnsys." | tee -a $FILESAL
     exit 3
 fi
@@ -333,7 +333,8 @@ fi
 
 # MYSQL
 echo "   * Importamos informacion mysql."
-source $OPENGNSYS/etc/ogserver.cfg
+source $OPENGNSYS/lib/ogfunctions.sh || exit 1
+source_json_config $OPENGNSYS/etc/ogserver.json
 # Crear fichero temporal de acceso a la BD
 if [ ! -r $MYCNF ]; then
     chmod 600 $MYCNF

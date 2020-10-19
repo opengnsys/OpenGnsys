@@ -180,9 +180,9 @@ fi
 echo "- Directory list"
 ls -Ral ${home_dir}                     >> $backup_dir/opengnsys_files.txt 2>&1
 
-if [ -r ${home_dir}/etc/ogserver.cfg ]; then
+if [ -r ${home_dir}/etc/ogserver.json ]; then
     echo "- Database schema"
-    source ${home_dir}/etc/ogserver.cfg
+    source_json_config ${home_dir}/etc/ogserver.json
     mysqldump -u "$USUARIO" -p"$PASSWORD" -d "$CATALOG" >> ${backup_dir}/opengnsys_schema.sql 2>&1
 else
     echo "- WARNING: The OpenGnsys database can not be accessed" | tee ${backup_dir}/db_schema.txt

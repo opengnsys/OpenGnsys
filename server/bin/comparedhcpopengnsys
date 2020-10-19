@@ -16,7 +16,7 @@
 
 PROG="$(basename "$0")"
 OPENGNSYS=${OPENGNSYS:-"/opt/opengnsys"}
-SERVERCONF=$OPENGNSYS/etc/ogserver.cfg
+SERVERCONF=$OPENGNSYS/etc/ogserver.json
 DHCPFILE=${DHCPFILE:-/etc/dhcp/dhcpd.conf}
 TMP_DHCP=/tmp/$PROG-dhcp$$
 TMP_MYSQL=/tmp/$PROG-mysql$$
@@ -29,7 +29,7 @@ source $OPENGNSYS/lib/ogfunctions.sh || exit 1
 [ -r $DHCPFILE ] || raiseError access "No tenemos acceso al fichero de configuracion del dhcp"
 
 # Obtener datos de acceso a la Base de datos.
-source $SERVERCONF 2> /dev/null || raiseError access "Fichero de configuración del servidor"
+source_json_config $SERVERCONF 2> /dev/null || raiseError access "Fichero de configuración del servidor"
 
 trap "rm -f $TMP_DHCP $TMP_MYSQL" 1 2 3 9 15
 # Genero fichero temporal de dhcp recorriendo la configuración del dhcp cadena a cadena.
