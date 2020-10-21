@@ -798,9 +798,9 @@ DROP TABLE IF EXISTS `remotepc`;
 CREATE TABLE `remotepc` (
   `id` int(11) NOT NULL DEFAULT 0,
   `reserved` datetime DEFAULT NULL,
-  `urllogin` varchar(100) DEFAULT NULL,
-  `urllogout` varchar(100) DEFAULT NULL,
-  `urlrelease` varchar(100) DEFAULT NULL,
+  `urllogin` varchar(255) DEFAULT NULL,
+  `urllogout` varchar(255) DEFAULT NULL,
+  `urlrelease` varchar(255) DEFAULT NULL,
   `language` varchar(5),
   `islocal` tinyint NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`)

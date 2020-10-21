@@ -27,7 +27,7 @@ CREATE PROCEDURE altercols() BEGIN
 			WHERE COLUMN_NAME='urlrelease' AND TABLE_NAME='remotepc' AND TABLE_SCHEMA=DATABASE())
 	THEN
 		ALTER TABLE remotepc
-			ADD urlrelease VARCHAR(100) DEFAULT NULL AFTER urllogout;
+			ADD urlrelease VARCHAR(255) DEFAULT NULL AFTER urllogout;
 	END IF;
 	# Add flag field to indicate if a local session is open (ticket #992).
 	IF NOT EXISTS (SELECT * FROM information_schema.COLUMNS
@@ -59,5 +59,6 @@ ALTER TABLE imagenes
 	MODIFY inremotepc SMALLINT NOT NULL DEFAULT 0;
 # Redefine some fields as null by default.
 ALTER TABLE remotepc
-      MODIFY urllogin VARCHAR(100) DEFAULT NULL,
-      MODIFY urllogout VARCHAR(100) DEFAULT NULL;
+      MODIFY urllogin VARCHAR(255) DEFAULT NULL,
+      MODIFY urllogout VARCHAR(255) DEFAULT NULL,
+      MODIFY urlrelease VARCHAR(255) DEFAULT NULL;
