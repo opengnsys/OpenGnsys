@@ -47,6 +47,7 @@ case "${1,,}" in
 esac
 [ "$USER" != "root" ] && raiseError access "Need to be root"
 [ -w $SERVERCFG ] || raiseError access "Server configuration file"
+source_json_config $SERVERCFG
 
 # Update user token.
 if [ "$OGUSER" ]; then
