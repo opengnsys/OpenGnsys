@@ -428,7 +428,7 @@ function installDependencies()
 	eval $UPDATEPKGLIST
 	if [ -f /etc/debian_version ]; then
 		# Basado en paquetes Deb.
-		PHP7VERSION=$(apt-cache pkgnames php7 2>/dev/null | sort | head -1)
+		PHP7VERSION="php7.2"
 		PHPFPMSERV="${PHP7VERSION}-fpm"
 		PHP5PKGS=( $(dpkg -l | awk '$2~/^php5/ {print $2}') )
 		if [ -n "$PHP5PKGS" ]; then
