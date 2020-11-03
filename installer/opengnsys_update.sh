@@ -1089,7 +1089,28 @@ function ogServerCompilation()
 	popd
 	# Renaming OpenGnsys Server configuration file, if needed
 	[ -e $INSTALL_TARGET/etc/ogAdmServer.cfg ] && \
-	    mv -v $INSTALL_TARGET/etc/ogAdmServer.cfg $INSTALL_TARGET/etc/ogserver.cfg
+	    rm -f $INSTALL_TARGET/etc/ogAdmServer.cfg
+	[ -e $INSTALL_TARGET/etc/ogserver.cfg ] && \
+	    rm -f $INSTALL_TARGET/etc/ogserver.cfg
+	if [ ! -e $INSTALL_TARGET/etc/ogserver.json ]; then
+		echo "{
+			\"rest\" : {
+				\"ip\" : \"$ServidorAdm\",
+				\"port\" : \"8888\",
+				\"api_token\": \"$APITOKEN\"
+			},
+			\"database\" : {
+				\"ip\": \"$datasource\",
+				\"port\": \"3306\",
+				\"name\" : \"$CATALOG\",
+				\"user\" : \"$USUARIO\",
+				\"pass\" : \"$PASSWORD\"
+			},
+			\"wol\" : {
+				\"interface\" : \"$INTERFACE\"
+			}
+		}" | jq '.' > "$INSTALL_TARGET"/etc/ogserver.json
+	fi
 	# Remove old OpenGnsys services
 	for serv in ogAdmAgent ogAdmRepo ogAdmServer; do
 		pgrep $serv > /dev/null && pkill -9 $serv && \
@@ -1100,8 +1121,8 @@ function ogServerCompilation()
 		fi
 	done
 	# Generating an ogServer API token, if it does not exist
-	grep -q "APITOKEN=" $INSTALL_TARGET/etc/ogserver.cfg || \
-		$INSTALL_TARGET/bin/settoken -f
+	[ -z "$APITOKEN" ] && \
+	    $INSTALL_TARGET/bin/settoken -f
 	# Updating service file, if needed
 	if ! diff -q \
 	     "$WORKDIR"/ogServer-"$BRANCH"/cfg/ogserver.service \
