@@ -289,7 +289,7 @@ function install() {
     OGINITRD=$OGLIVEDIR/oginitrd.img
     [ ! -r $OGINITRD ] && OGINITRD=$TFTPDIR/$DEFOGLIVE/oginitrd.img
     if [ -r $OGINITRD ]; then
-        COMPRESS=$(file -b "$OGINITRD " | awk '{print tolower($1);}')
+        COMPRESS=$(file -b "$OGINITRD" | awk '{print tolower($1);}')
         SAMBAPASS=$($COMPRESS -dc $OGINITRD | \
             cpio -i --to-stdout scripts/ogfunctions 2>&1 | \
             sed -n '/^[ 	].*OPTIONS=/s/.*pass=\(\w*\).*/\1/p')
