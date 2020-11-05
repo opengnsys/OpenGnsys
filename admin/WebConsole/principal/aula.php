@@ -246,7 +246,7 @@ function RecorreOrdenadores($cmd){
 		$Mrow[$k]=$rs->campos["n_row"]??0;
 		$Mcol[$k]=$rs->campos["n_col"]??0;
 		// Calcula nº máximo de columnas para pintar el aula (-1, modo antiguo)
-		if ($max_col === -1 or $Mrow[$k] === 0 or $Mcol[$k] === 0 or isset($map[$Mrow[$k]][$Mcol[$k]])) {
+		if ($max_col === -1 or $Mrow[$k] === '0' or $Mcol[$k] === '0' or isset($map[$Mrow[$k]][$Mcol[$k]])) {
 			$max_col = -1;
 		} else {
 			$max_col = max($max_col, $Mcol[$k]);
