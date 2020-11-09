@@ -19,19 +19,12 @@ IMAGEDIR=$BASEDIR/images
 CLIENTLOGDIR=$BASEDIR/log/clients
 
 #
-# Servidor de OpenGnsys
-#
-SERVERNAME=ogserver
-SERVERCFG=$BASEDIR/etc/$SERVERNAME.cfg
-
-#
 # Servidor de Repositorio
 #
 ############## ADV
 REPOAUXNAME=ogAdmRepoAux
 REPOAUXDAEMON=$BASEDIR/sbin/$REPOAUXNAME
-REPOAUXPORT=$(awk -F= '/PUERTO/ {print $2+1}' $SERVERCFG 2>/dev/null)
-############# IRINA
+REPOAUXPORT=2009
 
 #
 # Opciones Bittorrent
@@ -142,14 +135,22 @@ para_demonios() {
   if [ -e $BTSEEDERPID ]; then
     $ACTIONMSG "Parando demonio: $BTSEEDER"
     $SEEDERSTOP
-    [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
-    rm -f $BTSEEDERPID
+    if [ $? = 0 ]; then
+	   $SUCCESSMSG
+	   rm -f $BTSEEDERPID
+    else
+	   $FAILMSG
+    fi
   fi
   if [ -e $BTTRACKPID ]; then
     $ACTIONMSG "Parando demonio: $BTTRACK"
     $TRACKERSTOP
-    [ $? = 0 ] && $SUCCESSMSG || $FAILMSG
-    rm -f $BTTRACKPID
+    if [ $? = 0 ]; then
+	    $SUCCESSMSG
+            rm -f $BTTRACKPID
+    else
+	    $FAILMSG
+    fi
   fi 
   $ACTIONMSG "Parando demonio: $REPOAUXNAME"
   pkill faucet
