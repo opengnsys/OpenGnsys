@@ -48,8 +48,8 @@ chown -R $OPENGNSYS_USER:$OPENGNSYS_USER $OPENGNSYS_DIR/client/etc/ssl/private
 chmod -R go-rwx $OPENGNSYS_DIR/client/etc/ssl/private
 chown $OPENGNSYS_USER:$OPENGNSYS_USER $OPENGNSYS_DIR/client/interfaceAdm/CambiarAcceso
 chmod 700 $OPENGNSYS_DIR/client/interfaceAdm/CambiarAcceso
-chown root:$APACHE_GROUP $OPENGNSYS_DIR/{www/controlacceso*.php,etc/ogAdmRepo*.cfg,etc/ogserver*.cfg}
-chmod 640 $OPENGNSYS_DIR/{www/controlacceso*.php,etc/ogAdmRepo*.cfg,etc/ogserver*.cfg}
+chown root:$APACHE_GROUP $OPENGNSYS_DIR/{www/controlacceso*.php,etc/ogAdmRepo*.cfg,etc/ogserver*.json}
+chmod 640 $OPENGNSYS_DIR/{www/controlacceso*.php,etc/ogAdmRepo*.cfg,etc/ogserver*.json}
 chown -R $APACHE_USER:$APACHE_GROUP $OPENGNSYS_DIR/www/images/{fotos,iconos}
 mkdir -p $OPENGNSYS_DIR/www/{api,tmp}
 chown -R $APACHE_USER:$APACHE_GROUP $OPENGNSYS_DIR/www/{api,tmp}
