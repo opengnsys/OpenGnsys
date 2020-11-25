@@ -44,7 +44,7 @@ $TbMsg["IMAGE_REPOSITORY"]='Image / Repository';
 $TbMsg["INCREMENTAL_IMAGE_REPOSITORY"]='Incremental Image / Repository';
 
 $TbMsg["CONFIG_NOCONFIG"]='No configuration: client not connected to server.';
-$TbMsg["CONFIG_NODISK1MSDOS"]='Warning: this command only uses disk 1 with MSDOS partition table.';
+$TbMsg["CONFIG_NODISK1MSDOS"]='Warning: this command only works with MSDOS partition table.';
 $TbMsg["CONFIG_NOOS"]='No operating system detected on the computer.';
 
 $TbMsg["SYNC_METHOD"]='Method';

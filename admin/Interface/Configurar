@@ -108,8 +108,8 @@ ogCreatePartitionTable $dis MSDOS
 # Inicia la cache.
 if echo "$sparam" |grep "CACHE" >/dev/null; then
         ogEcho session log "[30] $MSG_HELP_ogCreateCache"
-        ogEcho session log "   initCache $tch"
-	ogExecAndLog COMMAND  initCache $tch
+        ogEcho session log "   initCache  $dis $tch"
+	ogExecAndLog COMMAND  initCache $dis $tch
 fi
 
 # Definir particionado.

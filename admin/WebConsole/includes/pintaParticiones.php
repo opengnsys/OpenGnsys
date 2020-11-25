@@ -312,7 +312,8 @@ function pintaParticionesRestaurarImagen($cmd,$configuraciones,$idordenadores,$c
 	Devuelve:
 		El código html de la tabla
 ________________________________________________________________________________________________________*/
-function pintaParticionesConfigurar($cmd,$configuraciones,$idordenadores,$cc)
+function pintaParticionesConfigurar($cmd,$configuraciones,$idordenadores,$cc,
+				    $numdisk)
 {
 
 	global $tbKeys; // Tabla contenedora de claves de configuración
@@ -337,18 +338,18 @@ function pintaParticionesConfigurar($cmd,$configuraciones,$idordenadores,$cc)
 		$auxKey=explode(";",$auxCfg[$i]); // Toma clave de configuracion
 		for($k=1;$k<$conKeys;$k++){ // Busca los literales para las claves de esa partición
 			if($tbKeys[$k]["cfg"]==$auxCfg[$i]){ // Claves encontradas
-				if($tbKeys[$k]["numdisk"]==1){ // Solo tratar disco 1
+				if($tbKeys[$k]["numdisk"]==$numdisk){
 					if($tbKeys[$k]["numpar"]>0){ // Solo particiones (número>0)
 						$icp=$cc."_".$k; // Identificador de la configuración-partición
 						echo '<tr id="TR_'.$icp.'" align="center">';
 						echo '<td><input type="checkbox" onclick="eliminaParticion(this,\''.$icp.'\')"></td>';
 						echo '<td>'.HTMLSELECT_particiones($tbKeys[$k]["numpar"]).'</td>';
 						echo '<td>'.HTMLSELECT_tipospar($cmd,$tbKeys[$k]["tipopar"]).'</td>';
-						$sf=tomaSistemasFicheros($tbKeys[$k]["numpar"],$idordenadores,true);
+						$sf=tomaSistemasFicheros($tbKeys[$k]["numpar"], $idordenadores, true, $numdisk);
 						echo '<td>'.HTMLSELECT_sistemasficheros($cmd,$sf).'</td>';
-						$tm=tomaTamano($tbKeys[$k]["numpar"],$idordenadores);
+						$tm=tomaTamano($tbKeys[$k]["numpar"], $idordenadores, $numdisk);
 						echo '<td><input type="text" style="width:100px" value="'.$tm.'"></td>';
-						echo '<td>'.tomaNombresSO($tbKeys[$k]["numpar"],$idordenadores).'</td>';					
+						echo '<td>'.tomaNombresSO($tbKeys[$k]["numpar"], $idordenadores, $numdisk).'</td>';
 						echo '<td>'.opeFormatear().'</td>';
 						echo '</tr>';
 					} else {
@@ -364,7 +365,7 @@ function pintaParticionesConfigurar($cmd,$configuraciones,$idordenadores,$cc)
 	}
 	// Marcar fin de zona de datos de la tabla.
 	// Datos del disco
-	$tm=tomaTamano(0,$idordenadores);
+	$tm=tomaTamano(0,$idordenadores, $numdisk);
 	echo '<tr id="TRIMG_'.$cc.'" align="center">'.
 	     "\n<td></td>\n<td></td>\n<td".' style="font-size: 1em; padding: 1px 0;  "'.">".$TbMsg["DISK"]."</td>".
      "\n<td></td>\n<td".' style="font-size: 1em; padding: 1px 0; "> '.(isset($tm)?$tm:("<em>".$TbMsg["VARIABLE"]."</em>"))." <input type='hidden' id='hdsize$cc' name='hdsize$cc' style='width:100px' value='".$tm."'></td>".

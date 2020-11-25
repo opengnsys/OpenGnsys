@@ -239,7 +239,7 @@ function comprobarDatos(cc)
 	*/
 
 	var RC="!";
-	var disco=1; // Siempre disco 1
+	var disco = document.disk.current_numdisk.value;
 
 	atributos="dsk="+disco+"@"+"cfg="; // Inicializa variable global de parámetros del comando
 

@@ -41,6 +41,8 @@ $fk_sysFi=0;
 $fk_tamano=0;
 $fk_nombreSO=0;
 
+$numdisk=1;
+
 if (isset($_GET["idambito"])) $idambito=$_GET["idambito"]; 
 if (isset($_GET["ambito"])) $ambito=$_GET["ambito"]; 
 
@@ -50,6 +52,8 @@ if (isset($_POST["ambito"])) $ambito=$_POST["ambito"];
 if (isset($_POST["fk_sysFi"])) $fk_sysFi=$_POST["fk_sysFi"]; 
 if (isset($_POST["fk_tamano"])) $fk_tamano=$_POST["fk_tamano"]; 
 if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"]; 
+
+if (isset($_POST["numdisk"])) $numdisk=$_POST["numdisk"];
 //________________________________________________________________________________________________________ 
 ?>
 <HTML>
@@ -122,7 +126,30 @@ if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 	}
 	$sws=$fk_sysFi |  $fk_tamano | $fk_nombreSO;
 
-	pintaConfiguraciones($cmd,$idambito,$ambito,7,$sws,false,"pintaParticionesConfigurar");	
+	$configs = pintaConfiguraciones($cmd, $idambito, $ambito, 7, $sws, false, "pintaParticionesConfigurar", "idordenador", $numdisk);
+
+?>
+
+	<div align=center>
+		<span class=subcabeceras><?php echo $TbMsg["HD"] ?></span>
+		<form action="Configurar.php" name="disk" method="POST">
+			<input type="hidden" name="idambito" value="<?php echo $idambito?>">
+			<input type="hidden" name="ambito" value="<?php echo $ambito?>">
+			<input type="hidden" name="cadenaid" value="<?php echo $cadenaid?>">
+			<input type="hidden" name="nombreambito" value="<?php echo $nombreambito?>">
+			<input type="hidden" name="idcomando" value="<?php echo $idcomando?>">
+			<input type="hidden" name="descricomando" value="<?php echo $descricomando?>">
+			<input type="hidden" name="gestor" value="<?php echo $gestor?>">
+			<input type="hidden" name="funcion" value="<?php echo $funcion?>">
+			<input type="hidden" name="current_numdisk" value="<?php echo $numdisk?>">
+			<?php echo HTMLSELECT_disks($configs, $numdisk); ?>
+			<a href=#>
+				<img border=0 src="../images/boton_confirmar_<?php echo $idioma ?>.gif" onclick="document.disk.submit()">
+			</a>
+		</form>
+	</div>
+
+<?php
 
 	/* Dibuja tabla patron  !OJO! no insertar caracteres entre las etiquetas*/
 	
@@ -145,6 +172,25 @@ if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 </BODY>
 </HTML>
 <?php
+
+function HTMLSELECT_disks($configs, $default_numdisk)
+{
+	foreach($configs as $config){
+		$diskConfigs = splitConfigurationsByDisk($config);
+		$numdisks = count($diskConfigs);
+		if ( $mindisks > $numdisks )
+			 $mindisks = $numdisks;
+	}
+
+	$options="";
+	for ($i = 1; $i <= $numdisks; $i++)
+			$options.="$i=$i".chr(13);
+
+	$SelectHtml="";
+	$SelectHtml.=HTMLCTESELECT($options, "numdisk", "estilodesple", "",
+				   $default_numdisk, 40, "");
+	return($SelectHtml);
+}
 
 /*________________________________________________________________________________________________________
 	Crea la etiqueta html <SELECT> de los número de particiones
