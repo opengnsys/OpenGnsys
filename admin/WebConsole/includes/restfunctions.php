@@ -542,24 +542,26 @@ function setup($string_ips, $params) {
 		$params, $matches);
 
 	$ips = explode(';',$string_ips);
-	$disk = $matches[0][0];
-	$cache = $matches[0][2];
-	$cache_size = $matches[0][3];
+	$table_type= $matches[0][0];
+	$disk = $matches[0][1];
+	$cache = $matches[0][3];
+	$cache_size = $matches[0][4];
 	$partition_number = array();
 	$partition_code = array();
 	$file_system = array();
 	$part_size = array();
 	$format = array();
 	for ($x = 0; $x < 4; $x++) {
-		$partition_number[$x] = $matches[0][4 + 5 * $x];
-		$partition_code[$x] = $matches[0][5 + 5 * $x];
-		$file_system[$x] = $matches[0][6 + 5 * $x];
-		$part_size[$x] = $matches[0][7 + 5 * $x];
-		$format[$x] = $matches[0][8 + 5 * $x];
+		$partition_number[$x] = $matches[0][5 + 5 * $x];
+		$partition_code[$x] = $matches[0][6 + 5 * $x];
+		$file_system[$x] = $matches[0][7 + 5 * $x];
+		$part_size[$x] = $matches[0][8 + 5 * $x];
+		$format[$x] = $matches[0][9 + 5 * $x];
 	}
 
 	$data = array(
 		OG_REST_PARAM_CLIENTS => $ips,
+		OG_REST_PARAM_TYPE => $table_type,
 		OG_REST_PARAM_DISK => $disk,
 		OG_REST_PARAM_CACHE => $cache,
 		OG_REST_PARAM_CACHE_SIZE => $cache_size,

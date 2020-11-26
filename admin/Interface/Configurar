@@ -32,10 +32,11 @@ PROG=$(basename $0)
 #		@= caracter de separación
 #____________________________________________________________________
 
+tabletype=$1
+
 # Captura de parámetros (se ignora el 1er parámetro y se eliminan espacios y tabuladores).
 #param='dis=1*che=0*tch=70000000!par=1*cpt=NTFS*sfi=NTFS*tam=11000000*ope=0%'
-shift
-param="$(echo $* | sed 's/[ 	]//g')"
+param="$(echo $2 | sed 's/[ 	]//g')"
 
 # Activa navegador para ver progreso
 coproc /opt/opengnsys/bin/browser -qws http://localhost/cgi-bin/httpd-log.sh
@@ -103,7 +104,7 @@ ogDeletePartitionTable $dis
 ogExecAndLog COMMAND ogUpdatePartitionTable $dis
 
 # Crea tabla de particiones MSDOS (NOTA: adaptar para tablas GPT).
-ogCreatePartitionTable $dis MSDOS
+ogCreatePartitionTable "$dis" "$tabletype"
 
 # Inicia la cache.
 if echo "$sparam" |grep "CACHE" >/dev/null; then

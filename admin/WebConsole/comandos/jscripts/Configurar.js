@@ -240,8 +240,9 @@ function comprobarDatos(cc)
 
 	var RC="!";
 	var disco = document.disk.current_numdisk.value;
+	var table_type = document.getElementById("table_type").value;
 
-	atributos="dsk="+disco+"@"+"cfg="; // Inicializa variable global de parámetros del comando
+	atributos="ttp="+table_type+"@"+"dsk="+disco+"@"+"cfg="; // Inicializa variable global de parámetros del comando
 
 
 	if(swc){

@@ -124,6 +124,26 @@ if (isset($_POST["numdisk"])) $numdisk=$_POST["numdisk"];
 		</FORM>	
 <?php
 	}
+	$rs = new Recordset;
+	$cmd->texto = "SELECT codpar FROM ordenadores_particiones WHERE idordenador='"
+		      .$idambito."' AND numdisk='".$numdisk."'";
+	$rs->Comando = &$cmd;
+	if ($rs->Abrir()) { // Error al abrir recordset
+		$rs->Primero();
+		if (!$rs->EOF){
+			$current_table_type = $rs->campos["codpar"];
+		}
+		$rs->Cerrar();
+	}
+?>
+	<div>
+		Tabla de particiones:
+		<select name="table_type" id="table_type">
+			<option value="MSDOS">MSDOS</option>
+			<option value="GPT" <?php echo $current_table_type == 2 ? "selected" : ""; ?>>GPT</option>
+		</select>
+	</div>
+<?php
 	$sws=$fk_sysFi |  $fk_tamano | $fk_nombreSO;
 
 	$configs = pintaConfiguraciones($cmd, $idambito, $ambito, 7, $sws, false, "pintaParticionesConfigurar", "idordenador", $numdisk);
