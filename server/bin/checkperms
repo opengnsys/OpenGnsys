@@ -58,4 +58,6 @@ chown -R :$OPENGNSYS_USER $OPENGNSYS_DIR/tftpboot/ogLive*
 find -L $OPENGNSYS_DIR/tftpboot -type d -exec chmod 755 {} \;
 find -L $OPENGNSYS_DIR/tftpboot -type f -exec chmod 644 {} \;
 chown $APACHE_USER:$APACHE_GROUP $OPENGNSYS_DIR/log/{ogagent,remotepc,rest}.log
+chown root:"$OPENGNSYS_USER" "$OPENGNSYS_DIR"/client/ogClient/cfg/ogclient.json
+chmod 640 "$OPENGNSYS_DIR"/client/ogClient/cfg/ogclient.json
 
