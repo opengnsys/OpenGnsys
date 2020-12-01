@@ -104,6 +104,9 @@ for OGLIVE in $LIST; do
     fi
 done
 if [[ $CHANGES != 0 ]]; then
+    jq ".samba.user = \"$SAMBAUSER\" | .samba.pass = \"$SAMBAPASS\"" \
+        "$OPENGNSYS"/client/ogClient/cfg/ogclient.json > /tmp/ogclient.json
+    mv /tmp/ogclient.json "$OPENGNSYS"/client/ogClient/cfg/ogclient.json
     # Ticket 565, preparar acceso Rsync servidor.
     [ -e /etc/rsyncd.secrets ] && sed -i -n -e "/^$SAMBAUSER:/!p" -e "$ a$SAMBAUSER:$SAMBAPASS" /etc/rsyncd.secrets || echo "$SAMBAUSER:$SAMBAPASS" > /etc/rsyncd.secrets
     chown root.root /etc/rsyncd.secrets
