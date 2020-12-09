@@ -10,9 +10,26 @@ fi
 
 # Comprobar errores.
 PART=$(ogDiskToDev "$1" "$2") || exit $?
-ogMount $1 $2  &>/dev/null || exit $?
+MNTDIR=$(ogMount $1 $2) || exit $?
 
 echo "[0] Inicio del proceso de arranque."
+
+# Si el equipo está hibernado chequeamos el f.s. y borramos el hiberfile (error cod.6)
+mount |grep -q "$MNTDIR.*(rw"
+if [ $? -ne 0 ]; then
+    ogEcho log session "${MSG_WARNING}: $MSG_MOUNTREADONLY"
+    ogUnmount $1 $2
+    ogCheckFs $1 $2
+
+    PART=$(ogDiskToDev "$1" "$2")
+    mkdir -p $MNTDIR
+    ntfs-3g -o remove_hiberfile $PART $MNTDIR
+    ogEcho log session "Particion desbloqueada"
+
+    ogUnmount $1 $2
+    ogMount $1 $2
+fi
+
 
 if which bootOsCustom  &>/dev/null; then
     echo "[10] Configuración personalizada del inicio."
