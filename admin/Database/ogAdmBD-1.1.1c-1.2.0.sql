@@ -62,3 +62,7 @@ ALTER TABLE remotepc
       MODIFY urllogin VARCHAR(255) DEFAULT NULL,
       MODIFY urllogout VARCHAR(255) DEFAULT NULL,
       MODIFY urlrelease VARCHAR(255) DEFAULT NULL;
+
+# Support hard disk bigger 2Tb (ticket #1012)
+ALTER TABLE ordenadores_particiones
+      MODIFY tamano BIGINT NOT NULL DEFAULT '0';
