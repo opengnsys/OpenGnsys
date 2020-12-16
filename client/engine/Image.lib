@@ -940,7 +940,7 @@ IMGFILE=$1
 FILEHEAD=/tmp/`basename $IMGFILE`.infohead
 COMPRESSOR=`file $IMGFILE | awk '{print $2}'`
 ogCheckStringInGroup "$COMPRESSOR" "gzip lzop" || ogRaiseError $OG_ERR_IMAGE "Image format is not valid $IMGFILE" || return $?
-$($COMPRESSOR -dc $IMGFILE 2>/dev/null | head > $FILEHEAD) || ogRaiseError $OG_ERR_IMAGE "Image format is not valid $IMGFILE" || return $? 
+$($COMPRESSOR -dc $IMGFILE 2>/dev/null | head -n 40 > $FILEHEAD) || ogRaiseError $OG_ERR_IMAGE "Image format is not valid $IMGFILE" || return $?
 
 ## buscando Primera opción.
 if [ "$IMGDETECT" == "FALSE" ] 
