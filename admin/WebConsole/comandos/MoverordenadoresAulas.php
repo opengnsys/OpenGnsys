@@ -19,6 +19,7 @@ include_once("../includes/HTMLCTESELECT.php");
 include_once("../includes/TomaDato.php");
 include_once("../includes/RecopilaIpesMacs.php");
 include_once("../includes/opcionesprotocolos.php");
+include_once("../includes/tftputils.php");
 include_once("../idiomas/php/".$idioma."/comandos/moverordenadoresAulas_".$idioma.".php");
 //________________________________________________________________________________________________________
 //include_once("./includes/capturaacciones.php");
@@ -153,6 +154,7 @@ if($confmovord == "si" ){
 							$cmd->texto = "UPDATE ordenadores SET idaula=$idaulamov, grupoid=0 WHERE idordenador=$idordmov";
 							$resulm=$cmd->Ejecutar();
 							###	AGP		######################################################################################
+							updateBootMode($cmd, "idordenador", $idordmov, $idioma);
 						}
 				}
 			}else{echo "<script>comprobarord();</script>";}

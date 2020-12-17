@@ -323,7 +323,7 @@ EOD;
 			$cmd->texto="UPDATE ordenadores SET idaula=@idaula, grupoid=@grupoid WHERE idordenador=@idordenador";
 			$resul=$cmd->Ejecutar();
 			// Actualizar fichero TFTP/PXE a partir de la plantilla asociada.
-			createBootMode ($cmd, $arranque, $ip, $idioma);
+			updateBootMode ($cmd, "idordenador", $idordenador, $idioma);
 			break;
 		default:
 			break;

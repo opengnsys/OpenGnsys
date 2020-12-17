@@ -151,7 +151,7 @@ function updateBootMode ($cmd, $idfield, $idvalue, $lang) {
 		$rs->Primero();
 		while (! $rs->EOF) {
 			$ip = $rs->campos["ip"];
-			if (! empty ($hostname)) {
+			if (! empty ($ip)) {
 				$bootopt=$rs->campos["bootopt"];
 
 				// Volver a crear el fichero de arranque.
