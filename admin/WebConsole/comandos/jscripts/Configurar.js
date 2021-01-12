@@ -10,7 +10,6 @@
 
 var atributos=""; // Variable global
 var swc=false; // Switch para detectar cache
-var swe=false; // Switch para detectar partición extendida
 
 //________________________________________________________________________________________________________ 
 // 
@@ -32,7 +31,6 @@ function eliminaParticion(o,icp)
 	var desplepar=o.parentNode.nextSibling.nextSibling.childNodes[0]; 
 	var tipar=tomavalorDesple(desplepar); // Partición
 	if(tipar==="CACHE") swc=false; // Si es la caché se pone a false su switch
-	if(tipar==="EXTENDED") swe=false; // Si es la EXTENDED se pone a false su switch
 
 	var tbCfg = document.getElementById("tabla_conf"); // Recupera objeto <TABLE>
 	var trCfg = document.getElementById("TR_"+icp); // Recupera <TR> de la fila a eliminar
@@ -129,6 +127,9 @@ function comprobarDatos(cc)
 
 	var trCfg = document.getElementById("TR_"+cc); // Recupera primer <TR> de la configuración
 	trCfg=trCfg.nextSibling; // Primera fila de particiones
+
+	var swe = false;
+
 	while(trCfg.id!=="TRIMG_"+cc){
 
 		var tama=trCfg.childNodes[itama].childNodes[0].value; // Tamaño de partición
@@ -212,22 +213,35 @@ function comprobarDatos(cc)
 	}	
 	
 	//Controles finales de los paramtros a enviar
+	var table_type = document.getElementById("table_type").value;
 
-	if(!swe){ // Si no se han especificado particiones extendidas ...
-		if(maxpar>4){ // La partición de mayor orden supera el número 4
-			alert(TbMsg[7]);
+	switch (table_type) {
+	case "MSDOS":
+		if (!swe) {
+			if (maxpar > 4) {
+				alert(TbMsg[7]);
+				return(false);
+			}
+		} else {
+			if (allextsize > extsize) {
+				alert(TbMsg["EXTSIZE"]);
+				return(false);
+			}
+			allpartsize += extsize;
+		}
+		break;
+	case "GPT":
+		if (swe) {
+			alert("Extended type not compatible with GPT");
 			return(false);
 		}
+		break;
+	default:
+		alert("Disk type not compatible");
+		return(false);
+		break;
 	}
 
-	// Alerta si las particiones lógicas son mayores que la extendida
-	if(swe){
-		if (allextsize>extsize) {
-			alert(TbMsg["EXTSIZE"]);
-			return(false);
-		}
-		allpartsize+=extsize;
-	}
 	// Alerta si tamaño del disco menor que las particiones 
 	if (hdsize<allpartsize) {
 		alert(TbMsg["HDSIZE"]);
@@ -240,7 +254,6 @@ function comprobarDatos(cc)
 
 	var RC="!";
 	var disco = document.disk.current_numdisk.value;
-	var table_type = document.getElementById("table_type").value;
 
 	atributos="ttp="+table_type+"@"+"dsk="+disco+"@"+"cfg="; // Inicializa variable global de parámetros del comando
 

@@ -85,6 +85,7 @@ define('TYPE_TASK', 3);
 define('OG_SCHEDULE_COMMAND', 'command');
 define('OG_SCHEDULE_PROCEDURE', 'procedure');
 define('OG_SCHEDULE_TASK', 'task');
+define('PART_MAX_NUM_FIELDS', 5);
 
 $conf_file = json_decode(file_get_contents(__DIR__ . '/../../etc/ogserver.json'), true);
 define('OG_REST_API_TOKEN', 'Authorization: ' . $conf_file['rest']['api_token']);
@@ -551,7 +552,8 @@ function setup($string_ips, $params) {
 	$file_system = array();
 	$part_size = array();
 	$format = array();
-	for ($x = 0; $x < 4; $x++) {
+	$num_partitions = (sizeof($matches[0]) - 5) / PART_MAX_NUM_FIELDS;
+	for ($x = 0; $x < $num_partitions; $x++) {
 		$partition_number[$x] = $matches[0][5 + 5 * $x];
 		$partition_code[$x] = $matches[0][6 + 5 * $x];
 		$file_system[$x] = $matches[0][7 + 5 * $x];
