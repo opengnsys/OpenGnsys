@@ -198,8 +198,6 @@ function HTMLSELECT_disks($configs, $default_numdisk)
 	foreach($configs as $config){
 		$diskConfigs = splitConfigurationsByDisk($config);
 		$numdisks = count($diskConfigs);
-		if ( $mindisks > $numdisks )
-			 $mindisks = $numdisks;
 	}
 
 	$options="";
