@@ -2,6 +2,45 @@
 LISTA DE CAMBIOS	CHANGELOG.es.txt
 ========================================
 
+Lista de cambios incluidos en OpenGnsys 1.2
+-------------------------------------------
+
+Tickets resueltos en módulo OpenGnsys Cloning Engine:
+#1011 	Error con Windows hibernado
+#1014 	ogGetImageInfo falla con la actualización de Windows de octubre 2020
+
+Tickets resueltos en módulo OpenGnsys Client:
+#980 	Add REST API to ogClient
+#999	ogClient session command do not boot the selected OS (corrección)
+#1000 	Fix ogClient HTTP lenght handling (corrección)
+#1009 	Fix ogclient permissions (corrección)
+
+Tickets resueltos en módulo OpenGnsys Server:
+#941 	Use libdbi in ogAdmServer (mejora)
+#942 	Remove ogAdmAgent (mejora)
+#970 	Use autotools in ogAdmServer
+#971 	Remove unused code in ogAdmServer, ogAdmAgent and ogAdmClient
+#981 	add native systemd unit file for ogAdmServer
+#986 	Rename ogAdmServer to ogServer
+#990 	Use client broadcast address on WoL (mejora)
+#1002 	Fix update script to not remove ogAdmRepo.cfg (corrección)
+#1008 	Add support to several disk (mejora)
+#1010 	Clean up and fix /software
+
+Tickets resueltos en módulo OpenGnsys Web Admin Console:
+#838 	Problema con parámetros vga en ogLive
+#901 	Investigate if connections to the database are made correctly
+#944 	Mostrar la distribución de equipos en el aula (mejora)
+#998 	disable incremental image updates
+#1001 	Remove trailing \r and \n in some scripts (corrección)
+#1005 	Fix support for computer groups in RemotePC (corrección)
+#1006 	Fix RemotePC IP retrieving on running clients
+#1012 	Soporte disco mayores de 2Tb
+
+Tickets resueltos en módulo OpenGnsys Installer:
+#987 	Use systemctl to disable/enable services in Debian/Ubuntu (mejora)
+#1003 	Fix ogClient update
+
 
 Lista de cambios incluidos en OpenGnsys 1.1.1c (versión de mantenimiento)
 ----------------------------------------------
