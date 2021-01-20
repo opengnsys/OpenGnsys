@@ -208,7 +208,8 @@ CREATE EVENT e_timeout_$clntid
 	    END IF;
        END
 EOD;
-		$t3 = $cmd->Ejecutar();
+		// #839 Fixes problem of expulsion of the user from the session at 15min
+		$t3=1; //$t3 = $cmd->Ejecutar();
 		if ($t1 and $t2 and $t3) {
 			// Commit transaction on success.
 			$cmd->texto = "COMMIT;";
