@@ -2,8 +2,8 @@
 LISTA DE CAMBIOS	CHANGELOG.es.txt
 ========================================
 
-Lista de cambios incluidos en OpenGnsys 1.2
--------------------------------------------
+Lista de cambios incluidos en OpenGnsys 1.2.0
+---------------------------------------------
 
 Tickets resueltos en módulo OpenGnsys Cloning Engine:
 #1011 	Error con Windows hibernado

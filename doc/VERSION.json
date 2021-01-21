@@ -1,8 +1,8 @@
 {
   "project": "OpenGnsys",
   "version": "1.2.0",
-  "codename": "",
-  "definition": "",
+  "codename": "Gazpacho",
+  "definition": "https://www.andalucia.com/gastronomy/gazpacho.htm",
   "release": "",
   "ogagent": "1.1.2"
 }
