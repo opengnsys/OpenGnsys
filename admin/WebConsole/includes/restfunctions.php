@@ -121,8 +121,6 @@ function common_request($command, $type, $data = null) {
 
 	curl_close($curl);
 
-	syslog(LOG_INFO, 'response '.$command.' ok!');
-
 	return json_decode($curl_response, true);
 }
 
