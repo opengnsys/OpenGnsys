@@ -114,7 +114,7 @@ case "$TYPE" in
             fi
 
             # Crear orden de arranque (con unos valores por defecto).
-            ogNvramAddEntry $BOOTLABEL "/EFI/$BOOTLABEL/Boot/$BOOTLOADER"
+            ogNvramAddEntry $BOOTLABEL "/EFI/$BOOTLABEL/Boot/$BOOTLOADER" TRUE
             # Marcar próximo arranque y reiniciar.
             ogNvramSetNext "$BOOTLABEL"
             reboot
@@ -139,7 +139,7 @@ case "$TYPE" in
             [ -n "$LOADER" ] || ogRaiseError $OG_ERR_NOTOS "$1 $2 ($TYPE, EFI)" || return $?
 
             # Crear orden de arranque (con unos valores por defecto).
-            ogNvramAddEntry $BOOTLABEL "/EFI${LOADER#*EFI}"
+            ogNvramAddEntry $BOOTLABEL "/EFI${LOADER#*EFI}" TRUE
             # Marcar próximo arranque y reiniciar.
             ogNvramSetNext "$BOOTLABEL"
             reboot
