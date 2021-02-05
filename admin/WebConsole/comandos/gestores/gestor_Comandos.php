@@ -36,6 +36,18 @@ define('OG_CMD_ID_CREATE_INCREMENTAL_IMAGE', 14);
 define('OG_CMD_ID_RESTORE_INCREMENTAL_IMAGE', 15);
 define('OG_CMD_ID_SENDMESSAGE', 16);
 
+function clean_shell_params($cmd_id, $params) {
+	switch ($cmd_id) {
+	case OG_CMD_ID_DELETE_CACHED_IMAGE:
+			$params = substr($params, 0, -1);
+	case OG_CMD_ID_SCRIPT:
+			$params = rawurldecode($params);
+			break;
+	}
+
+	return $params;
+}
+
 function run_command($idcomando, $cadenaip, $cadenamac, $netmasks_string,
 		     $atributos) {
 	global $cmd;
@@ -206,7 +218,8 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 		$cmd->ParamSetValor("@descriaccion",$descricomando);
 		$cmd->ParamSetValor("@sesion",$sesion);
 		$cmd->ParamSetValor("@idcomando",$idcomando);
-		$cmd->ParamSetValor("@parametros",$parametros);
+		$cmd->ParamSetValor("@parametros",
+				    clean_shell_params($idcomando, $parametros));
 		$cmd->ParamSetValor("@fechahorareg",date("y/m/d H:i:s"));
 		if($sw_ejprg=="on") // Switch de ejecución con programación (se para el comando tarea para lanzarlo posteriormente)
 			$cmd->ParamSetValor("@estado",$ACCION_DETENIDA);
