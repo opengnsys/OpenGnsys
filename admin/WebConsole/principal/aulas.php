@@ -511,13 +511,13 @@ function ContextualXMLAulas(){
 	$layerXML.=' imgitem="../images/iconos/carpeta.gif"';
 	$layerXML.=' textoitem='.$TbMsg[8];
 	$layerXML.='></ITEM>';
-	
+/*	
 	$layerXML.='<ITEM';
 	$layerXML.=' alpulsar="colocar_ordenador(1)"';
 	$layerXML.=' imgitem="../images/iconos/colocar.gif"';
 	$layerXML.=' textoitem='.$TbMsg[11];
 	$layerXML.='></ITEM>';
-	
+*/	
 	$layerXML.='<SEPARADOR>';
 	$layerXML.='</SEPARADOR>';
 	
@@ -767,13 +767,13 @@ function ContextualXMLGruposOrdenadores(){
 
 	$layerXML.='<SEPARADOR>';
 	$layerXML.='</SEPARADOR>';
-
+/*
 	$layerXML.='<ITEM';
 	$layerXML.=' alpulsar="colocar_ordenador(0)"';
 	$layerXML.=' imgitem="../images/iconos/colocar.gif"';
 	$layerXML.=' textoitem='.$TbMsg[11];
 	$layerXML.='></ITEM>';
-
+*/
 	$layerXML.='<SEPARADOR>';
 	$layerXML.='</SEPARADOR>'; 
 	
@@ -831,13 +831,13 @@ function ContextualXMLOrdenadores(){
 	$layerXML.=' imgitem="../images/iconos/acciones.gif"';
 	$layerXML.=' textoitem='.$TbMsg[48];
 	$layerXML.='></ITEM>';
-	
+/*	
 	$layerXML.='<ITEM';
 	$layerXML.=' alpulsar="mover_ordenador()"';
 	$layerXML.=' imgitem="../images/iconos/mover.gif"';
 	$layerXML.=' textoitem='.$TbMsg[17];
 	$layerXML.='></ITEM>';
-
+*/
 	$layerXML.='<SEPARADOR>';
 	$layerXML.='</SEPARADOR>';
 
