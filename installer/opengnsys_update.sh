@@ -1406,6 +1406,7 @@ if ogServerCompilation; then
 	if [ "$NEWSERVICES" ]; then
 		echoAndLog "Restarting OpenGnsys services"
 		service="opengnsys" $STARTSERVICE
+		service="ogserver" $STARTSERVICE
 	fi
 else
 	errorAndLog "Error compiling OpenGnsys services"
