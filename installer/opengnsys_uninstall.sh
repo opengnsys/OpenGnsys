@@ -66,6 +66,14 @@ if [ -x /etc/init.d/opengnsys ]; then
 	chkconfig --del opengnsys
     fi
 fi
+
+#Parar ogserver
+if [ -r /lib/systemd/system/ogserver.service ]; then
+    systemctl stop ogserver
+    systemctl disable ogserver
+    rm /lib/systemd/system/ogserver.service
+fi
+
 # Comprobar acceso a la bases de datos.
 echo "Erasing OpenGnsys database."
 DROP=1
