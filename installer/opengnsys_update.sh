@@ -1299,8 +1299,8 @@ function updateSummary()
 	echoAndLog " - You must to clear web browser cache before loading OpenGnsys page"
 	echoAndLog " - Run \"settoken\" script to update authentication tokens"
 	[ "$INSTALLEDOGLIVE" ] && echoAndLog " - Installed new ogLive Client: $INSTALLEDOGLIVE"
-	echoAndLog " - If you want to use BURG as boot manager, run following command as root:"
-	echoAndLog "      curl $DOWNLOADURL/burg.tgz -o $INSTALL_TARGET/client/lib/burg.tgz"
+	echoAndLog " - Review syslog configuration and logrotate by syslog,"
+	echoAndLog "      in debug mode OpenGnsys log is very extensive."
 
 	echo
 }
