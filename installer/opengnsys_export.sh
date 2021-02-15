@@ -56,11 +56,6 @@ if ! which realpath &>/dev/null ; then
     exit 5
 fi
 
-# Comprobamos  acceso a ficheros de configuración
-if ! [ -r $OPENGNSYS/etc/ogserver.json ]; then
-    echo "$PROG: ERROR: Sin acceso a la configuración de OpenGnsys." | tee -a $FILESAL
-    exit 3
-fi
 
 # Comprobamos que exista el directorio para el archivo de backup
 BACKUPDIR=$(realpath $(dirname $1) 2>/dev/null)
@@ -75,7 +70,16 @@ done
 # Exportar la base de datos
 echo "Exportamos la información de la base de datos."
 source $OPENGNSYS/lib/ogfunctions.sh || exit 1
-source_json_config $OPENGNSYS/etc/ogserver.json
+# Comprobamos  acceso a ficheros de configuración
+
+if [ -r $OPENGNSYS/etc/ogserver.json ]; then
+    source_json_config $OPENGNSYS/etc/ogserver.json
+elif [ -r $OPENGNSYS/etc/ogAdmServer.cfg ]; then
+    source $OPENGNSYS/etc/ogAdmServer.cfg
+else
+    echo "$PROG: ERROR: Sin acceso a la configuración de OpenGnsys." | tee -a $FILESAL
+    exit 3
+fi
 
 # Crear fichero temporal de acceso a la BD
 MYCNF=$(mktemp /tmp/.my.cnf.XXXXX)
