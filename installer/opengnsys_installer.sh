@@ -1576,7 +1576,8 @@ EOT
 	$ENABLESERVICE; $STARTSERVICE
 
 	echoAndLog "${FUNCNAME}(): Creating ogClient config files."
-	sed -i -e "s/127\.0\.0\.1/$OPENGNSYS_SERVERIP/g" \
+	sed -i  -e 's/127.0.0.1/'$OPENGNSYS_SERVERIP'/' \
+	    -e 's/pass'.*$'/pass\": \"'$OPENGNSYS_CLIENT_PASSWD'\"/' \
 	    $INSTALL_TARGET/client/ogClient/cfg/ogclient.json
 }
 

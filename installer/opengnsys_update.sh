@@ -1207,6 +1207,7 @@ function updateClient()
 function updateOgClient()
 {
 	local ogclientUrl="https://codeload.github.com/opengnsys/ogClient/zip/$BRANCH"
+	local CLIENTPASS
 
 	echoAndLog "${FUNCNAME}(): downloading ogClient code..."
 
@@ -1219,6 +1220,11 @@ function updateOgClient()
 	fi
 	if [ -e $INSTALL_TARGET/client/ogClient/cfg/ogclient.json ]; then
 	     rm -f ogClient-"$BRANCH"/cfg/ogclient.json
+	else
+	     CLIENTPASS=$(awk -F":" '{print $2}' /etc/rsyncd.secrets)
+	     sed -i -e 's/127.0.0.1/'$ServidorAdm'/' \
+		-e 's/pass'.*$'/pass\": "'$CLIENTPASS'"/' \
+		ogClient-"$BRANCH"/cfg/ogclient.json
 	fi
 	rsync -irplt "ogClient-$BRANCH/" $INSTALL_TARGET/client/ogClient
 	rm -f ogclient.zip
