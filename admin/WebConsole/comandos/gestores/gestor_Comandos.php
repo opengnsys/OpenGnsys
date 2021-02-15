@@ -48,8 +48,7 @@ function clean_shell_params($cmd_id, $params) {
 	return $params;
 }
 
-function run_command($idcomando, $cadenaip, $cadenamac, $netmasks_string,
-		     $atributos) {
+function run_command($idcomando, $cadenaip, $cadenamac, $atributos) {
 	global $cmd;
 	switch ($idcomando) {
 		case OG_CMD_ID_WAKEUP:
@@ -163,14 +162,12 @@ $cadenaid="";
 $cadenaip="";
 $cadenamac="";
 $cadenaoga="";	// Clave de acceso a la API REST de OGAgent.
-$netmasks_string="";
 
 if(!empty($filtro)){ // Ambito restringido a un subconjuto de ordenadores
 	if(substr($filtro,strlen($cadenaid)-1,1)==";") // Si el último caracter es una coma
 		$filtro=substr($filtro,0,strlen($filtro)-1); // Quita la coma
 }
 RecopilaIpesMacs($cmd,$ambito,$idambito,$filtro);
-get_netmasks($cmd, $cadenamac, $netmasks_string);
 
 /*--------------------------------------------------------------------------------------------------------------------
 	Creación de parametros para sentencias SQL
@@ -269,7 +266,7 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 							 $when['map_am_pm'],
 							 $when['map_minute']);
 			} else {
-				run_command($idcomando, $cadenaip, $cadenamac, $netmasks_string, $atributos);
+				run_command($idcomando, $cadenaip, $cadenamac, $atributos);
 			}
 
 			// En agente nuevo devuelvo siempre correcto

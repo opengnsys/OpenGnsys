@@ -36,7 +36,6 @@ define('OG_REST_CMD_MODE', 'mode');
 define('OG_REST_PARAM_CLIENTS', 'clients');
 define('OG_REST_PARAM_ADDR', 'addr');
 define('OG_REST_PARAM_MAC', 'mac');
-define('OG_REST_PARAM_NETMASK', 'netmask');
 define('OG_REST_PARAM_DISK', 'disk');
 define('OG_REST_PARAM_PART', 'partition');
 define('OG_REST_PARAM_RUN', 'run');
@@ -189,7 +188,7 @@ function clients($case, $ips) {
 	return $trama_notificacion;
 }
 
-function wol($type_wol, $macs, $ips, $netmasks) {
+function wol($type_wol, $ips) {
 
 	switch ($type_wol) {
 		default:
@@ -200,16 +199,8 @@ function wol($type_wol, $macs, $ips, $netmasks) {
 			$wol = 'unicast';
 	}
 
-	$clients = array();
-
-	for($i=0; $i<count($macs); $i++) {
-		$clients[] = array(OG_REST_PARAM_ADDR => $ips[$i],
-				   OG_REST_PARAM_MAC => $macs[$i],
-				   OG_REST_PARAM_NETMASK => $netmasks[$i]);
-	}
-
 	$data = array(OG_REST_PARAM_TYPE => $wol,
-		OG_REST_PARAM_CLIENTS => $clients);
+		OG_REST_PARAM_CLIENTS => $ips);
 
 	common_request(OG_REST_CMD_WOL, POST, $data);
 }

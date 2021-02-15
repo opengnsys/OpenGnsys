@@ -129,7 +129,7 @@ EOD;
 			// TODO: if client is busy?????
 			if ($app->settings['debug'])
 				writeRemotepcLog($app->request()->getResourceUri(). ": Send boot command through ogAdmServer: iph=$clntip,mac=$clntmac.");
-			wol(1, [$clntmac], [$clntip], [$clntnetmask]);
+			wol(1, [$clntip]);
 			// Send WOL command to client repository.
 			$repo = [['url' => "https://$repoip/opengnsys/rest/repository/poweron",
 			          'header' => ["Authorization: $repokey"],
@@ -642,7 +642,7 @@ EOD;
 			// TODO: if client is busy?????
 			if ($app->settings['debug'])
 				writeRemotepcLog("{$app->request()->getResourceUri()}: Send boot command through ogAdmServer: iph=$clntip,mac=$clntmac.");
-			wol(1, [$clntmac], [$clntip], [$clntnetmask]);
+			wol(1, [$clntip]);
 			// Send WOL command to client repository.
 			$repo = [['url' => "https://$repoip/opengnsys/rest/repository/poweron",
 			          'header' => ["Authorization: $repokey"],

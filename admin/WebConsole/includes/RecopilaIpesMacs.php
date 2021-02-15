@@ -165,22 +165,3 @@ function RecorreOrdenadores($cmd){
 	}
 	$rs->Cerrar();
 }
-
-function get_netmasks($cmd, &$macs, &$netmasks){
-	$macs = str_replace(";", "','", $macs);
-	$cmd->texto="SELECT mac, mascara
-		     FROM ordenadores
-		     WHERE mac IN ('".$macs."')";
-	$rs=new Recordset;
-	$rs->Comando=&$cmd;
-	if (!$rs->Abrir()) return;
-	$macs = "";
-	while (!$rs->EOF){
-		$macs.=$rs->campos["mac"].";";
-		$netmasks.=$rs->campos["mascara"].";";
-		$rs->Siguiente();
-	}
-	$rs->Cerrar();
-	$macs = substr($macs, 0, -1);
-	$netmasks = substr($netmasks, 0, -1);
-}
