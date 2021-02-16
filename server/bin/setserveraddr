@@ -123,7 +123,7 @@ if [ -n "$SERVERIP" ]; then
 			  "$OPENGNSYS"/client/ogClient/cfg/ogclient.json
 		# Restart OpenGnsys services.
 		echo "Restarting services..."
-		restart opengnsys >/dev/null
+		restart ogserver >/dev/null
 		source $DEFAULTFILE
 		# If OpenGnsys Server is active, updating the database.
 		if [ "$RUN_OGADMSERVER" == "yes" ]; then
