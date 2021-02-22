@@ -136,12 +136,22 @@ if (isset($_POST["numdisk"])) $numdisk=$_POST["numdisk"];
 		$rs->Cerrar();
 	}
 ?>
-	<div>
-		Tabla de particiones:
-		<select name="table_type" id="table_type">
-			<option value="MSDOS">MSDOS</option>
-			<option value="GPT" <?php echo $current_table_type == 2 ? "selected" : ""; ?>>GPT</option>
-		</select>
+	<div style="display: flex; justify-content: center;">
+		<table class="tabla_listados_sin">
+			<tbody>
+				<tr>
+					<th>
+						Tabla de particiones:
+					</th>
+				</tr>
+				<td>
+					<select name="table_type" id="table_type">
+						<option value="MSDOS">MSDOS</option>
+						<option value="GPT" <?php echo $current_table_type == 2 ? "selected" : ""; ?>>GPT</option>
+					</select>
+				</td>
+			</tbody>
+		</table>
 	</div>
 <?php
 	$sws=$fk_sysFi |  $fk_tamano | $fk_nombreSO;
@@ -164,7 +174,7 @@ if (isset($_POST["numdisk"])) $numdisk=$_POST["numdisk"];
 			<input type="hidden" name="current_numdisk" value="<?php echo $numdisk?>">
 			<?php echo HTMLSELECT_disks($configs, $numdisk); ?>
 			<a href=#>
-				<img border=0 src="../images/boton_confirmar_<?php echo $idioma ?>.gif" onclick="document.disk.submit()">
+				<button onclick="document.disk.submit()">Cambiar disco</button>
 			</a>
 		</form>
 	</div>
