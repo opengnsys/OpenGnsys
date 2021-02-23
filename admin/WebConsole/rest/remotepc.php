@@ -573,6 +573,12 @@ $app->post('/ous/:ouid/labs/:labid/clients/:clntid/init', 'validateApiKey',
     function($ouid, $labid, $clntid) use ($app) {
         global $cmd;
         global $userid;
+        global $AMBITO_ORDENADORES;
+        global $EJECUCION_COMANDO;
+        global $ACCION_INICIADA;
+        global $ACCION_FINALIZADA;
+        global $ACCION_SINRESULTADO;
+        global $ACCION_FALLIDA;
 
 	if ($app->settings['debug'])
 		writeRemotepcLog("{$app->request()->getResourceUri()}: Init.");
@@ -587,6 +593,7 @@ $app->post('/ous/:ouid/labs/:labid/clients/:clntid/init', 'validateApiKey',
 		// Reading POST parameters in JSON format.
 		$input = json_decode($app->request()->getBody());
 		$imageid = $input->image ?? 0;
+		$opts = Array('options' => Array('min_range' => 1));    // Check for int>0
 		if (filter_var($imageid, FILTER_VALIDATE_INT, $opts) === false) {
 			throw new Exception("Image id. must be positive integer");
 		}
@@ -601,7 +608,7 @@ $app->post('/ous/:ouid/labs/:labid/clients/:clntid/init', 'validateApiKey',
 
 	// Select data to init a session.
 	$cmd->texto = <<<EOD
-SELECT adm.idusuario, ordenadores.ip, ordenadores.mac, ordenadores.mascara, ordenadores.agentkey,
+SELECT adm.idusuario, ordenadores.idordenador, ordenadores.ip, ordenadores.mac, ordenadores.mascara, ordenadores.agentkey,
        par.numdisk, par.numpar, repo.ip AS repoip, repo.apikey AS repokey
   FROM ordenadores
   JOIN aulas USING(idaula)
@@ -652,6 +659,7 @@ EOD;
 			$result = multiRequest($repo);
 		}
 		// Create an init session on opertions queue.
+		$timestamp = time();
 		$cmd->texto = <<<EOD
 INSERT INTO acciones
    SET tipoaccion=$EJECUCION_COMANDO,

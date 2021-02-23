@@ -662,6 +662,35 @@ paths:
         - server
         - client
         - remotepc
+  /ous/{ouid}/labs/{labid}/clients/{clientid}/init:
+    post:
+      description: Send an init operation to a client with an image installed.
+      parameters:
+        - $ref: "#/parameters/ouParam"
+        - $ref: "#/parameters/labParam"
+        - $ref: "#/parameters/clientParam"
+        - name: data
+          in: body
+          description: Image identificator
+          required: true
+          schema:
+            type: object
+            properties:
+              image:
+                description: Operating System Image Identifier
+                type: integer
+                format: int64
+                minimum: 0
+            required: [ image ]
+      responses:
+        "200":
+          description: Successful response
+      security:
+        - apikey: []
+      tags:
+        - server
+        - client
+        - remotepc
   /ous/{ouid}/labs/{labid}/clients/{clientid}/session:
     post:
       description: Record session data for a client
