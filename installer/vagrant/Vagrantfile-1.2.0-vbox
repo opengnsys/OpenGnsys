@@ -38,7 +38,7 @@ if [ -z "$(blkid /dev/mapper/og-images | grep ext4)" ]; then
     mkfs -t ext4 /dev/mapper/og-images
     mkdir -p /opt/opengnsys/images
     echo "/dev/mapper/og-images  /opt/opengnsys/images  ext4  defaults  0  0" >> /etc/fstab
-    mount -a
+    mount -t ext4 /dev/mapper/og-images /opt/opengnsys/images
 fi
 # Install OpenGnsys and change server address.
 if which curl &>/dev/null; then
@@ -68,10 +68,11 @@ dpkg-reconfigure -fnoninteractive console-setup
 #    SQL="$SQL ('pc$i', '#{NETPREFIX}.$i', REPLACE('#{MACPREFIX}$i',':',''), 1, 1, 0, 0, 0, 0, '#{NETPREFIX}.1', '255.255.255.0', '00unknown', 'eth0', 'generic', 'fotoordenador.gif'),"
 #done
 #mysql -u usuog -ppassusuog -D ogAdmBD -e "${SQL%,}"
-#/opt/opengnsys/bin/setclientmode ogLiveAdmin pc11 PERM
-#for ((i=12; i<=#{NCLIENTS+10}; i++)); do
-#    /opt/opengnsys/bin/setclientmode ogLive pc$i PERM
-#done
+#read -pe PORT TOKEN <<< $(jq -r '.rest.port+" "+.rest.api_token' /opt/opengnsys/etc/ogserver.json)
+#DATA='{"clients": ["#{NETPREFIX}.11"], "mode": "19pxeADMIN"}'
+#curl -ks -H "Authorization: $TOKEN" -d "$DATA" "http://localhost:$PORT/mode"
+#DATA='{"clients": ["#{NETPREFIX}.'$(seq -s '", "#{NETPREFIX}.' 12 #{NCLIENTS+10})'"], "mode": "pxe"}'
+#curl -ks -H "Authorization: $TOKEN" -d "$DATA" "http://localhost:$PORT/mode"
 echo "Notes:"
 echo "- OpenGnsys Server URL: https://localhost:#{LOCALWEBPORT}/opengnsys/"
 exit 0
