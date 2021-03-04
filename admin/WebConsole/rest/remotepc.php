@@ -698,7 +698,7 @@ CREATE EVENT IF NOT EXISTS e_timeout_$clntid
 	    END IF;
        END
 EOD;
-		$cmd->Ejecutar();
+		//$cmd->Ejecutar();
 		if ($app->settings['debug'])
 			writeRemotepcLog("{$app->request()->getResourceUri()}: DB tables and events updated, clntid=$clntid.");
 		// Send init session command if client is booted on ogLive.
