@@ -55,6 +55,23 @@ fi
 
 source $INSTALL_TARGET/lib/ogfunctions.sh || exit 1
 
+echo -n "Current version: "
+if [ -r $INSTALL_TARGET/doc/VERSION.json ]; then
+	jq -j '"OpenGnsys", .version, " ", .release' $INSTALL_TARGET/doc/VERSION.json
+else
+	cat $INSTALL_TARGET/doc/VERSION.txt
+fi
+
+echo -e "\nThe OpenGnsys version 1.2.0 was tested with full functionality on Ubuntu 18.04 with PHP 7.2."
+echo " * If the update is made from a version prior to 1.1.1c, you must disable strict mode in mysql by adding in the configuration file: sql_mode = NO_ENGINE_SUBSTITUTION"
+echo " * If you are going to perform an update from version 1.1.0, it is necessary to start with the operating system, moving it from Ubuntu 16.04 to Ubuntu 18.04, and then perform the OpenGnsys update."
+
+echo -e -n "\nDo you want to continue? [y/N]: "
+read -r GO_ON
+if [ "${GO_ON^^}" != "Y" ]; then
+        echo "We left the installation." && exit
+fi
+
 # Cargar configuración de acceso a la base de datos.
 if [ -r $INSTALL_TARGET/etc/ogserver.json ]; then
 	source_json_config $INSTALL_TARGET/etc/ogserver.json
