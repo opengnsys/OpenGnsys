@@ -43,6 +43,24 @@ function enterPassword ()
 	done
 }
 
+# Si la distribución no es la recomendada mostramos mensaje informativo.
+function checkDistribution()
+{
+	local ADVISED VERSION
+
+	ADVISED="18"
+	[ -r /etc/os-release ] && eval $(grep VERSION /etc/os-release)
+
+	[[ "$VERSION" == "$ADVISED."* ]] && return
+
+	echoAndLog "The OpenGnsys version 1.2.0 installation was tested with full functionality on Ubuntu 18.04 with PHP 7.2."
+	echo -n "Do you want to continue? [y/N]: "
+	read -r GO_ON
+	if [ "${GO_ON^^}" != "Y" ]; then
+		echoAndLog "We left the installation." && exit
+	fi
+}
+
 # Recoge los datos de configuración introducidos por el usuario.
 function userData ()
 {
@@ -1657,12 +1675,8 @@ if cat $INSTALL_TARGET/doc/VERSION.* &>/dev/null; then
 	exit 2
 fi
 
-echoAndLog "The OpenGnsys version 1.2.0 installation was tested with full functionality on Ubuntu 18.04 with PHP 7.2."
-echo -n "Do you want to continue? [y/N]: "
-read -r GO_ON
-if [ "${GO_ON^^}" != "Y" ]; then
-	echoAndLog "We left the installation." && exit
-fi
+# Si la distribución no es la recomendada mostramos mensaje informativo.
+checkDistribution
 
 echoAndLog "OpenGnsys installation begins at $(date)"
 # Introducir datos de configuración y establecer variables globales.
