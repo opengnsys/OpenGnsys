@@ -2,10 +2,9 @@
 
 #/**
 #@file    setclientmode
-#@brief   Configura el archivo de arranque de PXE para los clientes, ya sea un equipo o un aula, generando enlaces a archivos usados como plantilla.
-#@usage   setclientmode Plantilla Ambito Modo
-#@warning El archivo PXE por defecto "default" se deja en modo de ejecución "user" y se eliminan los enlaces para equipos con la plantilla por defecto.
-#@param   Config file  Path to the configuration file.
+#@brief   Configures the client's PXE boot file from a template file.
+#@usage   setclientmode Config_file
+#@param   Config_file  Path to the configuration file.
 #@version 1.0 - Versión inicial.
 #@author  Irina Gomez y Ramon Gomez - Univ. Sevilla, noviembre 2010
 #@version 1.0.1 - Identificacion de la plantilla por nombre en consola = en primera linea de la plantilla
@@ -23,6 +22,9 @@
 #@version 1.1.1 - Crea configuración PXE para BIOS y UEFI. Permite pasar los datos acceso a la base de datos por variables de entorno. (ticket #802)
 #@author  Irina Gomez, ETSII Universidad de Sevilla
 #@date    2019-02-13
+#@version 1.2.0 - Using configuration file instead of input parameters; english messages.
+#@author  Roberto Hueso Gómez
+#@date    2020-10-16
 #*/ ##
 
 # Variables y funciones globales.
@@ -33,11 +35,13 @@ PXEDIR[1]=$OPENGNSYS/tftpboot/grub
 LOGFILE=$OPENGNSYS/log/opengnsys.log
 
 source $OPENGNSYS/lib/ogfunctions.sh || exit 1
-source $1 || exit 1
 
 # Mostrar ayuda.
 [ "$*" == "help" ] && help
 [ "$*" == "version" ] && version
+# Checking errors.
+[ $# -gt 1 ] && raiseError usage
+source "$1" || exit 1
 # Comprobar si el usuario es "root" o el del servicio web.
 WEBUSER=$(ps axho user,comm|awk '!/root/ && /httpd|apache/ {print $1; exit;}')
 CALLER=$(getcaller)
@@ -56,11 +60,8 @@ esac
 BOOTMODE="${TEMPLATE_NAME//\'/\\\'}"
 ETHERNET=$MAC
 
-# Copiar fichero de configuración y actualizar base de datos.
-date +"%b %d %T $PROG: Configurando \"$TEMPLATE_NAME\" en \"$2\" en modo \"$MODE\"" | tee -a $LOGFILE
-NPC=0
+# Copiar fichero de configuración.
 for MAC in $ETHERNET; do
-	date +"%b %d %T $PROG: Detectada ethernet \"$MAC\" en \"$2\"" | tee -a $LOGFILE
 	MACFILE="${MAC^^}"
 	PXEFILE[0]=01-${MACFILE:0:2}-${MACFILE:2:2}-${MACFILE:4:2}-${MACFILE:6:2}-${MACFILE:8:2}-${MACFILE:10:2}
 	MACFILE="${MAC,,}"
@@ -117,7 +118,6 @@ for MAC in $ETHERNET; do
 			[ -z "${TEMPLATE[0]}" ] && TEMPLATE[0]=${TEMPLATE[1]}
 		fi
 	fi
-	let NPC=NPC+1
+	date +"%b %d %T $PROG: Configured \"$TEMPLATE_NAME\" on \"$MAC\", \"$MODE\" mode" | tee -a $LOGFILE
 done
-date +"%b %d %T $PROG: $NPC equipo(s) configurado(s)" | tee -a $LOGFILE
 exit 0
