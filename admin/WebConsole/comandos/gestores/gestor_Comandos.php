@@ -256,15 +256,9 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 		$script=@urldecode($ValorParametros["scp"]);
 		if($sw_ejya=='on'){
 			if ($sw_seguimiento == 1) {
-				$when = now_params();
 				$resul = create_schedule_now(strval($sesion),
 							 $EJECUCION_PROCEDIMIENTO,
-							 "", $when['map_year'],
-							 $when['map_month'],
-							 0, 0, $when['map_day'],
-							 $when['map_hour'],
-							 $when['map_am_pm'],
-							 $when['map_minute']);
+							 "");
 			} else {
 				run_command($idcomando, $cadenaip, $cadenamac, $atributos);
 			}

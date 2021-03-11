@@ -243,12 +243,7 @@ function insertaComando($idcomando,$parametros,$idprocedimiento,$ambito,$idambit
 		      "WHERE idaccion = @sesion";
 	$resul=$cmd->Ejecutar();
 	if (resul) {
-		$when = now_params();
-		$resul = create_schedule(strval($sesion), $EJECUCION_PROCEDIMIENTO, "",
-					 $when['map_year'], $when['map_month'],
-					 0, 0, $when['map_day'],
-					 $when['map_hour'], $when['map_am_pm'],
-					 $when['map_minute']);
+		$resul = create_schedule_now(strval($sesion), $EJECUCION_PROCEDIMIENTO, "");
 	}
 	return(true);
 }
