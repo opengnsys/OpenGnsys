@@ -619,6 +619,30 @@ function create_schedule($task_id, $type, $name, $years, $months, $weeks,
 	return common_request(OG_REST_CMD_CREATE_SCHEDULE, POST, $data);
 }
 
+function create_schedule_now($task_id, $type, $name) {
+	$type_string;
+
+	switch ($type) {
+	case TYPE_COMMAND:
+		$type_string = OG_SCHEDULE_COMMAND;
+		break;
+	case TYPE_PROCEDURE:
+		$type_string = OG_SCHEDULE_PROCEDURE;
+		break;
+	case TYPE_TASK:
+	default:
+		$type_string = OG_SCHEDULE_TASK;
+	}
+
+	$data = array (
+		OG_REST_PARAM_TASK => $task_id,
+		OG_REST_PARAM_TYPE => $type_string,
+		OG_REST_PARAM_NAME => $name,
+	);
+
+	return common_request(OG_REST_CMD_CREATE_SCHEDULE, POST, $data);
+}
+
 function delete_schedule($schedule_id) {
 
 	$data = array (

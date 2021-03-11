@@ -257,7 +257,7 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 		if($sw_ejya=='on'){
 			if ($sw_seguimiento == 1) {
 				$when = now_params();
-				$resul = create_schedule(strval($sesion),
+				$resul = create_schedule_now(strval($sesion),
 							 $EJECUCION_PROCEDIMIENTO,
 							 "", $when['map_year'],
 							 $when['map_month'],
