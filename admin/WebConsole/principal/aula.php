@@ -292,6 +292,7 @@ function pintaordenadores(){
 		echo '<p align=center class=cabeceras><img  border=0 nod="'.$LITAMBITO_AULAS.'-'.$idaula.'" value="'.$nombreaula.'"
 				style="cursor:pointer" src="../images/iconos/aula.gif" oncontextmenu="nwmenucontextual(this,' ."'flo_".$LITAMBITO_AULAS."'" .')" >&nbsp;&nbsp;'.$TbMsg[23].'</br><span id="'.$LITAMBITO_AULAS.'-'.$idaula.'" class=subcabeceras>'.$nombreaula.'</span></p>';
 	}
+	echo '<TABLE style="border: 1px solid #d4d0c8;" align="center"><TR><td align=center width=200 height=10 class=subcabeceras>'.$k.' Ordenadores</TD></TR>';
 	echo '<table style="border: 1px solid #d4d0c8;" align="center">';
 	if ($max_col === -1) {  // Modo antiguo
 		echo '<tr>';
