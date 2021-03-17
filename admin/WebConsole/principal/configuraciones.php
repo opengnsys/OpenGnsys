@@ -170,6 +170,7 @@ function datosAulas($cmd,$idaula)
 			$comentarios=$rs->campos["comentarios"];
 			$puestos=$rs->campos["puestos"];
 			$ordenadores=$rs->campos["numordenadores"];
+			$numord=$rs->campos["numordenadores"];
 		}
 		$rs->Cerrar();
 	}
@@ -210,7 +211,8 @@ function datosAulas($cmd,$idaula)
 			<?php
 					echo '<TD>'.$comentarios.'</TD>';
 			?>
-		</TR>	
+		</TR>
+		<TABLE style="border: 1px solid #d4d0c8;" align="center"><TR><td align=center width=200 height=10 class=subcabeceras><?php echo $TbMsg[4]." - ".$numord; ?></TD></TR>
 	</TABLE>
 <?php
 }
@@ -282,6 +284,7 @@ function datosGruposOrdenadores($cmd,$idgrupo)
 			$nombregrupoordenador=$rs->campos["nombregrupoordenador"];
 			$ordenadores=$rs->campos["numordenadores"];
 			$idaula=$rs->campos["idaula"];
+			$numord=$rs->campos["numordenadores"];
 		}
 		$rs->Cerrar();
 	}
@@ -331,6 +334,7 @@ function datosGruposOrdenadores($cmd,$idgrupo)
 
 			?>
 		</TR>
+		<TABLE style="border: 1px solid #d4d0c8;" align="center"><TR><td align=center width=200 height=10 class=subcabeceras><?php echo $TbMsg[4]." - ".$numord; ?></TD></TR>
 	</TABLE>
 <?php
 }
