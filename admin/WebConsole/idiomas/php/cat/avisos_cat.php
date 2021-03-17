@@ -14,5 +14,5 @@ $TbMsg["WARN_NOTESOFMENU"]='NOTAS: Los men&uacute;s personalizados tienen mayor 
 $TbMsg["WARN_GPT"]='AVISO: Para tabla de particiones GPT es necesario que la primera partición sea tipo EFI <br>y se recomienda un tamaño en torno a 512Mb.';
 $TbMsg["WARN_SCHEDULER"]='AVISO: activar calendario de eventos de la BD para habilitar esta propiedad.';
 $TbMsg["WARN_SOURCE_PATH"]='AVISO: La ruta de origen sólo se utiliza en las sincronizadas tipo directorio.';
-
+$TbMsg["COMM_REMOTEACCESS_CREATEAULA"]='permitir gestión de acceso remoto a los ordenadores cuando Aula creada';
 

@@ -37,8 +37,14 @@ $horaresevini=0;
 $horaresevfin=0;
 $idmenu=0;
 $idproautoexec=0;
+######################## AGP
 $idrepositorio=0;
-### AGP
+$diskremotepc=0;
+$partremotepc=0;
+$imaremotepc=0;
+$idimaremotepc=0;
+$idperfilsoftimaremotepc=0;
+######################## AGP
 $oglive="ogLive";
 $idperfilhard=0;
 $modomul=0;
@@ -127,8 +133,48 @@ if ($cmd){
 	$resul=Gestiona();
 	$cmd->Conexion->Cerrar();
 }
-// *************************************************************************************************************************************************
-?>
+//________________________________________________________________________________________________________
+###	AGP	remotePC	######################################################################################
+if (isset($_POST["diskremotepc"])) $diskremotepc=$_POST["diskremotepc"]; 
+if (isset($_POST["partremotepc"])) $partremotepc=$_POST["partremotepc"]; 
+if (isset($_POST["imaremotepc"])) $imaremotepc=$_POST["imaremotepc"]; 
+$imaremoPC=explode("_",$imaremotepc);
+$idimaremotepc=$imaremoPC[2];
+$idperfilsoftimaremotepc=$imaremoPC[3];
+
+###	AGP	remotePC	######################################################################################
+///*
+$cmd=CreaComando($cadenaconexion); // Crea objeto comando
+$rs=new Recordset;
+$cmd->texto="SELECT idordenador FROM ordenadores WHERE idaula=".$idaula;
+$rs->Comando=&$cmd;
+if (!$rs->Abrir()) return(true); // Error al abrir recordset
+$rs->Primero();
+while (!$rs->EOF){
+			$idordremotepc=$rs->campos["idordenador"];
+			RecorreOrdenadoresremotePC($cmd,$idordremotepc);
+			$rs->Siguiente();
+}
+$rs->Cerrar();
+//*/
+//________________________________________________________________________________________________________
+###	AGP	remotePC	######################################################################################
+/*________________________________________________________________________________________________________
+	Crea un arbol XML para el nuevo nodo insertado 
+________________________________________________________________________________________________________*/
+function SubarbolXML_aulas($idaula,$nombreaula){
+	global 	$LITAMBITO_AULAS;
+	$cadenaXML='<AULAS ';
+	// Atributos		
+	$cadenaXML.=' clickcontextualnodo="menu_contextual(this,' ."'flo_".$LITAMBITO_AULAS."'" .')"';
+	$cadenaXML.=' imagenodo="../images/iconos/aula.gif"';
+	$cadenaXML.=' infonodo="'.$nombreaula.'"';
+	$cadenaXML.=' nodoid='.$LITAMBITO_AULAS.'-'.$idaula;
+	$cadenaXML.='>';
+	$cadenaXML.='</AULAS>';
+	return($cadenaXML);
+}
+?> 
 <HTML>
 <HEAD>
 	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
@@ -355,4 +401,54 @@ function SubarbolXML_aulas($idaula,$nombreaula){
 	$cadenaXML.='</AULAS>';
 	return($cadenaXML);
 }
+###	AGP	remotePC	######################################################################################
+///*
+//________________________________________________________________________________________________________
+function RecorreOrdenadoresRemotePC($cmd,$idordremotepc){
+	global $cmd;
+	global $idordremotepc;
+	global $diskremotepc;
+	global $partremotepc;
+	global $idimaremotepc;
+	global $idperfilsoftimaremotepc;
+
+	$cmd->CreaParametro("@idordremotepc",$idordremotepc,1);
+	$cmd->CreaParametro("@diskremotepc",$diskremotepc,1);
+	$cmd->CreaParametro("@partremotepc",$partremotepc,1);
+	$cmd->CreaParametro("@idimaremotepc",$idimaremotepc,1);
+	$cmd->CreaParametro("@idperfilsoftimaremotepc",$idperfilsoftimaremotepc,1);
+	
+	$cmd->texto="SELECT numdisk,numpar FROM ordenadores_particiones
+				 WHERE idordenador=@idordremotepc
+				 AND numdisk=@diskremotepc 
+				 AND numpar=@partremotepc";
+	$rs=new Recordset;
+	$rs->Comando=&$cmd; 
+	if (!$rs->Abrir()) return; // Error al abrir recordset
+	$NumdiskremoPC=$rs->campos["numdisk"];
+	// Si los 3 campos tienen datos realizamos cambios
+    if (  (!empty($diskremotepc)) && (!empty($partremotepc)) && (!empty($idimaremotepc))  ){
+		// Si tienen algun disco realizamos operacion
+		if ( !empty($NumdiskremoPC)){
+			// Si tiene algun Disco Actualizamos
+			$cmd->texto = "UPDATE ordenadores_particiones
+						   SET idimagen=@idimaremotepc, idperfilsoft=@idperfilsoftimaremotepc
+						   WHERE numdisk=@diskremotepc
+						   AND numpar=@partremotepc
+						   AND idordenador=@idordremotepc";
+			$resul=$cmd->Ejecutar();
+		}else{
+			// Si NO tiene ningun Disco Insertamos
+			$cmd->texto="INSERT INTO ordenadores_particiones (idordenador,numdisk,numpar,idimagen,idperfilsoft) 
+						 VALUES ( @idordremotepc, @diskremotepc ,@partremotepc, @idimaremotepc, @idperfilsoftimaremotepc ) ";
+			$resul=$cmd->Ejecutar();
+		}
+	}else{
+			// NO realiza ningun cambio
+			echo "";
+	}
+	$rs->Cerrar();
+}
+###	AGP	remotePC	######################################################################################
+///*
 ?>
