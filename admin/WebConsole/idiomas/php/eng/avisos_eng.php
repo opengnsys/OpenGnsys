@@ -14,3 +14,4 @@ $TbMsg["WARN_NOTESOFMENU"]='NOTES: Personalized messages have priority over atom
 $TbMsg["WARN_GPT"]='WARNING: In GPT partitions table first partition must be EFI, and it is recommended it has about 512 MB.';
 $TbMsg["WARN_SCHEDULER"]='WARNING: Turn on database event scheduler to enable this property.';
 $TbMsg["WARN_SOURCE_PATH"]='WARNING: The source path is only used in directory-type synchronized images.';
+$TbMsg["COMM_REMOTEACCESS_CREATEAULA"]='Allow remote access management to computers when Classroom created';

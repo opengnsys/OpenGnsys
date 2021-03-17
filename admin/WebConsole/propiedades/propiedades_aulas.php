@@ -94,6 +94,21 @@ function abrir_ventana(URL){
    window.open('../images/ver.php','Imagenes','scrollbars=yes,resizable=yes,width=950,height=640') 
 } 
 </script> 
+<!-- ###	AGP	remotePC	###################################################################################### -->
+<script type="text/javascript">
+function MuestraAccesoR() {
+	element = document.getElementById("verinremotepc");
+	check = document.getElementById("check");
+	if (check.checked) {
+		element.style.display='';
+	}
+	else {
+		element.style.display='none';
+	}
+}
+</script>
+
+<!-- ###	AGP	remotePC	###################################################################################### -->
 </HEAD>
 <BODY>
 <DIV  align=center>
@@ -235,13 +250,17 @@ function abrir_ventana(URL){
 					echo '<td colspan="3"><input  class="formulariodatos" name="inremotepc" type="checkbox" onclick="desabilita(this)" ';
 					if ($inremotepc)  echo ' checked ';
 					echo '></td>';
-				} else {
-					echo '<td colspan="3"><input  class="formulariodatos" name="inremotepc" type="checkbox" value="1" ';
-					if ($inremotepc)  echo ' checked ';
-					if ($scheduler)
-						echo '> <em>('.$TbMsg['COMM_REMOTEACCESS'].')<em></td>';
-					else
-						echo 'disabled> <em>'.$TbMsg['WARN_SCHEDULER'].'<em></td>';
+				} else { ### AGP Se activa la casilla verificacion cuando el Aula esta creada
+					echo '<td colspan="3"><input onchange="MuestraAccesoR();" class="formulariodatos" name="inremotepc" id="check" type="checkbox" value="1" ';
+					if ( !empty($idaula) ){
+						if ($inremotepc)  echo ' checked ';
+						if ($scheduler)
+							echo '> <em>('.$TbMsg['COMM_REMOTEACCESS'].')<em></td>';
+						else
+							echo 'disabled> <em>'.$TbMsg['WARN_SCHEDULER'].'<em></td>';
+					}else{
+						echo 'disabled> <em><font color=red>('.$TbMsg['COMM_REMOTEACCESS_CREATEAULA'].')</font><em></td>';
+					}
 				}
 			?>
 		</tr>
@@ -375,7 +394,7 @@ function abrir_ventana(URL){
 </TABLE><p>
 <!-- ###########################################	PROPIEDADES APLICABLES A TODOS LOS ORDENADORES	#################################################################################-->
 
-<TABLE  align=center border=7 cellPadding=3 cellSpacing=1 class=tabla_listados >
+<TABLE  name=masivo id=masivo align=center border=7 cellPadding=3 cellSpacing=1 class=tabla_listados >
 		<TR>
 			<TH style="BACKGROUND-COLOR:#FFFFFF;COLOR:red" colspan=4 align=center>&nbsp;<?php echo $TbMsg[1888]?>&nbsp;</TH>
 		</TR>
@@ -465,7 +484,33 @@ function abrir_ventana(URL){
 					echo '<td colspan="3"><input class="formulariodatos" name="paginavalidacion" style="width:200px" type="text" value="'.$paginavalidacion.'"></td>';
 			?>
 		</tr>
-<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+<!-------------------------------------------------------------------	UMA remotePC-------------------------------------------------------------------------------------->
+<!-- ###	AGP	remotePC	############################################################################################################################################# -->
+	<?php if ($inremotepc){
+		echo '<tr id="verinremotepc" style="display:">';
+	}else{
+		echo '<tr id="verinremotepc" style="display:none">';
+	}?>
+			<th align="center">&nbsp;<?php echo "remotePC"?>&nbsp;</th>
+		<?php	if ($opcion==$op_eliminacion)	//eliminacion=3
+					//echo '<td colspan="3">'.$paginavalidacion.'</td>';
+					echo '<td colspan="3">De momento nada</td>';
+				else	// sino insertamos
+						$ambito=4;	//Ambito aula 4
+					echo '<td colspan="3">Nº Disk&nbsp;----&nbsp;Nº Part&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Imagen remotePC<br>&nbsp;&nbsp;
+							<input class="formulariodatos" name="diskremotepc" style="width:20px" maxlength="1" align="center" type="text" value="'.$diskremotepc.'">
+								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+							<input class="formulariodatos" name="partremotepc" style="width:20px" maxlength="1" align="center" type="text" value="'.$partremotepc.'">
+								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+							<select  class="formulariodatos" name="imaremotepc"  align="center">
+							<option value="">-- Selecciona Imagen remotePC --</option>
+								'. htmlOPTION_images($cmd,$ambito,$idaula) .'
+							</select>
+						</td>';
+			?>
+		</tr>
+<!-- ###	AGP	remotePC	############################################################################################################################################# -->
+<!-------------------------------------------------------------------	UMA remotePC-------------------------------------------------------------------------------------->
 
 	</TABLE>
 </FORM>
@@ -673,3 +718,54 @@ function TomaConfiguracion($cmd) {
 	}
 	return(false);
 }
+###	AGP	remotePC	######################################################################################
+//________________________________________________________________________________________________________
+//	Recupera los datos de una imagen
+//		Parametros: 
+//		- cmd: Una comando ya operativo (con conexión abierta)  
+//		- ambito: El ambito del aula
+//		- idambito: El identificador del aula
+//________________________________________________________________________________________________________
+function htmlOPTION_images($cmd,$ambito,$idambito)
+{
+// 1.1  Imagenes de todos los repositorios de la UO.
+if ($ambito == 4)
+{
+// ambito aulas
+$subconsultarepo='select idrepositorio from repositorios INNER JOIN aulas where repositorios.idcentro=aulas.idcentro AND idaula='.$idambito;
+}
+if ($ambito == 8) 
+{
+$subconsultarepo='select idrepositorio  from repositorios INNER JOIN aulas INNER JOIN gruposordenadores where repositorios.idcentro=aulas.idcentro AND aulas.idaula=gruposordenadores.idaula AND idgrupo='.$idambito;
+}
+if ($ambito == 16)
+{
+$subconsultarepo='select repositorios.idrepositorio from repositorios INNER JOIN aulas INNER JOIN ordenadores where repositorios.idcentro=aulas.idcentro AND aulas.idaula=ordenadores.idaula AND idordenador='.$idambito;
+}	
+	$SelectHtml="";
+	// 1.0.5  imagenes.tipo =1 para que solo muestre las monoloticas.
+	$cmd->texto="SELECT *,repositorios.ip as iprepositorio, repositorios.nombrerepositorio as nombrerepo FROM  imagenes
+		INNER JOIN repositorios ON repositorios.idrepositorio=imagenes.idrepositorio 
+		AND repositorios.idrepositorio IN (" . $subconsultarepo . ") WHERE imagenes.inremotepc=1 AND imagenes.tipo=1 ORDER BY imagenes.descripcion"; 
+	$rs=new Recordset; 
+	$rs->Comando=&$cmd; 
+
+	if ($rs->Abrir()){
+		$rs->Primero(); 
+		while (!$rs->EOF){
+			$SelectHtml.='<OPTION value="'.$rs->campos["iprepositorio"] ."_".$rs->campos["nombreca"]."_".$rs->campos["idimagen"].'_'.$rs->campos["idperfilsoft"].'" ';
+			//$SelectHtml.='<OPTION value="'.$rs->campos["nombreca"] . '" ';
+			$SelectHtml.='>';
+			$SelectHtml.= $rs->campos["descripcion"] .' ('.$rs->campos["nombrerepo"].')  </OPTION>';
+			$rs->Siguiente();
+		}
+		$rs->Cerrar();
+	}
+	else
+	{
+		$SelectHtml.='<option value=""> ERROR: Ambito con multiples Repositorios --</option>';
+	
+	}
+	return($SelectHtml);	
+}
+###	AGP	remotePC	######################################################################################

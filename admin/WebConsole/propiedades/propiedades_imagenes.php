@@ -75,6 +75,7 @@ if (!$resul)
 if ($opcion == 1 && $datospost == 1) {
 	if (isset($_POST["opcion"])) $opcion=$_POST["opcion"];// Recoge parametros
 	if (isset($_POST["idrepositorio"])) $idrepositorio=$_POST["idrepositorio"];
+	if (isset($_POST["idperfilsoft"])) $idperfilsoft=$_POST["idperfilsoft"]; 
 	if (isset($_POST["idimagen"])) $idimagen=$_POST["idimagen"];
 	if (isset($_POST["nombreca"])) {
 		$nombreca=$_POST["nombreca"];
@@ -128,6 +129,28 @@ if  ($opcion!=$op_alta and isset($repokey)) {
 	<SCRIPT language="javascript" src="../jscripts/propiedades_imagenes.js"></SCRIPT>
 	<SCRIPT language="javascript" src="../jscripts/opciones.js"></SCRIPT>
 	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/propiedades_imagenes_'.$idioma.'.js"></SCRIPT>'?>
+<!-- ###	AGP	remotePC	###################################################################################### -->
+<script type="text/javascript">
+function showContent() {
+	element = document.getElementById("content");
+	check = document.getElementById("check");
+	if (check.checked) {
+		element.style.display='';
+	}
+	else {
+		element.style.display='none';
+	}
+}
+</script>
+<script type="text/javascript">
+
+
+	check = document.getElementById("check");
+	if(check.value==1){
+		alert();
+	}
+</script>
+<!-- ###	AGP	remotePC	###################################################################################### -->
 </HEAD>
 <BODY>
 <DIV align=center>
@@ -185,6 +208,17 @@ if  ($opcion!=$op_alta and isset($repokey)) {
 					echo '</TD>';
 				} ?>
 		</TR>
+	<!-- -------------------------------------	TIPO PARTICION	------------------------- -->
+			<tr>
+			<th align="center">&nbsp;<?php echo $TbMsg[9]?>&nbsp;</th>
+			<?php
+				if ($opcion==$op_eliminacion || !empty($idperfilsoft))
+					echo '<td>'.$tipopar.' ('.dechex($codpar).')
+					&nbsp;<input type="hidden" name="codpar" value="'.$codpar.'"></td>';
+				else
+					echo '<td>'.HTMLSELECT($cmd,0,'tipospar',$codpar,'codpar',"CONCAT(CASE WHEN codpar BETWEEN 1 AND 255 THEN '1-MSDOS' WHEN codpar BETWEEN 256 AND 65535 THEN '2-GPT' ELSE codpar END,': ',tipopar,' (',HEX(codpar),')')",170,"","","clonable=1").'</td>';
+			?>
+		</tr>
 	<!-- -------------------------------------------------------------------------------- -->
 	<?php if($tipoimg==$IMAGENES_INCREMENTALES){?>
 		<TR>
@@ -237,7 +271,8 @@ if  ($opcion!=$op_alta and isset($repokey)) {
 					if ($inremotepc)  echo ' checked ';
 					echo '></td>';
 				} else {
-					echo '<td><input name="inremotepc" type="checkbox" value="1"';
+					echo '<td><input onchange="showContent();" name="inremotepc" id="check" type="checkbox" value="1" ';
+				//	echo '<td><input name="inremotepc" type="checkbox" value="1"';
 					if ($inremotepc)  echo ' checked ';
 					if ($scheduler)
 						echo '> <em>('.$TbMsg['COMM_REMOTEACCESS'].')<em></td>';
@@ -267,6 +302,8 @@ if  ($opcion!=$op_alta and isset($repokey)) {
 			<td>&nbsp;<?php if (! empty ($modelo)) echo "$fechacreacion ".($revision>0 ? "(r$revision)" : "") ?>
 			    <input type="hidden" name="fechacreacion" value="<?php echo $fechacreacion ?>"></td>
 		</tr>
+<!----------------------------------------------	AGP Perfil software------------------------------------------------------------------>
+<?php } if ($opcion!=$op_alta){ ?>
 		<!-- Perfil de software -->
 		<TR>
 			<TH align=center>&nbsp;<?php echo $TbMsg[6]?>&nbsp;</TH>
@@ -278,7 +315,19 @@ if  ($opcion!=$op_alta and isset($repokey)) {
 					echo '<TD>'.HTMLSELECT($cmd,$idcentro,'perfilessoft',$idperfilsoft,'idperfilsoft','descripcion',300).'</TD>';
 				}
 			?>
-		</TR>			
+		</TR>	
+<?php }else{ ?>
+		<!-- Perfil de software ALTA -->
+		<TR id="content"  style="display:none"> 
+			<TH align=center>&nbsp;<?php echo $TbMsg[6]?>&nbsp;</TH>
+			<?php
+					//	echo '<INPUT type="text" name="idperfilsoft" value="'.$idperfilsoft.'">';
+						echo '<TD>'.HTMLSELECT($cmd,$idcentro,'perfilessoft',$idperfilsoft,'idperfilsoft','descripcion',300).'</TD>';
+			?>
+		</TR>
+<?php	}?>
+<!----------------------------------------------	AGP Perfil software------------------------------------------------------------------>
+		<?php if ($opcion!=$op_alta) { ?>
 		<!-- Sistema Operativo -->
 		<tr>
 			<th align="center">&nbsp;<?php echo $TbMsg['PROP_OS']?>&nbsp;</th>
