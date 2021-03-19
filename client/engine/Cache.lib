@@ -275,7 +275,7 @@ ogDevToDisk ${PART%% *} 2>/dev/null
 function ogFormatCache ()
 {
 # Variables locales.
-local DEV MNTDIR
+local DEV MNTDIR OPTIONS
 # Si se solicita, mostrar ayuda.
 if [ "$*" == "help" ]; then
     ogHelp "$FUNCNAME" "$FUNCNAME"
@@ -288,7 +288,9 @@ DEV=$(ogDiskToDev $DEV) || return $?
 
 # Formatear sistema de ficheros. 
 ogUnmountCache 2>/dev/null 
-mkfs.ext4 -q -F $DEV -L "CACHE" -O extent,large_file 2>/dev/null || ogRaiseError $OG_ERR_PARTITION "CACHE" || return $? 
+OPTIONS="extent,large_file"
+[[ $(uname -r) =~ ^5 ]] && OPTIONS+=",uninit_bg,^metadata_csum,^64bit"
+mkfs.ext4 -q -F $DEV -L "CACHE" -O "$OPTIONS" 2>/dev/null || ogRaiseError $OG_ERR_PARTITION "CACHE" || return $?
 
 # Crear estructura básica. 
 MNTDIR=$(ogMountCache) 
