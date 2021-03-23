@@ -18,3 +18,4 @@
 	$TbMsgAux[10]='Save as a new task ' ;
 	$TbMsgAux[11]='Add to an existing task ' ;
 	$TbMsgAux[12]='Running sequence';
+	$TbMsgAux[13]=' Start Restored System';

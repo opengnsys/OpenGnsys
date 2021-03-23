@@ -84,7 +84,7 @@ if (isset($_POST["fk_nombreSO"])) $fk_nombreSO=$_POST["fk_nombreSO"];
 		$cadenaid="";
 		$cadenaip="";
 		$cadenamac="";
-		RecopilaIpesMacs($cmd,$ambito,$idambito);		
+		RecopilaIpesMacs($cmd,$ambito,$idambito);	
 	?>
 		<FORM action="RestaurarImagen.php" name="fdatos" method="POST">
 				<INPUT type="hidden" name="idambito" value="<?php echo $idambito?>">
