@@ -10,8 +10,6 @@
 // *************************************************************************************************************************************************
 ?>
 <P align=center><span align=center class=subcabeceras><?php echo $TbMsgAux[0] ?></span></P>
-
-
 <?php if($idcomando!=10){?>
 	<TABLE align=center>
 		<TR>
@@ -21,6 +19,23 @@
 	<BR>
 <?php }?>	
 <TABLE align=center  class=opciones_ejecucion BORDER=0>
+<!-------------------------------------------------AGP-------------------------------------------------------------------------------->
+	<TR>
+		<TD colspan=4>
+		<?php if($idcomando==8 && $descricomando=="Asistente Deploy de Imagenes" ){ ?>
+		<DIV name="verinsires" id="verinsires">
+			<TABLE id="tabla_conf" class="tabla_listados" align=right border="2" cellpadding="1" cellspacing="1">
+				<TR>
+					<TH colspan=3><?php echo $TbMsgAux[13]; ?>&nbsp;</TH>
+					<TH align="center"><INPUT name=sw_ejsis type=checkbox checked value=0></TH>
+					
+				</TR>
+			</TABLE>
+		</DIV>
+		<?php } ?>
+		</TD>
+	</TR>	
+<!-------------------------------------------------AGP-------------------------------------------------------------------------------->
 	<TR>
 		<TD><INPUT name=sw_ejya type=checkbox checked></TD>
 		<TD colspan=3> <?php echo $TbMsgAux[1] ?> &nbsp; </TD>
