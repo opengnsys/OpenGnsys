@@ -47,12 +47,28 @@ if (!$cmd)
 	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/ejecutarscripts_'.$idioma.'.js"></SCRIPT>'?>
 	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/comandos/comunescomandos_'.$idioma.'.js"></SCRIPT>'?>
 	<?php echo '<SCRIPT language="javascript" src="../idiomas/javascripts/'.$idioma.'/asistentes_'.$idioma.'.js"></SCRIPT>'?>
-
+<!-- // agp ______________________________________ -->
+<script type="text/javascript">
+function MuestraInsires() {
+	element = document.getElementById("verinsires");
+	check = document.getElementById("check");
+	if (check.checked) {
+		element.style.display='';
+	}
+	else {
+		element.style.display='none';
+	}
+}
+</script>
+<!-- // agp ______________________________________ -->
 </head>
 
 
 <body>
 <?php
+// agp ______________________________________
+include_once("./includes/FiltradoAmbito.php");
+//________________________________________________________________________________________________________
 # ambito:   4->aulas   16->ordenadores
 # idambito:  id de los elementos en su correspondiente tabla-ambito (aulas, ordenadores...)
 # nombreambito: nombre del elemento.
@@ -70,7 +86,13 @@ switch($ambito){
 			$urlimg='../images/iconos/aula.gif';
 			$textambito=$TbMsg[2];
 			if (isset($_GET["idambito"])) $idambito=$_GET["idambito"];
-			if (isset($_GET["litambito"])) $litambito=$_GET["litambito"];			
+			if (isset($_GET["litambito"])) $litambito=$_GET["litambito"];	
+			// agp ______________________________________
+			$cadenaid="";
+			$cadenaip="";
+			$cadenamac="";
+			RecopilaIpesMacs($cmd,$ambito,$idambito);
+			// agp ______________________________________
 			break;
 		case $AMBITO_GRUPOSORDENADORES :
 			$urlimg='../images/iconos/carpeta.gif';
@@ -81,6 +103,12 @@ switch($ambito){
 			$textambito=$TbMsg[4];
 			if (isset($_GET["idambito"])) $idambito=$_GET["idambito"];
 			if (isset($_GET["litambito"])) $litambito=$_GET["litambito"];
+			// agp ______________________________________
+			$cadenaid="";
+			$cadenaip="";
+			$cadenamac="";
+			RecopilaIpesMacs($cmd,$ambito,$idambito);
+			// agp ______________________________________
 			break;
 	}
 	echo '<p align=center><span class=cabeceras>'.$TbMsg["WDI11"].'&nbsp;</span><br>';

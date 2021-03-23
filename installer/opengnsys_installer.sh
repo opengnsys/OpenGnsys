@@ -1097,7 +1097,7 @@ function installWebFiles()
 		errorAndLog "${FUNCNAME}(): Error copying web files."
 		exit 1
 	fi
-
+	
 	# Descomprimir librerías: Slim y Swagger-UI.
 	unzip -o $WORKDIR/opengnsys/admin/$SLIMFILE -d $INSTALL_TARGET/www/rest
 	unzip -o $WORKDIR/opengnsys/admin/$SWAGGERFILE -d $INSTALL_TARGET/www/rest
@@ -1243,6 +1243,8 @@ function createDirs()
 	mkdir -p $path_opengnsys_base/etc
 	mkdir -p $path_opengnsys_base/lib
 	mkdir -p $path_opengnsys_base/log/clients
+	mkdir -p $path_opengnsys_base/log/clients/setBootMode
+	chmod 777 $path_opengnsys_base/log/clients/setBootMode
 	ln -fs $path_opengnsys_base/log /var/log/opengnsys
 	mkdir -p $path_opengnsys_base/sbin
 	mkdir -p $path_opengnsys_base/www
