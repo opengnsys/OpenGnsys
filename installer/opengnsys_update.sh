@@ -749,7 +749,7 @@ function updateWebFiles()
 		perl -pi -e 's!http://!https://!g' $INSTALL_TARGET/www/controlacceso.php
 		NEWFILES="$NEWFILES $INSTALL_TARGET/www/controlacceso.php"
 	fi
-
+	
 	# Compatibilidad con dispositivos móviles.
 	COMPATDIR="$INSTALL_TARGET/www/principal"
 	for f in acciones administracion aula aulas hardwares imagenes menus repositorios softwares; do
@@ -841,6 +841,12 @@ function createDirs()
 	mkdir -p ${INSTALL_TARGET}/{bin,doc,etc,lib,sbin,www}
 	mkdir -p ${INSTALL_TARGET}/{client,images/groups}
 	mkdir -p ${INSTALL_TARGET}/log/clients
+	if [ ! -d ${INSTALL_TARGET}/log/clients/setBootMode ]; then
+		mkdir -p ${INSTALL_TARGET}/log/clients/setBootMode
+		chmod 777 ${INSTALL_TARGET}/log/clients/setBootMode
+	else
+		chmod 777 ${INSTALL_TARGET}/log/clients/setBootMode
+	fi
 	ln -fs ${INSTALL_TARGET}/log /var/log/opengnsys
 	# Detectar directorio de instalación de TFTP.
 	if [ ! -L ${INSTALL_TARGET}/tftpboot ]; then
