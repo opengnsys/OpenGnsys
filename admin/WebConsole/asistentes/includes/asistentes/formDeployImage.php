@@ -15,9 +15,9 @@ for($cfgIndex = 0; $cfgIndex < $conKeys; $cfgIndex++){
 ?>
 <input type="hidden" name="atrib_restore" value="">
 <?php echo $TbMsg["WDI13"] ?> <br>
-		<input type="radio" name="modo" value="deployImage" onClick="enableDirect(this.form)" checked ><?php echo $TbMsg["WDI14"] ?> <br>
-		<input type="radio" name="modo" value="updateCache" onClick="disableDirect(this.form)" > <?php echo $TbMsg["WDI15"] ?> <br> 
-	
+		<input type="radio" name="modo" id="check" value="deployImage" onClick="enableDirect(this.form);MuestraInsires();" checked ><?php echo $TbMsg["WDI14"] ?> <br>
+		<input type="radio" name="modo" id="check" value="updateCache" onClick="disableDirect(this.form);MuestraInsires();" > <?php echo $TbMsg["WDI15"] ?> <br>
+
 <tr> <td> <?php echo $TbMsg["WDI16"] ?>  </td> <td> <?php echo $TbMsg["WDI17"] ?> </td> <td>  <?php echo $TbMsg["WDI18"] ?> </td> <td>  <?php echo $TbMsg["WDI19"] ?> </td></tr>
 
 <tr>  

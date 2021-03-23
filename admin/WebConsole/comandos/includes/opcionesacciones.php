@@ -9,6 +9,7 @@
 //		Opciones comunes para la ejecución de comandos
 // *************************************************************************************************************************************************
 ?>
+
 <P align=center><span align=center class=subcabeceras><?php echo $TbMsgAux[0] ?></span></P>
 <?php if ($ambito !=16 ){ ?>
 	<INPUT type="hidden" name="ambito" value="<?php echo $ambito?>">
@@ -22,14 +23,34 @@
 	<BR>
 <?php }?>	
 <TABLE align=center  class=opciones_ejecucion BORDER=0>
+<!-------------------------------------------------AGP-------------------------------------------------------------------------------->
+	<TR>
+		<TD colspan=4>
+		<?php if ($funcion == "RestaurarImagen" || $funcion == "RestaurarImagenCache" ){ ?>
+			<TABLE id="tabla_conf" class="tabla_listados" align=right border="2" cellpadding="1" cellspacing="1">
+				<TR>
+					<TH colspan=3><?php echo $TbMsgAux[13]; ?>&nbsp;</TH>
+					<TH align="center"><INPUT name=sw_ejsis type=checkbox checked value=0></TH>
+					
+				</TR>
+			</TABLE>
+		<?php } ?>
+		</TD>
+	</TR>	
+	<!-------------------------------------------------------------------------------------------------------------------------------->
+		 <TR HEIGHT=5><TD colspan=4><HR></TD></TR>
+	<!-------------------------------------------------------------------------------------------------------------------------------->
+<!-------------------------------------------------AGP-------------------------------------------------------------------------------->
 	<TR>
 		<TD><INPUT name=sw_ejya type=checkbox checked></TD>
-		<TD colspan=3> <?php echo $TbMsgAux[1] ?> &nbsp; </TD>
+		<TD colspan=2> <?php echo $TbMsgAux[1] ?> &nbsp; </TD>
+		<TD rowspan="3">
+		</TD>
 	</TR>
 	<TR>
 	  <TD>&nbsp; </TD>
 	  <TD><INPUT name=sw_seguimiento type=radio value=1></TD><TD><?php echo $TbMsgAux[2] ?>&nbsp;</TD>
-	</TR>
+    </TR>
 	<TR>
 		<TD>&nbsp; </TD>
 		<TD><INPUT checked name=sw_seguimiento type=radio value=0></TD><TD><?php echo $TbMsgAux[3] ?>&nbsp;</TD>
@@ -66,7 +87,7 @@
 	  <TD><?php echo $TbMsgAux[8] ?>&nbsp;</TD>
 	  <TD><INPUT maxlength=3  style="FONT-FAMILY:Arial, Helvetica, sans-serif;FONT-SIZE: 11px;WIDTH:30px" name=ordprocedimiento type=text value=""></TD></TR>
 	<!-------------------------------------------------------------------------------------------------------------------------------->
-		 <TR><TD colspan=4 HEIGHT="10px">&nbsp; <HR></TD></TR>
+		 <TR><TD colspan=4 HEIGHT="10">&nbsp; <HR></TD></TR>
 	<!-------------------------------------------------------------------------------------------------------------------------------->
 	 <TR>
 	  <TD><INPUT  onclick="clic_mktarea(this)"  name=sw_mktarea type=checkbox></TD>

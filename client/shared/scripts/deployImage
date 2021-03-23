@@ -212,6 +212,9 @@ else
 fi
 RETVAL=$?
 
+# Marca de Iniciar Sistema Restaurado
+InSisRes="/opt/opengnsys/log/setBootMode/InSisRes."$(ogGetIpAddress)
+
 # Mostrar resultados.
 RESUMERESTOREIMAGE=$(grep -m 1 "Total Time:" $OGLOGCOMMAND)
 ogEcho log session "   [ ]      $RESUMERESTOREIMAGE "
@@ -220,6 +223,7 @@ if [ $RETVAL -ne 0 ] ; then
     ogRaiseError session $OG_ERR_IMAGE "$REPO $IMGNAME" 2>&1
     # Muestro registro de fin de ejecución si no viene de Ejecutar Script
     [ "$(ogGetCaller)" == "EjecutarScript" ] || ogEcho log session "$MSG_INTERFACE_END $OG_ERR_IMAGE"
+	[ -f $InSisRes ] && rm -f $InSisRes	## Borrar Marca Iniciar Sistema Restaurado
     exit $OG_ERR_IMAGE
 fi
 TIME3=$[SECONDS-TIME3]
@@ -241,6 +245,8 @@ ogEcho log session "[100] $MSG_SCRIPTS_TIME_TOTAL $[TIME/60]m $[TIME%60]s"
 # Si se ha llamado desde ejecutar script no lo muestro para no repetir.
 if [ "$(ogGetCaller)" != "EjecutarScript" ] ; then
     ogEcho log session "$MSG_INTERFACE_END $RETVAL"
+    [ -f $InSisRes ] && ./$InSisRes	 &>/dev/null ## Iniciar Sistema Restaurado
     exit $RETVAL
 fi
 
+[ -f $InSisRes ] && ./$InSisRes &>/dev/null	## Iniciar Sistema Restaurado
