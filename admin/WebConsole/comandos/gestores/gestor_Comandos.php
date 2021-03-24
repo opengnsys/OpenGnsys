@@ -36,6 +36,18 @@ define('OG_CMD_ID_CREATE_INCREMENTAL_IMAGE', 14);
 define('OG_CMD_ID_RESTORE_INCREMENTAL_IMAGE', 15);
 define('OG_CMD_ID_SENDMESSAGE', 16);
 
+function clean_shell_params($cmd_id, $params) {
+	switch ($cmd_id) {
+	case OG_CMD_ID_DELETE_CACHED_IMAGE:
+			$params = substr($params, 0, -1);
+	case OG_CMD_ID_SCRIPT:
+			$params = rawurldecode($params);
+			break;
+	}
+
+	return $params;
+}
+
 function run_command($idcomando, $cadenaip, $cadenamac, $atributos) {
 	global $cmd;
 	switch ($idcomando) {
@@ -79,8 +91,10 @@ function run_command($idcomando, $cadenaip, $cadenamac, $atributos) {
 			software($cadenaip, $atributos);
 			break;
 		case OG_CMD_ID_SCRIPT:
-		case OG_CMD_ID_DELETE_CACHED_IMAGE:
 			shell(3, $cadenaip, $atributos);
+			break;
+		case OG_CMD_ID_DELETE_CACHED_IMAGE:
+			shell(4, $cadenaip, $atributos);
 			break;
 	}
 }
@@ -155,12 +169,12 @@ $cadenaid="";
 $cadenaip="";
 $cadenamac="";
 $cadenaoga="";	// Clave de acceso a la API REST de OGAgent.
-//echo $descricomando;
+
 if(!empty($filtro)){ // Ambito restringido a un subconjuto de ordenadores
 	if(substr($filtro,strlen($cadenaid)-1,1)==";") // Si el último caracter es una coma
 		$filtro=substr($filtro,0,strlen($filtro)-1); // Quita la coma
 }
-RecopilaIpesMacs($cmd,$ambito,$idambito,$filtro);//echo "hola".$ambito." - ".$idambito." - ".$filtro;
+RecopilaIpesMacs($cmd,$ambito,$idambito,$filtro);
 
 ###################################################################
 ///////////////////// agp	///////////////////////////////////////
@@ -265,13 +279,14 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 	$parametros=$funcion.$atributos;
 	$aplicacion=chr(13)."ido=".$cadenaid.chr(13)."mac=".$cadenamac.chr(13)."iph=".$cadenaip.chr(13);
 	if($sw_seguimiento==1 || $sw_ejprg=="on"){ // Switch de ejecución con seguimiento o comando programado
-		$sesion=time();
+		$sesion = 0;
 		$cmd->ParamSetValor("@tipoaccion",$EJECUCION_COMANDO);
 		$cmd->ParamSetValor("@idtipoaccion",$idcomando);
 		$cmd->ParamSetValor("@descriaccion",$descricomando);
 		$cmd->ParamSetValor("@sesion",$sesion);
 		$cmd->ParamSetValor("@idcomando",$idcomando);
-		$cmd->ParamSetValor("@parametros",$parametros);
+		$cmd->ParamSetValor("@parametros",
+				    clean_shell_params($idcomando, $parametros));
 		$cmd->ParamSetValor("@fechahorareg",date("y/m/d H:i:s"));
 		if($sw_ejprg=="on") // Switch de ejecución con programación (se para el comando tarea para lanzarlo posteriormente)
 			$cmd->ParamSetValor("@estado",$ACCION_DETENIDA);
@@ -291,7 +306,14 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 						VALUES (@idordenador,@tipoaccion,@idtipoaccion,@descriaccion,@ip,
 						@sesion,@idcomando,@parametros,@fechahorareg,@estado,@resultado,@ambito,@idambito,@restrambito,@idcentro)";
 			$resul=$cmd->Ejecutar();
+			if ($i == 0) {
+				$sesion = $cmd->Autonumerico();
+				$cmd->ParamSetValor("@sesion",$sesion);
+			}
 		}
+		$cmd->texto = "UPDATE acciones SET sesion=@sesion ".
+			      "WHERE idaccion = @sesion";
+		$resul=$cmd->Ejecutar();
 		$acciones=chr(13)."ids=".$sesion.chr(13); // Para seguimiento
 	}
 	if (!$resul){
@@ -303,11 +325,13 @@ if($sw_ejya=='on' || $sw_ejprg=="on" ){
 		$ValorParametros=extrae_parametros($parametros,chr(13),'=');
 		$script=@urldecode($ValorParametros["scp"]);
 		if($sw_ejya=='on'){
-			if (($sw_seguimiento == 1 || $sw_ejprg == "on") &&
-			    $idcomando != OG_CMD_ID_WAKEUP)
-				run_schedule($cadenaip);
-			else
+			if ($sw_seguimiento == 1) {
+				$resul = create_schedule_now(strval($sesion),
+							 $EJECUCION_PROCEDIMIENTO,
+							 "");
+			} else {
 				run_command($idcomando, $cadenaip, $cadenamac, $atributos);
+			}
 
 			// En agente nuevo devuelvo siempre correcto
 			$resulhidra = 1;
@@ -424,7 +448,10 @@ if($sw_mkprocedimiento=='on' || $sw_mktarea=='on'){
 		$cmd->ParamSetValor("@idprocedimiento",$idprocedimiento);
 		$cmd->ParamSetValor("@idcomando",$idcomando);
 		$cmd->ParamSetValor("@ordprocedimiento",$ordprocedimiento);
-		$parametros=$funcion.$atributos;
+		if ($idcomando == OG_CMD_ID_SCRIPT)
+			$parametros=$funcion.substr(rawurldecode($atributos), 0, -2);
+		else
+			$parametros=$funcion.$atributos;
 		$cmd->ParamSetValor("@parametros",$parametros);
 		$cmd->texto="INSERT INTO procedimientos_acciones(idprocedimiento,orden,idcomando,parametros) 
 				    VALUES (@idprocedimiento,@ordprocedimiento,@idcomando,@parametros)";
