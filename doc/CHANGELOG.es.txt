@@ -6,40 +6,63 @@ Lista de cambios incluidos en OpenGnsys 1.2.0
 ---------------------------------------------
 
 Tickets resueltos en módulo OpenGnsys Cloning Engine:
+#976 	ogBootMbrGeneric: mejora en la compatibilidad con GPT
 #1011 	Error con Windows hibernado
 #1014 	ogGetImageInfo falla con la actualización de Windows de octubre 2020
 
 Tickets resueltos en módulo OpenGnsys Client:
-#980 	Add REST API to ogClient
-#999	ogClient session command do not boot the selected OS (corrección)
-#1000 	Fix ogClient HTTP lenght handling (corrección)
-#1009 	Fix ogclient permissions (corrección)
+#980 	Se añade API REST API a ogClient
+#999	El comando "session" de ogClient no arranque el SO seleccionado (corrección)
+#1000 	Se arregla el manejo de la longitud HTTP (corrección)
+#1009 	Se arreglan los permisos de ogclient (corrección)
+#1013 	ogClient (en modo live) se cuelga mostrando estado ocupado cuando falla createImage
+#1019 	El agente ogclient del oglive no ejecuta algunas instrucciones encoladas
+#1027 	opengnsys_update.sh: no configura ip del servidor en ogclient.json
+#1033 	ogLive 5.4 incompatible con opción del netboot opengnsys-cache
+
+Tickets resueltos en módulo OpenGnsys Agent:
+#968 	Elegir operaciones permitidas en agentes OGAgent
+#975 	Definir opción para que OGAgent devuelva estado detallado del sistema
 
 Tickets resueltos en módulo OpenGnsys Server:
-#941 	Use libdbi in ogAdmServer (mejora)
-#942 	Remove ogAdmAgent (mejora)
-#970 	Use autotools in ogAdmServer
-#971 	Remove unused code in ogAdmServer, ogAdmAgent and ogAdmClient
-#981 	add native systemd unit file for ogAdmServer
-#986 	Rename ogAdmServer to ogServer
-#990 	Use client broadcast address on WoL (mejora)
+#941 	Utilizar libdbi en ogAdmServer (mejora)
+#942 	Eliminar ogAdmAgent (mejora)
+#970 	Utilizar autotools en ogAdmServer
+#971 	Eliminar código innecesario en ogAdmServer, ogAdmAgent y ogAdmClient
+#981 	Añadir fichero de inicio para ogAdmServer con systemd
+#986 	Renombrar ogAdmServer a ogServer
+#990 	Utilizar la dirección del cliente para WoL por broadcast (mejora)
 #1002 	Fix update script to not remove ogAdmRepo.cfg (corrección)
-#1008 	Add support to several disk (mejora)
-#1010 	Clean up and fix /software
+#1008 	Añadir soporte para varios discos (mejora)
+#1010 	Limpiar y corregir código
+#1017 	Falla ogLive (por defecto) tras una actualización, los enlaces del tftpboot oglive y oclient no están.
+#1018 	Servicio ogserver no se para ni se inicia durante el proceso de opengnsys_update
+#1020 	logrotate no rota los ficheros de log de opengnsys
+#1022 	NO realiza Inventario Software cuando supera los 64 kb
+#1028 	servicio ogserver: modificar su estado al desinstalar o cambiar la ip del servidor.
+#1034 	opengnsys_export.sh muestra falso error durante su ejecución
 
 Tickets resueltos en módulo OpenGnsys Web Admin Console:
 #838 	Problema con parámetros vga en ogLive
-#901 	Investigate if connections to the database are made correctly
+#901 	Revisión de las conexiones a la base de datos
 #944 	Mostrar la distribución de equipos en el aula (mejora)
-#998 	disable incremental image updates
-#1001 	Remove trailing \r and \n in some scripts (corrección)
-#1005 	Fix support for computer groups in RemotePC (corrección)
-#1006 	Fix RemotePC IP retrieving on running clients
+#991 	Definir ordenador en estado de mantenimiento
+#998 	Deshabilitar imágenes sincronizadas
+#1001 	Eliminar finales en \r y \n en algunos scripts (corrección)
+#1005 	Arreglar el soporte para grupos de ordenadores en RemotePC (corrección)
+#1006 	Arreglar la recuperación de IP de clientes en ejecución en RemotePC
 #1012 	Soporte disco mayores de 2Tb
+#1015 	Los ficheros de arranque PXE files no se actualizan cuando es necesario
+#1024 	Se dehabilita la función de mover un único equipo
+#1031 	La consola de administración no muestra las estadísticas
+#1032 	La ejecución de tareas provoca el mal funcionamiento de la cola de acciones
 
 Tickets resueltos en módulo OpenGnsys Installer:
-#987 	Use systemctl to disable/enable services in Debian/Ubuntu (mejora)
-#1003 	Fix ogClient update
+#987 	Utilizar systemctl para habilitar/deshabilitar los servicios en Debian/Ubuntu (mejora)
+#1003 	Arreglar la actualizacion del ogClient
+#1007 	Error en opengnsys_update.sh: no genera archivo version.json
+#1026 	Los script de instalación y actualización deben mostrar los prerequisitos de OpenGnsys (y el de actualizacion la versión previa)
+#1029 	Los script de instalación y actualización muestran aviso sobre el nivel de depuración de syslog.
 
 
 Lista de cambios incluidos en OpenGnsys 1.1.1c (versión de mantenimiento)
