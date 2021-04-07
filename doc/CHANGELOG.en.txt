@@ -2,8 +2,8 @@ CHANGELOG.en.txt
 ================
 
 
-Changes included inc OpenGnsys 1.2.0
-------------------------------------
+Changes included in OpenGnsys 1.2.0
+-----------------------------------
 
 #140 	Unified configuration file (duplicated)
 #803 	Delete drop-down of images from different partition (won't be resolved)
