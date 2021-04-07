@@ -6,7 +6,7 @@ Lista de cambios incluidos en OpenGnsys 1.2.0
 ---------------------------------------------
 
 Tickets resueltos en módulo OpenGnsys Cloning Engine:
-#976 	ogBootMbrGeneric: mejora en la compatibilidad con GPT
+#976 	ogBootMbrGeneric: mejora en la compatibilidad con GPT (no se resolverá)
 #1011 	Error con Windows hibernado
 #1014 	ogGetImageInfo falla con la actualización de Windows de octubre 2020
 
@@ -25,6 +25,7 @@ Tickets resueltos en módulo OpenGnsys Agent:
 #975 	Definir opción para que OGAgent devuelva estado detallado del sistema
 
 Tickets resueltos en módulo OpenGnsys Server:
+#140 	Fichero de configuración unificado (duplicado)
 #941 	Utilizar libdbi en ogAdmServer (mejora)
 #942 	Eliminar ogAdmAgent (mejora)
 #970 	Utilizar autotools en ogAdmServer
@@ -35,7 +36,7 @@ Tickets resueltos en módulo OpenGnsys Server:
 #1002 	Fix update script to not remove ogAdmRepo.cfg (corrección)
 #1008 	Añadir soporte para varios discos (mejora)
 #1010 	Limpiar y corregir código
-#1017 	Falla ogLive (por defecto) tras una actualización, los enlaces del tftpboot oglive y oclient no están.
+#1017 	Falla ogLive (por defecto) tras una actualización, los enlaces del tftpboot oglive y oclient no están. (no válido)
 #1018 	Servicio ogserver no se para ni se inicia durante el proceso de opengnsys_update
 #1020 	logrotate no rota los ficheros de log de opengnsys
 #1022 	NO realiza Inventario Software cuando supera los 64 kb
@@ -43,8 +44,10 @@ Tickets resueltos en módulo OpenGnsys Server:
 #1034 	opengnsys_export.sh muestra falso error durante su ejecución
 
 Tickets resueltos en módulo OpenGnsys Web Admin Console:
+#803 	Consola Web: Eliminar desplegable imágenes de distinta partición (no se resolverá)
 #838 	Problema con parámetros vga en ogLive
 #901 	Revisión de las conexiones a la base de datos
+#902 	Unclear error message (no se resolverá)
 #944 	Mostrar la distribución de equipos en el aula (mejora)
 #991 	Definir ordenador en estado de mantenimiento
 #998 	Deshabilitar imágenes sincronizadas
@@ -58,6 +61,7 @@ Tickets resueltos en módulo OpenGnsys Web Admin Console:
 #1032 	La ejecución de tareas provoca el mal funcionamiento de la cola de acciones
 
 Tickets resueltos en módulo OpenGnsys Installer:
+#837 	Paquete deb para instalar OpenGnsys (duplicado)
 #987 	Utilizar systemctl para habilitar/deshabilitar los servicios en Debian/Ubuntu (mejora)
 #1003 	Arreglar la actualizacion del ogClient
 #1007 	Error en opengnsys_update.sh: no genera archivo version.json
