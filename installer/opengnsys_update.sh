@@ -221,8 +221,9 @@ function chooseVersion()
         [ -f $INSTALL_TARGET/doc/VERSION.txt ] && read -pe INSTVERSION INSTRELEASE <<< $(awk '{print $2,$3}' $INSTALL_TARGET/doc/VERSION.txt)
         # Fetch tags (releases) data from GitHub.
         while read -pe TAG URL; do
-            if [[ $TAG =~ ^opengnsys- ]]; then
+            if [[ $TAG =~ ^(opengnsys-|v)[0-9] ]]; then
                 [ "${TAG#opengnsys-}" \< "${INSTVERSION%pre}" ] && continue
+                [ "${TAG#v}" \< "${INSTVERSION%pre}" ] && continue
                 RELDATE=$(curl -s "$URL" | jq -r '.commit.committer.date | split("-") | join("")[:8]')
                 RELEASES+=( "${TAG} ($RELDATE)" )
                 DOWNLOADS+=( "$URL" )
