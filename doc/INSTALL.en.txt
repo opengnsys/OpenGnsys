@@ -1,10 +1,10 @@
-Installing OpenGnsys Server 1.1.1 (Espeto)
-==========================================
+Installing OpenGnsys Server 1.2.0 (Gazpacho)
+============================================
 
 Before installation
 -------------------
 
-OpenGnsys Server 1.1.1 (codename Espeto) is meant to be installed under Ubuntu Server 18.04 LTS or newer (some tests have been done on CentOS 7-based systems).
+OpenGnsys Server 1.2.0 (codename Gazpacho) is meant to be installed under Ubuntu Server 18.04 LTS 64-bit.
 
 Network connection is needed in order to download the required packages, the source code and the preconfigured client.
 
@@ -71,7 +71,7 @@ Once the installation process is finished, you can start working with the system
 Updating / upgrading
 --------------------
 
-Warning: if you are going to upgrade OpenGnsys from a version earlier than 1.1.1 (Espeto), you must first upgrade Ubuntu to version 18.04 LTS and restart the server.
+Warning: if you are going to upgrade OpenGnsys from a version earlier than 1.2.0 (Gazpacho), you must first upgrade Ubuntu to version 18.04 LTS and restart the server.
 
 There is a system self-upgrading script with the following features:
     * Network connection is needed to obtain the latest updates / upgrades.
