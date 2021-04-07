@@ -1,0 +1,60 @@
+CHANGELOG.en.txt
+================
+
+
+Changes included inc OpenGnsys 1.2.0
+------------------------------------
+
+#140 	Unified configuration file (duplicated)
+#803 	Delete drop-down of images from different partition (won't be resolved)
+#837 	Install OpenGnsys using deb package (duplicated)
+#838 	Problema con parámetros vga en ogLive
+#901 	Investigate if connections to the database are made correctly
+#902 	Unclear error message (won't be resolved)
+#941 	Use libdbi in ogAdmServer
+#942 	Remove ogAdmAgent
+#944 	Show computer distribution in a lab
+#968 	Choose allowed operations in OGAgent agents
+#970 	Use autotools in ogAdmServer
+#971 	Remove unused code in ogAdmServer, ogAdmAgent and ogAdmClient
+#975 	New OGAgent option to obtain system status in detail
+#976 	ogBootMbrGeneric: improve GPT compatibility (won't be resolved)
+#980 	Add REST API to ogClient
+#981 	add native systemd unit file for ogAdmServer
+#986 	Rename ogAdmServer to ogServer
+#987 	Use systemctl to disable/enable services in Debian/Ubuntu
+#990 	Use client broadcast address on WoL
+#991 	Define computer in maintenance status
+#997	Releasing OpenGnsys version 1.2.0
+#998 	disable incremental image updates
+#999 	ogClient session command do not boot the selected OS
+#1000 	Fix ogClient HTTP lenght handling
+#1001 	Remove trailing \r and \n in some scripts
+#1002 	Fix update script to not remove ogAdmRepo.cfg
+#1003 	Fix ogClient update
+#1005 	Fix support for computer groups in RemotePC
+#1006 	Fix RemotePC IP retrieving on running clients
+#1007 	opengnsys_update.sh does not generate VERSION.json file
+#1008 	Add support to several disks
+#1009 	Fix ogclient permissions
+#1010 	Clean up and fix /software
+#1011 	Windows hibernation error
+#1012 	Support disk larger than 2Tb
+#1013 	ogClient (live mode) hangs busy when createImage script fails 
+#1014 	ogGetImageInfo function fails with Windows 10 2009 update
+#1015 	PXE files are not updated when needed
+#1017 	Default ogLive crash after system update, symlinks don't exist (not valid)
+#1018 	opengnsys_update script cannot start or stop ogserver service
+#1019 	ogClient cannot execute some queued instructions
+#1020 	logrotate does not rotate opengnsys log files
+#1022 	Software inventory crashes when it exceeds 64 Kb
+#1024 	Disable function move a single computer
+#1026 	Installation and update scripts must report the operating system prerequisites (and previous version of OpenGnsys in the case of update scripts)
+#1027 	opengnsys_update.sh does not include the server IP in ogclient.json file
+#1028 	ogServer: modify its status when uninstalling or changing the server's IP address
+#1029 	Final message of installation and upgrade scripts
+#1031 	Admin console doesn't show the statistics
+#1032 	Running a task causes a malfunction in action queue
+#1033 	ogLive 5.4 incompatible with "opengnsys-cache" netboot option
+#1034 	Error is displayed during the execution of opengnsys_export.sh
+
