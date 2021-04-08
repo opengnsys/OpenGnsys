@@ -114,24 +114,26 @@ function userData ()
 	OPENGNSYS_CLIENT_PASSWD="$PASSWORD"
 	unset PASSWORD
 
+	# El ogclient sólo es compatible con ogLive de kernel 5.x. Se comenta la elección de ogLive.
 	# Selección de clientes ogLive para descargar.
-	while : ; do
-		echo -e "\\n\\nChoose ogLive client to install."
-		echo -e "1) Kernel 5.4, 64-bit, EFI-compatible"
-		echo -e "2) Kernel 3.2, 32-bit"
-		echo -e "3) Both"
-		echo -n -e "Please, type a valid number (1): "
-		read -r OPT
-		case "$OPT" in
-			1|"")	OGLIVE="$DEFAULT_OGLIVE"
-				break ;;
-			2)	OGLIVE="ogLive-precise-3.2.0-23-generic-r5159.iso"
-				break ;;
-			3)	OGLIVE=" $DEFAULT_OGLIVE ogLive-precise-3.2.0-23-generic-r5159.iso";
-				break ;;
-			*)	echo -e "\\aERROR: unknown option, try again."
-		esac
-	done
+	#while : ; do
+	#	echo -e "\\n\\nChoose ogLive client to install."
+	#	echo -e "1) Kernel 5.4, 64-bit, EFI-compatible"
+	#	echo -e "2) Kernel 3.2, 32-bit"
+	#	echo -e "3) Both"
+	#	echo -n -e "Please, type a valid number (1): "
+	#	read -r OPT
+	#	case "$OPT" in
+	#		1|"")	OGLIVE="$DEFAULT_OGLIVE"
+	#			break ;;
+	#		2)	OGLIVE="ogLive-precise-3.2.0-23-generic-r5159.iso"
+	#			break ;;
+	#		3)	OGLIVE=" $DEFAULT_OGLIVE ogLive-precise-3.2.0-23-generic-r5159.iso";
+	#			break ;;
+	#		*)	echo -e "\\aERROR: unknown option, try again."
+	#	esac
+	#done
+	OGLIVE="$DEFAULT_OGLIVE"
 
 	echo -e "\\n=============================="
 }
@@ -833,7 +835,7 @@ function downloadCode()
 
 	echoAndLog "${FUNCNAME}(): downloading code..."
 
-	curl "${url}" -o opengnsys.zip && unzip opengnsys.zip && mv "OpenGnsys-$BRANCH" opengnsys
+	curl "${url}" -o opengnsys.zip && unzip opengnsys.zip && mv "OpenGnsys-${BRANCH#v}" opengnsys
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error getting OpenGnsys code from $url"
 		return 1
@@ -1360,7 +1362,7 @@ function ogServerCompilation ()
 	echoAndLog "${FUNCNAME}(): ogServer code was downloaded"
 
 	echoAndLog "${FUNCNAME}(): Compiling OpenGnsys Server"
-	pushd "$WORKDIR/ogServer-$BRANCH"
+	pushd "$WORKDIR/ogServer-${BRANCH#v}"
 	autoreconf -fi && ./configure && make && mv ogserver $INSTALL_TARGET/sbin
 	if [ $? -ne 0 ]; then
 		echoAndLog "${FUNCNAME}(): error while compiling OpenGnsys Server"
@@ -1427,7 +1429,7 @@ function copyClientFiles()
 
 	if ! (curl "${ogclientUrl}" -o ogclient.zip && \
 	     unzip -qo ogclient.zip && \
-	     mv "ogClient-$BRANCH" $INSTALL_TARGET/client/ogClient)
+	     mv "ogClient-${BRANCH#v}" $INSTALL_TARGET/client/ogClient)
 	then
 		errorAndLog "${FUNCNAME}(): "\
 			    "error getting ogClient code from ${ogclientUrl}"
@@ -1496,7 +1498,7 @@ function openGnsysConfigure()
 	cp -a $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.init /etc/init.d/opengnsys
 	cp -a $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.service \
 	      /lib/systemd/system/opengnsys.service
-	cp -a $WORKDIR/ogServer-$BRANCH/cfg/ogserver.service \
+	cp -a $WORKDIR/ogServer-${BRANCH#v}/cfg/ogserver.service \
 	      /lib/systemd/system/ogserver.service
 	cp -a $WORKDIR/opengnsys/admin/Sources/Services/opengnsys.default /etc/default/opengnsys
 	# Deshabilitar servicios de BitTorrent si no están instalados.
