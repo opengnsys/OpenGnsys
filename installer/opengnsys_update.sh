@@ -139,7 +139,7 @@ function autoConfigure()
 	# Configuración según la distribución de Linux.
 	if [ -f /etc/debian_version ]; then
 		# Distribución basada en paquetes Deb.
-		DEPENDENCIES=( curl rsync btrfs-tools procps arp-scan realpath php-curl gettext moreutils jq wakeonlan udpcast libev-dev libjansson-dev libssl-dev shim-signed grub-efi-amd64-signed php-fpm gawk libdbi-dev libdbi1 libdbd-mysql automake liblz4-tool )
+		DEPENDENCIES=( curl rsync btrfs-tools procps arp-scan realpath php-curl gettext moreutils jq wakeonlan udpcast libev-dev libjansson-dev libssl-dev shim-signed grub-efi-amd64-signed php-fpm gawk libdbi-dev libdbi1 libdbd-mysql automake liblz4-tool software-properties-common )
 		# Paquete correcto para realpath.
 		[ -z "$(apt-cache pkgnames realpath)" ] && DEPENDENCIES=( ${DEPENDENCIES[@]//realpath/coreutils} )
 		UPDATEPKGLIST="add-apt-repository -y ppa:ondrej/php; apt-get update"
@@ -497,13 +497,12 @@ function downloadCode()
 	fi
 
 	local url="$1"
-
 	echoAndLog "${FUNCNAME}(): downloading code..."
 
 	curl "$url" -o opengnsys.zip && \
 		unzip -qo opengnsys.zip && \
 		rm -fr opengnsys && \
-		mv "OpenGnsys-$BRANCH" opengnsys
+		mv "OpenGnsys-${BRANCH#v}" opengnsys
 	if [ $? -ne 0 ]; then
 		errorAndLog "${FUNCNAME}(): error getting code from ${url}, verify your user and password"
 		return 1
@@ -1098,7 +1097,7 @@ function ogServerCompilation()
 	echoAndLog "${FUNCNAME}(): ogServer code was downloaded"
 
 	echoAndLog "${FUNCNAME}(): Recompiling OpenGnsys Admin Server"
-	pushd "$WORKDIR/ogServer-$BRANCH"
+	pushd "$WORKDIR/ogServer-${BRANCH#v}"
 	autoreconf -fi && ./configure && make && moveNewService ogserver $INSTALL_TARGET/sbin
 	if [ $? -ne 0 ]; then
 		echoAndLog "${FUNCNAME}(): error while compiling OpenGnsys Server"
@@ -1143,7 +1142,7 @@ function ogServerCompilation()
 	    $INSTALL_TARGET/bin/settoken -f
 	# Updating service file, if needed
 	if ! diff -q \
-	     "$WORKDIR"/ogServer-"$BRANCH"/cfg/ogserver.service \
+	     "$WORKDIR"/ogServer-"${BRANCH#v}"/cfg/ogserver.service \
 	     /lib/systemd/system/ogserver.service 2>/dev/null; then
 		service="opengnsys"
 		$STOPSERVICE
@@ -1152,7 +1151,7 @@ function ogServerCompilation()
 		service="ogserver"
 		$STOPSERVICE
 		cp -a \
-		   "$WORKDIR"/ogServer-"$BRANCH"/cfg/ogserver.service \
+		   "$WORKDIR"/ogServer-"${BRANCH#v}"/cfg/ogserver.service \
 		   /lib/systemd/system/ogserver.service
 		systemctl daemon-reload
 		$STARTSERVICE
@@ -1237,14 +1236,14 @@ function updateOgClient()
 		return 1
 	fi
 	if [ -e $INSTALL_TARGET/client/ogClient/cfg/ogclient.json ]; then
-	     rm -f ogClient-"$BRANCH"/cfg/ogclient.json
+	     rm -f ogClient-"${BRANCH#v}"/cfg/ogclient.json
 	else
 	     CLIENTPASS=$(awk -F":" '{print $2}' /etc/rsyncd.secrets)
 	     sed -i -e 's/127.0.0.1/'$ServidorAdm'/' \
 		-e 's/pass'.*$'/pass\": "'$CLIENTPASS'"/' \
-		ogClient-"$BRANCH"/cfg/ogclient.json
+		ogClient-"${BRANCH#v}"/cfg/ogclient.json
 	fi
-	rsync -irplt "ogClient-$BRANCH/" $INSTALL_TARGET/client/ogClient
+	rsync -irplt "ogClient-${BRANCH#v}/" $INSTALL_TARGET/client/ogClient
 	rm -f ogclient.zip
 	echoAndLog "${FUNCNAME}(): ogClient code was downloaded and updated"
 
