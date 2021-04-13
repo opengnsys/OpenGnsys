@@ -21,6 +21,7 @@
 OPENGNSYS=${OPENGNSYS:-/opt/opengnsys}	# Instalación de OpenGnsys
 OGETC=${OGETC:-$OPENGNSYS/etc}		# Configuración de OpenGnsys
 POWEROFFCONF=/etc/poweroff.conf		# Configuración del script
+OGCLIENT=ogclient
 
 # Error si no existe el fichero de configuración de ahorro de energía. 
 if [ ! -f $POWEROFFCONF ]; then
@@ -62,7 +63,7 @@ case $# in
 esac
 # Comprobar si hay algún script en ejecución (verificando compatibilidad de "pgrep").
 [ -n "$(pgrep -fa 2>&1 | grep "invalid")" ] && PGREP="pgrep -fl" || PGREP="pgrep -fa"
-if [ -n "$($PGREP $OPENGNSYS | egrep -v "$OGETC|$0")" ]; then
+if [ -n "$($PGREP $OPENGNSYS | egrep -v "$OGETC|$0|$OGCLIENT")" ]; then
     # Eliminar tiempo de inicio de espera, si se está ejecutando operación.
     perl -pi -e 's/POWEROFFTIME=.*$/POWEROFFTIME=/' $POWEROFFCONF
 else
