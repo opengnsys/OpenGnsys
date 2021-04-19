@@ -1,0 +1,187 @@
+# Vagrantfile to install OpenGnsys virtual environment (development version) using VirtualBox provider.
+
+VAGRANTFILE_API_VERSION = "2"
+# VM provider: Oracle VM VirtualBox.
+ENV['VAGRANT_DEFAULT_PROVIDER'] = "libvirt"
+# OGAgent version.
+OGAGENTVERSION="1.1.2"
+# Language (accepted values: es_ES, ca_ES, en_GB).
+LANGUAGE = "es_ES"
+ENV['LC_ALL'] = LANGUAGE + ".UTF-8"
+# Number of OpenGnsys clients (accepted values: from 2 to 9).
+NCLIENTS = 4
+# Repository virtual disk: file and size (GB).
+REPODISK = "ogRepo.vdi"
+REPOSIZE = 50
+# Amount of memory for server and clients (MB)
+SERVERMEM = 1024	# Minimum: 512
+CLIENTMEM = 512		# Minimum: 256
+# Amount of CPU for server and clients (MB)
+SERVERCPU = 1
+CLIENTCPU = 1
+# Prefixes for MAC and IP addresses.
+MACPREFIX = "08:00:27:0E:65"
+NETPREFIX = "192.168.2"
+# OpenGnsys Server IP address.
+SERVERIP = "#{NETPREFIX}.10"
+# Local port to access OpenGnsys Server.
+LOCALWEBPORT = 8443
+
+# OpenGnsys Server provisioning script: prepare repo disk, install OpenGnsys, change default interface, configure DHCP server.
+OGSERVERSCRIPT = <<EOT
+# Exit if OpenGnsys is installed.
+[ -f /opt/opengnsys/doc/VERSION.json ] && echo "Cannot provision, OpenGnsys is already installed." && exit 1
+
+# Create repository disk using LVM, if necesary.
+if [ -z "$(blkid /dev/mapper/og-images | grep ext4)" ]; then
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get update
+    apt-get -y install lvm2
+    pvcreate /dev/vdb
+    vgcreate og /dev/vdb
+    vgchange -ay
+    lvcreate -ay -n images -l 100%VG og
+    mkfs -t ext4 /dev/mapper/og-images
+    mkdir -p /opt/opengnsys/images
+    echo "/dev/mapper/og-images  /opt/opengnsys/images  ext4  defaults  0  0" >> /etc/fstab
+    mount -t ext4 /dev/mapper/og-images /opt/opengnsys/images
+fi
+# Install OpenGnsys and change server address.
+if which curl &>/dev/null; then
+    DOWNLOAD="curl -s"
+elif which wget &>/dev/null; then
+    DOWNLOAD="wget -q -O -"
+fi
+BRANCH="master"
+$DOWNLOAD "https://raw.githubusercontent.com/opengnsys/OpenGnsys/$BRANCH/installer/opengnsys_installer.sh" | bash || exit $?
+mv /opt/opengnsys/log/bash.log /opt/opengnsys/log/opengnsys_installer.log
+echo y | /opt/opengnsys/bin/setserveraddr $(ip -o link show | tail -1 | cut -d: -f2)
+# Insert DHCP data.
+for ((i=#{NCLIENTS+10}; i>10; i--)); do
+    sed -i "/^}$/ i host pc${i} { hardware ethernet #{MACPREFIX}:${i}; fixed-address #{NETPREFIX}.${i}; }" /etc/dhcp/dhcpd.conf
+done
+service isc-dhcp-server restart
+# Set language.
+export LANG="#{LANGUAGE}.UTF-8"
+echo "LANG=\\\"$LANG\\\"" > /etc/default/locale
+echo "LANG=\\\"$LANG\\\"" >> /etc/environment
+locale-gen --lang #{LANGUAGE}
+sed -i "s/XKBLAYOUT=.*/XKBLAYOUT=\\\"${LANG%_*}\\\"/" /etc/default/keyboard
+dpkg-reconfigure -fnoninteractive console-setup
+# Comment out next lines for automatic data insertion.
+#SQL="INSERT INTO aulas (nombreaula, idcentro, urlfoto, grupoid, ubicacion, puestos, modomul, ipmul, pormul, velmul, router, netmask, ntp, dns, proxy, modp2p, timep2p) VALUES  ('Aula virtual', 1, 'aula.jpg', 0, 'Despliegue virtual con Vagrant.', 5, 2, '239.194.2.11', 9000, 70, '#{NETPREFIX}.1', '255.255.255.0', '', '', '', 'peer', 30); INSERT INTO ordenadores (nombreordenador, ip, mac, idaula, idrepositorio, idperfilhard, idmenu, idproautoexec, grupoid, router, mascara, arranque, netiface, netdriver, fotoord) VALUES"
+#for ((i=11; i<=#{NCLIENTS+10}; i++)); do
+#    SQL="$SQL ('pc$i', '#{NETPREFIX}.$i', REPLACE('#{MACPREFIX}$i',':',''), 1, 1, 0, 0, 0, 0, '#{NETPREFIX}.1', '255.255.255.0', '00unknown', 'eth0', 'generic', 'fotoordenador.gif'),"
+#done
+#mysql -u usuog -ppassusuog -D ogAdmBD -e "${SQL%,}"
+#read -pe PORT TOKEN <<< $(jq -r '.rest.port+" "+.rest.api_token' /opt/opengnsys/etc/ogserver.json)
+#DATA='{"clients": ["#{NETPREFIX}.11"], "mode": "19pxeADMIN"}'
+#curl -ks -H "Authorization: $TOKEN" -d "$DATA" "http://localhost:$PORT/mode"
+#DATA='{"clients": ["#{NETPREFIX}.'$(seq -s '", "#{NETPREFIX}.' 12 #{NCLIENTS+10})'"], "mode": "pxe"}'
+#curl -ks -H "Authorization: $TOKEN" -d "$DATA" "http://localhost:$PORT/mode"
+
+# Tftpboot: Change grldr to new version
+cp /opt/opengnsys/tftpboot/grldr /opt/opengnsys/tftpboot/grldr.orig
+cp /opt/opengnsys/tftpboot/grldr-0.4.4 /opt/opengnsys/tftpboot/grldr
+
+echo "Notes:"
+echo "- OpenGnsys Server URL: https://#{SERVERIP}/opengnsys/"
+exit 0
+EOT
+
+# Client 1 OS provisioning script.
+MODELSCRIPT = <<EOT
+# Comment out next lines to install and configure OGAgent for Ubuntu.
+#export DEBIAN_FRONTEND=noninteractive
+#OGAGENTPKG="ogagent_#{OGAGENTVERSION}_all.deb"
+#apt-get update -y
+#apt-get install -y curl
+#curl -ks https://#{SERVERIP}/opengnsys/descargas/$OGAGENTPKG -o /tmp/$OGAGENTPKG
+#if [ -f /tmp/$OGAGENTPKG ]; then
+#    apt-get install -y /tmp/$OGAGENTPKG || exit $?
+#    sed -i "0,/remote=/ s,remote=.*,remote=https://#{SERVERIP}/opengnsys/rest/," /usr/share/OGAgent/cfg/ogagent.cfg
+#    rm -f /tmp/$OGAGENTPKG
+#else
+#    echo "Warning: cannot install OGAgent package $OGAGENTPKG"
+#fi
+echo "Notes:"
+echo "- After now, use virt-manager GUI to disable network interface 1, reconfigure boot network and restart this VM."
+# Leave VM halted.
+sleep 2
+poweroff &
+EOT
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+
+  # OpenGnsys Server VM definition.
+  config.vm.define :ogAdministrator, primary: true do |og|
+    # Specific VirtualBox configuration.
+    og.vm.provider "libvirt" do |vb|
+      # VM name, memory and CPUs.
+      vb.memory = SERVERMEM
+      vb.cpus = SERVERCPU
+      # 2nd virtual disk.
+      vb.storage :file, :size => REPOSIZE,
+         :path => REPODISK,
+         :allow_existing => true
+    end
+    # VM base and host name.
+    og.vm.box = "peru/ubuntu-18.04-server-amd64"
+    og.vm.hostname = "ogAdministrator"
+    # Network configuration: forward web port and attach new interface to VMs private network.
+    og.vm.network :forwarded_port, guest: 443, host: LOCALWEBPORT, host_ip: "127.0.0.1"
+    og.vm.network :private_network,
+      :libvirt__network_name => "virtualLab0",
+      :mac => "#{MACPREFIX}10".tr(":",""),
+      :ip => "#{SERVERIP}",
+      :libvirt__dhcp_enabled => false,
+      :libvirt__forward_mode => "none"
+    # Comment out to disable synced folder.
+    #og.vm.synced_folder ".", "/vagrant", disabled: true
+    # Launch provisioning script.
+    og.vm.provision "shell", inline: OGSERVERSCRIPT
+  end
+
+  # Client 1 VM definition.
+  config.vm.define "pc11", autostart: false do |v1|
+    v1.vm.box = "peru/ubuntu-18.04-server-amd64"
+    v1.vm.synced_folder ".", "/vagrant", disabled: true
+    v1.ssh.insert_key = false
+    v1.vm.boot_timeout = 5
+    v1.vm.network :private_network,
+      :libvirt__network_name => "virtualLab0",
+      :libvirt__forward_mode => "none",
+      :libvirt__dhcp_enabled => false,
+      :mac => "#{MACPREFIX}11".tr(":","")
+    v1.vm.provider "libvirt" do |vb|
+      vb.cpu_mode = 'host-passthrough'
+      vb.memory = CLIENTMEM
+      vb.cpus = CLIENTCPU
+      boot_network = {'network' => "vagrant_libvirt"}
+      vb.boot boot_network
+    end
+    v1.vm.provision "shell", inline: MODELSCRIPT
+  end
+
+  # Clonable clients definition.
+  (2..NCLIENTS).each do |i|
+    config.vm.define "pc#{i+10}", autostart: false do |cl|
+      cl.vm.synced_folder ".", "/vagrant", disabled: true
+      cl.ssh.insert_key = false
+      cl.vm.boot_timeout = 5
+      cl.vm.network :private_network,
+        :libvirt__network_name => "virtualLab0",
+        :libvirt__forward_mode => "none",
+        :libvirt__dhcp_enabled => false,
+        :mac => "#{MACPREFIX}#{i+10}".tr(":","")
+      cl.vm.provider :libvirt do |vb|
+        vb.storage :file, :size => '100G', :type => 'qcow2'
+        vb.memory = CLIENTMEM
+        vb.cpus = CLIENTCPU
+        boot_network = {'network' => "virtualLab0"}
+        vb.boot boot_network
+      end
+      cl.vm.post_up_message = "- After now, use virt-manager GUI to disable network interface 1 and restart this VM."
+    end
+  end
+end
