@@ -185,6 +185,9 @@ INSERT INTO acciones
        idcentro=$ouid;
 EOD;
 		$t2 = $cmd->Ejecutar();
+		create_schedule_now(strval($timestamp),
+				    $EJECUCION_COMANDO,
+				    "auto-queue-remotepc-reserve-".$timestamp);
 		// Create event to remove reservation on timeout (15 min.).
 		$timeout = "15 MINUTE";
 		$cmd->texto = <<<EOD
@@ -679,6 +682,9 @@ INSERT INTO acciones
        idcentro=$ouid;
 EOD;
 		$cmd->Ejecutar();
+		create_schedule_now(strval($timestamp),
+				    $EJECUCION_COMANDO,
+				    "auto-queue-remotepc-init-".$timestamp);
 		// Create event to remove the operation on timeout (15 min.).
 		$timeout = "15 MINUTE";
 		$cmd->texto = <<<EOD
