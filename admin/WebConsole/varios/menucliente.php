@@ -47,6 +47,35 @@ else{
 	$UrlPaginaIconos=dirname($UrlPagina)."/images/iconos";
 	$codeHtml="";
 	//________________________________________________________________________________________________________
+	//agp Tomamos el tipo de disco DISK o NVM
+//________________________________________________________________________________________________________
+	// Leemos el fichero que contiene la información de discos
+	$nom_fich = "/opt/opengnsys/log/clients/".$iph.".tdisk.txt";
+	$cont_fich = file_get_contents($nom_fich);//echo $cont_fich;
+	// quitamos 2 ultimos caracteres (espacio y ;)
+	$cont_fich = substr($cont_fich, 0, -2);
+	$disk_l=explode(";",$cont_fich);
+
+	for($i=0;$i<count($disk_l);$i++){
+		// Obtenemos los 3 primeros caracteres del disco
+		$dcar=substr($disk_l[$i], 0, 3);
+		// Comprobamos si los 2 primeros caracteres son DISCOS ejemp: 1:0  ,  2:0  , 3:0
+		if ( $dcar == $i.":0"){
+			// Obtenemos el último campo DISK - NVM
+			$disko_enc = explode(":",$disk_l[$i]);
+			$NUMDISK=$dcar2[0];
+			$TIPODISK=$disko_enc[7];
+		// Actualizamos la base de datos en el campo
+			$cmd->texto="UPDATE ordenadores_particiones
+				SET tdisk='".$TIPODISK."'
+				WHERE idordenador=(SELECT idordenador
+						     FROM ordenadores
+						    WHERE ip='".$iph."')
+				AND numdisk='".$NUMDISK."'";
+		$resul=$cmd->Ejecutar();
+		}
+	}
+//________________________________________________________________________________________________________
 	//agp
 	$nombre_archivo = "/opt/opengnsys/log/clients/".$iph.".cache.txt";
 	$contenidofichero = file_get_contents($nombre_archivo);

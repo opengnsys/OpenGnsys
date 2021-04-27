@@ -66,11 +66,31 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 	$aviso="";
 	foreach($diskConfigs as $disk => $diskConfig){
 		$disk = (int)$disk;
+// agp =============================================================================
+		// Actualizamos la base de datos en el campo
+		$cmd->texto="SELECT tdisk 
+			FROM ordenadores_particiones
+			WHERE idordenador='$idordenadores'
+			AND numdisk='$disk'
+			AND numpar=0";
+
+		$rs=new Recordset; 
+		$rs->Comando=&$cmd; 
+		if (!$rs->Abrir()) return; // Error al abrir recordset
+		$rs->Primero();
+			while (!$rs->EOF){
+				$tipodisk = $rs->campos["tdisk"];
+				$rs->Siguiente();
+			}
+// agp =============================================================================
 		echo'<tr height="16">'.chr(13);
-	        echo '<td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;'.$TbMsg["DISK"].'&nbsp;'.$disk.'</td>'.chr(13);
-
-
-		
+// agp =============================================================================
+			if ($tipodisk=="NVM"){
+	        echo '<td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;'.$TbMsg["DISK"].'&nbsp;'.$disk.' - <span style="color: red"><strong>( '.$tipodisk.'e )</span></td>'.chr(13);
+			}else{
+			echo '<td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;'.$TbMsg["DISK"].'&nbsp;'.$disk.' - <span><strong>( '.$tipodisk.' )</span></td>'.chr(13);
+			}
+// agp =============================================================================
 		$auxCfg=explode("@",$diskConfig); // Crea lista de particiones
 		for($i=0;$i<sizeof($auxCfg);$i++){
 			$auxKey=explode(";",$auxCfg[$i]); // Toma clave de configuracion
@@ -240,8 +260,31 @@ function pintaParticionesRestaurarImagen($cmd,$configuraciones,$idordenadores,$c
 	
 	foreach($diskConfigs as $disk => $diskConfig){
 		$disk = (int)$disk;
+// agp =============================================================================
+		// Actualizamos la base de datos en el campo
+		$cmd->texto="SELECT tdisk 
+			FROM ordenadores_particiones
+			WHERE idordenador='$idordenadores'
+			AND numdisk='$disk'
+			AND numpar=0";
+
+		$rs=new Recordset; 
+		$rs->Comando=&$cmd; 
+		if (!$rs->Abrir()) return; // Error al abrir recordset
+		$rs->Primero();
+			while (!$rs->EOF){
+				$tipodisk = $rs->campos["tdisk"];
+				$rs->Siguiente();
+			}
+// agp =============================================================================
 		echo'<tr height="16">'.chr(13);
-		echo '<td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;'.$TbMsg["DISK"].'&nbsp;'.$disk.'</td>'.chr(13);
+// agp =============================================================================
+			if ($tipodisk=="NVM"){
+	        echo '<td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;'.$TbMsg["DISK"].'&nbsp;'.$disk.' - <span style="color: red"><strong>( '.$tipodisk.'e )</span></td>'.chr(13);
+			}else{
+			echo '<td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;'.$TbMsg["DISK"].'&nbsp;'.$disk.' - <span><strong>( '.$tipodisk.' )</span></td>'.chr(13);
+			}
+// agp =============================================================================
 	         
 		$auxCfg=explode("@",$diskConfig); // Crea lista de particiones
 		for($i=0;$i<sizeof($auxCfg);$i++){
@@ -439,8 +482,31 @@ function pintaParticionesRestaurarImagenSincronizacion1($cmd,$configuraciones,$i
 	
 	foreach($diskConfigs as $disk => $diskConfig){
 		$disk = (int)$disk;
+// agp =============================================================================
+		// Actualizamos la base de datos en el campo
+		$cmd->texto="SELECT tdisk 
+			FROM ordenadores_particiones
+			WHERE idordenador='$idordenadores'
+			AND numdisk='$disk'
+			AND numpar=0";
+
+		$rs=new Recordset; 
+		$rs->Comando=&$cmd; 
+		if (!$rs->Abrir()) return; // Error al abrir recordset
+		$rs->Primero();
+			while (!$rs->EOF){
+				$tipodisk = $rs->campos["tdisk"];
+				$rs->Siguiente();
+			}
+// agp =============================================================================
 		echo'<tr height="16">'.chr(13);
-		echo '<td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;'.$TbMsg["DISK"].'&nbsp;'.$disk.'</td>'.chr(13);
+// agp =============================================================================
+			if ($tipodisk=="NVM"){
+	        echo '<td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;'.$TbMsg["DISK"].'&nbsp;'.$disk.' - <span style="color: red"><strong>( '.$tipodisk.'e )</span></td>'.chr(13);
+			}else{
+			echo '<td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;'.$TbMsg["DISK"].'&nbsp;'.$disk.' - <span><strong>( '.$tipodisk.' )</span></td>'.chr(13);
+			}
+// agp =============================================================================
 	     
 		$auxCfg=explode("@",$diskConfig); // Crea lista de particiones
 		for($i=0;$i<sizeof($auxCfg);$i++){

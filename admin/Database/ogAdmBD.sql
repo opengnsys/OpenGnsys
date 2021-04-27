@@ -557,6 +557,7 @@ CREATE TABLE `ordenadores` (
 DROP TABLE IF EXISTS `ordenadores_particiones`;
 CREATE TABLE `ordenadores_particiones` (
   `idordenador` int(11) NOT NULL DEFAULT '0',
+  `tdisk` varchar(4) DEFAULT NULL,
   `numdisk` smallint NOT NULL DEFAULT '0',
   `numpar` smallint NOT NULL DEFAULT '0',
   `codpar` int(8) NOT NULL DEFAULT '0',
