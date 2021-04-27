@@ -46,6 +46,13 @@ CREATE PROCEDURE altercols() BEGIN
 			ADD filesystem varchar(100) NOT NULL DEFAULT '',
 			ADD datasize bigint NOT NULL DEFAULT 0;
 	END IF;
+	# Add tipodisco (ticket #1037).
+	IF NOT EXISTS (SELECT * FROM information_schema.COLUMNS
+			WHERE COLUMN_NAME='tdisk' AND TABLE_NAME='ordenadores_particiones' AND TABLE_SCHEMA=DATABASE())
+	THEN
+		ALTER TABLE ordenadores_particiones
+			ADD tdisk VARCHAR(4) DEFAULT NULL AFTER idordenador;
+	END IF;
 END//
 # Run conditional update.
 DELIMITER ';'

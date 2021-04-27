@@ -70,6 +70,7 @@ INSERT INTO usuarios (idusuario, pasguor)
 # evitar errores "TEXT NOT NULL" y "NO_ZERO_DATE" (ticket #730).
 ALTER TABLE ordenadores_particiones
 	MODIFY cache TEXT,
+	ADD tdisk VARCHAR(4) DEFAULT NULL,
 	ADD revision SMALLINT UNSIGNED NOT NULL DEFAULT 0 AFTER idimagen,
 	ADD uso TINYINT NOT NULL DEFAULT 0;
 ALTER TABLE acciones
