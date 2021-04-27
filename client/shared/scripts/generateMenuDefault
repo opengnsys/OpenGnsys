@@ -8,8 +8,11 @@ DEVICE=${DEVICE:-"eth0"}
 source /tmp/net-$DEVICE.conf
 FILEINFOHTML=$OGLOG/`ogGetIpAddress`.info.html
 FILEINFOCACHE=$OGLOG/`ogGetIpAddress`.cache.txt
+FILETIPODISK=$OGLOG/`ogGetIpAddress`.tdisk.txt
 ogMountCache 2>/dev/null
 CACHECONTENIDO="ls -m $OGCAC/$OGIMG 2>/dev/null"
+TIPODISK=`cat /tmp/getconfigd`
+echo $TIPODISK > $FILETIPODISK
 
 SPEED=$(LANG=C ethtool $DEVICE 2>/dev/null | awk '$1~/Speed/ {print $2}')
 case "${SPEED,,}" in

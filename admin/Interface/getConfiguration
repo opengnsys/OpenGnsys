@@ -12,6 +12,9 @@ export DEBUG="no"
 
 ser=$(ogGetSerialNumber)
 cfg=""
+#AGP -----
+cfgd=""
+#AGP -----
 disks=$(ogDiskToDev | wc -w)
 for ((dsk=1; dsk<=$disks; dsk++)); do
     particiones=$(ogGetPartitionsNumber $dsk)
@@ -25,6 +28,11 @@ for ((dsk=1; dsk<=$disks; dsk++)); do
         ZPOOL)  ptt=4 ;; 
         *)      ptt=0 ;; 
     esac
+	#AGP -----------------------------------------------------------------------
+	# Información Tipo de Disco DISK o NVM
+	tdisk=$(ogDiskToDev $dsk)
+	cfgd="$cfgd$dsk:0:$ptt:::$(ogGetDiskSize $dsk):0:$(ogGetDiskType $tdisk);"
+	#AGP -----------------------------------------------------------------------
     # Información de disco (partición 0)
     cfg="$cfg$dsk:0:$ptt:::$(ogGetDiskSize $dsk):0;"
     for ((par=1;par<=$particiones;par++)); do
@@ -64,6 +72,11 @@ done
 # Guardar salida en fichero temporal.
 cfgfile=/tmp/getconfig
 echo "${ser:+$ser;}$cfg" > $cfgfile
+#AGP ----------------------------------
+# Guardar salida en fichero temporal.
+cfgfiled=/tmp/getconfigd
+echo "${ser:+$ser;}$cfgd" > $cfgfiled
+#AGP ----------------------------------
 
 # Crear el menú por defecto a partir del fichero generado (no dar ninguna salida).
 generateMenuDefault &>/dev/null
@@ -85,4 +98,3 @@ rm -f /mnt/*/ogboot.* /mnt/*/*/ogboot.*
 
 # Volver a registrar los errores.
 unset DEBUG
-

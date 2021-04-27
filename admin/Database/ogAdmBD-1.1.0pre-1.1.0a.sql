@@ -42,6 +42,13 @@ CREATE PROCEDURE addcols() BEGIN
 		ALTER TABLE ordenadores_particiones
 			ADD uso TINYINT NOT NULL DEFAULT 0;
 	END IF;
+	# Add tipodisco (ticket #1037).
+	IF NOT EXISTS (SELECT * FROM information_schema.COLUMNS
+			WHERE COLUMN_NAME='tdisk' AND TABLE_NAME='ordenadores_particiones' AND TABLE_SCHEMA=DATABASE())
+	THEN
+		ALTER TABLE ordenadores_particiones
+			ADD tdisk VARCHAR(4) DEFAULT NULL AFTER idordenador;
+	END IF;
 	# Añadir nº de serie (ticket #713)
 	IF NOT EXISTS (SELECT * FROM information_schema.COLUMNS
 			WHERE COLUMN_NAME='numserie' AND TABLE_NAME='ordenadores' AND TABLE_SCHEMA=DATABASE())
@@ -124,6 +131,13 @@ CREATE PROCEDURE addcols() BEGIN
 	THEN
 		ALTER TABLE ordenadores_particiones 
 			ADD revision SMALLINT UNSIGNED NOT NULL DEFAULT 0 AFTER idimagen;
+	END IF;
+	# Add tipodisco (ticket #1037).
+	IF NOT EXISTS (SELECT * FROM information_schema.COLUMNS
+			WHERE COLUMN_NAME='tdisk' AND TABLE_NAME='ordenadores_particiones' AND TABLE_SCHEMA=DATABASE())
+	THEN
+		ALTER TABLE ordenadores_particiones
+			ADD tdisk VARCHAR(4) DEFAULT NULL AFTER idordenador;
 	END IF;
 	# Incluir campo sistema operativo en el perfil de software (tickets #738 #713)
 	IF NOT EXISTS (SELECT * FROM information_schema.COLUMNS
