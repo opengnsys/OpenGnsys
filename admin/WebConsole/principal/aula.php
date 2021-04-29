@@ -363,7 +363,7 @@ function pintaordenadores(){
 	}
 	echo '  </tr>';
 	echo '  <tr align="center" valign="top">';
-	foreach (Array ("OFF", "MNT") as $status) {
+	foreach (Array ("OFF", "MNT", "WOL_SENT") as $status) {
 		echo '    <td><img src="../images/ordenador_'.$status.'.png" alt="'.$status.'" width="24" style="opacity: '.(1-0.5*($status=="MNT")).'" /><br /><font color="#003300" size="1" face="Arial, Helvetica, sans-serif">'.str_replace(" ", "<br>", $TbMsg["STATUS_$status"]).'</font></td>';
 	}
 	echo '  </tr>';

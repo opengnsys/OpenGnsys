@@ -19,5 +19,5 @@ $TbMsg["STATUS_LNXS"]="Sesi&oacute;n GNU/Linux";
 $TbMsg["STATUS_OSX"]="macOS";
 $TbMsg["STATUS_WIN"]="Windows";
 $TbMsg["STATUS_WINS"]="Sesi&oacute;n Windows";
-
-
+// Estados WoL
+$TbMsg["STATUS_WOL_SENT"]="WoL enviado";

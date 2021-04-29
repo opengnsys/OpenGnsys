@@ -138,6 +138,9 @@ function soIMG(so)
 		case 'VDI':
 			MimgOrdenador="ordenador_VDI.png"; // Virtual
 			break;
+		case 'WOL_SENT':
+			MimgOrdenador="ordenador_WOL_SENT.png"; // Wol enviado
+			break;
 		default:
 			MimgOrdenador="ordenador_OFF.png"; // Apagado
 			break;

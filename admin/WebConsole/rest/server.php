@@ -81,6 +81,7 @@ function getStatus($ouid, $labid, $clntid=0) {
 		   'LNX'=>"linux",
 		   'OSX'=>"macos",
 		   'WIN'=>"windows",
+		   'WOL_SENT'=>"wol_sent",
 		   'UNK'=>"unknown"];
 	// Parameters.
 	$ouid = htmlspecialchars($ouid);

@@ -19,3 +19,5 @@ $TbMsg["STATUS_LNXS"]="GNU/Linux session";
 $TbMsg["STATUS_OSX"]="MacOS";
 $TbMsg["STATUS_WIN"]="Windows";
 $TbMsg["STATUS_WINS"]="Windows session";
+// WoL states
+$TbMsg["STATUS_WOL_SENT"]="WoL sent";
