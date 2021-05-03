@@ -841,11 +841,11 @@ function createDirs()
 	mkdir -p ${INSTALL_TARGET}/{bin,doc,etc,lib,sbin,www}
 	mkdir -p ${INSTALL_TARGET}/{client,images/groups}
 	mkdir -p ${INSTALL_TARGET}/log/clients
-	if [ ! -d ${INSTALL_TARGET}/log/clients/setBootMode ]; then
-		mkdir -p ${INSTALL_TARGET}/log/clients/setBootMode
-		chmod 777 ${INSTALL_TARGET}/log/clients/setBootMode
+	if [ ! -d ${INSTALL_TARGET}/log/clients/bootOs ]; then
+		mkdir -p ${INSTALL_TARGET}/log/clients/bootOs
+		chmod 777 ${INSTALL_TARGET}/log/clients/bootOs
 	else
-		chmod 777 ${INSTALL_TARGET}/log/clients/setBootMode
+		chmod 777 ${INSTALL_TARGET}/log/clients/bootOs
 	fi
 	ln -fs ${INSTALL_TARGET}/log /var/log/opengnsys
 	# Detectar directorio de instalación de TFTP.

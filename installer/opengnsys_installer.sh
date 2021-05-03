@@ -1245,8 +1245,8 @@ function createDirs()
 	mkdir -p $path_opengnsys_base/etc
 	mkdir -p $path_opengnsys_base/lib
 	mkdir -p $path_opengnsys_base/log/clients
-	mkdir -p $path_opengnsys_base/log/clients/setBootMode
-	chmod 777 $path_opengnsys_base/log/clients/setBootMode
+	mkdir -p $path_opengnsys_base/log/clients/bootOs
+	chmod 777 $path_opengnsys_base/log/clients/bootOs
 	ln -fs $path_opengnsys_base/log /var/log/opengnsys
 	mkdir -p $path_opengnsys_base/sbin
 	mkdir -p $path_opengnsys_base/www

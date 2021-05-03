@@ -213,7 +213,7 @@ fi
 RETVAL=$?
 
 # Marca de Iniciar Sistema Restaurado
-InSisRes="/opt/opengnsys/log/setBootMode/InSisRes."$(ogGetIpAddress)
+InSisRes="/opt/opengnsys/log/bootOs/InSisRes."$(ogGetIpAddress)
 
 # Mostrar resultados.
 RESUMERESTOREIMAGE=$(grep -m 1 "Total Time:" $OGLOGCOMMAND)
