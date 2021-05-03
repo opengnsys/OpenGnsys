@@ -44,6 +44,7 @@ $TbMsg[32]="Pàgina validació";
 // AGP
 $TbMsg[33]="ogLive";
 $TbMsg[34]="*** Existeixen Equips amb diferents ogLive ***";
+$TbMsg[35]="*** A l'Iniciar equips amb ogLive s'actualitza Base Dades  ***";
 $TbMsg[495]="Data/Caché";
 $TbMsg[509]="Foto ordinador";
 $TbMsg[5091]="Afegir foto";

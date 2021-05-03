@@ -44,6 +44,7 @@ $TbMsg[32]="Validation page";
 // AGP
 $TbMsg[33]="ogLive";
 $TbMsg[34]="*** Some computers have different ogLive ***";
+$TbMsg[35]="When starting equipment with ogLive, the Database is updated ";
 $TbMsg[495]="Cache data";
 $TbMsg[509]="Computer picture";
 $TbMsg[5091]="Insert picture";

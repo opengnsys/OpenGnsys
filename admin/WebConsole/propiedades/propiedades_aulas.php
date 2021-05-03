@@ -394,7 +394,7 @@ function MuestraAccesoR() {
 </TABLE><p>
 <!-- ###########################################	PROPIEDADES APLICABLES A TODOS LOS ORDENADORES	#################################################################################-->
 
-<TABLE  name=masivo id=masivo align=center border=7 cellPadding=3 cellSpacing=1 class=tabla_listados >
+<TABLE  align=center border=7 cellPadding=3 cellSpacing=1 class=tabla_listados >
 		<TR>
 			<TH style="BACKGROUND-COLOR:#FFFFFF;COLOR:red" colspan=4 align=center>&nbsp;<?php echo $TbMsg[1888]?>&nbsp;</TH>
 		</TR>
@@ -490,7 +490,7 @@ function MuestraAccesoR() {
 		echo '<tr id="verinremotepc" style="display:">';
 	}else{
 		echo '<tr id="verinremotepc" style="display:none">';
-	}?>
+	?>
 			<th align="center">&nbsp;<?php echo "remotePC"?>&nbsp;</th>
 		<?php	if ($opcion==$op_eliminacion)	//eliminacion=3
 					//echo '<td colspan="3">'.$paginavalidacion.'</td>';
@@ -506,9 +506,17 @@ function MuestraAccesoR() {
 							<option value="">-- Selecciona Imagen remotePC --</option>
 								'. htmlOPTION_images($cmd,$ambito,$idaula) .'
 							</select>
+					<br>
+					<div style="color: red; font-weight: bold;">'.$TbMsg[35].'
 						</td>';
+
 			?>
-		</tr>
+		<?php 
+		echo '<tr id="verinremotepc" style="display:none">';
+		echo '<TH style="BACKGROUND-COLOR:#FFFFFF;COLOR:red" colspan=4 align=center>&nbsp;<?php echo $TbMsg[1888]?>&nbsp;</TH>';
+		echo '</TR>';
+		
+	}?>
 <!-- ###	AGP	remotePC	############################################################################################################################################# -->
 <!-------------------------------------------------------------------	UMA remotePC-------------------------------------------------------------------------------------->
 
