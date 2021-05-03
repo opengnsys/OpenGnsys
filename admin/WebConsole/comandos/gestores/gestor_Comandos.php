@@ -239,6 +239,74 @@ if($sw_ejya=='on'){
 ###################################################################
 
 
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+>>>>>>> f3f00f104cb9aaf0331fab5d6adcb63e1ecc6f6b
+###################################################################
+///////////////////// agp	///////////////////////////////////////
+###################################################################
+if($sw_ejya=='on'){
+	if( ($sw_ejsis == "0") && ($idcomando == "3" || $idcomando == "18")  ){
+
+		// Buscamos el Numero de Disco
+		$disco=explode(chr(13),$atributos);
+		$disco=$disco[0];
+		$disco=explode("=",$disco);
+		$disco=$disco[1];
+
+		// =========================================
+		// Buscamos el Numero de Particion
+		$particion=explode(chr(13),$atributos);
+		$particion=$particion[1];
+		$particion=explode("=",$particion);
+		$particion=$particion[1];
+
+		// =========================================
+		// Asignamos el arranque
+		$insisresdisk=$disco." ".$particion;
+
+		$cadenaipsh=explode(";",$filtro);
+			for ($x=0;$x<count($cadenaipsh);$x++){
+			/*--------------------------------------------------------------------------------------------------------------------
+				Creacion del fichero .sh para cambiar la columna de arranque
+			--------------------------------------------------------------------------------------------------------------------*/
+			$ipsh=$cadenaipsh[$x];
+			$ficherosh = "/opt/opengnsys/log/clients/setBootMode/InSisRes.".$ipsh;
+			$ficherolanza=fopen($ficherosh,"w");
+			fwrite($ficherolanza,"#!/bin/bash
+
+	##########################################
+	ipsh=\"".$ipsh."\"
+	##########################################
+	#/*--------------------------------------------------------------------------------------------------------------------*/
+	#/*								CAMBIAMOS EL NETBOOT AVANZADO  															*/
+	#/*--------------------------------------------------------------------------------------------------------------------*/
+	
+	# Matamos el proceso de deployImage
+	PROCDEPLOY=`ps -aux | grep deployImage | awk  'NR == 1' | awk  '{ print $2 }' ` 
+	kill -9 \$PROCDEPLOY
+	sleep 2
+	
+	# Borramos el fichero
+	rm /opt/opengnsys/log/setBootMode/InSisRes.$ipsh
+	
+	# Iniciamos el Sistema
+	sleep 2
+	bootOs $insisresdisk
+	
+			");
+			fclose($ficherolanza);
+			exec("chmod 777 /opt/opengnsys/log/clients/setBootMode/InSisRes.".$ipsh."");
+		}
+	}
+}
+###################################################################
+///////////////////// agp	///////////////////////////////////////
+###################################################################
+
+
+<<<<<<< HEAD
 ###################################################################
 ///////////////////// agp	///////////////////////////////////////
 ###################################################################
@@ -365,69 +433,10 @@ if($sw_ejya=='on'){
 ###################################################################
 
 
-###################################################################
-///////////////////// agp	///////////////////////////////////////
-###################################################################
-if($sw_ejya=='on'){
-	if( ($sw_ejsis == "0") && ($idcomando == "3" || $idcomando == "18")  ){
-
-		// Buscamos el Numero de Disco
-		$disco=explode(chr(13),$atributos);
-		$disco=$disco[0];
-		$disco=explode("=",$disco);
-		$disco=$disco[1];
-
-		// =========================================
-		// Buscamos el Numero de Particion
-		$particion=explode(chr(13),$atributos);
-		$particion=$particion[1];
-		$particion=explode("=",$particion);
-		$particion=$particion[1];
-
-		// =========================================
-		// Asignamos el arranque
-		$insisresdisk=$disco." ".$particion;
-
-		$cadenaipsh=explode(";",$filtro);
-			for ($x=0;$x<count($cadenaipsh);$x++){
-			/*--------------------------------------------------------------------------------------------------------------------
-				Creacion del fichero .sh para cambiar la columna de arranque
-			--------------------------------------------------------------------------------------------------------------------*/
-			$ipsh=$cadenaipsh[$x];
-			$ficherosh = "/opt/opengnsys/log/clients/setBootMode/InSisRes.".$ipsh;
-			$ficherolanza=fopen($ficherosh,"w");
-			fwrite($ficherolanza,"#!/bin/bash
-
-	##########################################
-	ipsh=\"".$ipsh."\"
-	##########################################
-	#/*--------------------------------------------------------------------------------------------------------------------*/
-	#/*								CAMBIAMOS EL NETBOOT AVANZADO  															*/
-	#/*--------------------------------------------------------------------------------------------------------------------*/
-	
-	# Matamos el proceso de deployImage
-	PROCDEPLOY=`ps -aux | grep deployImage | awk  'NR == 1' | awk  '{ print $2 }' ` 
-	kill -9 \$PROCDEPLOY
-	sleep 2
-	
-	# Borramos el fichero
-	rm /opt/opengnsys/log/setBootMode/InSisRes.$ipsh
-	
-	# Iniciamos el Sistema
-	sleep 2
-	bootOs $insisresdisk
-	
-			");
-			fclose($ficherolanza);
-			exec("chmod 777 /opt/opengnsys/log/clients/setBootMode/InSisRes.".$ipsh."");
-		}
-	}
-}
-###################################################################
-///////////////////// agp	///////////////////////////////////////
-###################################################################
-
-
+=======
+=======
+>>>>>>> ad404a75612b5101f72cafb6ab2a1b62bf7b9d5e
+>>>>>>> f3f00f104cb9aaf0331fab5d6adcb63e1ecc6f6b
 /*--------------------------------------------------------------------------------------------------------------------
 	Creación de parametros para sentencias SQL
 --------------------------------------------------------------------------------------------------------------------*/
