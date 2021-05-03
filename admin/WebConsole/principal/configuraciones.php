@@ -356,7 +356,7 @@ function datos_sesiones($cmd, $idordenador)
     }
     if ($ip) {
         foreach (file(LOG_FILE) as $line) {
-            if (strstr($line, "ip=$ip")) {
+            if (strstr($line, "ip=$ip,")) {
                 $fields = preg_split("/[:,=]/", rtrim($line, ". \t\n\r\0\x0B"));
                 $date_time = str_replace("T", " ", $fields[0]) . ":" . $fields[1] . ":" .
                     preg_replace("/\+.*$/", "", $fields[2]);
