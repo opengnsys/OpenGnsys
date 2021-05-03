@@ -307,11 +307,10 @@ switch($ambito){
                         break;
 
                 case $AMBITO_GRUPOSORDENADORES :
-                        $cmd->texto="SELECT * FROM ordenadores,aulas,ordenadores_particiones,gruposordenadores 
+                        $cmd->texto="SELECT * FROM ordenadores,aulas,ordenadores_particiones
 				        JOIN sistemasficheros USING(idsistemafichero)
                                         WHERE ordenadores_particiones.idordenador=ordenadores.idordenador 
                                         AND ordenadores.idaula=aulas.idaula
-                                        AND gruposordenadores.idaula=aulas.idaula
                                         AND aulas.idcentro='$idc'
                                         AND sistemasficheros.nemonico='CACHE'
                                         AND ordenadores.grupoid='$idambito'";
