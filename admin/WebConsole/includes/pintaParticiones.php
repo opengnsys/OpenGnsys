@@ -2,6 +2,30 @@
 
 include_once("../idiomas/php/".$idioma."/pintaParticiones_".$idioma.".php");
 
+function draw_disk_type($cmd, $computer_id, $disk)
+{
+	$cmd->texto = "SELECT disk_type " .
+		      "FROM ordenadores_particiones " .
+		      "WHERE idordenador=$computer_id " .
+		      "AND numdisk=$disk " .
+		      "AND numpar=0";
+
+	$rs = new Recordset;
+	$rs->Comando=&$cmd;
+	if (!$rs->Abrir()) return;
+	$rs->Primero();
+	$disk_type = $rs->campos["disk_type"];
+	syslog(LOG_ERR, print_r("test".$disk_type,true));
+
+	if ($disk_type=="NVM")
+		$html = ' - <span style="color: red"><strong>( ' . $disk_type .
+			'e )</span>';
+	else
+		$html = ' - <span><strong>( ' . $disk_type . ' )</span>';
+
+	return $html;
+}
+
 /**
  * Separa las distintas configuraciones de una cadena por disco.
  * Ej. 1;0;1@1;1;7@1;2;131@2;0;1@2;1;7
@@ -66,11 +90,15 @@ function pintaParticiones($cmd,$configuraciones,$idordenadores,$cc)
 	$aviso="";
 	foreach($diskConfigs as $disk => $diskConfig){
 		$disk = (int)$disk;
-		echo'<tr height="16">'.chr(13);
-	        echo '<td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;'.$TbMsg["DISK"].'&nbsp;'.$disk.'</td>'.chr(13);
 
+		echo '<tr height="16">'.chr(13);
 
-		
+		$html_disk_type = draw_disk_type($cmd, $idordenadores, $disk);
+		echo '<td colspan="' . $columns . '" style="BORDER-TOP: " .
+		     "#999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;' .
+		     $TbMsg["DISK"] . '&nbsp;' . $disk . $html_disk_type .
+		     '</td>'.chr(13);
+
 		$auxCfg=explode("@",$diskConfig); // Crea lista de particiones
 		for($i=0;$i<sizeof($auxCfg);$i++){
 			$auxKey=explode(";",$auxCfg[$i]); // Toma clave de configuracion
@@ -240,9 +268,15 @@ function pintaParticionesRestaurarImagen($cmd,$configuraciones,$idordenadores,$c
 	
 	foreach($diskConfigs as $disk => $diskConfig){
 		$disk = (int)$disk;
-		echo'<tr height="16">'.chr(13);
-		echo '<td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;'.$TbMsg["DISK"].'&nbsp;'.$disk.'</td>'.chr(13);
-	         
+
+		echo '<tr height="16">'.chr(13);
+
+		$html_disk_type = draw_disk_type($cmd, $idordenadores, $disk);
+		echo '<td colspan="' . $columns . '" style="BORDER-TOP: " .
+		     "#999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;' .
+		     $TbMsg["DISK"] . '&nbsp;' . $disk . $html_disk_type .
+		     '</td>'.chr(13);
+
 		$auxCfg=explode("@",$diskConfig); // Crea lista de particiones
 		for($i=0;$i<sizeof($auxCfg);$i++){
 			$auxKey=explode(";",$auxCfg[$i]); // Toma clave de configuracion
@@ -439,9 +473,15 @@ function pintaParticionesRestaurarImagenSincronizacion1($cmd,$configuraciones,$i
 	
 	foreach($diskConfigs as $disk => $diskConfig){
 		$disk = (int)$disk;
-		echo'<tr height="16">'.chr(13);
-		echo '<td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;'.$TbMsg["DISK"].'&nbsp;'.$disk.'</td>'.chr(13);
-	     
+
+		echo '<tr height="16">'.chr(13);
+
+		$html_disk_type = draw_disk_type($cmd, $idordenadores, $disk);
+		echo '<td colspan="' . $columns . '" style="BORDER-TOP: " .
+		     "#999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;' .
+		     $TbMsg["DISK"] . '&nbsp;' . $disk . $html_disk_type .
+		     '</td>'.chr(13);
+
 		$auxCfg=explode("@",$diskConfig); // Crea lista de particiones
 		for($i=0;$i<sizeof($auxCfg);$i++){
 			$auxKey=explode(";",$auxCfg[$i]); // Toma clave de configuracion

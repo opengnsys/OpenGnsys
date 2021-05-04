@@ -26,7 +26,9 @@ for ((dsk=1; dsk<=$disks; dsk++)); do
         *)      ptt=0 ;; 
     esac
     # Información de disco (partición 0)
-    cfg="$cfg$dsk:0:$ptt:::$(ogGetDiskSize $dsk):0;"
+    devpath=$(ogDiskToDev "$dsk")
+    dsktype=$(ogGetDiskType "$devpath")
+    cfg="$cfg$dsk:$dsktype:0:$ptt:::$(ogGetDiskSize $dsk):0;"
     for ((par=1;par<=$particiones;par++)); do
 	# Código del identificador de tipo de partición
 	cod=$(ogGetPartitionId $dsk $par 2>/dev/null)
@@ -74,6 +76,9 @@ awk '{  n=split($0,sep,";");
 	    c=split (sep[i],dua,":");
 	    if (i==1 && c==1)
 		printf ("ser=%s\n", dua[1]);
+	    else if (c==8)
+		printf("disk=%s\tdtype=%s\tpar=%s\tcpt=%s\tfsi=%s\tsoi=%s\ttam=%s\tuso=%s\n",
+		       dua[1],dua[2],dua[3],dua[4],dua[5],dua[6],dua[7],dua[8]);
 	    else
 		printf ("disk=%s\tpar=%s\tcpt=%s\tfsi=%s\tsoi=%s\ttam=%s\tuso=%s\n",
 		        dua[1],dua[2],dua[3],dua[4],dua[5],dua[6],dua[7]);
