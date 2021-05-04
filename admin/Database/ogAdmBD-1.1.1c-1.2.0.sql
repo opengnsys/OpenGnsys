@@ -1,5 +1,6 @@
 ### Database update file.
 # OpenGnsys 1.1.1, 1.1.1a, 1.1.1b, 1.1.1c - OpenGnsys 1.2.0
+# OpenGnsys 1.2.0 - OpenGnsys 1.2.1
 #use ogAdmBD
 
 DROP PROCEDURE IF EXISTS altercols;
