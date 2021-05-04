@@ -77,6 +77,7 @@ define('OG_REST_PARAM_AM_PM', 'am_pm');
 define('OG_REST_PARAM_MINUTES', 'minutes');
 define('OG_REST_PARAM_MODE', 'mode');
 define('OG_REST_PARAM_SCOPE_NAME', 'scope_name');
+define('OG_REST_PARAM_SPEED', 'speed');
 
 define('TYPE_COMMAND', 1);
 define('TYPE_PROCEDURE', 2);
@@ -186,6 +187,22 @@ function clients($case, $ips) {
 	}
 
 	return $trama_notificacion;
+}
+
+function clients_v2($case, $ips) {
+
+	switch ($case) {
+		case 1:
+			$type = POST;
+			$data = array(OG_REST_PARAM_CLIENTS => $ips);
+			break;
+		case 2:
+			$type = GET;
+			$data = null;
+			break;
+	}
+
+	return common_request(OG_REST_CMD_CLIENTS, $type, $data);
 }
 
 function wol($type_wol, $ips) {

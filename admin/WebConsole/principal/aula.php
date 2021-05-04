@@ -15,6 +15,7 @@ include_once("../clases/MenuContextual.php");
 include_once("../includes/constantes.php");
 include_once("../includes/comunes.php");
 include_once("../includes/CreaComando.php");
+include_once("../includes/restfunctions.php");
 include_once("../idiomas/php/".$idioma."/aulas_".$idioma.".php");
 include_once("../idiomas/php/".$idioma."/estados_".$idioma.".php");
 include_once("../idiomas/php/".$idioma."/comandos/mensajes_".$idioma.".php");
@@ -286,6 +287,12 @@ function pintaordenadores(){
 	global $map;
 	global $max_col;
 
+	$clients = clients_v2(2, $Mip);
+	$get_speed = function($cli) {
+		return $cli['speed'] ? $cli['speed'] : '-1';
+	};
+	$speeds = array_map($get_speed, $clients['clients']);
+
 	$ntr=0; // Numero de ordenadores por fila
 	if ($nombreaula!=""){
 		echo '<div>';
@@ -313,6 +320,13 @@ function pintaordenadores(){
 			echo '	<strong><font color="#D0A126">'.$Mip[$i].'</font></strong>';			
 			echo '	</br>';
 			echo '	<font color="#003300" size="1" face="Arial, Helvetica, sans-serif">'.$Mmac[$i].'</font>';
+			echo '	</br>';
+			if ($speeds[$i] > 0 && $speeds[$i] < 1000) {
+				echo '	<font style="background-color: red" size="1" face="Arial, Helvetica, sans-serif">'.$speeds[$i].' Mbit</font>';
+			}
+			if ($speeds[$i] > 0 && $speeds[$i] >= 1000) {
+				echo '	<font size="1" color="#007700" face="Arial, Helvetica, sans-serif">'.$speeds[$i].' Mbit</font>';
+			}
 			echo '</td>';
 			echo '</tr>';
 			echo '</table>';
