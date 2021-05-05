@@ -63,7 +63,7 @@ else{
 		if ( $dcar == $i.":0"){
 			// Obtenemos el último campo DISK - NVM
 			$disko_enc = explode(":",$disk_l[$i]);
-			$NUMDISK=$dcar2[0];
+			$NUMDISK=$dcar[0];
 			$TIPODISK=$disko_enc[7];
 		// Actualizamos la base de datos en el campo
 			$cmd->texto="UPDATE ordenadores_particiones
