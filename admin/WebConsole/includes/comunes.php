@@ -151,7 +151,7 @@
 		$html="";
 		$auxprm=explode($ch,$parametros);
 		for($i=0;$i<sizeof($auxprm);$i++){
-			list($nemonico,$valor)=explode("=",$auxprm[$i]);
+			list($nemonico, $valor) = explode("=", $auxprm[$i], 2);
 			if(isset($tbParametros[$nemonico])){
 				if($tbParametros[$nemonico]["visual"]==1){
 					$tbParametrosValor[$nemonico]["descripcion"]=$tbParametros[$nemonico]["descripcion"];
@@ -181,7 +181,7 @@
 							$tbParametrosValor[$nemonico]["valor"]=$tbcte[$valor];
 							break;
 						case 4: // El valor lo toma directamente pero está codificado con urlencode
-							$tbParametrosValor[$nemonico]["valor"]='<PRE>'.urldecode($valor).'</PRE>';
+							$tbParametrosValor[$nemonico]["valor"]='<PRE>'.$valor.'</PRE>';
 							break;
 						case 5: // El valor es 0 ó 1 y se muestra NO o SI
 							$tbSN[0]="No";
