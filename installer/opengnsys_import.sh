@@ -361,7 +361,7 @@ fi
 sed -i -e '/Table structure.* `entornos`/,/Table structure/d' \
        -e '/Table structure.*`usuarios`/,/CHARSET/d' \
        -e '/usuarios/s/IGNORE//g' \
-       -e '/usuarios/s/^INSERT /\nALTER TABLE usuarios ADD UNIQUE (usuario);\n\nINSERT IGNORE /g' \
+       -e '/usuarios/s/^INSERT INTO .usuarios. /\nALTER TABLE usuarios ADD UNIQUE (usuario);\n\nINSERT IGNORE INTO `usuarios` /g' \
        -e "s/\(DEFINER=\`\)[^\`]*\(\`.* TRIGGER\)/\1$USUARIO\2/" \
        -e "s/\(\` [a-z]*int([0-9]*) NOT NULL\),/\1 DEFAULT 0,/" \
        -e "s/\(\` [a-z]*char([0-9]*) NOT NULL\),/\1 DEFAULT '',/" \
