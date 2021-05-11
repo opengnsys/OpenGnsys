@@ -233,6 +233,9 @@ function RecorreOrdenadores($cmd){
 	
 	global $cadenaip;
 
+	// empty variable - Fixes error in status called from organizational unit (#1047)
+	$map = [];
+
 	$cmd->texto.= " ORDER BY n_row, n_col";
 	$rs=new Recordset; 
 	$rs->Comando=&$cmd; 
