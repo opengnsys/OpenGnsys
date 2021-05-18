@@ -21,6 +21,7 @@ Changes included in OpenGnsys 1.2.0
 #976 	ogBootMbrGeneric: improve GPT compatibility (won't be resolved)
 #980 	Add REST API to ogClient
 #981 	add native systemd unit file for ogAdmServer
+#984    Include compatible OGAgent in version file
 #986 	Rename ogAdmServer to ogServer
 #987 	Use systemctl to disable/enable services in Debian/Ubuntu
 #990 	Use client broadcast address on WoL

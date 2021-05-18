@@ -62,6 +62,7 @@ Tickets resueltos en módulo OpenGnsys Web Admin Console:
 
 Tickets resueltos en módulo OpenGnsys Installer:
 #837 	Paquete deb para instalar OpenGnsys (duplicado)
+#984    Incluir OGAgent compatible en fichero de versión
 #987 	Utilizar systemctl para habilitar/deshabilitar los servicios en Debian/Ubuntu (mejora)
 #1003 	Arreglar la actualizacion del ogClient
 #1007 	Error en opengnsys_update.sh: no genera archivo version.json
