@@ -290,11 +290,16 @@ function pintaordenadores(){
 	global $map;
 	global $max_col;
 
-	$clients = clients_v2(2, $Mip);
-	$get_speed = function($cli) {
+	$clients = clients_v2(2, $Mip)['clients'];
+	$addr_clients = function($cli) {
+		return $cli['addr'];
+	};
+	$speed_clients = function($cli) {
 		return $cli['speed'] ? $cli['speed'] : '-1';
 	};
-	$speeds = array_map($get_speed, $clients['clients']);
+	$clients_speed = array_map($speed_clients, $clients);
+	$clients_addr = array_map($addr_clients, $clients);
+	$addr_speed_map = array_combine($clients_addr, $clients_speed);
 
 	$ntr=0; // Numero de ordenadores por fila
 	if ($nombreaula!=""){
@@ -324,11 +329,10 @@ function pintaordenadores(){
 			echo '	</br>';
 			echo '	<font color="#003300" size="1" face="Arial, Helvetica, sans-serif">'.$Mmac[$i].'</font>';
 			echo '	</br>';
-			if ($speeds[$i] > 0 && $speeds[$i] < 1000) {
-				echo '	<font style="background-color: red" size="1" face="Arial, Helvetica, sans-serif">'.$speeds[$i].' Mbit</font>';
-			}
-			if ($speeds[$i] > 0 && $speeds[$i] >= 1000) {
-				echo '	<font size="1" color="#007700" face="Arial, Helvetica, sans-serif">'.$speeds[$i].' Mbit</font>';
+			if ($addr_speed_map[$Mip[$i]] > 0 && $addr_speed_map[$Mip[$i]] >= 1000) {
+				echo '	<font size="1" color="#007700" face="Arial, Helvetica, sans-serif">'.$addr_speed_map[$Mip[$i]].' Mbit</font>';
+			} elseif ($addr_speed_map[$Mip[$i]] > 0 && $addr_speed_map[$Mip[$i]] < 1000) {
+				echo '	<font size="1" color="#990000" face="Arial, Helvetica, sans-serif">'.$addr_speed_map[$Mip[$i]].' Mbit</font>';
 			}
 			echo '</td>';
 			echo '</tr>';
