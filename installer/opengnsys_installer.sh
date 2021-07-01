@@ -894,7 +894,7 @@ function getNetworkSettings()
 	local dev=""
 
 	echoAndLog "${FUNCNAME}(): Detecting network parameters."
-	DEVICE=( $(ip -o link show up | awk '!/loopback/ {sub(/:.*/,"",$2); print $2}') )
+	DEVICE=( $(ip -o link show up | awk '!/loopback/ {sub(/[:@].*/,"",$2); print $2}') )
 	if [ -z "$DEVICE" ]; then
 		errorAndLog "${FUNCNAME}(): Network devices not detected."
 		exit 1

@@ -565,7 +565,7 @@ function getNetworkSettings()
 	local dev
 
 	SERVERIP="$ServidorAdm"
-	DEVICES="$(ip -o link show up | awk '!/loopback/ {sub(/:.*/,"",$2); print $2}')"
+	DEVICES="$(ip -o link show up | awk '!/loopback/ {sub(/[:@].*/,"",$2); print $2}')"
 	for dev in $DEVICES; do
 		[ -z "$SERVERIP" ] && SERVERIP=$(ip -o addr show dev $dev | awk '$3~/inet$/ {sub (/\/.*/, ""); print ($4); exit;}')
 	done
