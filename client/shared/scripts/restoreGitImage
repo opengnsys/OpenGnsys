@@ -1,0 +1,111 @@
+#!/bin/bash
+#/**
+#@file    restoreGitImage
+#@brief   Script de ejemplo para restaurar una imagen.
+#@param   $1 Repositorio (CACHE, REPO o dirección IP)
+#@param   $2 Nombre canónico de la imagen (sin extensión)
+#@param   $3 Número de disco
+#@param   $4 Número de particion
+#@param   $5 Protocolo (GIT)
+#@param   $6 Opciones del protocolo [str_modo_git:str_modo_acl] str_modo_git=clone|checkout str_modo_acl:total|sync
+#@exception OG_ERR_FORMAT   1 formato incorrecto.
+#@exception OG_ERR_NOTFOUND  2 cambio de repositorio: repositorio no encontrado
+#@exception OG_ERR_NOTFOUND  2 fichero de imagen o partición no detectados.
+#@exception $OG_ERR_MCASTRECEIVERFILE  57 Error en la recepción Multicast de un fichero
+#@exception $OG_ERR_PROTOCOLJOINMASTER 60 Error en la conexión de una sesión Unicast|Multicast con el Master
+#@version 1.2 - Primera versión. Se parte de los script de UGR y de restoreImage de OpenGnsys
+#@date    2020/01/08
+#**/
+
+TIME1=$SECONDS
+PROG="$(basename $0)"
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$PROG" "$PROG CACHE imagen ndisk npart GIT [ git_mode:acl_mode ]" \
+           "$PROG CACHE Ubuntu20 1 2 GIT clone:total" \
+           "$PROG CACHE Windows20 1 1 GIT checkout:user"
+   exit 0
+fi
+
+# Controlamos el número de parámetros.
+if [ $# -lt 4 ]; then
+    ogRaiseError session $OG_ERR_FORMAT "$MSG_FORMAT: $PROG CACHE imagen ndisco nparticion GIT [ git_mode:acl_mode ]"
+    exit $?
+fi
+
+#Load engine configurator from engine.cfg file.
+#Carga el configurador del engine desde el fichero engine.cfg
+[ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
+
+# Clear temporary file used as log track by httpdlog
+# Limpia los ficheros temporales usados como log de seguimiento para httpdlog
+echo " " > $OGLOGCOMMAND
+ogCheckStringInGroup "$(ogGetCaller)" "deployGitImage restoreGitImageCustom" || echo -n "" > $OGLOGSESSION; 
+
+ogEcho log session "[1] $MSG_SCRIPTS_START $0 $*"
+
+# Procesar parámetros de entrada
+REPO="${1^^}"
+IMGNAME="$2"
+DISK="$3"
+PART="$4"
+PROTOOPT="${6:-clone:total}"
+GITMODE=${PROTOOPT%:*}
+ACLMODE=${PROTOOPT#*:}
+
+# El protocolo tiene que se GIT
+[ "${5^^}" == "GIT" ] || ogRaiseError $OG_ERR_FORMAT "único protocolo permitido GIT" || exit $?
+
+# Comprobamos que el modo de Git es correcto
+ogCheckStringInGroup "$GITMODE" "clone checkout" || ogRaiseError session $OG_ERR_FORMAT "$MSG_FORMAT: str_git_mode:clone|checkout" || exit $?
+
+# Si es una ip y es igual a la del equipo restaura desde cache
+[ "$REPO" == "$(ogGetIpAddress)" ] && REPO="CACHE"
+[ "$REPO" == "CACHE" ] || ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT Solo permitido desde cache" || exit $?
+
+# Comprobamos que la partición se pueda montar. Si no modo total (formateo)
+MNTDIR=$(ogMount $DISK $PART) || GITMODE="clone"
+
+TIME2=$SECONDS
+if [ "$GITMODE" == "checkout" ]; then
+    # comprobamos que la partición contenga la imagen. Si no modo clone
+    cd $MNTDIR
+    git branch| grep "[ *] ${IMGNAME}$" &>/dev/null
+
+    if [ $? -eq 0 ]; then
+        # Revertimos la partición a la situación inicial de git
+        ogEcho log session "ogSyncLocalGitImage  $DISK $PART"
+	ogSyncLocalGitImage $DISK $PART
+    else
+        GITMODE="clone"
+    fi
+fi
+
+if [ "$GITMODE" == "clone" ]; then
+    # Comprobar que exista la imagen la cache
+    ogExistGitImage CACHE "$IMGNAME" || ogRaiseError session $OG_ERR_NOTFOUND "CACHE $IMGNAME" || exit
+
+    # Las ACL se deben restaurar completas
+    ACLMODE="total"
+
+    # Procesar protocolos de transferencia.
+    ogGitConfig
+
+    # Restauramos datos (formatea la partición)
+    ogEcho log session "ogRestoreLocalGitImage $IMGNAME $DISK $PART"
+    ogExecAndLog command ogRestoreLocalGitImage $IMGNAME $DISK $PART || exit $?
+fi
+TIME2=$[SECONDS-TIME2]
+ogEcho log session "   [ ]  $MSG_SCRIPTS_TIME_PARTIAL ogSyncLocalGitImage/ogRestoreLocalGitImage $[TIME2/60]m $[TIME2%60]s"
+
+TIME3=$SECONDS
+# Restauramos ACL
+# Nota: al restaurar las acl da falsos errores, no podemos controlar el error.
+ogEcho log session "ogRestoreGitAcl $IMGNAME $DISK $PART $ACLMODE"
+ogExecAndLog command ogRestoreGitAcl $IMGNAME $DISK $PART $ACLMODE
+TIME3=$[SECONDS-TIME3]
+ogEcho log session "   [ ]  $MSG_SCRIPTS_TIME_PARTIAL ogRestoreGitAcl $[TIME3/60]m $[TIME3%60]s"
+
+TIME=$[SECONDS-TIME1]
+ogEcho log session "[100] Duracion de la operacion $[TIME/60]m $[TIME%60]s"

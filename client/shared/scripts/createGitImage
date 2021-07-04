@@ -1,0 +1,136 @@
+#!/bin/bash
+
+#/**
+#@file    createGitImage
+#@brief   Script de ejemplo para crear una imagen de un sistema de archivos.
+#@note    La imagen se crea siempre en cache, luego puede al servidor
+#@param 1 disco 
+#@param 2 particion 
+#@param 3 REPO|CACHE
+#@param 4 imagen
+#@param 5 message  Comentario para el commit (por defecto fecha)
+#@return  
+#@exception OG_ERR_FORMAT     # 1 formato incorrecto.
+#@exception OG_ERR_PARTITION  # 3 Error en partición de disco o en su sistema de archivos
+#@exception OG_ERR_IMAGE      # 5 Error en funcion ogCreateImage o ogRestoreImage.
+#@exception OG_ERR_NOTWRITE   # 14 error de escritura
+#@exception OG_ERR_NOTCACHE   # 15 si cache no existe 15
+#@exception OG_ERR_NOTFOUND   # 2  no se encuentra comando git
+#@exception OG_ERR_CACHESIZE  # 16 si espacio de la cache local o remota no tiene espacio 16
+#@exception OG_ERR_REDUCEFS   # 17 error al reducir sistema de archivos.
+#@exception OG_ERR_EXTENDFS   # 18 Errror al expandir el sistema de archivos.
+#@version 1.1 - Primera versión. Se parte de los script de UGR y de createImage de OpenGnsys
+#@date    2020/01/08
+#*/ ##
+
+PROG="$(basename $0)"
+if [ $# -lt 4 ]; then
+    ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $PROG ndisco nparticion REPO|CACHE imagen mensaje_commit"
+    exit $?
+fi
+
+TIME1=$SECONDS
+
+#Load engine configurator from engine.cfg file.
+#Carga el configurador del engine desde el fichero engine.cfg
+[ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
+
+# Valores por defecto en etc/engine.cfg
+DISK=$1
+PART=$2
+REPO="${3^^}"
+IMGNAME="$4"
+MSGCOMMIT="${5:-$(date +%Y-%m-%d)}"
+GITDIR=${GITDIR:-"git"}
+
+# Unidad organizativa
+[ "$ogunit" != "" ] && OGUNIT="$ogunit"
+
+# Clear temporary file used as log track by httpdlog
+# Limpia los ficheros temporales usados como log de seguimiento para httpdlog
+# salvo si es llamado desde createImageCustom
+if [ "$(ogGetCaller)" != "createImageCustom" ]; then
+    echo " " > $OGLOGSESSION; echo " " > $OGLOGCOMMAND; echo " " > ${OGLOGCOMMAND}.tmp
+fi
+
+ogEcho log session "[1] $MSG_SCRIPTS_START $0 $*"
+
+# Si es una ip y es igual a la del equipo restaura desde cache
+[ "$REPO" == "$(ogGetIpAddress)" ] && REPO="CACHE"
+# Si es una ip y es distinta a la del recurso samba cambiamos de REPO.
+ogCheckIpAddress $REPO
+if [ $? == 0 -o $REPO == "REPO" ] ; then
+        # Si falla el cambio -> salimos con error repositorio no valido
+        ogChangeRepo $REPO $OGUNIT || exit $(ogRaiseError $OG_ERR_NOTFOUND '$REPO'; echo $?)
+        REPO="REPO"
+fi
+
+# Comprobamos que exista CACHE. Se necesita obligatoriamente
+ogFindCache >/dev/null || ogRaiseError $OG_ERR_NOTCACHE "CACHE " || echo $?
+
+# Comprobamos que el ogLive contiene git
+which git >/dev/null ||  ogRaiseError $OG_ERR_NOTFOUND "git command" || echo $?
+
+# Obtener información de los parámetros de entrada.
+DEVICE=$(ogDiskToDev "$DISK" "$PART" 2>/dev/null) || exit $(ogRaiseError $OG_ERR_PARTITION "$DISK $PART"; echo $?)
+
+#Comprobamos acceso de escritura.
+DIRTEMP=$(date +%Y%m%d-%H%M%S)
+ogMakeDir $REPO /$4$DIRTEMP 2>/dev/null || exit $(ogRaiseError $OG_ERR_NOTWRITE "$REPO"; echo $?) && ogDeleteTree $REPO /$4$DIRTEMP 
+
+echo " " > $OGLOGCOMMAND
+# Borramos ficheros de paginacion y configuracion
+ogCleanOs $DISK $PART
+
+# Con Git no podemos comprobar espacio
+##Comprobar espacio que requerira la imagen para ser almacenada
+#read SIZEDATA SIZEREQUIRED SIZEFREE ISENOUGHSPACE <<< $(ogGetSizeParameters $DISK $PART "$REPO" "$4")
+#
+#ogEcho log session "[16] $PROG: $MSG_SCRIPTS_CREATE_SIZE $SIZEREQUIRED $SIZEFREE"
+#[ "$ISENOUGHSPACE" == "TRUE" ] || exit $(ogRaiseError session $OG_ERR_CACHESIZE "$REPO"; echo $?)
+
+# Comprobar consistencia del sistema de archivos.
+echo " " > $OGLOGCOMMAND
+SIZEFS=$(ogGetFsSize  $DISK $PART)
+ogEcho log session "[20] $MSG_HELP_ogCheckFs  $DEVICE $SIZEFS (KB)"
+ogUnmount $DISK $PART 2>/dev/null
+ogCheckFs $DISK $PART || exit $(ogRaiseError $OG_ERR_PARTITION "ogCheckFs $DISK $PART" && echo $?)
+
+# Si es UEFI copio el cargador de arranque a la partición
+OSTYPE="$(ogGetOsType $DISK $PART)"
+if ogIsEfiActive && [ "$OSTYPE" == "Windows" ]; then
+    ogEcho log session "[25] $MSG_HELP_ogCopyEfiBootLoader" 
+    ogCopyEfiBootLoader $DISK $PART
+fi
+
+# FALTA: Renombrar el fichero de imagen si ya existe ¿cómo?
+# Git falta
+
+# Configuración del usuario de git.
+ogGitConfig
+
+ogEcho log session "[30] $MSG_HELP_ogCreateGitAcl"
+ogExecAndLog command ogCreateGitAcl $DISK $PART $IMGNAME
+
+
+# Crear la imagen en cache.
+echo " " > $OGLOGCOMMAND
+TIME2=$SECONDS
+ogEcho log session "[40] $MSG_HELP_ogCreateLocalGitImage ogCreateLocalGitImage $DISK $PART $IMGNAME \"$MSGCOMMIT\""
+ogExecAndLog command ogCreateLocalGitImage "$DISK" "$PART" "$IMGNAME" "$MSGCOMMIT" &>> $OGLOGCOMMAND || ogRaiseError $OG_ERR_IMAGE "$IMGNAME"|| exit $?
+TIMEAUX2=$[SECONDS-TIME2]
+ogEcho log session "      $RESUMECREATEIMAGE "
+ogEcho log session "      $MSG_SCRIPTS_TIME_PARTIAL : $[TIMEAUX2/60]m $[TIMEAUX2%60]s"
+
+# Enviar imagen a repositorio
+if [ "$REPO" == "REPO" ]; then
+    ogEcho log session "[60] $MSG_HELP_ogPushImage   ogPushImage $DISK $PART $IMGNAME"
+    ogExecAndLog command ogPushImage $DISK $PART $IMGNAME
+fi
+
+# Guardamos información de la imagen
+ogExecAndLog command ogSaveImageInfo $DISK $PART $REPO $IMGNAME
+
+TIME=$[SECONDS-TIME1]
+ogEcho log session "[100] $MSG_SCRIPTS_TIME_TOTAL $[TIME/60]m $[TIME%60]s"
+ogEcho log session "      FileSystem $DEVICE with $SIZEDATA KB data created onto branch $IMGNAME of GIT"

@@ -1,0 +1,89 @@
+#!/bin/bash
+#/**
+#         updateGitCache
+#@brief   Actualiza la cache del cliente con imagen tipo git
+#@param 1 REPO          Origen del fichero. -accesible por nfs-samba-
+#@param 2 str_fichero   nombre del fichero a actualizar.
+#@param 3 str_protoco.  GIT
+#@ejemplo: updateGitCache 172.17.36.11 imagen1 GIT
+#@return  
+#@exception OG_ERR_FORMAT       formato incorrecto.
+#@exception OG_ERR_NOTCACHE     No existe cache -15-
+#@todo      si existe la imagen sólo actualizar
+#@date    2019/12/19
+#*/ ##
+
+TIME=$SECONDS
+PROG="$(basename $0)"
+if [ $# -lt 3 ]; then
+    ogRaiseError session $OG_ERR_FORMAT "$MSG_FORMAT: $PROG str_REPO _str_IMGNAME GIT"
+    exit $?
+fi
+
+#Carga del configurador del engine
+[ -z $OGENGINECONFIGURATE ] && source /opt/opengnsys/etc/engine.cfg
+
+# Clear temporary file used as log track by httpdlog
+# Limpia los ficheros temporales usados como log de seguimiento para httpdlog
+echo " " > $OGLOGCOMMAND
+
+if ! [ "$(ogGetCaller)" == "deployGitImage" ]; then
+    echo -n "" > $OGLOGSESSION;
+
+    # Registro de inicio de ejecución
+    ogEcho log session "[1] $MSG_SCRIPTS_START $0 $*"
+fi
+
+REPOSITORIO="${1^^}"
+IMGNAME="$2"
+PROTOCOLO="${3^^}"
+[ "$PROTOCOLO" == "GIT" ] || ogRaiseError "$PROG: protocolo $PROTOCOLO" || exit $?
+GITDIR=${GITDIR:-"git"}
+
+# Unidad organizativa.
+[ "$ogunit" != "" ] && OGUNIT="$ogunit/"
+
+# Si es una ip y es distinta a la del recurso samba cambiamos de REPO.
+ogCheckIpAddress $REPOSITORIO
+if [ $? == 0 -o $REPOSITORIO == "REPO" ] ; then
+        # Si falla el cambio -> salimos con error repositorio no valido
+        ogChangeRepo $REPOSITORIO $OGUNIT || exit $(ogRaiseError $OG_ERR_NOTFOUND $REPOSITORIO; echo $?)
+        REPOSITORIO="REPO"
+fi
+REPOIP=$(ogGetRepoIp)
+ogEcho log session  $REPOSITORIO $REPOIP $PROTOCOLO $OPTPROTOCOLO
+
+# Si el repositorio local CACHE no existe error 15.
+if ! $(ogFindCache >/dev/null); then
+        ogRaiseError session $OG_ERR_NOTCACHE "CACHE"
+        exit $?
+fi
+
+
+
+# Comprobar si existe la imagen en el repo remoto
+ogExistGitImage REPO "$IMGNAME" || ogRaiseError log session $OG_ERR_NOTFOUND "REPO $IMGNAME" || exit $?
+
+# Si no existe el directorio de git lo creamos
+ogMountCache
+[ -d $OGCAC$OGIMG/$GITDIR ] || mkdir $OGCAC$OGIMG/$GITDIR
+
+# Copiamos la información de la imagen
+ogCopyFile REPO "/.$IMGNAME.img.json" CACHE / || ogRaiseError log session $OG_ERR_NOTFOUND "REPO .$IMGNAME.img.json"
+
+# Comprobar si existe la imagen en el repo local para actualizar o empezar de cero
+#FALTA si existe en cache la actualizamos.
+ogEcho log session "$MSG_SCRIPTS_UPDATECACHE_DOUPDATE"
+ogExistGitImage CACHE "$IMGNAME" && echo "La imagen ya está bajada" && exit 0
+ogEcho log session ogPullImage $IMGNAME $DISK $PART
+#ogExecAndLog command ogPullImage $IMGNAME $DISK $PART
+ogPullImage $IMGNAME
+RETVAL=$?
+[ $RETVAL -eq 0 ] || ogRaiseError log session || exit $?
+
+# FALTA: comprobar que ha ido bien
+
+TIME1=$[SECONDS-TIME]
+
+ogEcho log session "   [ ] $MSG_SCRIPTS_TIME_PARTIAL $[TIME1/60]m $[TIME1%60]s"
+TIME2=$SECONDS
