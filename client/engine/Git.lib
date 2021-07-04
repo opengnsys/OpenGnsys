@@ -1,0 +1,607 @@
+#!/bin/bash
+#/**
+#@file  Git.lib
+#@brief  Librería para imágenes con git
+#@class  Git
+#@version 1.2.1
+#@warning License: GNU GPLv3+
+#*/
+
+
+# Provisional: Mensajes de ayuda de las funciones (para lang.es_ES.conf)
+MSG_HELP_ogCreateGitAcl="Realiza backup de las ACL de una partición."
+MSG_HELP_ogCreateLocalGitImage="Crea imagen tipo GIT de una partición en cache."
+MSG_HELP_ogExistGitImage="Comprueba si existe la imagen de Git:"
+MSG_HELP_ogGitConfig="Configura usuario y permisos de git."
+MSG_HELP_ogPullImage="Trae imagen tipo git desde el repositorio a cache."
+MSG_HELP_ogPushImage="Envía imagen tipo git desde cache al repositorio."
+MSG_HELP_ogRestoreGitAcl="Restaura backup de las ACL de una partición."
+MSG_HELP_ogRestoreLocalGitImage="Restaura la imagen de una partición desde cache."
+MSG_HELP_ogSyncLocalGitImage="Sincroniza una partición con la imagen en cache."
+MSG_HELP_ogUuidUpdate="Actualiza el UUID de un sistema de ficheros en los archivos de configuración."
+
+#/**
+#         ogCreateGitAcl int_ndisk int_npartition str_name_image
+#@brief   Realiza backup de las ACL de una partición.
+#@param   int_ndisk      nº de orden del disco
+#@param   int_npartition nº de orden de la partición
+#@param   str_name_image     nombre de la imagen (sin extensión)
+#@note    realizar despues de hacer la limpieza del sistema operativo
+#*/
+function ogCreateGitAcl ()
+{
+    local IMGNAME DISK PART OSTYPE ACLDIR DEVICE MNTDIR
+
+    # Si se solicita, mostrar ayuda.
+    if [ "$*" == "help" ]; then
+        ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition str_name_image " \
+               "$FUNCNAME 1 1 Ubuntu"
+        return
+    fi
+    # Controlamos el número de parámetros
+    if [ $# -lt 3 ]; then
+        ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $FUNCNAME int_ndisk int_npartition str_name_image"
+        return $?
+    fi
+
+    DISK=$1
+    PART=$2
+    IMGNAME="$3"
+
+    # Comprobamos permisos de escritura en el repositorio
+    touch $OGIMG || ogRaiseError $OG_ERR_NOTWRITE "$OGIMG" || return $?
+
+    OSTYPE="$(ogGetOsType $DISK $PART)"
+    case "$OSTYPE" in
+	Windows)
+            ACLDIR=$OGIMG/WinAcl
+	    DEVICE="$(ogDiskToDev $DISK $PART)"
+            ogUnmount $DISK $PART 2>/dev/null || ogRaiseError $OG_ERR_PARTITION "$DISK $PART" || return $?
+            # Sobreescribimos los ficheros existentes (si los hay)
+            ntfs-3g.secaudit -b $DEVICE > "$ACLDIR/$IMGNAME.perm.ntfs"
+            ntfs-3g.secaudit -b $DEVICE /Users > "$ACLDIR/$IMGNAME.perm.ntfs.users"
+            ntfs-3g.secaudit -b $DEVICE /Windows/System32 > "$ACLDIR/$IMGNAME.perm.ntfs.win32"
+            [ $? -eq 0 ] || ogRaiseError "ogCreateGitAcl $IMGNAME $DISK $PART" || return $?
+            ;;
+	Linux)
+            ACLDIR=$OGIMG/LinAcl
+            cd $(ogMount $DISK $PART) || ogRaiseError $OG_ERR_PARTITION "$DISK $PART" || return $?
+            # Sobreescribimos los ficheros existentes (si los hay)
+            time LD_PRELOAD="$OGBIN/acl/libacl.so.1 $OGBIN/acl/libattr.so.1" $OGBIN/acl/getfacl -R . > "$ACLDIR/$IMGNAME.perm.acl"
+            time LD_PRELOAD="$OGBIN/acl/libacl.so.1 $OGBIN/acl/libattr.so.1" $OGBIN/acl/getfacl -R ./home > "$ACLDIR/$IMGNAME.perm.acl.users"
+            [ $? -eq 0 ] || ogRaiseError "ogCreateGitAcl $IMGNAME $DISK $PART" || return $?
+            ;;
+	*) ogRaiseError $OG_ERR_PARTITION "ogCreateGitAcl $1, $2"
+            return $?
+            ;;
+    esac
+
+}
+
+#/**
+#         ogCreateLocalGitImage int_ndisk int_npartition str_name_image [ str_commit_message ]
+#@brief   Crea imagen de una partición en cache.
+#@param   int_ndisk      nº de orden del disco
+#@param   int_npartition nº de orden de la partición
+#@param   str_name_image     nombre de la imagen (sin extensión)
+#@param   str_commit_message mensaje para el commit (por defecto la fecha)
+#*/
+function ogCreateLocalGitImage ()
+{
+    local DISK PART IMGNAME MSGCOMMIT GITDIR REPODIR UNIONFSDIR MNTDIR
+
+    # Si se solicita, mostrar ayuda.
+    if [ "$*" == "help" ]; then
+        ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition str_name_image [ str_commit_message ]" \
+               "$FUNCNAME 1 1 Ubuntu \"Curso 2020\""
+        return
+    fi
+    # Controlamos el número de parámetros
+    if [ $# -lt 3 ]; then
+        ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $FUNCNAME int_ndisk int_npartition str_name_image"
+        return $?
+    fi
+
+    DISK=$1
+    PART=$2
+    IMGNAME="$3"
+    MSGCOMMIT="${4:-$(date +%Y-%m-%d)}"
+    GITDIR=${GITDIR:-"git"}
+    REPODIR="$OGCAC$OGIMG/$GITDIR"
+    UNIONFSDIR="$OGCAC$OGIMG/synchro"
+
+    MNTDIR=$(ogMount $DISK $PART) || ogRaiseError $OG_ERR_PARTITION "$DISK $PART" || return $?
+    ogMountCache || ogRaiseError $OG_ERR_NOTFOUND "Cache" || return $?
+
+    ##Rellenamos los ficheros vacíos del SO para que git no los borre
+    cd $MNTDIR
+    find -type d -empty -exec touch {}/.gitkeep \;
+    #Eliminamos los fiches .gitignore
+    ogEcho log session "`date`: Eliminando fiches .gitignore..."
+    find . -name ".gitignore" -exec rm {} +;
+    cd
+
+    # Configuración del usuario de git.
+    ogGitConfig
+
+    if ogExistGitImage $DISK $PART "$IMGNAME"; then
+        cd $MNTDIR
+        git checkout  "$IMGNAME"
+    else
+        ogEcho log session " * git init"
+        # Iniciando repositorio local
+        [ -d $REPODIR ] || mkdir -p $REPODIR
+
+        cd $REPODIR
+        git init
+        git commit --allow-empty -m "Init local REPO"
+
+        # Se crea una rama con el nombre de la imagen
+        git branch "$IMGNAME"
+        git checkout "$IMGNAME"
+
+        ogEcho log session " * unionfuse"
+        #Se montan los filesystem union
+        cd
+        [ -d  $UNIONFSDIR ] || mkdir -p $UNIONFSDIR
+        unionfs-fuse -o cow  $REPODIR=RW:$MNTDIR=RO $UNIONFSDIR
+
+        # Añadiendo cambios de unionfs
+        cd $UNIONFSDIR
+
+    fi
+    ogEcho log session " * git add"
+    time git add .
+
+    ogEcho log session " * git commit"
+    # Guardando cambios de unionfs
+    time git commit -m "$IMGNAME $MSGCOMMIT"
+
+    # Creo que se puede hacer después (si no se borra GITDIR)
+    #ogPushImage $DISK $PART "$IMGNAME"
+
+    #Se desmonta unionfs
+    #cd
+    #umount $UNIONFSDIR
+
+    #Borramos los directorios git y synchro
+    #rm -rf $OGCAC/$UNIONFSDIR
+    #rm -rf $OGCAC/$GITDIR
+}
+
+#/**
+#         ogExistGitImage [ str_repo | int_ndisk int_npartition ] str_name_image
+#@brief   Comprueba si existe la imagen de Git
+#@param   str_repo       repositorio de imágenes o caché local [REPO|CACHE]
+#@param   int_ndisk      nº de orden del disco
+#@param   int_npartition nº de orden de la partición
+#@param   str_name_image nombre de la imagen (sin extensión)
+#@return  codigo de error: 0 si existe; 1 si no existe.
+#*/ ##
+function ogExistGitImage ()
+{
+    local REPO IMGNAME REPODIR GITDIR RETVAL
+
+    # Si se solicita, mostrar ayuda.
+    if [ "$*" == "help" ]; then
+        ogHelp "$FUNCNAME" "$FUNCNAME [ str_repo | int_ndisk int_npartition ] str_name_image " \
+               "$FUNCNAME 1 1 Ubuntu" \
+               "$FUNCNAME REPO Window"
+        return
+    fi
+    # Controlamos el número de parámetros
+    if [ $# -lt 2 ]; then
+        ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $FUNCNAME [ str_repo | int_ndisk int_npartition ] str_name_image "
+        return $?
+    fi
+    # Guardo el directorio actual para volver a él
+    pushd  $(pwd) &>/dev/null
+
+    # Procesar camino según el número de parámetros.
+    case $# in
+      2)  IMGNAME="$2"
+          case "${1^^}" in
+              REPO)
+                  REPODIR="$OGIMG/base.git"
+                  ;;
+              CACHE)
+                  GITDIR=${GITDIR:-"git"}
+                  #REPODIR="$OGCAC$OGIMG/$GITDIR/$IMGNAME"
+                  REPODIR="$OGCAC$OGIMG/$GITDIR"
+                  ;;
+          esac
+          ;;
+      3)  IMGNAME="$3"
+          REPODIR=$(ogMount $1 $2) || ogRaiseError $OG_ERR_PARTITION "$1 $2" || return $?
+          ;;
+    esac
+
+    [ -d "$REPODIR" ] && cd "$REPODIR" || ogRaiseError $OG_ERR_NOTFOUND "$REPODIR" || return $?
+    # Devuelvo la salida del comando grep
+    git branch |grep "[ *] ${IMGNAME}$" &>/dev/null
+    RETVAL=${PIPESTATUS[0]}
+
+    #Volvemos a direcotorio inicial
+    popd  &>/dev/null
+
+    return $RETVAL
+}
+
+#/**
+#         ogGitConfig
+#@brief   Configura usuario y permisos de git.
+#@return
+#*/ ##
+function ogGitConfig ()
+{
+
+     # Si se solicita, mostrar ayuda.
+    if [ "$*" == "help" ]; then
+        ogHelp "$FUNCNAME" "$FUNCNAME "
+        return
+    fi
+
+    git config --global user.name "OpenGnsys"
+    git config --global user.email "OpenGnsys@opengnsys.com"
+    git config --add --global core.filemode false
+}
+
+#/**
+#         ogPullImage str_name_image int_ndisk int_npartition
+#@brief   Trae imagen tipo git desde el repositorio a cache.
+#@param   str_name_image nombre de la imagen (sin extensión)
+#@param   int_ndisk      nº de orden del disco
+#@param   int_npartition nº de orden de la partición
+#@note    No es necesario que esté montado el unionfs
+#@return
+#*/ ##
+function ogPullImage ()
+{
+    local DISK PART IMGNAME SERVER OSTYPE BARE
+
+    # Si se solicita, mostrar ayuda.
+    if [ "$*" == "help" ]; then
+        ogHelp "$FUNCNAME" "$FUNCNAME str_name_image " \
+               "$FUNCNAME Ubuntu"
+        return
+    fi
+    # Controlamos el número de parámetros
+    if [ $# -lt 1 ]; then
+        ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $FUNCNAME str_name_image"
+        return $?
+    fi
+
+    IMGNAME="$1"
+    SERVER="opengnsys@$(ogGetRepoIp):$OGIMG"
+    GITDIR=${GITDIR:-"git"}
+    BARE=base.git
+
+    ogMountCache >/dev/null || ogRaiseError $OG_ERR_NOTFOUND "Cache" || return $?
+
+    # Configuración del usuario de git.
+    ogGitConfig
+
+    # Si existe repositorio lo borra (REPENSAR: mejor sería actualizar)
+    [ -d $OGCAC$OGIMG/$GITDIR ] && rm -rf $OGCAC$OGIMG/$GITDIR
+    mkdir $OGCAC$OGIMG/$GITDIR
+    #cd $OGCAC$OGIMG/$GITDIR
+
+    # Seleccionamos el repositorio remoto según el tipo de sistema operativo
+    #OSTYPE="$(ogGetOsType $DISK $PART)"
+    #case "$OSTYPE" in
+#	Windows)
+#                #BARE=windowsBare
+#                BARE=windows.git
+#		;;
+#	Linux)
+#		#BARE=linuxBare
+#		#BARE=linux.git
+#		;;
+#	*) ogRaiseError $OG_ERR_PARTITION "$FUNCNAME $1, $2"
+#		return $?
+#		;;
+#    esac
+    # Nota para linux se puede poner $SERVER/git y va bien (git es el bare inicial)
+    #time git clone -b "$IMGNAME" --single-branch --bare $SERVER/$BARE "$IMGNAME"
+    time git clone -b "$IMGNAME" --single-branch --bare $SERVER/$BARE $OGCAC$OGIMG/$GITDIR
+}
+
+#/**
+#         ogPushImage int_ndisk int_npartition str_name_image
+#@brief   Envía imagen tipo git desde cache al repositorio
+#@param   int_ndisk      nº de orden del disco
+#@param   int_npartition nº de orden de la partición
+#@param   str_name_image     nombre de la imagen (sin extensión)
+#@note    No es necesario que esté montado el unionfs (probar)
+#@return
+#*/ ##
+function ogPushImage ()
+{
+    local DISK PART IMGNAME SERVER BRANCH OSTYPE BARE LOCAL
+
+    # Si se solicita, mostrar ayuda.
+    if [ "$*" == "help" ]; then
+        ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition str_name_image " \
+               "$FUNCNAME 1 1 Ubuntu"
+        return
+    fi
+    # Controlamos el número de parámetros
+    if [ $# -lt 3 ]; then
+        ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $FUNCNAME int_ndisk int_npartition str_name_image"
+        return $?
+    fi
+
+    DISK=$1
+    PART=$2
+    IMGNAME="$3"
+    GITDIR=${GITDIR:-"git"}
+    UNIONFSDIR="$OGCAC$OGIMG/synchro"
+    #SERVER="root@$(ogGetRepoIp):$OGIMG"
+    SERVER="opengnsys@$(ogGetRepoIp):$OGIMG"
+
+    # Comentamos para actualizar imagen > comprobar si es necesario para
+    #       crearla desde cero
+    # Compromamos que está montado el unionfs
+    #[ -d "$UNIONFSDIR/.git" ] || ogRaiseError $OG_ERR_NOTFOUND "$UNIONFSDIR/.git" || return $?
+
+    # Configuración del usuario de git.
+    ogGitConfig
+
+
+    #cd $OGCAC$OGIMG/$GITDIR
+    cd $UNIONFSDIR
+    # Comprobar que exista la rama de la imagen
+    #BRANCH=$(git branch| grep "^[ *] ${IMGNAME}$")
+    #[ "$BRANCH" == "" ] && return $(ogRaiseError $OG_ERR_NOTFOUND "Git image: $IMGNAME"; echo $?)
+    ogExistGitImage CACHE "$IMGNAME" || ogRaiseError $OG_ERR_NOTFOUND "Git image: $IMGNAME" || return $?
+    # Si no estoy en la rama me cambio a ella.
+    BRANCH=$(git branch| grep "^[ *] ${IMGNAME}$")
+    [[ "$BRANCH" =~ '*' ]] || git checkout "$IMGNAME"
+
+    # Seleccionamos el repositorio remoto según el tipo de sistema operativo
+    # Debemos poner el nombre del directorio y no del worktree
+    OSTYPE="$(ogGetOsType $DISK $PART)"
+    case "$OSTYPE" in
+	Windows)
+                #BARE=windowsBare
+                BARE=windows.git
+		;;
+	Linux)
+		#BARE=linuxBare
+                BARE=linux.git
+		;;
+	*) ogRaiseError $OG_ERR_PARTITION "ogPushImage $1, $2"
+		return $?
+		;;
+    esac
+    # Repositorio local
+    #LOCAL=${BARE%Bare}
+    LOCAL=${BARE%.git}
+
+    git remote remove $LOCAL
+    git remote add $LOCAL $SERVER/$BARE
+    time git push -u $LOCAL "$IMGNAME"
+
+}
+
+#/**
+#         ogRestoreGitAcl str_name_image int_ndisk int_npartition
+#@brief   Restaura backup de las ACL de una partición.
+#@param   str_name_image     nombre de la imagen (sin extensión)
+#@param   int_ndisk      nº de orden del disco
+#@param   int_npartition nº de orden de la partición
+#@param   mode           [ total | user ] Restaura los permisos completos o sólo los del usuario.
+#*/
+function ogRestoreGitAcl ()
+{
+    local IMGNAME DISK PART OSTYPE ACLDIR DEVICE MNTDIR
+
+    # Si se solicita, mostrar ayuda.
+    if [ "$*" == "help" ]; then
+        ogHelp "$FUNCNAME" "$FUNCNAME str_name_image int_ndisk int_npartition [total|sync]" \
+               "$FUNCNAME Ubuntu 1 1 sync"
+        return
+    fi
+    # Controlamos el número de parámetros
+    if [ $# -lt 4 ]; then
+        ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $FUNCNAME str_name_image int_ndisk int_npartition [total|sync]"
+        return $?
+    fi
+
+    IMGNAME="$1"
+    DISK=$2
+    PART=$3
+    #MODE=${4:-"total"}
+    MODE=$4
+
+    OSTYPE="$(ogGetOsType $DISK $PART)"
+    case "$OSTYPE" in
+	Windows)
+            ACLDIR=$OGIMG/WinAcl
+	    DEVICE="$(ogDiskToDev $DISK $PART)"
+            ogUnmount $DISK $PART 2>/dev/null || ogRaiseError $OG_ERR_PARTITION "$DISK $PART" || return $?
+	    if [ "$MODE" == "user" ]; then
+                [ -r "$ACLDIR/$IMGNAME.perm.ntfs.users" ] || ogRaiseError $OG_ERR_NOTFOUND "$IMGNAME.perm.ntfs.users" || return $?
+		ntfs-3g.secaudit -s $DEVICE "$ACLDIR/$IMGNAME.perm.ntfs.users"
+		ntfs-3g.secaudit -s $DEVICE "$ACLDIR/$IMGNAME.perm.ntfs.win32"
+            else 
+                [ -r "$ACLDIR/$IMGNAME.perm.ntfs" ] || ogRaiseError $OG_ERR_NOTFOUND "$ACLDIR/$IMGNAME.perm.ntfs" || return $?
+		ntfs-3g.secaudit -s $DEVICE "$ACLDIR/$IMGNAME.perm.ntfs"
+            fi
+            [ $? -eq 0 ] || ogRaiseError "ogCreateGitAcl $IMGNAME $DISK $PART" || return $?
+            
+
+            ;;
+	Linux)
+            cd $(ogMount $DISK $PART) || ogRaiseError $OG_ERR_PARTITION "$DISK $PART" || return $?
+            ACLDIR=$OGIMG/LinAcl
+	    if [ "$MODE" == "user" ]; then
+                [ -r "$ACLDIR/$IMGNAME.perm.acl.users" ] || ogRaiseError $OG_ERR_NOTFOUND "$IMGNAME.perm.acl.users" || return $?
+                time LD_PRELOAD="$OGBIN/acl/libacl.so.1 $OGBIN/acl/libattr.so.1" $OGBIN/acl/setfacl --restore "$ACLDIR/$IMGNAME.perm.acl.users" > /dev/null
+            else
+                [ -r "$ACLDIR/$IMGNAME.perm.acl" ] || ogRaiseError $OG_ERR_NOTFOUND "$IMGNAME.perm.acl" || return $?
+                time LD_PRELOAD="$OGBIN/acl/libacl.so.1 $OGBIN/acl/libattr.so.1" $OGBIN/acl/setfacl --restore "$ACLDIR/$IMGNAME.perm.acl" > /dev/null
+            fi
+            ;;
+	*) ogRaiseError $OG_ERR_PARTITION "ogRestoreGitAcl $DISK $PART"
+            return $?
+            ;;
+    esac
+
+
+}
+
+#/**
+#         ogRestoreLocalGitImage str_name_image int_ndisk int_npartition
+#@brief   Restaura la imagen de una partición desde cache.
+#@param   str_name_image     nombre de la imagen (sin extensión)
+#@param   int_ndisk      nº de orden del disco
+#@param   int_npartition nº de orden de la partición
+#*/
+function ogRestoreLocalGitImage ()
+{
+    local IMGNAME DISK PART UNIONFSDIR MNTDIR 
+
+    # Si se solicita, mostrar ayuda.
+    if [ "$*" == "help" ]; then
+        ogHelp "$FUNCNAME" "$FUNCNAME str_name_image int_ndisk int_npartition " \
+               "$FUNCNAME Ubuntu 1 1"
+        return
+    fi
+    # Controlamos el número de parámetros
+    if [ $# -lt 3 ]; then
+        ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $FUNCNAME str_name_image int_ndisk int_npartition"
+        return $?
+    fi
+
+    IMGNAME="$1"
+    DISK=$2
+    PART=$3
+    GITDIR=${GITDIR:-"git"}
+    #REPODIR="$OGCAC$OGIMG/$GITDIR/$IMGNAME"
+    REPODIR="$OGCAC$OGIMG/$GITDIR"
+
+    # Obtenemos de tipo de fs de la información de la imagen.
+    INFOFILE="$OGCAC$OGIMG/.$IMGNAME.img.json"
+    [ -r "$INFOFILE" ] && FSTYPE=$(jq .fstype $INFOFILE|tr -d \")
+
+    ogUnmount $DISK $PART
+    ogFormatFs $DISK $PART $FSTYPE
+    MNTDIR=$(ogMount $DISK $PART) || ogRaiseError $OG_ERR_PARTITION "$DISK $PART" || return $?
+
+    ogMountCache || ogRaiseError $OG_ERR_NOTFOUND "Cache" || return $?
+    echo cd $REPODIR
+    cd $REPODIR
+
+    # Borro worktree y rama de restauracion anterior
+    echo git worktree remove $MNTDIR/part$PART
+    #git worktree list 2>/dev/null | grep "$MNTDIR/part$PART" && git worktree remove $MNTDIR/part$PART
+    git worktree list | grep "$MNTDIR/part$PART" &>/dev/null && git worktree remove $MNTDIR/part$PART
+    #git branch | grep  "part$PART" &>/dev/null && git branch -d "part$PART"
+    git branch | grep  "[ *] part${PART}$" &>/dev/null && git branch -d "part$PART"
+    git worktree list
+
+    # Crear arbol con la nueva rama
+    echo time git worktree add $MNTDIR/part$PART
+    time git worktree add $MNTDIR/part$PART
+    [ $? -eq 0 ] || ogRaiseError "ogRestoreLocalGitImage" || return $?
+
+    # Movemos los archivos al punto de montaje
+    cd $MNTDIR
+    mv $MNTDIR/part$PART/* .
+    mv $MNTDIR/part$PART/.git .
+    #rm -rf part$PART
+
+    cd /
+}
+
+#/**
+#         ogSyncLocalGitImage int_ndisk int_npartition
+#@brief   Sincroniza una partición con la imagen en cache.
+#@param   int_ndisk      nº de orden del disco
+#@param   int_npartition nº de orden de la partición
+#@todo    definir errores
+#*/
+function ogSyncLocalGitImage ()
+{
+    local DISK PART MNTDIR 
+
+    # Si se solicita, mostrar ayuda.
+    if [ "$*" == "help" ]; then
+        ogHelp "$FUNCNAME" "$FUNCNAME int_ndisk int_npartition " \
+               "$FUNCNAME 1 1"
+        return
+    fi
+    # Controlamos el número de parámetros
+    if [ $# -lt 2 ]; then
+        ogRaiseError $OG_ERR_FORMAT "$MSG_FORMAT: $FUNCNAME int_ndisk int_npartition"
+        return $?
+    fi
+
+    AUXPWD=$(pwd)
+
+    DISK=$1
+    PART=$2
+
+    MNTDIR=$(ogMount $DISK $PART) || ogRaiseError $OG_ERR_NOTFOUND "$DISK $PART" || return $?
+    ogMountCache &>/dev/null || ogRaiseError $OG_ERR_NOTFOUND "Cache" || return $?
+
+    cd $MNTDIR
+    ogEcho log session "`date` : Agregando archivos eliminados..."
+    time git checkout-index -f -a || ogRaiseError "Al agregrar archivos eliminados" || exit $?
+
+    ogEcho log session "`date` : Eliminando nuevos archivos..."
+    time git clean -df > /dev/null || ogRaiseError "Al Eliminando nuevos archivos." || exit $?
+
+    cd $AUXPWD
+}
+
+#/**
+#         ogUuidUpdate str_repo str_path_image int_ndisk str_repo
+#@brief   Actualiza el UUID de un sistema de ficheros en los archivos de configuración.
+#@param   str_repo       repositorio de imágenes o caché local
+#@param   str_path_image     camino de la imagen
+#@param   int_ndisk    nº de orden del disco
+#@param   int_part     nº de partición
+#@return  (nada, por determinar)
+#@exception OG_ERR_FORMAT    formato incorrecto.
+#@exception OG_ERR_NOTFOUND  fichero o dispositivo no encontrado.
+#*/ ##
+function ogUuidUpdate ()
+{
+local MNTDIR DEVICE UUID ROOT NEWUUID f
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME str_repo path_image int_ndisk int_part" \
+           "$FUNCNAME REPO Ubuntu18 1 2"
+    return
+fi
+
+# Error si no se reciben al menos 2 parámetros.
+[ $# -eq 4 ] || ogRaiseError $OG_ERR_FORMAT "$FUNCNAME str_repo path_image int_ndisk int_part" || return $?
+
+# Comprobamos que sea un sistema linux
+[ "$(ogGetOsType $3 $4)" == "Linux" ] || ogRaiseError $OG_ERR_NOTFOUND "Linux system." || return $?
+
+# Comprobamos que existe archivo de información de la imagen
+INFOFILE=$(ogGetPath $1 ".${2}.img.json")
+[ "$INFOFILE" == "" ] && return $(ogRaiseError $OG_ERR_NOTFOUND "$INFOFILE")
+# Comprobamos que exista la partición
+MNTDIR=$(ogMount $3 $4) || ogRaiseError $OG_ERR_NOTFOUND "Device $1 $2" || return $?
+DEVICE=$(ogDiskToDev $3 $4)
+UUID=$(blkid -o value -s UUID $DEVICE)
+OLDUUID=$(jq .uuid $INFOFILE| tr -d \")
+
+# Para sistemas UEFI también cambio los archivos de la ESP
+ogIsEfiActive && GRUBEFI=$(ogMount $(ogGetEsp))/boot/grubMBR/boot/grub/grub.cfg || GRUBEFI=""
+
+# Obtenemos el dispositivo en formato del grub
+grub_probe=${grub_probe:-$OGBIN/grub-probe1.99_$(arch)}
+ROOT=$(${grub_probe}  --device $(ogDiskToDev $3 $4) --target=drive |tr '()' "''")
+
+# Cambiamos UUID en la configuración (fstab y grub)
+for f in $MNTDIR/etc/fstab $MNTDIR/{,boot/}{{grubMBR,grubPARTITION}/boot/,}{grub{,2},{,efi/}EFI/*}/{menu.lst,grub.cfg} $GRUBEFI; do
+        [ -r $f ] && sed -i -e s/$OLDUUID/$UUID/g -e s/"'hd.,gpt.'"/"$ROOT"/g -e s/"hd.,msdos."/$ROOT/g $f
+done
+}
