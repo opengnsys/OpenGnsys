@@ -23,7 +23,7 @@
 #		XX1X: Borrar previamente la imagen de la cache antes de copiarla
 #		XXX1: No borrar archivos en destino
 #		El valor X indica que no importa el valor que tenga el dato
-# $7 Método de syncronización 1=Sincronización1  2=Sincronizacion2
+# $7 Método de syncronización 1=Sincronización1  2=Sincronizacion2 3=Git
 # $8 Ruta de origen de la Imagen (Carpeta)
 
 #___________________________________________________________________
@@ -85,6 +85,14 @@
 		createBaseImage $1 $2 $DEST "$3" 
         	RETVAL=$?
 
+	fi
+
+	if [ $7 -eq 3 ]; then
+                # Sincronizacion3 GIT
+		#No utilizamos los flat
+		ogEcho log session createGitImage $1 $2 $DEST "$3"
+		createGitImage $1 $2 $DEST "$3"
+		RETVAL=$?
 	fi
 
 	# Si estamos en modo user montamos el repositorio en modo lectura.

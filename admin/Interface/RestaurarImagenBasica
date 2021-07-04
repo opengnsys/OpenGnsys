@@ -25,7 +25,7 @@
 #		XXX1: No borrar archivos en destino
 #		El valor X indica que no importa el valor que tenga el dato
 # $8 Método de clonación 0=Desde caché 1=Desde repositorio
-# $9 Metodo de sincronizacion  1=Sincronización1  2=Sincronizacion2
+# $9 Metodo de sincronizacion  1=Sincronización1  2=Sincronizacion2 3=Git
 # $10 Ruta de origen de la Imagen (Carpeta)
 
 #___________________________________________________________________
@@ -80,6 +80,24 @@
 		OPT=${5#*_}
 
 		restoreBaseImage $DEST "$3" $1 $2  $PROTO $OPT
+		RETVAL=$?
+	fi
+
+	if [ $9 -eq 3 ]; then
+		#sincronizacion3 GIT
+		# Opciones de clonacion
+		flag=$6
+		GITMODE=${flag:0:1}
+		ACLMODE=${flag:1:1}
+		[ ${flag:0:1} -eq 1 ] && GITMODE="clone" || GITMODE="checkout"
+		[ ${flag:1:1} -eq 1 ] && ACLMODE="total" || ACLMODE="user"
+
+		# Origen de la imagen.2
+		[ $8 -eq 0 ] && DEST="CACHE" || DEST=$4
+
+		ogEcho log session deployGitImage $DEST "$3" $1 $2 GIT $GITMODE:$ACLMODE
+		deployGitImage $DEST "$3" $1 $2 GIT $GITMODE:$ACLMODE
+
 		RETVAL=$?
 	fi
 
