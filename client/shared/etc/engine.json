@@ -104,6 +104,16 @@
       "description": "default communication speed (blank, do not use; 100Mb/s; 1000Mb/s)",
       "name": "DEFAULTSPEED",
       "value": ""
+    },
+    {
+      "description": "OpenGnsys server timezone",
+      "name": "TZ",
+      "value": "Europe/Madrid"
+    },
+    {
+      "description": "subdirectory git-synced images.",
+      "name": "GITDIR",
+      "value": "git"
     }
   ],
   "errors": [
