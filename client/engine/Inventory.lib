@@ -408,11 +408,11 @@ MNTDIR=$(ogMount $1 $2) || return $?
 # Para GNU/Linux: leer descripción.
 TYPE="Linux"
 FILE="$MNTDIR/etc/os-release"
-[ -r $FILE ] && VERSION="$(awk -F= '$1~/PRETTY_NAME/ {gsub(/\"/,"",$2); print $2}' $FILE)"
+[ -r $FILE ] && VERSION="$(awk -F= '$1~/PRETTY_NAME/ {gsub(/"/,"",$2); print $2}' $FILE)"
 # Si no se puede obtener, buscar en ficheros del sistema.
 if [ -z "$VERSION" ]; then
     FILE="$MNTDIR/etc/lsb-release"
-    [ -r $FILE ] && VERSION="$(awk -F= '$1~/DESCRIPTION/ {gsub(/\"/,"",$2); print $2}' $FILE)"
+    [ -r $FILE ] && VERSION="$(awk -F= '$1~/DESCRIPTION/ {gsub(/"/,"",$2); print $2}' $FILE)"
     for DISTRIB in redhat SuSE mandrake gentoo; do
         FILE="$MNTDIR/etc/${DISTRIB}-release"
         [ -r $FILE ] && VERSION="$(head -1 $FILE)"

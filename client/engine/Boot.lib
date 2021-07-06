@@ -1447,7 +1447,7 @@ function ogBootLoaderHidePartitions ()
 
 #   /*  (comentario de bloque para  Doxygen)
     # Entradas de Windows: numero de linea y particion. De mayor a menor.
-    WINENTRY=$(awk '/menuentry.*Windows/ {gsub(/\)\"/, "");  gsub(/^.*dev/,"");  print NR":/dev"$1} ' $CFGFILE | sed -e '1!G;h;$!d')
+    WINENTRY=$(awk '/menuentry.*Windows/ {gsub(/\)["'"'"']/, "");  gsub(/^.*dev/,"");  print NR":/dev"$1} ' $CFGFILE | sed -e '1!G;h;$!d')
     #*/ (comentario para bloque Doxygen)
     # Particiones de Windows, pueden no estar en el grub.
     WINPART=$(fdisk -l $(ogDiskToDev)|awk '/NTFS/ {print $1}'|sed '1!G;h;$!d')

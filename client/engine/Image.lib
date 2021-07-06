@@ -950,9 +950,9 @@ then
 	if `echo $PARTCLONEINFO | grep size > /dev/null`
 	then
 		TOOLS=PARTCLONE
-		FS=$(echo $PARTCLONEINFO | awk '{gsub(/\: /,"\n"); print toupper($8);}')
+		FS=$(echo $PARTCLONEINFO | awk '{gsub(/: /,"\n"); print toupper($8);}')
 		if [[ "$FS" == "HFS" || "$FS" == "HFSPLUS" || "$FS" == "FAT32" ]]; then
-			FSPLUS=$(echo $PARTCLONEINFO | awk '{gsub(/\: /,"\n"); print toupper($9);}')
+			FSPLUS=$(echo $PARTCLONEINFO | awk '{gsub(/: /,"\n"); print toupper($9);}')
 			echo $PARTCLONEINFO | grep GB > /dev/null && SIZEFACTOR=1000000 || SIZEFACTOR=1024
 			if [ "$FSPLUS" == "PLUS" ]; then
 				FS=$FS$FSPLUS
@@ -962,7 +962,7 @@ then
 			fi
 		else
 			echo $PARTCLONEINFO | grep GB > /dev/null && SIZEFACTOR=1000000 || SIZEFACTOR=1024
-			SIZE=$(echo $PARTCLONEINFO | awk -v FACTOR=$SIZEFACTOR '{gsub(/\: /,"\n"); printf "%d\n", $11*FACTOR;}')
+			SIZE=$(echo $PARTCLONEINFO | awk -v FACTOR=$SIZEFACTOR '{gsub(/: /,"\n"); printf "%d\n", $11*FACTOR;}')
 		fi
 		IMGDETECT="TRUE"
 	fi
