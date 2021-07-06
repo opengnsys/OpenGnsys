@@ -33,8 +33,8 @@ case "$PROTO" in
 		exit $? ;;
 esac
 case "$1" in
-	admin)	MODE="rw,nolock" ;;
-	user)	MODE="ro,nolock" ;;
+	admin)	MODE="rw" ;;
+	user)	MODE="ro" ;;
 	*)	ogRaiseError $OG_ERR_FORMAT "modo desconocido $1"
 		exit $? ;;
 esac
