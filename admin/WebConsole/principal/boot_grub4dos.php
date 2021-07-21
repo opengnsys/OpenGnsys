@@ -3,10 +3,10 @@
 // Autor: Irina Gomez - ETSII Universidad de Sevilla.
 // Fecha: 2019/02/12
 
-include_once("../includes/ctrlacc.php");
-include_once("../clases/AdoPhp.php");
-include_once("../includes/CreaComando.php");
-include_once("../idiomas/php/".$idioma."/boot_grub4dos_".$idioma.".php");
+include_once(__DIR__."/../includes/ctrlacc.php");
+include_once(__DIR__."/../clases/AdoPhp.php");
+include_once(__DIR__."/../includes/CreaComando.php");
+include_once(__DIR__."/../idiomas/php/".$idioma."/boot_grub4dos_".$idioma.".php");
 
 $cmd=CreaComando($cadenaconexion);
 if (!$cmd)
@@ -42,12 +42,13 @@ switch($litambito){
 // /var/lib/tftboot/menu.lst/templates y /var/lib/tftpboot/grub/templates/
 //#########################################################################
 // Leer nombres de ficheros plantillas bios
-$dirtemplatesbios="/var/lib/tftpboot/menu.lst/templates/";
+const TFTPBOOT_DIR = "/opt/opengnsys/tftpboot";
+$dirtemplatesbios=TFTPBOOT_DIR."/menu.lst/templates/";
 chdir($dirtemplatesbios);
 $pnbios=glob("*");
 
 // Leer nombres de ficheros plantillas uefi
-$dirtemplatesuefi="/var/lib/tftpboot/grub/templates/";
+$dirtemplatesuefi=TFTPBOOT_DIR."/grub/templates/";
 chdir($dirtemplatesuefi);
 $pnuefi=glob("*");
 
