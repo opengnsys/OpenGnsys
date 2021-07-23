@@ -10,9 +10,6 @@
 // *************************************************************************************************************************************************
 ?>
 <P align=center><span align=center class=subcabeceras><?php echo $TbMsgAux[0] ?></span></P>
-<?php if ($ambito !=16 ){ ?>
-	<INPUT type="hidden" name="ambito" value="<?php echo $ambito?>">
-<?php } ?>
 <?php if($idcomando!=10){?>
 	<TABLE align=center>
 		<TR>
