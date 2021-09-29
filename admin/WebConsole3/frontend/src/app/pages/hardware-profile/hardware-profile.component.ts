@@ -9,6 +9,7 @@ import {HardwareComponentService} from '../../api/hardware-component.service';
 import {HardwareComponent} from '../../model/hardware-component';
 import {HardwareProfileFormType} from '../../form-type/hardware-profile.form-type';
 import {OgCommonService} from '../../service/og-common.service';
+import {HardwareType} from '../../model/hardware-type';
 
 @Component({
   selector: 'app-hardware-profile',
@@ -18,6 +19,7 @@ import {OgCommonService} from '../../service/og-common.service';
 export class HardwareProfileComponent implements OnInit {
   public hardwareProfile: HardwareProfile = new HardwareProfile();
   public hardwareComponents: HardwareComponent[];
+  private hardwareTypes: HardwareType[] = [];
   formType: any;
   // this tells the tabs component which Pages
   // should be each tab's root Page
@@ -28,6 +30,14 @@ export class HardwareProfileComponent implements OnInit {
   }
 
   ngOnInit(): void {
+      this.ogCommonService.loadEngineConfig().subscribe(
+          data => {
+              this.hardwareTypes = data.constants.hardwareTypes;
+          },
+          (error) => {
+              alert(error);
+          }
+      );
     this.hardwareComponentsService.list().subscribe(
       components => {
         this.hardwareComponents = components;

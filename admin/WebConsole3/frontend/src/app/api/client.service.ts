@@ -18,6 +18,6 @@ export class ClientService extends ResourceService<Client> {
   }
 
   statusAll(ouId) {
-    return this.httpClient.get(this.url + '/' + this.endpoint + '/status.json?ou=' + ouId);
+    return this.httpClient.get(this.url + '/' + this.endpoint + '/status/all?ou=' + ouId);
   }
 }

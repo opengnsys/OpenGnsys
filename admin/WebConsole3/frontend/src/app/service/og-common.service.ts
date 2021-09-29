@@ -9,6 +9,7 @@ import {environment} from '../../environments/environment';
 import {LayoutStore} from 'angular-admin-lte';
 import {AdminLteConf} from '../admin-lte.conf';
 import {User, UserPreferences} from '../model/user';
+import {Client} from '../model/client';
 
 @Injectable({
     providedIn: 'root'
@@ -41,7 +42,10 @@ export class OgCommonService {
             languages: environment.languages,
             deployMethods: environment.deployMethods,
             commands: environment.commands,
-            user: environment.user
+            user: environment.user,
+            clientstatus: environment.clientstatus,
+            hardwareTypes: environment.hardwareTypes,
+            softwareTypes: environment.softwareTypes
         };
         this.loadEngineConfig();
         /*
@@ -223,6 +227,14 @@ export class OgCommonService {
         return Object.keys(this.selectedClients).length;
     }
 
+    getSelectedClients(): Client[] {
+        const result: Client[] = [];
+        for (const key in this.selectedClients) {
+            result.push(this.selectedClients[key]);
+        }
+        return result;
+    }
+
     isMovingClients() {
         return (this.movingClients === true);
     }
@@ -247,16 +259,16 @@ export class OgCommonService {
      * Dada la particion 0 de la configuracion de un cliente, devuelve el objeto partitionTable asociado
      */
     getPartitionTable(partition) {
-        return this.constants.partitiontable[parseInt(partition.partitionCode, 10) - 1];
+        return this.constants.partitiontables[parseInt(partition.partitionCode, 10) - 1];
     }
 
     getDisksConfigFromPartitions(partitions) {
         // Ordenar la lista por numero de partición
         partitions = partitions.sort(function(p1, p2) {
             let result = 0;
-           if (p1.numPartition < p2.numPartition) {
+           if (p1.partitionNumber < p2.partitionNumber) {
                result = -1;
-           } else if (p1.numPartition > p2.numPartition) {
+           } else if (p1.partitionNumber > p2.partitionNumber) {
                result = 1;
            }
            return result;
@@ -266,16 +278,16 @@ export class OgCommonService {
         // La partición 0 es la configuración del disco
         for (let p = 0; p < partitions.length; p++) {
             const partition = partitions[p];
-            if (!disks[partition.numDisk - 1]) {
+            if (!disks[partition.diskNumber - 1]) {
                 disks.push({});
             }
 
             // La partición 0 es la configuración del disco
-            if (partition.numPartition === 0) {
+            if (partition.partitionNumber === 0) {
                 partitionTable = this.getPartitionTable(partition);
-                disks[partition.numDisk - 1] = {
+                disks[partition.diskNumber - 1] = {
                     size: partition.size,
-                    disk: partition.numDisk,
+                    disk: partition.diskNumber,
                     parttable: partitionTable.type,
                     partitions: []
                 };
@@ -286,34 +298,41 @@ export class OgCommonService {
                 // Si es cache, actualizar su contenido
                 if (partition.partitionCode === 'ca') {
                     // actualizar el contenido de la cache
-                    if (typeof partition.cacheContent === 'string') {
-                        let cacheContent = [];
-                        cacheContent = partition.cacheContent.trim().split(',');
-                        const cacheContentObj = {
+                    if (typeof partition.content === 'string') {
+                        let content = [];
+                        content = partition.content.trim().split(',');
+                        const contentObj = {
                             files: [],
                             freeSpace: 0
                         };
-                        for (let index = 0; index < cacheContent.length; index++) {
+                        for (let index = 0; index < content.length; index++) {
                             if (index === 0) {
-                                cacheContentObj.freeSpace = cacheContent[index];
+                                contentObj.freeSpace = content[index];
                             } else {
-                                if (cacheContent[index] !== '') {
-                                    const parts = cacheContent[index].trim().split(' ');
+                                if (content[index] !== '') {
+                                    // Analizar contenido de la cache, si tiene dos partes una es el tamaño y otra el fichero, sino, solo el fichero
+                                    const parts = content[index].trim().split(' ');
+                                    let fileSize = '';
+                                    let fileName = '-';
+                                    if (parts.length === 1) {
+                                        fileName = parts[0].trim();
+                                    } else {
+                                        fileSize = parts[0].trim();
+                                        fileName = parts[1].trim();
+                                    }
 
-                                    const fileSize = parts[0].trim() + 'KB';
-                                    const fileName = parts[1].trim();
                                     const file = {name: fileName, size: fileSize, type: ''};
                                     file.type = (file.name.indexOf('/') !== -1) ? 'D' : 'F';
-                                    cacheContentObj.files.push(file);
+                                    contentObj.files.push(file);
                                 }
                             }
                         }
-                        partition.cacheContent = cacheContentObj;
-                    } else if (!partition.cacheContent) {
-                        partition.cacheContent = [];
+                        partition.content = contentObj;
+                    } else if (!partition.content) {
+                        partition.content = [];
                     }
                 }
-                disks[partition.numDisk - 1].partitions.push(partition);
+                disks[partition.diskNumber - 1].partitions.push(partition);
             }
 
         }

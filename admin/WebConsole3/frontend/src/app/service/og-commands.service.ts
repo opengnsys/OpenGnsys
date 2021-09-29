@@ -45,7 +45,7 @@ export class OGCommandsService {
             keys.forEach((index) => {
                 const elemKeys = Object.keys(response[index]);
                 elemKeys.forEach((elemKey) => {
-                  if (elemKey === 'statusCode' && response[index][elemKey] !== 200) {
+                  if (elemKey === 'statusCode' && (response[index][elemKey] !== 200 && response[index][elemKey] !== 201)) {
                     errors.push(response[index]);
                   }
                 });
@@ -123,8 +123,8 @@ export class OGCommandsService {
           if (client.partitions[index].osName !== 'DATA' && client.partitions[index].osName !== '') {
             // Crear como nombre para mostrar, el disco y partición del sistema
             const obj = Object.assign({}, client.partitions[index]);
-            const str = 'disco: ' + obj.numDisk + ', part: ' + obj.numPartition + ', SO: ' + client.partitions[index].osName;
-            clonablePartitions.push(obj.numDisk + ' ' + obj.numPartition);
+            const str = 'disco: ' + obj.diskNumber + ', part: ' + obj.partitionNumber + ', SO: ' + client.partitions[index].osName;
+            clonablePartitions.push(obj.diskNumber + ' ' + obj.partitionNumber);
             options.scope.partitions.push(str);
           }
         }
@@ -146,6 +146,7 @@ export class OGCommandsService {
             if (result.value) {
               // Montar el script con el disco y partición elegida
               self.execution.script = self.commands.SOFTWARE_INVENTORY + ' ' + clonablePartitions[result.value];
+              self.execution.sendConfig = false;
               self.loadClients();
               self.sendCommand();
             }
@@ -154,12 +155,15 @@ export class OGCommandsService {
       } else {
         if (command === 'REBOOT') {
           this.execution.script = environment.commands.REBOOT;
+          this.execution.sendConfig = false;
         } else if (command === 'POWER_OFF') {
           this.execution.script = environment.commands.POWER_OFF;
+          this.execution.sendConfig = false;
         } else if (command === 'POWER_ON') {
           this.execution.script = 'wakeonlan';
         } else if (command === 'HARDWARE_INVENTORY') {
           this.execution.script = environment.commands.HARDWARE_INVENTORY;
+          this.execution.sendConfig = false;
         } else if (command === 'RUN_SCRIPT') {
           this.execution.script = params ? (params.script || this.ogInstructions) : this.ogInstructions;
         } else if (command === 'REFRESH_INFO') {

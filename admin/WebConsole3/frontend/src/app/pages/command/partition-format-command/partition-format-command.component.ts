@@ -90,7 +90,7 @@ export class PartitionFormatCommandComponent implements OnInit {
                         const clientPartitions = [];
                         client.partitions.forEach((partition) => {
                             // si es la partición 0 o una partición Vacía no EFI
-                            if (partition.numPartition !== 0) {
+                            if (partition.partitionNumber !== 0) {
 
                                 // Obtener el tipo de partición según su code
                                 if (partition.partitionCode.length === 1) {
@@ -107,7 +107,7 @@ export class PartitionFormatCommandComponent implements OnInit {
                         this.reorderPartitions();
 
                         this.setChartData(this.diskConfig);
-                        this.partitionTableTypes = this.constants.partitiontable;
+                        this.partitionTableTypes = this.constants.partitiontables;
                     } else {
                         // TODO - dar error?
                         this.toaster.pop({type: 'error', body: this.translate.instant('not_clients_selected'), title: this.translate.instant('opengnsys_error')});

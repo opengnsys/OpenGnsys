@@ -43,9 +43,6 @@ export class LoginCommandComponent implements OnInit {
 
   ngOnInit() {
     this.selectedClients = this.ogCommonService.selectedClients;
-    if (this.user && this.selectedClients) {
-      this.execution.clients = Object.keys(this.selectedClients).join(',');
-    }
   }
 
 
@@ -53,8 +50,11 @@ export class LoginCommandComponent implements OnInit {
     if (!this.selectedPartition) {
       this.toaster.pop({type: 'error', title: 'error', body: this.translate.instant('you_must_select_partition')});
     } else {
-      const disk = this.selectedPartition.numDisk;
-      const partition = this.selectedPartition.numPartition;
+      if (this.user && this.selectedClients) {
+        this.execution.clients = Object.keys(this.selectedClients).join(',');
+      }
+      const disk = this.selectedPartition.diskNumber;
+      const partition = this.selectedPartition.partitionNumber;
 
       this.execution.script = 'bootOs ' + disk + ' ' + partition + ' &';
       this.execution.script = this.execution.script.replace(/\"/g, '\\"').replace(/\$/g, '\\\$');

@@ -18,12 +18,12 @@
       <td>
                   <span *ngIf="softwareComponent.$$editing">
                     <select class="form-control" [(ngModel)]="softwareComponent.$$tmpType">
-                      <option [value]="softwareType.nemonic" *ngFor="let softwareType of softwareTypes">{{softwareType.name}}</option>
+                      <option [value]="softwareType.id" *ngFor="let softwareType of softwareTypes">{{softwareType.name}}</option>
                     </select>
                   </span>
         <span *ngIf="!softwareComponent.$$editing">
             <select disabled="disabled" class="form-control" [(ngModel)]="softwareComponent.type">
-              <option [value]="softwareType.nemonic" *ngFor="let softwareType of softwareTypes">{{softwareType.name}}</option>
+              <option [value]="softwareType.id" *ngFor="let softwareType of softwareTypes">{{softwareType.name}}</option>
             </select>
           </span>
       </td>

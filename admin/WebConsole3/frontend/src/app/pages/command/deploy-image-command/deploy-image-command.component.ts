@@ -101,7 +101,7 @@ export class DeployImageCommandComponent implements OnInit {
     const disk = this.disk;
     const partition = this.partition;
     // Capturar ip del repositorio de la imagen elegida
-    let ip = '172.16.140.210';
+    let ip = this.image.repository.ip;
     let imgName = this.image.canonicalName;
     let target = ' ' + disk + ' ' + partition;
     let log = 'ogEcho log session "[0] $MSG_SCRIPTS_TASK_START ';

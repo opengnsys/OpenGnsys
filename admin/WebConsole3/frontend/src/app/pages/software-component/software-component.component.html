@@ -1,1 +1,35 @@
-<div>Html template for class SoftwareComponent</div>
+<section class="content-header">
+    <h1 translate="software">
+    </h1>
+    <ol class="breadcrumb">
+        <li><a [routerLink]="'/app/dashboard'"><i class="fa fa-dashboard"></i> {{'dashboard'|translate}}</a></li>
+        <li><a [routerLink]="'/app/software'"><i class="fa  fa-server"></i> {{'software'|translate}}</a></li>
+        <li class="active" translate="software_component"></li>
+    </ol>
+</section>
+<section fixed-toolboxbar class="toolboxbar">
+    <div>
+        <div class="col-md-12">
+            <div class="box-tools pull-right">
+                <button class="btn btn-primary" translate="save" (click)="save(Form)"></button>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                <div class="box-header with-border">
+                    <h3 *ngIf="!softwareComponent.id" class="box-title" translate="new_software_component"></h3>
+                    <h3 *ngIf="softwareComponent.id" class="box-title" translate="software_component"></h3>
+                </div>
+                <div class="box-body">
+                    <app-form-input [model]="softwareComponent" [formType]="formType"></app-form-input>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>

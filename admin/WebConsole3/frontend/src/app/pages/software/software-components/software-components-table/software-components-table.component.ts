@@ -56,6 +56,7 @@ export class SoftwareComponentsTableComponent implements OnInit {
   }
 
   deleteSoftwareComponent(softwareComponent: SoftwareComponent) {
+    var self = this;
     this.ogSweetAlert.swal({
       title: this.translate.instant('sure_to_delete') + '?',
       text: this.translate.instant('action_cannot_be_undone'),
@@ -65,17 +66,17 @@ export class SoftwareComponentsTableComponent implements OnInit {
       confirmButtonText: this.translate.instant('yes_delete'),
       closeOnConfirm: true}).then(
       function(result) {
-        if (result === true) {
-          this.softwareComponentService.delete(softwareComponent.id).subscribe(
+        if (result.value === true) {
+          self.softwareComponentService.delete(softwareComponent.id).subscribe(
             (response) => {
-              this.toaster.pop({type: 'success', title: this.translate.instant('success'), body: this.translate.instant('successfully_deleted')});
-              const index = this.softwareComponentsGroups[0].components.indexOf(softwareComponent);
+              self.toaster.pop({type: 'success', title: self.translate.instant('success'), body: self.translate.instant('successfully_deleted')});
+              const index = self.components.indexOf(softwareComponent);
               if (index !== -1) {
-                this.softwareComponentsGroups[0].components.splice(index, 1);
+                self.components.splice(index, 1);
               }
             },
             (error) => {
-              this.toaster.pop({type: 'error', title: this.translate.instant('error'), body: error});
+              self.toaster.pop({type: 'error', title: self.translate.instant('error'), body: error});
             }
           );
         }

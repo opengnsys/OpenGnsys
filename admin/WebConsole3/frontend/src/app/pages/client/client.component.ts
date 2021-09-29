@@ -1,7 +1,7 @@
 import {Component, NgZone, OnInit} from '@angular/core';
 
 import {ClientService} from 'src/app/api/client.service';
-import {Client} from 'src/app/model/client';
+import {Client, Partition} from 'src/app/model/client';
 import {ActivatedRoute, ParamMap, Router} from '@angular/router';
 import {Observable} from 'rxjs';
 import {NetbootService} from '../../api/netboot.service';
@@ -14,6 +14,9 @@ import {OgCommonService} from '../../service/og-common.service';
 import {ClientFormType} from '../../form-type/client.form-type';
 import * as pluginDataLabels from 'chartjs-plugin-datalabels';
 import {ChartOptions} from 'chart.js';
+import {ImageService} from '../../api/image.service';
+import {Image} from '../../model/image';
+import {PartitionService} from '../../api/partition.service';
 
 @Component({
     selector: 'app-client',
@@ -29,6 +32,7 @@ export class ClientComponent implements OnInit {
     private formType: ClientFormType;
     public form;
     public pluginDataLabels;
+    public images: Image[] = [];
 
     // this tells the tabs component which Pages
     // should be each tab's root Page
@@ -39,6 +43,8 @@ export class ClientComponent implements OnInit {
                 private toaster: ToasterService,
                 private repositoryService: RepositoryService,
                 private hardwareProfileService: HardwareProfileService,
+                private imageService: ImageService,
+                private partitionService: PartitionService,
                 private ogCommonService: OgCommonService) {
         this.client = new Client();
         this.client.disksConfig = [];
@@ -51,6 +57,7 @@ export class ClientComponent implements OnInit {
         this.loadOgLives();
         this.loadRepositories();
         this.loadHardwareProfiles();
+        this.loadImages();
         // Comprobar por un lado si es edicion o un nuevo cliente
         this.activatedRouter.paramMap.subscribe(
             (data: ParamMap) => {
@@ -139,6 +146,18 @@ export class ClientComponent implements OnInit {
         );
     }
 
+    private loadImages() {
+        this.imageService.list().subscribe(
+            list => {
+                this.images = list;
+            },
+            error => {
+                this.toaster.pop({type: 'error', title: 'error', body: error});
+            }
+        );
+    }
+
+
     getChartData(diskConfig) {
         const diskChartData = [];
         const diskChartLabels = [];
@@ -224,6 +243,25 @@ export class ClientComponent implements OnInit {
             result = 'bg-yellow';
         } else if (usage >= 80) {
             result = 'bg-red';
+        }
+        return result;
+    }
+
+    assignImageToPartition(partition: Partition) {
+        this.partitionService.update(partition).subscribe(
+            data => {
+                this.toaster.pop({type: 'success', title: 'success', body: 'Successfully saved'});
+            },
+            error => {
+                this.toaster.pop({type: 'error', title: 'error', body: error});
+            }
+        );
+    }
+
+    compareImages(image1: Image, image2: Image): boolean {
+        let result = false;
+        if (image1 !== null && image2 !== null) {
+            result = (image1.id === image2.id);
         }
         return result;
     }

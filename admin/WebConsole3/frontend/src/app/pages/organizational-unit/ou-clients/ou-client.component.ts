@@ -79,9 +79,14 @@ export class OuClientComponent {
 
   mustShow(client) {
     let result = true;
-    const status = this.clientStatus[client.id];
-    if (status) {
-      result = this.selectedStatus[status];
+    if (typeof this.clientStatus[client.id] !== 'undefined') {
+      const status = this.clientStatus[client.id].id;
+      if (status) {
+        result = this.selectedStatus[status];
+      }
+    } else {
+      // Si no se detectó el estado, se asigna no definido
+      this.clientStatus[client.id] = {id: 0, name: 'undefined'};
     }
 
     return result;

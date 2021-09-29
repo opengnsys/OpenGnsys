@@ -1,5 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import {NgModule, ViewEncapsulation} from '@angular/core';
+import { CommonModule } from '@angular/common';
 import {AdminLteConf } from './admin-lte.conf';
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
@@ -55,7 +56,6 @@ import {ImageEditComponent} from './pages/image/edit/image-edit.component';
 import {ProfileComponent} from './pages/profile/profile.component';
 import {layoutProvider} from '../../library/angular-admin-lte/src/lib/layout/layout.provider';
 import {OrganizationalUnitEditComponent} from './pages/organizational-unit/edit/organizational-unit-edit.component';
-import {platformBrowserDynamic} from '@angular/platform-browser-dynamic';
 import {ClientComponent} from './pages/client/client.component';
 import {ChartsModule} from 'ng2-charts';
 import {ClientDhcpComponent} from './pages/client/dhcp/client-dhcp.component';
@@ -81,6 +81,8 @@ import {PartitionFormatCommandComponent} from './pages/command/partition-format-
 import {ColResizableDirective} from './pages/common/directive/col-resizable.directive';
 import { NgxDaterangepickerMd } from 'ngx-daterangepicker-material';
 import {NetbootClientsComponent} from './pages/netboot/clients/netboot-clients.component';
+import {SortByPipe} from './pages/common/pipes/sort-by.pipe';
+import {OgCommonService} from './service/og-common.service';
 
 
 @NgModule({
@@ -147,7 +149,8 @@ import {NetbootClientsComponent} from './pages/netboot/clients/netboot-clients.c
     NetbootEditComponent,
     NetbootClientsComponent,
     ProfileComponent,
-    OgCommandsPipe
+    OgCommandsPipe,
+    SortByPipe
   ],
   entryComponents: [
     AppComponent,
@@ -188,6 +191,7 @@ import {NetbootClientsComponent} from './pages/netboot/clients/netboot-clients.c
     ProfileComponent
   ],
   imports: [
+    CommonModule,
     BrowserModule,
     AppRoutingModule,
     CoreModule,
@@ -212,17 +216,12 @@ import {NetbootClientsComponent} from './pages/netboot/clients/netboot-clients.c
     NgxDaterangepickerMd.forRoot()
   ],
   providers: [
-    {provide: HTTP_INTERCEPTORS, useClass: TokenInterceptorService, multi: true}
+    {provide: HTTP_INTERCEPTORS, useClass: TokenInterceptorService, multi: true},
+    OgCommonService
   ],
   bootstrap: [AppComponent]
 })
 export class AppModule {}
-
-platformBrowserDynamic().bootstrapModule(AppModule, [
-  {
-    defaultEncapsulation: ViewEncapsulation.None
-  }
-]);
 
 export function createTranslateLoader(http: HttpClient) {
   return new TranslateHttpLoader(http, './assets/i18n/', '.json');

@@ -1,9 +1,9 @@
-import {Component, NgZone, ViewEncapsulation} from '@angular/core';
+import {Component} from '@angular/core';
 import {AuthModule, GlobunetUser} from 'globunet-angular/core';
 import {Router} from '@angular/router';
 import {User} from '../../model/user';
 import {OgCommonService} from '../../service/og-common.service';
-import {LayoutService, LayoutStore} from 'angular-admin-lte';
+import {LayoutStore} from 'angular-admin-lte';
 import {AdminLteConf} from '../../admin-lte.conf';
 
 
@@ -23,12 +23,12 @@ export class LoginComponent {
   constructor(public authModule: AuthModule, private router: Router, private ogCommonService: OgCommonService, private layoutStore: LayoutStore, private adminLteConfig: AdminLteConf) {
     this.user = new GlobunetUser();
     if (this.authModule.getLoggedUser(new User()).id !== 0) {
-      this.goToDashboard();
+        this.goToDashboard();
     }
   }
 
   goToDashboard() {
-    this.router.navigate(['/app/dashboard']).then(
+    this.router.navigate(['/app/ous/create']).then(
       success => {
         this.ogCommonService.loadEngineConfig().subscribe(
             data => {
@@ -45,15 +45,23 @@ export class LoginComponent {
         console.log(error);
       }
     );
+    /**/
 
   }
 
   signIn() {
+
+  this.user.email = "test@test.com";
+  this.user.id = 1;
+  this.user.username = "admin";
+    this.goToDashboard();
+    /*
     this.authModule.login(this.login.username, this.login.password, this.user).subscribe(
       data => {
           this.user = data;
           this.goToDashboard();
       }
     );
+    /**/
   }
 }

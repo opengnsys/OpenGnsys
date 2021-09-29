@@ -14,7 +14,7 @@ import {ResourceService} from "globunet-angular/core/providers/api/resource.serv
 export class HardwareProfileService extends ResourceService<HardwareProfile> {
 
 	constructor(http: HttpClient){
-		super(http, environment.API_URL,"hardwareprofiles", new HardwareProfileSerializer());
+		super(http, environment.API_URL,'hardware-profiles', new HardwareProfileSerializer());
 	}
 
 }

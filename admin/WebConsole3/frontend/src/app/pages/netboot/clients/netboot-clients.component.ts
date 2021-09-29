@@ -48,8 +48,13 @@ export class NetbootClientsComponent implements OnInit {
                 self.biosNetboots.push(netboot);
               }
             });
-            this.netbootTypes.push(this.biosNetboots);
-            this.netbootTypes.push(this.uefiNetboots);
+            if (this.biosNetboots.length > 0) {
+              this.netbootTypes.push(this.biosNetboots);
+            }
+            if (this.uefiNetboots.length > 0) {
+              this.netbootTypes.push(this.uefiNetboots);
+            }
+
             const clientIds = Object.keys(this.ogCommonService.selectedClients);
             // Recorrer todos los clientes y formar los grupos según el partitionCode de sus particiones, deben coincidir todos
             for (let index = 0; index < clientIds.length; index++) {

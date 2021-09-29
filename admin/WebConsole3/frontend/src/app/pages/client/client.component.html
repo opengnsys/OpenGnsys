@@ -1,6 +1,11 @@
 <section class="content-header">
-    <h1 translate="{{client.name||'new_client'}}">
+    <h1 *ngIf="client.name">
+        {{client.name}}
     </h1>
+    <h1 *ngIf="!client.name" translate="new_client">
+        {{client.name}}
+    </h1>
+
     <ol class="breadcrumb">
         <li><a [routerLink]="'/app/dashboard'"><i class="fa fa-dashboard"></i> {{'dashboard'|translate}}</a></li>
         <li><a [routerLink]="'/app/ous'"><i class="fa fa-th"></i> {{'ous'|translate}}</a></li>
@@ -53,7 +58,7 @@
                         <!-- /.box-header -->
                         <mk-box-content class="box-body">
                             <div class="row">
-                                <div class="col-md-8">
+                                <div class="col-lg-8 col-md-12">
                                     <table class="table table-condensed table-striped">
                                         <tbody>
                                         <tr>
@@ -63,21 +68,29 @@
                                             <th translate="size"></th>
                                             <th translate="usage"></th>
                                             <th translate="os"></th>
+                                            <th translate="image"></th>
                                         </tr>
                                         </tbody>
                                         <ng-container *ngFor="let partition of diskConfig.partitions">
                                             <tbody *ngIf="partition.size > 0">
                                             <tr ng-class="{'odd': $index%2 == 0, 'even': $index%2 != 0}">
-                                                <td>{{partition.numPartition}}</td>
+                                                <td>{{partition.partitionNumber}}</td>
                                                 <td>{{partition.type}}</td>
                                                 <td>{{partition.filesystem}}</td>
                                                 <td>{{getSizeInGB(partition.size)}} GB</td>
                                                 <td><span class="badge"
                                                           [ngClass]="getPartitionUsageClass(partition.usage)">{{partition.usage}}
-                                                    %</span></td>
+                                                    %</span>
+                                                </td>
                                                 <td>{{partition.osName}}</td>
+                                                <td *ngIf="partition.partitionCode != 'ca'">
+                                                    <select [compareWith]="compareImages" (change)="assignImageToPartition(partition)" class="form-control" type="text" [(ngModel)]="partition.image" name="images">
+                                                        <option [ngValue]="null" translate="----"></option>
+                                                        <option *ngFor="let image of images" [ngValue]="image">{{image.canonicalName}}</option>
+                                                    </select>
+                                                </td>
                                             </tr>
-                                            <tr *ngIf="partition.partitionCode == 'ca' && partition.cacheContent.files.length > 0"
+                                            <tr *ngIf="partition.partitionCode == 'ca' && partition.content.files.length > 0"
                                                 class="client-cache-info"
                                                 ng-class="{'odd': $index%2 == 0, 'even': $index%2 != 0}">
                                                 <td colspan="6">
@@ -91,7 +104,7 @@
                                                         </tr>
                                                         </thead>
                                                         <tbody>
-                                                        <tr *ngFor="let file of partition.cacheContent.files">
+                                                        <tr *ngFor="let file of partition.content.files">
                                                             <td>{{file.type}}</td>
                                                             <td>{{file.name}}</td>
                                                             <td>{{file.size}}</td>
@@ -99,7 +112,7 @@
                                                         <tr>
                                                             <td style="font-weight: bold" translate="free_space"
                                                                 colspan="2"></td>
-                                                            <td>{{partition.cacheContent.freeSpace}}</td>
+                                                            <td>{{partition.content.freeSpace}}</td>
                                                         </tr>
                                                         </tbody>
                                                     </table>
@@ -109,7 +122,7 @@
                                         </ng-container>
                                     </table>
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-lg-4 col-md-12">
                                     <!--flot dataset="diskConfig.diskChartData" options="diskConfig.diskChartOptions" height="200px"></flot-->
                                     <div class="chart" >
                                         <canvas baseChart

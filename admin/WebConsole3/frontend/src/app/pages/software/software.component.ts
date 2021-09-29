@@ -29,7 +29,6 @@ export class SoftwareComponent implements OnInit {
               private translate: TranslateService) { }
 
   ngOnInit() {
-    if (this.authModule.getLoggedUser().id !== 0) {
       this.softwareProfileService.list().subscribe(
         (response) => {
           this.softwareProfileGroups = [
@@ -41,9 +40,9 @@ export class SoftwareComponent implements OnInit {
           alert(error);
         }
       );
-      this.softwareTypeService.list().subscribe(
+      this.OGCommonService.loadEngineConfig().subscribe(
         data => {
-          this.softwareTypes = data;
+          this.softwareTypes = data.constants.softwareTypes;
         },
         (error) => {
           alert(error);
@@ -62,6 +61,5 @@ export class SoftwareComponent implements OnInit {
           alert(error);
         }
       );
-    }
   }
 }

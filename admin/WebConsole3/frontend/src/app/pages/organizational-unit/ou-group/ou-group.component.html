@@ -44,7 +44,7 @@
   </mk-box-header>
   <!-- /.box-header -->
   <mk-box-content class="box-body folders" style="display: block;">
-    <app-ou-group-component *ngFor="let child of content.children" [content]="child" [ous]="ous" [clientStatus]="clientStatus" [selectedStatus]="selectedStatus" [showGrid]="showGrid"  ></app-ou-group-component>
+    <app-ou-group-component *ngFor="let child of content.children" [content]="child" [parent]="content" [ous]="ous" [clientStatus]="clientStatus" [selectedStatus]="selectedStatus" [showGrid]="showGrid"  ></app-ou-group-component>
     <app-ou-client-component *ngIf="content.clients" [ou]="content" [clientStatus]="clientStatus" [showGrid]="showGrid" [selectedStatus]="selectedStatus"></app-ou-client-component>
   </mk-box-content>
   <!-- /.box-body -->

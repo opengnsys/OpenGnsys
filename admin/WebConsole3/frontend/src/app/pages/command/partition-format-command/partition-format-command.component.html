@@ -78,7 +78,7 @@
               </td>
               <td>
                 <select  name="partitionType" [disabled]="partTableTypeIsGPT() && index == 0 && ogCommonService.isEFI(partition)"  [(ngModel)]="partition.filesystem" >
-                  <option *ngFor="let partitionFilesystem of constants.filesystems">{{partitionFilesystem}}</option>
+                  <option *ngFor="let partitionFilesystem of constants.filesystems">{{partitionFilesystem.type}}</option>
                 </select>
               </td>
               <td>
@@ -110,7 +110,7 @@
               </td>
               <td>
                 <select  name="extendedPartitionType" [(ngModel)]="extendedPartition.filesystem" >
-                  <option *ngFor="let partitionFilesystem of constants.filesystems">{{partitionFilesystem}}</option>
+                  <option *ngFor="let partitionFilesystem of constants.filesystems">{{partitionFilesystem.type}}</option>
                 </select>
               </td>
               <td>

@@ -19,7 +19,7 @@ export class CommandService extends ResourceService<Command> {
     }
 
     execute(params): Observable<any> {
-        const url = this.url + '/commands/executes.json';
+        const url = this.url + '/commands/execute';
         return this.httpClient.post(url, params);
     }
 

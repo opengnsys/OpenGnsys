@@ -13,7 +13,7 @@ import {ResourceService} from 'globunet-angular/core/providers/api/resource.serv
 })
 export class OrganizationalUnitService extends ResourceService<OrganizationalUnit> {
     constructor(http: HttpClient){
-		super(http, environment.API_URL, 'organizationalunits', new OrganizationalUnitSerializer());
+		super(http, environment.API_URL, 'ous', new OrganizationalUnitSerializer());
 	}
 
 }

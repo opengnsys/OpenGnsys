@@ -38,6 +38,7 @@ export class HardwareComponentsTableComponent implements OnInit {
     hardwareComponent.$$tmpDescription = hardwareComponent.description;
     hardwareComponent.$$tmpType = hardwareComponent.type;
   }
+
   saveHardwareComponent(hardwareComponent: any) {
     hardwareComponent.$$editing = false;
     hardwareComponent.description = hardwareComponent.$$tmpDescription;
@@ -56,6 +57,7 @@ export class HardwareComponentsTableComponent implements OnInit {
   }
 
   deleteHardwareComponent(hardwareComponent: HardwareComponent) {
+    const self = this;
     this.ogSweetAlert.swal({
       title: this.translate.instant('sure_to_delete') + '?',
       text: this.translate.instant('action_cannot_be_undone'),
@@ -65,17 +67,17 @@ export class HardwareComponentsTableComponent implements OnInit {
       confirmButtonText: this.translate.instant('yes_delete'),
       closeOnConfirm: true}).then(
       function(result) {
-        if (result === true) {
-          this.hardwareComponentService.delete(hardwareComponent.id).subscribe(
+        if (result.value === true) {
+          self.hardwareComponentService.delete(hardwareComponent.id).subscribe(
             (response) => {
-              this.toaster.pop({type: 'success', title: this.translate.instant('success'), body: this.translate.instant('successfully_deleted')});
-              const index = this.hardwareComponentsGroups[0].components.indexOf(hardwareComponent);
+              self.toaster.pop({type: 'success', title: self.translate.instant('success'), body: self.translate.instant('successfully_deleted')});
+              const index = self.components.indexOf(hardwareComponent);
               if (index !== -1) {
-                this.hardwareComponentsGroups[0].components.splice(index, 1);
+                self.components.splice(index, 1);
               }
             },
             (error) => {
-              this.toaster.pop({type: 'error', title: this.translate.instant('error'), body: error});
+              self.toaster.pop({type: 'error', title: self.translate.instant('error'), body: error});
             }
           );
         }

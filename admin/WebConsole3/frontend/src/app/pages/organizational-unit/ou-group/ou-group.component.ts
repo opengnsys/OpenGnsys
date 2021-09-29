@@ -1,6 +1,6 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {OrganizationalUnit} from '../../../model/organizational-unit';
-import {Client} from '../../../model/client';
+import { marker as tr } from '@biesbjerg/ngx-translate-extract-marker';
 import {forkJoin, Observable} from 'rxjs';
 import {OrganizationalUnitService} from '../../../api/organizational-unit.service';
 import {OgSweetAlertService} from '../../../service/og-sweet-alert.service';
@@ -8,7 +8,7 @@ import {ToasterService} from '../../../service/toaster.service';
 import {ClientService} from '../../../api/client.service';
 import {TranslateService} from '@ngx-translate/core';
 import {OgCommonService} from '../../../service/og-common.service';
-import {AuthModule, tr} from 'globunet-angular/core';
+import {AuthModule} from 'globunet-angular/core';
 import {Router} from '@angular/router';
 
 @Component({
@@ -19,6 +19,8 @@ import {Router} from '@angular/router';
 export class OuGroupComponent {
     private _ou: OrganizationalUnit;
     @Input() ous;
+
+    @Input() parent;
 
     @Input()
     set content(ou) {
@@ -85,11 +87,8 @@ export class OuGroupComponent {
             const promises = [];
             for (let i = 0; i < clientIds.length; i++) {
                 cId = clientIds[i];
-                const client = new Client();
                 // @ts-ignore
-                client.id = cId;
-                client.organizationalUnit = ou.id;
-                promises.push(this.clientService.update(client));
+                promises.push(this.clientService.update({id: cId, organizationalUnit: ou.id}));
             }
             forkJoin(promises).subscribe(
                 (response) => {
@@ -185,7 +184,7 @@ export class OuGroupComponent {
                         if (answer.value === 1) {
                             // Obtener la ou para saber el id de su padre
                             // @ts-ignore
-                            self.organizationalUnitService.read(ou.id + '?parent= 1').subscribe(
+                            self.organizationalUnitService.read(ou.id + '?parent=1').subscribe(
                                 (response) => {
                                     // Mover todos los hijos al nivel superior de la ou actual si tiene un nivel superior, sino no será posible realizar la acción
                                     if (response.parent && response.parent.id || ou.clients.length === 0) {
@@ -198,6 +197,8 @@ export class OuGroupComponent {
                                         ou.clients = ou.clients || [];
                                         for (let i = 0; i < ou.clients.length; i++) {
                                             ou.clients[i].organizationalUnit = parentId;
+                                            // Asignar los clientes a la unidad organizativa del nivel superior en la interfaz
+                                            self.parent.clients.push(ou.clients[i]);
                                             // @ts-ignore
                                             promises.push(self.clientService.update({id: ou.clients[i].id, organizationalUnit: parentId}));
                                         }

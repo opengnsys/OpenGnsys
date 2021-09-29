@@ -18,12 +18,12 @@
       <td>
                   <span *ngIf="hardwareComponent.$$editing">
                     <select class="form-control" [(ngModel)]="hardwareComponent.$$tmpType">
-                      <option [value]="hardwareType.nemonic" *ngFor="let hardwareType of hardwareTypes">{{hardwareType.name}}</option>
+                      <option [value]="hardwareType.id" *ngFor="let hardwareType of hardwareTypes">{{hardwareType.name}}</option>
                     </select>
                   </span>
         <span *ngIf="!hardwareComponent.$$editing">
             <select disabled="disabled" class="form-control" [(ngModel)]="hardwareComponent.type">
-              <option [value]="hardwareType.nemonic" *ngFor="let hardwareType of hardwareTypes">{{hardwareType.name}}</option>
+              <option [value]="hardwareType.id" *ngFor="let hardwareType of hardwareTypes">{{hardwareType.name}}</option>
             </select>
           </span>
       </td>

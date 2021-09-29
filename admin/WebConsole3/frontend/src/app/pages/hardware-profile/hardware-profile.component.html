@@ -63,9 +63,9 @@
                   </span>
               </td>
               <td>
-                    <span >
-                      {{hardwareComponent.type.name}}
-                    </span>
+                <select disabled="disabled" class="form-control" [(ngModel)]="hardwareComponent.type">
+                  <option [value]="hardwareType.id" *ngFor="let hardwareType of hardwareTypes">{{hardwareType.name}}</option>
+                </select>
               </td>
             </tr>
             </tbody>

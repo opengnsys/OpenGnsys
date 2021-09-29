@@ -13,7 +13,7 @@ import {OrganizationalUnitFormType} from '../../../form-type/organizational-unit
 import {Observable} from 'rxjs';
 
 @Component({
-  selector: 'app-organizational-unit',
+  selector: 'app-organizational-unit-edit',
   templateUrl: './organizational-unit-edit.component.html',
   styleUrls: [ './organizational-unit-edit.component.css' ]
 })

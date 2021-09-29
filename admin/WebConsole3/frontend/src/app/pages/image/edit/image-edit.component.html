@@ -39,11 +39,11 @@
             </tr>
             <tr>
               <td>
-                <span *ngIf="image.partitionInfo">{{image.partitionInfo.numDisk}}</span>
+                <span *ngIf="image.partitionInfo">{{image.partitionInfo.diskNumber}}</span>
                 <span *ngIf="!image.partitionInfo" translate="not_available"></span>
               </td>
               <td>
-                <span *ngIf="image.partitionInfo">{{image.partitionInfo.numPartition}}</span>
+                <span *ngIf="image.partitionInfo">{{image.partitionInfo.partitionNumber}}</span>
                 <span *ngIf="!image.partitionInfo" translate="not_available"></span>
               </td>
               <td>

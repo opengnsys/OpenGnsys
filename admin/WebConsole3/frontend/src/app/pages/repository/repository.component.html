@@ -81,8 +81,8 @@
                 <th translate="delete"></th>
               </tr>
               </tbody>
-              <tbody ng-repeat="fileGroup in repository.info.files">
-              <tr ng-repeat="file in fileGroup | orderBy: 'name'">
+              <tbody *ngFor="let fileGroup of repository.info.files | keyvalue">
+              <tr *ngFor="let file of fileGroup.value | sortBy:'desc':'name'">
                 <td>{{file.name}}</td>
                 <td>{{OGCommonService.getUnits(file.size)}}</td>
                 <td>

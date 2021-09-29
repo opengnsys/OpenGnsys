@@ -51,21 +51,21 @@
                   </th>
                   <th translate="size">
                   </th>
-                  <th translate="osname">
+                  <th translate="osName">
                   </th>
                 </tr>
                 </thead>
                 <tbody>
                 <ng-container *ngFor="let partition of client.partitions">
-                  <tr  *ngIf="partition.numPartition !== 0 && partition.size > 0">
+                  <tr  *ngIf="partition.partitionNumber !== 0 && partition.size > 0">
                   <td>
                     <input icheck type="checkbox" checkbox-class="icheckbox_square-blue" radio-class="iradio_square-blue" type="checkbox" class="selection-checkbox" [(ngModel)]="partition.selected" />
                   </td>
                   <td>
-                    {{partition.numDisk}}
+                    {{partition.diskNumber}}
                   </td>
                   <td>
-                    {{partition.numPartition}}
+                    {{partition.partitionNumber}}
                   </td>
                   <td>
                     <select [(ngModel)]="partition.partitionCode">
@@ -74,7 +74,7 @@
                   </td>
                   <td>
                     <select [(ngModel)]="partition.filesystem">
-                      <option [ngValue]="filesystem" *ngFor="let filesystem of constants.filesystems">{{filesystem}}</option>
+                      <option [ngValue]="filesystem" *ngFor="let filesystem of constants.filesystems">{{filesystem.type}}</option>
                     </select>
                   </td>
                   <td>

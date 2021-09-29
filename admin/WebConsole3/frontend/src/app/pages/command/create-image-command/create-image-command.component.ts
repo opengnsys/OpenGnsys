@@ -76,8 +76,8 @@ export class CreateImageCommandComponent implements OnInit {
     if (!this.selectedPartition) {
       this.toaster.pop({type: 'error', title: 'error', body: this.translate.instant('you_must_select_partition')});
     } else {
-      const disk = this.client.partitions[this.selectedPartition].numDisk;
-      const partition = this.client.partitions[this.selectedPartition].numPartition;
+      const disk = this.client.partitions[this.selectedPartition].diskNumber;
+      const partition = this.client.partitions[this.selectedPartition].partitionNumber;
       // Al crear la imagen, le asociamos un perfil software
       // @ts-ignore
       this.execution.script	 = this.constants.commands.SOFTWARE_INVENTORY + ' ' + disk + ' ' + partition + '\n';
@@ -109,7 +109,7 @@ export class CreateImageCommandComponent implements OnInit {
       // Asignar a la imagen los atributos del sistema operativo elegido
       image.client = this.client;
 
-      // Si no hubo ningun error se guardan todas las pgms
+      // Si no hubo ningun error
       if (result === true) {
         const promises = [];
         if (newImage === true) {
@@ -168,12 +168,12 @@ export class CreateImageCommandComponent implements OnInit {
     let index = 0;
     const code = partition.partitionCode;
 
-    if (partition.numPartition !== 0) {
+    if (partition.partitionNumber !== 0) {
       // Buscar el codigo entre las constantes
-      while (index < this.constants.partitiontable.length && !clonable) {
+      while (index < this.constants.partitiontables.length && !clonable) {
         // para cada tabla de particiones, buscamos el codigo de la particion
-        const elements = this.constants.partitiontable[index].partitions.filter(function(part) {
-            return (part.id === partition.partitionCode.padStart(2, '0'));
+        const elements = this.constants.partitiontables[index].partitions.filter(function(part) {
+            return (part.id === partition.partitionCode);
           }
         );
         clonable = (elements.length > 0 && elements[0].clonable === true);

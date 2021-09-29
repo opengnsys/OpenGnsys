@@ -23,13 +23,11 @@ export class HardwareComponent implements OnInit {
               private ogSweetAlert: OgSweetAlertService,
               private toaster: ToasterService,
               private hardwareComponentService: HardwareComponentService,
-              private hardwareTypeService: HardwareTypeService,
               private hardwareProfileService: HardwareProfileService,
               private OGCommonService: OgCommonService,
               private translate: TranslateService) { }
 
   ngOnInit() {
-    if (this.authModule.getLoggedUser().id !== 0) {
       this.hardwareProfileService.list().subscribe(
         (response) => {
           this.hardwareProfileGroups = [
@@ -41,9 +39,9 @@ export class HardwareComponent implements OnInit {
           alert(error);
         }
       );
-      this.hardwareTypeService.list().subscribe(
+      this.OGCommonService.loadEngineConfig().subscribe(
         data => {
-          this.hardwareTypes = data;
+          this.hardwareTypes = data.constants.hardwareTypes;
         },
         (error) => {
           alert(error);
@@ -62,6 +60,5 @@ export class HardwareComponent implements OnInit {
           alert(error);
         }
       );
-    }
   }
 }

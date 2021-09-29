@@ -12,15 +12,4 @@ export class HardwareTypesComponent implements OnInit {
 
   ngOnInit() {
   }
-
-  editHardwareType(hardwareType) {
-    hardwareType.$$editing = true;
-    hardwareType.$$tmpName = hardwareType.name;
-  }
-  saveHardwareType(hardwareType) {
-    hardwareType.$$editing = false;
-    hardwareType.name = hardwareType.$$tmpName;
-    // TODO - Llamar al servidor para guardar el cambio
-  }
-
 }

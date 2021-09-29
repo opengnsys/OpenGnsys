@@ -74,7 +74,7 @@ export class FormatCommandComponent implements OnInit {
       if (partitions[p].partitionCode.length === 1) {
         partitions[p].partitionCode = '0' + partitions[p].partitionCode;
       }
-      key += partitions[p].numDisk + partitions[p].numPartition + partitions[p].partitionCode;
+      key += partitions[p].diskNumber + partitions[p].partitionNumber + partitions[p].partitionCode;
     }
     return key;
   }
@@ -100,13 +100,13 @@ export class FormatCommandComponent implements OnInit {
         const partition = client.partitions[index];
         if (partition.selected === true) {
           if (executions[g].script === '') {
-            executions[g].script = 'ogUnmountAll ' + partition.numDisk + '\n';
+            executions[g].script = 'ogUnmountAll ' + partition.diskNumber + '\n';
           }
           // Si la particion es cache
           if (partition.partitionCode.toUpperCase() === 'CA') {
             executions[g].script += 'ogFormatCache' + '\n';
           } else {
-            executions[g].script += 'ogFormat ' + partition.numDisk + ' ' + partition.numPartition + ' ' + partition.filesystem + '\n';
+            executions[g].script += 'ogFormat ' + partition.diskNumber + ' ' + partition.partitionNumber + ' ' + partition.filesystem.type + '\n';
           }
         }
         index++;
@@ -138,7 +138,7 @@ export class FormatCommandComponent implements OnInit {
 
   getPartitionTypes(partitions) {
     let types = [];
-    const infoPart = partitions.filter((partition: Partition) => partition.numPartition === 0);
+    const infoPart = partitions.filter((partition: Partition) => partition.partitionNumber === 0);
     if (infoPart.length === 1) {
       const partitionTable = this.ogCommonService.getPartitionTable(infoPart[0]);
       types = partitionTable.partitions;

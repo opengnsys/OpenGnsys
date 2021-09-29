@@ -6,12 +6,9 @@ import {OgCommonService} from '../../service/og-common.service';
 import {AuthModule} from 'globunet-angular/core';
 import {ClientService} from '../../api/client.service';
 import {forkJoin, Observable} from 'rxjs';
-import {OgSweetAlertService} from '../../service/og-sweet-alert.service';
-import {ToasterService} from '../../service/toaster.service';
-import {TranslateService} from '@ngx-translate/core';
-import {Router} from '@angular/router';
 import * as _ from 'lodash';
 import {environment} from '../../../environments/environment';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-organizational-unit',
@@ -19,7 +16,7 @@ import {environment} from '../../../environments/environment';
   styleUrls: [ './organizational-unit.component.scss' ]
 })
 export class OrganizationalUnitComponent implements OnInit, OnDestroy {
-  public config: any;
+  public config: any = null;
   public ous: OrganizationalUnit[];
   public movingClients: boolean;
   public options: { scope: { moveChildren: boolean } };
@@ -33,11 +30,7 @@ export class OrganizationalUnitComponent implements OnInit, OnDestroy {
   constructor(private authModule: AuthModule,
               private ogCommonService: OgCommonService,
               private organizationalUnitService: OrganizationalUnitService,
-              private clientService: ClientService,
-              private router: Router,
-              private translate: TranslateService,
-              private ogSweetAlert: OgSweetAlertService,
-              private toaster: ToasterService) {
+              private clientService: ClientService) {
     this.user = this.authModule.getLoggedUser();
     this.user.preferences = this.user.preferences || environment.user.preferences;
     this.clientStatus = [];
@@ -46,6 +39,7 @@ export class OrganizationalUnitComponent implements OnInit, OnDestroy {
         clientstatus: []
       }
     };
+
     this.ogCommonService.showLoader = false;
   }
 
@@ -112,7 +106,7 @@ export class OrganizationalUnitComponent implements OnInit, OnDestroy {
         (response: any[]) => {
         for (let p = 0; p < response.length; p++) {
           for (let elem = 0; elem < response[p].length; elem++) {
-            this.clientStatus[response[p][elem].id] = response[p][elem].status;
+            this.clientStatus[response[p][elem].id] = this.config.constants.clientstatus[response[p][elem].status];
           }
         }
       },

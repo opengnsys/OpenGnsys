@@ -44,7 +44,7 @@ const routes: Routes = [
   },
   { path: 'app',
     data: {
-      customLayout: false
+      customLayout: false,
     },
     children: [
       {
@@ -104,12 +104,12 @@ const routes: Routes = [
         component: HardwareProfileComponent
       },
       {
-        path: 'hardware/component/create',
-        component: HardwareComponentComponent
-      },
-      {
         path: 'hardware/profile/:id',
         component: HardwareProfileComponent
+      },
+      {
+        path: 'hardware/component/create',
+        component: HardwareComponentComponent
       },
       {
         path: 'software',
@@ -208,8 +208,9 @@ const routes: Routes = [
   },
 ];
 
+
 @NgModule({
-  imports: [RouterModule.forRoot(routes, { useHash: true })],
+  imports: [RouterModule.forRoot(routes, { useHash: true, initialNavigation: 'enabled' })],
   exports: [RouterModule]
 })
 export class AppRoutingModule { }

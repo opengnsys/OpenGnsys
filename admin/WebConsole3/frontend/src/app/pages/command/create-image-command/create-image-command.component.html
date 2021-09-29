@@ -63,7 +63,7 @@
                   </th>
                   <th translate="filesystem">
                   </th>
-                  <th translate="osname">
+                  <th translate="osName">
                   </th>
                 </tr>
                 </thead>
@@ -71,13 +71,13 @@
                 <ng-container *ngFor="let partition of client.partitions; let index = index;">
                   <tr *ngIf="isClonable(partition)">
                     <td>
-                      <input icheck type="radio" [name]="'partition_'+partition.numPartition" checkbox-class="icheckbox_square-blue" radio-class="iradio_square-blue" class="selection-checkbox" [(ngModel)]="selectedPartition" [value]="index" />
+                      <input icheck type="radio" [name]="'partition_'+partition.partitionNumber" checkbox-class="icheckbox_square-blue" radio-class="iradio_square-blue" class="selection-checkbox" [(ngModel)]="selectedPartition" [value]="index" />
                     </td>
                     <td>
-                      {{partition.numDisk}}
+                      {{partition.diskNumber}}
                     </td>
                     <td>
-                      {{partition.numPartition}}
+                      {{partition.partitionNumber}}
                     </td>
                     <td>
                       {{partition.filesystem}}

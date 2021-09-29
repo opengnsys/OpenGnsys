@@ -14,7 +14,7 @@ import {ResourceService} from "globunet-angular/core/providers/api/resource.serv
 export class SoftwareProfileService extends ResourceService<SoftwareProfile> {
 
 	constructor(http: HttpClient){
-		super(http, environment.API_URL,"softwareprofiles", new SoftwareProfileSerializer());
+		super(http, environment.API_URL,"software-profiles", new SoftwareProfileSerializer());
 	}
 
 }

@@ -4,8 +4,8 @@ import {Client} from './client';
 import {SoftwareProfile} from './software-profile';
 
 export class PartitionInfo {
-  numDisk: number;
-  numPartition: number;
+  diskNumber: number;
+  partitionNumber: number;
   partitionCode: string;
   filesystem: string;
   osName: string;

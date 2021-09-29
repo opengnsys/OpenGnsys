@@ -5,12 +5,12 @@ import {Netboot} from './netboot';
 import {PartitionInfo} from './image';
 
 export class Partition {
-  cacheContent: string;
+  content: string;
   filesystem: string;
   id: number;
   image: any;
-  numDisk: number;
-  numPartition: number;
+  diskNumber: number;
+  partitionNumber: number;
   osName: string;
   partitionCode: string;
   size: number;

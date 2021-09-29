@@ -71,8 +71,8 @@ export class DeleteCacheImageCommandComponent implements OnInit {
             const partition = diskConfig.partitions[p];
             if (partition.partitionCode === 'ca') {
               // Solo cogemos las imagenes .img, no los .sum
-              for (let f = 0; f < partition.cacheContent.files.length; f++) {
-                const file = partition.cacheContent.files[f];
+              for (let f = 0; f < partition.content.files.length; f++) {
+                const file = partition.content.files[f];
                 // Si no es un .sum
                 if (!file.name.match('.sum')) {
                   this.cacheImages.push(file);

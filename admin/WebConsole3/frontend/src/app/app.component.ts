@@ -1,10 +1,10 @@
 import {Component, OnInit} from '@angular/core';
-import {LayoutService, LayoutState, LayoutStore} from 'angular-admin-lte';
-import {AuthModule, GlobunetUser} from 'globunet-angular/core';
+import {LayoutService, LayoutStore} from 'angular-admin-lte';
+import {AuthModule} from 'globunet-angular/core';
 import {TranslateService} from '@ngx-translate/core';
 import {OgCommonService} from './service/og-common.service';
 import {AdminLteConf} from './admin-lte.conf';
-import {User, UserPreferences} from './model/user';
+import {User} from './model/user';
 
 @Component({
     selector: 'app-root',
@@ -38,6 +38,6 @@ export class AppComponent implements OnInit {
     }
 
     userIsLogged(): boolean {
-        return (this.authModule.getLoggedUser() && this.authModule.getLoggedUser().id !== 0);
+        return true; //(this.authModule.getLoggedUser() && this.authModule.getLoggedUser().id !== 0);
     }
 }

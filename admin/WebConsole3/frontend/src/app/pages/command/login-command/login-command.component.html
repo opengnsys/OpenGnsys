@@ -29,12 +29,12 @@
         </div>
         <div class="box-body">
           <form role="form" name="vm.Form">
-            <div *ngFor="let client of selectedClients">
-              <table class="table" *ngIf="client && client.id" >
+            <div *ngFor="let client of selectedClients | keyvalue">
+              <table class="table" *ngIf="client.value && client.value.id" >
                 <thead>
                 <tr>
                   <th colspan="5">
-                    {{client.name}}
+                    {{client.value.name}}
                   </th>
                 </tr>
                 <tr>
@@ -46,21 +46,21 @@
                   </th>
                   <th translate="filesystem">
                   </th>
-                  <th translate="osname">
+                  <th translate="osName">
                   </th>
                 </tr>
                 </thead>
                 <tbody>
-                <ng-container *ngFor="let partition of client.partitions">
+                <ng-container *ngFor="let partition of client.value.partitions">
                   <tr *ngIf="canLogin(partition)">
                       <td>
                         <input icheck type="radio" name="partition" checkbox-class="icheckbox_square-blue" radio-class="iradio_square-blue" class="selection-checkbox" [(ngModel)]="selectedPartition" [value]="partition" />
                       </td>
                       <td>
-                        {{partition.numDisk}}
+                        {{partition.diskNumber}}
                       </td>
                       <td>
-                        {{partition.numPartition}}
+                        {{partition.partitionNumber}}
                       </td>
                       <td>
                         {{partition.filesystem}}

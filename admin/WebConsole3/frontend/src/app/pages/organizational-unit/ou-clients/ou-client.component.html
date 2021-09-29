@@ -20,7 +20,7 @@
       <td>{{client.ip}}</td>
       <td>{{client.mac}}</td>
       <td>
-        <span class="badge client-color-{{clientStatus[client.id]}}">{{clientStatus[client.id] | translate}}</span>
+        <span class="badge client-color-{{clientStatus[client.id].name}}">{{clientStatus[client.id].name | translate}}</span>
       </td>
       <td class="right">
         <div class="btn-group visible-md visible-lg hidden-sm hidden-xs">
@@ -57,7 +57,7 @@
       <span class="info-box-icon">
                       <i class="fa fa-desktop">
                       </i>
-                      <small class="label client-color-{{clientStatus[client.id]}}">{{clientStatus[client.id] | translate}}</small>
+                      <small class="label client-color-{{clientStatus[client.id].name}}">{{clientStatus[client.id].name | translate}}</small>
                     </span>
       <div class="info-box-content">
         <a href="javascript:void(0)" (click)="deleteClient(client)" class="small-box-footer pull-right">

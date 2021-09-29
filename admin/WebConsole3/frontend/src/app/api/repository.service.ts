@@ -19,7 +19,7 @@ export class RepositoryService extends ResourceService<Repository> {
 	}
 
   getInfo(repository: Repository) {
-    const url = 'https://' + repository.ip + '/' + environment.BASE_DIR + environment.API_BASE_URL;
+    const url = 'https://' + repository.ip + '/' + environment.BASE_DIR + environment.API_BASE_URL + '/' + this.endpoint + '/files/list';
     return this.httpClient.get(url, {headers: {
       Authorization: repository.randomId
       }});
