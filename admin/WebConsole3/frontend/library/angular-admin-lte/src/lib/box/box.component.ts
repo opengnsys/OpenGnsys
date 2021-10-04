@@ -57,13 +57,13 @@ export class BoxComponent implements AfterViewInit, OnDestroy {
   @Output() public onCollapseDone = new EventEmitter();
   @Output() public onCollapseStart = new EventEmitter();
 
-  @ContentChild(BoxHeaderDirective) public boxHeaderDirective: BoxHeaderDirective;
-  @ContentChild(BoxFooterDirective) public boxFooterDirective: BoxFooterDirective;
-  @ContentChild(BoxContentDirective) public boxContentDirective: BoxContentDirective;
-  @ContentChild(BoxToolsDirective) public boxToolsDirective: BoxToolsDirective;
+  @ContentChild(BoxHeaderDirective, {static: true}) public boxHeaderDirective: BoxHeaderDirective;
+  @ContentChild(BoxFooterDirective, {static: true}) public boxFooterDirective: BoxFooterDirective;
+  @ContentChild(BoxContentDirective, {static: true}) public boxContentDirective: BoxContentDirective;
+  @ContentChild(BoxToolsDirective, {static: true}) public boxToolsDirective: BoxToolsDirective;
 
-  @ViewChild('toggleButtonElement') private toggleButtonElement;
-  @ViewChild('removeButtonElement') private removeButtonElement;
+  @ViewChild('toggleButtonElement', {static: true}) private toggleButtonElement;
+  @ViewChild('removeButtonElement', {static: true}) private removeButtonElement;
 
   /**
    * @method constructor

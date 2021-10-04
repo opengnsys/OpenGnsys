@@ -16,7 +16,7 @@ import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import {TranslateHttpLoader} from '@ngx-translate/http-loader';
 import {TranslateLoader, TranslateModule, TranslateService} from '@ngx-translate/core';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { ToastrModule } from 'ng6-toastr-notifications';
+import { ToastrModule } from 'ngx-toastr';
 import { Ng2SmartTableModule } from 'ng2-smart-table';
 import { FormsModule } from '@angular/forms';
 import {Ng2TableActionComponent} from './pages/common/table-action/ng2-table-action.component';
@@ -57,7 +57,7 @@ import {ProfileComponent} from './pages/profile/profile.component';
 import {layoutProvider} from '../../library/angular-admin-lte/src/lib/layout/layout.provider';
 import {OrganizationalUnitEditComponent} from './pages/organizational-unit/edit/organizational-unit-edit.component';
 import {ClientComponent} from './pages/client/client.component';
-import {ChartsModule} from 'ng2-charts';
+import {ChartsModule, ThemeService} from 'ng2-charts';
 import {ClientDhcpComponent} from './pages/client/dhcp/client-dhcp.component';
 import {DeployImageCommandComponent} from './pages/command/deploy-image-command/deploy-image-command.component';
 import {MenuComponent} from './pages/menu/menu.component';
@@ -217,7 +217,8 @@ import {OgCommonService} from './service/og-common.service';
   ],
   providers: [
     {provide: HTTP_INTERCEPTORS, useClass: TokenInterceptorService, multi: true},
-    OgCommonService
+    OgCommonService,
+    ThemeService
   ],
   bootstrap: [AppComponent]
 })
