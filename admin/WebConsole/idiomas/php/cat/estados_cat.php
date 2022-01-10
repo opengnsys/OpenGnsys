@@ -11,6 +11,7 @@ $TbMsg["STATUS_INI"]="Iniciant";
 $TbMsg["STATUS_OFF"]="Apagat";
 $TbMsg["STATUS_OPG"]="OpenGnsys";
 $TbMsg["STATUS_LNX"]="GNU/Linux";
+$TbMsg["STATUS_MNT"]="Manteniment";
 $TbMsg["STATUS_WXP"]="Windows";
 // Estats nou agent OGAgent.
 $TbMsg["STATUS_LNXS"]="Sessi&oacute; GNU/Linux";

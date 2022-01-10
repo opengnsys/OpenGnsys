@@ -11,6 +11,7 @@ $TbMsg["STATUS_INI"]="Initializing";
 $TbMsg["STATUS_OFF"]="Off";
 $TbMsg["STATUS_OPG"]="OpenGnsys";
 $TbMsg["STATUS_LNX"]="GNU/Linux";
+$TbMsg["STATUS_MNT"]="Maintenance";
 $TbMsg["STATUS_WXP"]="Windows";
 // New OGAgent states.
 $TbMsg["STATUS_LNXS"]="GNU/Linux session";
