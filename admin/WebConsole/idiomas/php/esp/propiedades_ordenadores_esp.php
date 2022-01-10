@@ -35,6 +35,7 @@ $TbMsg[4951]="Cach&eacute; libre";
 //AGP
 $TbMsg['COMM_DEFOGLIVE']="Asignado por el administrador";
 $TbMsg["PROP_SERIALNO"]="N&ordm; de serie";
+$TbMsg["LABEL_MAINTENANCE"]="Ordenador en mantenimiento";
 $TbMsg["WARN_NOREPO"]="<em>AVISO: sin repositorio asignado.</em>";
 $TbMsg["WARN_NOTDETECTED"]="<em>(no detectado)</em>";
 $TbMsg['WARN_PROFESSOR']="profesor";

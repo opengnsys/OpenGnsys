@@ -26,6 +26,7 @@ $idordenador=0;
 $ordprofesor=false;
 $nombreordenador="";
 $numserie="";
+$maintenance=0;
 $ip="";
 $mac="";
 $idperfilhard=0;
@@ -100,7 +101,7 @@ function abrir_ventana(URL){
 				$dirfotos="../images/fotos";
 			?>
 			<td colspan="2" valign="top" align="left" rowspan="4">
-			<img border="2" style="border-color:#63676b" src="<?php echo $dirfotos.'/'.$fotoordenador?>" />
+			<img border="2" style="border-color:#63676b; opacity: <?php echo 1-0.5*$maintenance ?>;" src="<?php echo $dirfotos.'/'.$fotoordenador?>" />
 			<?php	if ($opcion!=$op_eliminacion) {
 				echo '<br />(150X110)-(jpg - gif - png) ---- '.$TbMsg[5091].'><br />';
 				echo '<input name="archivo" type="file" id="archivo" size="16" />';
@@ -139,6 +140,18 @@ function abrir_ventana(URL){
 					echo "</td>\n";
 				}
 			?>
+		</tr>
+		<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
+		<tr>
+			<th align="center">&nbsp;<?php echo $TbMsg["LABEL_MAINTENANCE"] ?>&nbsp;</th>
+			<td>
+			<?php   if ($opcion==$op_eliminacion) {
+					echo '<input class="formulariodatos" name="maintenance" type="checkbox" disabled'. ($maintenance ? ' checked' : '') .">\n";
+				} else {
+					echo '<input class="formulariodatos" name="maintenance" type="checkbox" value="1"'. ($maintenance ? ' checked' : '') .">\n";
+				}
+			?>
+			</td>
 		</tr>
 		<!------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------->
 		<TR>
@@ -355,6 +368,7 @@ function TomaPropiedades($cmd,$id){
 	global $ordprofesor;
 	global $nombreordenador;
 	global $numserie;
+	global $maintenance;
 	global $ip;
 	global $mac;
 	global $fotoordenador;
@@ -400,7 +414,7 @@ EOD;
                 $paginavalidacion=$rs->campos["paginavalidacion"];
 ########################### Ramón
                 $arranque=$rs->campos["arranque"];
-
+		$maintenance=$rs->campos["maintenance"]??0;
 		$rs->Cerrar();
 		return(true);
 	}
