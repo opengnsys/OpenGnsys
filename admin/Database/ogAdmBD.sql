@@ -554,7 +554,7 @@ CREATE TABLE `ordenadores_particiones` (
   `numdisk` smallint NOT NULL DEFAULT '0',
   `numpar` smallint NOT NULL DEFAULT '0',
   `codpar` int(8) NOT NULL DEFAULT '0',
-  `tamano` int(11) NOT NULL DEFAULT '0',
+  `tamano` bigint(20) NOT NULL DEFAULT '0',
   `uso` tinyint NOT NULL DEFAULT '0',
   `idsistemafichero` smallint(11) NOT NULL DEFAULT '0',
   `idnombreso` smallint(11) NOT NULL DEFAULT '0',

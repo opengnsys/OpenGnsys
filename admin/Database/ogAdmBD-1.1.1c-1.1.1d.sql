@@ -25,3 +25,7 @@ ALTER TABLE aulas
       MODIFY inremotepc SMALLINT NOT NULL DEFAULT 0;
 ALTER TABLE imagenes
       MODIFY inremotepc SMALLINT NOT NULL DEFAULT 0;
+
+# Support hard disk bigger 2Tb (ticket #1012)
+ALTER TABLE ordenadores_particiones
+      MODIFY tamano BIGINT NOT NULL DEFAULT '0';
