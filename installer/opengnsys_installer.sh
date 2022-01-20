@@ -52,7 +52,7 @@ function userData ()
 	DEFAULT_OPENGNSYS_DB_USER="usuog"		# Usuario por defecto de acceso a la base de datos
 	DEFAULT_OPENGNSYS_DB_PASSWD="passusuog"		# Clave por defecto de acceso a la base de datos
 	DEFAULT_OPENGNSYS_CLIENT_PASSWD="og"		# Clave por defecto de acceso del cliente	
-	DEFAULT_OGLIVE="ogLive-bionic-5.0.0-27-generic-amd64-r20190830.7208cc9.iso"	# Cliente ogLive
+	DEFAULT_OGLIVE="ogLive-focal-5.11.0-22-generic-amd64-r20210413.992ebb9.iso"	# Cliente ogLive
 
 	echo -e "\\nOpenGnsys Installation"
 	echo "=============================="
@@ -99,7 +99,7 @@ function userData ()
 	# Selección de clientes ogLive para descargar.
 	while : ; do
 		echo -e "\\n\\nChoose ogLive client to install."
-		echo -e "1) Kernel 5.0, 64-bit, EFI-compatible"
+		echo -e "1) Kernel 5.11, 64-bit, EFI-compatible"
 		echo -e "2) Kernel 3.2, 32-bit"
 		echo -e "3) Both"
 		echo -n -e "Please, type a valid number (1): "
@@ -132,7 +132,7 @@ function globalSetup ()
 	else
 		REMOTE=1
 	fi
-	BRANCH="opengnsys-1.1.1c"
+	BRANCH="opengnsys-1.1.1dpre"
 	CODE_URL="https://codeload.github.com/opengnsys/OpenGnsys/zip/$BRANCH"
 	API_URL="https://api.github.com/repos/opengnsys/OpenGnsys"
 

@@ -1,8 +1,8 @@
 {
   "project": "OpenGnsys",
-  "version": "1.2.0",
-  "codename": "",
-  "definition": "",
+  "version": "1.1.1dpre",
+  "codename": "Espeto",
+  "definition": "http://www.andalucia.com/gastronomy/espeto.htm",
   "release": "",
-  "ogagent": "1.1.1b"
+  "ogagent": "1.1.2"
 }
