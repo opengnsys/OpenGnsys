@@ -19,7 +19,12 @@ echo "${MSG_LAUNCHCLIENT:-.}"
 [ -f /usr/local/etc/${LANG%_*}.qmap ] && export QWS_KEYBOARD="TTY:keymap=/usr/local/etc/${LANG%_*}.qmap"
 
 if [ "$ogstatus" != "offline"  ]; then
-    /opt/opengnsys/ogClient/./ogclient
+    GROUP_CONFIG=/opt/opengnsys/ogClient/cfg/${group/ /_}.json
+    if [ -f $GROUP_CONFIG ]; then
+        /opt/opengnsys/ogClient/./ogclient -c $GROUP_CONFIG
+    else
+        /opt/opengnsys/ogClient/./ogclient
+    fi
 else
     for FILE in index $OGGROUP $(ogGetIpAddress)
     do
