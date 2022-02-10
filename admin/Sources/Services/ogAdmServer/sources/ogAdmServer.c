@@ -606,7 +606,7 @@ bool actualizaConfiguracion(struct og_dbi *dbi, char *cfg, int ido)
 		} else { // Existe el registro
 			swu = true; // Se supone que algún dato ha cambiado
 
-			dato = dbi_result_get_uint(result, "tamano");
+			dato = dbi_result_get_ulonglong(result, "tamano");
 			if (atoi(tam) == dato) {// Parámetro tamaño igual al almacenado
 				dato = dbi_result_get_uint(result, "idsistemafichero");
 				if (idsfi == dato) {// Parámetro sistema de fichero igual al almacenado
