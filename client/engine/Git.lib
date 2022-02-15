@@ -219,7 +219,7 @@ function ogExistGitImage ()
     [ -d "$REPODIR" ] && cd "$REPODIR" || ogRaiseError $OG_ERR_NOTFOUND "$REPODIR" || return $?
     # Devuelvo la salida del comando grep
     git branch |grep "[ *] ${IMGNAME}$" &>/dev/null
-    RETVAL=${PIPESTATUS[0]}
+    RETVAL=$?
 
     #Volvemos a direcotorio inicial
     popd  &>/dev/null
@@ -351,12 +351,10 @@ function ogPushImage ()
     #cd $OGCAC$OGIMG/$GITDIR
     cd $UNIONFSDIR
     # Comprobar que exista la rama de la imagen
-    #BRANCH=$(git branch| grep "^[ *] ${IMGNAME}$")
-    #[ "$BRANCH" == "" ] && return $(ogRaiseError $OG_ERR_NOTFOUND "Git image: $IMGNAME"; echo $?)
     ogExistGitImage CACHE "$IMGNAME" || ogRaiseError $OG_ERR_NOTFOUND "Git image: $IMGNAME" || return $?
     # Si no estoy en la rama me cambio a ella.
-    BRANCH=$(git branch| grep "^[ *] ${IMGNAME}$")
-    [[ "$BRANCH" =~ '*' ]] || git checkout "$IMGNAME"
+    git branch |grep "* ${IMGNAME}$" &>/dev/null
+    [ $? -eq 0 ] || git checkout "$IMGNAME"
 
     # Seleccionamos el repositorio remoto según el tipo de sistema operativo
     # Debemos poner el nombre del directorio y no del worktree
