@@ -444,6 +444,10 @@ fi
 DISK="$(ogDiskToDev $1)" || return $?
 ms-sys -z -f $DISK
 ms-sys -s -f $DISK
+
+# Firma necesaria para Windows equipos UEFI
+SIGNATURE=0x$(cat /proc/sys/kernel/random/uuid | cut -d '-' -f1)
+ms-sys -S $SIGNATURE $DISK
 }
 
 
