@@ -50,10 +50,13 @@ $TbMsg["CONFIG_NOOS"]='No se ha detectado ningún sistema operativo en el equipo
 $TbMsg["SYNC_METHOD"]='Método';
 $TbMsg["SYNC1_DIR"]='Basada en directorio';
 $TbMsg["SYNC2_FILE"]='Basada en archivo';
+$TbMsg["SYNC3_GIT"]='GIT';
 
 $TbMsg["TITLE_W"]='Opción de rsync: El algoritmo incremental rsync no se usa y se envía todo el archivo. Rsync lo usa por defecto cuando el origen y destino locales. ';
 $TbMsg["TITLE_E"]='Opción de rsync: Se compara el destino con el origen y se borran los ficheros que no existen en el primero.';
 $TbMsg["TITLE_C"]='Opción de rsync: Comprime los archivos de datos que se envían a la máquina de destino, lo que reduce la cantidad de datos que se transmiten. ';
+$TbMsg["TITLE_G"]='Opción de git: Se formateará la partición y se clonará la imagen, en vez de hacer un checkout';
+$TbMsg["TITLE_A"]='Opción de restauración de acl: Se restauraran todos los permisos y no sólo los del usuario.';
 $TbMsg["SEND"]='Protocolo';
 // AVISOS.
 $TbMsg["WARN_PROTOCOL"]='La opción "protocolo" sólo se utiliza en las sincronizadas tipo archivo la primera vez que se envía la imagen a caché. <br>En otro caso el protocolo es RSYNC.';

@@ -7,6 +7,33 @@
 // Descripción : 
 //		Este fichero implementa las funciones javascript del fichero RestaurarImagenBasica.php (Comandos)
 // *************************************************************************************************************************************************
+
+// protocolo_opt: activa o desactiva las casillas de selección de las opciones del protocolo segun sea rsync o git
+ function protocolo_opt(){
+	// rsync (SYNC1 y SYNC2)
+	var whole = document.getElementsByClassName("whole");
+	var eli = document.getElementsByClassName("paramb");
+	var compres = document.getElementsByClassName("compres");
+	// git (SYNC3)
+	var gitmode = document.getElementsByClassName("git");
+	var acl = document.getElementsByClassName("acl");
+	if (arguments[0].value == "SYNC3") {
+		var rsync=true
+		var git=false;
+	} else {
+		var rsync=false;
+		var git=true;
+
+        }
+	for (var i = 0, len = whole.length; i < len; i++){
+		whole[i].disabled = rsync;
+		eli[i].disabled = rsync;
+		compres[i].disabled = rsync;
+		gitmode[i].disabled = git;
+		acl[i].disabled = git;
+	}
+ }
+
  function confirmar(){
 	if(comprobar_datos()){
 		var RC="@";
@@ -38,19 +65,29 @@
 				var desplemet=document.getElementById("desplemet_"+idradio); // Desplegable metodo de restauración
 				var p=desplemet.selectedIndex; // Toma índice seleccionado
 				atributos+="met="+p+RC;	// Método de clonación 0=caché 1=repositorio	
-				
+
 				desplemet=document.getElementById("desplesync_"+idradio); // Desplegable metodo de syncronización
-				p=desplemet.selectedIndex; // Toma índice seleccionado
-				atributos+="msy="+p+RC;	// Método de clonación 
+				var p2=desplemet.selectedIndex; // Toma índice seleccionado
+				atributos+="msy="+p2+RC;	// Método de clonación
+
 				
 				desplemet=document.getElementById("despletpt_"+idradio); // Desplegable metodo de syncronización
 				p=desplemet.value; // Toma índice seleccionado
 				atributos+="tpt="+p+RC;	// Método de clonación 
 								
-				var chrChk=document.getElementById('whl-'+idradio); // Recupera objeto fila de la tabla opciones adicionales
-				if(chrChk.checked)	atributos+="whl=1"+RC; else atributos+="whl=0"+RC;
-				chrChk=document.getElementById('eli-'+idradio); // Recupera objeto fila de la tabla opciones adicionales
-				if(chrChk.checked)	atributos+="eli=1"+RC;	 else atributos+="eli=0"+RC;
+				// Si el metodo es rsync se usan los parametros whl, eli y cmp. para git se usan git y acl
+				// Reutilizamos los nombres de rsync para no cambiar base de datos y ogAdmServer
+				if (p2 == 3) {
+				    var chrChk=document.getElementById('git-'+idradio); // Recupera objeto fila de la tabla opciones adicionales
+				    if(chrChk.checked)	atributos+="whl=1"+RC; else atributos+="whl=0"+RC;
+				    chrChk=document.getElementById('acl-'+idradio); // Recupera objeto fila de la tabla opciones adicionales
+				    if(chrChk.checked)	atributos+="eli=1"+RC;	 else atributos+="eli=0"+RC;
+				} else {
+				    var chrChk=document.getElementById('whl-'+idradio); // Recupera objeto fila de la tabla opciones adicionales
+				    if(chrChk.checked)	atributos+="whl=1"+RC; else atributos+="whl=0"+RC;
+				    chrChk=document.getElementById('eli-'+idradio); // Recupera objeto fila de la tabla opciones adicionales
+				    if(chrChk.checked)	atributos+="eli=1"+RC;	 else atributos+="eli=0"+RC;
+				}
 				chrChk=document.getElementById('cmp-'+idradio); // Recupera objeto fila de la tabla opciones adicionales
 				if(chrChk.checked)	atributos+="cmp=1"+RC; else atributos+="cmp=0"+RC;
 

@@ -415,7 +415,7 @@ function pintaParticionesRestaurarImagenSincronizacion1($cmd,$configuraciones,$i
 	// Separamos las configuraciones segun el disco al que pertenezcan
 	$diskConfigs = splitConfigurationsByDisk($configuraciones);
 	
-	$columns=14;
+	$columns=16;
 	echo '<TR>';
 	echo '<TH align=center>&nbsp;&nbsp;</TH>';
 	echo '<th align="center">&nbsp;'.$TbMsg["DISK"].'&nbsp;</th>'; // Número de  disco
@@ -428,9 +428,11 @@ function pintaParticionesRestaurarImagenSincronizacion1($cmd,$configuraciones,$i
 	echo '<TH align=center>&nbsp;'.$TbMsg[16].'&nbsp;</TH>';	
 	echo '<TH align=center>&nbsp;'.$TbMsg["SYNC_METHOD"].'&nbsp;</TH>';
 	echo '<TH align=center>&nbsp;'.$TbMsg["SEND"].'&nbsp;</TH>';
-	echo '  <TH align=center>&nbsp;<dfn  title="'.$TbMsg["TITLE_W"].'">W</dfn> &nbsp;</TH>';
-	echo '  <TH align=center>&nbsp;<dfn  title="'.$TbMsg["TITLE_E"].'">E</dfn> &nbsp;</TH>';
-	echo '  <TH align=center>&nbsp;<dfn  title="'.$TbMsg["TITLE_C"].'">C</dfn> &nbsp;</TH>';
+	echo '  <TH id="whl" align=center>&nbsp;<dfn  title="'.$TbMsg["TITLE_W"].'">W</dfn> &nbsp;</TH>';
+	echo '  <TH id="eli" align=center>&nbsp;<dfn  title="'.$TbMsg["TITLE_E"].'">E</dfn> &nbsp;</TH>';
+	echo '  <TH id="cmp" align=center>&nbsp;<dfn  title="'.$TbMsg["TITLE_C"].'">C</dfn> &nbsp;</TH>';
+	echo '  <TH id="git" align=center>&nbsp;<dfn  title="'.$TbMsg["TITLE_G"].'">G</dfn> &nbsp;</TH>';
+	echo '  <TH id="acl" align=center>&nbsp;<dfn  title="'.$TbMsg["TITLE_A"].'">A</dfn> &nbsp;</TH>';
 	echo '</TR>';
 
 	
@@ -438,9 +440,15 @@ function pintaParticionesRestaurarImagenSincronizacion1($cmd,$configuraciones,$i
 	
 	foreach($diskConfigs as $disk => $diskConfig){
 		$disk = (int)$disk;
-		echo'<tr height="16">'.chr(13);
-		echo '<td colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;'.$TbMsg["DISK"].'&nbsp;'.$disk.'</td>'.chr(13);
-	     
+
+		echo '<tr height="18">'.chr(13);
+
+		$html_disk_type = draw_disk_type($cmd, $idordenadores, $disk);
+		echo '<td colspan="' . $columns . '" style="BORDER-TOP: " .
+		     "#999999 1px solid;BACKGROUND-COLOR: #D4D0C8;">&nbsp;' .
+		     $TbMsg["DISK"] . '&nbsp;' . $disk . $html_disk_type .
+		     '</td>'.chr(13);
+
 		$auxCfg=explode("@",$diskConfig); // Crea lista de particiones
 		for($i=0;$i<sizeof($auxCfg);$i++){
 			$auxKey=explode(";",$auxCfg[$i]); // Toma clave de configuracion
@@ -464,8 +472,9 @@ function pintaParticionesRestaurarImagenSincronizacion1($cmd,$configuraciones,$i
 						
 						$metodos="SYNC0="."  ".chr(13);
 						$metodos.="SYNC1=".$TbMsg["SYNC1_DIR"].chr(13);						
-						$metodos.="SYNC2=".$TbMsg["SYNC2_FILE"];		
-						echo '<TD align=center>'.HTMLCTESELECT($metodos,"desplesync_".$icp,"estilodesple","",1,100).'</TD>';								
+						$metodos.="SYNC2=".$TbMsg["SYNC2_FILE"].chr(13);
+						$metodos.="SYNC3=".$TbMsg["SYNC3_GIT"];
+						echo '<TD align=center>'.HTMLCTESELECT($metodos,"desplesync_".$icp,"estilodesple","",1,100,"protocolo_opt").'</TD>';
 							
 						$metodos="UNICAST="."Unicast".chr(13);						
 						$metodos.="MULTICAST_". mcast_syntax($cmd,$ambito,$idambito) ."="."Multicast".chr(13);		
@@ -473,9 +482,11 @@ function pintaParticionesRestaurarImagenSincronizacion1($cmd,$configuraciones,$i
 						$metodos.="RSYNC=Rsync";
 						echo '<TD align=center>'.HTMLCTESELECT($metodos,"despletpt_".$icp,"estilodesple","",1,100).'</TD>';								
 						
-						echo '<td align=center><input type=checkbox name="whole" id="whl-'.$icp.'"></td>';	
-						echo '<td align=center><input type=checkbox name="paramb" checked id="eli-'.$icp.'"></td>';	
-						echo '<td align=center><input type=checkbox name="compres" id="cmp-'.$icp.'"></td>';	
+						echo '<td align=center><input type=checkbox name="whole" class="whole" id="whl-'.$icp.'"></td>';
+						echo '<td align=center><input type=checkbox name="eli" class="paramb" checked id="eli-'.$icp.'"></td>';
+						echo '<td align=center><input type=checkbox name="compres" class="compres" id="cmp-'.$icp.'"></td>';
+						echo '<td align=center><input type=checkbox name="git" class="git" id="git-'.$icp.'"></td>';
+						echo '<td align=center><input type=checkbox name="acl" class="acl" id="acl-'.$icp.'"></td>';
 										
 					}
 					echo '</TR>'.chr(13);
@@ -485,5 +496,5 @@ function pintaParticionesRestaurarImagenSincronizacion1($cmd,$configuraciones,$i
 	}	
 
 	echo '<TR><TD colspan="'.$columns.'" style="BORDER-TOP: #999999 1px solid;BACKGROUND-COLOR: #FFFFFF; height: 5px;">&nbsp;</TD></TR>';
-	echo '<tr><th colspan="14">'.$TbMsg["WARN_PROTOCOL"].'</th></tr>';
+	echo '<tr><th colspan="'.$columns.'">'.$TbMsg["WARN_PROTOCOL"].'</th></tr>';
 }

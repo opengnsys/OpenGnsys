@@ -50,10 +50,13 @@ $TbMsg["CONFIG_NOOS"]='No operating system detected on the computer.';
 $TbMsg["SYNC_METHOD"]='Method';
 $TbMsg["SYNC1_DIR"]='Directory based';
 $TbMsg["SYNC2_FILE"]='File based';
+$TbMsg["SYNC3_GIT"]='GIT';
 
 $TbMsg["TITLE_W"]='Rsync option: Rsync incremental algorithm is not used and the whole file is sent as-is instead. This is the default when both the source and destination are specified as local paths.';
 $TbMsg["TITLE_E"]="Rsync option: Delete extraneous files from the receiving side (ones  that  aren't on the sending side).";
 $TbMsg["TITLE_C"]='Rsync option: Compresses data files sent to  the  destination  machine, which reduces the amount of data being transmitted.';
+$TbMsg["TITLE_G"]='Git option: The partition will be formatted and the image will be cloned, instead of doing a checkout.';
+$TbMsg["TITLE_A"]='Acl restore option: All permissions will be restored and not just those of the user.';
 $TbMsg["SEND"]='Protocol';
 // WARNINGS.
 $TbMsg["WARN_PROTOCOL"]='"Protocol" option is only used in incremental file-type, the first time that image is sent to cache. <br>In other case protocol is RSYNC.';
