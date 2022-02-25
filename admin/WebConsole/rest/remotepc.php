@@ -533,7 +533,7 @@ EOD;
 			$cmd->Ejecutar();
 			$cmd->texto = <<<EOD
 DELETE FROM ogagent_queue
- WHERE clientid = '$clntid' AND command IN ('popup-10', 'popup-5', 'poweroff');
+ WHERE clientid = '$clntid' AND operation IN ('popup-10', 'popup-5', 'poweroff');
 EOD;
 			$cmd->Ejecutar();
 			$cmd->texto = "DROP EVENT IF EXISTS e_timeout_$clntid;";
