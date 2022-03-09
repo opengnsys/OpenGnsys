@@ -376,6 +376,37 @@ efibootmgr |awk   '{if($1~/Boot[[:digit:]]/) ; active="" ;if ($1~/*/) active="*"
 
 
 #/**
+#         ogNvramPxeEntryFirst
+#@brief   Sitúa la entrada de la tarjeta de red en el primer lugar en la NVRAM.
+#@return  (nada)
+#@exception OG_ERR_NOTUEFI  UEFI no activa.
+#*/ ##
+function ogNvramPxeEntryFirst (){
+local NUMENTRY ORDER
+
+# Si se solicita, mostrar ayuda.
+if [ "$*" == "help" ]; then
+    ogHelp "$FUNCNAME" "$FUNCNAME" \
+           "$FUNCNAME"
+    return
+fi
+
+# Si no es equipo UEFI salir con error
+ogIsEfiActive || ogRaiseError $OG_ERR_NOTUEFI || return $?
+
+NUMENTRY=$(printf  %04X 0x$(efibootmgr|awk '/IP[vV]{0,1}4/ {print gensub(/^0{1,3}/,"",1,substr($1,5,4))}'))
+
+# Si la entrada es la primera nos salimos.
+[[ $(ogNvramGetOrder) =~ ^$NUMENTRY ]] && return
+
+# Si la entrada ya existe la borramos.
+ORDER="$NUMENTRY $(ogNvramGetOrder| sed -e  s/$NUMENTRY//g -e s/,/' '/g)"
+
+ogNvramSetOrder $ORDER
+}
+
+
+#/**
 #         ogRestoreEfiBootLoader int_ndisk str_repo
 #@brief   Copia el cargador de arranque de la partición de sistema a la partición EFI.
 #@param   int_ndisk    nº de orden del disco
