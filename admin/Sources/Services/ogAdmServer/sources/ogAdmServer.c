@@ -1189,8 +1189,7 @@ bool respuestaConsola(int socket_c, TRAMA *ptrTrama, int res)
 //		true: Si el proceso es correcto
 //		false: En caso de ocurrir algún error
 // ________________________________________________________________________________________________________
-
-bool Levanta(char *ptrIP[], char *ptrMacs[], int lon, char *mar)
+bool Levanta(char *ptrIP[], char *ptrMacs[], char *ptrNetmasks[], int lon, char *mar)
 {
 	unsigned int on = 1;
 	struct sockaddr_in local;
@@ -1209,13 +1208,14 @@ bool Levanta(char *ptrIP[], char *ptrMacs[], int lon, char *mar)
 		syslog(LOG_ERR, "cannot set broadcast socket\n");
 		return false;
 	}
+
 	memset(&local, 0, sizeof(local));
 	local.sin_family = AF_INET;
 	local.sin_port = htons(PUERTO_WAKEUP);
 	local.sin_addr.s_addr = htonl(INADDR_ANY);
 
 	for (i = 0; i < lon; i++) {
-		if (!WakeUp(s, ptrIP[i], ptrMacs[i], mar)) {
+		if (!WakeUp(s, ptrIP[i], ptrMacs[i], ptrNetmasks[i], mar)) {
 			syslog(LOG_ERR, "problem sending magic packet\n");
 			close(s);
 			return false;
@@ -1235,16 +1235,17 @@ struct wol_msg {
 };
 
 static bool wake_up_broadcast(int sd, struct sockaddr_in *client,
-			      const struct wol_msg *msg)
+			      const struct wol_msg *msg, const struct in_addr *addr)
 {
 	struct sockaddr_in *broadcast_addr;
 	struct ifaddrs *ifaddr, *ifa;
-	int ret;
+	int ret1, ret2;
 
 	if (getifaddrs(&ifaddr) < 0) {
 		syslog(LOG_ERR, "cannot get list of addresses\n");
 		return false;
 	}
+
 
 	client->sin_addr.s_addr = htonl(INADDR_BROADCAST);
 
@@ -1261,9 +1262,12 @@ static bool wake_up_broadcast(int sd, struct sockaddr_in *client,
 	}
 	freeifaddrs(ifaddr);
 
-	ret = sendto(sd, msg, sizeof(*msg), 0,
+	ret1 = sendto(sd, msg, sizeof(*msg), 0,
 		     (struct sockaddr *)client, sizeof(*client));
-	if (ret < 0) {
+	client->sin_addr.s_addr = addr->s_addr;
+	ret2 = sendto(sd, msg, sizeof(*msg), 0,
+		     (struct sockaddr *)client, sizeof(*client));
+	if ((ret1 < 0) & (ret2 < 0)) {
 		syslog(LOG_ERR, "failed to send broadcast wol\n");
 		return false;
 	}
@@ -1289,6 +1293,8 @@ static bool wake_up_unicast(int sd, struct sockaddr_in *client,
 	return true;
 }
 
+
+
 enum wol_delivery_type {
 	OG_WOL_BROADCAST = 1,
 	OG_WOL_UNICAST = 2
@@ -1309,15 +1315,26 @@ enum wol_delivery_type {
 //		false: En caso de ocurrir algún error
 //_____________________________________________________________________________________________________________
 //
-bool WakeUp(int s, char* iph, char *mac, char *mar)
+bool WakeUp(int s, char* iph, char *mac, char *netmask, char *mar)
 {
 	unsigned int macaddr[OG_WOL_MACADDR_LEN];
 	char HDaddress_bin[OG_WOL_MACADDR_LEN];
 	struct sockaddr_in WakeUpCliente;
 	struct wol_msg Trama_WakeUp;
-	struct in_addr addr;
+	struct in_addr addr, netmask_addr, broadcast_addr ={};
 	bool ret;
 	int i;
+
+	if (!inet_aton(iph, &addr)) {
+		syslog(LOG_ERR, "bad IP address\n");
+		return false;
+	}
+
+	if (!inet_aton(netmask, &netmask_addr)) {
+		syslog(LOG_ERR, "bad netmask address: %s\n", netmask);
+		return false;
+	}
+	broadcast_addr.s_addr = addr.s_addr | ~netmask_addr.s_addr;
 
 	for (i = 0; i < 6; i++) // Primera secuencia de la trama Wake Up (0xFFFFFFFFFFFF)
 		Trama_WakeUp.secuencia_FF[i] = 0xFF;
@@ -1338,14 +1355,9 @@ bool WakeUp(int s, char* iph, char *mac, char *mar)
 
 	switch (atoi(mar)) {
 	case OG_WOL_BROADCAST:
-		ret = wake_up_broadcast(s, &WakeUpCliente, &Trama_WakeUp);
+		ret = wake_up_broadcast(s, &WakeUpCliente, &Trama_WakeUp, &broadcast_addr );
 		break;
 	case OG_WOL_UNICAST:
-		if (inet_aton(iph, &addr) < 0) {
-			syslog(LOG_ERR, "bad IP address for unicast wol\n");
-			ret = false;
-			break;
-		}
 		ret = wake_up_unicast(s, &WakeUpCliente, &Trama_WakeUp, &addr);
 		break;
 	default:
@@ -2627,8 +2639,8 @@ static bool recibeArchivo(TRAMA *ptrTrama, struct og_client *cli)
 // ________________________________________________________________________________________________________
 static bool envioProgramacion(TRAMA *ptrTrama, struct og_client *cli)
 {
-	char *ptrIP[MAXIMOS_CLIENTES],*ptrMacs[MAXIMOS_CLIENTES];
-	char *idp, *iph, *mac;
+	char *ptrIP[MAXIMOS_CLIENTES],*ptrMacs[MAXIMOS_CLIENTES],*ptrNetmasks[MAXIMOS_CLIENTES];
+	char *idp, *iph, *mac, *netmask;
 	int idx,idcomando,lon;
 	const char *msglog;
 	struct og_dbi *dbi;
@@ -2644,8 +2656,9 @@ static bool envioProgramacion(TRAMA *ptrTrama, struct og_client *cli)
 	idp = copiaParametro("idp",ptrTrama); // Toma identificador de la programación de la tabla acciones
 
 	result = dbi_conn_queryf(dbi->conn,
-			"SELECT ordenadores.ip,ordenadores.mac,acciones.idcomando FROM acciones "\
+			"SELECT ordenadores.ip,ordenadores.mac,aulas.netmask, acciones.idcomando FROM acciones "\
 			" INNER JOIN ordenadores ON ordenadores.ip=acciones.ip"\
+			" INNER JOIN aulas ON ordenadores.idaula=aulas.idaula "\
 			" WHERE acciones.idprogramacion=%s",idp);
 
 	liberaMemoria(idp);
@@ -2670,17 +2683,19 @@ static bool envioProgramacion(TRAMA *ptrTrama, struct og_client *cli)
 
 		if (idcomando == 1){ // Arrancar
 			mac = (char *)dbi_result_get_string(result, "mac");
+			netmask = (char *)dbi_result_get_string(result, "netmask");
 			lon = splitCadena(ptrIP, iph, ';');
 			lon = splitCadena(ptrMacs, mac, ';');
+			lon = splitCadena(ptrNetmasks, netmask, ';');
 
 			// Se manda por broadcast y por unicast
-			if (!Levanta(ptrIP, ptrMacs, lon, (char*)"1")) {
+			if (!Levanta(ptrIP, ptrMacs, ptrNetmasks, lon, (char*)"1")) {
 				dbi_result_free(result);
 				og_dbi_close(dbi);
 				return false;
 			}
 
-			if (!Levanta(ptrIP, ptrMacs, lon, (char*)"2")) {
+			if (!Levanta(ptrIP, ptrMacs, ptrNetmasks, lon, (char*)"2")) {
 				dbi_result_free(result);
 				og_dbi_close(dbi);
 				return false;
@@ -2920,6 +2935,7 @@ struct og_sync_params {
 struct og_msg_params {
 	const char	*ips_array[OG_CLIENTS_MAX];
 	const char	*mac_array[OG_CLIENTS_MAX];
+	const char	*netmask_array[OG_CLIENTS_MAX];
 	unsigned int	ips_array_len;
 	const char	*wol_type;
 	char		run_cmd[4096];
@@ -3333,6 +3349,12 @@ static int og_json_parse_type(json_t *element, struct og_msg_params *params)
 
 static int og_cmd_wol(json_t *element, struct og_msg_params *params)
 {
+	char ips_str[(OG_DB_IP_MAXLEN + 1) * OG_CLIENTS_MAX + 1] = {};
+	int ips_str_len = 0;
+	const char *msglog;
+	struct og_dbi *dbi;
+	int i = 0;
+	dbi_result result;
 	const char *key;
 	json_t *value;
 	int err = 0;
@@ -3356,8 +3378,48 @@ static int og_cmd_wol(json_t *element, struct og_msg_params *params)
 					    OG_REST_PARAM_WOL_TYPE))
 		return -1;
 
+	for (i = 0; i < params->ips_array_len; ++i) {
+		ips_str_len += snprintf(ips_str + ips_str_len,
+					sizeof(ips_str) - ips_str_len,
+					"'%s',", params->ips_array[i]);
+	}
+	ips_str[ips_str_len - 1] = '\0';
+
+	dbi = og_dbi_open(&dbi_config);
+	if (!dbi) {
+		syslog(LOG_ERR, "cannot open connection database (%s:%d)\n",
+		       __func__, __LINE__);
+		return -1;
+	}
+
+	result = dbi_conn_queryf(dbi->conn,
+				 "SELECT ordenadores.ip, ordenadores.mac, "
+					"aulas.netmask "
+				 "FROM   ordenadores "
+				 "INNER JOIN aulas "
+					 "ON ordenadores.idaula = aulas.idaula "
+				 "WHERE  ordenadores.ip IN (%s)",
+				 ips_str);
+	if (!result) {
+		dbi_conn_error(dbi->conn, &msglog);
+		syslog(LOG_ERR, "failed to query database (%s:%d) %s\n",
+		       __func__, __LINE__, msglog);
+		og_dbi_close(dbi);
+		return -1;
+	}
+
+	for (i = 0; dbi_result_next_row(result); i++) {
+		params->ips_array[i] = dbi_result_get_string_copy(result, "ip");
+		params->mac_array[i] = dbi_result_get_string_copy(result, "mac");
+		params->netmask_array[i] = dbi_result_get_string_copy(result, "netmask");
+	}
+
+	dbi_result_free(result);
+	og_dbi_close(dbi);
+
 	if (!Levanta((char **)params->ips_array, (char **)params->mac_array,
-		     params->ips_array_len, (char *)params->wol_type))
+		     (char **)params->netmask_array, i,
+		     (char *)params->wol_type))
 		return -1;
 
 	return 0;

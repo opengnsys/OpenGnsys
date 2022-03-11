@@ -17,5 +17,6 @@ struct og_dbi {
 
 struct og_dbi *og_dbi_open(struct og_dbi_config *config);
 void og_dbi_close(struct og_dbi *db);
+#define OG_DB_IP_MAXLEN		15
 
 #endif
