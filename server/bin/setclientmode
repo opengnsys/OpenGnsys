@@ -48,7 +48,7 @@ CALLER=$(getcaller)
 [ "$USER" != "root" -a "$USER" != "$WEBUSER" -a "$CALLER" != "ogserver" ] && raiseError access "Need to be root (or webserver user)"
 TEMPLATE[0]="${PXEDIR[0]}/templates/${MODE_FILE}"
 TEMPLATE[1]="${PXEDIR[1]}/templates/${MODE_FILE}"
-[ -z "${TEMPLATE[0]}${TEMPLATE[1]}" ] && raiseError notfound "PXE template file \"$TEMPLATE_NAME\""
+[ -z "${TEMPLATE[0]}${TEMPLATE[1]}" ] && raiseError notfound "PXE template file \"$MODE_FILE\""
 
 case "${MODE^^}" in
 	0|TEMP)	MODE="TEMP" ;;
@@ -56,8 +56,6 @@ case "${MODE^^}" in
 	*)	raiseError notfound "Unknown mode \"$MODE\"" ;;
 esac
 
-# Sustituir caracteres ' por \' para evitar inyección SQL.
-BOOTMODE="${TEMPLATE_NAME//\'/\\\'}"
 ETHERNET=$MAC
 
 # Copiar fichero de configuración.
@@ -70,54 +68,52 @@ for MAC in $ETHERNET; do
 	[ -e ${PXEDIR[0]}/${PXEFILE[0]} ] && mv ${PXEDIR[0]}/${PXEFILE[0]} ${PXEDIR[0]}/${PXEFILE[0]}.netboot
 	[ -e ${PXEDIR[1]}/${PXEFILE[1]} ] && mv ${PXEDIR[1]}/${PXEFILE[1]} ${PXEDIR[1]}/${PXEFILE[1]}.netboot
 
-	if [ "$TEMPLATE_NAME" != "default" ]; then
-		# Si no está definida la variable LANG, usar idioma inglés por defecto.
-		[ -z "$LANG" -o "$LANG" == "C" ] && LANG="en"
-		DATOS=$DATA
-		# Quitar tabuladores, sustituir acentos y dejar resolución por defecto.
-		DATOS=$(echo ${DATOS//	/} | tr 'áéíóúñçÁÉÍÓÚÑÇ' 'aeiouncAEIOUNC')
-		[[ "$DATOS" =~ (vga|video) ]] || DATOS="$DATOS vga=788"
-		# Obtener directorio ogLive a partir de los datos.
-		OGLIVEDIR=$(echo "$DATOS" | awk -F= 'BEGIN {RS=" "} $1=="oglivedir" {print $2}')
+	# Si no está definida la variable LANG, usar idioma inglés por defecto.
+	[ -z "$LANG" -o "$LANG" == "C" ] && LANG="en"
+	DATOS=$DATA
+	# Quitar tabuladores, sustituir acentos y dejar resolución por defecto.
+	DATOS=$(echo ${DATOS//	/} | tr 'áéíóúñçÁÉÍÓÚÑÇ' 'aeiouncAEIOUNC')
+	[[ "$DATOS" =~ (vga|video) ]] || DATOS="$DATOS vga=788"
+	# Obtener directorio ogLive a partir de los datos.
+	OGLIVEDIR=$(echo "$DATOS" | awk -F= 'BEGIN {RS=" "} $1=="oglivedir" {print $2}')
 
-		# Pondremos como propietario al usuario y grupo de Apache para que se pueda cambiar desde la consola web.
-		WEBGROUP=$(ps axho group,comm|awk '!/root/ && /httpd|apache/ {print $1; exit;}')
+	# Pondremos como propietario al usuario y grupo de Apache para que se pueda cambiar desde la consola web.
+	WEBGROUP=$(ps axho group,comm|awk '!/root/ && /httpd|apache/ {print $1; exit;}')
+	for BOOTTYPE in 0 1; do
+		# Si no existe la plantilla borramos el archivo PXE anterior continuamos
+		if [ -z "${TEMPLATE[$BOOTTYPE]}" ]; then
+			rm ${PXEDIR[$BOOTTYPE]}/${PXEFILE[$BOOTTYPE]}
+			continue
+		fi
+		# Comprobar si existe "oglivedir" en la plantilla para evitar duplicados.
+		if grep -q "oglivedir=" ${TEMPLATE[$BOOTTYPE]} 2>/dev/null; then
+			DATOSAUX="${DATOS/oglivedir=$OGLIVEDIR/}"
+		fi
+		# Renombra el fichero PXE original
+		[ -e ${PXEDIR[$BOOTTYPE]}/${PXEFILE[$BOOTTYPE]} ] && mv ${PXEDIR[$BOOTTYPE]}/${PXEFILE[$BOOTTYPE]} ${PXEDIR[$BOOTTYPE]}/${PXEFILE[$BOOTTYPE]}.netboot
+
+		# Crear fichero PXE a partir de la plantilla con los datos obtenidos en la BD.
+		sed -e "s,vga=[0-9]*,,g; s,INFOHOST,${DATOSAUX//,/\\,},g; s,set ISODIR=.*,set ISODIR=$OGLIVEDIR,g" ${TEMPLATE[$BOOTTYPE]} >${PXEDIR[$BOOTTYPE]}/${PXEFILE[$BOOTTYPE]}
+		[ -n "$WEBUSER" ] && chown $WEBUSER:$WEBGROUP ${PXEDIR[$BOOTTYPE]}/${PXEFILEE[$BOOTTYPE]}
+	done
+
+	# Si el modo de trabajo es temporal (0) mete un retardo, restaura el fichero PXE a su estado original y no toca la base de datos
+	if [ "$MODE" == "TEMP" ]; then
+		sleep 60
 		for BOOTTYPE in 0 1; do
-			# Si no existe la plantilla borramos el archivo PXE anterior continuamos
-			if [ -z "${TEMPLATE[$BOOTTYPE]}" ]; then
-				rm ${PXEDIR[$BOOTTYPE]}/${PXEFILE[$BOOTTYPE]}
-				continue
-			fi
-			# Comprobar si existe "oglivedir" en la plantilla para evitar duplicados.
-			if grep -q "oglivedir=" ${TEMPLATE[$BOOTTYPE]} 2>/dev/null; then
-				DATOSAUX="${DATOS/oglivedir=$OGLIVEDIR/}"
-			fi
-			# Renombra el fichero PXE original
-			[ -e ${PXEDIR[$BOOTTYPE]}/${PXEFILE[$BOOTTYPE]} ] && mv ${PXEDIR[$BOOTTYPE]}/${PXEFILE[$BOOTTYPE]} ${PXEDIR[$BOOTTYPE]}/${PXEFILE[$BOOTTYPE]}.netboot
-
-			# Crear fichero PXE a partir de la plantilla con los datos obtenidos en la BD.
-			sed -e "s,vga=[0-9]*,,g; s,INFOHOST,${DATOSAUX//,/\\,},g; s,set ISODIR=.*,set ISODIR=$OGLIVEDIR,g" ${TEMPLATE[$BOOTTYPE]} >${PXEDIR[$BOOTTYPE]}/${PXEFILE[$BOOTTYPE]}
-			[ -n "$WEBUSER" ] && chown $WEBUSER:$WEBGROUP ${PXEDIR[$BOOTTYPE]}/${PXEFILEE[$BOOTTYPE]}
+			[ -e ${PXEDIR[$BOOTTYPE]}/${PXEFILE[$BOOTTYPE]} ] && rm ${PXEDIR[$BOOTTYPE]}/${PXEFILE[$BOOTTYPE]}
+			[ -e ${PXEDIR[$BOOTTYPE]}/${PXEFILE[$BOOTTYPE]}.netboot ] && mv ${PXEDIR[$BOOTTYPE]}/${PXEFILE[$BOOTTYPE]}.netboot ${PXEDIR[$BOOTTYPE]}/${PXEFILE[$BOOTTYPE]}
 		done
-
-		# Si el modo de trabajo es temporal (0) mete un retardo, restaura el fichero PXE a su estado original y no toca la base de datos
-		if [ "$MODE" == "TEMP" ]; then
-			sleep 60
-			for BOOTTYPE in 0 1; do
-				[ -e ${PXEDIR[$BOOTTYPE]}/${PXEFILE[$BOOTTYPE]} ] && rm ${PXEDIR[$BOOTTYPE]}/${PXEFILE[$BOOTTYPE]}
-				[ -e ${PXEDIR[$BOOTTYPE]}/${PXEFILE[$BOOTTYPE]}.netboot ] && mv ${PXEDIR[$BOOTTYPE]}/${PXEFILE[$BOOTTYPE]}.netboot ${PXEDIR[$BOOTTYPE]}/${PXEFILE[$BOOTTYPE]}
-			done
-		fi
-
-
-		# Si el modo de trabajo es permanente (1)  borra el fichero PXE.netboot si existe y graba los datos en la base de datos
-		if [ "$MODE" == "PERM" ]; then
-			[ -e ${PXEDIR[0]}/${PXEFILE[0]}.netboot ] && rm ${PXEDIR[0]}/${PXEFILE[0]}.netboot
-			[ -e ${PXEDIR[1]}/${PXEFILE[1]}.netboot ] && rm ${PXEDIR[1]}/${PXEFILE[1]}.netboot
-			# Si no existe la plantilla de tipo BIOS tomo el nombre de la UEFI
-			[ -z "${TEMPLATE[0]}" ] && TEMPLATE[0]=${TEMPLATE[1]}
-		fi
 	fi
-	date +"%b %d %T $PROG: Configured \"$TEMPLATE_NAME\" on \"$MAC\", \"$MODE\" mode" | tee -a $LOGFILE
+
+
+	# Si el modo de trabajo es permanente (1)  borra el fichero PXE.netboot si existe y graba los datos en la base de datos
+	if [ "$MODE" == "PERM" ]; then
+		[ -e ${PXEDIR[0]}/${PXEFILE[0]}.netboot ] && rm ${PXEDIR[0]}/${PXEFILE[0]}.netboot
+		[ -e ${PXEDIR[1]}/${PXEFILE[1]}.netboot ] && rm ${PXEDIR[1]}/${PXEFILE[1]}.netboot
+		# Si no existe la plantilla de tipo BIOS tomo el nombre de la UEFI
+		[ -z "${TEMPLATE[0]}" ] && TEMPLATE[0]=${TEMPLATE[1]}
+	fi
+	date +"%b %d %T $PROG: Configured \"$MODE_FILE\" on \"$MAC\", \"$MODE\" mode" | tee -a $LOGFILE
 done
 exit 0
