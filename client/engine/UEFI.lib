@@ -376,12 +376,12 @@ efibootmgr |awk   '{if($1~/Boot[[:digit:]]/) ; active="" ;if ($1~/*/) active="*"
 
 
 #/**
-#         ogNvramPxeEntryFirst
+#         ogNvramPxeFirstEntry
 #@brief   Sitúa la entrada de la tarjeta de red en el primer lugar en la NVRAM.
 #@return  (nada)
 #@exception OG_ERR_NOTUEFI  UEFI no activa.
 #*/ ##
-function ogNvramPxeEntryFirst (){
+function ogNvramPxeFirstEntry (){
 local NUMENTRY ORDER
 
 # Si se solicita, mostrar ayuda.
