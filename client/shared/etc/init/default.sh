@@ -20,6 +20,8 @@ echo "${MSG_LAUNCHCLIENT:-.}"
 
 if [ "$ogstatus" != "offline"  ]; then
     GROUP_CONFIG=/opt/opengnsys/ogClient/cfg/${group/ /_}.json
+    PYMAJMIN=`python3 --version | cut -d" " -f2 | cut -d. -f1,2`
+    export PYTHONPATH=/opt/opengnsys/lib/python$PYMAJMIN
     if [ -f $GROUP_CONFIG ]; then
         /opt/opengnsys/ogClient/./ogclient -c $GROUP_CONFIG
     else
