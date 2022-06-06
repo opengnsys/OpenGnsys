@@ -285,10 +285,12 @@ ogEcho session \"[10] $MSG_HELP_ogUnmountAll "+n_disk+"\"\n \
 ogUnmountAll "+n_disk+" 2>/dev/null \n \
 ogUnmountCache \n \
 " + sizecacheCode + "\
-ogEcho session \"[30] $MSG_HELP_ogUpdatePartitionTable "+n_disk+"\"\n \
-ogCreatePartitionTable "+n_disk+" "+tipo_part_table +" \n \
-ogDeletePartitionTable "+n_disk+" \n \
-ogUpdatePartitionTable "+n_disk+" \n \
+if [ `ogGetPartitionTableType "+n_disk+"` != 'MSDOS' ]; then \n \
+  ogEcho session \"[30] $MSG_HELP_ogUpdatePartitionTable "+n_disk+"\"\n \
+  ogCreatePartitionTable "+n_disk+" "+tipo_part_table +" \n \
+  ogDeletePartitionTable "+n_disk+" \n \
+  ogUpdatePartitionTable "+n_disk+" \n \
+fi \n \
 " + cacheCode + "\
 ogEcho session \"[70] $MSG_HELP_ogCreatePartitions  " + partCode + "\"\n \
 ogExecAndLog command ogCreatePartitions "+n_disk+" " + partCode + " \n \
@@ -390,10 +392,12 @@ ogEcho session \"[10] $MSG_HELP_ogUnmountAll "+n_disk+"\"\n \
 ogUnmountAll "+n_disk+" \n \
 ogUnmountCache \n \
 " + sizecacheCode + "\
-ogEcho session \"[30] $MSG_HELP_ogUpdatePartitionTable "+n_disk+"\"\n \
-ogCreatePartitionTable "+n_disk+" "+tipo_part_table +" \n \
-ogDeletePartitionTable "+n_disk+" \n \
-ogUpdatePartitionTable "+n_disk+" \n \
+if [ `ogGetPartitionTableType "+n_disk+"` != 'GPT' ]; then \n \
+    ogEcho session \"[30] $MSG_HELP_ogUpdatePartitionTable "+n_disk+"\"\n \
+    ogCreatePartitionTable "+n_disk+" "+tipo_part_table +" \n \
+    ogDeletePartitionTable "+n_disk+" \n \
+    ogUpdatePartitionTable "+n_disk+" \n \
+fi \n \
 " + cacheCode + "\
 ogEcho session \"[70] $MSG_HELP_ogCreatePartitions " + partCode + "\"\n \
 ogExecAndLog command ogCreatePartitions "+n_disk+" " + partCode + "\n \
