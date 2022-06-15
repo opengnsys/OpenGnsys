@@ -1,10 +1,10 @@
-# Vagrantfile to install OpenGnsys virtual environment (production version) using VirtualBox provider.
+# Vagrantfile to install OpenGnsys virtual environment (development version) using VirtualBox provider.
 
 VAGRANTFILE_API_VERSION = "2"
 # VM provider: Oracle VM VirtualBox.
 ENV['VAGRANT_DEFAULT_PROVIDER'] = "virtualbox"
-# OpenGnsys version and OGAgent version.
-OGVERSION="1.1.1c"
+# OGAgent version.
+OGAGENTVERSION="1.1.1"
 # Language (accepted values: es_ES, ca_ES, en_GB).
 LANGUAGE = "es_ES"
 ENV['LC_ALL'] = LANGUAGE + ".UTF-8"
@@ -45,7 +45,7 @@ if which curl &>/dev/null; then
 elif which wget &>/dev/null; then
     DOWNLOAD="wget -q -O -"
 fi
-BRANCH="opengnsys-#{OGVERSION}"
+BRANCH="main"
 $DOWNLOAD "https://raw.githubusercontent.com/opengnsys/OpenGnsys/$BRANCH/installer/opengnsys_installer.sh" | bash || exit $?
 mv /opt/opengnsys/log/bash.log /opt/opengnsys/log/opengnsys_installer.log
 echo y | /opt/opengnsys/bin/setserveraddr $(ip -o link show | tail -1 | cut -d: -f2)
@@ -79,7 +79,7 @@ EOT
 # Client 1 OS provisioning script.
 MODELSCRIPT = <<EOT
 # Comment out next lines to install and configure OGAgent for Ubuntu.
-#OGAGENTPKG="ogagent_#{OGVERSION}_all.deb"
+#OGAGENTPKG="ogagent_#{OGAGENTVERSION}_all.deb"
 #apt-get update -y
 #apt-get install -y curl
 #curl -ks https://#{SERVERIP}/opengnsys/descargas/$OGAGENTPKG -o /tmp/$OGAGENTPKG
