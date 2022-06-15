@@ -187,7 +187,7 @@ function chooseVersion()
     local RELEASES DOWNLOADS INSTVERSION INSTRELEASE RELDATE
 
     # Development branch.
-    BRANCH="master"
+    BRANCH="main"
     API_URL="https://api.github.com/repos/opengnsys/OpenGnsys/branches/$BRANCH"
 
     RELEASES=( )
@@ -205,7 +205,7 @@ function chooseVersion()
                 DOWNLOADS+=( "$URL" )
             fi
         done <<< $(curl -s "$API_URL/../../tags" | jq -r '.[] | .name+" "+.commit.url')
-        # Add development (master) branch.
+        # Add development (main) branch.
         RELEASES+=( "$BRANCH" )
         DOWNLOADS+=( "$API_URL" )
         # Show selection menu, if needed.
@@ -1182,7 +1182,7 @@ function updateSummary()
 	# Obtener revisión.
 	if [ $REMOTE -eq 1 ]; then
 		# Revisión: rAñoMesDía.Gitcommit (8 caracteres de fecha y 7 primeros de commit).
-		if [ "$BRANCH" = "master" ]; then
+		if [ "$BRANCH" = "main" ]; then
 			REVISION=$(curl -s "$API_URL" | jq '"r" + (.commit.commit.committer.date | split("-") | join("")[:8]) + "." + (.commit.sha[:7])')
 		else
 			REVISION=$(curl -s "$API_URL" | jq '"r" + (.commit.committer.date | split("-") | join("")[:8]) + "." + (.sha[:7])')

@@ -18,7 +18,7 @@ Requisitos mínimos de almacenamiento:
 Instalación
 -----------
 
-La instalación de OpenGnsys se realiza ejecutando el script de instalación opengnsys_installer.sh, el cual puede obtenerse descomprimiendo el fichero de la versión opengnsys-Version.tar.gz o descargándolo directamente de la dirección: https://raw.githubusercontent.com/opengnsys/OpenGnsys/master/installer/opengnsys_installer.sh
+La instalación de OpenGnsys se realiza ejecutando el script de instalación opengnsys_installer.sh, el cual puede obtenerse descomprimiendo el fichero de la versión opengnsys-Version.tar.gz o descargándolo directamente de la dirección: https://raw.githubusercontent.com/opengnsys/OpenGnsys/main/installer/opengnsys_installer.sh
 
 Ejemplos de descompresión del programa:
 
