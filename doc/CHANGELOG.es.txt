@@ -13,6 +13,7 @@ Tickets resueltos en módulo OpenGnsys Cloning Engine:
 Tickets resueltos en módulo OpenGnsys Web Admin Console:
 #1012 Soporte disco mayores de 2Tb
 #1031 Admin console doesn't shows the statistics
+#1072 The partitioning command or wizard formats the cache partition even if the size does not change. 
 
 Tickets resueltos en módulo OGLive:
 #1033 ogLive 5.4 incompatible con opción del netboot opengnsys-cache
@@ -31,7 +32,10 @@ Tickets resueltos en módulo OpenGnsys Server:
 
 Tickets resueltos en módulo OpenGnsys Installer:
 #1046 Fix import script
+#1076 oglivecli Error when check the url of ogLive 
 
+Tickets genéricos resueltos:
+#1066 Liberar versión OpenGnsys 1.1.1d 
 
 Lista de cambios incluidos en OpenGnsys 1.1.1c (versión de mantenimiento)
 ----------------------------------------------
