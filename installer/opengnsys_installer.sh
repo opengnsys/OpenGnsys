@@ -132,7 +132,7 @@ function globalSetup ()
 	else
 		REMOTE=1
 	fi
-	BRANCH="main"
+	BRANCH="opengnsys-1.1.1d"
 	CODE_URL="https://codeload.github.com/opengnsys/OpenGnsys/zip/$BRANCH"
 	API_URL="https://api.github.com/repos/opengnsys/OpenGnsys"
 

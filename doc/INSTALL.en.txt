@@ -19,7 +19,7 @@ Minimum storage requirements:
 Installing
 ----------
 
-To install OpenGnsys, run opengnsys_installer.sh script after unpacking the release file (opengnsys-release.tar.gz) or after downloading it directly from https://raw.githubusercontent.com/opengnsys/OpenGnsys/master/installer/opengnsys_installer.sh
+To install OpenGnsys, run opengnsys_installer.sh script after unpacking the release file (opengnsys-release.tar.gz) or after downloading it directly from https://raw.githubusercontent.com/opengnsys/OpenGnsys/main/installer/opengnsys_installer.sh
 
 Unpacking example:
 	tar xvzf opengnsys-VERSION.tar.gz

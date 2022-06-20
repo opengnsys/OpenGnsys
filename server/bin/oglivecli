@@ -250,10 +250,11 @@ function download() {
         done
     fi
     # Get download size.
-    HTTPCODE=$(curl --head --silent $DOWNLOADURL/$OGLIVEFILE | awk '/HTTP\// {print $2}')
-    [ "$HTTPCODE" != "200" ] && raiseError download "\"$OGLIVEFILE\"."
+    SOURCELENGTH=$(curl --head --silent $DOWNLOADURL/$OGLIVEFILE | awk -F: '/Content-Length:/ {print $2}')
+    [ -n "$SOURCELENGTH" ] || raiseError download "$OGLIVEFILE"
     # Download ogLive.
     TARGETFILE=$DOWNLOADDIR/$OGLIVEFILE
+    trap "rm -f $TARGETFILE" 1 2 3 6 9 15
     curl $DOWNLOADURL/$OGLIVEFILE -o $TARGETFILE || raiseError download "\"$OGLIVEFILE\"."
 }
 

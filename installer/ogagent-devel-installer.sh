@@ -12,7 +12,7 @@
 
 # Variables.
 PROGDIR="$PWD/ogagent"
-BRANCH="master"
+BRANCH="main"
 SVNURL="https://github.com/opengnsys/ogAgent/branches/$BRANCH/"
 
 # Show prerequisites needed to build the environment.

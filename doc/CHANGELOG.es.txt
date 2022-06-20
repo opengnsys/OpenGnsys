@@ -2,6 +2,40 @@
 LISTA DE CAMBIOS	CHANGELOG.es.txt
 ========================================
 
+Lista de cambios incluidos en OpenGnsys 1.1.1d (versión de mantenimiento)
+----------------------------------------------
+
+Tickets resueltos en módulo OpenGnsys Cloning Engine:
+#1011 Error con Windows hibernado
+#1014 ogGetImageInfo falla con la actualización de Windows de octubre 2020
+#1069 Windows first boot does not work on a newly partitioned hard drive (BIOS)
+
+Tickets resueltos en módulo OpenGnsys Web Admin Console:
+#1012 Soporte disco mayores de 2Tb
+#1031 Admin console doesn't shows the statistics
+#1072 The partitioning command or wizard formats the cache partition even if the size does not change. 
+
+Tickets resueltos en módulo OGLive:
+#1033 ogLive 5.4 incompatible con opción del netboot opengnsys-cache
+Support for Initrd compressed in several formats (commit belonging to #997)
+
+Tickets resueltos relativos a RemotePC:
+#839  Errores detectado en API REST para Remote PC
+#991  Definir ordenador en estado de mantenimiento
+#1005 Fix support for computer groups in RemotePC
+#1006 Fix RemotePC IP retrieving on running clients
+#1070 Error in RemotePC's unreserve function
+
+Tickets resueltos en módulo OpenGnsys Server:
+#990  Use client broadcast address on WoL
+#1020 logrotate does not rotate opengnsys log files
+
+Tickets resueltos en módulo OpenGnsys Installer:
+#1046 Fix import script
+#1076 oglivecli Error when check the url of ogLive 
+
+Tickets genéricos resueltos:
+#1066 Liberar versión OpenGnsys 1.1.1d 
 
 Lista de cambios incluidos en OpenGnsys 1.1.1c (versión de mantenimiento)
 ----------------------------------------------

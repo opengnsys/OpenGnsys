@@ -99,11 +99,13 @@ ogUnmountAll $dis &>/dev/null
 ogUnmountCache
 
 # Elimina la tabla de particiones
-ogDeletePartitionTable $dis
-ogExecAndLog COMMAND ogUpdatePartitionTable $dis
+if [ `ogGetPartitionTableType 1` != 'MSDOS' ]; then
+        ogDeletePartitionTable $dis
+        ogExecAndLog COMMAND ogUpdatePartitionTable $dis
 
-# Crea tabla de particiones MSDOS (NOTA: adaptar para tablas GPT).
-ogCreatePartitionTable $dis MSDOS
+        # Crea tabla de particiones MSDOS (NOTA: adaptar para tablas GPT).
+        ogCreatePartitionTable $dis MSDOS
+fi
 
 # Inicia la cache.
 if echo "$sparam" |grep "CACHE" >/dev/null; then
