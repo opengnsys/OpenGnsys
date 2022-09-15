@@ -29,3 +29,9 @@ ALTER TABLE imagenes
 # Support hard disk bigger 2Tb (ticket #1012)
 ALTER TABLE ordenadores_particiones
       MODIFY tamano BIGINT NOT NULL DEFAULT '0';
+
+# Compatibility with UDS 3.5 (ticket #1077)
+ALTER TABLE remotepc
+      MODIFY urllogin VARCHAR(255),
+      MODIFY urllogout VARCHAR(255);
+
