@@ -51,7 +51,7 @@ function userData ()
 	DEFAULT_MYSQL_ROOT_PASSWORD="passwordroot"	# Clave por defecto root de MySQL
 	DEFAULT_OPENGNSYS_DB_USER="usuog"		# Usuario por defecto de acceso a la base de datos
 	DEFAULT_OPENGNSYS_DB_PASSWD="passusuog"		# Clave por defecto de acceso a la base de datos
-	DEFAULT_OPENGNSYS_CLIENT_PASSWD="og"		# Clave por defecto de acceso del cliente	
+	DEFAULT_OPENGNSYS_CLIENT_PASSWD="og"		# Clave por defecto de acceso del cliente
 	DEFAULT_OGLIVE="ogLive-focal-5.11.0-22-generic-amd64-r20210413.992ebb9.iso"	# Cliente ogLive
 
 	echo -e "\\nOpenGnsys Installation"
@@ -132,7 +132,7 @@ function globalSetup ()
 	else
 		REMOTE=1
 	fi
-	BRANCH="opengnsys-1.1.1d"
+	BRANCH="main"
 	CODE_URL="https://codeload.github.com/opengnsys/OpenGnsys/zip/$BRANCH"
 	API_URL="https://api.github.com/repos/opengnsys/OpenGnsys"
 
@@ -325,8 +325,11 @@ case "$OSDISTRIB" in
 		fi
 		# Adaptar dependencias para libmysqlclient.
 		[ -z "$(apt-cache pkgnames libmysqlclient-dev)" ] && [ -n "$(apt-cache pkgnames libmysqlclient15)" ] && DEPENDENCIES=( ${DEPENDENCIES[@]//libmysqlclient-dev/libmysqlclient15} )
-		# Paquete correcto para realpath.
+		# Paquetes correctos en versiones nuevas.
 		[ -z "$(apt-cache pkgnames realpath)" ] && DEPENDENCIES=( ${DEPENDENCIES[@]//realpath/coreutils} )
+		[ -z "$(apt-cache pkgnames btrfs-tools)" ] && DEPENDENCIES=( ${DEPENDENCIES[@]//btrfs-tools/btrfs-progs} )
+		[ -z "$(apt-cache pkgnames bittorrent)" ] && DEPENDENCIES=( ${DEPENDENCIES[@]//bittorrent/} )
+		[ -z "$(apt-cache pkgnames bittornado)" ] && DEPENDENCIES=( ${DEPENDENCIES[@]//bittornado/} )
 		;;
 	centos)	# Postconfiguación personalizada para CentOS.
 		# Configuración para PHP 7.
@@ -341,7 +344,7 @@ case "$OSDISTRIB" in
 			DEPENDENCIES=( ${DEPENDENCIES[*]/ctorrent/http://dl.fedoraproject.org/pub/epel/6/$(arch)/Packages/c/ctorrent-1.3.4-14.dnh3.3.2.el6.$(arch).rpm} )
 		fi
 		;;
-	fedora)	# Postconfiguación personalizada para Fedora. 
+	fedora)	# Postconfiguación personalizada para Fedora.
 		# Incluir paquetes específicos.
 		DEPENDENCIES=( ${DEPENDENCIES[@]} btrfs-progs )
 		# Sustituir MySQL por MariaDB a partir de Fedora 20.
@@ -782,9 +785,10 @@ function mysqlCreateAdminUserToDb()
 	echoAndLog "${FUNCNAME}(): creating admin user ${userdb} to database ${database}"
 
 	cat > $WORKDIR/create_${database}.sql <<EOF
-GRANT USAGE ON *.* TO '${userdb}'@'localhost' IDENTIFIED BY '${passdb}' ;
-GRANT ALL PRIVILEGES ON ${database}.* TO '${userdb}'@'localhost' WITH GRANT OPTION ;
-FLUSH PRIVILEGES ;
+CREATE USER '${userdb}'@'localhost' IDENTIFIED BY '${passdb}';
+GRANT USAGE ON *.* TO '${userdb}'@'localhost';
+GRANT ALL PRIVILEGES ON ${database}.* TO '${userdb}'@'localhost' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
 EOF
 	mysql --defaults-extra-file=$TMPMYCNF < $WORKDIR/create_${database}.sql
 	if [ $? -ne 0 ]; then
@@ -874,7 +878,7 @@ function getNetworkSettings()
 	local dev=""
 
 	echoAndLog "${FUNCNAME}(): Detecting network parameters."
-	DEVICE=( $(ip -o link show up | awk '!/loopback/ {sub(/:.*/,"",$2); print $2}') )
+	DEVICE=( $(ip -o link show up | awk '!/loopback/ {sub(/[:@].*/,"",$2); print $2}') )
 	if [ -z "$DEVICE" ]; then
 		errorAndLog "${FUNCNAME}(): Network devices not detected."
 		exit 1
@@ -954,7 +958,7 @@ function smbConfigure()
 	echoAndLog "${FUNCNAME}(): Configuring Samba service."
 
 	backupFile $SAMBACFGDIR/smb.conf
-	
+
 	# Copiar plantailla de recursos para OpenGnsys
         sed -e "s/OPENGNSYSDIR/${INSTALL_TARGET//\//\\/}/g" \
 		$WORKDIR/opengnsys/server/etc/smb-og.conf.tmpl > $SAMBACFGDIR/smb-og.conf
@@ -1021,7 +1025,7 @@ EOT
 	return 0
 }
 
-	
+
 ########################################################################
 ## Configuración servicio DHCP
 ########################################################################
@@ -1121,7 +1125,7 @@ function installDownloadableFiles()
 		errorAndLog "${FUNCNAME}(): Cannot download $FILENAME"
 		return 1
 	fi
-	
+
 	# Descomprimir fichero en zona de descargas.
 	tar xvzf $TARGETFILE -C $INSTALL_TARGET/www/descargas
 	if [ $? != 0 ]; then
@@ -1238,7 +1242,7 @@ function createDirs()
 	fi
 
 	# Crear usuario ficticio.
-	if id -u $OPENGNSYS_CLIENT_USER &>/dev/null; then 
+	if id -u $OPENGNSYS_CLIENT_USER &>/dev/null; then
 		echoAndLog "${FUNCNAME}(): user \"$OPENGNSYS_CLIENT_USER\" is already created"
 	else
 		echoAndLog "${FUNCNAME}(): creating OpenGnsys user"
@@ -1347,7 +1351,7 @@ function servicesCompilation ()
 		echoAndLog "${FUNCNAME}(): error while compiling OpenGnsys Agent"
 		hayErrores=1
 	fi
-	popd	
+	popd
 	# Compilar OpenGnsys Client
 	echoAndLog "${FUNCNAME}(): Compiling OpenGnsys Admin Client"
 	pushd $WORKDIR/opengnsys/admin/Sources/Clients/ogAdmClient
@@ -1369,7 +1373,7 @@ function servicesCompilation ()
 function copyInterfaceAdm ()
 {
 	local hayErrores=0
-	
+
 	# Crear carpeta y copiar Interface
 	echoAndLog "${FUNCNAME}(): Copying Administration Interface Folder"
 	cp -ar $WORKDIR/opengnsys/admin/Interface $INSTALL_TARGET/client/interfaceAdm
@@ -1396,7 +1400,7 @@ function copyClientFiles()
 		errorAndLog "${FUNCNAME}(): error while copying client estructure"
 		errstatus=1
 	fi
-	
+
 	echoAndLog "${FUNCNAME}(): Copying OpenGnsys Cloning Engine files."
 	mkdir -p $INSTALL_TARGET/client/lib/engine/bin
 	cp -a $WORKDIR/opengnsys/client/engine/*.lib* $INSTALL_TARGET/client/lib/engine/bin
@@ -1404,7 +1408,7 @@ function copyClientFiles()
 		errorAndLog "${FUNCNAME}(): error while copying engine files"
 		errstatus=1
 	fi
-	
+
 	if [ $errstatus -eq 0 ]; then
 		echoAndLog "${FUNCNAME}(): client copy files success."
 	else
@@ -1437,7 +1441,7 @@ function clientCreate()
 
 	local FILENAME="$1"
 	local TARGETFILE=$INSTALL_TARGET/lib/$FILENAME
- 
+
 	# Descargar cliente, si es necesario.
 	if [ -s $PROGRAMDIR/$FILENAME ]; then
 		echoAndLog "${FUNCNAME}(): Moving $PROGRAMDIR/$FILENAME file to $(dirname $TARGETFILE)"
@@ -1680,7 +1684,7 @@ if [ -n "$INSTALLEXTRADEPS" ]; then
 	for (( i=0; i<${#INSTALLEXTRADEPS[*]}; i++ )); do
 		eval ${INSTALLEXTRADEPS[i]}
 	done
-fi	
+fi
 
 # Detectar datos de auto-configuración después de instalar paquetes.
 autoConfigurePost
@@ -1760,7 +1764,7 @@ if [ $? -eq 0 ]; then
 	# Asignar clave del usuario "root".
 	mysqlSetRootPassword "${MYSQL_ROOT_PASSWORD}"
 else
-	# Si ya está instalado el gestor de bases de datos, obtener clave de "root", 
+	# Si ya está instalado el gestor de bases de datos, obtener clave de "root".
 	mysqlGetRootPassword
 fi
 
