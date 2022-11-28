@@ -57,12 +57,12 @@ export class HeaderComponent implements AfterViewInit, OnDestroy {
   @Input() isSidebarRightToggle = true;
   @Input() logoLink: string | any[] = '/';
 
-  @ContentChild(HeaderLogoComponent, {static: true}) public headerLogoComponent: HeaderLogoComponent;
-  @ContentChild(HeaderLogoMiniComponent, {static: true}) public headerLogoMiniComponent: HeaderLogoMiniComponent;
+  @ContentChild(HeaderLogoComponent, {static: false}) public headerLogoComponent: HeaderLogoComponent;
+  @ContentChild(HeaderLogoMiniComponent, {static: false}) public headerLogoMiniComponent: HeaderLogoMiniComponent;
 
-  @ViewChild('headerElement', {static: true}) private headerElement: ElementRef;
-  @ViewChild('sidebarLeftToggleElement', {static: true}) private sidebarLeftToggleElement: ElementRef;
-  @ViewChild('sidebarRightToggleElement', {static: true}) private sidebarRightToggleElement: ElementRef;
+  @ViewChild('headerElement', {static: false}) private headerElement: ElementRef;
+  @ViewChild('sidebarLeftToggleElement', {static: false}) private sidebarLeftToggleElement: ElementRef;
+  @ViewChild('sidebarRightToggleElement', {static: false}) private sidebarRightToggleElement: ElementRef;
 
   /**
    * @method constructor

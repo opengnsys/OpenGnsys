@@ -106,7 +106,7 @@ export class OrganizationalUnitComponent implements OnInit, OnDestroy {
         (response: any[]) => {
         for (let p = 0; p < response.length; p++) {
           for (let elem = 0; elem < response[p].length; elem++) {
-            this.clientStatus[response[p][elem].id] = this.config.constants.clientstatus[response[p][elem].status];
+            this.clientStatus[response[p][elem].id] = response[p][elem].status;
           }
         }
       },

@@ -19,7 +19,7 @@ export class OrganizationalUnit extends Resource {
   name: string;
   capacity: number;
   defclients: number;
-  inremotepc: boolean;
+  inremotepc  = false;
   projector: boolean;
   board: boolean;
   description: string;

@@ -22,4 +22,5 @@ export class Image extends Resource {
   public softwareProfile: SoftwareProfile;
   public partitionInfo: PartitionInfo;
   public client?: Client;
+  public inremotepc = false;
 }

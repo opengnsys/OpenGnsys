@@ -62,8 +62,12 @@ export class OGCommandsService {
             this.toaster.pop(toasterOpts);
             this.router.navigate(['/app/ous']);
           },
-          (error)  => {
-            this.toaster.pop({type: 'error', title: 'error', body: error});
+          (response)  => {
+            let msg = response;
+            if(response.error){
+              msg = response.error.message;
+            }
+            this.toaster.pop({type: 'error', title: 'error', body: msg});
           }
         );
       }

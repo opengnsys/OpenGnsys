@@ -35,7 +35,7 @@ import { Subscription } from 'rxjs';
   template: '<ng-template #templateRef><ng-content></ng-content></ng-template>'
 })
 export class AccordionHeaderComponent {
-  @ViewChild('templateRef', {static: true}) public templateRef: TemplateRef<any>;
+  @ViewChild('templateRef', {static: false}) public templateRef: TemplateRef<any>;
 }
 
 

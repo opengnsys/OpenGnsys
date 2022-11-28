@@ -5,6 +5,7 @@ import {TranslateService} from '@ngx-translate/core';
 import {OgCommonService} from './service/og-common.service';
 import {AdminLteConf} from './admin-lte.conf';
 import {User} from './model/user';
+import {environment} from '../environments/environment';
 
 @Component({
     selector: 'app-root',
@@ -13,6 +14,7 @@ import {User} from './model/user';
 })
 export class AppComponent implements OnInit {
     public isCustomLayout: boolean;
+    versionName = environment.version;
 
     constructor(private layoutService: LayoutService, private layoutStore: LayoutStore, private adminLteConfig: AdminLteConf, private authModule: AuthModule, private translate: TranslateService, private ogCommonService: OgCommonService) {
 

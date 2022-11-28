@@ -70,7 +70,7 @@ export class TabComponent implements OnInit {
   @Input() public isDisabled: boolean;
   @Input() public tabColor: string;
 
-  @ViewChild('templateRef', {static: true}) public templateRef: TemplateRef<any>;
+  @ViewChild('templateRef', {static: false}) public templateRef: TemplateRef<any>;
 
   @ContentChild(TabHeaderComponent, {static: true}) public tabHeaderComponent: TabHeaderComponent;
   @ContentChild(TabContentComponent, {static: true}) public tabContentComponent: TabContentComponent;
@@ -96,7 +96,7 @@ export class TabComponent implements OnInit {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TabsHeaderComponent {
-  @ViewChild('templateRef', {static: true}) public templateRef: TemplateRef<any>;
+  @ViewChild('templateRef', {static: false}) public templateRef: TemplateRef<any>;
 }
 
 /*
@@ -127,7 +127,7 @@ export class TabsComponent implements AfterContentInit, AfterViewInit, OnChanges
   @Output() public onClose = new EventEmitter();
   @Output() public onOpen = new EventEmitter();
 
-  @ContentChild(TabsHeaderComponent, {static: true}) public tabsHeaderComponent: TabsHeaderComponent;
+  @ContentChild(TabsHeaderComponent, {static: false}) public tabsHeaderComponent: TabsHeaderComponent;
 
   @ContentChildren(TabComponent) public tabs: QueryList<TabComponent>;
 

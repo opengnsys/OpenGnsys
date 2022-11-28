@@ -21,7 +21,7 @@ export class SidebarRightComponent implements OnInit, AfterViewInit, OnDestroy {
   private listeners = [];
   private subscriptions = [];
 
-  @ViewChild('sidebarContentElement', {static: true}) public sidebarContentElement: ElementRef;
+  @ViewChild('sidebarContentElement', {static: false}) public sidebarContentElement: ElementRef;
 
   constructor(
     private elementRef: ElementRef,

@@ -18,6 +18,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
+            "deployUrl": "/webconsole/",
             "outputPath": "dist/opengnsysAngular6",
             "index": "src/index.html",
             "main": "src/main.ts",
@@ -38,6 +39,7 @@
               "node_modules/prismjs/themes/prism-tomorrow.css",
               "node_modules/admin-lte-css/dist/css/AdminLTE.css",
               "node_modules/admin-lte-css/dist/css/skins/_all-skins.css",
+              "node_modules/ngx-toastr/toastr.css",
               "src/app/pages/common/directive/icheck.directive.css",
               "src/styles.scss"
             ],

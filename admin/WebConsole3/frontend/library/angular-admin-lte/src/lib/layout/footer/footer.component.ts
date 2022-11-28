@@ -30,8 +30,8 @@ export class FooterRightComponent {
   styleUrls: ['./footer.component.css']
 })
 export class FooterComponent implements OnInit {
-  @ContentChild(FooterLeftComponent, {static: true}) public footerLeftComponent: FooterLeftComponent;
-  @ContentChild(FooterRightComponent, {static: true}) public footerRightComponent: FooterRightComponent;
+  @ContentChild(FooterLeftComponent, {static: false}) public footerLeftComponent: FooterLeftComponent;
+  @ContentChild(FooterRightComponent, {static: false}) public footerRightComponent: FooterRightComponent;
 
   constructor(
     private elementRef: ElementRef,

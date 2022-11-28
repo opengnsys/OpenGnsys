@@ -6,6 +6,7 @@ import {ToasterService} from '../../../service/toaster.service';
 import {TranslateService} from '@ngx-translate/core';
 import {OrganizationalUnit} from '../../../model/organizational-unit';
 import {OgCommonService} from '../../../service/og-common.service';
+import {environment} from '../../../../environments/environment';
 
 @Component({
   selector: 'app-ou-client-component',
@@ -80,15 +81,28 @@ export class OuClientComponent {
   mustShow(client) {
     let result = true;
     if (typeof this.clientStatus[client.id] !== 'undefined') {
-      const status = this.clientStatus[client.id].id;
-      if (status) {
-        result = this.selectedStatus[status];
-      }
+      const status = this.clientStatus[client.id];
+      environment.clientstatus.find((value) => {
+        let found = false;
+        if (value.name === status) {
+          found = true;
+          result = this.selectedStatus[value.id];
+        }
+        return found;
+      });
     } else {
       // Si no se detectó el estado, se asigna no definido
-      this.clientStatus[client.id] = {id: 0, name: 'undefined'};
+      this.clientStatus[client.id] = 'unknown';
     }
 
+    return result;
+  }
+
+  getClientStatus(id: number) {
+    let result = 'unknown';
+    if(this.clientStatus[id]) {
+      result = this.clientStatus[id];
+    }
     return result;
   }
 }

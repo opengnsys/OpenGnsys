@@ -42,7 +42,7 @@ export class DropdownToggleComponent {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DropdownMenuComponent {
-  @ViewChild('templateRef', {static: true}) public templateRef: TemplateRef<any>;
+  @ViewChild('templateRef', {static: false}) public templateRef: TemplateRef<any>;
 }
 
 
@@ -71,10 +71,10 @@ export class DropdownComponent implements AfterViewInit, OnDestroy {
   @Output() public onCollapseStart = new EventEmitter();
   @Output() public onCollapseDone = new EventEmitter();
 
-  @ContentChild(DropdownToggleComponent, {static: true}) public dropdownToggleComponent: DropdownToggleComponent;
-  @ContentChild(DropdownMenuComponent, {static: true}) public dropdownMenuComponent: DropdownMenuComponent;
+  @ContentChild(DropdownToggleComponent, {static: false}) public dropdownToggleComponent: DropdownToggleComponent;
+  @ContentChild(DropdownMenuComponent, {static: false}) public dropdownMenuComponent: DropdownMenuComponent;
 
-  @ViewChild('toggleElement', {static: true}) private defaultToggleElement: ElementRef;
+  @ViewChild('toggleElement', {static: false}) private defaultToggleElement: ElementRef;
 
   /**
    * @method constructor

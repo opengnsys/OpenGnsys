@@ -3,8 +3,9 @@ import { marker as tr } from '@biesbjerg/ngx-translate-extract-marker';
 // This file can be replaced during build by using the `fileReplacements` array.
 // `ng build --prod` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
-const url = 'http://172.16.53.200/opengnsys3';
+const url = 'https://172.16.53.200/opengnsys3';
 export const environment = {
+  version: '1.0.0 - 1',
   production: false,
   BASE_URL: url,
   API_URL: url + '/index.php/api',
@@ -23,7 +24,8 @@ export const environment = {
     {id: 5, name: tr('linux_session')},
     {id: 6, name: tr('macos')},
     {id: 7, name: tr('windows')},
-    {id: 8, name: tr('windows_session')}
+    {id: 8, name: tr('windows_session')},
+    {id: 9, name: tr('unknown')}
   ],
   windowsboots: ['reboot', 'directo (kexec)'],
   hardwareTypes: [
