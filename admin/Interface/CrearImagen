@@ -87,5 +87,7 @@ RETVAL=$?
 # Registro de fin de ejecución
 ogEcho log session "$MSG_INTERFACE_END $RETVAL"
 
+$OGAGENTCONSOLE CreateImage $1 $2 $3 $OGIMG
+
 exit $RETVAL
 

@@ -36,6 +36,10 @@ sleep 5
 ogagent stop &>/dev/null
 pkill -9 browser
 
+# Informar al server og3
+source /opt/opengnsys/etc/preinit/loadenviron.sh > /dev/null 2> /dev/null
+$OGAGENTCONSOLE SendStatus 0
+
 # Apagar.
 $BUSYBOX poweroff
 

@@ -1,5 +1,0 @@
-#!/bin/bash
-# Script de interfaz para devolver el inventario de hardware de un cliente.
-
-listHardwareInfo | tail -n+2
-

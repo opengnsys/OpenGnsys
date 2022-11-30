@@ -50,6 +50,9 @@ sleep $TIME
 ogagent stop &>/dev/null
 pkill -9 browser
 
+# Informar al server og3
+$OGAGENTCONSOLE SendStatus 0
+
 # Reiniciar.
 $BUSYBOX reboot
 

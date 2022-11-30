@@ -179,5 +179,7 @@ export sendStatusToServer
 export createCacheInfoFile
 
 
-
+# Variables para usar el servicio OgAgent de Opengnsys 3
+export OGAGENT=$OPENGNSYS/lib/ogagent
+export OGAGENTCONSOLE="php $OGAGENT/bin/console"
 

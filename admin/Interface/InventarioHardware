@@ -4,3 +4,6 @@
 file=$(listHardwareInfo)
 tail -n+2 $file >$1
 
+$OGAGENTCONSOLE HardwareInventory $file
+
+

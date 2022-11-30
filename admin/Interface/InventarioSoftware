@@ -17,3 +17,4 @@ cp $file $3
 TIME=$[SECONDS-TIME1]
 ogEcho log session "   [ ]      $MSG_SCRIPTS_TIME_PARTIAL : $[TIME/60]m $[TIME%60]s"
 
+$OGAGENTCONSOLE SoftwareInventory $file $1 $2

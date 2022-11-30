@@ -32,5 +32,3 @@ ethtool -s $DEVICE wol g 2>/dev/null
 
 # TODO Localizar correctamente el script de arranque.
 [ -f /opt/opengnsys/scripts/runhttplog.sh ] && /opt/opengnsys/scripts/runhttplog.sh 2>/dev/null
-
-
