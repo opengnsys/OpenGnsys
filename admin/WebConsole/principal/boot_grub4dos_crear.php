@@ -20,8 +20,8 @@ $guarnomb = isset($_POST["nombrenuevoboot"]) ? ucfirst($_POST["nombrenuevoboot"]
 $admin = isset($_POST["modo"]) ? $_POST["modo"] : "";
 $selectfile = isset($_POST["selectfile"]) ? $_POST["selectfile"] : "";
 $boottype = isset($_POST["boottype"]) ? $_POST["boottype"] : "";
-$dirtemplates= ( $boottype === "uefi" ) ? "/var/lib/tftpboot/grub/templates/"  : "/var/lib/tftpboot/menu.lst/templates/";
-$otrodirtemplates= ( $boottype === "uefi" ) ? "/var/lib/tftpboot/menu.lst/templates/" : "/var/lib/tftpboot/grub/templates/";
+$dirtemplates= ( $boottype === "uefi" ) ? "/opt/opengnsys/tftpboot/grub/templates/"  : "/opt/opengnsys/tftpboot/menu.lst/templates/";
+$otrodirtemplates= ( $boottype === "uefi" ) ? "/opt/opengnsys/tftpboot/menu.lst/templates/" : "/opt/opengnsys/tftpboot/grub/templates/";
 $descripcion = "";
 $modo = "";
 ?>

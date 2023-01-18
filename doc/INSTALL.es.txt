@@ -10,7 +10,7 @@ El serividor debe tener acceso a Internet para descargar los paquetes necesarios
 
 Requisitos mínimos de almacenamiento:
 - 100 MB en el directorio /tmp (solo durante la instalación)
-- 600 MB en el directorio /var/lib/tftpboot (o /srv en sistemas Debian) por cada cliente ogLive que se desee instalar.
+- 600 MB en el directorio /var/lib/tftpboot (o /srv/tftp en las nuevas versiones) por cada cliente ogLive que se desee instalar.
 - 250 MB en el directorio de instalación /opt/opengnsys más 600 MB por cada imagen ISO descargada de clientes ogLive.
 - Estimar la capacidad necesaria para el repositorio de imágenes en /opt/opengnsys/images (es recomendable que este directorio se monte sobre un sistema de archivos independiente).
 

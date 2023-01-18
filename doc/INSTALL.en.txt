@@ -10,7 +10,7 @@ Network connection is needed in order to download the required packages, the sou
 
 Minimum storage requirements:
 - 100 MB in /tmp (for the installation process)
-- 600 MB in /var/lib/tftpboot (or /srv in Debian systems) for every installed ogLive client.
+- 600 MB in /var/lib/tftpboot (or /srv/tftp on new systems) for every installed ogLive client.
 - 250 MB in the installation folder (/opt/opengnsys) plus 600 MB for every downloaded ISO image.
 - Enough disk space for the image repository in /opt/opengnsys/images (it is recommended to mount it on an independent file system)
 

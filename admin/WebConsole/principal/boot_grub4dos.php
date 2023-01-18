@@ -42,12 +42,12 @@ switch($litambito){
 // /var/lib/tftboot/menu.lst/templates y /var/lib/tftpboot/grub/templates/
 //#########################################################################
 // Leer nombres de ficheros plantillas bios
-$dirtemplatesbios="/var/lib/tftpboot/menu.lst/templates/";
+$dirtemplatesbios="/opt/opengnsys/tftpboot/menu.lst/templates/";
 chdir($dirtemplatesbios);
 $pnbios=glob("*");
 
 // Leer nombres de ficheros plantillas uefi
-$dirtemplatesuefi="/var/lib/tftpboot/grub/templates/";
+$dirtemplatesuefi="/opt/opengnsys/tftpboot/grub/templates/";
 chdir($dirtemplatesuefi);
 $pnuefi=glob("*");
 
