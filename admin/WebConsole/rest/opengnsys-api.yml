@@ -836,9 +836,9 @@ paths:
                     type: integer
                     format: int32
               type:
-                description: image type (``monolithic``, ``basic``, ``incremental``)
+                description: image type (``monolithic``, ``basic``, ``incremental``, ``git``)
                 type: string
-                enum: [ "monolithic", "basic", "incremental" ]
+                enum: [ "monolithic", "basic", "incremental", "git" ]
                 default: "monolithic"
               baseimg:
                 description: base image for an incremental image (if ``type`` is ``incremental``)
@@ -870,6 +870,19 @@ paths:
               os:
                 description: installed operating system
                 type: string
+              # Parametros opcionales para git para que sea backwards compatible
+              gittags:
+                description: list of git tags available for an image, this is only returned when type is git
+                type: array
+                items:
+                  description: a git tag included ``refs/tags/`` namespace
+                  type: string
+              gitbranches:
+                description: list of git branches available for an image, this is only returned when type is git
+                type: array
+                items:
+                  description: a git tag included ``refs/heads/`` namespace
+                  type: string
             required: [ id, name, description, comments, inremotepc, repo, type ]
       security:
         - apikey: []
@@ -882,6 +895,14 @@ paths:
       parameters:
         - $ref: "#/parameters/ouParam"
         - $ref: "#/parameters/imageParam"
+        # TODO: Revisar el parametro para el boot opcional para git  
+        - gitParam:
+          name: imageid
+          in: path
+          description: git branch
+          required: true
+          type: integer
+          minimum: 1  
       responses:
         "200":
           description: Successful response
@@ -921,6 +942,7 @@ paths:
       parameters:
         - $ref: "#/parameters/ouParam"
         - $ref: "#/parameters/imageParam"
+          
         - in: body
           name: data
           description: Operation data
